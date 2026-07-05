@@ -433,8 +433,27 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .card.genesis{border-color:var(--r-genesis);background:linear-gradient(160deg,#2A1E06 0%,#180E00 100%)}
 
 /* hand card */
-.hand-card{width:72px;padding:6px 5px 5px;font-size:9px}
-.hand-card .c-abil{display:none}  /* legible via hover-to-enlarge; keeps the hand compact */
+.hand-card{width:92px;padding:0;background:transparent!important;overflow:visible;position:relative;border:none!important}
+.hand-card .bigcard.tframe{width:100%!important;box-shadow:0 5px 14px rgba(0,0,0,.55)}
+.hand-card .bigcard{pointer-events:none}
+.hand-card .tf-text{display:none}          /* ability micro-text off the tiny hand frame — read it on hover */
+.hand-card .tf-kd{font-size:6px}
+.hc-info{position:absolute;bottom:3px;right:4px;font-size:10px;color:#f3e4c0;background:rgba(10,7,4,.72);border-radius:50%;width:15px;height:15px;display:flex;align-items:center;justify-content:center;z-index:6;cursor:pointer;pointer-events:auto}
+.hc-info:hover{color:var(--electric)}
+.hc-called{position:absolute;top:2px;right:3px;font-size:11px;z-index:6;filter:drop-shadow(0 1px 2px #000);pointer-events:none}
+.hc-darwin{position:absolute;bottom:2px;left:2px;font-size:7px;color:#e2c3ff;background:rgba(120,48,184,0.55);border-radius:3px;padding:1px 3px;z-index:6;cursor:pointer;pointer-events:auto}
+.rcard{width:268px;background:linear-gradient(162deg,#17110a,#0b0805);border:1px solid #8a6a2f;border-radius:12px;padding:13px 15px;box-shadow:0 18px 50px rgba(0,0,0,.72);color:var(--text)}
+.rcard.rare{border-color:var(--r-rare)}.rcard.ultra{border-color:var(--r-ultra)}.rcard.genesis{border-color:var(--r-genesis)}.rcard.uncommon{border-color:var(--r-uncommon)}
+.rc-top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+.rc-cost{background:var(--electric);color:#04141c;font-weight:800;font-size:13px;border-radius:7px;padding:2px 8px;flex-shrink:0}
+.rc-name{flex:1;font-size:15px;font-weight:800;color:#fff;line-height:1.12}
+.rc-pow{font-size:23px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;flex-shrink:0}
+.rc-meta{font-size:10px;color:var(--text3);letter-spacing:.05em}
+.rc-meta .k{color:var(--win)}.rc-meta .d{color:var(--lose)}
+.rc-sec{font-size:12.5px;line-height:1.5;color:var(--text);margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
+.rc-lbl{display:block;font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
+.rc-called .rc-lbl{color:var(--electric)}
+.rc-traits{margin-top:9px}
 .hand-card .c-name{font-size:9px;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:4px;height:22px;overflow:hidden}
 .hand-card .c-pow{font-size:16px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;line-height:1;margin-bottom:4px}
 .hand-card .c-kd{font-size:8px;font-variant-numeric:tabular-nums;margin-bottom:3px}
@@ -3278,22 +3297,11 @@ function buildHand(){
     const el = document.createElement('div');
     el.className = `card hand-card ${c.rarity}${i===preSelectedCard?' selected':''}${rearGuardIdxs.indexOf(i)>=0?' called':''}`;
     el.id = `hcard-${i}`;
-    if(CARD_ART[c.artKey||c.name]){
-      el.style.backgroundImage = `linear-gradient(180deg,rgba(7,9,15,0.32),rgba(7,9,15,0.9)),url(${CARD_ART[c.artKey||c.name]})`;
-      el.style.backgroundSize = 'cover';
-      el.style.backgroundPosition = ART_FOCUS[c.artKey||c.name] || 'center top';
-    }
     const isInstant = c.timing === 'instant';
-    el.innerHTML = `
-      <div class="c-rarity">${rlab1(c.rarity)}</div>
-      <div class="c-cost" title="Energy to conjure this as your Fighter">⚡${conjureCost(c)}</div>
-      <div class="c-info" onclick="event.stopPropagation();pinPreview(${i})" title="View full card">ⓘ</div>
-      <div class="c-name">${CALLED[c.name]?'<span class="c-called-dot" title="Has a Called support ability">📣</span> ':''}${c.name}</div>
-      <div class="c-pow" style="${(banishSurge>0||deathRemnantPow>0)&&!isInstant?'color:var(--gold)':''}">${(banishSurge>0||deathRemnantPow>0)&&!isInstant?c.pow+(banishSurge>0?'+'+banishSurge:'')+(deathRemnantPow>0?'+'+deathRemnantPow+'☠':''):c.pow}</div>
-      <div class="c-kd"><span class="k">${kdOf(c).k}K</span><span class="slash"> / </span><span class="d">${kdOf(c).d}D</span></div>
-      ${traitIconsHTML(c)}
-      <div class="c-abil"><span class="ca-fighter">${c.abil}</span>${CALLED[c.name]?'<span class="ca-called">📣 '+CALLED[c.name].text+'</span>':''}</div>
-      ${(c.name === 'Darwin' && flameVeilFromWC) ? `<div style="font-size:7px;color:rgba(180,120,240,0.9);background:rgba(120,48,184,0.15);border:1px solid rgba(120,48,184,0.5);border-radius:2px;padding:2px 3px;margin-top:2px;cursor:pointer;text-align:center;line-height:1.3" onclick="event.stopPropagation();activateFlameVeilCurse(${i})">🧬 WC Return: Banish → opp −5</div>` : ''}`;
+    el.innerHTML = bigCardHTML(c)
+      + `<div class="hc-info" onclick="event.stopPropagation();pinPreview(${i})" title="Details">ⓘ</div>`
+      + (CALLED[c.name] ? `<div class="hc-called" title="Has a Called support ability">📣</div>` : '')
+      + ((c.name === 'Darwin' && flameVeilFromWC) ? `<div class="hc-darwin" onclick="event.stopPropagation();activateFlameVeilCurse(${i})">🧬 WC → −5</div>` : '');
     if(isInstant && phase === 'revealed'){
       el.style.borderColor = 'var(--electric)';
       el.style.boxShadow = '0 0 8px rgba(91,192,235,0.25)';
@@ -7563,9 +7571,24 @@ function bigCardHTML(c){
     <div class="tf-text"><div class="tf-abil"><b class="tf-lbl">⚔️</b>${c.abil}</div>${CALLED[c.name]?`<div class="tf-called"><b class="tf-lbl gold">📣</b>${CALLED[c.name].text}</div>`:``}</div>
   </div>`;
 }
-function previewCardEl(c, el){
+function readableCardHTML(c){
+  var kd=(typeof kdOf==='function')?kdOf(c):{k:c.kills,d:c.deaths};
+  var cost=(typeof conjureCost==='function')?conjureCost(c):(c.cost||0);
+  var pristine=kd.d===0?' · ◈ Pristine':'';
+  var called=CALLED[c.name];
+  var traits=(typeof traitChipsHTML==='function')?traitChipsHTML(c):'';
+  var gl=(typeof glossify==='function')?glossify:function(x){return x;};
+  return '<div class="rcard '+c.rarity+'">'
+    + '<div class="rc-top"><span class="rc-cost">⚡'+cost+'</span><span class="rc-name">'+c.name+'</span><span class="rc-pow">'+c.pow+'</span></div>'
+    + '<div class="rc-meta">'+String(c.rarity).toUpperCase()+' · <span class="k">'+kd.k+'K</span> / <span class="d">'+kd.d+'D</span>'+pristine+'</div>'
+    + '<div class="rc-sec"><span class="rc-lbl">⚔ Conjured — Fighter</span>'+gl(c.abil)+'</div>'
+    + (called?'<div class="rc-sec rc-called"><span class="rc-lbl">📣 Called — Support</span>'+called.text+'</div>':'')
+    + (traits?'<div class="rc-traits">'+traits+'</div>':'')
+    + '</div>';
+}
+function previewCardEl(c, el, readable){
   const pv = document.getElementById('card-preview');
-  pv.innerHTML = bigCardHTML(c);
+  pv.innerHTML = readable ? readableCardHTML(c) : bigCardHTML(c);
   const _pvv = pv.querySelector('video'); if(_pvv){ _pvv.muted=true; _pvv.play().catch(()=>{}); }
   pv.classList.add('show');
   const r = el.getBoundingClientRect();
@@ -7577,7 +7600,7 @@ function previewCardEl(c, el){
 }
 function showCardPreview(i){ if(window.matchMedia&&window.matchMedia('(hover:none)').matches)return; if(typeof SFX!=='undefined') SFX.play('hover');
   const c = hand[i]; const el = document.getElementById('hcard-' + i);
-  if(c && el) previewCardEl(c, el);
+  if(c && el) previewCardEl(c, el, true);
 }
 function previewPoolCard(name, el){ if(typeof SFX!=='undefined') SFX.play('hover'); const c = COLLECTION.find(x => (x.uid||x.name) === name); if(c) previewCardEl(c, el); }
 function hideCardPreview(){ var p=document.getElementById('card-preview'); if(p){ p.classList.remove('show','pinned'); p.onclick=null; } var sc=document.getElementById('preview-scrim'); if(sc) sc.remove(); }
