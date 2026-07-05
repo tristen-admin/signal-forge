@@ -3268,7 +3268,7 @@ function buildHand(){
     if(CARD_ART[c.artKey||c.name]){
       el.style.backgroundImage = `linear-gradient(180deg,rgba(7,9,15,0.32),rgba(7,9,15,0.9)),url(${CARD_ART[c.artKey||c.name]})`;
       el.style.backgroundSize = 'cover';
-      el.style.backgroundPosition = 'center top';
+      el.style.backgroundPosition = ART_FOCUS[c.artKey||c.name] || 'center top';
     }
     const isInstant = c.timing === 'instant';
     el.innerHTML = `
@@ -6536,6 +6536,7 @@ const VIDEO_FULL = {'Ahdor':'assets/video/140f98e8b4de.mp4','Kotei':'assets/vide
 VIDEO_FULL['Akatosh, the Golden Dragon']=_AKATOSH_VID;
 const _TANGE_VID='assets/video/1a2dfab9ec4b.mp4';VIDEO_ABILITY['Tange Sazen']=_TANGE_VID;VIDEO_PREVIEW['Tange Sazen']=_TANGE_VID;VIDEO_FULL['Tange Sazen']=_TANGE_VID;
 const VIDEO_FOCUS={'Ahdor':'center 24%'};function vidStyle(k){return VIDEO_FOCUS[k]?' style="object-position:'+VIDEO_FOCUS[k]+'"':'';}
+const ART_FOCUS={'Tange Sazen':'center 45%'};function artFoc(k){return ART_FOCUS[k]?' style="object-position:'+ART_FOCUS[k]+';transform:none"':'';}
 const CARD_ART = {
   'The Regenerating Horror':'assets/img/ee57670d048e.jpg',
   'Tanlorin':'assets/img/c9af2bca1593.jpg',
@@ -7157,7 +7158,7 @@ function pickOppCard(){
 // ══ ART HELPERS ══
 function artFillStyle(name){
   const art = CARD_ART[name];
-  if(art) return `background-image:url(${art})`;
+  if(art) return `background-image:url(${art})${ART_FOCUS[name]?';background-position:'+ART_FOCUS[name]:''}`;
   const sig = CARD_SIGIL[name]||'◈';
   return `background:radial-gradient(circle at 50% 35%,rgba(255,255,255,0.05),transparent 70%)`;
 }
@@ -7536,8 +7537,8 @@ function bigCardHTML(c){
   const vid = VIDEO_PREVIEW[key];
   const art = CARD_ART[key];
   let artStyle='', artInner='';
-  if(vid){ artInner=`<video class="bc-vid" src="${vid}" autoplay muted loop playsinline></video>`; }
-  else if(art){ artInner=`<img class="tf-media" src="${art}" alt="">`; }
+  if(vid){ artInner=`<video class="bc-vid"${artFoc(key)} src="${vid}" autoplay muted loop playsinline></video>`; }
+  else if(art){ artInner=`<img class="tf-media"${artFoc(key)} src="${art}" alt="">`; }
   else { artStyle='background:radial-gradient(circle at 50% 35%,rgba(255,255,255,0.05),transparent 70%)'; artInner=`<span class="bc-sigil">${CARD_SIGIL[key]||'◈'}</span>`; }
   const pristine = c.deaths === 0 ? ' · ◈ Pristine' : '';
   return `<div class="bigcard tframe" style="background-image:url(${TEMP_FRAME})">
