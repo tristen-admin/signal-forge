@@ -3781,10 +3781,10 @@ function retreat(who){
 // Best-of-7 conclusion — win/loss screen with Signal payout.
 function showMatchComplete(mode, amt){ if(typeof SFX!=='undefined')SFX.stopCrowd();
   clearTurnTimers();
-  if(typeof matchPlayed!=='undefined' && matchPlayed.size>=2){ if(rankedMode||pvpMode) recordFormationBonds([...matchPlayed]); matchPlayed=new Set(); }
+  if(typeof matchPlayed!=='undefined' && matchPlayed.size>=2){ recordFormationBonds([...matchPlayed]); matchPlayed=new Set(); }
   wagerDone=true; if(wagerTimer){ clearInterval(wagerTimer); wagerTimer=null; } { const _wo=document.getElementById('wager-overlay'); if(_wo) _wo.classList.remove('show'); }
   const _seasonWon = pvpMode ? (pvpForced ? (pvpForced==='win') : (playerScore[0]>playerScore[1])) : (mode==='retreat-bot' ? true : mode==='retreat-player' ? false : (playerScore[0]>playerScore[1]));
-  if(rankedMode||pvpMode){ if(_seasonWon) seasonWins++; else seasonLosses++; }
+  if(_seasonWon) seasonWins++; else seasonLosses++;
   if(pvpMode){ pvpSettle(); return; }
   const won = (mode==='retreat-bot') ? true : (mode==='retreat-player') ? false : (playerScore[0] > playerScore[1]);
   let swing='';
@@ -3795,6 +3795,8 @@ function showMatchComplete(mode, amt){ if(typeof SFX!=='undefined')SFX.stopCrowd
   }
   if(won && rankedMode){ const rpGained = mode ? amt : (matchWager*stakeMult); sigGain=Math.round(rpGained/100*25); if(sigGain>0){ signalPoints+=sigGain; updateBalance(); } }  // Ranked only: 25 Signal per 100 RP collected (not Play-vs-Bot)
   if(won && rankedMode){ const _rpB = mode ? amt : (matchWager*stakeMult); const _mult=bountyRankMult(rankRP); const _bg=Math.max(1,Math.round(_rpB/100*5*_mult)); bountyBalance+=_bg; if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('\u2b25 +'+fmtPts(_bg)+' Bounty \u2014 '+rankTier(rankRP)+' win (\u00d7'+_mult+')', true); }  // Bounty: EARN-ONLY via ranked skill, rank-scaled
+  if(!rankedMode && !pvpMode){ signalPoints += (won ? 180 : 30); }
+  if(typeof updateBalance==='function') updateBalance();
   saveState();
   document.getElementById('result-overlay').classList.remove('show');
   const end=document.getElementById('match-end');
@@ -5380,7 +5382,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     playerScore[0]++;
     winnersCircle.push({...pc});
     lastResult = 'win';
-    if(rankedMode||pvpMode) recordDuel(pc,'win');   // Public Server = zero consequence
+    recordDuel(pc,'win'); signalPoints += 20;   // playtest: every match tracks K/D + pays
     if(pc.name === 'Signal Diviner'){ charge=Math.min(ENERGY_CAP,charge+2); abilLog.push('\u26a1 Signal Diviner: +2 Charge'); if(typeof renderCharge==='function') renderCharge(); }
     if(pc.name === 'Tange Sazen') skullchainKills++;
     if(pc.name === 'Kotei') ragwingWins++;
@@ -5390,7 +5392,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     lastResult = 'lose';
     playerScore[1]++;
     charge=Math.min(ENERGY_CAP,charge+1); if(typeof renderCharge==='function') renderCharge();
-    if(rankedMode||pvpMode) recordDuel(pc,'death');   // Public Server = zero consequence
+    recordDuel(pc,'death');   // playtest: every match records the death
     if(isDeathRemnant){
       deathRemnantPow = pc.pow;
       sub.textContent = `${oc.name} (${oc.pow}) defeated ${pc.name} (${playerCommittedPow}) — Death Remnant active`;
@@ -8863,7 +8865,7 @@ const _hadSave=(function(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e)
 loadState();
 applyAscendantFrame();
 if(!_hadSave && typeof startNewPlayer==='function') startNewPlayer();
-try{ if(_hadSave && !localStorage.getItem('sf_clearrec_v1')){ cardRecords={}; localStorage.setItem('sf_clearrec_v1','1'); if(typeof saveState==='function') saveState(); } }catch(e){}
+try{ localStorage.setItem('sf_clearrec_v1','1'); }catch(e){}  /* removed one-time cardRecords wipe — it was resetting legit records on reload; playtest tracks persistently */
 try{ if(!localStorage.getItem('sf_grant50k_v1')){ signalPoints=(signalPoints||0)+50000; localStorage.setItem('sf_grant50k_v1','1'); if(typeof updateBalance==='function') updateBalance(); if(typeof saveState==='function') saveState(); } }catch(e){}
 try{ if(!localStorage.getItem('sf_grantcards_v1') && typeof COLLECTION!=='undefined'){ COLLECTION.forEach(function(c){ if(c.uid||c.variant) return; var key=c.name; if((ownedCopies[key]||0)<1){ ownedCopies[key]=1; if(!cardRecords[key]) cardRecords[key]={k:c.kills||0,d:c.deaths||0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Playtest grant'}]}; } }); localStorage.setItem('sf_grantcards_v1','1'); if(typeof saveState==='function') saveState(); if(typeof buildVault==='function') buildVault(); if(typeof updateBalance==='function') updateBalance(); } }catch(e){}
 buildHub();
