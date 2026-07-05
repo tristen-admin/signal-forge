@@ -250,15 +250,16 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .bigcard .bc-kd .k{color:var(--win);font-weight:700}.bigcard .bc-kd .d{color:var(--lose);font-weight:700}
 .bigcard .bc-abil{font-size:11.5px;color:var(--text);line-height:1.5;border-top:1px solid rgba(255,255,255,0.08);padding-top:8px}
 .bigcard .bc-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.bigcard.tframe{width:284px;aspect-ratio:1463 / 1382;border:none !important;border-radius:0;overflow:visible;background-color:transparent;background-repeat:no-repeat;background-position:center;background-size:100% 100%;box-shadow:0 20px 55px rgba(0,0,0,0.8);padding:0}
-.tframe .tf-art{position:absolute;left:16.5%;right:13.5%;top:16%;height:66%;background-size:cover;background-position:center 22%;background-repeat:no-repeat;z-index:1;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.bigcard.tframe{width:284px;aspect-ratio:765 / 1024;border:none !important;border-radius:0;overflow:visible;background-color:transparent;background-repeat:no-repeat;background-position:center;background-size:100% 100%;box-shadow:0 20px 55px rgba(0,0,0,0.8);padding:0}
+.tframe .tf-art{position:absolute;left:16.2%;right:15.6%;top:16.2%;height:37%;background-size:cover;background-position:center 22%;background-repeat:no-repeat;z-index:1;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .tframe .tf-art::after{content:'';position:absolute;left:0;right:0;bottom:0;height:52%;background:linear-gradient(180deg,transparent,rgba(5,6,11,0.72));pointer-events:none;z-index:2}
 .tframe .tf-art .bc-sigil{font-size:44px;opacity:0.92;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.7))}
 .tframe .tf-media,.tframe .bc-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 20%;transform:scale(1.18);transform-origin:center 26%}
-.tframe .tf-name{position:absolute;left:24%;right:12%;top:4.5%;height:9.5%;z-index:3;display:flex;align-items:center;justify-content:center;text-align:center;color:#2a1b06;font-weight:800;font-size:12px;white-space:nowrap;overflow:hidden;text-shadow:0 1px 0 rgba(255,240,200,0.35)}
-.tframe .tf-pow{position:absolute;left:2.5%;width:21%;top:45.5%;height:18%;z-index:3;display:flex;align-items:center;justify-content:center;color:#eaf3ff;font-weight:800;font-size:25px;font-variant-numeric:tabular-nums;text-shadow:0 2px 6px rgba(0,0,0,0.9),0 0 10px rgba(90,150,255,0.55)}
-.tframe .tf-text{position:absolute;left:19%;right:15.5%;top:63.5%;bottom:7.5%;z-index:2;overflow:hidden;display:flex;flex-direction:column;gap:3px}
-.tframe .tf-kd{font-size:9px;font-variant-numeric:tabular-nums;color:#cfd8e6;flex-shrink:0;text-shadow:0 1px 2px rgba(0,0,0,0.98)}
+.tframe .tf-name{position:absolute;left:26%;right:25%;top:6.4%;height:7.6%;z-index:3;display:flex;align-items:center;justify-content:center;text-align:center;color:#2a1b06;font-weight:800;font-size:10px;letter-spacing:-0.015em;white-space:nowrap;overflow:hidden;text-shadow:0 1px 0 rgba(255,240,200,0.35)}
+.tframe .tf-pow{position:absolute;left:3.4%;width:20%;top:79.4%;height:14.5%;z-index:4;display:flex;align-items:center;justify-content:center;color:#2e1a04;font-weight:800;font-size:23px;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 rgba(255,244,214,0.6)}
+.tframe .tf-text{position:absolute;left:19.5%;right:17.5%;top:57%;bottom:12.8%;z-index:2;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.tframe .tf-kd{position:absolute;left:57.5%;width:29.5%;top:87.2%;height:6.6%;z-index:4;display:flex;align-items:center;justify-content:center;gap:1px;font-size:9px;font-weight:800;font-variant-numeric:tabular-nums;color:#2c1904;text-shadow:0 1px 0 rgba(255,238,200,0.4)}
+.tf-cost{position:absolute;left:5%;width:17.2%;top:4%;height:12.7%;z-index:4;display:flex;align-items:center;justify-content:center;color:#3a2103;font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 rgba(255,240,205,0.6)}
 .tframe .tf-kd .k{color:var(--win);font-weight:700}.tframe .tf-kd .d{color:var(--lose);font-weight:700}
 .tframe .tf-abil{font-size:9px;line-height:1.35;color:#eef2f8;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;text-shadow:0 1px 2px rgba(0,0,0,0.98),0 0 6px rgba(0,0,0,0.85)}
 .tf-lbl{font-weight:800;margin-right:2px;opacity:.85}.tf-lbl.gold{color:#ffcf5a}
@@ -7529,7 +7530,7 @@ function openLightbox(name, caption){
 function closeLightbox(){ document.getElementById('lightbox').classList.remove('open'); try{ document.getElementById('lightbox-vid').pause(); }catch(e){} }
 
 // ── HOVER CARD PREVIEW (in-hand readability) ──
-const TEMP_FRAME='assets/img/eb30f867e2ea.jpg'; // TEMP card frame overlay (crop of user's runic frame) — placeholder until final art
+const TEMP_FRAME='assets/img/e5c4875d54aa.png'; // TEMP card frame overlay (crop of user's runic frame) — placeholder until final art
 function bigCardHTML(c){
   const key = c.artKey||c.name;
   const vid = VIDEO_PREVIEW[key];
@@ -7541,9 +7542,11 @@ function bigCardHTML(c){
   const pristine = c.deaths === 0 ? ' · ◈ Pristine' : '';
   return `<div class="bigcard tframe" style="background-image:url(${TEMP_FRAME})">
     <div class="tf-art" style="${artStyle}">${artInner}</div>
+    <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
     <div class="tf-name">${c.name}</div>
     <div class="tf-pow">${c.pow}</div>
-    <div class="tf-text"><div class="tf-kd"><span class="k">${c.kills}K</span> / <span class="d">${c.deaths}D</span>${pristine}</div><div class="tf-abil"><b class="tf-lbl">⚔️</b>${c.abil}</div>${CALLED[c.name]?`<div class="tf-called"><b class="tf-lbl gold">📣</b>${CALLED[c.name].text}</div>`:``}</div>
+    <div class="tf-kd"><span class="k">${c.kills}K</span>/<span class="d">${c.deaths}D</span>${c.deaths===0?' ◈':''}</div>
+    <div class="tf-text"><div class="tf-abil"><b class="tf-lbl">⚔️</b>${c.abil}</div>${CALLED[c.name]?`<div class="tf-called"><b class="tf-lbl gold">📣</b>${CALLED[c.name].text}</div>`:``}</div>
   </div>`;
 }
 function previewCardEl(c, el){
