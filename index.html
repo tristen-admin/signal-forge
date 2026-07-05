@@ -707,6 +707,17 @@ body{flex-direction:row!important}
   border-right:1px solid var(--border);display:flex;flex-direction:column;
   height:100vh;overflow-y:auto;
 }
+.nav-toggle{cursor:pointer;border-radius:6px;padding:1px 3px;transition:background .15s,transform .15s}
+.nav-toggle:hover{background:rgba(245,194,77,0.22);transform:scale(1.15)}
+body.nav-collapsed .sidebar{width:48px!important;min-width:48px!important;overflow:hidden}
+body.nav-collapsed .sidebar > *{display:none!important}
+body.nav-collapsed .sidebar > .nav{display:flex!important;align-items:center;padding:10px 0 0}
+body.nav-collapsed .nav > *{display:none!important}
+body.nav-collapsed .nav > #nav-hub{display:flex!important;justify-content:center;width:100%;background:transparent!important;padding:6px 0}
+body.nav-collapsed #nav-hub .brand-text{display:none!important}
+body.nav-collapsed #nav-hub .ni-icon{font-size:22px;margin:0;color:var(--gold);filter:drop-shadow(0 0 7px var(--gold-glow));animation:navpulse 2.4s ease-in-out infinite}
+@keyframes navpulse{0%,100%{filter:drop-shadow(0 0 5px var(--gold-glow))}50%{filter:drop-shadow(0 0 11px var(--gold-glow))}}
+body.rm body.nav-collapsed #nav-hub .ni-icon,body.rm.nav-collapsed #nav-hub .ni-icon{animation:none}
 .brand{
   display:flex;align-items:center;gap:8px;padding:16px 16px 14px;
   font-size:14px;font-weight:800;letter-spacing:0.08em;color:var(--gold);
@@ -2158,7 +2169,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 <aside class="sidebar">
   <div class="brand"><span class="brand-mark">◈</span><span class="brand-text">SIGNAL FORGE<span class="brand-sub">TCG · PROTOTYPE</span></span></div>
   <nav class="nav">
-    <button class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon">◆</span><span class="brand-text">Hub</span></button>
+    <button class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon nav-toggle" onclick="event.stopPropagation();toggleSidebar()" title="Collapse / expand the menu">◆</span><span class="brand-text">Hub</span></button>
     <div class="nav-group open" id="grp-play">
       <button class="nav-grp-head" onclick="toggleNavGroup('grp-play')"><span class="ni-icon">🎮</span><span class="brand-text">Play</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
@@ -5533,6 +5544,7 @@ function nextTurn(){
 }
 
 const SCREEN_TITLES = {hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',shop:'Shop',market:'Marketplace',lobby:'Public Server',ranked:'Ranked Ladder',pvp:'Staked PvP',draft:'Draft',asc:'Ascension · The Rite',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile'};
+function toggleSidebar(){ document.body.classList.toggle('nav-collapsed'); }
 function toggleNavGroup(id){ var g=document.getElementById(id); if(!g) return; var wasOpen=g.classList.contains('open'); document.querySelectorAll('.nav-group').forEach(function(x){ x.classList.remove('open'); }); if(!wasOpen) g.classList.add('open'); }
 function show(id, btn){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
