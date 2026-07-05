@@ -260,7 +260,9 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .tframe .tf-text{position:absolute;left:19%;right:15.5%;top:63.5%;bottom:7.5%;z-index:2;overflow:hidden;display:flex;flex-direction:column;gap:3px}
 .tframe .tf-kd{font-size:9px;font-variant-numeric:tabular-nums;color:#cfd8e6;flex-shrink:0;text-shadow:0 1px 2px rgba(0,0,0,0.98)}
 .tframe .tf-kd .k{color:var(--win);font-weight:700}.tframe .tf-kd .d{color:var(--lose);font-weight:700}
-.tframe .tf-abil{font-size:9px;line-height:1.35;color:#eef2f8;overflow:hidden;text-shadow:0 1px 2px rgba(0,0,0,0.98),0 0 6px rgba(0,0,0,0.85)}
+.tframe .tf-abil{font-size:9px;line-height:1.35;color:#eef2f8;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;text-shadow:0 1px 2px rgba(0,0,0,0.98),0 0 6px rgba(0,0,0,0.85)}
+.tf-lbl{font-weight:800;margin-right:2px;opacity:.85}.tf-lbl.gold{color:#ffcf5a}
+.tf-called{font-size:8.5px;line-height:1.3;color:#ffe0a3;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;flex-shrink:0;margin-top:1px;padding-top:3px;border-top:1px dashed rgba(245,194,77,0.45);text-shadow:0 1px 2px rgba(0,0,0,0.98),0 0 6px rgba(0,0,0,0.8)}
 #lightbox-vid{max-width:100%;max-height:100%;border-radius:10px;box-shadow:0 24px 90px rgba(0,0,0,0.8);border:1px solid var(--border2)}
 .field-card.video-card{overflow:hidden;position:relative}
 .field-card .field-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
@@ -7541,7 +7543,7 @@ function bigCardHTML(c){
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-name">${c.name}</div>
     <div class="tf-pow">${c.pow}</div>
-    <div class="tf-text"><div class="tf-kd"><span class="k">${c.kills}K</span> / <span class="d">${c.deaths}D</span>${pristine}</div><div class="tf-abil">${c.abil}</div></div>
+    <div class="tf-text"><div class="tf-kd"><span class="k">${c.kills}K</span> / <span class="d">${c.deaths}D</span>${pristine}</div><div class="tf-abil"><b class="tf-lbl">⚔️</b>${c.abil}</div>${CALLED[c.name]?`<div class="tf-called"><b class="tf-lbl gold">📣</b>${CALLED[c.name].text}</div>`:``}</div>
   </div>`;
 }
 function previewCardEl(c, el){
