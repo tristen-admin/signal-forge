@@ -4149,7 +4149,7 @@ function selectCard(i, el){
   if(phase === 'selecting' && preSelectedCard !== null && i !== preSelectedCard){ callSupportIdx(i); return; }
   stageFighter(i);
 }
-function stageFighter(i){
+function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview();
   var c=hand[i]; if(!c || c.timing==='instant') return;
   if(phase!=='revealed' && phase!=='selecting') return;
   if(conjureCost(c) > charge){ if(typeof toast==='function') toast('Not enough energy — '+c.name+' costs ⚡'+conjureCost(c)+' (you have '+charge+')', false); return; }
@@ -4165,7 +4165,7 @@ function stageFighter(i){
   setPhase('selecting');
   buildHand(); renderRearSlot(); refreshStageHint();
 }
-function callSupportIdx(i){
+function callSupportIdx(i){ if(typeof hideCardPreview==='function')hideCardPreview();
   if(preSelectedCard===null){ if(typeof toast==='function') toast('Conjure a Fighter first, then Call a support.', false); return; }
   if(i===preSelectedCard) return;
   var c=hand[i]; if(!c || c.timing==='instant') return;
@@ -4221,7 +4221,7 @@ function handPointerUp(e){
 }
 
 // Back out of a staged selection (returns to the Select phase; opponent unlocks).
-function deselectCard(){
+function deselectCard(){ if(typeof hideCardPreview==='function')hideCardPreview();
   preSelectedCard = null;
   rearGuardIdxs = [];
   pendingOppCard = null;
@@ -7553,13 +7553,13 @@ function previewCardEl(c, el){
   if(r.top > ph + 24){ pv.style.top = 'auto'; pv.style.bottom = (window.innerHeight - r.top + 12) + 'px'; }
   else { pv.style.bottom = 'auto'; pv.style.top = (r.bottom + 12) + 'px'; }
 }
-function showCardPreview(i){ if(typeof SFX!=='undefined') SFX.play('hover');
+function showCardPreview(i){ if(window.matchMedia&&window.matchMedia('(hover:none)').matches)return; if(typeof SFX!=='undefined') SFX.play('hover');
   const c = hand[i]; const el = document.getElementById('hcard-' + i);
   if(c && el) previewCardEl(c, el);
 }
 function previewPoolCard(name, el){ if(typeof SFX!=='undefined') SFX.play('hover'); const c = COLLECTION.find(x => (x.uid||x.name) === name); if(c) previewCardEl(c, el); }
-function hideCardPreview(){ var p=document.getElementById('card-preview'); if(p) p.classList.remove('show','pinned'); var sc=document.getElementById('preview-scrim'); if(sc) sc.remove(); }
-function pinPreview(i){ showCardPreview(i); var p=document.getElementById('card-preview'); if(!p) return; p.classList.add('pinned'); var sc=document.getElementById('preview-scrim'); if(!sc){ sc=document.createElement('div'); sc.id='preview-scrim'; document.body.appendChild(sc); } sc.onclick=hideCardPreview; }
+function hideCardPreview(){ var p=document.getElementById('card-preview'); if(p){ p.classList.remove('show','pinned'); p.onclick=null; } var sc=document.getElementById('preview-scrim'); if(sc) sc.remove(); }
+function pinPreview(i){ showCardPreview(i); var p=document.getElementById('card-preview'); if(!p) return; p.classList.add('pinned'); p.style.pointerEvents='auto'; p.onclick=hideCardPreview; var sc=document.getElementById('preview-scrim'); if(!sc){ sc=document.createElement('div'); sc.id='preview-scrim'; document.body.appendChild(sc); } sc.onclick=hideCardPreview; sc.ontouchstart=function(e){e.preventDefault();hideCardPreview();}; }
 
 // ── KEYWORD DEFINITION TOOLTIP (hover any .kw term) ──
 function showKwTip(el){
