@@ -1,0 +1,160 @@
+459a2ad Hosting: GitHub Pages setup (docs/ built site + deploy scripts)
+29a4aae Audio: arena crowd ambience on match start + card-deploy SFX
+344ddad Aesthetic pass: embed Cinzel display serif + chrome refinement
+1dbb0a4 Overnight 5/N: Reduce Motion also skips the heavy video match-intro
+7ba41dc Overnight: changelog + final deploy sync
+1ab3b87 Overnight 4/N: landscape combat compaction
+4550917 Overnight 3/N: Settings panel (sound + reduce-motion + how-to)
+e0202bf Overnight 2/N: self-healing combat watchdog + tap-to-continue
+51c3af1 Overnight 1/N: How to Play overlay (core-loop guide)
+6e147e5 Real gameplay fixes: card-swap clarity, touch drag, intro, name clip
+4cc2fae Purchase confirms + clickable lore links + opp-card guard
+a7d6af1 QA sweep: fix mobile horizontal overflow on 4 views + replay layout
+1348cb2 Dev Abilities: plain-words Called description zone + Requests export
+eafcc21 Dev Abilities tab: instant cost + friendly Called quick-build
+0b68a3c Called support renders as compact art card, not text wall
+ce2ee2d Mobile combat: transparent centered hand + minimized charge meter
+388cdfa Mobile combat: reclaim header space + transparent hand/charge
+4447400 New-player wipe + deck-size range + card draw
+d7a8ab5 Drawer: Card tab first from deck builder; show Called effect + conjure cost
+caf8a12 Dev mode: ⚡ Abilities tab — edit conjure cost + Called + CARD_RULES live
+a1e3a97 Duel UI: card-face Called+cost, clickable pile viewers, drag-and-drop deploy
+3de2795 Collection: Mastery & Bonds hub + Trade hub
+af0026a Collection: foil is now selectable (pick any unlocked finish via cardFoilMax) + foil/frame are collapsible dropdowns to shrink the drawer
+5fd50d9 Combat flow: second rear-guard slot (RG_SLOTS=2)
+b4dddb2 Combat flow refinements — Tier 1-2 + pacing (11 of 12)
+e46fc59 Fix: mobile duel view rendered on every screen (unconditional display:flex)
+32135f4 Mobile: conform duel height to safe-area model (100dvh -> 100%)
+d149071 Mobile duel redesign — fit-to-viewport, field-first, nav out of combat
+9e958e3 Rear-guard rework — full content pass + deck size
+fc950b1 Rear-guard / Called combat system — playable slice (verify-gated)
+dfcb12a Consolidate sessions 2 & 3 final work as master baseline
+7eed57f Consolidate for master session: resync monolith + capture off-artifact deploy tooling
+f51e954 Ascension skins: gate regalia to Ultra+ rarity, character-keyed
+e2e72b5 Ascension: move loadout + per-unit regalia skins (the two deferred items)
+4921c33 Ascension: dead-code cleanup, bond growth, onboarding, Chapter 2, balance pass
+331cd96 Ascension: promote to a top-level nav item beneath the Collection group
+1a61b97 Ascension objectives: Crossroads (choice) + Trials (risk/reward) + Bounties
+8b3d8a0 Ascension Hub — lobby with Champions, Team Builder, Arena & Shop
+6f67651 Ascension depth: learnable move pools + lore link auras (raise skill ceiling)
+afd64df Cleanup #5: remove inert relic/boon system from Ascension
+d5fd702 Cleanup: slim hub to Play-only, promote Chapter 1 as Ascension primary CTA, remove dead UI panels
+3789128 Card frame art crop: zoom + bleed past crop, no black corners
+b224ced Card frame: art fills the interior, text box transparent (scrim overlay)
+bf9c22a Card videos: keep-alive re-play (heavy muted clips get paused/deferred)
+7d062cb Played cards on field: framed overlay + video animation (resolution cinematic)
+ca3b317 Ascension: promote to its own top-level nav tab + story-map location fix
+65ee777 Card frame (tframe) art crop: aim for faces, not chest
+c46df31 Ascension: authored Chapter 1 story campaign (loosely off the KOTEI saga)
+200eb5a Ascension: monthly loaner rotation + PvP Arena
+910ba4a Ascension: campaign wizard — lore intro -> Avatar screen -> companions
+8c19f91 Ascension: Avatar becomes a patron (ultimate + passives), not a fighter
+ca7e0ff Ascension: bag + gear/equipment system
+71b0bb7 Ascension: location-journey backgrounds + rank ladder + edit-team menu
+f8cbe2d Ascension: add Keawe Kil'lua as an avatar Champion (real card + art)
+6f8cfde Ascension: card-bound Champions + Rite achievements drive card value
+b6b3a4f Conditional/situational traits (client + server) — fairness capstone
+6499e60 Ascension: enemy & boss mechanics (behaviors + threat telegraphs)
+25c103e Trait progression ladder + Legend Board + market badges + title fix
+5bdaf2c Ascension: RPG consumable economy (Merchant nodes + battle items)
+0c67a2f Link Skills — lore synergy unlocks latent power (DBZ-style)
+26ad9f2 Ascension: Avatar summon mechanic + premium Summon VFX cosmetic
+c097095 Merge cards now award Signal (rarity-scaled 10-25)
+62c789b Ascension pivot: JRPG party-battler (roster + turn-based FF-style combat)
+c1afb88 Resolution cinematic — flip cards face-up + tic power per effect
+7b9cf56 Server: mirror one-active-trait (equip model) — end trait stacking
+1095420 Traits: one active trait per card (equip model) — end stacking
+487eb9d Ascension Phase 1: every node is a real duel (abilities + conditions)
+2826afc Hub: consolidate play modes under one Play category + surface Draft/Ascension
+978283c Free play is casual + add The Ascendant trait-trial bot
+355c384 Tange keyword name + remove the Uncommon tier
+002e495 Server spell system + build step (the last two follow-ups)
+ffc676e Rarity relabel: AR / UR / SR / Rare / Common (display map)
+f33a54d Changelog: shared rules spec — client adopted (parity drift closed)
+3dffb13 Client adopts the shared rules spec (data-driven resolve)
+6f48ff8 Tange Sazen: genesis rarity + conditional Banish Surge ("Last Blade")
+5cd18c8 Server Tier-0 finish: persistent sessions, rules.json, hardening
+c818a66 Data-driven rules: server ability interpreter (big-one step 1)
+97c501f Rule gaps: Formations, spell hooks, Ascension + authoritative mastery
+44a2467 Rules parity: authoritative match engine (server plays the real game)
+e9f1509 Fix: opponent cards carry their canonical ability (Ahdor Record Guard)
+60dadaf Match board: gold screen-wipe transition on location change
+9b04803 Match intro: extend frozen last-frame backdrop to hand/charge strip
+3df8d22 Match intro: cinematic arena walk-out video on match open
+aaccc7a Step 2: thin browser client on the authoritative server
+cf594ee Vista background across all main screens (shared --vista, tiered scrims)
+7009270 Server economy aligned: Signal = card currency, Forge = premium (no cash-out)
+7937862 Hub: fantasy vista background with readability scrim
+d0a5b71 Server: starter deck = 10 cards, excluded from the market
+5a477cf Tier 0 backend: self-hosted authoritative server (accounts + anti-cheat + closed-loop $FORGE)
+44f586b Akatosh: encode phase-order model + honest card text
+b6031a3 Fix: don't log "Akatosh unmakes the arena" under Ability Lock
+04f647b QoL: deck strength readout in Deck Builder
+be9e80d QoL: tooltips on vault keyword-filter chips
+4284cdd a11y: complete reduced-motion gating
+3ca036e Polish: profile hero header serif+gold + active filter-chip glow
+4d3c483 Aesthetic: pack-pull reveal animation
+ed6ee3f QoL: vault empty state
+299bb44 Aesthetic: unified serif+gold headers across secondary views
+8b00f67 a11y: keyboard access for emblem / DNA-chip controls
+95cd008 QoL: Escape closes the card drawer / lightbox
+3b73516 QoL: confirm before destructive actions
+2761608 Preventive: preserve Forge on load + harden wonCounter
+65fc199 Card Packs: brand as "Legends Reborn" · Chapter 1: Rebirth
+4797633 Genesis Vault: 5% Genesis, mostly rares + ultras
+5f7a76a Shop: split Card Packs into its own tab, separate from cosmetics
+8b6ffe6 Legend Economy Phase A: $FORGE token + Legend Score appraisal
+34af85c Match board: one seamless location image across all zones
+1accdae Match field: unobstructed location art + outlined card slots
+e247163 Pillar 2 — Roguelike Rite: Ascension becomes a run-based campaign
+9a093f1 Pillar 3 — Bonds & Formations: cards that fight together grow synergies
+227f0bf Pillar 1 — Living Cards: biography-driven traits change how a card plays
+a546126 Mastery Lv 25 ladder: capstone free variant, genesis global frame, lobby browser
+1d5c908 Echo gem motif into sidebar nav + hub tiles
+28a0ab6 Mastery system: per-card cosmetic tracks, rarity-gated, fueled by Ascension bond
+995916c Ornate metal-framed gem buttons for primary CTAs
+14b1766 New mode: Ascension — The Rite (original avatar / Vanguard-inspired)
+abd1c0b Recolor UI from deep-blue to neutral black
+60f87d2 Hub redesign: Elden Ring / Elder Scrolls selection-screen feel
+d492a02 UI overhaul: brighter palette, bigger type, motion + ambient eye candy
+86b7dec Raise scales only on agreement + opponent Record Guard + drawer live K/D
+f5237c7 Replace between-duels Wager Phase with anytime HUD raise/fold (Marvel-Snap style)
+a331874 Marketplace: card click shows the LISTED card's stats, not your own copy
+c4949e2 Fix: card detail drawer now opens from Deck Builder + Marketplace
+d29e760 Signal reward retune + deck drag-and-drop + click-to-inspect (deck & market)
+49a64f4 Hub: buttons for every option + ranked wins stack Signal
+4f3bbf9 Hub action tiles: add Shop, enlarge + restyle
+5066729 Hub: surface Ranked Ladder / Play vs Bot / Deck Builder / Vault as action tiles; drop Signal + Trust stats
+80ba110 Titles unbuyable from Profile — route to Shop to drive traction
+f809334 Featured Units page in Profile — multi-select + 10s shuffle rotation
+04fb5da Fix rank-wager exploit: cap stake at x8 + one raise per turn
+77db124 Unify emblem systems — Profile + Shop + sidebar share one source
+6ae3c05 Featured-card picker (Hub) + title selector (Profile)
+5b7c905 Won cards are distinct instances (not x2 stacks) + fix variant bleed + charset
+c5d62b2 PvP pot = match winner (reinforced) + DNA→Marketplace compare + PvP auto-sim
+475ba68 Ranked Ladder matchmaking + Staked PvP wait room (terms, rarity floor, approval)
+b398c89 Wager Phase (Snap→Raise, true 30s phase, mutual-skip) + PvP card raise
+1827b7d Live on-chain records: deck ownership gate + career/owner K/D + dynamic Card DNA
+01ac3ca Rank rework + Ahdor visibility + tie-returns-to-hand
+259e5ea Add Staked PvP tab — card wagering (separate from Signal snap)
+e966ab2 Regen Horror art; variant deck-selectable (uid identity, own art + K/D); combat resolve animation
+5cf817e Implement wagering + Snap window (realizes the Match Arc snap step); variant excluded from genesis-100 legend
+ecaf133 Implement variant cards: same name as base, identical ability, marker in Card DNA
+51435bf Reinstate Tanlorin art; Melanie/Legion/Skeleton portraits; re-embed Darwin+Heir; add Kotei — Voidcrown (first tournament variant)
+7328a77 Rename KOTEI->Kotei; rework Akatosh (Unmaking + WC decay); remove Darwin — Heir (41->40)
+d9cefaf Embed Akatosh/Ella-true-form/werewolf art; restore Darwin's proper art; move Tanlorin portrait to Melanie
+73d4af7 Rename flagship Keawe Kil'lua -> KOTEI; promote base-form Keawe Kil'lua (Rare)
+7e379a0 Timeout auto-deploys a chosen card (only a true no-pick surrenders) + Craglorn/Yozai arena art
+1ce31a0 Powered art swap + 2 new arenas + 4 new cards (37->41)
+6aec89e Embed card art (7 new cards) + arena backgrounds (6 conditions)
+b622702 Rename the 8 turn conditions to KOTEI locations (arenas)
+01ad619 Add 15 KOTEI reserve cards (Series 1 expansion): 22 -> 37 cards
+8861e43 Add 'Purity' to keyword glossary (Alucard's drain-purity text now has a hover definition)
+0b1908d Re-cast Match-Replay hero Keawe -> Darwin (now the 41-3 finisher)
+490a3d9 Swap Keawe/Darwin records; Keawe -> 7-0 Pristine, Darwin -> 41-3
+c592446 Rebalance base power across 12 cards to scale with ability strength
+32e4651 Fix deck-builder pool scroll (flex-height chain) + hover preview; Korrin base power -> 14
+70c1230 Swap Tange Sazen & Korrin abilities; Tange -> Kill Escalation at pow 15, Korrin -> kill-compare
+bca38ee Re-rank: Darwin -> Genesis (pow 15); Lagertha/Anorith/Tange/Alucard -> Rare
+678ea09 Remove Crown of the Damned keyword; align Alucard wording with unnamed effects
+bd80650 Signal Forge prototype — Series 1 build

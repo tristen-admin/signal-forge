@@ -1,0 +1,232 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
+<title>Signal Forge — Card Compendium · Series 1</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --void:#07090F; --panel:#0D1828; --surface:#111E30; --surface2:#16263c;
+  --border:#1A2D48; --border2:#243c5c;
+  --gold:#D4A843; --gold-dim:#8A6A20; --electric:#5BC0EB;
+  --text:#C2D0E2; --text2:#7188A8; --text3:#3E5170;
+  --k:#4FB088; --d:#D06A6A;
+  --r-common:#7C90A8; --r-uncommon:#3FB07A; --r-rare:#5B8CF0; --r-ultra:#B06CF0; --r-genesis:#E8B84B;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+body{background:
+    radial-gradient(1200px 600px at 80% -10%,rgba(212,168,67,0.06),transparent 60%),
+    radial-gradient(900px 500px at 0% 0%,rgba(91,192,235,0.05),transparent 55%),
+    var(--void);
+  color:var(--text);min-height:100vh;line-height:1.5;
+  -webkit-font-smoothing:antialiased;padding:34px 20px 60px;}
+.wrap{max-width:1060px;margin:0 auto}
+
+/* header */
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--electric);margin-bottom:9px}
+h1{font-size:33px;font-weight:800;letter-spacing:-0.01em;color:#EAF1FA;line-height:1.05;text-wrap:balance}
+h1 .amp{color:var(--gold)}
+.lede{font-size:13.5px;color:var(--text2);margin-top:9px;max-width:60ch}
+.lede b{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* legend */
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 6px}
+.leg{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:7px 12px}
+.leg .dot{width:9px;height:9px;border-radius:2px;transform:rotate(45deg);flex-shrink:0}
+.leg .lr{font-size:11.5px;font-weight:700;letter-spacing:0.02em}
+.leg .lm{font-size:11px;color:var(--text2);font-variant-numeric:tabular-nums}
+.leg .lm b{color:var(--text3);font-weight:600}
+
+/* controls */
+.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:20px 0 12px}
+.controls .lbl{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-right:2px}
+.chip{font-family:inherit;font-size:12px;font-weight:600;letter-spacing:0.02em;color:var(--text2);
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:6px 13px;cursor:pointer;transition:color .12s,border-color .12s,background .12s}
+.chip:hover{color:var(--text);border-color:var(--border2)}
+.chip.on{color:var(--gold);border-color:var(--gold-dim);background:rgba(212,168,67,0.08)}
+.chip:focus-visible{outline:2px solid var(--electric);outline-offset:2px}
+
+/* table */
+.sheet{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:840px}
+thead th{font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);
+  text-align:left;padding:12px 12px;border-bottom:1px solid var(--border);white-space:nowrap;background:var(--surface)}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums}
+th.ctr,td.ctr{text-align:center}
+tbody td{padding:12px 12px;border-bottom:1px solid rgba(255,255,255,0.035);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:var(--surface)}
+/* rarity stripe */
+td.rank{position:relative;font-size:13px;font-weight:800;color:var(--text3);font-variant-numeric:tabular-nums;width:44px;padding-left:16px}
+td.rank::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:2px;background:var(--stripe)}
+tr.genesis{--stripe:var(--r-genesis)} tr.ultra{--stripe:var(--r-ultra)} tr.rare{--stripe:var(--r-rare)}
+tr.uncommon{--stripe:var(--r-uncommon)} tr.common{--stripe:var(--r-common)}
+
+.card-cell{display:flex;align-items:center;gap:10px;min-width:180px}
+.sig{font-size:18px;width:24px;text-align:center;flex-shrink:0;filter:saturate(1.1)}
+.cn{font-size:14px;font-weight:700;color:#E7EEF7;line-height:1.2}
+.badge{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;
+  padding:3px 8px;border-radius:4px;white-space:nowrap;border:1px solid transparent}
+.badge.genesis{color:#1a1305;background:var(--r-genesis)}
+.badge.ultra{color:#fff;background:rgba(176,108,224,0.18);border-color:var(--r-ultra)}
+.badge.rare{color:#fff;background:rgba(91,140,240,0.16);border-color:var(--r-rare)}
+.badge.uncommon{color:#fff;background:rgba(63,176,122,0.16);border-color:var(--r-uncommon)}
+.badge.common{color:#cdd8e6;background:rgba(124,144,168,0.14);border-color:var(--r-common)}
+.pow{font-size:19px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1}
+.rec{font-variant-numeric:tabular-nums;font-size:13px;font-weight:600;white-space:nowrap}
+.rec .k{color:var(--k)} .rec .d{color:var(--d)} .rec .sl{color:var(--text3)}
+.pristine{display:block;font-size:9px;font-weight:700;color:var(--gold);letter-spacing:0.05em;margin-top:2px}
+.timing{font-size:10.5px;font-weight:700;letter-spacing:0.04em;color:var(--text2);white-space:nowrap}
+.timing.instant{color:var(--electric)} .timing.pre{color:var(--gold)} .timing.resolution{color:var(--r-ultra)}
+.edi{font-size:12px;color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.edi b{color:var(--text)}
+.abil{font-size:12.5px;color:var(--text);line-height:1.5;min-width:260px;max-width:420px}
+.abil .kw{color:var(--electric);font-weight:600}
+
+.foot{margin-top:16px;font-size:11px;color:var(--text3);text-align:center;letter-spacing:0.02em}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Signal Forge · Series 1</div>
+    <h1>Card Compendium</h1>
+    <p class="lede">Every card in the set, ranked. <b>40</b> cards across five rarities plus <b>1</b> tournament variant — a Series 1 float of <b>109,912</b> on-chain copies. Sort by any column below; the rarity stripe and badge track each card's tier.</p>
+  </header>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="controls">
+    <span class="lbl">Sort</span>
+    <button class="chip on" data-sort="power">Power</button>
+    <button class="chip" data-sort="kills">Most Kills</button>
+    <button class="chip" data-sort="deaths">Fewest Deaths</button>
+    <button class="chip" data-sort="rarity">Rarity</button>
+    <button class="chip" data-sort="name">Name</button>
+  </div>
+
+  <div class="sheet">
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr>
+            <th class="num">#</th>
+            <th>Card</th>
+            <th>Rarity</th>
+            <th class="num">Pow</th>
+            <th>Record</th>
+            <th>Timing</th>
+            <th>Edition</th>
+            <th>Ability</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="foot">Record = career kills (duels won) – deaths (duels lost). Edition = mint supply per card at Series 1 launch. Data mirrors the live build.</p>
+</div>
+
+<script>
+const SUPPLY = {genesis:100, ultra:1000, rare:2500, uncommon:4000, common:5000};
+const RORDER = {genesis:0, ultra:1, rare:2, uncommon:3, common:4};
+const RNAME = {genesis:"Genesis", ultra:"Ultra", rare:"Rare", uncommon:"Uncommon", common:"Common"};
+const TLABEL = {on:"On-Commit", instant:"Instant", pre:"Pre-Commit", resolution:"Resolution", "":"—"};
+
+const CARDS = [
+  {n:"Kotei", p:18, k:7, d:0, r:"genesis", t:"on", s:"⚡", a:"On commit: +3 if opponent's card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match."},
+  {n:"Ahdor", p:11, k:2, d:5, r:"genesis", t:"on", s:"🛡", a:"Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. Ahdor returns to your hand and a random hand card gains +4."},
+  {n:"Alucard The Damned", p:13, k:31, d:2, r:"rare", t:"on", s:"🩸", a:"On commit: the opponent's card loses 4 power — or if it is Pristine (0 deaths), Alucard drains its purity for +4 instead."},
+  {n:"Lagertha Waltz", p:14, k:19, d:4, r:"rare", t:"on", s:"🪓", a:"On commit: +2 if you lost your last duel. -2 if you won your last duel."},
+  {n:"Ella Ballora", p:14, k:15, d:4, r:"ultra", t:"on", s:"⚔️", a:"Bloodrage: on commit +3 power, and +3 more if you have already lost a duel this match — she fights harder wounded."},
+  {n:"Anorith Keeling", p:10, k:6, d:1, r:"rare", t:"on", s:"🦂", a:"On commit: if opponent's base power is higher than this card, gain +2 power for every card in your hand."},
+  {n:"Tange Sazen", p:15, k:14, d:6, r:"rare", t:"resolution", s:"🗡", a:"Kill Escalation: gains +3 power per kill Tange has earned this match."},
+  {n:"Valcarion", p:13, k:3, d:1, r:"rare", t:"pre", s:"🔒", a:"Pre-commit: lock the active condition this turn — opponent cannot shift it."},
+  {n:"Tanlorin", p:10, k:8, d:2, r:"rare", t:"instant", s:"⚡", a:"⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only."},
+  {n:"Arch-Grim Korrin", p:14, k:28, d:7, r:"rare", t:"on", s:"💀", a:"On commit: if opponent's card has fewer career kills than this card, +4 power."},
+  {n:"Zerith Var", p:12, k:9, d:3, r:"rare", t:"on", s:"🔥", a:"On commit: if you are losing this duel (opponent's base power is higher), +4 power."},
+  {n:"Kiana", p:11, k:9, d:3, r:"rare", t:"on", s:"🔥", a:"Elemental Flurry: on commit +3 power, and +4 more if the active condition is a chaos condition (Force Swap, Energy Surge, or Mirror)."},
+  {n:"Val Kreigh", p:13, k:11, d:5, r:"rare", t:"on", s:"⚔", a:"On commit: if this is the 1st duel of the match, +5 power."},
+  {n:"Uso Oso", p:8, k:12, d:0, r:"rare", t:"resolution", s:"🐻", a:"Death Remnant: when Uso dies he stays on field. Your cards here gain +7 power until an opponent's card is killed, then Remnant is removed."},
+  {n:"Darwin", p:15, k:41, d:3, r:"genesis", t:"on", s:"🧬", a:"On commit: if 3rd+ commit this match, +3 power. Returns from Winners Circle: banish from hand to curse opponent's next committed card −5 power."},
+  {n:"Veronica", p:10, k:5, d:1, r:"uncommon", t:"on", s:"🎭", a:"On commit: copy opponent's card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability."},
+  {n:"Malia", p:10, k:5, d:1, r:"uncommon", t:"on", s:"🪞", a:"On commit: your power becomes the opponent's committed card power for this duel."},
+  {n:"Moro", p:9, k:4, d:2, r:"uncommon", t:"on", s:"🐾", a:"On commit: if opponent's card has 6+ career kills, gain +3 power."},
+  {n:"Hanse Waltz", p:9, k:3, d:2, r:"uncommon", t:"resolution", s:"🎻", a:"Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded."},
+  {n:"Ruffius Rufeldro", p:5, k:1, d:3, r:"common", t:"on", s:"🗡", a:"On commit: if you are down 2 or more duels this match, double this card's power."},
+  {n:"Kiba", p:2, k:0, d:8, r:"common", t:"resolution", s:"🐺", a:"Death Remnant: when Kiba dies it stays on field. Your cards here gain +2 power until an opponent's card is killed, then Remnant is removed."},
+  {n:"Bixie Bee", p:1, k:0, d:0, r:"common", t:"", s:"🐝", a:"No ability. Starter card. Never hesitate to deploy."},
+  {n:"Melanie", p:1, k:0, d:0, r:"common", t:"on", s:"🌷", a:"No ability. Keawe's mother — a civilian, not a fighter. At 1 power she quietly wins under Lowest Wins."},
+  {n:"Heir of Kaiga", p:3, k:4, d:6, r:"common", t:"on", s:"🗡", a:"Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast."},
+  {n:"Uso Oso's Skeletal Summons", p:3, k:2, d:10, r:"common", t:"resolution", s:"🦴", a:"Death Remnant: when the summons falls it lingers on the field, your committed cards gaining its power until an opponent's card is killed."},
+  {n:"Korrin's Possessed Legion", p:6, k:11, d:9, r:"uncommon", t:"on", s:"🪖", a:"Thrall Swarm: on commit, +5 power if Arch-Grim Korrin is in your Winners Circle — the possessed surge while their master reigns."},
+  {n:"Josef", p:7, k:6, d:4, r:"uncommon", t:"on", s:"🧵", a:"Master Tailor: on commit, +4 power once he has taken the measure of the fight (any commit after your first)."},
+  {n:"Sister Mire", p:8, k:7, d:3, r:"uncommon", t:"resolution", s:"🌱", a:"Death Remnant: ash returns to root — when Sister Mire dies she stays on the field, your cards gaining her power until an opponent's card is killed."},
+  {n:"King Joris", p:10, k:12, d:4, r:"rare", t:"on", s:"👑", a:"Rightful Claim: on commit, +1 power for every death on the opponent's record — the betrayed king judges every usurper's sins."},
+  {n:"The Regenerating Horror", p:10, k:8, d:1, r:"rare", t:"resolution", s:"👁", a:"Regeneration (one use): the first time it would lose it regrows — the duel ties, no death, and it returns to your hand. Only a finisher ends it."},
+  {n:"Broodmother", p:11, k:9, d:2, r:"rare", t:"on", s:"🕷", a:"Spiderling Swarm: on commit, +2 power for every card in your hand — the brood answers her call."},
+  {n:"Chieftain Reyva Vosh", p:13, k:20, d:5, r:"rare", t:"on", s:"🏔", a:"Warriors in Reserve: on commit, +2 power for each card in your Winners Circle — she commits her hold's warriors once the stakes are undeniable."},
+  {n:"Forgemask", p:14, k:16, d:3, r:"rare", t:"on", s:"🔨", a:"Reforged: on commit, +3 power, and +4 more if you lost your last duel — the forge tempers what breaks."},
+  {n:"Lagertha Waltz — Werewolf Form", p:14, k:21, d:5, r:"ultra", t:"on", s:"🌕", a:"Alpha's Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack's fury peaks in mourning."},
+  {n:"Hanse Waltz — Werewolf Form", p:15, k:22, d:4, r:"ultra", t:"on", s:"🐺", a:"Blood Moon: on commit, +5 power while you are behind in the match — rage completes the transformation."},
+  {n:"Ella Ballora — True Form", p:17, k:24, d:1, r:"ultra", t:"on", s:"🕸", a:"Devour: on commit, +3 power, and +4 more if you have already won a duel this match — the Spider-Queen grows with every kill."},
+  {n:"Akatosh, the Golden Dragon", p:21, k:77, d:0, r:"genesis", t:"on", s:"🐉", a:"Unmaking: when Akatosh is committed the active condition takes no effect this duel — the god ignores the arena. Each time he returns from the Winners Circle to hand, he permanently loses 3 power."},
+  {n:"Keawe Kil'lua", p:12, k:6, d:3, r:"rare", t:"on", s:"⚡", a:"Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei."},
+  {n:"Rhaess Korvain", p:12, k:14, d:3, r:"rare", t:"on", s:"🗡", a:"Assassin's Mark: on commit, +6 power if the opponent's card has more career kills than this one — Rhaess hunts the notable."},
+  {n:"Ossian Drell", p:12, k:18, d:5, r:"rare", t:"on", s:"🎖", a:"Field Command: on commit, +3 power, and +3 more if you are ahead in the match — a veteran presses the advantage."},
+  {n:"Kotei", v:"Tournament Won", opened:12, p:18, k:16, d:2, r:"genesis", t:"on", s:"🏆", a:"On commit: +3 if opponent's card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match."},
+];
+
+const KW = ["Record Guard","Death Remnant","Kill Escalation","Last Stand","Banish Surge","Bloodrage","Elemental Flurry","Pre-commit","Winners Circle","Pristine"];
+function glossify(t){
+  KW.forEach(k=>{ t = t.replace(new RegExp("\\b"+k.replace(/[-]/g,"\\$&")+"\\b"), '<span class="kw">'+k+'</span>'); });
+  return t;
+}
+
+const SORTS = {
+  power:  (a,b)=> b.p-a.p || RORDER[a.r]-RORDER[b.r],
+  kills:  (a,b)=> b.k-a.k || b.p-a.p,
+  deaths: (a,b)=> a.d-b.d || b.k-a.k,
+  rarity: (a,b)=> RORDER[a.r]-RORDER[b.r] || b.p-a.p,
+  name:   (a,b)=> a.n.localeCompare(b.n),
+};
+
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+function render(sortKey){
+  const rows = CARDS.slice().sort(SORTS[sortKey]);
+  document.getElementById("rows").innerHTML = rows.map((c,i)=>{
+    const pristine = c.d===0 ? '<span class="pristine">◈ PRISTINE</span>' : '';
+    return `<tr class="${c.r}">
+      <td class="rank num">${i+1}</td>
+      <td><div class="card-cell"><span class="sig">${c.s}</span><span class="cn">${esc(c.n)}${c.v?` <span style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:0.04em">🏆 ${c.v}</span>`:''}</span></div></td>
+      <td><span class="badge ${c.r}">${RNAME[c.r]}</span></td>
+      <td class="num"><span class="pow">${c.p}</span></td>
+      <td><span class="rec"><span class="k">${c.k}</span><span class="sl"> – </span><span class="d">${c.d}</span></span>${pristine}</td>
+      <td><span class="timing ${c.t}">${TLABEL[c.t]}</span></td>
+      <td><span class="edi">${c.v?`🏆 1 / <b>${c.opened}</b> won`:`1 / <b>${SUPPLY[c.r].toLocaleString()}</b>`}</span></td>
+      <td class="abil">${glossify(esc(c.a))}</td>
+    </tr>`;
+  }).join("");
+}
+
+function buildLegend(){
+  const counts = {}; CARDS.forEach(c=>{if(!c.v)counts[c.r]=(counts[c.r]||0)+1;});
+  document.getElementById("legend").innerHTML = Object.keys(RORDER).map(r=>
+    `<div class="leg"><span class="dot" style="background:var(--r-${r})"></span>`+
+    `<span class="lr" style="color:var(--r-${r})">${RNAME[r]}</span>`+
+    `<span class="lm">×${counts[r]||0} · run of <b>${SUPPLY[r].toLocaleString()}</b></span></div>`
+  ).join("");
+}
+
+document.querySelectorAll(".chip").forEach(ch=>ch.addEventListener("click",()=>{
+  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));
+  ch.classList.add("on");
+  render(ch.dataset.sort);
+}));
+
+buildLegend();
+render("power");
+</script>
+
+</body></html>

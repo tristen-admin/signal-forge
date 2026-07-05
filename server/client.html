@@ -1,0 +1,120 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Signal Forge — Local Client (Tier 0)</title>
+<style>
+  :root{--bg:#0a0d14;--panel:#131a26;--panel2:#182131;--border:#243146;--text:#E4EDFB;--text2:#9fb0c8;--text3:#657792;--gold:#F5C24D;--elec:#6FD3FF;--violet:#9B7BFF;--win:#57d98e;--lose:#f0625f;--mono:ui-monospace,Menlo,Consolas,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:radial-gradient(900px 500px at 80% -5%,rgba(111,211,255,.08),transparent 60%),var(--bg);color:var(--text);font-family:system-ui,-apple-system,sans-serif;line-height:1.5}
+  .wrap{max-width:1000px;margin:0 auto;padding:20px 22px 80px}
+  h1{font-size:24px;margin:0;letter-spacing:-.01em}
+  h1 .tag{font-family:var(--mono);font-size:11px;color:var(--elec);letter-spacing:.2em;text-transform:uppercase;display:block;margin-top:6px}
+  h2{font-size:13px;font-family:var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--elec);margin:26px 0 10px}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:14px 0}
+  input,button{font:inherit}
+  input{background:#070a10;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:9px 11px;width:160px}
+  button{background:var(--gold);color:#1a1206;border:none;border-radius:8px;padding:9px 14px;font-weight:700;cursor:pointer;transition:filter .1s}
+  button:hover{filter:brightness(1.08)} button.ghost{background:transparent;border:1px solid var(--border2,#31435f);color:var(--text2)}
+  button.sm{padding:5px 10px;font-size:12px}
+  .bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--border);border-radius:12px;padding:14px 18px}
+  .bal{font-family:var(--mono);font-weight:800;font-size:18px}
+  .bal .s{color:var(--gold)} .bal .f{color:var(--violet)}
+  .bar .who{font-weight:800;font-size:16px;margin-right:auto}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+  .u{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 13px}
+  .u.genesis{border-left:3px solid var(--gold)} .u.ultra{border-left:3px solid var(--violet)} .u.rare{border-left:3px solid var(--elec)}
+  .u .nm{font-weight:800;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .u .meta{font-size:11px;color:var(--text3);font-family:var(--mono);margin:3px 0 8px}
+  .u .lg{font-size:11px;font-weight:700;color:var(--gold);margin-bottom:8px}
+  .u .row{display:flex;gap:6px;align-items:center}
+  .u .row input{width:78px;padding:5px 7px;font-size:12px}
+  .starter{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+  .lst{display:flex;align-items:center;gap:12px;padding:9px 12px;border:1px solid var(--border);border-radius:9px;margin-bottom:8px;background:var(--panel)}
+  .lst .lnm{font-weight:700;flex:1}.lst .lpr{font-family:var(--mono);color:var(--gold);font-weight:700}
+  .lst .lsell{font-size:11px;color:var(--text3);font-family:var(--mono)}
+  #log{font-family:var(--mono);font-size:12px;background:#070a10;border:1px solid var(--border);border-radius:10px;padding:12px 14px;max-height:150px;overflow:auto;white-space:pre-wrap}
+  #log .ok{color:var(--win)} #log .err{color:var(--lose)}
+  .muted{color:var(--text3);font-size:12px}
+</style></head><body><div class="wrap">
+  <h1>Signal Forge <span class="tag">Local Client · Tier 0 authoritative server</span></h1>
+
+  <div id="auth" class="card">
+    <h2 style="margin-top:0">Account</h2>
+    <div class="row" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <input id="handle" placeholder="handle" value="player1">
+      <input id="pass" type="password" placeholder="password" value="forge123">
+      <button onclick="doAuth('register')">Register</button>
+      <button class="ghost" onclick="doAuth('login')">Login</button>
+    </div>
+    <p class="muted">Everything you see is served by the authoritative server — balances, records, and outcomes are computed there, not here.</p>
+  </div>
+
+  <div id="app" style="display:none">
+    <div class="bar">
+      <span class="who" id="who"></span>
+      <span class="bal"><span class="s" id="sig">0</span> <span class="muted">◈ Signal</span></span>
+      <span class="bal"><span class="f" id="frg">0</span> <span class="muted">❖ Forge</span></span>
+      <button class="sm" onclick="buyForge()">Buy Forge (blaze)</button>
+      <button class="sm ghost" onclick="convert()">Convert 100 ❖→◈</button>
+    </div>
+
+    <h2>Your Vault <span class="muted" id="vcount"></span></h2>
+    <div class="grid" id="vault"></div>
+
+    <h2>Market <span class="muted">· player-to-player, in Signal · starters excluded</span></h2>
+    <div id="market"></div>
+
+    <h2>Activity</h2>
+    <div id="log"></div>
+  </div>
+</div>
+<script>
+let TOKEN=localStorage.getItem("sf_tok")||null;
+const $=id=>document.getElementById(id);
+function log(m,cls){const l=$("log");const t=new Date().toLocaleTimeString();l.innerHTML=`<div class="${cls||''}">[${t}] ${m}</div>`+l.innerHTML;}
+async function api(method,path,body){
+  const h={"Content-Type":"application/json"}; if(TOKEN)h.Authorization="Bearer "+TOKEN;
+  const r=await fetch(path,{method,headers:h,body:body?JSON.stringify(body):undefined});
+  const j=await r.json().catch(()=>({})); if(!r.ok) throw new Error(j.error||("HTTP "+r.status)); return j;
+}
+async function doAuth(kind){
+  try{ const j=await api("POST","/api/auth/"+kind,{handle:$("handle").value.trim(),password:$("pass").value});
+    TOKEN=j.token; localStorage.setItem("sf_tok",TOKEN); render(j.state); log(kind+" ok — welcome "+j.state.user.handle,"ok");
+    $("auth").style.display="none"; $("app").style.display="";
+  }catch(e){ log(kind+" failed: "+e.message,"err"); }
+}
+function render(st){
+  $("who").textContent="@"+st.user.handle;
+  $("sig").textContent=st.user.signal.toLocaleString();
+  $("frg").textContent=st.user.forge.toLocaleString();
+  $("vcount").textContent="· "+st.cards.length+" cards";
+  $("vault").innerHTML=st.cards.map(c=>{
+    const starter=["Ruffius Rufeldro","Bixie Bee","Malia","Moro","Melanie","Heir of Kaiga","Tange Sazen","Forgemask","Valcarion","Ella Ballora"].includes(c.type);
+    const sell=starter?`<span class="starter">starter · not tradeable</span>`
+      :`<div class="row"><input type="number" placeholder="price" id="p_${c.uid}"><button class="sm" onclick="sell('${c.uid}')">Sell</button></div>`;
+    return `<div class="u ${c.rarity}"><div class="nm">${c.type}</div>
+      <div class="meta">⚔${c.pow} · ${c.k}-${c.d} · #${c.mint_index}/${c.edition}</div>
+      <div class="lg">💎 Legend ${c.legend_score} · ${c.legend_tier}</div>
+      <div class="row"><button class="sm" onclick="duel('${c.uid}')">⚔ Duel</button></div>
+      <div style="margin-top:7px">${sell}</div></div>`;}).join("");
+  loadMarket();
+}
+async function loadMarket(){
+  try{ const j=await api("GET","/api/market/listings");
+    $("market").innerHTML=j.listings.map(l=>`<div class="lst"><span class="lnm">${l.type} <span class="lsell">${l.k}-${l.d} · ${l.seller_addr}</span></span>
+      <span class="lpr">◈ ${l.price.toLocaleString()}</span><button class="sm" onclick="buy(${l.id})">Buy</button></div>`).join("");
+  }catch(e){ log("market load failed: "+e.message,"err"); }
+}
+async function duel(uid){ try{ const j=await api("POST","/api/match/resolve",{cardUid:uid});
+  const r=j.result; log(`duel: ${r.outcome.toUpperCase()} (you ${r.player_pow} vs ${r.opp_pow}) +${r.reward.signal}◈`, r.outcome==="win"?"ok":"");
+  render(j.state);}catch(e){log("duel failed: "+e.message,"err");}}
+async function buy(id){ try{ const j=await api("POST","/api/market/buy",{listingId:id});
+  log(`bought ${j.bought} for ${j.price.toLocaleString()}◈`,"ok"); render(j.state);}catch(e){log("buy failed: "+e.message,"err");}}
+async function sell(uid){ const p=parseInt($("p_"+uid).value||0); try{ const j=await api("POST","/api/market/sell",{cardUid:uid,price:p});
+  log(`sold ${j.sold} for ${j.price.toLocaleString()}◈`,"ok"); render(j.state);}catch(e){log("sell failed: "+e.message,"err");}}
+async function buyForge(){ try{ const j=await api("POST","/api/shop/buy-forge",{tier:"blaze"});
+  log(`bought +${j.forge_added}❖ (simulated purchase)`,"ok"); render(j.state);}catch(e){log("buy-forge failed: "+e.message,"err");}}
+async function convert(){ try{ const j=await api("POST","/api/forge/convert",{forge:100});
+  log(`converted 100❖ → +${j.signal_gained.toLocaleString()}◈`,"ok"); render(j.state);}catch(e){log("convert failed: "+e.message,"err");}}
+// auto-resume a session
+if(TOKEN){ api("GET","/api/state").then(j=>{render(j.state);$("auth").style.display="none";$("app").style.display="";log("session resumed","ok");}).catch(()=>{TOKEN=null;localStorage.removeItem("sf_tok");}); }
+</script></body></html>

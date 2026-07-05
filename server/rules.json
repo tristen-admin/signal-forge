@@ -1,0 +1,368 @@
+{
+ "Kotei": [
+  {
+   "if": {
+    "or": [
+     {
+      "v": "opp_deaths",
+      "op": "==",
+      "n": 0
+     },
+     {
+      "v": "last_result",
+      "op": "==",
+      "s": "lose"
+     }
+    ]
+   },
+   "add": 3,
+   "log": "🔥 Kotei: +3"
+  },
+  {
+   "if": {
+    "and": [
+     {
+      "or": [
+       {
+        "v": "opp_deaths",
+        "op": "==",
+        "n": 0
+       },
+       {
+        "v": "last_result",
+        "op": "==",
+        "s": "lose"
+       }
+      ]
+     },
+     {
+      "v": "ragwing",
+      "op": ">",
+      "n": 0
+     }
+    ]
+   },
+   "add": 3,
+   "log": "🔥 Kotei: repeat +3"
+  }
+ ],
+ "Lagertha Waltz": [
+  {
+   "if": {
+    "v": "last_result",
+    "op": "==",
+    "s": "lose"
+   },
+   "add": 2,
+   "log": "🔥 Lagertha: +2 (lost last)"
+  },
+  {
+   "if": {
+    "v": "last_result",
+    "op": "==",
+    "s": "win"
+   },
+   "add": -2,
+   "log": "🔥 Lagertha: −2 (won last)"
+  }
+ ],
+ "Darwin": [
+  {
+   "if": {
+    "v": "match_commits",
+    "op": ">=",
+    "n": 3
+   },
+   "add": 3,
+   "log": "🧬 Darwin: +3 (3rd+ commit)"
+  }
+ ],
+ "Anorith Keeling": [
+  {
+   "if": {
+    "v": "opp_pow",
+    "op": ">",
+    "v2": "pc_pow"
+   },
+   "addvar": "hand_len",
+   "x": 2,
+   "log": "✨ Anorith: +2×hand"
+  }
+ ],
+ "Malia": [
+  {
+   "set": "opp_pow",
+   "log": "🔄 Malia: power mirrors opponent"
+  }
+ ],
+ "Moro": [
+  {
+   "if": {
+    "v": "opp_kills",
+    "op": ">=",
+    "n": 6
+   },
+   "add": 3,
+   "log": "💀 Moro: +3"
+  }
+ ],
+ "Zerith Var": [
+  {
+   "if": {
+    "v": "opp_pow",
+    "op": ">",
+    "v2": "pc_pow"
+   },
+   "add": 4,
+   "log": "💫 Zerith Var: +4"
+  }
+ ],
+ "Ruffius Rufeldro": [
+  {
+   "if": {
+    "v": "player_losses",
+    "op": ">=",
+    "n": 2
+   },
+   "mult": 2,
+   "log": "🩸 Ruffius: ×2"
+  }
+ ],
+ "Val Kreigh": [
+  {
+   "if": {
+    "v": "match_commits",
+    "op": "==",
+    "n": 1
+   },
+   "add": 5,
+   "log": "⚔️ Val Kreigh: +5 (first duel)"
+  }
+ ],
+ "Tange Sazen": [
+  {
+   "if": {
+    "v": "skullchain",
+    "op": ">",
+    "n": 0
+   },
+   "addvar": "skullchain",
+   "x": 3,
+   "log": "💀 Kill Escalation: +3×kills"
+  }
+ ],
+ "Arch-Grim Korrin": [
+  {
+   "if": {
+    "v": "opp_kills",
+    "op": "<",
+    "v2": "pc_kills"
+   },
+   "add": 4,
+   "log": "👻 Korrin: +4"
+  }
+ ],
+ "Alucard The Damned": [
+  {
+   "if": {
+    "v": "opp_deaths",
+    "op": "==",
+    "n": 0
+   },
+   "add": 4,
+   "log": "🩸 Alucard: +4 (drained Pristine)"
+  },
+  {
+   "if": {
+    "v": "opp_deaths",
+    "op": ">",
+    "n": 0
+   },
+   "oppadd": -4,
+   "log": "🩸 Alucard: opponent −4"
+  }
+ ],
+ "Ella Ballora": [
+  {
+   "add": 3,
+   "log": "⚔️ Bloodrage: +3"
+  },
+  {
+   "if": {
+    "v": "player_losses",
+    "op": ">",
+    "n": 0
+   },
+   "add": 3,
+   "log": "⚔️ Bloodrage: +3 (wounded)"
+  }
+ ],
+ "Kiana": [
+  {
+   "add": 3,
+   "log": "🔥 Flurry: +3"
+  },
+  {
+   "if": {
+    "chaos": true
+   },
+   "add": 4,
+   "log": "🔥 chaos surge: +4"
+  }
+ ],
+ "King Joris": [
+  {
+   "if": {
+    "v": "opp_deaths",
+    "op": ">",
+    "n": 0
+   },
+   "addvar": "opp_deaths",
+   "x": 1,
+   "log": "👑 Rightful Claim: +opp deaths"
+  }
+ ],
+ "Chieftain Reyva Vosh": [
+  {
+   "if": {
+    "v": "wc_len",
+    "op": ">",
+    "n": 0
+   },
+   "addvar": "wc_len",
+   "x": 2,
+   "log": "🏔 Reserve: +2×WC"
+  }
+ ],
+ "Broodmother": [
+  {
+   "addvar": "hand_len",
+   "x": 2,
+   "log": "🕷 Swarm: +2×hand"
+  }
+ ],
+ "Forgemask": [
+  {
+   "add": 3,
+   "log": "🔨 Reforged: +3"
+  },
+  {
+   "if": {
+    "v": "last_result",
+    "op": "==",
+    "s": "lose"
+   },
+   "add": 4,
+   "log": "🔨 Tempered: +4"
+  }
+ ],
+ "Heir of Kaiga": [
+  {
+   "if": {
+    "v": "match_commits",
+    "op": "==",
+    "n": 1
+   },
+   "add": 3,
+   "log": "🗡 Early Bravado: +3"
+  }
+ ],
+ "Josef": [
+  {
+   "if": {
+    "v": "match_commits",
+    "op": ">",
+    "n": 1
+   },
+   "add": 4,
+   "log": "🧵 Master Tailor: +4"
+  }
+ ],
+ "Ella Ballora — True Form": [
+  {
+   "add": 3,
+   "log": "🕸 Devour: +3"
+  },
+  {
+   "if": {
+    "v": "wc_len",
+    "op": ">",
+    "n": 0
+   },
+   "add": 4,
+   "log": "🕸 fed: +4"
+  }
+ ],
+ "Korrin's Possessed Legion": [
+  {
+   "if": {
+    "wc_has": "Arch-Grim Korrin"
+   },
+   "add": 5,
+   "log": "🪖 Thrall Swarm: +5"
+  }
+ ],
+ "Hanse Waltz — Werewolf Form": [
+  {
+   "if": {
+    "v": "player_losses",
+    "op": ">",
+    "v2": "player_wins"
+   },
+   "add": 5,
+   "log": "🐺 Blood Moon: +5"
+  }
+ ],
+ "Lagertha Waltz — Werewolf Form": [
+  {
+   "add": 3,
+   "log": "🌕 Alpha's Grief: +3"
+  },
+  {
+   "if": {
+    "v": "player_losses",
+    "op": ">",
+    "n": 0
+   },
+   "add": 4,
+   "log": "🌕 Mourning: +4"
+  }
+ ],
+ "Keawe Kil'lua": [
+  {
+   "if": {
+    "v": "last_result",
+    "op": "==",
+    "s": "lose"
+   },
+   "add": 3,
+   "log": "⚡ Rising Talent: +3"
+  }
+ ],
+ "Rhaess Korvain": [
+  {
+   "if": {
+    "v": "opp_kills",
+    "op": ">",
+    "v2": "pc_kills"
+   },
+   "add": 6,
+   "log": "🗡 Assassin's Mark: +6"
+  }
+ ],
+ "Ossian Drell": [
+  {
+   "add": 3,
+   "log": "🎖 Field Command: +3"
+  },
+  {
+   "if": {
+    "v": "player_wins",
+    "op": ">",
+    "v2": "player_losses"
+   },
+   "add": 3,
+   "log": "🎖 Advantage: +3"
+  }
+ ]
+}
