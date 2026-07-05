@@ -9078,6 +9078,40 @@ body:has(#v-turn.on) .set-btn{display:none}
 .sc-val{white-space:nowrap;font-size:19px;letter-spacing:-0.01em}
 @media(min-width:641px) and (max-width:1080px){.hub-hero{grid-template-columns:1fr!important}}
 </style>
+<style id="overhaul">
+/* ═══════ MOLTEN LEDGER — dramatic aesthetic overhaul ═══════ */
+/* 1 · warm obsidian palette (recolors the whole app: cool gray -> warm gold-black) */
+:root{
+  --void:#0A0704;--panel:#17110A;--surface:#221A0F;--surface2:#2F2416;
+  --border:#3E3220;--border2:#5A4930;--cond:#1A140C;--cond-border:#4C3C24;
+  --text:#F4ECDA;--text2:#B7AA8F;--text3:#7C6F55;
+  --gold:#F6C64E;--gold-dim:#8C6A26;--gold-glow:rgba(246,198,78,0.26);--ember:#E8963C;
+}
+/* 2 · cinematic forge-glow + vignette (replaces the cool blue/violet ambient) */
+body::before{background:
+  radial-gradient(135% 95% at 50% 122%,rgba(232,150,60,0.17),transparent 52%),
+  radial-gradient(100% 80% at 12% -14%,rgba(246,198,78,0.11),transparent 58%),
+  radial-gradient(125% 105% at 50% 44%,transparent 50%,rgba(0,0,0,0.6) 100%)
+  !important;animation:none!important;opacity:1!important}
+/* 3 · gilded framing — gold hairline + inner light + depth on panels & cards */
+.stat-cell,.sc,.hub-action,.cond-tile,.abil-tile,.dna-block,.mast-char,.trade-offer,.cosmetic,.arc-step,.bot-card,.listing,.feat-card,.en-card,.spell-chip,.cond-main,.dfx-card,.saved-decks,.dfb-panel,.mc-head,.draft-card,.pv-panel,.howto-panel,.set-panel{
+  border-color:rgba(246,198,78,0.20)!important;
+  box-shadow:0 3px 18px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,228,160,0.06)!important}
+/* 4 · molten-gold display headline */
+#hub-headline{font-size:clamp(26px,6.2vw,46px)!important;line-height:1.05;text-wrap:balance;
+  background:linear-gradient(176deg,#FFEEC0 6%,#F6C64E 50%,#B5851C 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 2px 12px rgba(246,198,78,0.28))}
+/* 5 · gilded structure — seams, section rules, brand */
+.sidebar{border-right:1px solid rgba(246,198,78,0.13)!important}
+.topbar{border-bottom:1px solid rgba(246,198,78,0.13)!important;background:linear-gradient(180deg,rgba(23,17,10,0.9),rgba(10,7,4,0.75))!important}
+.nav-section{color:var(--gold)!important;opacity:.85}
+.view-head{background:linear-gradient(180deg,rgba(23,17,10,0.95),rgba(23,17,10,0.7))!important;border-bottom:1px solid rgba(246,198,78,0.16)!important}
+/* 6 · warm the card rarity frames' bare backgrounds toward the ground */
+.card.common{background:linear-gradient(160deg,#1c160d,#0f0b06)!important}
+.field-half .placeholder{border-color:rgba(246,198,78,0.5)!important}
+.sc-val{font-size:clamp(15px,4.6vw,19px)!important;letter-spacing:-0.02em!important}
+</style>
 <div id="dev-fab" title="Developer mode — Shift+D">🛠</div>
 <div id="dev-ov" class="dev-ov" role="dialog" aria-label="Developer balance editor">
   <div class="dev-hd">
