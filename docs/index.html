@@ -2364,6 +2364,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <p id="shop-intro-desc">Spend Forge on cosmetic flair — accent auras, card backs, emblems, and duelist titles. Everything here is purely aesthetic and never affects play.</p>
         </div>
         <div class="sh-balance"><span class="shb-icon" id="shop-bal-icon">◈</span><span class="shb-val" id="shop-balance">48,200</span><span class="shb-label" id="shop-bal-label">Signal Points</span></div>
+        <button class="sh-reset" title="Fresh playtest start" style="align-self:flex-start;margin-top:8px;background:none;border:1px solid var(--border2);color:var(--text2);font-size:12px;font-weight:700;padding:8px 14px;border-radius:9px;cursor:pointer" onclick="if(confirm('Reset to a fresh new-player start?\n\n\u2022 15-card starter deck (4 rares + 11 commons)\n\u2022 5,000 Signal\n\u2022 wipes current progress \u2014 for playtesting')){ startNewPlayer(); if(typeof show==='function') show('hub',null); }">🌱 Reset to New Player</button>
       </div>
       <div class="shop-tabs">
         <button class="shop-tab on" id="stab-cosmetics" onclick="setShopTab('cosmetics')">✦ Cosmetics</button>
@@ -2982,7 +2983,7 @@ const CONDITIONS = [
 
 const HAND_CARDS = [
   {name:'Kotei',pow:18,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
-  {name:'Uso Oso',pow:8,kills:0,deaths:0,rarity:'uncommon',timing:'resolution',abil:'Death Remnant: when Uso dies he stays on field. Your cards here gain +7 power until an opponent\'s card is killed, then Remnant is removed.'},
+  {name:'Uso Oso',pow:8,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant: when Uso dies he stays on field. Your cards here gain +7 power until an opponent\'s card is killed, then Remnant is removed.'},
   {name:'Tanlorin',pow:10,kills:0,deaths:0,rarity:'uncommon',timing:'instant',abil:'⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.'},
   {name:'Bixie Bee',pow:1,kills:0,deaths:0,rarity:'common',timing:null,abil:'No ability. Starter card. Never hesitate to deploy.'},
   {name:'Veronica',pow:10,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: copy opponent\'s card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability.'},
@@ -3045,7 +3046,7 @@ const DECK_POOL = [
   {name:'Ahdor',pow:11,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. Ahdor returns to your hand and a random hand card gains +4.'},
   // Uncommons
   {name:'Darwin',pow:15,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: if 3rd+ commit this match, +3 power. Returns from Winners Circle: banish from hand to curse opponent\'s next committed card −5 power.'},
-  {name:'Hanse Waltz',pow:9,kills:0,deaths:0,rarity:'uncommon',timing:'resolution',abil:'Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.'},
+  {name:'Hanse Waltz',pow:9,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.'},
   // Rares
   {name:'Arch-Grim Korrin',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if opponent\'s card has fewer career kills than this card, +4 power.'},
   {name:'Valcarion',pow:13,kills:0,deaths:0,rarity:'rare',timing:'pre',abil:'Pre-commit: lock the active condition this turn — opponent cannot shift it.'},
@@ -3068,7 +3069,7 @@ const DECK_POOL = [
   {name:'Hanse Waltz — Werewolf Form',pow:15,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 power while you are behind in the match — rage completes the transformation.'},
   {name:'Ella Ballora — True Form',pow:17,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Devour: on commit, +3 power, and +4 more if you have already won a duel this match — the Spider-Queen grows with every kill she feeds on.'},
   {name:'Akatosh, the Golden Dragon',pow:21,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Unmaking: when Akatosh is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
-  {name:'Keawe Kil\'lua',pow:12,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.'},
+  {name:'Keawe Kil\'lua',pow:12,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.'},
   {name:'Rhaess Korvain',pow:12,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Assassin\'s Mark: on commit, +6 power if the opponent\'s card has more career kills than this one — Rhaess hunts the notable.'},
   {name:'Ossian Drell',pow:12,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Field Command: on commit, +3 power, and +3 more if you are ahead in the match — a veteran presses the advantage.'},
   {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
@@ -5950,7 +5951,7 @@ function newPlayerReset(){
   if(typeof toast==='function') toast('🌱 New-player state — 12 starter cards · 10,000 ◈ · 0 ❖ · 0 Bounty · records 0-0.', true);
 }
 // ── STARTER SET — new-player onboarding deck; infinite / always-in-creation, so NOT tradeable ──
-const STARTER_SET = ['Ruffius Rufeldro','Bixie Bee','Malia','Moro','Melanie','Heir of Kaiga','Tange Sazen','Forgemask','Valcarion','Ella Ballora'];
+const STARTER_SET = ['Keawe Kil\'lua','Lagertha Waltz','Hanse Waltz','Uso Oso','Melanie','Moro','Malia','King Joris','Bixie Bee','Ruffius Rufeldro','Kiba','Heir of Kaiga','Josef','Sister Mire','Veronica'];
 function isStarter(c){ const n=typeof c==='string'?c:(c&&c.name); return STARTER_SET.indexOf(n)>=0; }
 // PROVENANCE (Option A play-only firewall): 'forged'=earned → tradeable+wagerable | 'bought'=real-money Forge lane → play-only | 'starter'=fixed
 function cardProv(c){ if(!c) return 'forged'; if(c.variant) return 'variant'; if(c.prov) return c.prov; if(isStarter(c)) return 'starter'; return 'forged'; }
@@ -7167,11 +7168,11 @@ function buildHub(){
   const _rw=_mine.reduce((s,c)=>{const r=cardRecords[c.uid||c.name];return s+(r?(r.k||0):0);},0);
   const _trust=_duels<5?'Unverified':_duels<15?'Novice':_duels<30?'Reliable':'Trusted';
   const _tsub=_duels>0?(_rw/_duels).toFixed(2)+' quality \u00b7 '+_duels+' duels':'no duels yet';
-  const pristine=COLLECTION.filter(c=>kdOf(c).d===0).length;
+  const pristine=_mine.filter(c=>kdOf(c).d===0).length;
   const _hl=document.getElementById('hub-headline'); if(_hl) _hl.textContent=(typeof SEASON!=='undefined'?SEASON.chapter+' \u00b7 '+SEASON.name:'Your Vault');
   const stats=[
     {cls:'rank',icon:'🏅',val:rankTier(rankRP),label:'Ladder Rank',sub:fmtPts(rankRP)+' RP'},
-    {cls:'cards',icon:'🗄',val:COLLECTION.length,label:'Cards in Vault',sub:pristine+' Pristine'},
+    {cls:'cards',icon:'🗄',val:_mine.length,label:'Cards in Vault',sub:pristine+' Pristine'},
     {cls:'record',icon:'⚔',val:seasonWins+'–'+seasonLosses,label:'Season Record',sub:'Rebirth · ranked + staked'},
   ];
   document.getElementById('hub-stats').innerHTML = stats.map(s=>`
@@ -8866,8 +8867,8 @@ loadState();
 applyAscendantFrame();
 if(!_hadSave && typeof startNewPlayer==='function') startNewPlayer();
 try{ localStorage.setItem('sf_clearrec_v1','1'); }catch(e){}  /* removed one-time cardRecords wipe — it was resetting legit records on reload; playtest tracks persistently */
-try{ if(!localStorage.getItem('sf_grant50k_v1')){ signalPoints=(signalPoints||0)+50000; localStorage.setItem('sf_grant50k_v1','1'); if(typeof updateBalance==='function') updateBalance(); if(typeof saveState==='function') saveState(); } }catch(e){}
-try{ if(!localStorage.getItem('sf_grantcards_v1') && typeof COLLECTION!=='undefined'){ COLLECTION.forEach(function(c){ if(c.uid||c.variant) return; var key=c.name; if((ownedCopies[key]||0)<1){ ownedCopies[key]=1; if(!cardRecords[key]) cardRecords[key]={k:c.kills||0,d:c.deaths||0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Playtest grant'}]}; } }); localStorage.setItem('sf_grantcards_v1','1'); if(typeof saveState==='function') saveState(); if(typeof buildVault==='function') buildVault(); if(typeof updateBalance==='function') updateBalance(); } }catch(e){}
+try{ localStorage.setItem('sf_grant50k_v1','1'); }catch(e){}  /* playtest: no auto 50k — new player uses startNewPlayer's 5,000 */
+try{ localStorage.setItem('sf_grantcards_v1','1'); }catch(e){}  /* playtest: no auto grant-all — starter is the 15-card deck; rest via shop */
 buildHub();
 updateDeckCount();
 buildKeywordChips();
