@@ -434,6 +434,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 
 /* hand card */
 .hand-card{width:72px;padding:6px 5px 5px;font-size:9px}
+.hand-card .c-abil{display:none}  /* legible via hover-to-enlarge; keeps the hand compact */
 .hand-card .c-name{font-size:9px;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:4px;height:22px;overflow:hidden}
 .hand-card .c-pow{font-size:16px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;line-height:1;margin-bottom:4px}
 .hand-card .c-kd{font-size:8px;font-variant-numeric:tabular-nums;margin-bottom:3px}
@@ -3096,7 +3097,8 @@ const DECK_POOL = [
   {name:'Anorith Keeling',pow:10,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: if opponent\'s base power is higher than this card, gain +2 power for every card in your hand.'},
   {name:'Heir of Kaiga',pow:3,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast.'},
   {name:'Josef',pow:7,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Master Tailor: on commit, +4 power once he has taken the measure of the fight (any commit after your first).'},
-  {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, your committed cards gaining her power until an opponent\'s card is killed.'},];
+  {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, your committed cards gaining her power until an opponent\'s card is killed.'},
+  {name:'Kleydson',pow:4,kills:0,deaths:0,rarity:'common',abil:'No ability. A rider of the Blackened Order.'},];
 
 // ── SET 2 — held for post-launch release (NOT loaded into COLLECTION) ──
 const SET2_POOL = [
@@ -3866,8 +3868,8 @@ function revealCondition(){
   setTimeout(() => main.classList.remove('shimmer'), 1000);
   icon.textContent = c.icon;
   name.textContent = c.name;
-  rule.textContent = c.rule;
-  strat.textContent = '→ ' + c.strat;
+  rule.textContent = '';        // description lives in the Codex — keep the in-match box terse
+  strat.textContent = '';
   btn.disabled = true;
 
   document.getElementById('select-hint').textContent = 'Instant window open — then choose a card';
