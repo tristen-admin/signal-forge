@@ -3983,6 +3983,7 @@ function conjureCost(c){ if(!c) return 1; if(c.cost!=null) return c.cost; if(COS
 const CALLED = {
   // Buffs flattened to +2/+3/+5 (simple baseline). Engine cards keep utility = the generic draw/charge (soon banish/retrieve) engine.
   "Kotei":                         {text:"your Fighter +3", add:3},
+  "Kleydson":                      {text:"Blackened Order — return 2 banished cards to hand, +2 power each", recurBuff:2},
   "Lagertha Waltz":                {text:"your Fighter +3", add:3},
   "Hanse Waltz":                   {text:"your Fighter +3", add:3},
   "Kiana":                         {text:"your Fighter +3", add:3},
@@ -4010,11 +4011,11 @@ const CALLED = {
   "Conduit Adept":                 {text:"gain 2 Charge + draw 1", chargeGain:2, draw:1},
   "Signal Diviner":                {text:"gain 3 Charge", chargeGain:3},
   "Voltcaller":                    {text:"your next Interrupt costs 2 less", spellDiscountGain:2},
-  "Uso Oso's Skeletal Summons":    {text:"your Fighter +3", add:3},
-  "Sister Mire":                   {text:"your Fighter +3", add:3},
+  "Uso Oso's Skeletal Summons":    {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
+  "Sister Mire":                   {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
   "Josef":                         {text:"your Fighter +3", add:3},
   "Faye Quicksilver":              {text:"your Fighter +3", add:3},
-  "The Regenerating Horror":       {text:"your Fighter +2", add:2},
+  "The Regenerating Horror":       {text:"return 1 banished card to hand, +2 power", recurBuff:1},
   "Ilma the Patient":              {text:"your Fighter +5", add:5},
   "Broodmother":                   {text:"your Fighter +3, then draw 1", add:3, draw:1},
   "Old Garrick":                   {text:"your Fighter +3", add:3},
@@ -4024,7 +4025,7 @@ const CALLED = {
   "Bram the Bulwark":              {text:"your Fighter +5", add:5},
   "Valcarion":                     {text:"your Fighter +3", add:3},
   "Chieftain Reyva Vosh":          {text:"draw 2 cards", draw:2},
-  "Kravyn the Collector":          {text:"your Fighter +3", add:3},
+  "Kravyn the Collector":          {text:"both players banish 1 from hand; opponent −2", bothBanish:1},
   "Forgemask":                     {text:"your Fighter +3", add:3},
   "Veyra Stormcaller":             {text:"your Fighter +3", add:3},
   "Ghorruk Skullbrand":            {text:"your Fighter +5", add:5},
@@ -4058,7 +4059,7 @@ function calledCtx(){
 function projectPlay(){
   var f=(preSelectedCard!=null && hand[preSelectedCard]) ? hand[preSelectedCard] : null;
   if(!f) return null;
-  var base=f.pow||0, spell=(banishSurge||0)+(deathRemnantPow||0)+((typeof spellSelfPow!=='undefined'&&spellSelfPow)||0);
+  var base=(f.pow||0)+(f._bo||0), spell=(banishSurge||0)+(deathRemnantPow||0)+((typeof spellSelfPow!=='undefined'&&spellSelfPow)||0);
   var called=0, oppDelta=((typeof spellOppPow!=='undefined'&&spellOppPow)||0), link=0, linkName=null;
   rearGuardIdxs.forEach(function(ix){ var sup=hand[ix]; if(!sup) return; var d=projectCalled(CALLED[sup.name], calledCtx()); called+=d[0]; oppDelta+=d[1]; var lk=fieldLink(f,sup); if(lk){ link+=lk.pow; linkName=linkName?linkName+', '+lk.name:lk.name; } });
   var oppShown=pendingOppCard?(pendingOppCard.pow||0):null;
@@ -4073,6 +4074,9 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
   if(e.chargeGain && !isOpp){ charge=Math.min(ENERGY_CAP,charge+e.chargeGain); if(typeof renderCharge==="function") renderCharge(); }
   if(e.spellDiscountGain && !isOpp && typeof spellDiscount!=='undefined'){ spellDiscount+=e.spellDiscountGain; }
   if(e.draw && !isOpp){ drawToHand(e.draw); }
+  if(e.banishOwn && !isOpp){ for(var _b=0;_b<e.banishOwn;_b++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } abilLog.push("☠ Banished "+e.banishOwn+" from your hand — into the Order"); if(typeof buildHand==="function")buildHand(); }
+  if(e.recurBuff && !isOpp){ var _got=0; for(var _r=0;_r<e.recurBuff;_r++){ if(banishPile.length){ var _rc=banishPile.pop(); _rc._bo=(_rc._bo||0)+2; hand.push(_rc); _got++; } } if(_got) abilLog.push("♻ Blackened Order — returned "+_got+" from banish, +2 power each"); if(typeof buildHand==="function")buildHand(); }
+  if(e.bothBanish && !isOpp){ for(var _bb=0;_bb<e.bothBanish;_bb++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } oppPow-=2*e.bothBanish; abilLog.push("☠ Both discard — you banish "+e.bothBanish+", opponent −"+(2*e.bothBanish)); if(typeof buildHand==="function")buildHand(); }
   playerPow+=d[0]; oppPow+=d[1];
   abilLog.push("📣 "+(isOpp?"Opp ":"")+"Called — "+support.name+": "+e.text);
   return [playerPow, oppPow];
@@ -5208,7 +5212,7 @@ function applyCardRules(name, ctx, playerPow, oppPow, abilLog, stepSink){
   return [playerPow, oppPow];
 }
 function resolve(pc, oc, cond, playerCommittedPow){
-  let playerPow = playerCommittedPow != null ? playerCommittedPow : pc.pow;
+  let playerPow = playerCommittedPow != null ? playerCommittedPow : ((pc.pow||0)+(pc._bo||0));
   let oppPow = oc.pow;
 
   const abilLog = [];
@@ -7578,7 +7582,7 @@ function bigCardHTML(c){
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
     <div class="tf-name">${c.name}</div>
-    <div class="tf-pow">${c.pow}</div>
+    <div class="tf-pow"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${(c.pow||0)+(c._bo||0)}</div>
     <div class="tf-kd"><span class="k">${c.kills}K</span>/<span class="d">${c.deaths}D</span>${c.deaths===0?' ◈':''}</div>
     <div class="tf-text"><div class="tf-abil"><b class="tf-lbl">⚔️</b>${c.abil}</div>${CALLED[c.name]?`<div class="tf-called"><b class="tf-lbl gold">📣</b>${CALLED[c.name].text}</div>`:``}</div>
   </div>`;
@@ -7591,7 +7595,7 @@ function readableCardHTML(c){
   var traits=(typeof traitChipsHTML==='function')?traitChipsHTML(c):'';
   var gl=(typeof glossify==='function')?glossify:function(x){return x;};
   return '<div class="rcard '+c.rarity+'">'
-    + '<div class="rc-top"><span class="rc-cost">⚡'+cost+'</span><span class="rc-name">'+c.name+'</span><span class="rc-pow">'+c.pow+'</span></div>'
+    + '<div class="rc-top"><span class="rc-cost">⚡'+cost+'</span><span class="rc-name">'+c.name+'</span><span class="rc-pow">'+((c.pow||0)+(c._bo||0))+'</span></div>'
     + '<div class="rc-meta">'+String(c.rarity).toUpperCase()+' · <span class="k">'+kd.k+'K</span> / <span class="d">'+kd.d+'D</span>'+pristine+'</div>'
     + '<div class="rc-sec"><span class="rc-lbl">⚔ Conjured — Fighter</span>'+gl(c.abil)+'</div>'
     + (called?'<div class="rc-sec rc-called"><span class="rc-lbl">📣 Called — Support</span>'+called.text+'</div>':'')
