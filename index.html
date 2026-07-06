@@ -7357,7 +7357,7 @@ function oppEndDuelCycle(){
     _oppInPlay.forEach(function(c,i){ if(botWon && i===0) return;   // bot's winning fighter leaves to its WC (tallied via oppWC), doesn't recycle
       oppDeckBot.push(c); });                                       // losers + supports recycle to deck bottom
     _oppInPlay=[]; }
-  oppDrawOppHand();
+  if(oppDeckBot.length){ oppHandBot.push(oppDeckBot.shift()); }   // draw ONE per turn — same draw speed as the player (was: refill to a full 4-card hand)
 }
 function _oppStamp(card){ var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null; return Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{}); }
 function pickOppCard(){
@@ -9736,7 +9736,7 @@ function _oppShuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.ra
 if(typeof resetMatchState==='function'){ var _oppRMS=resetMatchState; resetMatchState=function(){ oppDrawPileBot=[]; oppWonBot=new Set(); if(typeof oppWC!=='undefined') oppWC=0; if(typeof oppInitDeck==='function') oppInitDeck(); return _oppRMS.apply(this,arguments); }; }
 /* replace random-with-replacement selection with a real deck draw */
 if(typeof pickOppCard==='function'){ pickOppCard=function(){
-  if(!oppHandBot||!oppHandBot.length){ if(typeof oppDrawOppHand==='function') oppDrawOppHand(); }
+  if(!oppHandBot||!oppHandBot.length){ if(oppDeckBot && oppDeckBot.length){ oppHandBot.push(oppDeckBot.shift()); } }
   if(!oppHandBot.length){ if(typeof oppInitDeck==='function') oppInitDeck(); }
   if(!oppHandBot.length){ var _p=(typeof activeBot!=='undefined'&&activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool:OPP_CARDS; oppHandBot=[_p[Math.floor(Math.random()*_p.length)]]; }
   var bias=(typeof activeBot!=='undefined'&&activeBot)?(activeBot.bias||0):0;
