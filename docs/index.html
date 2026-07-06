@@ -2206,8 +2206,17 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   .hand-card .tf-kd{font-size:6px}
   .commit-strip{flex:0 0 auto}
   #select-hint,#commit-hint{font-size:9px}
-  .confirm-btn,.commit-btn{padding:5px 12px!important;font-size:11px}
+  .confirm-btn,.commit-btn{padding:9px 22px!important;font-size:12px;min-height:42px}
   .pile-chip .pile-label{display:none}.pile-strip{gap:4px}
+  /* result overlay: was a chaotic pile in short height — make it a clean, compact, scrollable panel */
+  .result-overlay{background:rgba(6,8,13,.95)!important;overflow-y:auto!important;justify-content:flex-start!important;padding:10px 14px 12px}
+  .result-label{font-size:20px!important;margin-bottom:2px!important}
+  .result-sub{font-size:10px!important;margin-bottom:6px!important;max-width:94%;text-align:center;line-height:1.35}
+  .abil-log{min-width:0!important;width:min(94vw,470px);max-height:78px;overflow-y:auto;gap:2px!important;margin-bottom:6px!important}
+  .abil-log-entry{font-size:8.5px!important;padding:2px 7px!important}
+  .snap-window{display:none!important}
+  #result-overlay .bd-btn{font-size:9px!important;padding:4px 11px!important;margin-bottom:5px!important}
+  #result-overlay .next-btn{font-size:13px!important;padding:9px 26px!important;min-height:42px;flex:0 0 auto}
 }
 </style>
 <script>(function(){try{var m=document.querySelector('meta[name="viewport"]');var w='width=device-width,initial-scale=1,viewport-fit=cover';if(m){if(!/viewport-fit/.test(m.getAttribute('content')||''))m.setAttribute('content',w);}else{m=document.createElement('meta');m.name='viewport';m.setAttribute('content',w);(document.head||document.documentElement).appendChild(m);}}catch(e){}})();</script>
