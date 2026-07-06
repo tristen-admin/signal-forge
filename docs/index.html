@@ -267,7 +267,12 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .bigcard .bc-kd .k{color:var(--win);font-weight:700}.bigcard .bc-kd .d{color:var(--lose);font-weight:700}
 .bigcard .bc-abil{font-size:11.5px;color:var(--text);line-height:1.5;border-top:1px solid rgba(255,255,255,0.08);padding-top:8px}
 .bigcard .bc-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.bigcard.tframe{width:284px;aspect-ratio:765 / 1024;border:none !important;border-radius:0;overflow:visible;background-color:transparent;background-repeat:no-repeat;background-position:center;background-size:100% 100%;box-shadow:0 20px 55px rgba(0,0,0,0.8);padding:0}
+.bigcard.tframe{width:284px;aspect-ratio:765 / 1024;border:none !important;border-radius:0;overflow:visible;background:transparent;box-shadow:0 20px 55px rgba(0,0,0,0.8);padding:0}
+.bigcard.tframe::before{content:'';position:absolute;inset:0;z-index:0;background:var(--frame) center/100% 100% no-repeat;pointer-events:none}
+.bigcard.tframe.common::before,.bigcard.tframe.uncommon::before{filter:saturate(0.15) brightness(0.97) contrast(1.05)}   /* gunmetal iron */
+.bigcard.tframe.rare::before{filter:hue-rotate(168deg) saturate(1.15) brightness(0.98)}                                 /* steel + sapphire */
+.bigcard.tframe.ultra::before{filter:hue-rotate(224deg) saturate(1.25)}                                                 /* obsidian + amethyst */
+/* genesis = untouched molten gold (base) */
 .tframe .tf-art{position:absolute;left:16.2%;right:15.6%;top:16.2%;height:37%;background-size:cover;background-position:center 22%;background-repeat:no-repeat;z-index:1;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .tframe .tf-art::after{content:'';position:absolute;left:0;right:0;bottom:0;height:52%;background:linear-gradient(180deg,transparent,rgba(5,6,11,0.72));pointer-events:none;z-index:2}
 .tframe .tf-art .bc-sigil{font-size:44px;opacity:0.92;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.7))}
@@ -7607,7 +7612,7 @@ function bigCardHTML(c){
   else if(art){ artInner=`<img class="tf-media"${artFoc(key)} src="${art}" alt="">`; }
   else { artStyle='background:radial-gradient(circle at 50% 35%,rgba(255,255,255,0.05),transparent 70%)'; artInner=`<span class="bc-sigil">${CARD_SIGIL[key]||'◈'}</span>`; }
   const pristine = c.deaths === 0 ? ' · ◈ Pristine' : '';
-  return `<div class="bigcard tframe" style="background-image:url(${TEMP_FRAME})">
+  return `<div class="bigcard tframe ${c.rarity||''}" style="--frame:url(${TEMP_FRAME})">
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
     <div class="tf-name">${c.name}</div>
