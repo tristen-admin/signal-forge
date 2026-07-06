@@ -5755,9 +5755,14 @@ function resolve(pc, oc, cond, playerCommittedPow){
     if(glacialForcedTie){
       sub.textContent = `${pc.name} survives — forced tie, returned to hand. ${oc.name} (${oc.pow}) to deck bottom.`;
       deckSize += 1;
-    } else {
+    } else if((pc.abil||'').toLowerCase().includes('record guard')){
       hand.push({...pc});
-      sub.textContent = `"${cond.name}" — tied (${playerCommittedPow} vs ${oc.pow}). No death recorded — both cards return to hand.`;
+      abilLog.push('🛡 Record Guard: tie — '+pc.name+' bounces back to your hand');
+      sub.textContent = `"${cond.name}" — tied (${playerCommittedPow} vs ${oc.pow}). 🛡 Record Guard — ${pc.name} bounces back to your hand.`;
+    } else {
+      drawPile.unshift({...pc}); deckSize=drawPile.length;
+      abilLog.push('↩ '+pc.name+' — tie, recycles to the bottom of your deck');
+      sub.textContent = `"${cond.name}" — tied (${playerCommittedPow} vs ${oc.pow}). No death recorded — recycles to the bottom of your deck.`;
     }
     lastResult = 'tie';
   }
