@@ -1265,6 +1265,12 @@ body.rm body.nav-collapsed #nav-hub .ni-icon,body.rm.nav-collapsed #nav-hub .ni-
 .vc-pow{position:absolute;top:6px;right:8px;z-index:2;font-size:19px;font-weight:800;color:#fff;text-shadow:0 2px 6px #000;font-variant-numeric:tabular-nums}
 .vc-pristine{position:absolute;top:30px;right:8px;z-index:2;font-size:8px;font-weight:700;color:var(--gold);text-shadow:0 1px 3px #000}
 .vc-info{padding:0 9px 9px;position:relative;z-index:2;margin-top:-30px}
+.vc-art.vc-frame{background:transparent!important;padding:0;overflow:visible;min-height:0;box-shadow:none!important}
+.vc-art.vc-frame::after{display:none}
+.vc-frame .bigcard.tframe{width:100%!important;box-shadow:none}
+.vc-frame .tf-name,.vc-frame .tf-text,.vc-frame .tf-kd{display:none}
+.vault-card:has(.vc-frame){background:transparent!important;border:none!important;padding:4px}
+.vault-card:has(.vc-frame) .vc-info{margin-top:4px;text-align:center}
 .vc-name{font-size:11.5px;font-weight:800;color:#fff;line-height:1.15;margin-bottom:4px;text-shadow:0 1px 4px #000;min-height:26px}
 .vc-kd{display:flex;gap:8px;font-size:9px;font-variant-numeric:tabular-nums;margin-bottom:5px}
 .vc-kd .k{color:var(--win);font-weight:700} .vc-kd .d{color:var(--lose);font-weight:700}
@@ -7398,10 +7404,8 @@ function buildVault(){
     const pristine=e.d===0?`<span class="vc-pristine">◈ Pristine</span>`:'';
     const inDeck=activeDeck.has(c.uid||c.name)?'in-deck':'';
     return `<div class="vault-card ${c.rarity} ${inDeck} ${e.fresh?'is-fresh':''} ${c.won?'is-won':''} ${foilClass(c)} ${frameClass(c)}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}',${e.fresh?'true':'false'})">
-      <div class="vc-art" style="${artFillStyle(c.artKey||c.name)}">
-        ${sigilFor(c.artKey||c.name)}
-        <span class="vc-rarity-ribbon">${rlab(c.rarity)}</span>
-        <span class="vc-pow">${c.pow}</span>
+      <div class="vc-art vc-frame">
+        ${bigCardHTML(c)}
         ${pristine}
         ${e.count>1?`<span class="vc-copies">×${e.count}</span>`:''}
         ${e.fresh?'<span class="vc-fresh">✦ Fresh Mint</span>':(c.ascendant?'<span class="vc-ascendant">⭐ Ascendant</span>':(c.variant?'<span style="position:absolute;top:6px;left:6px;font-size:13px;filter:drop-shadow(0 1px 2px #000)">🏆</span>':''))}
