@@ -380,6 +380,11 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .vh-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .vh-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .vh-label{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-right:2px}
+.dfb-own{background:linear-gradient(180deg,rgba(245,194,77,0.11),rgba(245,194,77,0.04));border:1px solid rgba(245,194,77,0.34);border-radius:10px;padding:6px 10px}
+.dfb-own .vh-label{color:var(--gold)}
+.dfb-own .own-chip{font-weight:800}
+.dfb-own .own-chip.on{background:var(--gold-dim);border-color:var(--gold);color:var(--gold)}
+.dfb-own .own-chip.owned.on{background:rgba(87,196,106,0.20);border-color:#57c46a;color:#93e7a4}
 .filter-chip.kw-chip{border-style:dashed}
 .filter-chip.kw-chip.on{border-style:solid}
 .vh-kw.collapsed,.dfb-kw.collapsed{display:none}
@@ -2366,12 +2371,17 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
               <button class="deck-btn danger" onclick="clearDeck()">Clear</button>
             </div>
           </div>
-          <div class="dlc-title">Your 10-Card Deck</div>
+          <div class="dlc-title" id="dlc-deck-title">Your 12-Card Deck</div>
           <div class="deck-slots" id="deck-slots" ondragover="deckDragOver(event)" ondragleave="deckDragLeave(event)" ondrop="dropDeckCard(event)"></div>
           <div class="deck-formations" id="deck-formations"></div>
         </div>
         <div class="deck-pool-col">
           <div class="deck-filter-bar">
+            <div class="vh-group dfb-own"><span class="vh-label">Show</span>
+              <button class="filter-chip own-chip on" onclick="filterDeckOwned('all',this)">All</button>
+              <button class="filter-chip own-chip owned" onclick="filterDeckOwned('owned',this)">✓ Owned</button>
+              <button class="filter-chip own-chip" onclick="filterDeckOwned('unowned',this)">Unowned</button>
+            </div>
             <div class="vh-group dfb-rarity"><span class="vh-label">Rarity</span>
               <button class="filter-chip on" onclick="filterDeck('all',this)">All</button>
               <button class="filter-chip" onclick="filterDeck('genesis',this)">AR</button>
@@ -7057,6 +7067,7 @@ function buildDeckBuilder(){
   saveState();
   const n=activeDeck.size;
   document.getElementById('deck-count-label').textContent=`${n} / ${DECK_SIZE}`;
+  { var _dt=document.getElementById('dlc-deck-title'); if(_dt) _dt.textContent=`Your ${DECK_SIZE}-Card Deck`; }
   { let _pw=0; activeDeck.forEach(function(k){ var c=COLLECTION.find(function(x){return (x.uid||x.name)===k;}); if(c) _pw+=(c.pow||0); }); var _pe=document.getElementById('deck-power'); if(_pe) _pe.textContent = n ? (_pw+' pow \u00b7 avg '+(_pw/n).toFixed(1)) : ''; }
   const status=document.getElementById('deck-status');
   if(n===DECK_SIZE){ status.textContent='✓ Deck ready'; status.className='dh-status ready'; }
@@ -7091,7 +7102,9 @@ function buildDeckPool(){
   let cards = COLLECTION.filter(c => {
     const rOk = deckFilter==='all' ? true : (deckFilter==='deck' ? activeDeck.has(c.uid||c.name) : c.rarity===deckFilter);
     const kOk = !deckKeyword || cardHasKeyword(c, deckKeyword);
-    return rOk && kOk;
+    const _own = (ownedCopies[c.uid||c.name]||0) > 0;
+    const oOk = deckOwnFilter==='all' ? true : (deckOwnFilter==='owned' ? _own : !_own);
+    return rOk && kOk && oOk;
   });
   if(deckSort==='kills') cards.sort((a,b)=> b.kills-a.kills || (RARITY_ORDER[a.rarity]-RARITY_ORDER[b.rarity]));
   else if(deckSort==='deaths') cards.sort((a,b)=> a.deaths-b.deaths || b.kills-a.kills);
@@ -7149,8 +7162,9 @@ function lsGet(k, def){ try { const v = LS.getItem(k); return v==null ? def : JS
 function lsSet(k, v){ try { LS.setItem(k, JSON.stringify(v)); } catch(e){} }
 
 // ══ DECK-BUILDER FILTER / SORT / KEYWORD ══
-let deckFilter='all', deckSort='rarity', deckKeyword=null;
+let deckFilter='all', deckSort='rarity', deckKeyword=null, deckOwnFilter='all';
 function filterDeck(r, btn){ deckFilter=r; document.querySelectorAll('.dfb-rarity .filter-chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); buildDeckPool(); }
+function filterDeckOwned(m, btn){ deckOwnFilter=m; document.querySelectorAll('.dfb-own .filter-chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); buildDeckPool(); }
 function sortDeck(s, btn){ deckSort=s; document.querySelectorAll('.dfb-sort .filter-chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); buildDeckPool(); }
 function updateDeckKwToggle(){ var t=document.getElementById('dfb-kw-toggle'), g=document.getElementById('dfb-kw'); if(!t||!g) return; var caret=g.classList.contains('collapsed')?' ▾':' ▴'; if(deckKeyword){ t.classList.add('active'); t.textContent='Keyword: '+deckKeyword+caret; } else { t.classList.remove('active'); t.textContent='Keywords'+caret; } }
 function toggleDeckKw(){ var g=document.getElementById('dfb-kw'); if(g) g.classList.toggle('collapsed'); updateDeckKwToggle(); }
