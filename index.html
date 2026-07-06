@@ -9581,7 +9581,7 @@ applyCosmetics();
 .dev-ov.on{display:flex}
 .dev-hd{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #262d38;flex-wrap:wrap}
 .dev-ti{font-weight:800;color:#F5C24D;letter-spacing:.02em}
-.dev-q{flex:1;min-width:120px;max-width:280px;background:#0c0f16;border:1px solid #303a47;color:#e6e9f0;border-radius:7px;padding:6px 9px;font:inherit}
+.dev-q{flex:1;min-width:120px;max-width:280px;background:#0c0f16;border:1px solid #303a47;color:#e6e9f0;border-radius:7px;padding:6px 9px;font:inherit}.dev-rarf{display:inline-flex;gap:4px;flex:0 0 auto}.dev-rc{font-size:11px;font-weight:800;padding:5px 10px;border-radius:7px;border:1px solid #303a47;background:#0c0f16;color:#8b98ad;cursor:pointer}.dev-rc:hover{color:#e6e9f0;border-color:#4a5666}.dev-rc.on{color:#0a0a0c;background:#F5C24D;border-color:#F5C24D}
 .dev-chg{font-size:11px;color:#8b96a8;font-variant-numeric:tabular-nums}
 .dev-b{background:#171d27;border:1px solid #333d4a;color:#c8d0dc;font:inherit;font-size:12px;font-weight:600;padding:6px 11px;border-radius:7px;cursor:pointer}
 .dev-b:hover{border-color:#5a6675;color:#fff}
@@ -9811,7 +9811,7 @@ body::before{background:
   <div class="dev-hd">
     <span class="dev-ti">🛠 Developer — Balance</span>
     <input id="dev-q" class="dev-q" placeholder="search cards…">
-    <select id="dev-rar" class="dev-q" style="flex:0 0 auto;max-width:140px"><option value="">All rarities</option><option value="genesis">Genesis</option><option value="ultra">Ultra</option><option value="rare">Rare</option><option value="common">Common</option></select>
+    <span id="dev-rar" class="dev-rarf"><button class="dev-rc on" data-rar="">All</button><button class="dev-rc" data-rar="genesis">AR</button><button class="dev-rc" data-rar="ultra">UR</button><button class="dev-rc" data-rar="rare">Rare</button><button class="dev-rc" data-rar="common">Common</button></span>
     <span class="dev-chg" id="dev-chg">0 edits</span>
     <button class="dev-b" id="dev-exp">Export</button>
     <button class="dev-b" id="dev-req" title="Copy all your plain-word Called requests to hand off to Claude">📣 Requests</button>
@@ -9859,8 +9859,8 @@ body::before{background:
     function esc(s){return (''+s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
     function chg(){document.getElementById('dev-chg').textContent=Object.keys(OV).length+' edits';}
     function record(n,f,v){var map={p:'pow',r:'rarity',t:'timing',a:'abil'};setProp(n,map[f],v);var o=ORIG[n];if(!OV[n])OV[n]={};var og=o?o[f]:undefined;if((''+v)===(''+og))delete OV[n][f];else OV[n][f]=v;if(OV[n]&&!Object.keys(OV[n]).length)delete OV[n];saveOV();chg();schedVault();}
-    var cur='table', sortK='ceil', sortD=-1;
-    function renderTable(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=RARF?RARF.value:'';var d=model().filter(function(c){return (!q||c.n.toLowerCase().indexOf(q)>=0)&&(!rf||c.r===rf);});
+    var cur='table', sortK='ceil', sortD=-1, devRar='';
+    function renderTable(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=devRar;var d=model().filter(function(c){return (!q||c.n.toLowerCase().indexOf(q)>=0)&&(!rf||c.r===rf);});
       d.sort(function(a,b){var x=sortK==='ceil'?ceil(a):a[sortK],y=sortK==='ceil'?ceil(b):b[sortK];return (x<y?-1:x>y?1:0)*sortD;});
       var h='<table class="dev-tbl"><thead><tr><th>Card</th><th>Rarity</th><th class="num" data-k="p">Power'+(sortK==='p'?(sortD<0?' ▼':' ▲'):'')+'</th><th class="num" data-k="ceil">Ceil'+(sortK==='ceil'?(sortD<0?' ▼':' ▲'):'')+'</th><th>Ability (click to edit)</th></tr></thead><tbody>';
       d.forEach(function(c){var o=ORIG[c.n];h+='<tr data-n="'+esc(c.n)+'"><td class="nm" style="border-left:3px solid '+RAR[c.r].c+'">'+esc(c.n)+(stacks(c.a)?' <span title="scales further" style="color:#d0a24a">∞</span>':'')+'</td>'+
@@ -9897,7 +9897,7 @@ body::before{background:
       BODY.innerHTML=sec('⚠','Power creep','lower rarity reaching the tier above',creep)+sec('▽','Under-powered for rarity','at/below the tier below',under)+sec('∞','Uncapped scalers','no fixed ceiling',scal)+sec('💥','High burst','ability swing ≥ +6',burst);
     }
     function recordFx(n,f,v){if(!OV[n])OV[n]={};if(v==null||v==='')delete OV[n][f];else OV[n][f]=v;if(OV[n]&&!Object.keys(OV[n]).length)delete OV[n];saveOV();chg();}
-    function renderEffects(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=RARF?RARF.value:'';
+    function renderEffects(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=devRar;
       var d=baseList().filter(function(c){return (!q||c.name.toLowerCase().indexOf(q)>=0)&&(!rf||c.rarity===rf);});
       var h='<div class="dev-fxnote"><b>⚡ Cost</b> applies the instant you change it — no Apply needed, so set as many cards to <b>1</b> as you want. <b>📣 Called</b>: fill the quick-build fields → <b>↓ Fill JSON</b> → <b>Apply</b> (or edit JSON directly; conditionals go in the JSON box). Blank a JSON box + Apply removes that effect.</div>';
       d.forEach(function(c){var n=c.name;
@@ -9953,7 +9953,7 @@ body::before{background:
     function render(){R[cur]();}
     document.getElementById('dev-tabs').addEventListener('click',function(e){var b=e.target.closest('.dev-t');if(!b)return;document.querySelectorAll('.dev-t').forEach(function(t){t.classList.remove('on');});b.classList.add('on');cur=b.getAttribute('data-v');render();});
     Q.addEventListener('input',function(){if(cur==='table')renderTable();else if(cur==='effects')renderEffects();});
-    if(RARF)RARF.addEventListener('change',function(){render();});
+    if(RARF)RARF.addEventListener('click',function(e){var b=e.target.closest('.dev-rc');if(!b)return;devRar=b.getAttribute('data-rar')||'';RARF.querySelectorAll('.dev-rc').forEach(function(x){x.classList.toggle('on',x===b);});render();});
     document.getElementById('dev-exp').onclick=function(){var lines=Object.keys(OV).map(function(n){var o=OV[n],g=ORIG[n]||{},c=[];if(o.p!=null)c.push('pow '+g.p+'→'+o.p);if(o.r!=null)c.push('rarity '+g.r+'→'+o.r);if(o.t!=null)c.push('timing '+g.t+'→'+o.t);if(o.a!=null)c.push('ability → "'+o.a+'"');if(o.cost!=null)c.push('cost →'+o.cost);if(o.rename!=null)c.push('RENAME → "'+o.rename+'" (canonical rename — Claude to apply)');if(o.links!=null)c.push('links → ['+o.links.join(', ')+']');if(o.called!=null)c.push('CALLED →'+o.called);if(o.rules!=null)c.push('CARD_RULES →'+o.rules);if(o.note!=null)c.push('note: "'+o.note+'"');return n+': '+c.join(', ');});EXP.hidden=false;EXP.innerHTML='<textarea readonly>'+esc(lines.length?lines.join('\n'):'No changes yet.')+'</textarea>';try{EXP.querySelector('textarea').select();}catch(_){}};
     var _rq=document.getElementById('dev-req'); if(_rq) _rq.onclick=function(){ var lines=Object.keys(OV).filter(function(n){return OV[n]&&OV[n].note;}).map(function(n){ var cur=(typeof CALLED!=='undefined'&&CALLED[n])?JSON.stringify(CALLED[n]):'(none yet)'; var cst=(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[n]!=null)?(' [⚡'+COST_OVERRIDE[n]+']'):''; return n+cst+': '+OV[n].note+'   (current: '+cur+')'; }); EXP.hidden=false; EXP.innerHTML='<textarea readonly>'+esc(lines.length?('CALLED-EFFECT REQUESTS — paste to Claude:\n\n'+lines.join('\n\n')):'No descriptions yet — open ⚡ Abilities and describe a card in the plain-words box.')+'</textarea>'; try{EXP.querySelector('textarea').select();}catch(_){} };
     document.getElementById('dev-rst').onclick=function(){if(!confirm('Reset ALL dev edits back to original values?'))return;Object.keys(OV).forEach(function(n){var o=ORIG[n];if(o){setProp(n,'pow',o.p);setProp(n,'rarity',o.r);setProp(n,'timing',o.t);setProp(n,'abil',o.a);}});OV={};saveOV();chg();try{if(typeof buildVault==='function')buildVault();}catch(e){}render();};
