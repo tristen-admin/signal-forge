@@ -2209,6 +2209,11 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <button class="navitem" id="nav-lobby" onclick="show('lobby',this)"><span class="ni-icon">⚔</span><span class="brand-text">Public Server</span></button>
         <button class="navitem" id="nav-ranked" onclick="show('ranked',this)"><span class="ni-icon">🪜</span><span class="brand-text">Ranked Ladder</span></button>
         <button class="navitem" id="nav-pvp" onclick="show('pvp',this)"><span class="ni-icon">🩸</span><span class="brand-text">Staked PvP</span></button>
+      </div>
+    </div>
+    <div class="nav-group" id="grp-limited">
+      <button class="nav-grp-head" onclick="toggleNavGroup('grp-limited')"><span class="ni-icon">🎟️</span><span class="brand-text">Limited Events</span><span class="grp-chev brand-text">▾</span></button>
+      <div class="nav-sub">
         <button class="navitem" id="nav-draft" onclick="show('draft',this);buildDraft()"><span class="ni-icon">🌀</span><span class="brand-text">Draft</span></button>
       </div>
     </div>
@@ -9635,7 +9640,7 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
 /* inject nav slot + view + overlay */
 (function(){
   try{
-    var sub=document.querySelector('#grp-play .nav-sub');
+    var sub=document.querySelector('#grp-limited .nav-sub');
     if(sub && !document.getElementById('nav-tourney')){
       var btn=document.createElement('button'); btn.className='navitem'; btn.id='nav-tourney';
       btn.innerHTML='<span class="ni-icon">🏟️</span><span class="brand-text">Tournament</span>';
