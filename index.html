@@ -4089,11 +4089,11 @@ const ENERGY_SPELLS = [
 ];
 // ══ REAR-GUARD / CALLED SYSTEM (v1) ══
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
-const ENERGY_CAP = 7, ENERGY_REGEN = 2;   // energy pool (start 2, +2/turn, cap 6) - #1 balance dial
+const ENERGY_CAP = 6, ENERGY_REGEN = 2;   // energy pool — max 6; per-duel floor scales so late turns never drop low
 const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdor":3};   // ability-strength nudges above the power band (balance dial)
 function conjureCost(c){ if(!c) return 1; if(c.cost!=null) return c.cost; if(COST_OVERRIDE[c.name]!=null) return COST_OVERRIDE[c.name]; var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; }
-function duelEnergyCap(){ var d=(typeof playerScore!=='undefined')?((playerScore[0]||0)+(playerScore[1]||0)+1):1; return Math.min(ENERGY_CAP, 3 + Math.max(0, d-3)); }
-function duelEnergyFloor(){ return Math.max(2, duelEnergyCap()-1); } /* guaranteed energy GIVEN per round: d1-3=2, d4=3, d5=4, d6=5, d7=6 */
+function duelEnergyCap(){ var d=(typeof matchCommits!=='undefined')?((matchCommits||0)+1):1; return Math.min(ENERGY_CAP, 3 + Math.max(0, d-3)); }  /* d = true duel number — counts ties, so it never stalls */
+function duelEnergyFloor(){ return Math.max(3, duelEnergyCap()-1); } /* guaranteed energy per duel: d1-4≈3, d5≈4, d6-7≈5; cap 6 — never 2 */
 // CALLED - universal rear-guard keyword; fires ALWAYS when a support is called (no group gate).
 // Inverse-scaling: fighter cards -> simple static (+N / opp -N); low-power/support -> rich combos.
 const CALLED = {
