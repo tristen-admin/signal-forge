@@ -3984,17 +3984,30 @@ function revealCondition(){
 }
 
 function tangeSurgeReady(c){ return !!c && c.name==='Tange Sazen' && typeof skullchainKills!=='undefined' && skullchainKills>0 && typeof playerScore!=='undefined' && playerScore[1]>=3; }
+function renderInstantStrip(){
+  var strip=document.getElementById('instant-strip'); if(!strip) return;
+  var opts=document.getElementById('instant-options');
+  var actionCards = hand.filter(function(c){ return c.timing === 'instant' || c.timing === 'pre' || tangeSurgeReady(c); });
+  if(!actionCards.length){ strip.style.display='none'; if(opts) opts.innerHTML=''; return; }
+  strip.style.display='flex';
+  if(opts) opts.innerHTML = actionCards.map(function(ic){
+    var idx = hand.indexOf(ic);
+    if(tangeSurgeReady(ic)) return '<button class="instant-card-btn" style="border-color:rgba(240,98,95,0.6);color:#f2b8b8" onclick="activateInstant('+idx+')">\u26a1 '+ic.name+' \u2014 Banish Surge \u00b7 sac +'+ic.pow+'</button>';
+    if(ic.timing === 'instant') return '<button class="instant-card-btn" onclick="activateInstant('+idx+')">\u26a1 '+ic.name+' (+'+ic.pow+')</button>';
+    return '<button class="instant-card-btn" style="border-color:rgba(212,168,67,0.5);color:var(--gold)" onclick="activatePre('+idx+')">\ud83d\udccc '+ic.name+' \u2014 lock condition</button>';
+  }).join('');
+}
 function activateInstant(i){
-  if(phase !== 'revealed') return;
+  if(phase !== 'revealed' && phase !== 'selecting') return;
   const c = hand[i];
   if(c.timing !== 'instant' && !tangeSurgeReady(c)) return;
   // Banish Surge: banish this card, store its power
   banishSurge = c.pow;
   banishPile.push(c);
   hand.splice(i, 1);
-  document.getElementById('instant-strip').style.display = 'none';
   document.getElementById('select-hint').textContent = `${c.name} banished — next commit gains +${banishSurge} power`;
   document.getElementById('commit-hint').textContent = `Surge ready (+${banishSurge}). Now commit a card.`;
+  if(typeof renderInstantStrip==='function') renderInstantStrip();
   buildHand();
   updatePiles();
 }
@@ -4279,7 +4292,7 @@ function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview
   document.getElementById('opp-field').innerHTML = '<div class="card field-card facedown enemy"><div class="fd-mark">▪▪▪</div></div>';
   document.getElementById('opp-area').className = 'opp-waiting';
   document.getElementById('opp-area').innerHTML = '⏳ Opponent locked in — assemble your play';
-  document.getElementById('instant-strip').style.display = 'none';
+  if(typeof renderInstantStrip==='function') renderInstantStrip();
   document.getElementById('confirm-btn').style.display = 'flex';
   setPhase('selecting');
   buildHand(); renderRearSlot(); refreshStageHint();
@@ -4383,6 +4396,7 @@ function refreshStageHint(){
 
 function confirmSelection(){
   if(phase !== 'selecting' || preSelectedCard === null) return;
+  { var _is=document.getElementById('instant-strip'); if(_is) _is.style.display='none'; }
   selectedCard = preSelectedCard;
   const c = hand[selectedCard];
 
@@ -5365,7 +5379,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   // ── FIRE ON-COMMIT ABILITIES (before condition) ──
   if(!abilityLocked){
     // Kotei: +3 if opponent is 0-death OR you lost your last duel; whole effect repeats if Keawe already won a duel this match
-    var _ctx={opp_deaths:oc.deaths,opp_kills:oc.kills,pc_kills:pc.kills,pc_deaths:pc.deaths,opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),wc_names:winnersCircle.map(function(c){return c.name;})};
+    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),wc_names:winnersCircle.map(function(c){return c.name;})};
     if(pc.name==='Veronica'){
       var _oa=oc.abil||'';
       if(!_oa||_oa.indexOf('No ability')===0){ abilLog.push('🔄 Veronica: opponent has no ability — no effect'); }
@@ -5615,7 +5629,7 @@ function nextTurn(){
   pendingOppCard = null;
   preSelectedCard = null;
   rearGuardIdxs = []; pendingOppRears = [];
-  { var _pr2=document.getElementById('player-rear'); if(_pr2){_pr2.style.display='none';_pr2.innerHTML='';} var _or2b=document.getElementById('opp-rear'); if(_or2b){_or2b.style.display='none';_or2b.innerHTML='';} }
+  ['player-rear','player-rear2','opp-rear','opp-rear2'].forEach(function(_id){ var _e=document.getElementById(_id); if(_e){ _e.style.display='none'; _e.innerHTML=''; _e.className='rear-slot'+(_id.indexOf('opp')===0?' enemy':''); } });
   conditionLocked = false;
   flameVeilFromWC = false;
 
