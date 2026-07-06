@@ -12,50 +12,7 @@ import json, os, random
 import rules
 
 # ── CARD CATALOG (name → pow/kills/deaths/rarity/abil), ported from HAND_CARDS + DECK_POOL ──
-CATALOG = {
- "Kotei":{"pow":18,"kills":7,"deaths":0,"rarity":"genesis","abil":"Kotei"},
- "Uso Oso":{"pow":8,"kills":12,"deaths":0,"rarity":"uncommon","abil":"Death Remnant"},
- "Tanlorin":{"pow":10,"kills":8,"deaths":2,"rarity":"uncommon","abil":"Banish Surge"},
- "Bixie Bee":{"pow":1,"kills":0,"deaths":0,"rarity":"common","abil":""},
- "Veronica":{"pow":10,"kills":5,"deaths":1,"rarity":"common","abil":"Veronica"},
- "Conduit Adept":{"pow":6,"kills":0,"deaths":0,"rarity":"uncommon","abil":"Charge"},
- "Voltcaller":{"pow":8,"kills":0,"deaths":0,"rarity":"rare","abil":"Charge"},
- "Signal Diviner":{"pow":6,"kills":0,"deaths":0,"rarity":"rare","abil":"Charge"},
- "Ahdor":{"pow":11,"kills":15,"deaths":3,"rarity":"genesis","abil":"Record Guard"},
- "Ruffius Rufeldro":{"pow":5,"kills":1,"deaths":3,"rarity":"common","abil":"Ruffius"},
- "Kiba":{"pow":2,"kills":0,"deaths":8,"rarity":"common","abil":"Death Remnant"},
- "Darwin":{"pow":15,"kills":41,"deaths":3,"rarity":"genesis","abil":"Darwin"},
- "Malia":{"pow":10,"kills":5,"deaths":1,"rarity":"common","abil":"Malia"},
- "Moro":{"pow":9,"kills":4,"deaths":2,"rarity":"common","abil":"Moro"},
- "Hanse Waltz":{"pow":9,"kills":3,"deaths":2,"rarity":"uncommon","abil":"Last Stand"},
- "Arch-Grim Korrin":{"pow":14,"kills":28,"deaths":7,"rarity":"rare","abil":"Korrin"},
- "Zerith Var":{"pow":12,"kills":9,"deaths":3,"rarity":"uncommon","abil":"Zerith Var"},
- "Valcarion":{"pow":13,"kills":3,"deaths":1,"rarity":"rare","abil":"Pre-commit"},
- "Val Kreigh":{"pow":13,"kills":11,"deaths":5,"rarity":"uncommon","abil":"Val Kreigh"},
- "Tange Sazen":{"pow":15,"kills":14,"deaths":6,"rarity":"rare","abil":"Kill Escalation"},
- "Lagertha Waltz":{"pow":14,"kills":19,"deaths":4,"rarity":"rare","abil":"Lagertha Waltz"},
- "Anorith Keeling":{"pow":10,"kills":6,"deaths":1,"rarity":"common","abil":"Anorith Keeling"},
- "Alucard The Damned":{"pow":13,"kills":31,"deaths":2,"rarity":"rare","abil":"Alucard The Damned"},
- "Ella Ballora":{"pow":14,"kills":15,"deaths":4,"rarity":"ultra","abil":"Bloodrage"},
- "Kiana":{"pow":11,"kills":9,"deaths":3,"rarity":"uncommon","abil":"Kiana"},
- "Melanie":{"pow":1,"kills":0,"deaths":0,"rarity":"common","abil":""},
- "Heir of Kaiga":{"pow":3,"kills":4,"deaths":6,"rarity":"common","abil":"Heir of Kaiga"},
- "Korrin's Possessed Legion":{"pow":6,"kills":11,"deaths":9,"rarity":"common","abil":"Thrall Swarm"},
- "Josef":{"pow":7,"kills":6,"deaths":4,"rarity":"common","abil":"Josef"},
- "Sister Mire":{"pow":8,"kills":7,"deaths":3,"rarity":"common","abil":"Death Remnant"},
- "King Joris":{"pow":10,"kills":12,"deaths":4,"rarity":"common","abil":"King Joris"},
- "The Regenerating Horror":{"pow":10,"kills":8,"deaths":1,"rarity":"uncommon","abil":"Regeneration"},
- "Broodmother":{"pow":11,"kills":9,"deaths":2,"rarity":"uncommon","abil":"Broodmother"},
- "Chieftain Reyva Vosh":{"pow":13,"kills":20,"deaths":5,"rarity":"uncommon","abil":"Chieftain Reyva Vosh"},
- "Forgemask":{"pow":14,"kills":16,"deaths":3,"rarity":"rare","abil":"Forgemask"},
- "Lagertha Waltz — Werewolf Form":{"pow":14,"kills":21,"deaths":5,"rarity":"ultra","abil":"Lagertha Werewolf"},
- "Hanse Waltz — Werewolf Form":{"pow":15,"kills":22,"deaths":4,"rarity":"ultra","abil":"Hanse Werewolf"},
- "Ella Ballora — True Form":{"pow":17,"kills":24,"deaths":1,"rarity":"ultra","abil":"Ella True Form"},
- "Akatosh, the Golden Dragon":{"pow":21,"kills":77,"deaths":0,"rarity":"genesis","abil":"Unmaking"},
- "Keawe Kil'lua":{"pow":12,"kills":6,"deaths":3,"rarity":"uncommon","abil":"Keawe"},
- "Rhaess Korvain":{"pow":12,"kills":14,"deaths":3,"rarity":"uncommon","abil":"Rhaess Korvain"},
- "Ossian Drell":{"pow":12,"kills":18,"deaths":5,"rarity":"uncommon","abil":"Ossian Drell"},
-}
+CATALOG = {n: {"pow": c["pow"], "kills": 0, "deaths": 0, "rarity": c["rarity"], "abil": c["abil"]} for n, c in rules.CARD_FULL.items()}   # canonical (catalog.json)
 CHAOS_CONDS = {"forceswap", "surge", "mirror"}
 FORMATION_TIERS = [(15, "Legendary Duo", 3), (8, "Brothers-in-Arms", 2), (3, "Allied", 1)]
 # power conditions resolve() acts on (others — noretreat/openbook/recall etc. — don't touch power)
@@ -95,7 +52,7 @@ def opponent_pool():
 # ── DATA-DRIVEN ABILITY SPEC (step 1 of the shared rules spec) ──
 # Each card -> ordered rules. A rule fires if its "if" condition holds, then applies one op:
 #   add:N  addvar:var,x:mult  mult:N  set:var  oppadd:N.  Conditions compare context vars.
-RULES = json.load(open(os.path.join(os.path.dirname(__file__), "rules.json"), encoding="utf-8"))
+RULES = rules._CAT["rules"]   # canonical rules from catalog.json (was stale rules.json)
 SPELLS = json.load(open(os.path.join(os.path.dirname(__file__), "spells.json"), encoding="utf-8"))
 SPELL_IDS = [s["id"] for s in SPELLS]
 

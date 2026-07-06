@@ -1,0 +1,1905 @@
+{
+ "cards": {
+  "Kotei": {
+   "pow": 21,
+   "rarity": "genesis",
+   "cost": 4,
+   "abil": "On commit: +3 if opponent's card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Uso Oso": {
+   "pow": 16,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "Death Remnant: when Uso dies he stays on field. Your cards here gain +7 power until an opponent's card is killed, then Remnant is removed.",
+   "timing": "resolution",
+   "starter": true,
+   "opp": false
+  },
+  "Tanlorin": {
+   "pow": 10,
+   "rarity": "uncommon",
+   "cost": 2,
+   "abil": "⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.",
+   "timing": "instant",
+   "starter": false,
+   "opp": false
+  },
+  "Bixie Bee": {
+   "pow": 18,
+   "rarity": "common",
+   "cost": 3,
+   "abil": "No ability. Starter card. Never hesitate to deploy.",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "Veronica": {
+   "pow": 14,
+   "rarity": "common",
+   "cost": 3,
+   "abil": "On commit: copy opponent's card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability.",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "Kaelthar the Ascendant": {
+   "pow": 19,
+   "rarity": "ultra",
+   "cost": 4,
+   "abil": "Ascendant: +6 while you hold the match lead — a finisher for a winning board, dead weight when behind.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Voidmaw the Unmaker": {
+   "pow": 18,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Devastation: +4 on commit, and the opponent takes −3 if their card is Pristine (0 deaths).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Sunforged Colossus": {
+   "pow": 17,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Colossus: +3, and +5 more from the 3rd commit onward — a late-game bomb.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Kessuae, Tide of Ruin": {
+   "pow": 17,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Reckoning: +7 while you are behind in the match — a comeback finisher.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Elowen Dawnspear": {
+   "pow": 17,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Purity: +5 while this card is Pristine (0 deaths).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Kravyn the Collector": {
+   "pow": 17,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Kill Escalation: +5 at 20+ career kills.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Veyra Stormcaller": {
+   "pow": 16,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Elemental Flurry: +3, and +4 more under a chaos condition.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ghorruk Skullbrand": {
+   "pow": 16,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Death Remnant: when he falls he holds the field, +6 to your committed cards until an enemy is killed.",
+   "timing": "resolution",
+   "starter": false,
+   "opp": false
+  },
+  "Ilma the Patient": {
+   "pow": 13,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Late Bloomer: +5 from the 3rd commit onward.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Old Garrick": {
+   "pow": 12,
+   "rarity": "common",
+   "cost": 2,
+   "abil": "Grizzled Veteran: +5 at 20+ kills; +5 more at 8+ deaths.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Faye Quicksilver": {
+   "pow": 14,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "Snowball: +2 for every round you have already won this match.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Bram the Bulwark": {
+   "pow": 15,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "Last Stand — a loss by 3 power or less becomes a tie.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Conduit Adept": {
+   "pow": 6,
+   "rarity": "uncommon",
+   "cost": 1,
+   "abil": "On commit: gain 1 Charge.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Voltcaller": {
+   "pow": 8,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: your next Interrupt costs 2 less.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Signal Diviner": {
+   "pow": 12,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On win: next turn gain 2 max Charge.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ahdor": {
+   "pow": 17,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. Ahdor returns to your hand and a random hand card gains +4.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Darwin": {
+   "pow": 19,
+   "rarity": "ultra",
+   "cost": 4,
+   "abil": "On commit: if 3rd+ commit this match, +3 power. Returns from Winners Circle: banish from hand to curse opponent's next committed card −5 power.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Hanse Waltz": {
+   "pow": 9,
+   "rarity": "rare",
+   "cost": 1,
+   "abil": "Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.",
+   "timing": "resolution",
+   "starter": true,
+   "opp": false
+  },
+  "Arch-Grim Korrin": {
+   "pow": 14,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "On commit: if opponent's card has fewer career kills than this card, +6 power.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Valcarion": {
+   "pow": 15,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "Pre-commit: lock the active condition this turn — opponent cannot shift it.",
+   "timing": "pre",
+   "starter": false,
+   "opp": false
+  },
+  "Val Kreigh": {
+   "pow": 15,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "On commit: if this is the 1st duel of the match, +6 power.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Tange Sazen": {
+   "pow": 18,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.",
+   "timing": "resolution",
+   "starter": false,
+   "opp": false
+  },
+  "Lagertha Waltz": {
+   "pow": 15,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "On commit: +2 if you lost your last duel. -2 if you won your last duel.",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "Alucard The Damned": {
+   "pow": 17,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "On commit: the opponent's card loses 4 power — or if it is Pristine (0 deaths), Alucard drains its purity for +4 instead.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ella Ballora": {
+   "pow": 14,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Bloodrage: on commit +3 power, and +3 more if you have already lost a duel this match — she fights harder wounded.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Kiana": {
+   "pow": 19,
+   "rarity": "uncommon",
+   "cost": 4,
+   "abil": "Elemental Flurry: on commit +3 power, and +4 more if the active condition is a chaos condition (Force Swap, Energy Surge, or Mirror).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Melanie": {
+   "pow": 1,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "No ability. Keawe's mother — a civilian, not a fighter. At 1 power she quietly wins under Lowest Wins.",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "Uso Oso's Skeletal Summons": {
+   "pow": 5,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Death Remnant: these bones don't stay down — when the summons falls it lingers on the field, your committed cards gaining its power until an opponent's card is killed.",
+   "timing": "resolution",
+   "starter": false,
+   "opp": false
+  },
+  "King Joris": {
+   "pow": 12,
+   "rarity": "common",
+   "cost": 2,
+   "abil": "Rightful Claim: on commit, +1 power for every death on the opponent's record — the betrayed king judges every usurper's sins.",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "The Regenerating Horror": {
+   "pow": 11,
+   "rarity": "uncommon",
+   "cost": 2,
+   "abil": "Regeneration (one use per match): the first time this card would lose, it regrows instead — the duel ties, no death is recorded, and it returns to your hand. Only a finisher truly ends it.",
+   "timing": "resolution",
+   "starter": false,
+   "opp": false
+  },
+  "Broodmother": {
+   "pow": 13,
+   "rarity": "uncommon",
+   "cost": 2,
+   "abil": "Spiderling Swarm: on commit, +2 power for every card in your hand — the brood answers her call.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Chieftain Reyva Vosh": {
+   "pow": 14,
+   "rarity": "uncommon",
+   "cost": 3,
+   "abil": "Warriors in Reserve: on commit, +2 power for each card in your Winners Circle — she commits her hold's warriors once the stakes are undeniable.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Forgemask": {
+   "pow": 14,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "Reforged: on commit, +3 power, and +4 more if you lost your last duel — the forge tempers what breaks.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Lagertha Waltz — Werewolf Form": {
+   "pow": 16,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Alpha's Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack's fury peaks in mourning.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Hanse Waltz — Werewolf Form": {
+   "pow": 18,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Blood Moon: on commit, +5 power while you are behind in the match — rage completes the transformation.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ella Ballora — True Form": {
+   "pow": 17,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Devour: on commit, +3 power, and +4 more if you have already won a duel this match — the Spider-Queen grows with every kill she feeds on.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Akatosh, the Golden Dragon": {
+   "pow": 24,
+   "rarity": "genesis",
+   "cost": 4,
+   "abil": "Unmaking: when Akatosh is committed he shrugs off the arena — the active condition's power effects don't touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Keawe Kil'lua": {
+   "pow": 16,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "Rhaess Korvain": {
+   "pow": 13,
+   "rarity": "uncommon",
+   "cost": 2,
+   "abil": "Assassin's Mark: on commit, +6 power if the opponent's card has more career kills than this one — Rhaess hunts the notable.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ossian Drell": {
+   "pow": 13,
+   "rarity": "uncommon",
+   "cost": 2,
+   "abil": "Field Command: on commit, +3 power, and +3 more if you are ahead in the match — a veteran presses the advantage.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ruffius Rufeldro": {
+   "pow": 15,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "On commit: if you are down 2 or more duels this match, double this card's power.",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "Kiba": {
+   "pow": 2,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Death Remnant: when Kiba dies it stays on field. Your cards here gain +2 power until an opponent's card is killed, then Remnant is removed.",
+   "timing": "resolution",
+   "starter": true,
+   "opp": false
+  },
+  "Malia": {
+   "pow": 10,
+   "rarity": "common",
+   "cost": 2,
+   "abil": "On commit: your power becomes the opponent's committed card power for this duel.",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "Moro": {
+   "pow": 14,
+   "rarity": "common",
+   "cost": 3,
+   "abil": "On commit: if opponent's card has 6+ career kills, gain +3 power.",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "Zerith Var": {
+   "pow": 19,
+   "rarity": "uncommon",
+   "cost": 4,
+   "abil": "On commit: if you are losing this duel (opponent's base power is higher), +4 power.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Anorith Keeling": {
+   "pow": 12,
+   "rarity": "common",
+   "cost": 2,
+   "abil": "On commit: if opponent's base power is higher than this card, gain +2 power for every card in your hand.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Heir of Kaiga": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast.",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "Josef": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Master Tailor: on commit, +4 power once he has taken the measure of the fight (any commit after your first).",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "Sister Mire": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, your committed cards gaining her power until an opponent's card is killed.",
+   "timing": "resolution",
+   "starter": true,
+   "opp": false
+  },
+  "Kleydson": {
+   "pow": 11,
+   "rarity": "ultra",
+   "cost": 2,
+   "abil": "Blackened Order Boss — Conjure: +2 power per card in your banish zone. Feed the Order, ride harder.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Vharos, the Iron Crown": {
+   "pow": 20,
+   "rarity": "genesis",
+   "cost": 4,
+   "abil": "Record Guard. On commit: +5 against a Pristine opponent (0 deaths).",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Nyx, Devourer of Legends": {
+   "pow": 18,
+   "rarity": "genesis",
+   "cost": 3,
+   "abil": "On commit: +4; +4 more if you lost your last duel.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Aurelion Prime": {
+   "pow": 21,
+   "rarity": "genesis",
+   "cost": 4,
+   "abil": "Kill Escalation: +6 at 30+ career kills, +3 at 15+.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "The Hollow King": {
+   "pow": 16,
+   "rarity": "genesis",
+   "cost": 3,
+   "abil": "Bloodrage: +7 while you are behind in the match.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Sirefax the Warden": {
+   "pow": 16,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Record Guard. On commit: +3 vs a Pristine opponent.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Mordezh, Blood Prophet": {
+   "pow": 15,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Bloodrage: +5 while behind; +2 if you lost last.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Sable the Unseen": {
+   "pow": 14,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "On commit: a Pristine opponent is drained — opponent −4.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Torvald Ninefingers": {
+   "pow": 15,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Last Stand. On commit: +3 with 2 or fewer cards in hand.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Kessa Brightblade": {
+   "pow": 13,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: +4 vs a Pristine opponent.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Ruven Ashwalker": {
+   "pow": 12,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Bloodrage: +5 while behind in the match.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Dragan Korr": {
+   "pow": 14,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "Kill Escalation: +4 at 18+ career kills.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Sythe Marrow": {
+   "pow": 10,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Death Remnant: +5 to your cards until an enemy is killed.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Wren of the Vigil": {
+   "pow": 12,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Record Guard — once per match a loss becomes a tie, no death recorded.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Halbrecht the Sure": {
+   "pow": 13,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: +3; +3 more if the opponent has fewer career kills.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Nissa Emberfen": {
+   "pow": 11,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Elemental Flurry: +2, +4 under a chaos condition.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Vessa Coil": {
+   "pow": 9,
+   "rarity": "rare",
+   "cost": 1,
+   "abil": "Comeback: +6 if you lost your last duel.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Tobin Reed": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: +3 vs a Pristine opponent.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Marn the Digger": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Bloodrage: +4 while behind.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Little Pox": {
+   "pow": 4,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Death Remnant: +4 to your cards until an enemy is killed.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Gilda Fenn": {
+   "pow": 9,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Purity: +3 while this card is Pristine.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Rusk": {
+   "pow": 7,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: +3; +2 more from the 3rd commit onward.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Two-Coin Tilly": {
+   "pow": 5,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Elemental Flurry: +5 under a chaos condition.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Bonnick": {
+   "pow": 10,
+   "rarity": "common",
+   "cost": 2,
+   "abil": "Comeback: +4 if you lost your last duel.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Sedge the Meek": {
+   "pow": 3,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Underdog: +6 if the opponent's base power is higher.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Harrow Vane": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Veteran: +3 at 6+ career kills.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Mip": {
+   "pow": 2,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "No ability. Cheap fodder — a Lowest-Wins darling.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Doru Blacktooth": {
+   "pow": 9,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: a Pristine opponent is unnerved — opponent −3.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Wisp": {
+   "pow": 1,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "No ability. A whisper of power — thrives under Lowest Wins.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Calla Thorn": {
+   "pow": 7,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Last Stand — a narrow loss becomes a tie.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  },
+  "Grum the Steady": {
+   "pow": 11,
+   "rarity": "common",
+   "cost": 2,
+   "abil": "Giant-Killer: +4 if the opponent has more career kills.",
+   "timing": "on",
+   "starter": false,
+   "opp": true
+  }
+ },
+ "called": {
+  "Kaelthar the Ascendant": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Voidmaw the Unmaker": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Sunforged Colossus": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Kessuae, Tide of Ruin": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Kotei": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Kleydson": {
+   "text": "Blackened Order — return 2 banished cards to hand, +2 power each",
+   "recurBuff": 2
+  },
+  "Lagertha Waltz": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Hanse Waltz": {
+   "text": "your Fighter +5",
+   "add": 5
+  },
+  "Kiana": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Heir of Kaiga": {
+   "text": "your Fighter +5 · draw 1",
+   "add": 5,
+   "draw": 1
+  },
+  "Melanie": {
+   "text": "your Fighter +5 · draw 1",
+   "add": 5,
+   "draw": 1
+  },
+  "Darwin": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Ella Ballora — True Form": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Ella Ballora": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Arch-Grim Korrin": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Alucard The Damned": {
+   "text": "banish 1 card from your hand to fuel the Order",
+   "banishOwn": 1
+  },
+  "Zerith Var": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Ruffius Rufeldro": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Ahdor": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Val Kreigh": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "King Joris": {
+   "text": "your Fighter +4 · draw 1",
+   "add": 4,
+   "draw": 1
+  },
+  "Malia": {
+   "text": "your Fighter +4",
+   "add": 4
+  },
+  "Moro": {
+   "text": "return 1 banished card to hand",
+   "recurPlain": 1
+  },
+  "Akatosh, the Golden Dragon": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Tange Sazen": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Kiba": {
+   "text": "your Fighter +5",
+   "add": 5
+  },
+  "Hanse Waltz — Werewolf Form": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Lagertha Waltz — Werewolf Form": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Anorith Keeling": {
+   "text": "banish 1 card from your hand to fuel the Order",
+   "banishOwn": 1
+  },
+  "Conduit Adept": {
+   "text": "gain 2 Charge + draw 1",
+   "chargeGain": 2,
+   "draw": 1
+  },
+  "Signal Diviner": {
+   "text": "gain 3 Charge",
+   "chargeGain": 3
+  },
+  "Voltcaller": {
+   "text": "your next Interrupt costs 2 less",
+   "spellDiscountGain": 2
+  },
+  "Uso Oso's Skeletal Summons": {
+   "text": "banish 1 card from your hand to fuel the Order",
+   "banishOwn": 1
+  },
+  "Sister Mire": {
+   "text": "banish 1 card from your hand to fuel the Order",
+   "banishOwn": 1
+  },
+  "Josef": {
+   "text": "your Fighter +5 · draw 1",
+   "add": 5,
+   "draw": 1
+  },
+  "Faye Quicksilver": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "The Regenerating Horror": {
+   "text": "return 1 banished card to hand, +2 power",
+   "recurBuff": 1
+  },
+  "Ilma the Patient": {
+   "text": "your Fighter +4",
+   "add": 4
+  },
+  "Broodmother": {
+   "text": "your Fighter +3, then draw 1",
+   "add": 3,
+   "draw": 1
+  },
+  "Old Garrick": {
+   "text": "your Fighter +4",
+   "add": 4
+  },
+  "Keawe Kil'lua": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Rhaess Korvain": {
+   "text": "return 1 banished card to hand",
+   "recurPlain": 1
+  },
+  "Ossian Drell": {
+   "text": "your Fighter +4 · draw 1",
+   "add": 4,
+   "draw": 1
+  },
+  "Bram the Bulwark": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Valcarion": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Chieftain Reyva Vosh": {
+   "text": "draw 2 cards",
+   "draw": 2
+  },
+  "Kravyn the Collector": {
+   "text": "both players banish 1 from hand; opponent −2",
+   "bothBanish": 1
+  },
+  "Forgemask": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Veyra Stormcaller": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Ghorruk Skullbrand": {
+   "text": "return 1 banished card to hand, +2 power",
+   "recurBuff": 1
+  },
+  "Elowen Dawnspear": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Bixie Bee": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Uso Oso": {
+   "text": "your Fighter +3",
+   "add": 3
+  }
+ },
+ "rules": {
+  "Kaelthar the Ascendant": [
+   {
+    "if": {
+     "v": "player_wins",
+     "op": ">",
+     "v2": "player_losses"
+    },
+    "add": 6,
+    "log": "🐉 Ascendant: +6 (holding the lead)"
+   }
+  ],
+  "Voidmaw the Unmaker": [
+   {
+    "add": 4,
+    "log": "🌑 Voidmaw: +4"
+   },
+   {
+    "if": {
+     "v": "opp_deaths",
+     "op": "==",
+     "n": 0
+    },
+    "oppadd": -3,
+    "log": "🌑 Voidmaw: opponent −3 (Pristine prey)"
+   }
+  ],
+  "Sunforged Colossus": [
+   {
+    "add": 3,
+    "log": "☀️ Colossus: +3"
+   },
+   {
+    "if": {
+     "v": "match_commits",
+     "op": ">=",
+     "n": 3
+    },
+    "add": 5,
+    "log": "☀️ Colossus: +5 (late game)"
+   }
+  ],
+  "Kessuae, Tide of Ruin": [
+   {
+    "if": {
+     "v": "player_losses",
+     "op": ">",
+     "v2": "player_wins"
+    },
+    "add": 7,
+    "log": "🌊 Kessuae: +7 (behind)"
+   }
+  ],
+  "Vharos, the Iron Crown": [
+   {
+    "if": {
+     "v": "opp_deaths",
+     "op": "==",
+     "n": 0
+    },
+    "add": 5,
+    "log": "👑 Vharos: +5 vs Pristine"
+   }
+  ],
+  "Nyx, Devourer of Legends": [
+   {
+    "add": 4,
+    "log": "🌑 Nyx: +4"
+   },
+   {
+    "if": {
+     "v": "last_result",
+     "op": "==",
+     "s": "lose"
+    },
+    "add": 4,
+    "log": "🌑 Nyx: +4 vengeance"
+   }
+  ],
+  "Aurelion Prime": [
+   {
+    "if": {
+     "v": "pc_kills",
+     "op": ">=",
+     "n": 30
+    },
+    "add": 6,
+    "log": "⚔️ Aurelion: +6 (30+ kills)"
+   },
+   {
+    "if": {
+     "and": [
+      {
+       "v": "pc_kills",
+       "op": ">=",
+       "n": 15
+      },
+      {
+       "v": "pc_kills",
+       "op": "<",
+       "n": 30
+      }
+     ]
+    },
+    "add": 3,
+    "log": "⚔️ Aurelion: +3 (15+ kills)"
+   }
+  ],
+  "The Hollow King": [
+   {
+    "if": {
+     "v": "player_losses",
+     "op": ">",
+     "v2": "player_wins"
+    },
+    "add": 7,
+    "log": "💀 Hollow King: +7 (behind)"
+   }
+  ],
+  "Sirefax the Warden": [
+   {
+    "if": {
+     "v": "opp_deaths",
+     "op": "==",
+     "n": 0
+    },
+    "add": 3,
+    "log": "🛡 Sirefax: +3 vs Pristine"
+   }
+  ],
+  "Mordezh, Blood Prophet": [
+   {
+    "if": {
+     "v": "player_losses",
+     "op": ">",
+     "v2": "player_wins"
+    },
+    "add": 5,
+    "log": "🩸 Mordezh: +5 (behind)"
+   },
+   {
+    "if": {
+     "v": "last_result",
+     "op": "==",
+     "s": "lose"
+    },
+    "add": 2,
+    "log": "🩸 Mordezh: +2 (lost last)"
+   }
+  ],
+  "Elowen Dawnspear": [
+   {
+    "if": {
+     "v": "pc_deaths",
+     "op": "==",
+     "n": 0
+    },
+    "add": 5,
+    "log": "✨ Elowen: +5 (Pristine)"
+   }
+  ],
+  "Kravyn the Collector": [
+   {
+    "if": {
+     "v": "pc_kills",
+     "op": ">=",
+     "n": 20
+    },
+    "add": 5,
+    "log": "⚔️ Kravyn: +5 (20+ kills)"
+   }
+  ],
+  "Veyra Stormcaller": [
+   {
+    "add": 3,
+    "log": "🌪️ Veyra: +3"
+   },
+   {
+    "if": {
+     "chaos": true
+    },
+    "add": 4,
+    "log": "🌪️ Veyra: +4 (chaos)"
+   }
+  ],
+  "Sable the Unseen": [
+   {
+    "if": {
+     "v": "opp_deaths",
+     "op": "==",
+     "n": 0
+    },
+    "oppadd": -4,
+    "log": "🕷️ Sable: opponent −4 (purity drained)"
+   }
+  ],
+  "Torvald Ninefingers": [
+   {
+    "if": {
+     "v": "hand_len",
+     "op": "<=",
+     "n": 2
+    },
+    "add": 3,
+    "log": "🪓 Torvald: +3 (low hand)"
+   }
+  ],
+  "Kessa Brightblade": [
+   {
+    "if": {
+     "v": "opp_deaths",
+     "op": "==",
+     "n": 0
+    },
+    "add": 4,
+    "log": "⚔️ Kessa: +4 vs Pristine"
+   }
+  ],
+  "Ruven Ashwalker": [
+   {
+    "if": {
+     "v": "player_losses",
+     "op": ">",
+     "v2": "player_wins"
+    },
+    "add": 5,
+    "log": "🔥 Ruven: +5 (behind)"
+   }
+  ],
+  "Ilma the Patient": [
+   {
+    "if": {
+     "v": "match_commits",
+     "op": ">=",
+     "n": 3
+    },
+    "add": 5,
+    "log": "⏳ Ilma: +5 (late game)"
+   }
+  ],
+  "Dragan Korr": [
+   {
+    "if": {
+     "v": "pc_kills",
+     "op": ">=",
+     "n": 18
+    },
+    "add": 4,
+    "log": "⚔️ Dragan: +4 (18+ kills)"
+   }
+  ],
+  "Halbrecht the Sure": [
+   {
+    "add": 3,
+    "log": "🎯 Halbrecht: +3"
+   },
+   {
+    "if": {
+     "v": "opp_kills",
+     "op": "<",
+     "v2": "pc_kills"
+    },
+    "add": 3,
+    "log": "🎯 Halbrecht: +3 (outkilled)"
+   }
+  ],
+  "Nissa Emberfen": [
+   {
+    "add": 2,
+    "log": "🔥 Nissa: +2"
+   },
+   {
+    "if": {
+     "chaos": true
+    },
+    "add": 4,
+    "log": "🔥 Nissa: +4 (chaos)"
+   }
+  ],
+  "Old Garrick": [
+   {
+    "if": {
+     "v": "pc_kills",
+     "op": ">=",
+     "n": 20
+    },
+    "add": 5,
+    "log": "🎖️ Garrick: +5 (veteran)"
+   },
+   {
+    "if": {
+     "v": "pc_deaths",
+     "op": ">=",
+     "n": 8
+    },
+    "add": 5,
+    "log": "🎖️ Garrick: +5 (scarred)"
+   }
+  ],
+  "Faye Quicksilver": [
+   {
+    "if": {
+     "v": "player_wins",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "player_wins",
+    "x": 2,
+    "log": "⚡ Faye: +2 per round won"
+   }
+  ],
+  "Vessa Coil": [
+   {
+    "if": {
+     "v": "last_result",
+     "op": "==",
+     "s": "lose"
+    },
+    "add": 6,
+    "log": "↩ Vessa: +6 (comeback)"
+   }
+  ],
+  "Tobin Reed": [
+   {
+    "if": {
+     "v": "opp_deaths",
+     "op": "==",
+     "n": 0
+    },
+    "add": 3,
+    "log": "⚔️ Tobin: +3 vs Pristine"
+   }
+  ],
+  "Marn the Digger": [
+   {
+    "if": {
+     "v": "player_losses",
+     "op": ">",
+     "v2": "player_wins"
+    },
+    "add": 4,
+    "log": "🔥 Marn: +4 (behind)"
+   }
+  ],
+  "Gilda Fenn": [
+   {
+    "if": {
+     "v": "pc_deaths",
+     "op": "==",
+     "n": 0
+    },
+    "add": 3,
+    "log": "✨ Gilda: +3 (Pristine)"
+   }
+  ],
+  "Rusk": [
+   {
+    "add": 3,
+    "log": "🪨 Rusk: +3"
+   },
+   {
+    "if": {
+     "v": "match_commits",
+     "op": ">=",
+     "n": 3
+    },
+    "add": 2,
+    "log": "🪨 Rusk: +2 (late)"
+   }
+  ],
+  "Two-Coin Tilly": [
+   {
+    "if": {
+     "chaos": true
+    },
+    "add": 5,
+    "log": "🎲 Tilly: +5 (chaos)"
+   }
+  ],
+  "Bonnick": [
+   {
+    "if": {
+     "v": "last_result",
+     "op": "==",
+     "s": "lose"
+    },
+    "add": 4,
+    "log": "↩ Bonnick: +4 (comeback)"
+   }
+  ],
+  "Sedge the Meek": [
+   {
+    "if": {
+     "v": "opp_pow",
+     "op": ">",
+     "v2": "pc_pow"
+    },
+    "add": 6,
+    "log": "📉 Sedge: +6 (underdog)"
+   }
+  ],
+  "Harrow Vane": [
+   {
+    "if": {
+     "v": "pc_kills",
+     "op": ">=",
+     "n": 6
+    },
+    "add": 3,
+    "log": "🎖️ Harrow: +3 (veteran)"
+   }
+  ],
+  "Doru Blacktooth": [
+   {
+    "if": {
+     "v": "opp_deaths",
+     "op": "==",
+     "n": 0
+    },
+    "oppadd": -3,
+    "log": "🕷️ Doru: opponent −3 (purity drained)"
+   }
+  ],
+  "Grum the Steady": [
+   {
+    "if": {
+     "v": "opp_kills",
+     "op": ">",
+     "v2": "pc_kills"
+    },
+    "add": 4,
+    "log": "🗿 Grum: +4 (giant-killer)"
+   }
+  ],
+  "Kotei": [
+   {
+    "if": {
+     "or": [
+      {
+       "v": "opp_deaths",
+       "op": "==",
+       "n": 0
+      },
+      {
+       "v": "last_result",
+       "op": "==",
+       "s": "lose"
+      }
+     ]
+    },
+    "add": 3,
+    "log": "🔥 Kotei: +3"
+   },
+   {
+    "if": {
+     "and": [
+      {
+       "or": [
+        {
+         "v": "opp_deaths",
+         "op": "==",
+         "n": 0
+        },
+        {
+         "v": "last_result",
+         "op": "==",
+         "s": "lose"
+        }
+       ]
+      },
+      {
+       "v": "ragwing",
+       "op": ">",
+       "n": 0
+      }
+     ]
+    },
+    "add": 3,
+    "log": "🔥 Kotei: repeat +3"
+   }
+  ],
+  "Lagertha Waltz": [
+   {
+    "if": {
+     "v": "last_result",
+     "op": "==",
+     "s": "lose"
+    },
+    "add": 2,
+    "log": "🔥 Lagertha: +2 (lost last)"
+   },
+   {
+    "if": {
+     "v": "last_result",
+     "op": "==",
+     "s": "win"
+    },
+    "add": -2,
+    "log": "🔥 Lagertha: −2 (won last)"
+   }
+  ],
+  "Darwin": [
+   {
+    "if": {
+     "v": "match_commits",
+     "op": ">=",
+     "n": 3
+    },
+    "add": 3,
+    "log": "🧬 Darwin: +3 (3rd+ commit)"
+   }
+  ],
+  "Anorith Keeling": [
+   {
+    "if": {
+     "v": "opp_pow",
+     "op": ">",
+     "v2": "pc_pow"
+    },
+    "addvar": "hand_len",
+    "x": 2,
+    "log": "✨ Anorith: +2×hand"
+   }
+  ],
+  "Malia": [
+   {
+    "set": "opp_pow",
+    "log": "🔄 Malia: power mirrors opponent"
+   }
+  ],
+  "Moro": [
+   {
+    "if": {
+     "v": "opp_kills",
+     "op": ">=",
+     "n": 6
+    },
+    "add": 3,
+    "log": "💀 Moro: +3"
+   }
+  ],
+  "Zerith Var": [
+   {
+    "if": {
+     "v": "opp_pow",
+     "op": ">",
+     "v2": "pc_pow"
+    },
+    "add": 4,
+    "log": "💫 Zerith Var: +4"
+   }
+  ],
+  "Ruffius Rufeldro": [
+   {
+    "if": {
+     "v": "player_losses",
+     "op": ">=",
+     "n": 2
+    },
+    "mult": 2,
+    "log": "🩸 Ruffius: ×2"
+   }
+  ],
+  "Val Kreigh": [
+   {
+    "if": {
+     "v": "match_commits",
+     "op": "==",
+     "n": 1
+    },
+    "add": 6,
+    "log": "⚔️ Val Kreigh: +6 (first duel)"
+   }
+  ],
+  "Tange Sazen": [
+   {
+    "if": {
+     "v": "skullchain",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "skullchain",
+    "x": 3,
+    "log": "💀 Kill Escalation: +3×kills"
+   }
+  ],
+  "Arch-Grim Korrin": [
+   {
+    "if": {
+     "v": "opp_kills",
+     "op": "<",
+     "v2": "pc_kills"
+    },
+    "add": 6,
+    "log": "👻 Korrin: +6"
+   }
+  ],
+  "Alucard The Damned": [
+   {
+    "if": {
+     "v": "opp_deaths",
+     "op": "==",
+     "n": 0
+    },
+    "add": 4,
+    "log": "🩸 Alucard: +4 (drained Pristine)"
+   },
+   {
+    "if": {
+     "v": "opp_deaths",
+     "op": ">",
+     "n": 0
+    },
+    "oppadd": -4,
+    "log": "🩸 Alucard: opponent −4"
+   }
+  ],
+  "Ella Ballora": [
+   {
+    "add": 3,
+    "log": "⚔️ Bloodrage: +3"
+   },
+   {
+    "if": {
+     "v": "player_losses",
+     "op": ">",
+     "n": 0
+    },
+    "add": 3,
+    "log": "⚔️ Bloodrage: +3 (wounded)"
+   }
+  ],
+  "Kiana": [
+   {
+    "add": 3,
+    "log": "🔥 Flurry: +3"
+   },
+   {
+    "if": {
+     "chaos": true
+    },
+    "add": 4,
+    "log": "🔥 chaos surge: +4"
+   }
+  ],
+  "King Joris": [
+   {
+    "if": {
+     "v": "opp_deaths",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "opp_deaths",
+    "x": 1,
+    "log": "👑 Rightful Claim: +opp deaths"
+   }
+  ],
+  "Chieftain Reyva Vosh": [
+   {
+    "if": {
+     "v": "wc_len",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "wc_len",
+    "x": 2,
+    "log": "🏔 Reserve: +2×WC"
+   }
+  ],
+  "Broodmother": [
+   {
+    "addvar": "hand_len",
+    "x": 2,
+    "log": "🕷 Swarm: +2×hand"
+   }
+  ],
+  "Forgemask": [
+   {
+    "add": 3,
+    "log": "🔨 Reforged: +3"
+   },
+   {
+    "if": {
+     "v": "last_result",
+     "op": "==",
+     "s": "lose"
+    },
+    "add": 4,
+    "log": "🔨 Tempered: +4"
+   }
+  ],
+  "Heir of Kaiga": [
+   {
+    "if": {
+     "v": "match_commits",
+     "op": "==",
+     "n": 1
+    },
+    "add": 3,
+    "log": "🗡 Early Bravado: +3"
+   }
+  ],
+  "Josef": [
+   {
+    "if": {
+     "v": "match_commits",
+     "op": ">",
+     "n": 1
+    },
+    "add": 4,
+    "log": "🧵 Master Tailor: +4"
+   }
+  ],
+  "Ella Ballora — True Form": [
+   {
+    "add": 3,
+    "log": "🕸 Devour: +3"
+   },
+   {
+    "if": {
+     "v": "wc_len",
+     "op": ">",
+     "n": 0
+    },
+    "add": 4,
+    "log": "🕸 fed: +4"
+   }
+  ],
+  "Korrin's Possessed Legion": [
+   {
+    "if": {
+     "wc_has": "Arch-Grim Korrin"
+    },
+    "add": 5,
+    "log": "🪖 Thrall Swarm: +5"
+   }
+  ],
+  "Hanse Waltz — Werewolf Form": [
+   {
+    "if": {
+     "v": "player_losses",
+     "op": ">",
+     "v2": "player_wins"
+    },
+    "add": 5,
+    "log": "🐺 Blood Moon: +5"
+   }
+  ],
+  "Lagertha Waltz — Werewolf Form": [
+   {
+    "add": 3,
+    "log": "🌕 Alpha's Grief: +3"
+   },
+   {
+    "if": {
+     "v": "player_losses",
+     "op": ">",
+     "n": 0
+    },
+    "add": 4,
+    "log": "🌕 Mourning: +4"
+   }
+  ],
+  "Keawe Kil'lua": [
+   {
+    "if": {
+     "v": "last_result",
+     "op": "==",
+     "s": "lose"
+    },
+    "add": 3,
+    "log": "⚡ Rising Talent: +3"
+   }
+  ],
+  "Rhaess Korvain": [
+   {
+    "if": {
+     "v": "opp_kills",
+     "op": ">",
+     "v2": "pc_kills"
+    },
+    "add": 6,
+    "log": "🗡 Assassin's Mark: +6"
+   }
+  ],
+  "Ossian Drell": [
+   {
+    "add": 3,
+    "log": "🎖 Field Command: +3"
+   },
+   {
+    "if": {
+     "v": "player_wins",
+     "op": ">",
+     "v2": "player_losses"
+    },
+    "add": 3,
+    "log": "🎖 Advantage: +3"
+   }
+  ]
+ },
+ "links": {
+  "keawe": {
+   "name": "Keawe's Circle",
+   "icon": "🔵",
+   "pow": 1,
+   "members": [
+    "Kotei",
+    "Lagertha Waltz",
+    "Hanse Waltz",
+    "Uso Oso",
+    "Kianna",
+    "Kiana",
+    "Bixie Bee",
+    "Melanie",
+    "Heir of Kaiga"
+   ]
+  },
+  "squad19": {
+   "name": "Squad 19",
+   "icon": "🛡",
+   "pow": 1,
+   "members": [
+    "Ahdor",
+    "Val Kreigh",
+    "Ruffius Rufeldro"
+   ]
+  },
+  "court": {
+   "name": "Darwin's Court",
+   "icon": "🩸",
+   "pow": 1,
+   "members": [
+    "Darwin",
+    "Alucard The Damned",
+    "Zerith Var",
+    "Veronica",
+    "Ella Ballora",
+    "Ella Ballora — True Form",
+    "Arch-Grim Korrin",
+    "Grim Korrin",
+    "Ruffius Rufeldro",
+    "Voidmaw the Unmaker"
+   ]
+  },
+  "royalty": {
+   "name": "Exiled Royalty",
+   "icon": "👑",
+   "pow": 1,
+   "members": [
+    "Moro",
+    "Malia",
+    "King Joris"
+   ]
+  },
+  "dragon": {
+   "name": "Dragon-Pact",
+   "icon": "🐉",
+   "pow": 1,
+   "members": [
+    "Tange Sazen",
+    "Akatosh, the Golden Dragon",
+    "Kiba",
+    "Kleydson",
+    "Kaelthar the Ascendant"
+   ]
+  },
+  "waltz": {
+   "name": "Waltz Twins",
+   "icon": "🐺",
+   "pow": 1,
+   "members": [
+    "Lagertha Waltz",
+    "Hanse Waltz",
+    "Lagertha Waltz — Werewolf Form",
+    "Hanse Waltz — Werewolf Form",
+    "Kessuae, Tide of Ruin"
+   ]
+  },
+  "legend": {
+   "name": "Split Legend",
+   "icon": "✨",
+   "pow": 1,
+   "members": [
+    "Kotei",
+    "Ahdor",
+    "Kleydson",
+    "Anorith Keeling",
+    "Anorith Prime",
+    "Sunforged Colossus"
+   ]
+  }
+ },
+ "starter": [
+  "Keawe Kil'lua",
+  "Lagertha Waltz",
+  "Hanse Waltz",
+  "Uso Oso",
+  "Melanie",
+  "Moro",
+  "Malia",
+  "King Joris",
+  "Bixie Bee",
+  "Ruffius Rufeldro",
+  "Kiba",
+  "Heir of Kaiga",
+  "Josef",
+  "Sister Mire",
+  "Veronica"
+ ],
+ "costOverride": {
+  "Signal Diviner": 2,
+  "Voltcaller": 2,
+  "Ahdor": 3
+ }
+}

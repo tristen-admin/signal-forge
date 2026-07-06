@@ -4,37 +4,18 @@ The SERVER owns outcomes, rewards, traits, and appraisals. A subset of the clien
 rule-set, deliberately; bringing it to full parity with the client resolve() is a
 tracked follow-up. Pure functions + catalog only (no I/O).
 """
-import hashlib, secrets
+import hashlib, secrets, json, os
 
-# ── card catalog (subset of the client's set; full import is a follow-up) ──
-CARD_CATALOG = {
-    # ── STARTER SET — every player is granted these; owned by all → never tradeable ──
-    "Ruffius Rufeldro": {"pow": 5,  "rarity": "common"},
-    "Bixie Bee":        {"pow": 1,  "rarity": "common"},
-    "Malia":            {"pow": 10, "rarity": "common"},
-    "Moro":             {"pow": 9,  "rarity": "common"},
-    "Melanie":          {"pow": 1,  "rarity": "common"},
-    "Heir of Kaiga":    {"pow": 3,  "rarity": "common"},
-    "Tange Sazen":      {"pow": 15, "rarity": "rare"},
-    "Forgemask":        {"pow": 14, "rarity": "rare"},
-    "Valcarion":        {"pow": 13, "rarity": "rare"},
-    "Ella Ballora":     {"pow": 14, "rarity": "ultra"},
-    # ── non-starter — earnable / tradeable on the market ──
-    "Kotei":                     {"pow": 18, "rarity": "genesis"},
-    "Akatosh, the Golden Dragon":{"pow": 21, "rarity": "genesis"},
-    "Ahdor":                     {"pow": 11, "rarity": "genesis"},
-    "Darwin":                    {"pow": 15, "rarity": "genesis"},
-    "Arch-Grim Korrin":          {"pow": 14, "rarity": "rare"},
-    "Lagertha Waltz":            {"pow": 14, "rarity": "rare"},
-    "Veronica":                  {"pow": 10, "rarity": "common"},
-}
+# ── card catalog — LOADED from catalog.json (canonical; regen via extract_catalog.py) ──
+_CAT = json.load(open(os.path.join(os.path.dirname(__file__), "catalog.json"), encoding="utf-8"))
+CARD_CATALOG = {n: {"pow": c["pow"], "rarity": c["rarity"]} for n, c in _CAT["cards"].items() if not c.get("opp")}
+CARD_FULL = _CAT["cards"]   # every card incl. opponent-only (for the engine)
 EDITIONS = {"genesis": 100, "ultra": 1000, "rare": 2500, "uncommon": 4000, "common": 5000}
 RARITY_BASE = {"genesis": 100, "ultra": 60, "rare": 30, "uncommon": 12, "common": 4}
 
 # STARTER SET — the fixed 10 cards every player begins with. Because everyone owns them,
 # they are excluded from the market entirely (never listed, never sellable). Final list TBD by design.
-STARTER_DECK = ["Ruffius Rufeldro", "Bixie Bee", "Malia", "Moro", "Melanie",
-                "Heir of Kaiga", "Tange Sazen", "Forgemask", "Valcarion", "Ella Ballora"]
+STARTER_DECK = list(_CAT["starter"])   # from catalog.json
 STARTER_SET = set(STARTER_DECK)
 def is_starter(t): return t in STARTER_SET
 
