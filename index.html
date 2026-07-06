@@ -175,9 +175,9 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 }
 /* supports render as physical card frames + a readable effect label */
 .rear-slot.rg-card{flex-direction:column;border:none!important;background:transparent!important;padding:0;gap:3px;min-height:0;max-width:none;box-shadow:none}
-.rear-slot.rg-card .bigcard.tframe{width:86px}
+.rear-slot.rg-card .bigcard.tframe{width:104px}
 .rear-slot.rg-card .tf-text{display:none}
-.rear-slot.rg-card .rg-eff{font-size:8.5px;line-height:1.25;color:var(--gold);text-align:center;max-width:104px;background:rgba(10,7,4,.72);border:1px solid rgba(245,194,77,.28);border-radius:5px;padding:2px 5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rear-slot.rg-card .rg-eff{font-size:9px;line-height:1.3;color:var(--gold);text-align:center;max-width:118px;background:rgba(10,7,4,.72);border:1px solid rgba(245,194,77,.28);border-radius:5px;padding:2px 5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .rear-slot.rg-card.enemy .rg-eff{color:var(--lose);border-color:rgba(224,80,60,.35)}
 .rear-slot.rg-card.linked .rg-eff{color:var(--electric);border-color:rgba(91,192,235,.45)}
 @media (min-width:1025px){
@@ -189,6 +189,10 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
   #opp-rear2{grid-column:2;grid-row:2;justify-self:center}
   #player-rear{grid-column:3;grid-row:2;justify-self:center}
   #player-rear2{grid-column:4;grid-row:2;justify-self:center}
+  .rear-slot.rg-empty{width:104px;aspect-ratio:765/1024;min-height:0;max-width:none;border:2px dashed rgba(245,194,77,.55);border-radius:11px;background:rgba(245,194,77,.05);box-shadow:inset 0 0 22px rgba(0,0,0,.28);padding:6px;display:flex;align-items:center;justify-content:center;text-align:center}
+  .rear-slot.rg-empty .rg-hint{font-size:11px;line-height:1.45;color:var(--gold);opacity:.92;font-weight:800;letter-spacing:.02em;text-shadow:0 1px 3px rgba(0,0,0,.85)}
+  .rear-slot.rg-empty .rg-hint small{font-size:9px;font-weight:600;opacity:.68}
+  .field-half .placeholder{width:104px;height:139px}
 }
 
 /* ── REVEAL IMPACT FX ── */
@@ -318,9 +322,9 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .round-countdown.pop{animation:rc-pop 0.9s cubic-bezier(0.2,0.8,0.3,1)}
 @keyframes rc-pop{0%{transform:scale(1.7);opacity:0}22%{opacity:1}100%{transform:scale(1);opacity:0.92}}
 .clock-strip{display:flex;align-items:center;gap:10px;padding:6px 16px;background:rgba(10,11,15,0.5);border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0}
-.spell-tray{display:flex;align-items:center;gap:12px;padding:8px 16px;background:rgba(6,7,11,0.5);border-top:1px solid rgba(245,194,77,0.12);flex-shrink:0;flex-wrap:wrap}
-.charge-meter{font-size:12px;color:var(--electric);font-weight:700;white-space:nowrap;letter-spacing:0.03em}
-.charge-meter b{font-size:17px;font-variant-numeric:tabular-nums}
+.spell-tray{display:flex;align-items:center;gap:12px;padding:8px 16px;background:transparent;border-top:none;flex-shrink:0;flex-wrap:wrap}
+.charge-meter{font-size:13px;color:var(--electric);font-weight:800;white-space:nowrap;letter-spacing:0.03em;text-shadow:0 1px 5px rgba(0,0,0,.9),0 0 10px rgba(91,192,235,.35)}
+.charge-meter b{font-size:22px;font-variant-numeric:tabular-nums}
 .charge-meter span{color:var(--text3);font-weight:500}
 .spell-tray-cards{display:flex;gap:8px;flex-wrap:wrap}
 .spell-chip{display:flex;flex-direction:column;gap:2px;background:var(--panel);border:1px solid var(--cond-border);border-radius:6px;padding:5px 10px;cursor:pointer;transition:border-color .12s,transform .12s;text-align:left}
@@ -4361,7 +4365,7 @@ function renderRearSlot(){
     var ix=rearGuardIdxs[k];
     var card=(ix!=null && hand[ix]) ? hand[ix] : null;
     if(card){ fillRearSlot(el, card, false, f); }
-    else if(active && k===rearGuardIdxs.length){ el.className='rear-slot'; el.style.display=''; el.innerHTML='<span class="rg-hint">＋ Call a support (free)</span>'; }
+    else if(active){ el.className='rear-slot rg-empty'; el.style.display=''; el.innerHTML='<span class="rg-hint">＋ Call a<br>support<br><small>free</small></span>'; }
     else { el.style.display='none'; el.innerHTML=''; }
   }
 }
