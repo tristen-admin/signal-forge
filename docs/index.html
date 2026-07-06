@@ -3141,7 +3141,7 @@ const HAND_CARDS = [
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
   {name:'Uso Oso',pow:16,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant: when Uso dies he stays on field. Your cards here gain +7 power until an opponent\'s card is killed, then Remnant is removed. When this card is conjured, call a "Oso\'s skeletal summons" from outside of your deck to an open support circle.'},
   {name:'Tannis',pow:10,kills:0,deaths:0,rarity:'uncommon',timing:'instant',abil:'⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.'},
-  {name:'Bixie Bee',pow:18,kills:0,deaths:0,rarity:'common',timing:null,abil:'No ability. Starter card. Never hesitate to deploy.'},
+  {name:'Bixie Bee',pow:18,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Relentless Swarm: on commit, +1 power for each card in your banish zone — she feeds on the discarded.'},
   {name:'Veronica',pow:14,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: copy opponent\'s card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability.'},
 ];
 
@@ -3201,7 +3201,7 @@ const DECK_POOL = [
   // Energy-synergy bodies (Stage 1)
   {name:'Conduit Adept',pow:6,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'On commit: gain 1 Charge.'},
   {name:'Voltcaller',pow:8,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: your next Interrupt costs 2 less.'},
-  {name:'Signal Diviner',pow:12,kills:0,deaths:0,rarity:'rare',abil:'On win: next turn gain 2 max Charge.'},
+  {name:'Signal Diviner',pow:12,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Foresight: on commit, draw a card. On win: next turn gain 2 max Charge.'},
   // Commons
   {name:'Ahdor',pow:17,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. When Ahdor returns to your hand from the effect of "Record Guard", two random hand cards gain +3.'},
   // Uncommons
@@ -4649,6 +4649,7 @@ function commitCard(){
   { var _idxs=[selectedCard].concat(rearGuardIdxs.filter(function(ix){return ix!==selectedCard;})); _idxs.sort(function(a,b){return b-a;}); _idxs.forEach(function(_ix){hand.splice(_ix,1);}); }
   rearGuardIdxs=[];
   // ── conjure summons ──
+  if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
   if(pc.name==='Uso Oso' && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
   if(pc.name==='Valcarion' && banishPile.length){ var _rec=banishPile.pop(); if(rearGuards.length < RG_SLOTS){ rearGuards.push(_rec); if(typeof toast==='function') toast('🩸 Valcarion calls '+_rec.name+' from banish to support.', true); } else { hand.push(_rec); if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🩸 Valcarion reclaims '+_rec.name+' from banish to hand.', true); } if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name === 'Darwin') flameVeilFromWC = false;
@@ -5135,6 +5136,14 @@ function legendMiniHTML(c){ const s=legendScore(c); if(s<180) return ''; const t
 // ── DATA-DRIVEN ABILITY SPEC — shared with server/rules.json (one source of truth). ──
 // Regenerate this const from server/rules.json when the spec changes; the server is canonical.
 const CARD_RULES = {
+ "Bixie Bee": [
+  {
+   "if": { "v": "banish_len", "op": ">", "n": 0 },
+   "addvar": "banish_len",
+   "x": 1,
+   "log": "🐝 Swarm: +1 per banished card"
+  }
+ ],
  "Kaelthar the Ascendant": [{"if":{"v":"player_wins","op":">","v2":"player_losses"},"add":6,"log":"🐉 Ascendant: +6 (holding the lead)"}],
  "Voidmaw the Unmaker": [{"add":4,"log":"🌑 Voidmaw: +4"},{"if":{"v":"opp_deaths","op":"==","n":0},"oppadd":-3,"log":"🌑 Voidmaw: opponent −3 (Pristine prey)"}],
  "Sunforged Colossus": [{"add":3,"log":"☀️ Colossus: +3"},{"if":{"v":"match_commits","op":">=","n":3},"add":5,"log":"☀️ Colossus: +5 (late game)"}],
@@ -5610,7 +5619,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   // ── FIRE ON-COMMIT ABILITIES (before condition) ──
   if(!abilityLocked){
     // Kotei: +3 if opponent is 0-death OR you lost your last duel; whole effect repeats if Keawe already won a duel this match
-    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),wc_names:winnersCircle.map(function(c){return c.name;})};
+    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),banish_len:banishPile.length,wc_names:winnersCircle.map(function(c){return c.name;})};
     if(pc.name==='Veronica'){
       var _oa=oc.abil||'';
       if(!_oa||_oa.indexOf('No ability')===0){ abilLog.push('🔄 Veronica: opponent has no ability — no effect'); }
