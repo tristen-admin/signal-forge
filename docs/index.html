@@ -1247,7 +1247,7 @@ body.rm body.nav-collapsed #nav-hub .ni-icon,body.rm.nav-collapsed #nav-hub .ni-
 .filter-chip:hover{border-color:var(--border2);color:var(--text)}
 .filter-chip.on{background:var(--gold-glow);border-color:var(--gold);color:var(--gold);box-shadow:inset 0 0 12px rgba(245,194,77,0.12),0 0 10px var(--gold-glow)}
 .vault-body{flex:1;overflow-y:auto;padding:16px 18px}
-.vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px}
+.vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px}.vault-tracker{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:11px 15px;margin:0 0 14px;background:var(--panel);border:1px solid var(--border);border-radius:11px}.vt-bar-wrap{display:flex;align-items:center;gap:11px;flex:1;min-width:230px}.vt-lbl{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);white-space:nowrap}.vt-bar{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;min-width:70px}.vt-bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:4px;transition:width .4s ease}.vt-count{font-size:13px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}.vt-count .vt-pct{font-size:11px;color:var(--gold);margin-left:3px}.vt-chips{display:flex;flex-wrap:wrap;gap:6px}.vt-chip{font-size:10px;font-weight:700;padding:2px 9px;border-radius:12px;border:1px solid var(--border2);color:var(--text2);background:var(--surface);white-space:nowrap;font-variant-numeric:tabular-nums}.vt-chip.done{color:var(--gold);border-color:var(--gold);background:var(--gold-glow)}.vt-chip.r-genesis{border-left:3px solid var(--r-genesis)}.vt-chip.r-ultra{border-left:3px solid var(--r-ultra)}.vt-chip.r-rare{border-left:3px solid var(--r-rare)}.vt-chip.r-common{border-left:3px solid var(--r-common)}
 .vault-empty{grid-column:1/-1;padding:48px 20px;text-align:center;color:var(--text3);font-style:italic;font-size:13px}
 .vault-card{
   border-radius:10px;border:1px solid;overflow:hidden;cursor:pointer;position:relative;
@@ -2334,6 +2334,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       </div>
     </div>
     <div class="vault-body">
+      <div class="vault-tracker" id="vault-tracker"></div>
       <div class="vault-grid" id="vault-grid"></div>
     </div>
   </div>
@@ -7759,6 +7760,22 @@ function mergeFoil(){
   if(typeof toast==='function') toast('✦ Merged '+got+' \u2192 '+nx.name+' foil · spares return to '+SEASON.pack+' · +'+mergeReward+' ◈ Signal', true);
   if(typeof openCardDetail==='function') openCardDetail(key);
 }
+function isTypeOwned(name){
+  if((ownedCopies[name]||0)>0) return true;
+  return COLLECTION.some(function(c){ return c.uid && c.name===name && (ownedCopies[c.uid]||0)>0; });
+}
+function vaultTrackerHTML(){
+  var types=COLLECTION.filter(function(c){ return !c.uid && !c.variant; });
+  var order=['genesis','ultra','rare','common'], tot={}, own={}, T=0, O=0;
+  order.forEach(function(r){ tot[r]=0; own[r]=0; });
+  types.forEach(function(c){ var r=c.rarity; if(tot[r]==null){tot[r]=0;own[r]=0;} tot[r]++; T++; if(isTypeOwned(c.name)){ own[r]++; O++; } });
+  var pct=T?Math.round(O/T*100):0;
+  var chips=order.filter(function(r){return tot[r]>0;}).map(function(r){ var done=own[r]===tot[r]; return '<span class="vt-chip r-'+r+(done?' done':'')+'">'+rlab(r)+' '+own[r]+'/'+tot[r]+(done?' \u2713':'')+'</span>'; }).join('');
+  return '<div class="vt-bar-wrap"><span class="vt-lbl">Collection</span>'
+    +'<div class="vt-bar"><span style="width:'+pct+'%"></span></div>'
+    +'<span class="vt-count">'+O+'/'+T+' <span class="vt-pct">'+pct+'%</span></span></div>'
+    +'<div class="vt-chips">'+chips+'</div>';
+}
 function buildVault(){
   const grid=document.getElementById('vault-grid');
   const base=COLLECTION.filter(c=>{
@@ -7783,6 +7800,7 @@ function buildVault(){
   const sortLabel = vaultSort==='kills' ? ' · most kills' : vaultSort==='deaths' ? ' · fewest deaths' : '';
   const totalCards=entries.reduce((s,e)=>s+e.count,0);
   document.getElementById('vault-count').textContent=`${totalCards} cards${vaultKeyword?' · '+vaultKeyword:''}${sortLabel}`;
+  { var _vt=document.getElementById('vault-tracker'); if(_vt) _vt.innerHTML=vaultTrackerHTML(); }
   if(!entries.length){ grid.innerHTML='<div class="vault-empty">'+((vaultKeyword||vaultFilter!=='all')?'No cards match this filter — try clearing it.':'Your vault is empty — open a pack in the Shop or win a duel.')+'</div>'; return; }
   grid.innerHTML=entries.map(e=>{
     const c=e.c;
