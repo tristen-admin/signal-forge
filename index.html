@@ -6188,6 +6188,7 @@ function forgeSectionHTML(){
 }
 function buyForge(i){
   var t=FORGE_TIERS[i]; if(!t) return;
+  if(!confirm('Buy ❖ '+fmtPts(t.forge)+' Forge'+(t.usd?' for $'+t.usd:'')+'?')) return;
   forgeBalance+=t.forge; if(typeof updateBalance==='function') updateBalance(); saveState();
   toast('❖ +'+fmtPts(t.forge)+' Forge credited (prototype — no real charge).', true);
 }
