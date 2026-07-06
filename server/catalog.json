@@ -447,7 +447,7 @@
    "cost": 4,
    "abil": "On commit: if you are losing this duel (opponent's base power is higher), +4 power.",
    "timing": "on",
-   "starter": false,
+   "starter": true,
    "opp": false
   },
   "Anorith Keeling": {
@@ -1895,7 +1895,8 @@
   "Heir of Kaiga",
   "Josef",
   "Sister Mire",
-  "Veronica"
+  "Veronica",
+  "Zerith Var"
  ],
  "costOverride": {
   "Signal Diviner": 2,

@@ -87,11 +87,10 @@ def h_register(uid_none, body):
         if c.execute("SELECT 1 FROM users WHERE handle=?", (handle,)).fetchone():
             return 409, {"error": "handle taken"}
         uid = "u_" + secrets.token_hex(8); salt = rules.new_salt()
-        c.execute("INSERT INTO users(id,handle,pass_hash,salt,created,signal,forge,rp) VALUES(?,?,?,?,?,5000,200,1000)",
+        c.execute("INSERT INTO users(id,handle,pass_hash,salt,created,signal,forge,rp) VALUES(?,?,?,?,?,5000,0,1000)",
                   (uid, handle, rules.hash_pw(pw, salt), salt, store.now()))
         for t in rules.STARTER_DECK: mint_card(c, uid, t, via="Starter grant")
         store.ledger_add(c, uid, "SIGNAL", 5000, "Welcome grant (play currency)", 5000)
-        store.ledger_add(c, uid, "FORGE", 200, "Welcome Forge (premium)", 200)
         tok = rules.new_token()
         c.execute("INSERT INTO sessions(token,user_id,created) VALUES(?,?,?)", (tok, uid, store.now()))
     return 200, {"token": tok, "state": user_state(uid)}
