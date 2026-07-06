@@ -2101,31 +2101,8 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   .tbs-icon{font-size:11px}
   .tbs-val{font-size:11px}
 }
-/* landscape phones: the duel grid is fixed-height + overflow:hidden and clips the
-   condition/effect card + hand in short height — let it stack & scroll instead */
-@media (orientation:landscape) and (max-height:560px){
-  .oc-abil{display:none}.opp-committed{padding:2px 8px}
-  .hand-card .c-abil{display:none}.hand-card{padding:4px 4px 3px}.hand-card .c-name{margin-top:11px}
-  .field .field-card{max-width:120px}
-  .phase-strip{display:none!important}
-  .player-zone > div:first-child{display:none!important}
-  .opp-zone{padding:1px 10px!important;gap:6px}
-  #opp-area{font-size:9px!important;padding:2px 6px!important}
-  .cond-eyebrow,.cond-rule,.cond-strat{display:none!important}
-  .cond-main{padding:1px 8px!important;gap:6px}
-  .cond-icon{font-size:14px}.cond-name{font-size:11px}
-  .reveal-btn{font-size:8px!important;padding:3px 6px!important}
-  .field{flex-direction:row!important;min-height:84px!important;gap:6px;align-items:center;padding:2px}
-  .field .field-half{max-height:104px!important;max-width:150px;overflow:hidden}
-  .field .field-card{max-height:104px!important;width:auto}
-  .field .rear-slot{max-width:150px;min-height:0!important;font-size:9px!important;padding:2px 6px!important}
-  .spell-tray{padding:1px 10px!important}.charge-meter{font-size:10px}
-  .player-zone{padding:2px 8px!important}
-  .hand-card{width:84px!important}.hand-card .c-abil{display:none!important}
-  .hand-card .c-name{font-size:8px}.hand-card .c-pow{font-size:13px}
-  .confirm-btn,.commit-btn{padding:5px 8px!important;font-size:11px}
-  .hand-row{gap:5px}
-}
+/* landscape phones: ONE unified combat layout lives in the max-height:620 block below
+   (the old :560 / :520 blocks fought each other over row-vs-column + min-height floors). */
 .companion-pet{position:fixed;left:8px;bottom:96px;z-index:60;width:40px;height:40px;display:none;align-items:center;justify-content:center;font-size:26px;pointer-events:none;filter:drop-shadow(0 3px 8px rgba(0,0,0,.55));animation:petbob 3.4s ease-in-out infinite}
 @keyframes petbob{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-8px) rotate(3deg)}}
 @media(prefers-reduced-motion:reduce){.companion-pet{animation:none}}
@@ -2183,28 +2160,53 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   .charge-meter{font-size:10px}
   .spell-tray-cards{justify-content:center}
 }
-@media (orientation:landscape) and (max-height:520px){
+/* ══ LANDSCAPE PHONES — ONE authoritative combat layout (rebuilt 2026-07-06) ══
+   Source of truth for landscape-short. .field is the ONLY flex-grow (min-height:0, so it
+   never forces overflow and the outer zones never reflow between decisions); every other
+   zone is shrink-wrapped tight; the hand is sized so the commit strip always sits above
+   the fold with real margin. Covers the whole landscape range (≤620) + wins by source order. */
+@media (orientation:landscape) and (max-height:620px){
+  #v-turn.on{position:fixed;inset:0;overflow:hidden;z-index:30}
+  .duel-strip{flex-direction:column!important;flex:1 1 auto;min-height:0;overflow:hidden!important;gap:0;padding-bottom:env(safe-area-inset-bottom,0)}
   .phase-strip{display:none!important}
-  .opp-zone{padding:2px 10px;gap:6px}
-  #opp-area{font-size:9px;padding:2px 6px}
-  .cond-eyebrow,.cond-rule,.cond-strat{display:none}
-  .cond-main{padding:2px 8px;gap:6px}
-  .cond-icon{font-size:15px}.cond-name{font-size:11px}
-  .reveal-btn{font-size:8px;padding:3px 6px}
-  .field{flex-direction:row!important;min-height:88px;gap:8px;align-items:center;padding:2px}
-  .field .field-half{max-height:96px;max-width:150px}
-  .field .field-card{max-height:96px;width:auto}
-  .field .rear-slot{max-width:150px;min-height:0;font-size:9px;padding:2px 6px}
-  .spell-tray{padding:2px 10px}.charge-meter{font-size:10px}
-  .player-zone{padding:2px 8px}
-  .hand-card{width:80px;padding:4px 3px 3px}
-  .hand-card .c-abil{display:none}.hand-card .c-name{font-size:8px}.hand-card .c-pow{font-size:13px}
-  .confirm-btn,.commit-btn{padding:4px 8px;font-size:11px}
-  .player-zone > div:first-child{display:none}
-  .cond-main{padding:1px 8px}
-  .opp-zone{padding:1px 10px}
-  .spell-tray{padding:1px 10px}
-  .hand-row{gap:5px}
+  #v-turn > div:has(.match-exit){padding:2px 10px!important;gap:8px!important;background:transparent!important;border-bottom:1px solid rgba(255,255,255,.05)!important}
+  .match-exit{padding:3px 8px;font-size:9px}.match-vs{font-size:11px}
+  .whud-btn{padding:3px 7px!important;font-size:9px!important}
+  body:has(#v-turn.on) .topbar{display:none}
+  body:has(#v-turn.on) .sidebar{display:none!important}
+  .opp-zone{flex:0 0 auto!important;padding:2px 10px!important;gap:6px;background:transparent!important;border-bottom:none!important}
+  .opp-zone .zone-label{display:none!important}
+  #opp-area{font-size:9px!important;padding:2px 6px!important}
+  .cond-slot{flex:0 0 auto!important;padding:1px 10px!important;border-bottom:none!important}
+  .cond-card{max-width:none}
+  .cond-eyebrow,.cond-rule,.cond-strat{display:none!important}
+  .cond-main{padding:2px 8px!important;gap:8px;background:rgba(8,10,14,.32)}
+  .cond-icon{font-size:15px;width:22px}.cond-name{font-size:11px;margin:0}
+  .reveal-btn{font-size:8px!important;padding:3px 7px!important}
+  .clock-strip{flex:0 0 auto!important;padding:1px 10px!important;gap:6px;background:transparent!important;border-bottom:none!important}
+  .clock-strip .clock-label{display:none!important}
+  .clock-strip .clock-icon{font-size:10px}.clock-strip .clock-num{font-size:11px;min-width:16px}
+  .clock-strip .clock-bar{height:4px}
+  .field{flex:1 1 auto!important;min-height:0!important;display:flex!important;flex-direction:row!important;align-items:center;justify-content:center;gap:12px;padding:2px 10px!important;overflow:hidden}
+  .field .field-half{flex:0 1 auto;width:auto;max-width:46%;min-height:0;max-height:100%;display:flex;align-items:center;justify-content:center;overflow:visible}
+  .field .field-card{width:auto;max-width:120px;max-height:100%;margin:0}
+  .field .rear-slot{max-width:150px;min-height:0!important;font-size:9px!important;padding:2px 6px!important}
+  .field .rear-slot.rg-card .bigcard.tframe{width:72px}
+  .spell-tray{flex:0 0 auto!important;padding:1px 8px!important;gap:8px;justify-content:center;background:transparent!important;border-top:none!important}
+  .charge-meter{font-size:10px}.spell-tray-cards{justify-content:center}
+  .player-zone{flex:0 0 auto!important;padding:2px 8px 4px!important;gap:2px;background:transparent!important;border-top:none!important}
+  .player-zone > div:first-child{display:none!important}
+  .player-zone .zone-label,.player-zone #select-hint{display:none!important}
+  .hand-row{gap:5px;align-items:flex-end;justify-content:safe center;padding-bottom:0}
+  .hand-card{width:60px!important;padding:2px 2px 1px!important}
+  .hand-card .c-abil{display:none!important}
+  .hand-card .c-name{font-size:8px;margin-top:7px;height:auto}
+  .hand-card .c-pow{font-size:12px}
+  .hand-card .tf-kd{font-size:6px}
+  .commit-strip{flex:0 0 auto}
+  #select-hint,#commit-hint{font-size:9px}
+  .confirm-btn,.commit-btn{padding:5px 12px!important;font-size:11px}
+  .pile-chip .pile-label{display:none}.pile-strip{gap:4px}
 }
 </style>
 <script>(function(){try{var m=document.querySelector('meta[name="viewport"]');var w='width=device-width,initial-scale=1,viewport-fit=cover';if(m){if(!/viewport-fit/.test(m.getAttribute('content')||''))m.setAttribute('content',w);}else{m=document.createElement('meta');m.name='viewport';m.setAttribute('content',w);(document.head||document.documentElement).appendChild(m);}}catch(e){}})();</script>
