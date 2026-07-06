@@ -3078,13 +3078,19 @@ const CONDITIONS = [
   {id:"legendsclash",mech:"Legends' Clash",icon:"👑",name:"The Hall of Legends",rule:"A stage for the great — Apex cards gain +4, all others suffer −2.",strat:"Reserve this for your Genesis legends.",tag:"boost",prob:"3%"},
   {id:"woundedbeast",mech:"Wounded Beast",icon:"🐺",name:"The Broken Fang",rule:"The grizzled fight hardest — cards with 3 or more deaths gain +5.",strat:"Field your battle-worn survivors.",tag:"boost",prob:"3%"},
   {id:"survivorsground",mech:"Survivor's Ground",icon:"⚰️",name:"Last Light Hold",rule:"Endurance is rewarded — the card with fewer deaths gains +3.",strat:"Cleaner records edge it out.",tag:"neutral",prob:"3%"},
-  {id:"purereflection",mech:"Pure Reflection",icon:"🪞",name:"The Mirror Deep",rule:"You fight with your enemy's past — each card's power becomes the OPPONENT's career kills.",strat:"Turns their record against them.",tag:"flip",prob:"3%"}
+  {id:"purereflection",mech:"Pure Reflection",icon:"🪞",name:"The Mirror Deep",rule:"You fight with your enemy's past — each card's power becomes the OPPONENT's career kills.",strat:"Turns their record against them.",tag:"flip",prob:"3%"},
+  {id:'reinforce',mech:'Reinforcements',icon:'🃏',name:'The Muster Yard',rule:'The banners call fresh blood to the line — both players draw 1 card when this ground is revealed.',strat:'Pure card advantage. Great when your hand runs thin.',tag:'boost',prob:'6%'},
+  {id:'dredge',mech:'Dredge',icon:'🌊',name:'The Drowned Vault',rule:'The tide gives and takes — both players draw 2 cards, then discard 2 to the banish pile.',strat:'Digs deep and fuels banish-recur engines.',tag:'chaos',prob:'5%'},
+  {id:'wildpit',mech:'Wild Pit',icon:'🎲',name:'The Feral Menagerie',rule:'Beasts are loosed at random — both players draw 1 card, then after commit each conjured fighter is chosen at random from the hand.',strat:'Draw fuels the chaos. Commit knowing the pit decides.',tag:'chaos',prob:'5%'}
 ];
 const COND_EFF = {
   lowest:"Lowest base power wins — power-adding abilities backfire.",
   noretreat:"Withdraw is locked — once you select, you must commit.",
   abilitylock:"No card abilities fire — raw base power only.",
   forceswap:"After commit, your card becomes a random one from your hand.",
+  reinforce:"Both players draw 1 card.",
+  dredge:"Both draw 2, then discard 2 to banish.",
+  wildpit:"Both draw 1; each fighter is then chosen at random.",
   surge:"+6 power strikes one random committed card after both lock in.",
   openbook:"Both cards' identities are revealed before you commit.",
   recordties:"If power ties, the card with more career kills wins.",
@@ -3522,6 +3528,7 @@ function drawCard(){
     return;
   }
   hand.push(drawn);
+  for(var _xd=1;_xd<DRAW_PER_TURN;_xd++){ if(drawPile.length){ hand.push(drawPile.pop()); } } deckSize=drawPile.length;
 
   // Akatosh loses 3 power for good each time the god is dragged back from the Winners Circle
   if(fromWC && drawn.name === 'Akatosh, the Golden Dragon'){
@@ -3981,6 +3988,10 @@ function revealCondition(){
   name.textContent = c.name;
   rule.textContent = (typeof COND_EFF!=='undefined' && COND_EFF[c.id]) ? COND_EFF[c.id] : '';   // terse EFFECT only
   strat.textContent = '';        // flavor + coaching live in the Codex
+  if(c.id==='reinforce'){ drawToHand(1); if(typeof oppDrawN==='function')oppDrawN(1); if(typeof toast==='function')toast('🃏 Reinforcements — both draw 1',true); }
+  else if(c.id==='dredge'){ drawToHand(2); if(typeof banishFromHand==='function')banishFromHand(2); if(typeof oppDrawN==='function'){oppDrawN(2);oppBanishN(2);} if(typeof toast==='function')toast('🌊 Dredge — both draw 2, discard 2',true); }
+  else if(c.id==='wildpit'){ drawToHand(1); if(typeof oppDrawN==='function')oppDrawN(1); if(typeof toast==='function')toast('🎲 Wild Pit — both draw 1; fighters go random',true); }
+  if((c.id==='reinforce'||c.id==='dredge'||c.id==='wildpit') && typeof updatePiles==='function') updatePiles();
   btn.disabled = true;
 
   document.getElementById('select-hint').textContent = 'Instant window open — then choose a card';
@@ -4086,8 +4097,8 @@ const CALLED = {
   "Lagertha Waltz":                {text:"your Fighter +3", add:3},
   "Hanse Waltz":                   {text:"your Fighter +5", add:5},
   "Kiana":                         {text:"your Fighter +2", add:2},
-  "Heir of Kaiga":                 {text:"your Fighter +5", add:5},
-  "Melanie":                       {text:"your Fighter +5", add:5},
+  "Heir of Kaiga":                 {text:"your Fighter +5 · draw 1", add:5, draw:1},
+  "Melanie":                       {text:"your Fighter +5 · draw 1", add:5, draw:1},
   "Darwin":                        {text:"your Fighter +2", add:2},
   "Ella Ballora — True Form":      {text:"your Fighter +3", add:3},
   "Ella Ballora":                  {text:"your Fighter +3", add:3},
@@ -4097,7 +4108,7 @@ const CALLED = {
   "Ruffius Rufeldro":              {text:"your Fighter +3", add:3},
   "Ahdor":                         {text:"your Fighter +3", add:3},
   "Val Kreigh":                    {text:"your Fighter +3", add:3},
-  "King Joris":                    {text:"your Fighter +4", add:4},
+  "King Joris":                    {text:"your Fighter +4 · draw 1", add:4, draw:1},
   "Malia":                         {text:"your Fighter +4", add:4},
   "Moro":                          {text:"return 1 banished card to hand", recurPlain:1},
   "Akatosh, the Golden Dragon":    {text:"your Fighter +2", add:2},
@@ -4112,7 +4123,7 @@ const CALLED = {
   "Voltcaller":                    {text:"your next Interrupt costs 2 less", spellDiscountGain:2},
   "Uso Oso's Skeletal Summons":    {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
   "Sister Mire":                   {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
-  "Josef":                         {text:"your Fighter +5", add:5},
+  "Josef":                         {text:"your Fighter +5 · draw 1", add:5, draw:1},
   "Faye Quicksilver":              {text:"your Fighter +3", add:3},
   "The Regenerating Horror":       {text:"return 1 banished card to hand, +2 power", recurBuff:1},
   "Ilma the Patient":              {text:"your Fighter +4", add:4},
@@ -4120,7 +4131,7 @@ const CALLED = {
   "Old Garrick":                   {text:"your Fighter +4", add:4},
   "Keawe Kil'lua":                 {text:"your Fighter +3", add:3},
   "Rhaess Korvain":                {text:"return 1 banished card to hand", recurPlain:1},
-  "Ossian Drell":                  {text:"your Fighter +4", add:4},
+  "Ossian Drell":                  {text:"your Fighter +4 · draw 1", add:4, draw:1},
   "Bram the Bulwark":              {text:"your Fighter +3", add:3},
   "Valcarion":                     {text:"your Fighter +3", add:3},
   "Chieftain Reyva Vosh":          {text:"draw 2 cards", draw:2},
@@ -4173,6 +4184,9 @@ function projectPlay(){
   return {base:base, called:called, link:link, spell:spell, total:base+called+link+spell, oppDelta:oppDelta, oppShown:oppShown, linkName:linkName};
 }
 function drawToHand(n){ if(typeof drawPile==='undefined'||typeof hand==='undefined') return 0; var got=0; for(var i=0;i<(n||0);i++){ if(!drawPile.length) break; hand.push(drawPile.pop()); got++; } if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(got && typeof buildHand==='function') buildHand(); return got; }
+function banishFromHand(n){ for(var _bi=0;_bi<(n||0);_bi++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } if(typeof buildHand==='function') buildHand(); }
+function oppDrawN(n){ for(var _oi=0;_oi<(n||0);_oi++){ if(typeof oppDeckBot!=='undefined'&&oppDeckBot.length) oppHandBot.push(oppDeckBot.shift()); } }
+function oppBanishN(n){ for(var _oj=0;_oj<(n||0);_oj++){ if(typeof oppHandBot!=='undefined'&&oppHandBot.length){ oppBanishBot.push(oppHandBot.splice(Math.floor(Math.random()*oppHandBot.length),1)[0]); } } }
 function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
   if(!support) return [playerPow, oppPow];
   var e = CALLED[support.name];
@@ -5573,15 +5587,15 @@ function resolve(pc, oc, cond, playerCommittedPow){
   } else if(cond.id === 'mirror'){
     playerPow = oc.pow; oppPow = pc.pow;
     abilLog.push(`🔄 Mirror: your power → ${oc.pow}, opp power → ${pc.pow}`);
-  } else if(cond.id === 'forceswap'){
+  } else if(cond.id === 'forceswap' || cond.id === 'wildpit'){
     // swap committed cards with random hand cards
     if(hand.length > 0){
       const swapIdx = Math.floor(Math.random()*hand.length);
       const swapCard = hand[swapIdx];
-      playerPow = swapCard.pow; abilLog.push(`🎲 Twisted Vivarium: your card stays, but its power is scrambled to ${swapCard.pow} (a random specimen from your hand)`);
+      playerPow = swapCard.pow; abilLog.push(`🎲 ${cond.mech}: your fighter is scrambled to a random ${swapCard.pow}-power card from your hand`);
     } else { abilLog.push('🎲 Force Swap: no hand cards — stays as is'); }
     oppPow = OPP_CARDS[Math.floor(Math.random()*OPP_CARDS.length)].pow;
-    abilLog.push(`🎲 Twisted Vivarium: opponent's power is scrambled to ${oppPow} (an unknown specimen)`);
+    abilLog.push(`🎲 ${cond.mech}: opponent's fighter is scrambled to ${oppPow}`);
   } else if(cond.id === 'provingground'){
     if(pc.pow > oc.pow){ playerPow = Math.max(1, playerPow - 5); abilLog.push(`⛰️ Proving Ground: your card is the favorite (${pc.pow} vs ${oc.pow}) — −5`); }
     else if(oc.pow > pc.pow){ oppPow = Math.max(1, oppPow - 5); abilLog.push(`⛰️ Proving Ground: opponent is the favorite (${oc.pow} vs ${pc.pow}) — −5`); }
@@ -7148,8 +7162,9 @@ let firstTurn = true;           // opening turn of a match: no auto-draw
 let roundTimer = null;          // 3s round-start countdown handle
 let decisionTimer = null;       // 15s decision clock handle
 const STARTING_HAND = 4;
-const DECK_SIZE = 12;
-const MIN_DECK = 12;   // decks are 12–15 cards (min 12 to play, max 15)            // decks are exactly 10 unique cards
+const DRAW_PER_TURN = 2;   // cards drawn per turn (was 1 — ends card starvation; surplus intended)
+const DECK_SIZE = 16;
+const MIN_DECK = 12;   // decks are 12–16 (min 12 to play, max 16)
 // Curated 10-card starter deck (used when no full custom deck is built)
 const DEFAULT_DECK = ['Kotei','Lagertha Waltz','Kiana','Melanie','Arch-Grim Korrin','Darwin','Ruffius Rufeldro','King Joris','Ahdor','Valcarion','Bram the Bulwark','Old Garrick'];
 
@@ -7502,7 +7517,7 @@ function oppEndDuelCycle(){
     _oppInPlay.forEach(function(c,i){ if(botWon && i===0) return;   // bot's winning fighter leaves to its WC (tallied via oppWC), doesn't recycle
       oppDeckBot.push(c); });                                       // losers + supports recycle to deck bottom
     _oppInPlay=[]; }
-  if(oppDeckBot.length){ oppHandBot.push(oppDeckBot.shift()); }   // draw ONE per turn — same draw speed as the player (was: refill to a full 4-card hand)
+  for(var _bd=0;_bd<DRAW_PER_TURN;_bd++){ if(oppDeckBot.length) oppHandBot.push(oppDeckBot.shift()); }   // draw DRAW_PER_TURN per turn — same speed as player
 }
 function _oppStamp(card){ var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null; return Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{}); }
 function pickOppCard(){
