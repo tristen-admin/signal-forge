@@ -4958,7 +4958,7 @@ const TRAITS = [
   {id:'veteran',     name:'Veteran',     icon:'🎖', pow:1, cond:'from round 3 on',         desc:'+1 power from round 3 on — closes strong', test:function(c,r,m){ return (r.k+r.d)>=25; }, when:function(x){ return (x.wins+x.losses)>=2; }, prog:function(r,m){ return {have:r.k+r.d, need:25, unit:'duels fought'}; }},
   {id:'feared',      name:'Feared',      icon:'😤', pow:0, cond:'vs a less-proven foe',    desc:'opponent −1 power vs a less-proven foe — its reputation precedes it', test:function(c,r,m){ return r.k>=15; }, when:function(x){ return x.oppDeaths===0 || x.oppKills < x.myKills; }, prog:function(r,m){ return {have:r.k, need:15, unit:'kills'}; }},
   {id:'untouchable', name:'Untouchable', icon:'🛡', pow:0, desc:'first would-be loss each match becomes a tie', test:function(c,r,m){ return r.d===0 && r.k>=8; }, prog:function(r,m){ return {have:r.d===0?r.k:0, need:8, unit:'kills while flawless'}; }},
-  {id:'bloodthirsty',name:'Bloodthirsty',icon:'⚔️', pow:0, desc:'+1 permanent power per duel it wins this match', test:function(c,r,m){ return r.k>=25; }, prog:function(r,m){ return {have:r.k, need:25, unit:'kills'}; }}
+  {id:'bloodthirsty',name:'Bloodthirsty',icon:'⚔️', pow:0, desc:'draws a card each duel it wins this match — card advantage, not raw power', test:function(c,r,m){ return r.k>=25; }, prog:function(r,m){ return {have:r.k, need:25, unit:'kills'}; }}
 ];
 function cardTraits(c){ if(!c) return []; const r=getRec(c), m=masteryLevelOf(c); return TRAITS.filter(function(t){ try{ return t.test(c,r,m); }catch(e){ return false; } }); }
 function cardHasTrait(c,id){ return cardTraits(c).some(function(t){ return t.id===id; }); }
@@ -5552,11 +5552,11 @@ function resolve(pc, oc, cond, playerCommittedPow){
       else if(_at.pow){ playerPow+=_at.pow; abilLog.push(_at.icon+' '+_at.name+': +'+_at.pow+' power'); }
       else if(_at.id==='feared'){ oppPow-=1; abilLog.push('😤 Feared: opponent −1 power'); }
       else if(_at.id==='untouchable'){ untouchableActive=true; abilLog.push('🛡 Untouchable: your first loss this match becomes a tie'); }
-      else if(_at.id==='bloodthirsty'){ bloodthirstyActive=true; abilLog.push('⚔️ Bloodthirsty: +1 permanent power per duel won this match'); }
+      else if(_at.id==='bloodthirsty'){ bloodthirstyActive=true; abilLog.push('⚔️ Bloodthirsty: a victory feeds it — draw a card on a win'); }
     }
-    if(bloodthirstyActive && matchTraitPow[recKey(pc)]){ playerPow+=matchTraitPow[recKey(pc)]; abilLog.push('⚔️ Bloodthirsty momentum: +'+matchTraitPow[recKey(pc)]); }
+    /* Bloodthirsty no longer snowballs power — it draws a card on a win instead (see win branch) */
     if(typeof matchPlayed!=='undefined') matchPlayed.add(recKey(pc));
-    const _bf=bestFormation(pc); if(_bf){ playerPow+=_bf.bonus; abilLog.push('🤝 '+_bf.tierName+' with '+_bf.partner+': +'+_bf.bonus); }
+    const _bf=bestFormation(pc); if(_bf){ abilLog.push('🤝 '+_bf.tierName+' with '+_bf.partner+' — a proven bond (flavor, no combat power)'); }
     { const _lks=activeLinks(pc, hand); let _lp=0; _lks.forEach(function(l){ if(_lp>=LINK_POW_CAP) return; const add=Math.min(l.pow, LINK_POW_CAP-_lp); if(add>0){ playerPow+=add; _lp+=add; abilLog.push('🔗 '+l.name+' (with '+l.partner+'): +'+add); } }); } }
   // opponent's ONE conditional living trait — evaluated from ITS match perspective
   { const _or={k:oc.kills||0,d:oc.deaths||0,ok:0,od:0}; var _octx={wins:playerScore[1], losses:playerScore[0], lastLose:(lastResult==='win'), oppDeaths:pc.deaths||0, oppKills:pc.kills||0, myKills:oc.kills||0}; const _r=activeTraitFor(oc,_or,0,_octx);
@@ -5767,7 +5767,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     lastResult = 'tie';
   }
 
-  if(bloodthirstyActive && won === 'win'){ matchTraitPow[recKey(pc)] = (matchTraitPow[recKey(pc)]||0)+1; }
+  if(bloodthirstyActive && won === 'win'){ if(typeof drawToHand==='function') drawToHand(1); abilLog.push('⚔️ Bloodthirsty: the win feeds it — draw a card'); }
 
   rearGuards.forEach(function(rg){ if(rg){ drawPile.unshift(rg); abilLog.push('↩ '+rg.name+' (support) → deck bottom'); } }); if(rearGuards.length) deckSize=drawPile.length;
   rearGuards=[]; pendingOppRears=[];
