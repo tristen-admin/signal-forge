@@ -1629,7 +1629,7 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .var-tags{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
 .var-tag{font-size:8.5px;font-weight:700;letter-spacing:0.03em;color:#c9b7ff;background:rgba(150,110,255,0.14);border:1px solid rgba(150,110,255,0.3);border-radius:5px;padding:1px 6px}
 .var-pow{font-size:10px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
-.gb-foot{font-size:10px;color:var(--text3);margin-top:11px}
+.gb-foot{font-size:10px;color:var(--text3);margin-top:11px}.gacha-banner.sealed{opacity:.72;filter:saturate(.75)}.gacha-banner.live{border-color:var(--gold);box-shadow:0 0 0 1px rgba(245,194,77,.25)}.gb-live{color:#39d98a;font-weight:800;font-size:10px;letter-spacing:.08em}.gb-seal{color:var(--text3);font-weight:800;font-size:10px;letter-spacing:.08em}.gb-rateup{font-size:11px;font-weight:700;color:var(--gold);margin:0 0 9px;letter-spacing:.01em}.gb-pity{margin:0 0 12px}.gb-pity-bar{height:6px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden}.gb-pity-bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--gold),#ffe6a0);border-radius:4px;transition:width .3s}.gb-pity-lab{font-size:9.5px;color:var(--text3);margin-top:4px}.var-badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}.var-badges span{font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;letter-spacing:.02em}.vb-first{color:#0a0a0c;background:var(--gold)}.vb-final{color:var(--gold);border:1px solid var(--gold)}.vb-ser{color:var(--text2);background:rgba(255,255,255,.07)}.vb-asc{color:#c9a6ff;border:1px solid #7a5cff}.ess-chip{display:flex;align-items:baseline;gap:10px;background:linear-gradient(180deg,rgba(122,92,255,.14),rgba(122,92,255,.05));border:1px solid #7a5cff;border-radius:10px;padding:10px 14px;margin:0 0 14px;font-size:13px;font-weight:700}.ess-chip b{color:#c9a6ff;font-size:16px}.ess-chip span{font-size:10.5px;font-weight:500;color:var(--text3)}.ess-shop{margin-top:18px;border-top:1px solid var(--border);padding-top:14px}.ess-shop-head{font-size:13px;font-weight:800;color:#c9a6ff;margin-bottom:10px}.ess-shop-head span{font-size:10px;font-weight:500;color:var(--text3);margin-left:6px}.ess-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}.ess-item{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:11px}.ess-item.got{border-color:#7a5cff}.ess-it-name{font-size:12px;font-weight:800;margin-bottom:3px}.ess-it-desc{font-size:10px;color:var(--text3);margin-bottom:9px;min-height:26px}.ess-buy{width:100%;font-size:11px;font-weight:800;padding:7px;border-radius:8px;border:1px solid #7a5cff;background:rgba(122,92,255,.14);color:#c9a6ff;cursor:pointer}.ess-buy.dim{opacity:.5;cursor:not-allowed}
 .gb-odds{font-size:11.5px;font-weight:600;color:var(--text2);margin:0 0 11px;letter-spacing:0.02em}
 .gb-odds b{color:var(--gold);font-weight:800}
 .cosmetic{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;transition:border-color 0.14s,transform 0.14s}
@@ -6228,7 +6228,7 @@ function rlab(r){ return RARITY_LABEL[r]||cap(r||''); }
 function rlab1(r){ var l=RARITY_LABEL[r]||cap(r||''); return l.length<=2?l:l.charAt(0); }
 const SAVE_KEY = 'signalforge_save_v2';
 function saveState(){
-  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, essenceCosmetics, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
 }
 function loadState(){
   try{
@@ -6251,6 +6251,8 @@ function loadState(){
       if(s.variantEditions && typeof s.variantEditions==='object') variantEditions=s.variantEditions;
       if(typeof s.variantEssence==='number') variantEssence=s.variantEssence;
       if(s.variantFed && typeof s.variantFed==='object') variantFed=s.variantFed;
+      if(s.gachaPity && typeof s.gachaPity==='object') gachaPity=s.gachaPity;
+      if(s.essenceCosmetics && typeof s.essenceCosmetics==='object') essenceCosmetics=s.essenceCosmetics;
       if(s.cardFoilMax && typeof s.cardFoilMax==='object') cardFoilMax=s.cardFoilMax;
       if(s.cardFrames && typeof s.cardFrames==='object') cardFrames=s.cardFrames;
       if(Array.isArray(s.ownedFrames)) ownedFrames=new Set(s.ownedFrames);
@@ -6638,10 +6640,39 @@ const VARIANT_DEFS = [
 ];
 function variantDef(id){ return VARIANT_DEFS.find(function(v){return v.id===id;}); }
 const GACHA_BANNERS = [
-  {id:'b-genesis', name:'Genesis Legends', blurb:'Apex-focused summon. Highlighted: Akatosh — Eclipse. Ultra & rare skins round out a tight pool.', cost:900, featured:'v-akatosh-eclipse', pool:['v-akatosh-eclipse','v-kotei-ascend','v-ella-crimson','v-hanse-bloodmoon','v-forgemask-molten','v-valcarion-astral','v-voltcaller-surge']},
-  {id:'b-vanguard', name:'Vanguard Rites', blurb:'Highlighted: Darwin — Primal. A curated pool of apex, ultra & rare champions.', cost:600, featured:'v-darwin-primal', pool:['v-darwin-primal','v-tange-shogun','v-ahdor-warden','v-ella-radiant','v-lagertha-frost','v-alucard-nightfall','v-korrin-warlord','v-lagertha-storm']},
+  {id:'b-genesis', name:'Genesis Legends', blurb:'Apex-focused summon. Rate-up on three genesis Apexes. Ultra & rare skins round out a tight pool.', cost:900, featured:'v-akatosh-eclipse', rateUp:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal'], pool:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal','v-ella-crimson','v-hanse-bloodmoon','v-forgemask-molten','v-valcarion-astral','v-voltcaller-surge']},
+  {id:'b-vanguard', name:'Vanguard Rites', blurb:'Rate-up on three genesis Apexes. A curated pool of apex, ultra & rare champions.', cost:600, featured:'v-tange-shogun', rateUp:['v-tange-shogun','v-ahdor-warden','v-darwin-primal'], pool:['v-darwin-primal','v-tange-shogun','v-ahdor-warden','v-ella-radiant','v-lagertha-frost','v-alucard-nightfall','v-korrin-warlord','v-lagertha-storm']},
 ];
 function bannerByIdx(i){ return GACHA_BANNERS[i]; }
+let gachaPity = {};            // {bannerId: pulls since last Apex}
+const GACHA_PITY_CAP = 60;     // guaranteed rate-up Apex by this pull
+let essenceCosmetics = {};     // {itemId:true} cosmetic unlocks bought with Variant Essence
+const ESSENCE_SHOP = [
+  {id:'ec-aura', name:'Prismatic Duel Aura', cost:40, desc:'Shimmer aura around your board in duels'},
+  {id:'ec-back', name:'Mythforged Card Back', cost:70, desc:'Animated card back across your collection'},
+  {id:'ec-title', name:'\u201cAscendant\u201d Duelist Title', cost:50, desc:'Prestige title shown on your profile'},
+  {id:'ec-emblem', name:'Essence Crest Emblem', cost:30, desc:'Profile crest forged from spent variants'},
+];
+function essenceCosmeticOwned(id){ return !!essenceCosmetics[id]; }
+function buyEssenceCosmetic(id){
+  var it=ESSENCE_SHOP.find(function(x){return x.id===id;}); if(!it) return;
+  if(essenceCosmetics[id]){ if(typeof toast==='function') toast('Already owned.', false); return; }
+  if(variantEssence < it.cost){ if(typeof toast==='function') toast('Need \u2726 '+it.cost+' Essence \u2014 ingest more dupe variants.', false); return; }
+  variantEssence-=it.cost; essenceCosmetics[id]=true;
+  if(typeof updateBalance==='function') updateBalance(); if(typeof saveState==='function') saveState(); if(typeof buildShop==='function') buildShop();
+  if(typeof toast==='function') toast('\u2726 Unlocked '+it.name+' \u2014 cosmetic only, never affects play.', true);
+}
+// rotation: one banner live at a time (weekly); sealed editions freeze + get a Final Print
+function _isoWeekIdx(){ try{ var d=new Date(); var j=new Date(d.getFullYear(),0,1); return Math.floor((((d-j)/86400000)+j.getDay()+1)/7); }catch(e){ return 0; } }
+function activeBannerIdx(){ return _isoWeekIdx() % GACHA_BANNERS.length; }
+function bannerIsOpen(i){ return i===activeBannerIdx(); }
+function sealEdition(defId){
+  var ed=variantEditions[defId]; if(!ed||ed.sealed) return; ed.sealed=true;
+  var fin=COLLECTION.find(function(c){ return c.editionId===defId && c.serial===ed.minted; }); if(fin) fin.finalPrint=true;
+}
+function reconcileEditions(){
+  GACHA_BANNERS.forEach(function(b,i){ if(!bannerIsOpen(i)){ b.pool.forEach(function(id){ if(variantEditions[id]) sealEdition(id); }); } });
+}
 function variantOwned(v){ return COLLECTION.some(function(c){ return c.variant===v.label && c.name===v.unit && (ownedCopies[c.uid]||0)>0; }); }
 function mintVariant(def, viaLabel){
   const base=COLLECTION.find(function(c){return c.name===def.unit && !c.uid;}) || COLLECTION.find(function(c){return c.name===def.unit;});
@@ -6681,13 +6712,19 @@ function ingestVariant(uid){
 }
 function pullVariant(bannerId){
   const b=GACHA_BANNERS.find(function(x){return x.id===bannerId;}); if(!b) return;
+  const bi=GACHA_BANNERS.indexOf(b);
+  if(!bannerIsOpen(bi)){ if(typeof toast==='function') toast(b.name+' is sealed this rotation \u2014 summon on the live banner.', false); return; }
   if(forgeBalance < b.cost){ if(typeof toast==='function') toast('Need ❖ '+fmtPts(b.cost)+' Forge to summon on '+b.name+'.', false); return; }
   forgeBalance-=b.cost;
   const tiers=['genesis','ultra','rare'].filter(function(t){ return b.pool.some(function(id){ var v=variantDef(id); return v&&v.tier===t; }); });
   var _tot=tiers.reduce(function(s,t){return s+(GACHA_ODDS[t]||0);},0), _roll=Math.random()*_tot, _tier=tiers[tiers.length-1];
   for(var _i=0;_i<tiers.length;_i++){ _roll-=(GACHA_ODDS[tiers[_i]]||0); if(_roll<=0){ _tier=tiers[_i]; break; } }
+  var _pity=(gachaPity[bannerId]||0)+1, _forced=false;
+  if(_tier!=='genesis' && _pity>=GACHA_PITY_CAP && tiers.indexOf('genesis')>=0){ _tier='genesis'; _forced=true; }
   var cands=b.pool.filter(function(id){ var v=variantDef(id); return v&&v.tier===_tier; });
-  let pickId = (_tier==='genesis' && cands.indexOf(b.featured)>=0 && Math.random()<0.5) ? b.featured : cands[Math.floor(Math.random()*cands.length)];
+  var _ru=(b.rateUp||[]).filter(function(id){ return cands.indexOf(id)>=0; });
+  let pickId = (_tier==='genesis' && _ru.length && (_forced || Math.random()<0.7)) ? _ru[Math.floor(Math.random()*_ru.length)] : cands[Math.floor(Math.random()*cands.length)];
+  if(_tier==='genesis'){ gachaPity[bannerId]=0; } else { gachaPity[bannerId]=_pity; }
   const def=variantDef(pickId)||variantDef(b.featured);
   const res=mintVariant(def, 'Variant Summon · '+b.name);
   if(typeof updateBalance==='function') updateBalance();
@@ -6705,26 +6742,48 @@ function variantCardHTML(id){
   const pow=base?base.pow:'—'; const rar=base?base.rarity:'common';
   const sig=(typeof CARD_SIGIL!=='undefined' && base && CARD_SIGIL[base.artKey||base.name]) || (v.unit.charAt(0));
   const got=variantOwned(v);
+  var badge='';
+  if(got){
+    var insts=COLLECTION.filter(function(c){ return c.editionId===v.id && (ownedCopies[c.uid]||0)>0; });
+    var hasFirst=insts.some(function(c){return c.firstPrint;}), hasFinal=insts.some(function(c){return c.finalPrint;});
+    var lowSer=insts.reduce(function(m,c){ return (m===null||c.serial<m)?c.serial:m; }, null);
+    var atier=(typeof variantAscTier==='function')?variantAscTier(v.id):0;
+    if(hasFirst) badge+='<span class="vb-first">\u2605 1st</span>';
+    if(hasFinal) badge+='<span class="vb-final">\u25c6 Final</span>';
+    if(!hasFirst && lowSer!==null) badge+='<span class="vb-ser">#'+lowSer+'</span>';
+    if(atier>0) badge+='<span class="vb-asc">'+ASC_NAME[atier]+'</span>';
+  }
   return '<div class="var-card foil foil-'+(v.foil||'prism')+(got?' got':'')+'">'
     +'<div class="var-sig rar-'+rar+'">'+sig+(got?'<span class="var-owned">✓</span>':'')+'</div>'
     +'<div class="var-body"><div class="var-label">'+v.label+'</div><div class="var-unit">'+v.unit+'</div>'
-    +'<div class="var-tags"><span class="var-tag">✦ Play-only</span><span class="var-pow">'+pow+' POW</span></div></div></div>';
+    +'<div class="var-tags"><span class="var-tag">✦ Play-only</span><span class="var-pow">'+pow+' POW</span></div>'+(badge?'<div class="var-badges">'+badge+'</div>':'')+'</div></div>';
 }
 function bannerHTML(b, i, featured){
   const owned=b.pool.filter(function(id){ const v=variantDef(id); return v && variantOwned(v); }).length;
+  const isOpen=(typeof bannerIsOpen==='function')?bannerIsOpen(i):true;
+  const pity=(gachaPity[b.id]||0), pityPct=Math.min(100,Math.round(pity/GACHA_PITY_CAP*100));
+  const mintedTot=b.pool.reduce(function(s,id){ return s+((variantEditions[id]&&variantEditions[id].minted)||0); },0);
+  const ruNames=(b.rateUp||[]).map(function(id){ var v=variantDef(id); return v?(v.label+' '+v.unit):''; }).filter(Boolean);
   const cards=b.pool.map(variantCardHTML).join('');
   const _tiers=['genesis','ultra','rare'].filter(function(t){ return b.pool.some(function(id){ var v=variantDef(id); return v&&v.tier===t; }); });
   const oddsStr=_tiers.map(function(t){ return '<b>'+rlab(t)+' '+(GACHA_ODDS[t]||0)+'%</b>'; }).join(' · ');
   const afford=forgeBalance>=b.cost;
-  return '<div class="gacha-banner'+(featured?' feat':'')+'">'
-    +'<div class="gb-head"><div><div class="gb-name">'+(featured?'★ ':'')+b.name+'</div><div class="gb-blurb">'+b.blurb+'</div></div>'
-    +'<button class="gb-pull'+(afford?'':' dim')+'" onclick="pullVariantAt('+i+')">Summon · ❖ '+fmtPts(b.cost)+'</button></div>'
-    +'<div class="gb-odds">Pull odds — '+oddsStr+'</div><div class="var-grid">'+cards+'</div>'
-    +'<div class="gb-foot">'+owned+' / '+b.pool.length+' collected · single pull · dupes are extra, still play-only</div></div>';
+  return '<div class="gacha-banner'+(featured?' feat':'')+(isOpen?' live':' sealed')+'">'
+    +'<div class="gb-head"><div><div class="gb-name">'+(isOpen?'<span class="gb-live">\u25cf LIVE</span> ':'<span class="gb-seal">\u25a0 SEALED</span> ')+b.name+'</div><div class="gb-blurb">'+b.blurb+'</div></div>'
+    +'<button class="gb-pull'+((afford&&isOpen)?'':' dim')+'" onclick="pullVariantAt('+i+')">'+(isOpen?('Summon \u00b7 \u2756 '+fmtPts(b.cost)):'Sealed this rotation')+'</button></div>'
+    +(ruNames.length?'<div class="gb-rateup">\u2605 Rate-up Apexes \u00b7 '+ruNames.join(' \u00b7 ')+'</div>':'')
+    +'<div class="gb-odds">Pull odds \u2014 '+oddsStr+'</div>'
+    +(isOpen?'<div class="gb-pity"><div class="gb-pity-bar"><span style="width:'+pityPct+'%"></span></div><div class="gb-pity-lab">Pity '+pity+' / '+GACHA_PITY_CAP+' \u2014 next rate-up Apex guaranteed at '+GACHA_PITY_CAP+'</div></div>':'')
+    +'<div class="var-grid">'+cards+'</div>'
+    +'<div class="gb-foot">'+owned+' / '+b.pool.length+' collected \u00b7 '+mintedTot+' minted this edition'+(isOpen?' (live)':' (frozen)')+' \u00b7 dupes ingest for Essence</div></div>';
 }
 function variantsSectionHTML(){
-  const banners=GACHA_BANNERS.map(function(b,i){ return bannerHTML(b, i, i===0); }).join('');
-  return '<div class="banner-head singles">✦ Variant Summon <span class="banner-sub">Spend <b>❖ Forge</b> to summon alternate skins of marquee units. A variant plays, ranks, drafts, and earns Signal + Bounty <b>identically</b> to the base card — it is simply <b>play-only</b> (never traded or wagered) and never scarcer than the original. Different flair; same power. <span class="dev-note">(placeholder art — final per-variant art slots in later)</span></span></div>'+banners;
+  if(typeof reconcileEditions==='function') reconcileEditions();
+  const banners=GACHA_BANNERS.map(function(b,i){ return bannerHTML(b, i, (typeof bannerIsOpen==='function')?bannerIsOpen(i):(i===0)); }).join('');
+  const essChip='<div class="ess-chip">\u2726 Variant Essence <b>'+variantEssence+'</b> <span>earned by ingesting dupe variants \u00b7 spends on cosmetics only</span></div>';
+  const shopCards=ESSENCE_SHOP.map(function(it){ var got=essenceCosmeticOwned(it.id), can=variantEssence>=it.cost; return '<div class="ess-item'+(got?' got':'')+'"><div class="ess-it-name">'+it.name+'</div><div class="ess-it-desc">'+it.desc+'</div><button class="ess-buy'+((can&&!got)?'':' dim')+'" onclick="buyEssenceCosmetic(\''+it.id+'\')">'+(got?'\u2713 Owned':'\u2726 '+it.cost)+'</button></div>'; }).join('');
+  const essShop='<div class="ess-shop"><div class="ess-shop-head">\u2726 Essence Exchange <span>cosmetic flair only \u2014 never cards, power, or Signal</span></div><div class="ess-grid">'+shopCards+'</div></div>';
+  return '<div class="banner-head singles">\u2726 Variant Summon <span class="banner-sub">Spend <b>\u2756 Forge</b> to summon alternate skins of marquee units. Banners <b>rotate weekly</b> \u2014 one is live, the rest sealed with frozen editions. A variant plays, ranks, drafts, and earns Signal + Bounty <b>identically</b> to the base card \u2014 it is simply <b>play-only</b> (never traded or wagered) and never scarcer than the original. <span class="dev-note">(placeholder art)</span></span></div>'+essChip+banners+essShop;
 }
 function buildShop(){
   updateBalance();
