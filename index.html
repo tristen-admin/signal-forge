@@ -174,16 +174,22 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
   gap:1px;background:transparent;min-height:0;overflow:hidden;
   position:relative;
 }
+/* supports render as physical card frames + a readable effect label */
+.rear-slot.rg-card{flex-direction:column;border:none!important;background:transparent!important;padding:0;gap:3px;min-height:0;max-width:none;box-shadow:none}
+.rear-slot.rg-card .bigcard.tframe{width:86px}
+.rear-slot.rg-card .tf-text{display:none}
+.rear-slot.rg-card .rg-eff{font-size:8.5px;line-height:1.25;color:var(--gold);text-align:center;max-width:104px;background:rgba(10,7,4,.72);border:1px solid rgba(245,194,77,.28);border-radius:5px;padding:2px 5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.rear-slot.rg-card.enemy .rg-eff{color:var(--lose);border-color:rgba(224,80,60,.35)}
+.rear-slot.rg-card.linked .rg-eff{color:var(--electric);border-color:rgba(91,192,235,.45)}
 @media (min-width:1025px){
-  /* fighters on the top row, each side's supports stacked directly beneath — no scatter, no clip */
-  .field{overflow:visible;align-content:center;row-gap:7px;column-gap:24px}
-  #opp-field{grid-column:1;grid-row:1;justify-self:center}
-  #player-field{grid-column:2;grid-row:1;justify-self:center}
+  /* TRIANGLE: conjured fighter on top (spans 2 cols), its two supports side-by-side beneath */
+  .field{overflow:visible;align-content:center;grid-template-columns:repeat(4,1fr);row-gap:8px;column-gap:10px}
+  #opp-field{grid-column:1 / 3;grid-row:1;justify-self:center}
+  #player-field{grid-column:3 / 5;grid-row:1;justify-self:center}
   #opp-rear{grid-column:1;grid-row:2;justify-self:center}
-  #opp-rear2{grid-column:1;grid-row:3;justify-self:center}
-  #player-rear{grid-column:2;grid-row:2;justify-self:center}
-  #player-rear2{grid-column:2;grid-row:3;justify-self:center}
-  .field .rear-slot{max-width:230px;width:92%;margin:0 auto}
+  #opp-rear2{grid-column:2;grid-row:2;justify-self:center}
+  #player-rear{grid-column:3;grid-row:2;justify-self:center}
+  #player-rear2{grid-column:4;grid-row:2;justify-self:center}
 }
 
 /* ── REVEAL IMPACT FX ── */
@@ -4098,11 +4104,9 @@ function fillRearSlot(el, card, isOpp, fighter){
   if(!el) return;
   if(!card){ el.style.display='none'; el.innerHTML=''; el.className='rear-slot'+(isOpp?' enemy':''); return; }
   var e=CALLED[card.name]; var lk=fighter?fieldLink(fighter,card):null;
-  el.style.display=''; el.className='rear-slot'+(isOpp?' enemy':'')+' filled'+(lk?' linked':'');
-  var _art=(typeof CARD_ART!=='undefined')?CARD_ART[card.artKey||card.name]:null;
-  var _sig=(typeof CARD_SIGIL!=='undefined'&&CARD_SIGIL[card.artKey||card.name])||'◈';
-  var _thumb=_art?'<div class="rg-thumb" style="background-image:url('+_art+')"></div>':'<div class="rg-thumb"><span class="rg-sig">'+_sig+'</span></div>';
-  el.innerHTML=_thumb+'<div class="rg-meta"><div class="rg-line1"><span class="rg-lead">📣'+(isOpp?' Opp':'')+'</span><span class="rg-name">'+card.name+'</span>'+(lk?'<span class="rg-link">🔗+'+lk.pow+'</span>':'')+'</div><div class="rg-called">'+(e?e.text:'fighter-only')+'</div></div>';
+  el.style.display=''; el.className='rear-slot rg-card'+(isOpp?' enemy':'')+' filled'+(lk?' linked':'');
+  el.innerHTML = bigCardHTML(card)
+    + '<div class="rg-eff">📣 '+(e?e.text:'fighter-only')+(lk?' · 🔗'+lk.name+' +'+lk.pow:'')+'</div>';
   el.title=card.name+(e?' — '+e.text:' — fighter-only')+(lk?' · Link '+lk.name+' +'+lk.pow:'');
 }
 function renderCommittedRears(){
