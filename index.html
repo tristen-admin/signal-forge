@@ -1,4 +1,3 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>
 <title>Signal Forge TCG — System Design</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -2155,7 +2154,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   .rear-slot{min-height:26px;font-size:10px;padding:3px 8px}
   body:has(#v-turn.on) .topbar{display:none}
   #v-turn > div:has(.match-exit){padding:3px 10px!important;background:transparent!important;border-bottom:1px solid rgba(255,255,255,0.05)!important;gap:8px!important}
-  .opp-zone .pile-strip{display:none}
+  .opp-zone .pile-strip{display:flex;font-size:9px}
   .cond-main{background:rgba(8,10,14,0.32)}
   .cond-slot{border-bottom:none}
   .hand-row{justify-content:safe center;align-items:flex-end}
@@ -2655,7 +2654,10 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="opp-zone">
       <span class="zone-label">Opponent</span>
       <div class="pile-strip" style="margin-right:4px">
+        <div class="pile-chip" title="Opponent's hand"><span class="pile-icon">✋</span><span class="pile-count" id="opp-hand-count">4</span><span class="pile-label">Hand</span></div>
+        <div class="pile-chip" title="Opponent's deck remaining"><span class="pile-icon">🂠</span><span class="pile-count" id="opp-deck-count">8</span><span class="pile-label">Deck</span></div>
         <div class="pile-chip winners" title="Opponent Winners Circle"><span class="pile-icon">🏆</span><span class="pile-count" id="opp-wc-count">0</span><span class="pile-label">WC</span></div>
+        <div class="pile-chip banish" title="Opponent Banish"><span class="pile-icon">💀</span><span class="pile-count" id="opp-banish-count">0</span><span class="pile-label">Banish</span></div>
       </div>
       <div id="opp-area" class="opp-waiting">⏳ Waiting for draw…</div>
       <div class="score-row" id="score-display">
@@ -2712,7 +2714,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 
     <!-- ENERGY / SPELL TRAY -->
     <div class="spell-tray" id="spell-tray">
-      <div class="charge-meter">⚡ Charge <b id="charge-val">2</b><span>/6</span></div>
+      <div class="charge-meter">⚡ Charge <b id="charge-val">3</b><span>/<span id="charge-cap">3</span></span></div>
       <div class="spell-tray-cards" id="spell-tray-cards"></div>
     </div>
 
@@ -3194,7 +3196,7 @@ let conditionIndex = -1;
 let selectedCard = null;
 let playerScore = [1,0];
 let seasonWins=0, seasonLosses=0, seasonRewardClaimed=false;
-let charge=2/*energy start*/;                                   // energy resource, per match
+let charge=3/*energy start*/;                                   // energy resource, per match
 let spellHand=[];                               // Stage 2: spells you've drawn (a hand you spend)
 let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellDiscount=0;  // per-duel armed effects  // Rebirth season — cumulative match W/L across ranked + staked
 let hand = [...HAND_CARDS];
@@ -3307,6 +3309,10 @@ function updatePiles(){
   document.getElementById('wc-count').textContent = winnersCircle.length;
   document.getElementById('banish-count').textContent = banishPile.length;
   document.getElementById('opp-wc-count').textContent = oppWC;
+  { var _dp=(playerScore[0]||0)+(playerScore[1]||0);
+    var _od=document.getElementById('opp-deck-count'); if(_od) _od.textContent=Math.max(0,12-4-_dp);
+    var _oh=document.getElementById('opp-hand-count'); if(_oh) _oh.textContent=Math.max(0,Math.min(4,12-_dp));
+    var _ob=document.getElementById('opp-banish-count'); if(_ob) _ob.textContent=(typeof oppBanishCount!=='undefined'?oppBanishCount:0); }
   const pile = document.getElementById('pile-wc-chip');
   pile.style.borderColor = winnersCircle.length > 0 ? 'rgba(212,168,67,0.5)' : '';
   const si = document.getElementById('surge-indicator');
@@ -3494,7 +3500,7 @@ function beginTurnAutoDraw(){
 
 // Start-of-turn opener: no draw on the opening turn, auto-draw on every turn after.
 function openTurn(){
-  charge=Math.min(ENERGY_CAP,charge+ENERGY_REGEN); spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  charge=Math.min(duelEnergyCap(),charge+ENERGY_REGEN); spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -3991,9 +3997,10 @@ const ENERGY_SPELLS = [
 ];
 // ══ REAR-GUARD / CALLED SYSTEM (v1) ══
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
-const ENERGY_CAP = 6, ENERGY_REGEN = 2;   // energy pool (start 2, +2/turn, cap 6) - #1 balance dial
+const ENERGY_CAP = 7, ENERGY_REGEN = 2;   // energy pool (start 2, +2/turn, cap 6) - #1 balance dial
 const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2};   // ability-strength nudges above the power band (balance dial)
 function conjureCost(c){ if(!c) return 1; if(c.cost!=null) return c.cost; if(COST_OVERRIDE[c.name]!=null) return COST_OVERRIDE[c.name]; var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; }
+function duelEnergyCap(){ var d=(typeof playerScore!=='undefined')?((playerScore[0]||0)+(playerScore[1]||0)+1):1; return Math.min(ENERGY_CAP, 3 + Math.max(0, d-3)); }
 // CALLED - universal rear-guard keyword; fires ALWAYS when a support is called (no group gate).
 // Inverse-scaling: fighter cards -> simple static (+N / opp -N); low-power/support -> rich combos.
 const CALLED = {
@@ -4141,7 +4148,7 @@ function fieldLink(fighter, support){
   for(var i=0;i<fg.length;i++){ for(var j=0;j<sg.length;j++){ if(fg[i].id===sg[j].id) return fg[i]; } }
   return null;
 }
-function renderCharge(){ const v=document.getElementById('charge-val'); if(v) v.textContent=charge; buildSpellTray(); }
+function renderCharge(){ const v=document.getElementById('charge-val'); if(v) v.textContent=charge; var cp=document.getElementById('charge-cap'); if(cp&&typeof duelEnergyCap==='function') cp.textContent=duelEnergyCap(); buildSpellTray(); }
 function buildSpellTray(){
   const t=document.getElementById('spell-tray-cards'); if(!t) return;
   const castable = (phase==='revealed'||phase==='selecting'||phase==='select');
@@ -8927,7 +8934,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   banishSurge=0; deathRemnantPow=0; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null;
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false;
-  charge=2/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellDiscount=0; if(typeof renderCharge==='function') renderCharge();
+  charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellDiscount=0; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
