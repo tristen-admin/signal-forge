@@ -7484,7 +7484,7 @@ function buildDeckPool(){
         ${owned?'':'<span class="vc-lost">✕ Not owned</span>'}
       </div>
       <div class="vc-info">
-        <div class="vc-name">${c.name}</div>
+        <div class="vc-name">${dispName(c.name)}</div>
         <div class="vc-kd"><span class="k">${kdOf(c).k}K</span><span class="d">${kdOf(c).d}D</span></div>
       </div>
       <span class="vc-deck-tag">✓ In Deck</span>
@@ -7952,7 +7952,7 @@ function buildVault(){
         ${e.fresh?'<span class="vc-fresh">✦ Fresh Mint</span>':(c.ascendant?'<span class="vc-ascendant">⭐ Ascendant</span>':(c.variant?'<span style="position:absolute;top:6px;left:6px;font-size:13px;filter:drop-shadow(0 1px 2px #000)">🏆</span>':''))}
       </div>
       <div class="vc-info">
-        <div class="vc-name">${c.name}</div>
+        <div class="vc-name">${dispName(c.name)}</div>
         <div class="vc-kd"><span class="k">${e.k}K</span><span class="d">${e.d}D</span></div>
         ${traitIconsHTML(c)}
         ${legendMiniHTML(c)}
@@ -8005,7 +8005,7 @@ function openCardDetail(id, fresh, tab){
     <div class="dr-art ${CARD_ART_FULL[c.artKey||c.name]?'zoomable':''} ${foilClass(c)} ${frameClass(c)}" ${CARD_ART_FULL[c.artKey||c.name]?`onclick="openLightbox('${(c.artKey||c.name).replace(/'/g,"\\'")}')"`:''} style="${artFillStyle(c.artKey||c.name)}">${VIDEO_PREVIEW[c.artKey||c.name]?`<video class="fc-vid"${vidStyle(c.artKey||c.name)} src="${VIDEO_PREVIEW[c.artKey||c.name]}" autoplay muted loop playsinline></video>`:''}${CARD_ART[c.artKey||c.name]?'':`<span class="dr-sigil">${CARD_SIGIL[c.artKey||c.name]||'◈'}</span>`}${CARD_ART_FULL[c.artKey||c.name]?'<span class="dr-zoom-hint">⤢ Tap for full art</span>':''}</div>
     <div class="dr-header ${c.rarity}">
       <div class="dr-rarity">${rlab(c.rarity)}${pristine?' · ◈ Pristine':''}${fresh?' · ✦ Fresh Mint':''}</div>
-      <div class="dr-name">${c.name}</div>
+      <div class="dr-name">${dispName(c.name)}</div>
       <div class="dr-race-row">🧬 <span class="dr-race-lbl">Race</span> <select class="dr-race-sel" data-cardname="${(c.name||'').replace(/"/g,'&quot;')}" onchange="setRace(this.dataset.cardname, this.value)">${RACES.map(function(r){return '<option'+(raceOf(c.name)===r?' selected':'')+'>'+r+'</option>';}).join('')}</select></div>
       <div class="dr-powline"><span class="dr-pow">${c.pow}</span><span class="dr-pow-label">Base Power</span><span class="dr-pow" style="color:var(--electric);margin-left:16px">⚡${conjureCost(c)}</span><span class="dr-pow-label">Conjure</span></div>
     </div>
@@ -8097,7 +8097,7 @@ function openListingDetail(idx){
     <div class="dr-art ${full?'zoomable':''}" ${full?`onclick="openLightbox('${(c.artKey||c.name).replace(/'/g,"\\'")}')"`:''} style="${artFillStyle(c.artKey||c.name)}">${CARD_ART[c.artKey||c.name]?'':`<span class="dr-sigil">${CARD_SIGIL[c.artKey||c.name]||'◈'}</span>`}${full?'<span class="dr-zoom-hint">⤢ Tap for full art</span>':''}</div>
     <div class="dr-header ${c.rarity}">
       <div class="dr-rarity">${rlab(c.rarity)}${l.legend?' · 👑 Undefeated':(pristine?' · ◈ Pristine':'')}</div>
-      <div class="dr-name">${c.name}</div>
+      <div class="dr-name">${dispName(c.name)}</div>
       <div class="dr-powline"><span class="dr-pow">${c.pow}</span><span class="dr-pow-label">Base Power</span></div>
     </div>
     <div class="dr-section">
@@ -9811,6 +9811,7 @@ body::before{background:
   <div class="dev-hd">
     <span class="dev-ti">🛠 Developer — Balance</span>
     <input id="dev-q" class="dev-q" placeholder="search cards…">
+    <select id="dev-rar" class="dev-q" style="flex:0 0 auto;max-width:140px"><option value="">All rarities</option><option value="genesis">Genesis</option><option value="ultra">Ultra</option><option value="rare">Rare</option><option value="common">Common</option></select>
     <span class="dev-chg" id="dev-chg">0 edits</span>
     <button class="dev-b" id="dev-exp">Export</button>
     <button class="dev-b" id="dev-req" title="Copy all your plain-word Called requests to hand off to Claude">📣 Requests</button>
@@ -9833,7 +9834,7 @@ body::before{background:
   function boot(){
     if(typeof COLLECTION==='undefined'||typeof DECK_POOL==='undefined'){return setTimeout(boot,250);}
     var OVL=document.getElementById('dev-ov'); if(!OVL)return;
-    var FAB=document.getElementById('dev-fab'), BODY=document.getElementById('dev-body'), Q=document.getElementById('dev-q'), EXP=document.getElementById('dev-expbox');
+    var FAB=document.getElementById('dev-fab'), BODY=document.getElementById('dev-body'), Q=document.getElementById('dev-q'), RARF=document.getElementById('dev-rar'), EXP=document.getElementById('dev-expbox');
     var KEY='sf_dev_overrides_v1', ORDER=['genesis','ultra','rare','common'], SCALE=30;
     var RAR={genesis:{c:'#F5C24D',n:'Genesis'},ultra:{c:'#B36AF0',n:'Ultra'},rare:{c:'#5B86F5',n:'Rare'},common:{c:'#8b98ad',n:'Common'}};
     var HAND=(typeof HAND_CARDS!=='undefined')?HAND_CARDS:[];
@@ -9859,7 +9860,7 @@ body::before{background:
     function chg(){document.getElementById('dev-chg').textContent=Object.keys(OV).length+' edits';}
     function record(n,f,v){var map={p:'pow',r:'rarity',t:'timing',a:'abil'};setProp(n,map[f],v);var o=ORIG[n];if(!OV[n])OV[n]={};var og=o?o[f]:undefined;if((''+v)===(''+og))delete OV[n][f];else OV[n][f]=v;if(OV[n]&&!Object.keys(OV[n]).length)delete OV[n];saveOV();chg();schedVault();}
     var cur='table', sortK='ceil', sortD=-1;
-    function renderTable(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var d=model().filter(function(c){return !q||c.n.toLowerCase().indexOf(q)>=0;});
+    function renderTable(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=RARF?RARF.value:'';var d=model().filter(function(c){return (!q||c.n.toLowerCase().indexOf(q)>=0)&&(!rf||c.r===rf);});
       d.sort(function(a,b){var x=sortK==='ceil'?ceil(a):a[sortK],y=sortK==='ceil'?ceil(b):b[sortK];return (x<y?-1:x>y?1:0)*sortD;});
       var h='<table class="dev-tbl"><thead><tr><th>Card</th><th>Rarity</th><th class="num" data-k="p">Power'+(sortK==='p'?(sortD<0?' ▼':' ▲'):'')+'</th><th class="num" data-k="ceil">Ceil'+(sortK==='ceil'?(sortD<0?' ▼':' ▲'):'')+'</th><th>Ability (click to edit)</th></tr></thead><tbody>';
       d.forEach(function(c){var o=ORIG[c.n];h+='<tr data-n="'+esc(c.n)+'"><td class="nm" style="border-left:3px solid '+RAR[c.r].c+'">'+esc(c.n)+(stacks(c.a)?' <span title="scales further" style="color:#d0a24a">∞</span>':'')+'</td>'+
@@ -9896,8 +9897,8 @@ body::before{background:
       BODY.innerHTML=sec('⚠','Power creep','lower rarity reaching the tier above',creep)+sec('▽','Under-powered for rarity','at/below the tier below',under)+sec('∞','Uncapped scalers','no fixed ceiling',scal)+sec('💥','High burst','ability swing ≥ +6',burst);
     }
     function recordFx(n,f,v){if(!OV[n])OV[n]={};if(v==null||v==='')delete OV[n][f];else OV[n][f]=v;if(OV[n]&&!Object.keys(OV[n]).length)delete OV[n];saveOV();chg();}
-    function renderEffects(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();
-      var d=baseList().filter(function(c){return !q||c.name.toLowerCase().indexOf(q)>=0;});
+    function renderEffects(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=RARF?RARF.value:'';
+      var d=baseList().filter(function(c){return (!q||c.name.toLowerCase().indexOf(q)>=0)&&(!rf||c.rarity===rf);});
       var h='<div class="dev-fxnote"><b>⚡ Cost</b> applies the instant you change it — no Apply needed, so set as many cards to <b>1</b> as you want. <b>📣 Called</b>: fill the quick-build fields → <b>↓ Fill JSON</b> → <b>Apply</b> (or edit JSON directly; conditionals go in the JSON box). Blank a JSON box + Apply removes that effect.</div>';
       d.forEach(function(c){var n=c.name;
         var cost=(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[n]!=null)?COST_OVERRIDE[n]:((typeof conjureCost==='function')?conjureCost(c):1);
@@ -9952,6 +9953,7 @@ body::before{background:
     function render(){R[cur]();}
     document.getElementById('dev-tabs').addEventListener('click',function(e){var b=e.target.closest('.dev-t');if(!b)return;document.querySelectorAll('.dev-t').forEach(function(t){t.classList.remove('on');});b.classList.add('on');cur=b.getAttribute('data-v');render();});
     Q.addEventListener('input',function(){if(cur==='table')renderTable();else if(cur==='effects')renderEffects();});
+    if(RARF)RARF.addEventListener('change',function(){render();});
     document.getElementById('dev-exp').onclick=function(){var lines=Object.keys(OV).map(function(n){var o=OV[n],g=ORIG[n]||{},c=[];if(o.p!=null)c.push('pow '+g.p+'→'+o.p);if(o.r!=null)c.push('rarity '+g.r+'→'+o.r);if(o.t!=null)c.push('timing '+g.t+'→'+o.t);if(o.a!=null)c.push('ability → "'+o.a+'"');if(o.cost!=null)c.push('cost →'+o.cost);if(o.rename!=null)c.push('RENAME → "'+o.rename+'" (canonical rename — Claude to apply)');if(o.links!=null)c.push('links → ['+o.links.join(', ')+']');if(o.called!=null)c.push('CALLED →'+o.called);if(o.rules!=null)c.push('CARD_RULES →'+o.rules);if(o.note!=null)c.push('note: "'+o.note+'"');return n+': '+c.join(', ');});EXP.hidden=false;EXP.innerHTML='<textarea readonly>'+esc(lines.length?lines.join('\n'):'No changes yet.')+'</textarea>';try{EXP.querySelector('textarea').select();}catch(_){}};
     var _rq=document.getElementById('dev-req'); if(_rq) _rq.onclick=function(){ var lines=Object.keys(OV).filter(function(n){return OV[n]&&OV[n].note;}).map(function(n){ var cur=(typeof CALLED!=='undefined'&&CALLED[n])?JSON.stringify(CALLED[n]):'(none yet)'; var cst=(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[n]!=null)?(' [⚡'+COST_OVERRIDE[n]+']'):''; return n+cst+': '+OV[n].note+'   (current: '+cur+')'; }); EXP.hidden=false; EXP.innerHTML='<textarea readonly>'+esc(lines.length?('CALLED-EFFECT REQUESTS — paste to Claude:\n\n'+lines.join('\n\n')):'No descriptions yet — open ⚡ Abilities and describe a card in the plain-words box.')+'</textarea>'; try{EXP.querySelector('textarea').select();}catch(_){} };
     document.getElementById('dev-rst').onclick=function(){if(!confirm('Reset ALL dev edits back to original values?'))return;Object.keys(OV).forEach(function(n){var o=ORIG[n];if(o){setProp(n,'pow',o.p);setProp(n,'rarity',o.r);setProp(n,'timing',o.t);setProp(n,'abil',o.a);}});OV={};saveOV();chg();try{if(typeof buildVault==='function')buildVault();}catch(e){}render();};
