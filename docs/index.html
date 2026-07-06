@@ -1319,6 +1319,7 @@ body.rm body.nav-collapsed #nav-hub .ni-icon,body.rm.nav-collapsed #nav-hub .ni-
 .dr-header.common .dr-rarity{color:var(--r-common)} .dr-header.uncommon .dr-rarity{color:#5FB878}
 .dr-header.rare .dr-rarity{color:#6C8CF0} .dr-header.ultra .dr-rarity{color:#C080E0}
 .dr-header.genesis .dr-rarity{color:var(--gold)}
+.dr-race-row{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11px;color:var(--text3)}.dr-race-lbl{letter-spacing:.04em;text-transform:uppercase;font-weight:700}.dr-race-sel{background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer}.dr-race-sel:hover{border-color:var(--gold)}
 .dr-name{font-size:22px;font-weight:800;color:#fff;line-height:1.05;margin-bottom:6px;text-shadow:0 2px 8px #000;text-wrap:balance}
 .dr-powline{display:flex;align-items:baseline;gap:8px}
 .dr-pow{font-size:28px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1}
@@ -4106,6 +4107,32 @@ const ENERGY_SPELLS = [
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
 const ENERGY_CAP = 6, ENERGY_REGEN = 2;   // energy pool — max 6; per-duel floor scales so late turns never drop low
 const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdor":3};   // ability-strength nudges above the power band (balance dial)
+// ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
+const RACES = ['Human','Dragonkin','Lycan','Vampire','Revenant','Ork','Celestial','Construct','Beast','Spirit','Fae'];
+const CARD_RACE = {
+  // Dragonkin
+  'Akatosh, the Golden Dragon':'Dragonkin','Dragan Korr':'Dragonkin','Heir of Kaiga':'Dragonkin','Dragon':'Dragonkin','Scale Guard':'Dragonkin','Dragonfire':'Dragonkin','Wing Buffet':'Dragonkin','Ragefire':'Dragonkin',
+  // Lycan
+  'Hanse Waltz \u2014 Werewolf Form':'Lycan','Lagertha Waltz \u2014 Werewolf Form':'Lycan','Wolfsblood Guard':'Lycan','Werewolf Fury':'Lycan','Feral Lunge':'Lycan',
+  // Vampire
+  'Alucard The Damned':'Vampire','Mordezh, Blood Prophet':'Vampire','Kravyn the Collector':'Vampire','Blood Moon':'Vampire','Bloodline Surge':'Vampire','Bloodline Momentum':'Vampire','Crosscut Bleed':'Vampire','Soul Reave':'Vampire',
+  // Revenant (undead)
+  'Revenant':'Revenant','Revenant Mercy':'Revenant','The Regenerating Horror':'Revenant','Hollow Ravager':'Revenant','Twisted Specimen':'Revenant','Nyx, Devourer of Legends':'Revenant','Sythe Marrow':'Revenant','Soul Harvest':'Revenant','Grave Chill':'Revenant','Death Remnant':'Revenant','Phantom Cut':'Revenant','The Hollow King':'Revenant',
+  // Ork
+  'Ghorruk Skullbrand':'Ork','Doru Blacktooth':'Ork','Arch-Grim Korrin':'Ork','Ruven Ashwalker':'Ork','Skullchain Strike':'Ork',
+  // Celestial
+  'Valkyrie':'Celestial','Valkyrie Rush':'Celestial','Elowen Dawnspear':'Celestial','Kessa Brightblade':'Celestial','Sister Mire':'Celestial','Aurelion Prime':'Celestial','Stormcaller Prime':'Celestial','Veyra Stormcaller':'Celestial','Rallying Cry':'Celestial','Sovereign':'Celestial','Sovereign Charge':'Celestial','Crownfall':'Celestial',
+  // Construct
+  'Forgemask':'Construct','Anvil':'Construct','Bulwark':'Construct','Sunforged Colossus':'Construct','Aegis Protocol':'Construct','Reforge':'Construct','Shield Wall':'Construct','Shieldwall':'Construct','Shield Break':'Construct','Golden Maw':'Construct','Kingsmourne':'Construct',
+  // Beast
+  'Bixie Bee':'Beast','Anorith Keeling':'Beast','Little Pox':'Beast','Broodmother':'Beast','Mip':'Beast',
+  // Spirit
+  'Wisp':'Spirit','Veil of Echoes':'Spirit','Echo Ward':'Spirit','Signal Diviner':'Spirit','Avatar':'Spirit'
+  // everything else defaults to 'Human' (see raceOf)
+};
+let raceOverride = {};   // design-time per-card race edits (persisted); wins over CARD_RACE
+function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Human'; }
+function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.race=r; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83e\uddec Race set: '+name+' \u2192 '+r, true); }
 function conjureCost(c){ if(!c) return 1; if(c.cost!=null) return c.cost; if(COST_OVERRIDE[c.name]!=null) return COST_OVERRIDE[c.name]; var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; }
 function duelEnergyCap(){ var d=(typeof matchCommits!=='undefined')?((matchCommits||0)+1):1; return Math.min(ENERGY_CAP, 3 + Math.max(0, d-3)); }  /* d = true duel number — counts ties, so it never stalls */
 function duelEnergyFloor(){ return Math.max(3, duelEnergyCap()-1); } /* guaranteed energy per duel: d1-4≈3, d5≈4, d6-7≈5; cap 6 — never 2 */
@@ -6239,7 +6266,7 @@ function rlab(r){ return RARITY_LABEL[r]||cap(r||''); }
 function rlab1(r){ var l=RARITY_LABEL[r]||cap(r||''); return l.length<=2?l:l.charAt(0); }
 const SAVE_KEY = 'signalforge_save_v2';
 function saveState(){
-  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, essenceCosmetics, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, essenceCosmetics, raceOverride, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
 }
 function loadState(){
   try{
@@ -6264,6 +6291,7 @@ function loadState(){
       if(s.variantFed && typeof s.variantFed==='object') variantFed=s.variantFed;
       if(s.gachaPity && typeof s.gachaPity==='object') gachaPity=s.gachaPity;
       if(s.essenceCosmetics && typeof s.essenceCosmetics==='object') essenceCosmetics=s.essenceCosmetics;
+      if(s.raceOverride && typeof s.raceOverride==='object'){ raceOverride=s.raceOverride; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c) c.race=raceOf(c.name); }); }catch(e){} }
       if(s.cardFoilMax && typeof s.cardFoilMax==='object') cardFoilMax=s.cardFoilMax;
       if(s.cardFrames && typeof s.cardFrames==='object') cardFrames=s.cardFrames;
       if(Array.isArray(s.ownedFrames)) ownedFrames=new Set(s.ownedFrames);
@@ -7976,6 +8004,7 @@ function openCardDetail(id, fresh, tab){
     <div class="dr-header ${c.rarity}">
       <div class="dr-rarity">${rlab(c.rarity)}${pristine?' · ◈ Pristine':''}${fresh?' · ✦ Fresh Mint':''}</div>
       <div class="dr-name">${c.name}</div>
+      <div class="dr-race-row">🧬 <span class="dr-race-lbl">Race</span> <select class="dr-race-sel" data-cardname="${(c.name||'').replace(/"/g,'&quot;')}" onchange="setRace(this.dataset.cardname, this.value)">${RACES.map(function(r){return '<option'+(raceOf(c.name)===r?' selected':'')+'>'+r+'</option>';}).join('')}</select></div>
       <div class="dr-powline"><span class="dr-pow">${c.pow}</span><span class="dr-pow-label">Base Power</span><span class="dr-pow" style="color:var(--electric);margin-left:16px">⚡${conjureCost(c)}</span><span class="dr-pow-label">Conjure</span></div>
     </div>
     <div class="dr-tabs">
@@ -9516,7 +9545,7 @@ buildMatchView();
 updateScore();
 rpRender();
 initOwnedCopies();
-(function(){ try{ if(typeof COLLECTION!=='undefined') COLLECTION.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; }); if(typeof OPP_CARDS!=='undefined') OPP_CARDS.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; }); var _pk=[]; if(typeof PACKS!=='undefined')_pk=_pk.concat(PACKS); if(typeof FORGE_PACKS!=='undefined')_pk=_pk.concat(FORGE_PACKS); _pk.forEach(function(p){ if(p.odds&&p.odds.uncommon!=null){ p.odds.common=(p.odds.common||0)+p.odds.uncommon; delete p.odds.uncommon; } }); }catch(e){} })();
+(function(){ try{ if(typeof COLLECTION!=='undefined') COLLECTION.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); }); if(typeof OPP_CARDS!=='undefined') OPP_CARDS.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); }); var _pk=[]; if(typeof PACKS!=='undefined')_pk=_pk.concat(PACKS); if(typeof FORGE_PACKS!=='undefined')_pk=_pk.concat(FORGE_PACKS); _pk.forEach(function(p){ if(p.odds&&p.odds.uncommon!=null){ p.odds.common=(p.odds.common||0)+p.odds.uncommon; delete p.odds.uncommon; } }); }catch(e){} })();
   supply = defaultSupply(); cardSupply=defaultCardSupply();
 const _hadSave=(function(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}})();
 loadState();
