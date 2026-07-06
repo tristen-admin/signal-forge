@@ -716,6 +716,11 @@ body{flex-direction:row!important}
   height:100vh;overflow-y:auto;
 }
 .nav-toggle{cursor:pointer;border-radius:6px;padding:1px 3px;transition:background .15s,transform .15s}
+#nav-dropdown{position:fixed;top:46px;left:8px;z-index:250;display:none;flex-direction:column;gap:2px;background:linear-gradient(180deg,#17110a,#0b0805);border:1px solid #8a6a2f;border-radius:10px;padding:6px;box-shadow:0 18px 50px rgba(0,0,0,.72);min-width:180px}
+#nav-dropdown.open{display:flex}
+#nav-dropdown button{text-align:left;background:transparent;border:none;color:var(--text);font-weight:600;font-size:13px;padding:8px 12px;border-radius:6px;cursor:pointer;white-space:nowrap}
+#nav-dropdown button:hover{background:rgba(245,194,77,.16);color:var(--gold)}
+#nav-dropdown .nd-expand{color:var(--gold);border-bottom:1px solid rgba(245,194,77,.22);border-radius:6px 6px 0 0;margin-bottom:3px}
 .nav-toggle:hover{background:rgba(245,194,77,0.22);transform:scale(1.15)}
 body.nav-collapsed .sidebar{width:48px!important;min-width:48px!important;overflow:hidden}
 body.nav-collapsed .sidebar > *{display:none!important}
@@ -5556,7 +5561,22 @@ function nextTurn(){
 }
 
 const SCREEN_TITLES = {hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',shop:'Shop',market:'Marketplace',lobby:'Public Server',ranked:'Ranked Ladder',pvp:'Staked PvP',draft:'Draft',asc:'Ascension · The Rite',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile'};
-function toggleSidebar(){ document.body.classList.toggle('nav-collapsed'); }
+function toggleSidebar(){
+  if(document.body.classList.contains('nav-collapsed')){ toggleNavDropdown(); }
+  else { document.body.classList.add('nav-collapsed'); }
+}
+function _navAway(e){ var d=document.getElementById('nav-dropdown'); if(d && !d.contains(e.target) && !(e.target.closest&&e.target.closest('.nav-toggle'))) closeNavDropdown(); }
+function closeNavDropdown(){ var d=document.getElementById('nav-dropdown'); if(d) d.classList.remove('open'); document.removeEventListener('mousedown',_navAway); }
+function toggleNavDropdown(){
+  var d=document.getElementById('nav-dropdown');
+  if(!d){ d=document.createElement('div'); d.id='nav-dropdown'; document.body.appendChild(d); }
+  if(d.classList.contains('open')){ closeNavDropdown(); return; }
+  var items=[['hub','◆ Hub'],['lobby','⚔ Public Server'],['ranked','🪜 Ranked Ladder'],['pvp','🩸 Staked PvP'],['draft','🌀 Draft'],['vault','🗄 Vault'],['deck','🃏 Deck Builder'],['shop','🛒 Shop'],['asc','👑 Ascension'],['conds','📖 Codex']];
+  d.innerHTML='<button class="nd-expand" onclick="document.body.classList.remove(\'nav-collapsed\');closeNavDropdown()">⤢ Expand full menu</button>'
+    + items.map(function(x){ return '<button onclick="show(\''+x[0]+'\',null);closeNavDropdown()">'+x[1]+'</button>'; }).join('');
+  d.classList.add('open');
+  setTimeout(function(){ document.addEventListener('mousedown',_navAway); },0);
+}
 function toggleNavGroup(id){ var g=document.getElementById(id); if(!g) return; var wasOpen=g.classList.contains('open'); document.querySelectorAll('.nav-group').forEach(function(x){ x.classList.remove('open'); }); if(!wasOpen) g.classList.add('open'); }
 function show(id, btn){
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
