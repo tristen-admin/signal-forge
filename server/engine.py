@@ -63,7 +63,14 @@ def _ctx(pc, oc, m, rec, cond_id):
             "wc_len":len(m["winnersCircle"]),"skullchain":m["skullchainKills"],"ragwing":m["ragwingWins"],
             "chaos":cond_id in CHAOS_CONDS,"wc_names":[c["name"] for c in m["winnersCircle"]]}
 def _cmp(a, op, b):
-    return {"==":a==b,"!=":a!=b,">":a>b,"<":a<b,">=":a>=b,"<=":a<=b}[op]
+    if op == "==": return a == b
+    if op == "!=": return a != b
+    if a is None or b is None: return False   # ordering vs None -> False (matches the client's JS leniency)
+    if op == ">":  return a > b
+    if op == "<":  return a < b
+    if op == ">=": return a >= b
+    if op == "<=": return a <= b
+    return False
 def eval_cond(cond, ctx):
     if cond is None: return True
     if "or" in cond:  return any(eval_cond(c, ctx) for c in cond["or"])
