@@ -3214,7 +3214,7 @@ const DECK_POOL = [
   {name:'Tange Sazen',pow:18,kills:0,deaths:0,rarity:'ultra',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
   // Ultras
   {name:'Lagertha Waltz',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 if you lost your last duel. -2 if you won your last duel.'},
-  {name:'Alucard The Damned',pow:17,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: the opponent\'s card loses 4 power — or if it is Pristine (0 deaths), Alucard drains its purity for +4 instead.'},
+  {name:'Valcarion the Damned',pow:17,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: the opponent\'s card loses 4 power — or if it is Pristine (0 deaths), Valcarion the Damned drains its purity for +4 instead.'},
   {name:'Ella Ballora',pow:14,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Bloodrage: on commit +3 power, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
   {name:'Kiana',pow:19,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Elemental Flurry: on commit +3 power, and +4 more if the active condition is a chaos condition (Force Swap, Energy Surge, or Mirror).'},
   // ── KOTEI Series 1 Expansion ──
@@ -3369,7 +3369,7 @@ const OPP_CARDS = [
   {name:'Malia',pow:10,kills:0,deaths:0,rarity:'common',abil:'On commit: mirror opponent power.'},
   {name:'Ahdor',pow:17,kills:0,deaths:0,rarity:'rare',abil:'On commit: underdog hand bonus.'},
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',abil:'On commit: comeback double.'},
-  {name:'Alucard The Damned',pow:17,kills:0,deaths:0,rarity:'rare',abil:'On commit: opponent −4 power, or +4 vs Pristine.'},
+  {name:'Valcarion the Damned',pow:17,kills:0,deaths:0,rarity:'rare',abil:'On commit: opponent −4 power, or +4 vs Pristine.'},
   {name:'Ella Ballora',pow:14,kills:0,deaths:0,rarity:'ultra',abil:'Bloodrage: +3, and +3 more when wounded.'},
   {name:'Kiana',pow:19,kills:0,deaths:0,rarity:'uncommon',abil:'Elemental Flurry: +3, +4 more in chaos conditions.'},
 ];
@@ -4115,7 +4115,7 @@ const CARD_RACE = {
   // Lycan
   'Hanse Waltz \u2014 Werewolf Form':'Lycan','Lagertha Waltz \u2014 Werewolf Form':'Lycan','Wolfsblood Guard':'Lycan','Werewolf Fury':'Lycan','Feral Lunge':'Lycan',
   // Vampire
-  'Alucard The Damned':'Vampire','Mordezh, Blood Prophet':'Vampire','Kravyn the Collector':'Vampire','Blood Moon':'Vampire','Bloodline Surge':'Vampire','Bloodline Momentum':'Vampire','Crosscut Bleed':'Vampire','Soul Reave':'Vampire',
+  'Valcarion the Damned':'Vampire','Mordezh, Blood Prophet':'Vampire','Kravyn the Collector':'Vampire','Blood Moon':'Vampire','Bloodline Surge':'Vampire','Bloodline Momentum':'Vampire','Crosscut Bleed':'Vampire','Soul Reave':'Vampire',
   // Revenant (undead)
   'Revenant':'Revenant','Revenant Mercy':'Revenant','The Regenerating Horror':'Revenant','Hollow Ravager':'Revenant','Twisted Specimen':'Revenant','Nyx, Devourer of Legends':'Revenant','Sythe Marrow':'Revenant','Soul Harvest':'Revenant','Grave Chill':'Revenant','Death Remnant':'Revenant','Phantom Cut':'Revenant','The Hollow King':'Revenant',
   // Ork
@@ -4155,7 +4155,7 @@ const CALLED = {
   "Ella Ballora — True Form":      {text:"your Fighter +3", add:3},
   "Ella Ballora":                  {text:"your Fighter +3", add:3},
   "Arch-Grim Korrin":              {text:"your Fighter +3", add:3},
-  "Alucard The Damned":            {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
+  "Valcarion the Damned":            {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
   "Zerith Var":                    {text:"your Fighter +2", add:2},
   "Ruffius Rufeldro":              {text:"your Fighter +3", add:3},
   "Ahdor":                         {text:"your Fighter +3", add:3},
@@ -5045,7 +5045,7 @@ const LINK_POW_CAP = 4;   // max total power from active links per commit (keeps
 const LINK_GROUPS = [
   {id:'keawe',   name:"Keawe's Circle", icon:'🔵', pow:1, members:['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Kianna','Kiana','Bixie Bee','Melanie','Heir of Kaiga']},
   {id:'squad19', name:'Squad 19',       icon:'🛡', pow:1, members:['Ahdor','Val Kreigh','Ruffius Rufeldro']},
-  {id:'court',   name:"Darwin's Court",  icon:'🩸', pow:1, members:['Darwin','Alucard The Damned','Zerith Var','Veronica','Ella Ballora','Ella Ballora — True Form','Arch-Grim Korrin','Grim Korrin','Ruffius Rufeldro','Voidmaw the Unmaker']},
+  {id:'court',   name:"Darwin's Court",  icon:'🩸', pow:1, members:['Darwin','Valcarion the Damned','Zerith Var','Veronica','Ella Ballora','Ella Ballora — True Form','Arch-Grim Korrin','Grim Korrin','Ruffius Rufeldro','Voidmaw the Unmaker']},
   {id:'royalty', name:'Exiled Royalty',  icon:'👑', pow:1, members:['Moro','Malia','King Joris']},
   {id:'dragon',  name:'Dragon-Pact',     icon:'🐉', pow:1, members:['Tange Sazen','Ourvos, the Golden Dragon','Kiba','Kleydson','Kaelthar the Ascendant']},
   {id:'waltz',   name:'Waltz Twins',     icon:'🐺', pow:1, members:['Lagertha Waltz','Hanse Waltz','Lagertha Waltz — Werewolf Form','Hanse Waltz — Werewolf Form','Kessuae, Tide of Ruin']},
@@ -5326,7 +5326,7 @@ const CARD_RULES = {
    "log": "👻 Korrin: +6"
   }
  ],
- "Alucard The Damned": [
+ "Valcarion the Damned": [
   {
    "if": {
     "v": "opp_deaths",
@@ -5334,7 +5334,7 @@ const CARD_RULES = {
     "n": 0
    },
    "add": 4,
-   "log": "🩸 Alucard: +4 (drained Pristine)"
+   "log": "🩸 Valcarion the Damned: +4 (drained Pristine)"
   },
   {
    "if": {
@@ -5343,7 +5343,7 @@ const CARD_RULES = {
     "n": 0
    },
    "oppadd": -4,
-   "log": "🩸 Alucard: opponent −4"
+   "log": "🩸 Valcarion the Damned: opponent −4"
   }
  ],
  "Ella Ballora": [
@@ -6116,7 +6116,7 @@ let marketListings = [];
 let marketFocus = null;  // when set, market compares/filters to this card name
 let marketSort = 'recent';  // 'recent' | 'legend' | 'price'
 function seedMarket(){
-  const names = ['Arch-Grim Korrin','Lagertha Waltz','Tange Sazen','Zerith Var','Val Kreigh','Kiana','Alucard The Damned','Ella Ballora','Malia','Moro','Anorith Keeling','Forgemask','Valcarion','Chieftain Reyva Vosh','Rhaess Korvain','Ossian Drell','Tannis','Broodmother','King Joris','Sister Mire','Heir of Kaiga','Ella Ballora — True Form','Hanse Waltz','Uso Oso','Melanie','Bixie Bee'];
+  const names = ['Arch-Grim Korrin','Lagertha Waltz','Tange Sazen','Zerith Var','Val Kreigh','Kiana','Valcarion the Damned','Ella Ballora','Malia','Moro','Anorith Keeling','Forgemask','Valcarion','Chieftain Reyva Vosh','Rhaess Korvain','Ossian Drell','Tannis','Broodmother','King Joris','Sister Mire','Heir of Kaiga','Ella Ballora — True Form','Hanse Waltz','Uso Oso','Melanie','Bixie Bee'];
   const reg = names.map(name => {
     const c = COLLECTION.find(x => x.name === name); if(!c || isStarter(c)) return null; const h = hashStr(name);
     const seller = '0x' + ((h*2654435761)>>>0).toString(16).slice(0,4) + '…' + (h>>>16).toString(16).padStart(4,'0').slice(0,4);
@@ -6673,7 +6673,7 @@ const VARIANT_DEFS = [
   {id:'v-forgemask-molten', unit:'Forgemask', label:'Molten', tier:'rare', foil:'holo'},
   {id:'v-valcarion-astral', unit:'Valcarion', label:'Astral', tier:'rare', foil:'holo'},
   {id:'v-voltcaller-surge', unit:'Voltcaller', label:'Surge', tier:'rare', foil:'holo'},
-  {id:'v-alucard-nightfall', unit:'Alucard The Damned', label:'Nightfall', tier:'rare', foil:'holo'},
+  {id:'v-alucard-nightfall', unit:'Valcarion the Damned', label:'Nightfall', tier:'rare', foil:'holo'},
   {id:'v-korrin-warlord', unit:'Arch-Grim Korrin', label:'Warlord', tier:'rare', foil:'holo'},
   {id:'v-lagertha-storm', unit:'Lagertha Waltz', label:'Storm', tier:'rare', foil:'holo'},
 ];
@@ -7094,7 +7094,7 @@ const CARD_ART = {
   'Veronica':'assets/img/7c0c9a4c8953.jpg',
   'Zerith Var':'assets/img/7f0d0f540c73.jpg',
   'Ella Ballora':'assets/img/b6c5f3d2c7ad.jpg',
-  'Alucard The Damned':'assets/img/743366c68ab4.jpg',
+  'Valcarion the Damned':'assets/img/743366c68ab4.jpg',
   'Darwin':'assets/img/7e877fb90b21.jpg',
   'Tange Sazen':'assets/img/ee660de00747.jpg',
   'Malia':'assets/img/a16542f755a7.jpg',
@@ -7138,7 +7138,7 @@ const CARD_ART_FULL = {
   'Veronica':'assets/img/aea3ba3562dd.jpg',
   'Zerith Var':'assets/img/026d03f91aea.jpg',
   'Ella Ballora':'assets/img/88dd9987f851.jpg',
-  'Alucard The Damned':'assets/img/3efa65f5ff4e.jpg',
+  'Valcarion the Damned':'assets/img/3efa65f5ff4e.jpg',
   'Darwin':'assets/img/2941a257059c.jpg',
   'Tange Sazen':'assets/img/e78285411325.jpg',
   'Malia':'assets/img/c0828bde3864.jpg',
@@ -7177,7 +7177,7 @@ const CARD_SIGIL = {
   'Ahdor':'🛡','Ruffius Rufeldro':'🗡','Kiba':'🐺','Darwin':'🧬','Malia':'🪞','Moro':'🐾',
   'Hanse Waltz':'🎻','Arch-Grim Korrin':'💀','Zerith Var':'🔥','Valcarion':'🔒','Val Kreigh':'⚔',
   'Tange Sazen':'🗡','Lagertha Waltz':'🪓','Anorith Keeling':'🦂',
-  'Alucard The Damned':'🩸','Ella Ballora':'⚔️','Kiana':'🔥',
+  'Valcarion the Damned':'🩸','Ella Ballora':'⚔️','Kiana':'🔥',
   'King Joris':'👑','Chieftain Reyva Vosh':'🏔','Broodmother':'🕷','Forgemask':'🔨','Sister Mire':'🌱',
   'Heir of Kaiga':'🗡','Melanie':'🌷','Josef':'🧵','Ourvos, the Golden Dragon':'🐉','Ella Ballora — True Form':'🕸',
   "Korrin's Possessed Legion":'🪖','Hanse Waltz — Werewolf Form':'🐺','Lagertha Waltz — Werewolf Form':'🌕','The Regenerating Horror':'👁','Uso Oso\'s Skeletal Summons':'🦴'
@@ -7713,10 +7713,10 @@ const BOT_OPPONENTS = [
    sig:'Anorith Keeling (8)', pool:pick(['Anorith Keeling','Zerith Var','Darwin','Malia','Lagertha Waltz','Moro','Ella Ballora']),bias:2},
   {id:'keawe',name:'Mirror Kotei',avatar:'⚡',color:'var(--r-genesis)',arch:'Genesis Finisher',diff:4,
    desc:'The hardest opponent — a mirror of your own finisher deck. Commits high-power Genesis and never gives you a free round.',
-   sig:'Kotei (18)', pool:pick(['Kotei','Lagertha Waltz','Arch-Grim Korrin','Zerith Var','Darwin','Alucard The Damned']),bias:3},
+   sig:'Kotei (18)', pool:pick(['Kotei','Lagertha Waltz','Arch-Grim Korrin','Zerith Var','Darwin','Valcarion the Damned']),bias:3},
   {id:'ascendant',name:'The Ascendant',avatar:'👑',color:'var(--gold)',arch:'Trait Trial — maxed veterans',diff:4,
    desc:'A Living-Traits test dummy: every card it fields is a maxed legend — its record equips its single strongest trait (Scarred, +2) plus a peak stat boost. One trait, not a stack. Bring an average build and see if base power can still hang.',
-   sig:'maxed legends', pool:pick(['Kotei','Alucard The Damned','Arch-Grim Korrin','Darwin','Lagertha Waltz','Ella Ballora']),bias:3,maxed:true},
+   sig:'maxed legends', pool:pick(['Kotei','Valcarion the Damned','Arch-Grim Korrin','Darwin','Lagertha Waltz','Ella Ballora']),bias:3,maxed:true},
 ];
 let selectedBot = null;
 let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward gate)
@@ -8692,8 +8692,8 @@ const ASC_STORY_CH2=[
    beat:"The illusion village remembers you, and this time it does not bother to hide. A dragon-pact stirs in Kiba, gold beneath the skin, and the great eye that judged you once now weighs whether you have grown enough to be worth waking for."},
   {loc:'The Black Citadel', title:"The Court's Last Stand", champ:'Ella Ballora — True Form', art:'Ella Ballora — True Form', type:'boss',
    beat:"Darwin fell, but his Court did not scatter, and the throne room is not empty theatre. Ella Ballora sheds the shape you would recognize; what unfolds in the dark is what the Court always was underneath, and it has been waiting for you to climb this high a second time."},
-  {loc:'The Gray', title:'The Deeper Master', champ:'Alucard The Damned', art:'Alucard The Damned', type:'boss',
-   beat:"Past the Rift's last edge, the voice that whispered a Mad King into ruin steps into the light at last. Alucard the Damned was old when Ahdor-Khaan was young, and he has been patient far longer than you have been alive. The Undying Flame does not end with a king. It only asks who carries it next."}
+  {loc:'The Gray', title:'The Deeper Master', champ:'Valcarion the Damned', art:'Valcarion the Damned', type:'boss',
+   beat:"Past the Rift's last edge, the voice that whispered a Mad King into ruin steps into the light at last. Valcarion the Damned was old when Ahdor-Khaan was young, and he has been patient far longer than you have been alive. The Undying Flame does not end with a king. It only asks who carries it next."}
 ];
 const ASC_CHAPTERS=[
   {id:'ch1', title:'Chapter 1: Rebirth', sub:"Darwin's road — the slaver-city to the Gray.", beats:ASC_STORY},
