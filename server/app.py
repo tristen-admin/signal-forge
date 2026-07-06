@@ -113,7 +113,7 @@ def h_resolve(user_id, body):
     card = c.execute("SELECT * FROM cards WHERE uid=? AND owner_id=?", (body.get("cardUid"), user_id)).fetchone()
     if not card: return 404, {"error": "you do not own that card"}
     rec = dict(c.execute("SELECT k,d,ok,od FROM records WHERE uid=?", (card["uid"],)).fetchone())
-    opp_pow = int(body.get("oppPow") or (8 + secrets.randbelow(17)))   # SERVER picks the opponent
+    opp_pow = 8 + secrets.randbelow(17)   # SERVER always picks the opponent — client-supplied oppPow is IGNORED (was an authority hole: a client could send a low value to farm guaranteed wins)
     res = rules.resolve_duel(rules.card_pow(card["type"]), rec, opp_pow)
     with store.tx() as cc:
         if res["outcome"] == "win":
