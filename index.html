@@ -3138,7 +3138,7 @@ const COND_EFF = {
 
 const HAND_CARDS = [
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
-  {name:'Uso Oso',pow:16,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant: when Uso dies he stays on field. Your cards here gain +10 power until an opponent\'s card is killed, then Remnant is removed. When this card is conjured, call a "Oso\'s skeletal summons" from outside of your deck to an open support circle.'},
+  {name:'Uso Oso',pow:16,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant: when Uso dies he stays on field. Your cards here gain +7 power until an opponent\'s card is killed, then Remnant is removed. When this card is conjured, call a "Oso\'s skeletal summons" from outside of your deck to an open support circle.'},
   {name:'Tannis',pow:10,kills:0,deaths:0,rarity:'uncommon',timing:'instant',abil:'⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.'},
   {name:'Bixie Bee',pow:18,kills:0,deaths:0,rarity:'common',timing:null,abil:'No ability. Starter card. Never hesitate to deploy.'},
   {name:'Veronica',pow:14,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: copy opponent\'s card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability.'},
@@ -3213,7 +3213,7 @@ const DECK_POOL = [
   {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'genesis',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
   // Ultras
   {name:'Lagertha Waltz',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 if you lost your last duel. -2 if you won your last duel.'},
-  {name:'Valcarion',pow:17,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: the opponent\'s card loses 4 power — or if it is Pristine (0 deaths), Valcarion drains its purity for +4 instead.'},
+  {name:'Valcarion',pow:7,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if there is a card in your banish zone, add it to your hand — or call it to an open support circle.'},
   {name:'Ella Ballora',pow:14,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Bloodrage: on commit +3 power, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
   {name:'Kiana',pow:15,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Elemental Flurry: on commit +3 power, and +4 more if you have 4 or more cards in your hand.'},
   // ── KOTEI Series 1 Expansion ──
@@ -3368,7 +3368,7 @@ const OPP_CARDS = [
   {name:'Malia',pow:10,kills:0,deaths:0,rarity:'common',abil:'On commit: mirror opponent power.'},
   {name:'Ahdor',pow:17,kills:0,deaths:0,rarity:'rare',abil:'On commit: underdog hand bonus.'},
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',abil:'On commit: comeback double.'},
-  {name:'Valcarion',pow:17,kills:0,deaths:0,rarity:'rare',abil:'On commit: opponent −4 power, or +4 vs Pristine.'},
+  {name:'Valcarion',pow:7,kills:0,deaths:0,rarity:'rare',abil:'On commit: reclaim a banished card to hand or support.'},
   {name:'Ella Ballora',pow:14,kills:0,deaths:0,rarity:'ultra',abil:'Bloodrage: +3, and +3 more when wounded.'},
   {name:'Kiana',pow:19,kills:0,deaths:0,rarity:'uncommon',abil:'Elemental Flurry: +3, +4 more in chaos conditions.'},
 ];
@@ -4647,6 +4647,9 @@ function commitCard(){
 
   { var _idxs=[selectedCard].concat(rearGuardIdxs.filter(function(ix){return ix!==selectedCard;})); _idxs.sort(function(a,b){return b-a;}); _idxs.forEach(function(_ix){hand.splice(_ix,1);}); }
   rearGuardIdxs=[];
+  // ── conjure summons ──
+  if(pc.name==='Uso Oso' && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
+  if(pc.name==='Valcarion' && banishPile.length){ var _rec=banishPile.pop(); if(rearGuards.length < RG_SLOTS){ rearGuards.push(_rec); if(typeof toast==='function') toast('🩸 Valcarion calls '+_rec.name+' from banish to support.', true); } else { hand.push(_rec); if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🩸 Valcarion reclaims '+_rec.name+' from banish to hand.', true); } if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name === 'Darwin') flameVeilFromWC = false;
   document.getElementById('commit-btn').disabled = true;
   document.getElementById('commit-btn').style.display = 'none';
@@ -5328,26 +5331,7 @@ const CARD_RULES = {
    "log": "👻 Korrin: +6"
   }
  ],
- "Valcarion": [
-  {
-   "if": {
-    "v": "opp_deaths",
-    "op": "==",
-    "n": 0
-   },
-   "add": 4,
-   "log": "🩸 Valcarion: +4 (drained Pristine)"
-  },
-  {
-   "if": {
-    "v": "opp_deaths",
-    "op": ">",
-    "n": 0
-   },
-   "oppadd": -4,
-   "log": "🩸 Valcarion: opponent −4"
-  }
- ],
+ "Valcarion": [],
  "Ella Ballora": [
   {
    "add": 3,
