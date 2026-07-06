@@ -3054,6 +3054,38 @@ const CONDITIONS = [
   {id:"survivorsground",mech:"Survivor's Ground",icon:"⚰️",name:"Last Light Hold",rule:"Endurance is rewarded — the card with fewer deaths gains +3.",strat:"Cleaner records edge it out.",tag:"neutral",prob:"3%"},
   {id:"purereflection",mech:"Pure Reflection",icon:"🪞",name:"The Mirror Deep",rule:"You fight with your enemy's past — each card's power becomes the OPPONENT's career kills.",strat:"Turns their record against them.",tag:"flip",prob:"3%"}
 ];
+const COND_EFF = {
+  lowest:"Lowest base power wins — power-adding abilities backfire.",
+  noretreat:"Withdraw is locked — once you select, you must commit.",
+  abilitylock:"No card abilities fire — raw base power only.",
+  forceswap:"After commit, your card becomes a random one from your hand.",
+  surge:"+6 power strikes one random committed card after both lock in.",
+  openbook:"Both cards' identities are revealed before you commit.",
+  recordties:"If power ties, the card with more career kills wins.",
+  provingground:"The higher-base-power card takes −5 (min 1).",
+  mirror:"Each card's power becomes the opponent's base power.",
+  hollowreckoning:"Each card's power becomes its career kills.",
+  veteranedge:"+1 power per 3 kills on the card's record.",
+  freshblood:"0-kill cards gain +6.",
+  puritytrial:"Pristine (0-death) cards gain +5.",
+  puritydrain:"Pristine (0-death) cards take −5.",
+  bloodreckoning:"−1 power per death on the card's record.",
+  deathwish:"+1 power per death on the card's record.",
+  underdog:"The lower base-power card gains +7.",
+  rarityreckoning:"The rarer card gains +5.",
+  commonsrevolt:"The lower-rarity card gains +6.",
+  giantslayer:"If base powers differ by 8+, the weaker card wins outright.",
+  highroller:"Each card gains a random +0 to +10.",
+  chaosrift:"Both powers are re-rolled at random, 1–20.",
+  coinsedge:"The winner is random — power is ignored.",
+  momentumtide:"Whoever is behind in the match gains +6.",
+  eldersreach:"+1 power per 4 duels fought (kills + deaths).",
+  doubleedged:"Power shifts by net record (kills − deaths).",
+  legendsclash:"Apex cards gain +4; all others take −2.",
+  woundedbeast:"Cards with 3+ deaths gain +5.",
+  survivorsground:"The card with fewer deaths gains +3.",
+  purereflection:"Each card's power becomes the opponent's career kills."
+};
 
 const HAND_CARDS = [
   {name:'Kotei',pow:18,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
@@ -3920,8 +3952,8 @@ function revealCondition(){
   setTimeout(() => main.classList.remove('shimmer'), 1000);
   icon.textContent = c.icon;
   name.textContent = c.name;
-  rule.textContent = '';        // description lives in the Codex — keep the in-match box terse
-  strat.textContent = '';
+  rule.textContent = (typeof COND_EFF!=='undefined' && COND_EFF[c.id]) ? COND_EFF[c.id] : '';   // terse EFFECT only
+  strat.textContent = '';        // flavor + coaching live in the Codex
   btn.disabled = true;
 
   document.getElementById('select-hint').textContent = 'Instant window open — then choose a card';
