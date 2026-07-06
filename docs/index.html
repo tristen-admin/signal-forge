@@ -3259,6 +3259,7 @@ let matchTraitPow = {};   // Bloodthirsty snowball: per-card power gained this m
 let untouchableUsed = false;   // Untouchable trait tie-save (once per match)
 let matchPlayed = new Set();   // card keys committed this match — feeds Bonds & Formations
 let pendingOppCard = null;
+let oppHandBot=[], oppDeckBot=[], oppBanishBot=[], _oppInPlay=[]; const OPP_HAND_SIZE=4;
 let preSelectedCard = null;
 let rearGuardIdxs = [];
 let rearGuards = [];
@@ -3352,10 +3353,9 @@ function updatePiles(){
   document.getElementById('wc-count').textContent = winnersCircle.length;
   document.getElementById('banish-count').textContent = banishPile.length;
   document.getElementById('opp-wc-count').textContent = oppWC;
-  { var _dp=(playerScore[0]||0)+(playerScore[1]||0);
-    var _od=document.getElementById('opp-deck-count'); if(_od) _od.textContent=Math.max(0,12-4-_dp);
-    var _oh=document.getElementById('opp-hand-count'); if(_oh) _oh.textContent=Math.max(0,Math.min(4,12-_dp));
-    var _ob=document.getElementById('opp-banish-count'); if(_ob) _ob.textContent=(typeof oppBanishCount!=='undefined'?oppBanishCount:0); }
+  { var _od=document.getElementById('opp-deck-count'); if(_od) _od.textContent=oppDeckBot.length;
+    var _oh=document.getElementById('opp-hand-count'); if(_oh) _oh.textContent=oppHandBot.length;
+    var _ob=document.getElementById('opp-banish-count'); if(_ob) _ob.textContent=oppBanishBot.length; }
   const pile = document.getElementById('pile-wc-chip');
   pile.style.borderColor = winnersCircle.length > 0 ? 'rgba(212,168,67,0.5)' : '';
   const si = document.getElementById('surge-indicator');
@@ -4171,15 +4171,15 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
 function pickOppRears(fighter){
   var out=[];
   for(var k=0;k<RG_SLOTS;k++){
+    if(!oppHandBot.length) break;
     if(Math.random()<0.45) continue;
-    var used=out.map(function(c){return c.name;});
-    var names=Object.keys(CALLED).filter(function(n){ return !CALLED[n].chargeGain && n!==(fighter&&fighter.name) && used.indexOf(n)<0; });
-    if(!names.length) continue;
-    var same=names.filter(function(n){ return fieldLink(fighter,{name:n}); });
-    var pool=(same.length && Math.random()<0.5)?same:names;
-    var nm=pool[Math.floor(Math.random()*pool.length)];
-    var c=(typeof COLLECTION!=='undefined')&&COLLECTION.find(function(x){return x.name===nm && !x.uid;});
-    out.push(c?Object.assign({},c):{name:nm,pow:0,kills:0,deaths:0,rarity:'common'});
+    var pref=oppHandBot.filter(function(c){ return CALLED[c.name] && !CALLED[c.name].chargeGain; });   // prefer a card with a Called effect
+    var linked=pref.filter(function(c){ return fieldLink(fighter,{name:c.name}); });
+    var choose=(linked.length&&Math.random()<0.5)?linked:((pref.length&&Math.random()<0.7)?pref:oppHandBot);
+    var pick=choose[Math.floor(Math.random()*choose.length)];
+    var idx=oppHandBot.indexOf(pick); if(idx<0) continue;
+    var c=oppHandBot.splice(idx,1)[0]; _oppInPlay.push(c);   // support also leaves the bot's hand
+    out.push(_oppStamp(c));
   }
   return out;
 }
@@ -5631,6 +5631,7 @@ function nextTurn(){
   document.getElementById('instant-strip').style.display = 'none';
   document.getElementById('record-reveal').style.display = 'none';
   document.getElementById('cond-main').style.outline = '';
+  if(typeof oppEndDuelCycle==='function') oppEndDuelCycle();
   pendingOppCard = null;
   preSelectedCard = null;
   rearGuardIdxs = []; pendingOppRears = [];
@@ -7299,19 +7300,31 @@ let selectedBot = null;
 let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward gate)
 let activeBot = null;
 
+function oppInitDeck(){
+  var d=(activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool.slice():[];
+  var extra=OPP_CARDS.slice(); for(var i=extra.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=extra[i];extra[i]=extra[j];extra[j]=t; }
+  for(var e=0;e<extra.length && d.length<14;e++){ if(d.indexOf(extra[e])<0) d.push(extra[e]); }   // pad the themed pool up to a full 14-card deck
+  for(var i=d.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=d[i];d[i]=d[j];d[j]=t; }
+  oppDeckBot=d.slice(0,14); oppHandBot=[]; oppBanishBot=[]; _oppInPlay=[]; oppDrawOppHand();
+}
+function oppDrawOppHand(){ while(oppHandBot.length<OPP_HAND_SIZE && oppDeckBot.length){ oppHandBot.push(oppDeckBot.shift()); } }
+function oppEndDuelCycle(){
+  if(_oppInPlay.length){ var botWon=(typeof lastResult!=='undefined' && lastResult==='lose');   // player 'lose' == bot won this duel
+    _oppInPlay.forEach(function(c,i){ if(botWon && i===0) return;   // bot's winning fighter leaves to its WC (tallied via oppWC), doesn't recycle
+      oppDeckBot.push(c); });                                       // losers + supports recycle to deck bottom
+    _oppInPlay=[]; }
+  oppDrawOppHand();
+}
+function _oppStamp(card){ var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null; return Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{}); }
 function pickOppCard(){
-  const pool = (activeBot && activeBot.pool && activeBot.pool.length) ? activeBot.pool : OPP_CARDS;
+  if(!oppHandBot.length) oppInitDeck();
+  if(!oppHandBot.length){ var pool=(activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool:OPP_CARDS; oppHandBot=[pool[Math.floor(Math.random()*pool.length)]]; }
   const bias = activeBot ? activeBot.bias : 0;
-  let card = pool[Math.floor(Math.random()*pool.length)];
-  // difficulty bias: draw twice, keep the higher-power card
-  for(let i=0;i<bias;i++){
-    const alt = pool[Math.floor(Math.random()*pool.length)];
-    if(alt.pow > card.pow) card = alt;
-  }
-  // stamp the canonical ability (OPP_CARDS/bot-pool abils are simplified — resolve() detects effects like Record Guard from this text)
-  var _canon = (typeof COLLECTION!=='undefined') ? COLLECTION.find(function(x){ return x.name===card.name && !x.uid; }) : null;
-  var _out = Object.assign({}, card, (_canon && _canon.abil) ? {abil:_canon.abil} : {});
-  if(activeBot && activeBot.maxed){ _out.kills=99; _out.deaths=5; _out.pow=(_out.pow||8)+6; }   // Trait Trial: maxed record + peak stat boost
+  var bi=Math.floor(Math.random()*oppHandBot.length);
+  for(var i=0;i<bias;i++){ var a=Math.floor(Math.random()*oppHandBot.length); if((oppHandBot[a].pow||0)>(oppHandBot[bi].pow||0)) bi=a; }   // difficulty bias: keep the higher-power draw
+  var card=oppHandBot.splice(bi,1)[0]; _oppInPlay=[card];   // COMMIT: leaves the bot's hand
+  var _out=_oppStamp(card);
+  if(activeBot && activeBot.maxed){ _out.kills=99; _out.deaths=5; _out.pow=(_out.pow||8)+6; }
   return _out;
 }
 
@@ -9675,22 +9688,19 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
 var oppDrawPileBot=[], oppWonBot=new Set();
 function _oppShuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 /* rebuild the bot deck at the start of every match */
-if(typeof resetMatchState==='function'){ var _oppRMS=resetMatchState; resetMatchState=function(){ oppDrawPileBot=[]; oppWonBot=new Set(); if(typeof oppWC!=='undefined') oppWC=0; return _oppRMS.apply(this,arguments); }; }
+if(typeof resetMatchState==='function'){ var _oppRMS=resetMatchState; resetMatchState=function(){ oppDrawPileBot=[]; oppWonBot=new Set(); if(typeof oppWC!=='undefined') oppWC=0; if(typeof oppInitDeck==='function') oppInitDeck(); return _oppRMS.apply(this,arguments); }; }
 /* replace random-with-replacement selection with a real deck draw */
 if(typeof pickOppCard==='function'){ pickOppCard=function(){
-  var pool = (typeof activeBot!=='undefined' && activeBot && activeBot.pool && activeBot.pool.length) ? activeBot.pool : OPP_CARDS;
-  var bias = (typeof activeBot!=='undefined' && activeBot) ? (activeBot.bias||0) : 0;
-  if(!oppWonBot) oppWonBot=new Set();
-  if(!oppDrawPileBot || !oppDrawPileBot.length){
-    oppDrawPileBot = _oppShuffle(pool.filter(function(c){ return !oppWonBot.has(c.name); }).slice());
-    if(!oppDrawPileBot.length) oppDrawPileBot = _oppShuffle(pool.slice());   // extreme fallback: bot won its whole pool
-  }
-  var idx=0, top=Math.min(bias+1, oppDrawPileBot.length);                    // difficulty bias: pick the strongest of the top few
-  for(var b=1;b<top;b++){ if((oppDrawPileBot[b].pow||0) > (oppDrawPileBot[idx].pow||0)) idx=b; }
-  var card = oppDrawPileBot.splice(idx,1)[0];
-  var _canon = (typeof COLLECTION!=='undefined') ? COLLECTION.find(function(x){ return x.name===card.name && !x.uid; }) : null;
-  var _out = Object.assign({}, card, (_canon && _canon.abil) ? {abil:_canon.abil} : {});
-  if(typeof activeBot!=='undefined' && activeBot && activeBot.maxed){ _out.kills=99; _out.deaths=5; _out.pow=(_out.pow||8)+6; }
+  if(!oppHandBot||!oppHandBot.length){ if(typeof oppDrawOppHand==='function') oppDrawOppHand(); }
+  if(!oppHandBot.length){ if(typeof oppInitDeck==='function') oppInitDeck(); }
+  if(!oppHandBot.length){ var _p=(typeof activeBot!=='undefined'&&activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool:OPP_CARDS; oppHandBot=[_p[Math.floor(Math.random()*_p.length)]]; }
+  var bias=(typeof activeBot!=='undefined'&&activeBot)?(activeBot.bias||0):0;
+  var bi=Math.floor(Math.random()*oppHandBot.length);
+  for(var b=0;b<bias;b++){ var a=Math.floor(Math.random()*oppHandBot.length); if((oppHandBot[a].pow||0)>(oppHandBot[bi].pow||0)) bi=a; }   // difficulty bias
+  var card=oppHandBot.splice(bi,1)[0]; _oppInPlay=[card];   // COMMIT from the bot's hand
+  var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null;
+  var _out=Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{});
+  if(typeof activeBot!=='undefined'&&activeBot&&activeBot.maxed){ _out.kills=99;_out.deaths=5;_out.pow=(_out.pow||8)+6; }
   return _out;
 }; }
 /* when the bot wins a duel, its card enters the opponent Winners Circle (never redrawn this match) */
