@@ -9022,7 +9022,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
   banishSurge=0; divinerBonusNext=0; deathRemnantPow=0; lastResult=null; matchCommits=0; skullchainKills=0;
-  ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null;
+  ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false;
   charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellDiscount=0; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
@@ -9034,6 +9034,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   document.getElementById('draw-btn').style.display='none';
   document.getElementById('player-field').innerHTML='<span class="placeholder">your card</span>';
   document.getElementById('opp-field').innerHTML='<span class="placeholder">opponent card</span>';
+  ['player-rear','player-rear2','opp-rear','opp-rear2'].forEach(function(_id){ var _e=document.getElementById(_id); if(_e){ _e.style.display='none'; _e.innerHTML=''; _e.className='rear-slot'+(_id.indexOf('opp')===0?' enemy':''); } });
   document.getElementById('opp-area').className='opp-waiting';
   document.getElementById('opp-area').innerHTML='⏳ Waiting for draw…';
   // reset condition slot
