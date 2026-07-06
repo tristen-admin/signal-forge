@@ -4860,14 +4860,14 @@ const SFX = (function(){
   function setMuted(m){ muted=m; if(m) stopCrowd(); try{ localStorage.setItem('sf_muted', m?'1':'0'); }catch(e){} const b=document.getElementById('sfx-toggle'); if(b) b.textContent=m?'🔇':'🔊'; if(typeof MUSIC!=='undefined')MUSIC.refresh(); }
   function init(){ if(document.getElementById('sfx-toggle')) return; const b=document.createElement('button'); b.id='sfx-toggle'; b.title='Toggle sound'; b.textContent=muted?'🔇':'🔊'; b.style.cssText='position:fixed;right:16px;bottom:16px;z-index:200;width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--panel);color:var(--text);font-size:16px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.45);opacity:0.7;transition:opacity .15s,transform .12s'; b.onmouseenter=function(){b.style.opacity='1';b.style.transform='scale(1.08)';}; b.onmouseleave=function(){b.style.opacity='0.7';b.style.transform='none';}; b.onclick=function(){ setMuted(!muted); if(!muted) play('hover'); }; document.body.appendChild(b); }
   if(typeof document!=='undefined'){ if(document.body) init(); else document.addEventListener('DOMContentLoaded', init); }
-  return { play:play, setMuted:setMuted, startCrowd:startCrowd, stopCrowd:stopCrowd, get muted(){ return muted; } };
+  return { play:play, setMuted:setMuted, startCrowd:startCrowd, stopCrowd:stopCrowd, ac:ac, get muted(){ return muted; } };
 })();
 // ══ MUSIC — procedural background score (Web Audio, zero assets). Combat = tense martial minor; Ascension = expansive mystical. Respects Sound + a separate Music toggle. ══
 const MUSIC = (function(){
   var ctx=null, master=null, timer=null, cur=null, wanted=null, step=0, nextT=0;
   function mtof(m){ return 440*Math.pow(2,(m-69)/12); }
   function want(){ var s=true,m=true; try{ s=localStorage.getItem('sf_muted')!=='1'; }catch(e){} try{ m=localStorage.getItem('sf_music')!=='0'; }catch(e){} return s&&m; }
-  function ac(){ if(!ctx){ try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); master=ctx.createGain(); master.gain.value=0.0001; master.connect(ctx.destination); }catch(e){ ctx=null; } } return ctx; }
+  function ac(){ if(!ctx){ try{ ctx=(typeof SFX!=='undefined'&&SFX.ac)?SFX.ac():new (window.AudioContext||window.webkitAudioContext)(); master=ctx.createGain(); master.gain.value=0.0001; master.connect(ctx.destination); }catch(e){ ctx=null; } } return ctx; }
   function voice(t,freq,dur,type,peak,atk){ try{ var o=ctx.createOscillator(),g=ctx.createGain(); o.type=type; o.frequency.setValueAtTime(freq,t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+(atk||0.01)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g).connect(master); o.start(t); o.stop(t+dur+0.05); }catch(e){} }
   function chord(t,root,dur,type,peak,qual){ var iv=qual==='M'?[0,4,7]:qual==='sus'?[0,5,7]:[0,3,7]; for(var i=0;i<iv.length;i++) voice(t, mtof(root+iv[i]), dur, type, peak, 0.08); }
   function kick(t,peak){ try{ var o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(48,t+0.11); g.gain.setValueAtTime(peak,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.16); o.connect(g).connect(master); o.start(t); o.stop(t+0.2); }catch(e){} }
@@ -4897,8 +4897,10 @@ const MUSIC = (function(){
   function play(theme){ wanted=theme; if(!PROG[theme]) return; if(!want()) return; var c=ac(); if(!c) return; if(c.state==='suspended'){ try{ c.resume(); }catch(e){} } if(cur===theme && timer){ fade(PROG[theme].vol); return; } cur=theme; step=0; nextT=c.currentTime+0.1; if(!timer) timer=setInterval(scheduler,70); fade(PROG[theme].vol); }
   function stop(){ wanted=null; cur=null; fade(0,700); if(timer){ clearInterval(timer); timer=null; } }
   function refresh(){ if(wanted && want()){ var w=wanted; cur=null; play(w); } else { cur=null; fade(0,300); if(timer){ clearInterval(timer); timer=null; } } }
-  return { play:play, stop:stop, refresh:refresh, get current(){ return cur; }, get wanted(){ return wanted; } };
+  return { play:play, stop:stop, refresh:refresh, _dbg:function(){ return {state:ctx?ctx.state:'none', gain:master?+master.gain.value.toFixed(3):0, playing:!!timer, cur:cur, shared:(typeof SFX!=='undefined'&&SFX.ac&&ctx===SFX.ac())}; }, get current(){ return cur; }, get wanted(){ return wanted; } };
 })();
+// resume the shared audio context on the first user gesture (autoplay policy blocks sound until then)
+(function(){ function _unlock(){ try{ if(typeof SFX!=='undefined'&&SFX.ac){ var c=SFX.ac(); if(c&&c.state==='suspended') c.resume(); } }catch(e){} } ['pointerdown','keydown','touchstart','click'].forEach(function(ev){ document.addEventListener(ev,_unlock,{passive:true}); }); })();
 function playAbilityFX(name, caption){
   if(typeof SFX!=='undefined') SFX.play('ability');
   try{
@@ -7297,6 +7299,8 @@ function addToDeck(key){
 }
 function clearDeck(){ if(!confirm('Clear your deck? All cards are removed from the deck. Your collection is unaffected.')) return; activeDeck.clear(); rebuildDeckPool(); buildDeckBuilder(); }
 function loadStarterDeck(){ activeDeck=new Set(DEFAULT_DECK); rebuildDeckPool(); buildDeckBuilder(); }
+// Additive top-up: add owned cards to the deck until it hits the DECK_SIZE cap (never removes existing picks). Returns count added.
+function fillDeckToCap(){ if(typeof activeDeck==='undefined'||activeDeck.size>=DECK_SIZE) return 0; var added=0; COLLECTION.forEach(function(c){ if(activeDeck.size>=DECK_SIZE||c.uid) return; if((ownedCopies[c.name]||0)>0 && !activeDeck.has(c.name)){ activeDeck.add(c.name); added++; } }); return added; }
 
 // ══ PERSISTENCE (localStorage with in-memory fallback) ══
 const LS = (() => { try { const k='__sf__'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return localStorage; } catch(e){ const m={}; return {getItem:k=>k in m?m[k]:null, setItem:(k,v)=>{m[k]=String(v);}, removeItem:k=>{delete m[k];}}; } })();
@@ -9273,6 +9277,7 @@ const _hadSave=(function(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e)
 loadState();
 applyAscendantFrame();
 if(!_hadSave && typeof startNewPlayer==='function') startNewPlayer();
+try{ if(localStorage.getItem('sf_deckfill16')!=='1'){ localStorage.setItem('sf_deckfill16','1'); if(typeof fillDeckToCap==='function' && fillDeckToCap()>0 && typeof saveState==='function') saveState(); } }catch(e){}  /* one-time: top up saved decks to the 16 cap (additive — only adds owned cards you already have) */
 try{ localStorage.setItem('sf_clearrec_v1','1'); }catch(e){}  /* removed one-time cardRecords wipe — it was resetting legit records on reload; playtest tracks persistently */
 try{ localStorage.setItem('sf_grant50k_v1','1'); }catch(e){}  /* playtest: no auto 50k — new player uses startNewPlayer's 5,000 */
 try{ localStorage.setItem('sf_grantcards_v1','1'); }catch(e){}  /* playtest: no auto grant-all — starter is the 15-card deck; rest via shop */
