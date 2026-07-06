@@ -3073,7 +3073,7 @@ const CONDITIONS = [
   {id:'forceswap',mech:'Force Swap',icon:'🎲',name:'The Twisted Vivarium',rule:'In Darwin\'s menagerie specimens are shuffled on a whim — after commit, each player\'s card is replaced by a random card from their hand. You commit a sacrifice, not a fighter.',strat:'Send your worst card. Pray the swap lands something useful.',tag:'chaos',prob:'10%'},
   {id:'surge',mech:'Energy Surge',icon:'🌪️',name:'Sekihar',rule:'Storms break over the peaks without warning — +6 power strikes one randomly selected committed card after both are locked in.',strat:'You do not know who gets the surge. High-variance — plan for both outcomes.',tag:'chaos',prob:'10%'},
   {id:'openbook',mech:'Open Book',icon:'📖',name:'Tosa',rule:'Nothing stays hidden in the capital\'s open court — the opponent\'s card identity is revealed before you commit. They see yours in turn.',strat:'Full read, full counter. Best for ability-heavy decks that can respond.',tag:'info',prob:'10%'},
-  {id:'recordties',mech:'Record Breaks Ties',icon:'💀',name:'Craglorn',rule:'Where two legends once destroyed each other, legacy decides — if power is tied after all effects, the card with more career kills wins. Zero-kill cards lose all ties.',strat:'Pristine records matter here. High-kill veterans carry this condition.',tag:'boost',prob:'9%'},
+  {id:'recordties',mech:'Record Breaks Ties',icon:'💀',name:'Noctreach',rule:'Where two legends once destroyed each other, legacy decides — if power is tied after all effects, the card with more career kills wins. Zero-kill cards lose all ties.',strat:'Pristine records matter here. High-kill veterans carry this condition.',tag:'boost',prob:'9%'},
   {id:'provingground',mech:'Proving Ground',icon:'⛰️',name:'North Kasac',rule:'Skarrow Hold tests restraint, not strength — the higher-base-power card takes −5 power (to a minimum of 1). The mountain humbles the mighty.',strat:'Commit your smaller card into their favorite — underdogs are rewarded here.',tag:'flip',prob:'8%'},
   {id:'mirror',mech:'Mirror',icon:'🔄',name:'Yozai-no-Sato',rule:'In the illusion-warped village nothing is itself — each committed card\'s power becomes equal to the opponent\'s committed base power.',strat:'Turns the duel into a record and ability game — raw power is irrelevant.',tag:'chaos',prob:'7%'},
   {id:'hollowreckoning',mech:'Hollow Reckoning',icon:'🌫️',name:'The Gray',rule:'In the void identity falls away — each card\'s power becomes its career kills. Only what you have done remains.',strat:'Veterans dominate; fresh cards are helpless. Bring your record, not your power.',tag:'chaos',prob:'7%'},
@@ -3140,14 +3140,14 @@ const COND_EFF = {
 const HAND_CARDS = [
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
   {name:'Uso Oso',pow:16,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant: when Uso dies he stays on field. Your cards here gain +7 power until an opponent\'s card is killed, then Remnant is removed.'},
-  {name:'Tanlorin',pow:10,kills:0,deaths:0,rarity:'uncommon',timing:'instant',abil:'⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.'},
+  {name:'Tannis',pow:10,kills:0,deaths:0,rarity:'uncommon',timing:'instant',abil:'⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.'},
   {name:'Bixie Bee',pow:18,kills:0,deaths:0,rarity:'common',timing:null,abil:'No ability. Starter card. Never hesitate to deploy.'},
   {name:'Veronica',pow:14,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: copy opponent\'s card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability.'},
 ];
 
 const ABILITIES = {
   instant: [
-    {icon:'🔥',name:'Banish Surge',timing:'Instant',rule:'Activate from hand during the Instant Window. Send this card to the banish pile permanently. The next card you commit gains power equal to this card\'s base power for that duel only.',ex:'e.g. Tanlorin — 11 power. Sacrifice for +11 on your next commit. Banish is permanent — this card never returns to deck.'},
+    {icon:'🔥',name:'Banish Surge',timing:'Instant',rule:'Activate from hand during the Instant Window. Send this card to the banish pile permanently. The next card you commit gains power equal to this card\'s base power for that duel only.',ex:'e.g. Tannis — 11 power. Sacrifice for +11 on your next commit. Banish is permanent — this card never returns to deck.'},
     {icon:'🚫',name:'Counter',timing:'Instant',rule:'Cancel an opponent\'s instant ability before it resolves. Both activations are revealed simultaneously — first declared, first resolved.',ex:'e.g. Nullveil — 6 power. Trades itself to neutralize any instant.'},
     {icon:'👁',name:'Forced Reveal',timing:'Instant',rule:'Force both players to show their full hand until end of turn. No cards may be played face-down this turn.',ex:'e.g. Specter — 8 power. Intel at cost of your own surprise.'},
     {icon:'💫',name:'Cycle Surge',timing:'Instant',rule:'Send a card from your hand to deck bottom. Draw the top card of your Winners Circle instead. If Winners Circle is empty, draw from deck top.',ex:'e.g. Flux — 5 power. Routes around a bad hand by pulling a proven winner.'},
@@ -3228,8 +3228,8 @@ const DECK_POOL = [
   {name:'Lagertha Waltz — Werewolf Form',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Alpha\'s Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack\'s fury peaks in mourning.'},
   {name:'Hanse Waltz — Werewolf Form',pow:18,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 power while you are behind in the match — rage completes the transformation.'},
   {name:'Ella Ballora — True Form',pow:17,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Devour: on commit, +3 power, and +4 more if you have already won a duel this match — the Spider-Queen grows with every kill she feeds on.'},
-  {name:'Akatosh, the Golden Dragon',pow:24,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Unmaking: when Akatosh is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
-  {name:'Keawe Kil\'lua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.'},
+  {name:'Ourvos, the Golden Dragon',pow:24,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Unmaking: when Ourvos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
+  {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.'},
   {name:'Rhaess Korvain',pow:13,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Assassin\'s Mark: on commit, +6 power if the opponent\'s card has more career kills than this one — Rhaess hunts the notable.'},
   {name:'Ossian Drell',pow:13,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Field Command: on commit, +3 power, and +3 more if you are ahead in the match — a veteran presses the advantage.'},
   {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
@@ -3552,10 +3552,10 @@ function drawCard(){
   hand.push(drawn);
   for(var _xd=1;_xd<DRAW_PER_TURN;_xd++){ if(drawPile.length){ hand.push(drawPile.pop()); } } deckSize=drawPile.length;
 
-  // Akatosh loses 3 power for good each time the god is dragged back from the Winners Circle
-  if(fromWC && drawn.name === 'Akatosh, the Golden Dragon'){
+  // Ourvos loses 3 power for good each time the god is dragged back from the Winners Circle
+  if(fromWC && drawn.name === 'Ourvos, the Golden Dragon'){
     drawn.pow = Math.max(1, drawn.pow - 3);
-    source = `Winners Circle · Akatosh weakened \u2192 ${drawn.pow} power`;
+    source = `Winners Circle · Ourvos weakened \u2192 ${drawn.pow} power`;
   }
 
   // WC-return trigger (Darwin curse becomes available when returned from the Circle)
@@ -4108,10 +4108,10 @@ const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to ex
 const ENERGY_CAP = 6, ENERGY_REGEN = 2;   // energy pool — max 6; per-duel floor scales so late turns never drop low
 const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdor":3};   // ability-strength nudges above the power band (balance dial)
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
-const RACES = ['Human','Dragonkin','Lycan','Vampire','Revenant','Ork','Celestial','Construct','Beast','Spirit','Fae'];
+const RACES = ['Human','Dragonkin','Lycan','Vampire','Revenant','Wrothlan','Celestial','Construct','Beast','Spirit','Fae'];
 const CARD_RACE = {
   // Dragonkin
-  'Akatosh, the Golden Dragon':'Dragonkin','Dragan Korr':'Dragonkin','Heir of Kaiga':'Dragonkin','Dragon':'Dragonkin','Scale Guard':'Dragonkin','Dragonfire':'Dragonkin','Wing Buffet':'Dragonkin','Ragefire':'Dragonkin',
+  'Ourvos, the Golden Dragon':'Dragonkin','Dragan Korr':'Dragonkin','Heir of Kaiga':'Dragonkin','Dragon':'Dragonkin','Scale Guard':'Dragonkin','Dragonfire':'Dragonkin','Wing Buffet':'Dragonkin','Ragefire':'Dragonkin',
   // Lycan
   'Hanse Waltz \u2014 Werewolf Form':'Lycan','Lagertha Waltz \u2014 Werewolf Form':'Lycan','Wolfsblood Guard':'Lycan','Werewolf Fury':'Lycan','Feral Lunge':'Lycan',
   // Vampire
@@ -4119,7 +4119,7 @@ const CARD_RACE = {
   // Revenant (undead)
   'Revenant':'Revenant','Revenant Mercy':'Revenant','The Regenerating Horror':'Revenant','Hollow Ravager':'Revenant','Twisted Specimen':'Revenant','Nyx, Devourer of Legends':'Revenant','Sythe Marrow':'Revenant','Soul Harvest':'Revenant','Grave Chill':'Revenant','Death Remnant':'Revenant','Phantom Cut':'Revenant','The Hollow King':'Revenant',
   // Ork
-  'Ghorruk Skullbrand':'Ork','Doru Blacktooth':'Ork','Arch-Grim Korrin':'Ork','Ruven Ashwalker':'Ork','Skullchain Strike':'Ork',
+  'Ghorruk Skullbrand':'Wrothlan','Doru Blacktooth':'Wrothlan','Arch-Grim Korrin':'Wrothlan','Ruven Ashwalker':'Wrothlan','Skullchain Strike':'Wrothlan',
   // Celestial
   'Valkyrie':'Celestial','Valkyrie Rush':'Celestial','Elowen Dawnspear':'Celestial','Kessa Brightblade':'Celestial','Sister Mire':'Celestial','Aurelion Prime':'Celestial','Stormcaller Prime':'Celestial','Veyra Stormcaller':'Celestial','Rallying Cry':'Celestial','Sovereign':'Celestial','Sovereign Charge':'Celestial','Crownfall':'Celestial',
   // Construct
@@ -4163,7 +4163,7 @@ const CALLED = {
   "King Joris":                    {text:"your Fighter +4 · draw 1", add:4, draw:1},
   "Malia":                         {text:"your Fighter +4", add:4},
   "Moro":                          {text:"return 1 banished card to hand", recurPlain:1},
-  "Akatosh, the Golden Dragon":    {text:"your Fighter +2", add:2},
+  "Ourvos, the Golden Dragon":    {text:"your Fighter +2", add:2},
   "Tange Sazen":                   {text:"your Fighter +3", add:3},
   "Kiba":                          {text:"your Fighter +5", add:5},
   "Hanse Waltz — Werewolf Form":   {text:"your Fighter +3", add:3},
@@ -4181,7 +4181,7 @@ const CALLED = {
   "Ilma the Patient":              {text:"your Fighter +4", add:4},
   "Broodmother":                   {text:"your Fighter +3, then draw 1", add:3, draw:1},
   "Old Garrick":                   {text:"your Fighter +4", add:4},
-  "Keawe Kil'lua":                 {text:"your Fighter +3", add:3},
+  "Keawe Kel'rua":                 {text:"your Fighter +3", add:3},
   "Rhaess Korvain":                {text:"return 1 banished card to hand", recurPlain:1},
   "Ossian Drell":                  {text:"your Fighter +4 · draw 1", add:4, draw:1},
   "Bram the Bulwark":              {text:"your Fighter +3", add:3},
@@ -4314,7 +4314,7 @@ function castSpell(i){
   else if(s.id==='overload') spellOppPow -= 6;
   else if(s.id==='amplify') spellSelfPow += 3;
   else if(s.id==='jammer') spellJam=true;
-  else if(s.id==='recall'){ const idx=Math.floor(Math.random()*winnersCircle.length); const card=winnersCircle.splice(idx,1)[0]; if(card.name==='Akatosh, the Golden Dragon'){ card.pow=Math.max(1,card.pow-3); } if(card.name==='Darwin'){ flameVeilFromWC=true; } hand.push(card); if(typeof buildHand==='function') buildHand(); }
+  else if(s.id==='recall'){ const idx=Math.floor(Math.random()*winnersCircle.length); const card=winnersCircle.splice(idx,1)[0]; if(card.name==='Ourvos, the Golden Dragon'){ card.pow=Math.max(1,card.pow-3); } if(card.name==='Darwin'){ flameVeilFromWC=true; } hand.push(card); if(typeof buildHand==='function') buildHand(); }
   else if(s.id==='nullwave') spellNullOpp=true;
   else if(s.id==='ledgerward') spellShield=true;
   spellDiscount=0;
@@ -4347,7 +4347,7 @@ function lossChooseWinner(){
   if(winnersCircle.length){
     const idx=Math.floor(Math.random()*winnersCircle.length);
     const card=winnersCircle.splice(idx,1)[0];
-    if(card.name==='Akatosh, the Golden Dragon'){ card.pow=Math.max(1,card.pow-3); }
+    if(card.name==='Ourvos, the Golden Dragon'){ card.pow=Math.max(1,card.pow-3); }
     if(card.name==='Darwin'){ flameVeilFromWC=true; }
     hand.push(card); buildHand();
     toast('\u267b Recovered '+card.name+' from the Winners Circle', true);
@@ -5047,7 +5047,7 @@ const LINK_GROUPS = [
   {id:'squad19', name:'Squad 19',       icon:'🛡', pow:1, members:['Ahdor','Val Kreigh','Ruffius Rufeldro']},
   {id:'court',   name:"Darwin's Court",  icon:'🩸', pow:1, members:['Darwin','Alucard The Damned','Zerith Var','Veronica','Ella Ballora','Ella Ballora — True Form','Arch-Grim Korrin','Grim Korrin','Ruffius Rufeldro','Voidmaw the Unmaker']},
   {id:'royalty', name:'Exiled Royalty',  icon:'👑', pow:1, members:['Moro','Malia','King Joris']},
-  {id:'dragon',  name:'Dragon-Pact',     icon:'🐉', pow:1, members:['Tange Sazen','Akatosh, the Golden Dragon','Kiba','Kleydson','Kaelthar the Ascendant']},
+  {id:'dragon',  name:'Dragon-Pact',     icon:'🐉', pow:1, members:['Tange Sazen','Ourvos, the Golden Dragon','Kiba','Kleydson','Kaelthar the Ascendant']},
   {id:'waltz',   name:'Waltz Twins',     icon:'🐺', pow:1, members:['Lagertha Waltz','Hanse Waltz','Lagertha Waltz — Werewolf Form','Hanse Waltz — Werewolf Form','Kessuae, Tide of Ruin']},
   {id:'legend',  name:'Split Legend',    icon:'✨', pow:1, members:['Kotei','Ahdor','Kleydson','Anorith Keeling','Anorith Prime','Sunforged Colossus']},
 ];
@@ -5492,7 +5492,7 @@ const CARD_RULES = {
    "log": "🌕 Mourning: +4"
   }
  ],
- "Keawe Kil'lua": [
+ "Keawe Kel'rua": [
   {
    "if": {
     "v": "last_result",
@@ -5608,8 +5608,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
   let glacialForcedTie = false;
   const abilityLocked = cond.id === 'abilitylock';
   if(abilityLocked) abilLog.push('⚡ Ability Lock — all card effects suppressed');
-  const akatoshUnmakes = (pc.name === 'Akatosh, the Golden Dragon') && !abilityLocked;  // on-commit fires after the condition; a lock gags it first
-  if(akatoshUnmakes) abilLog.push('🐉 Akatosh unmakes the arena — the active condition takes no effect this duel.');
+  const akatoshUnmakes = (pc.name === 'Ourvos, the Golden Dragon') && !abilityLocked;  // on-commit fires after the condition; a lock gags it first
+  if(akatoshUnmakes) abilLog.push('🐉 Ourvos unmakes the arena — the active condition takes no effect this duel.');
 
   // Lingering debuffs from prior turns (not blocked by Ability Lock)
   if(oppNextDebuff !== 0){
@@ -6116,7 +6116,7 @@ let marketListings = [];
 let marketFocus = null;  // when set, market compares/filters to this card name
 let marketSort = 'recent';  // 'recent' | 'legend' | 'price'
 function seedMarket(){
-  const names = ['Arch-Grim Korrin','Lagertha Waltz','Tange Sazen','Zerith Var','Val Kreigh','Kiana','Alucard The Damned','Ella Ballora','Malia','Moro','Anorith Keeling','Forgemask','Valcarion','Chieftain Reyva Vosh','Rhaess Korvain','Ossian Drell','Tanlorin','Broodmother','King Joris','Sister Mire','Heir of Kaiga','Ella Ballora — True Form','Hanse Waltz','Uso Oso','Melanie','Bixie Bee'];
+  const names = ['Arch-Grim Korrin','Lagertha Waltz','Tange Sazen','Zerith Var','Val Kreigh','Kiana','Alucard The Damned','Ella Ballora','Malia','Moro','Anorith Keeling','Forgemask','Valcarion','Chieftain Reyva Vosh','Rhaess Korvain','Ossian Drell','Tannis','Broodmother','King Joris','Sister Mire','Heir of Kaiga','Ella Ballora — True Form','Hanse Waltz','Uso Oso','Melanie','Bixie Bee'];
   const reg = names.map(name => {
     const c = COLLECTION.find(x => x.name === name); if(!c || isStarter(c)) return null; const h = hashStr(name);
     const seller = '0x' + ((h*2654435761)>>>0).toString(16).slice(0,4) + '…' + (h>>>16).toString(16).padStart(4,'0').slice(0,4);
@@ -6124,12 +6124,12 @@ function seedMarket(){
   }).filter(Boolean);
   // Legendary UNDEFEATED Pristine GENESIS instances listed by whale vaults
   const whales = [
-    {name:'Akatosh, the Golden Dragon', k:512, d:0, price:8400000, seller:'@ApexCollector', legend:true},
+    {name:'Ourvos, the Golden Dragon', k:512, d:0, price:8400000, seller:'@ApexCollector', legend:true},
     {name:'Kotei',                      k:447, d:0, price:6900000, seller:'@GenesisVault', legend:true},
     {name:'Ahdor',                      k:318, d:0, price:4250000, seller:'@TheWhale', legend:true},
     {name:'Darwin',                     k:276, d:0, price:3800000, seller:'@VoidRunner', legend:true},
     {name:'Kotei',                      k:129, d:0, price:1450000, seller:'@Ravensmoor', legend:true},
-    {name:'Akatosh, the Golden Dragon', k:88,  d:0, price:990000,  seller:'@IronLedger', legend:true},
+    {name:'Ourvos, the Golden Dragon', k:88,  d:0, price:990000,  seller:'@IronLedger', legend:true},
   ].filter(w => COLLECTION.find(x=>x.name===w.name)).map(w => Object.assign({mine:false, sold:false}, w));
   marketListings = whales.concat(reg);
 }
@@ -6364,7 +6364,7 @@ function newPlayerReset(){
   if(typeof toast==='function') toast('🌱 New-player state — 12 starter cards · 10,000 ◈ · 0 ❖ · 0 Bounty · records 0-0.', true);
 }
 // ── STARTER SET — new-player onboarding deck; infinite / always-in-creation, so NOT tradeable ──
-const STARTER_SET = ['Keawe Kil\'lua','Lagertha Waltz','Hanse Waltz','Uso Oso','Melanie','Moro','Malia','King Joris','Bixie Bee','Ruffius Rufeldro','Kiba','Heir of Kaiga','Josef','Sister Mire','Veronica','Zerith Var'];
+const STARTER_SET = ['Keawe Kel\'rua','Lagertha Waltz','Hanse Waltz','Uso Oso','Melanie','Moro','Malia','King Joris','Bixie Bee','Ruffius Rufeldro','Kiba','Heir of Kaiga','Josef','Sister Mire','Veronica','Zerith Var'];
 function isStarter(c){ const n=typeof c==='string'?c:(c&&c.name); return STARTER_SET.indexOf(n)>=0; }
 // PROVENANCE (Option A play-only firewall): 'forged'=earned → tradeable+wagerable | 'bought'=real-money Forge lane → play-only | 'starter'=fixed
 function cardProv(c){ if(!c) return 'forged'; if(c.variant) return 'variant'; if(c.prov) return c.prov; if(isStarter(c)) return 'starter'; return 'forged'; }
@@ -6582,7 +6582,7 @@ const FRAMES = [
   {id:'runic', name:'Runic Ward', cost:1500, kind:'forge'},
   {id:'m-kotei', name:'Kotei’s Crest', kind:'mastery', unit:'Kotei', lvl:8},
   {id:'m-ahdor', name:'Ahdor’s Aegis', kind:'mastery', unit:'Ahdor', lvl:8},
-  {id:'m-akatosh', name:'Dragon’s Hoard', kind:'mastery', unit:'Akatosh, the Golden Dragon', lvl:8},
+  {id:'m-akatosh', name:'Dragon’s Hoard', kind:'mastery', unit:'Ourvos, the Golden Dragon', lvl:8},
 ];
 let cardFrames = {};
 let ownedFrames = new Set(['none']);
@@ -6661,7 +6661,7 @@ let variantEditions = {};   // {defId:{minted,circulating,sealed}} — Panini-In
 let variantEssence = 0;   // cosmetic-only currency from ingesting dupe variants (NEVER buys cards/power/Signal)
 let variantFed = {};   // {defId:#dupes fed} -> drives cosmetic ascension tier
 const VARIANT_DEFS = [
-  {id:'v-akatosh-eclipse', unit:'Akatosh, the Golden Dragon', label:'Eclipse', tier:'genesis', foil:'ethereal'},
+  {id:'v-akatosh-eclipse', unit:'Ourvos, the Golden Dragon', label:'Eclipse', tier:'genesis', foil:'ethereal'},
   {id:'v-kotei-ascend', unit:'Kotei', label:'Ascendant', tier:'genesis', foil:'ethereal'},
   {id:'v-darwin-primal', unit:'Darwin', label:'Primal', tier:'genesis', foil:'ethereal'},
   {id:'v-tange-shogun', unit:'Tange Sazen', label:'Shogun', tier:'genesis', foil:'gold'},
@@ -6935,7 +6935,7 @@ const REPLAY_STEPS = [
   {id:6,label:'Duel 1 · Turn 2',sublabel:'Condition Revealed',stake:'1×',series:[1,0],
    condition:{icon:'🔻',name:'Lowest Wins',rule:'Lowest base power wins. Power-adding abilities are now traps.'},condActive:true,
    playerCard:null,oppCard:null,events:[],result:null,
-   annotation:'Lowest Wins completely flips the board — every high-power card is now a liability, and Darwin is resting in the Winners Circle after duel 1. Player A\'s hand: Bixie Bee 1, Veronica 10, Tanlorin 10, Lagertha Waltz 14. The correct play is obvious: Bixie Bee. 1 power beats everything under Lowest Wins.',kdAfter:{}},
+   annotation:'Lowest Wins completely flips the board — every high-power card is now a liability, and Darwin is resting in the Winners Circle after duel 1. Player A\'s hand: Bixie Bee 1, Veronica 10, Tannis 10, Lagertha Waltz 14. The correct play is obvious: Bixie Bee. 1 power beats everything under Lowest Wins.',kdAfter:{}},
 
   {id:7,label:'Duel 1 · Turn 2',sublabel:'Player A Commits Bixie Bee',stake:'1×',series:[1,0],
    condition:{icon:'🔻',name:'Lowest Wins',rule:'Lowest base power wins.'},condActive:true,
@@ -7062,23 +7062,23 @@ function rpNext(){if(rpStep<REPLAY_STEPS.length-1){rpStep++;rpRender();}}
 const MATCH_INTRO_VID='assets/video/66bbd351b5dc.mp4';
 const VIDEO_ABILITY = {'Ahdor':'assets/video/7f826fbdcad5.mp4'};
 const VIDEO_PREVIEW = {'Ahdor':'assets/video/c10dbd49fc67.mp4','Kotei':'assets/video/222c2f796bd8.mp4'};
-const _AKATOSH_VID='assets/video/965a4b0011bb.mp4';VIDEO_ABILITY['Akatosh, the Golden Dragon']=_AKATOSH_VID;VIDEO_PREVIEW['Akatosh, the Golden Dragon']=_AKATOSH_VID;
+const _AKATOSH_VID='assets/video/965a4b0011bb.mp4';VIDEO_ABILITY['Ourvos, the Golden Dragon']=_AKATOSH_VID;VIDEO_PREVIEW['Ourvos, the Golden Dragon']=_AKATOSH_VID;
 const VIDEO_FULL = {'Ahdor':'assets/video/140f98e8b4de.mp4','Kotei':'assets/video/868d1c0552f1.mp4'};
-VIDEO_FULL['Akatosh, the Golden Dragon']=_AKATOSH_VID;
+VIDEO_FULL['Ourvos, the Golden Dragon']=_AKATOSH_VID;
 const _TANGE_VID='assets/video/1a2dfab9ec4b.mp4';VIDEO_ABILITY['Tange Sazen']=_TANGE_VID;VIDEO_PREVIEW['Tange Sazen']=_TANGE_VID;VIDEO_FULL['Tange Sazen']=_TANGE_VID;
 const VIDEO_FOCUS={'Ahdor':'center 24%'};function vidStyle(k){return VIDEO_FOCUS[k]?' style="object-position:'+VIDEO_FOCUS[k]+'"':'';}
 const ART_FOCUS={'Tange Sazen':'center 45%'};function artFoc(k){return ART_FOCUS[k]?' style="object-position:'+ART_FOCUS[k]+';transform:none"':'';}
 const CARD_ART = {
   'The Regenerating Horror':'assets/img/ee57670d048e.jpg',
-  'Tanlorin':'assets/img/c9af2bca1593.jpg',
+  'Tannis':'assets/img/c9af2bca1593.jpg',
   "Korrin's Possessed Legion":'assets/img/2dfae2d4f8cc.jpg',
   "Uso Oso's Skeletal Summons":'assets/img/c38ecea15574.jpg',
   'kotei-tournament':'assets/img/5f0ac8b353ea.jpg',
-  'Akatosh, the Golden Dragon':'assets/img/f07fd8da5102.jpg',
+  'Ourvos, the Golden Dragon':'assets/img/f07fd8da5102.jpg',
   'Ella Ballora — True Form':'assets/img/6f54f1f4d850.jpg',
   'Hanse Waltz — Werewolf Form':'assets/img/b934414aa4f4.jpg',
   'Lagertha Waltz — Werewolf Form':'assets/img/47a92a2ee0aa.jpg',
-  'Keawe Kil\'lua':'assets/img/ffb1df0dd296.jpg',
+  'Keawe Kel\'rua':'assets/img/ffb1df0dd296.jpg',
   'Rhaess Korvain':'assets/img/a552d2f2e191.jpg',
   'Ossian Drell':'assets/img/cfffed729ba5.jpg',
   'King Joris':'assets/img/f1177c2e6979.jpg',
@@ -7114,15 +7114,15 @@ const CARD_ART = {
 };
 const CARD_ART_FULL = {
   'The Regenerating Horror':'assets/img/b8c63020e8d0.jpg',
-  'Tanlorin':'assets/img/57cdd7d8df13.jpg',
+  'Tannis':'assets/img/57cdd7d8df13.jpg',
   "Korrin's Possessed Legion":'assets/img/16d3ca5085b0.jpg',
   "Uso Oso's Skeletal Summons":'assets/img/389cdb02b010.jpg',
   'kotei-tournament':'assets/img/53e65759fc3a.jpg',
-  'Akatosh, the Golden Dragon':'assets/img/51c787c7fb43.jpg',
+  'Ourvos, the Golden Dragon':'assets/img/51c787c7fb43.jpg',
   'Ella Ballora — True Form':'assets/img/2ff8a09bef37.jpg',
   'Hanse Waltz — Werewolf Form':'assets/img/67806431d3a6.jpg',
   'Lagertha Waltz — Werewolf Form':'assets/img/c0cea1c7d044.jpg',
-  'Keawe Kil\'lua':'assets/img/4ebc5e8c90fb.jpg',
+  'Keawe Kel\'rua':'assets/img/4ebc5e8c90fb.jpg',
   'Rhaess Korvain':'assets/img/9f9a1fa52c46.jpg',
   'Ossian Drell':'assets/img/73b5b5645881.jpg',
   'King Joris':'assets/img/aae7ba14dc18.jpg',
@@ -7158,7 +7158,7 @@ const CARD_ART_FULL = {
 };
 
 const LOCATION_ART = {
-  'Craglorn':'assets/img/fc65d1956078.jpg',
+  'Noctreach':'assets/img/fc65d1956078.jpg',
   'Yozai-no-Sato':'assets/img/8cd158829779.jpg',
   'North Kasac':'assets/img/e69d2937c5aa.jpg',
   'The Gray':'assets/img/ea24c3447143.jpg',
@@ -7172,14 +7172,14 @@ const LOCATION_ART = {
 const CARD_SIGIL = {
   'Kaelthar the Ascendant':'🐉','Voidmaw the Unmaker':'🌑','Sunforged Colossus':'☀️','Kessuae, Tide of Ruin':'🌊',
   'kotei-tournament':'🏆',
-  'Keawe Kil\'lua':'⚡','Rhaess Korvain':'🗡','Ossian Drell':'🎖',
-  'Kotei':'⚡','Uso Oso':'🐻','Tanlorin':'⚡','Bixie Bee':'🐝','Veronica':'🎭',
+  'Keawe Kel\'rua':'⚡','Rhaess Korvain':'🗡','Ossian Drell':'🎖',
+  'Kotei':'⚡','Uso Oso':'🐻','Tannis':'⚡','Bixie Bee':'🐝','Veronica':'🎭',
   'Ahdor':'🛡','Ruffius Rufeldro':'🗡','Kiba':'🐺','Darwin':'🧬','Malia':'🪞','Moro':'🐾',
   'Hanse Waltz':'🎻','Arch-Grim Korrin':'💀','Zerith Var':'🔥','Valcarion':'🔒','Val Kreigh':'⚔',
   'Tange Sazen':'🗡','Lagertha Waltz':'🪓','Anorith Keeling':'🦂',
   'Alucard The Damned':'🩸','Ella Ballora':'⚔️','Kiana':'🔥',
   'King Joris':'👑','Chieftain Reyva Vosh':'🏔','Broodmother':'🕷','Forgemask':'🔨','Sister Mire':'🌱',
-  'Heir of Kaiga':'🗡','Melanie':'🌷','Josef':'🧵','Akatosh, the Golden Dragon':'🐉','Ella Ballora — True Form':'🕸',
+  'Heir of Kaiga':'🗡','Melanie':'🌷','Josef':'🧵','Ourvos, the Golden Dragon':'🐉','Ella Ballora — True Form':'🕸',
   "Korrin's Possessed Legion":'🪖','Hanse Waltz — Werewolf Form':'🐺','Lagertha Waltz — Werewolf Form':'🌕','The Regenerating Horror':'👁','Uso Oso\'s Skeletal Summons':'🦴'
 };
 const TIMING_LABEL = {on:'On-Commit',instant:'Instant',pre:'Pre-Commit',resolution:'Resolution'};
@@ -8445,7 +8445,7 @@ function cardMasteryWins(key){ return (avatarBond[key]&&avatarBond[key].wins)||0
 function masteryRewardsOf(rarity){ return MASTERY_REWARDS[rarity]||[]; }
 function masteryLevelOf(c){ return Math.min(MASTERY_MAX, cardMasteryWins(c.uid||c.name)); }
 function masteryName(c,type){ const n=(c.name||'').split(/[ ,]/)[0];
-  // Smart title: use the epithet after a comma ("Akatosh, the Golden Dragon" -> "The Golden Dragon"); else "The <first name>".
+  // Smart title: use the epithet after a comma ("Ourvos, the Golden Dragon" -> "The Golden Dragon"); else "The <first name>".
   var _title; { var full=(c.name||'').split(' — ')[0]; var mm=full.match(/,\s*(?:the\s+)?(.+)$/i); _title = mm ? ('The '+mm[1].replace(/\b\w/g,function(ch){return ch.toUpperCase();})) : ('The '+n); }
   return type==='emote'?n+' — Signature Emote':type==='header'?'Champion of '+n+' — Header':type==='sleeve'?n+' — Card Sleeve':type==='title'?_title+' — Title':type==='frame'?'Ascendant Frame — all cards':type==='variant'?n+' — Ascendant Variant (free copy)':type; }
 function masteryNextReward(c){ const lvl=masteryLevelOf(c); return masteryRewardsOf(c.rarity).find(function(r){return r.lvl>lvl;})||null; }
@@ -8556,7 +8556,7 @@ function buildTrade(){
 // ══ ASCENSION — JRPG party mode: separate unit roster/vault, turn-based battles ══
 const ASC_UNITS=[
   {id:'kotei',    name:'Kotei',                     art:'Kotei',                     role:'Sovereign',  avatar:true,  hp:120, atk:26, spd:12, ability:{name:"Sovereign's Edict", kind:'aoe',  power:30, uses:2, desc:'Signature — heavy damage to every foe.'}},
-  {id:'akatosh',  name:'Akatosh, the Golden Dragon',art:'Akatosh, the Golden Dragon',role:'Dragon',     avatar:true,  hp:112, atk:30, spd:10, ability:{name:'Dragonfire',        kind:'dmg',  power:54, uses:2, desc:'Signature — devastating single-target flame.'}},
+  {id:'akatosh',  name:'Ourvos, the Golden Dragon',art:'Ourvos, the Golden Dragon',role:'Dragon',     avatar:true,  hp:112, atk:30, spd:10, ability:{name:'Dragonfire',        kind:'dmg',  power:54, uses:2, desc:'Signature — devastating single-target flame.'}},
   {id:'forgemask',name:'Forgemask',                 art:'Forgemask',                 role:'Guardian',   avatar:false, hp:158, atk:18, spd:7,  ability:{name:'Reforge',           kind:'heal', power:50, uses:2, desc:"Restore a large chunk of an ally's HP."}},
   {id:'tange',    name:'Tange Sazen',               art:'Tange Sazen',               role:'Blademaster',avatar:false, hp:94,  atk:33, spd:14, ability:{name:'Skullchain Strike',  kind:'dmg',  power:44, uses:2, desc:'A brutal single-target cut.'}},
   {id:'veronica', name:'Veronica',                  art:'Veronica',                  role:'Support',    avatar:false, hp:100, atk:19, spd:11, ability:{name:'Echo Ward',         kind:'heal', power:34, uses:3, desc:'Steady healing for an ally.'}},
@@ -8565,9 +8565,9 @@ const ASC_UNITS=[
   {id:'hanse',    name:'Hanse Waltz',               art:'Hanse Waltz',               role:'Warden',     avatar:false, hp:146, atk:20, spd:8,  ability:{name:'Last Stand',        kind:'heal', power:44, uses:2, desc:"Shore up an ally's HP when it matters most."}},
   {id:'uso',      name:'Uso Oso',                   art:'Uso Oso',                   role:'Revenant',   avatar:false, hp:104, atk:29, spd:12, ability:{name:'Death Remnant',     kind:'dmg',  power:40, uses:2, desc:'A haunting single-target strike.'}},
   {id:'ahdor',    name:'Ahdor',                     art:'Ahdor',                     role:'Keeper',     avatar:false, hp:150, atk:19, spd:8,  ability:{name:'Record Guard',      kind:'heal', power:38, uses:2, desc:'Guard an ally with a protective ward.'}},
-  {id:'keawe',    name:"Keawe Kil'lua",            art:"Keawe Kil'lua",            role:'Heir',       avatar:true,  hp:116, atk:27, spd:13, ability:{name:"Kil'lua Gambit",     kind:'dmg',  power:48, uses:2, desc:'Signature — a precise, lethal strike on one foe.'}}
+  {id:'keawe',    name:"Keawe Kel'rua",            art:"Keawe Kel'rua",            role:'Heir',       avatar:true,  hp:116, atk:27, spd:13, ability:{name:"Kel'rua Gambit",     kind:'dmg',  power:48, uses:2, desc:'Signature — a precise, lethal strike on one foe.'}}
 ];
-const ASC_JOURNEY=['Sorn-Vallis','The Black Citadel','North Kasac','Craglorn','Yozai-no-Sato','The Gray'];
+const ASC_JOURNEY=['Sorn-Vallis','The Black Citadel','North Kasac','Noctreach','Yozai-no-Sato','The Gray'];
 const ASC_PASSIVES={
   kotei:{name:"Sovereign's Aura", atk:4, desc:'Your units strike with +4 ATK.'},
   akatosh:{name:"Dragon's Blessing", atk:3, hp:12, desc:'Your units gain +3 ATK and +12 max HP.'},
@@ -8674,10 +8674,10 @@ const ASC_STORY=[
    beat:"In Yozai-no-Sato nothing is itself. A masked warrior waits at its heart, a dragon's pact burning gold beneath his scars — and behind him, half-dreamed, the great eye of a sleeping god weighs whether you are worth the killing."},
   {loc:'North Kasac', title:'Skarrow Hold', champ:'Chieftain Reyva Vosh', art:'Chieftain Reyva Vosh', type:'elite',
    beat:"Skarrow Hold tests restraint, not strength. Two generations ago it followed a warlord who lost himself mid-campaign and turned on his own warriors. Chieftain Reyva Vosh will not make that mistake twice — win without losing control, or do not win at all."},
-  {loc:'Craglorn', title:'Where Legends Died', champ:'Arch-Grim Korrin', art:'Arch-Grim Korrin', type:'elite',
-   beat:"Craglorn is a wound in the world — the shattered land where, an age ago, the first Ahdor-Khaan and Valcarion destroyed one another. What crawls its ruins now is Arch-Grim Korrin, and the Undying Flame answers to his ruined hands."},
+  {loc:'Noctreach', title:'Where Legends Died', champ:'Arch-Grim Korrin', art:'Arch-Grim Korrin', type:'elite',
+   beat:"Noctreach is a wound in the world — the shattered land where, an age ago, the first Ahdor-Khaan and Valcarion destroyed one another. What crawls its ruins now is Arch-Grim Korrin, and the Undying Flame answers to his ruined hands."},
   {loc:'The Black Citadel', title:"The Mad King's Web", champ:'Darwin', art:'Darwin', type:'boss',
-   beat:"The Black Citadel floats on a slab of Craglorn torn loose and raised into the sky — Darwin's throne, older than Darwin by far. The Mad King rules through fear, at the word of a deeper master who may not have his best interests at heart. He has been waiting for you to climb this high."},
+   beat:"The Black Citadel floats on a slab of Noctreach torn loose and raised into the sky — Darwin's throne, older than Darwin by far. The Mad King rules through fear, at the word of a deeper master who may not have his best interests at heart. He has been waiting for you to climb this high."},
   {loc:'The Gray', title:'The Undying Flame', champ:'Sister Mire', art:'Sister Mire', type:'boss',
    beat:"Past the Rift's last edge lies the Gray, where the banished are kept and identity itself falls away. A hooded courier cradles an ember of the Undying Flame — proof the war does not end with a king. Sister Mire turns to face you: 'Ash returns to root. Roots drink deep. Death... rebirthed.'"}
 ];
@@ -8686,8 +8686,8 @@ const ASC_STORY_CH2=[
    beat:"Sekihar welcomes you with open arms, and the warmest belong to Ruffius Rufeldro, who has never once been caught being what he is. He offers help you did not ask for, in a voice built to be trusted. Behind the smile he is already deciding how you will be useful."},
   {loc:'North Kasac', title:'The Blackened Order', champ:'Kleydson', art:'Kleydson', type:'elite',
    beat:"A rider crosses the frost with fire in one hand and killing cold in the other, raised by the Blackened Order to hunt exactly the kind of legend you are becoming. Kleydson does not hate you. That is what makes him dangerous."},
-  {loc:'Craglorn', title:'What The Wound Remembers', champ:'Anorith Keeling', art:'Anorith Keeling', type:'elite',
-   beat:"Craglorn keeps its dead close. Something old wears the name Anorith Keeling here, stitched together from an age that ended in fire, and it remembers being a legend before the land broke it. It would like company in the ruin."},
+  {loc:'Noctreach', title:'What The Wound Remembers', champ:'Anorith Keeling', art:'Anorith Keeling', type:'elite',
+   beat:"Noctreach keeps its dead close. Something old wears the name Anorith Keeling here, stitched together from an age that ended in fire, and it remembers being a legend before the land broke it. It would like company in the ruin."},
   {loc:'Yozai-no-Sato', title:'The Sleeping Pact', champ:'Kiba', art:'Kiba', type:'elite',
    beat:"The illusion village remembers you, and this time it does not bother to hide. A dragon-pact stirs in Kiba, gold beneath the skin, and the great eye that judged you once now weighs whether you have grown enough to be worth waking for."},
   {loc:'The Black Citadel', title:"The Court's Last Stand", champ:'Ella Ballora — True Form', art:'Ella Ballora — True Form', type:'boss',
