@@ -4842,10 +4842,47 @@ const SFX = (function(){
     master.connect(c.destination); src.start(t); rsrc.start(t); lfo.start(t);
     crowd={src:src,rsrc:rsrc,lfo:lfo,master:master}; }catch(e){} }
   function stopCrowd(){ if(!crowd||!ctx){ crowd=null; return; } try{ const c=ctx,t=c.currentTime,cr=crowd; cr.master.gain.cancelScheduledValues(t); cr.master.gain.setValueAtTime(Math.max(0.0001,cr.master.gain.value||0.05),t); cr.master.gain.exponentialRampToValueAtTime(0.0001,t+0.7); setTimeout(function(){ try{cr.src.stop();cr.rsrc.stop();cr.lfo.stop();}catch(e){} },800); }catch(e){} crowd=null; }
-  function setMuted(m){ muted=m; if(m) stopCrowd(); try{ localStorage.setItem('sf_muted', m?'1':'0'); }catch(e){} const b=document.getElementById('sfx-toggle'); if(b) b.textContent=m?'🔇':'🔊'; }
+  function setMuted(m){ muted=m; if(m) stopCrowd(); try{ localStorage.setItem('sf_muted', m?'1':'0'); }catch(e){} const b=document.getElementById('sfx-toggle'); if(b) b.textContent=m?'🔇':'🔊'; if(typeof MUSIC!=='undefined')MUSIC.refresh(); }
   function init(){ if(document.getElementById('sfx-toggle')) return; const b=document.createElement('button'); b.id='sfx-toggle'; b.title='Toggle sound'; b.textContent=muted?'🔇':'🔊'; b.style.cssText='position:fixed;right:16px;bottom:16px;z-index:200;width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--panel);color:var(--text);font-size:16px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.45);opacity:0.7;transition:opacity .15s,transform .12s'; b.onmouseenter=function(){b.style.opacity='1';b.style.transform='scale(1.08)';}; b.onmouseleave=function(){b.style.opacity='0.7';b.style.transform='none';}; b.onclick=function(){ setMuted(!muted); if(!muted) play('hover'); }; document.body.appendChild(b); }
   if(typeof document!=='undefined'){ if(document.body) init(); else document.addEventListener('DOMContentLoaded', init); }
   return { play:play, setMuted:setMuted, startCrowd:startCrowd, stopCrowd:stopCrowd, get muted(){ return muted; } };
+})();
+// ══ MUSIC — procedural background score (Web Audio, zero assets). Combat = tense martial minor; Ascension = expansive mystical. Respects Sound + a separate Music toggle. ══
+const MUSIC = (function(){
+  var ctx=null, master=null, timer=null, cur=null, wanted=null, step=0, nextT=0;
+  function mtof(m){ return 440*Math.pow(2,(m-69)/12); }
+  function want(){ var s=true,m=true; try{ s=localStorage.getItem('sf_muted')!=='1'; }catch(e){} try{ m=localStorage.getItem('sf_music')!=='0'; }catch(e){} return s&&m; }
+  function ac(){ if(!ctx){ try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); master=ctx.createGain(); master.gain.value=0.0001; master.connect(ctx.destination); }catch(e){ ctx=null; } } return ctx; }
+  function voice(t,freq,dur,type,peak,atk){ try{ var o=ctx.createOscillator(),g=ctx.createGain(); o.type=type; o.frequency.setValueAtTime(freq,t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+(atk||0.01)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g).connect(master); o.start(t); o.stop(t+dur+0.05); }catch(e){} }
+  function chord(t,root,dur,type,peak,qual){ var iv=qual==='M'?[0,4,7]:qual==='sus'?[0,5,7]:[0,3,7]; for(var i=0;i<iv.length;i++) voice(t, mtof(root+iv[i]), dur, type, peak, 0.08); }
+  function kick(t,peak){ try{ var o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(48,t+0.11); g.gain.setValueAtTime(peak,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.16); o.connect(g).connect(master); o.start(t); o.stop(t+0.2); }catch(e){} }
+  function hit(t,peak,hp,dur){ try{ var n=Math.max(1,Math.floor(ctx.sampleRate*(dur||0.05))), b=ctx.createBuffer(1,n,ctx.sampleRate), d=b.getChannelData(0); for(var i=0;i<n;i++) d[i]=(Math.random()*2-1)*(1-i/n); var s=ctx.createBufferSource(); s.buffer=b; var f=ctx.createBiquadFilter(); f.type='highpass'; f.frequency.value=hp||7000; var g=ctx.createGain(); g.gain.setValueAtTime(peak,t); g.gain.exponentialRampToValueAtTime(0.0001,t+(dur||0.05)); s.connect(f).connect(g).connect(master); s.start(t); s.stop(t+(dur||0.05)+0.02); }catch(e){} }
+  var PROG={
+    combat:{ sd:0.235, len:16, vol:0.5, wave:'sawtooth', pad:'triangle',
+      chords:[[45,'m'],[41,'M'],[48,'M'],[40,'M']],
+      bass:[45,null,52,null, 41,null,48,null, 48,null,55,null, 40,null,47,null],
+      kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0], hat:[0,1,0,1,0,1,0,1,0,1,0,1,0,1,0,1],
+      lead:null, bassV:0.16, padV:0.075, kickV:0.32, snareV:0.11, hatV:0.045 },
+    ascension:{ sd:0.34, len:16, vol:0.42, wave:'triangle', pad:'sine',
+      chords:[[50,'m'],[46,'M'],[53,'M'],[48,'sus']],
+      bass:[38,null,null,null, 34,null,null,null, 41,null,null,null, 36,null,null,null],
+      kick:null, snare:null, hat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],
+      lead:[62,null,65,null, 69,null,72,null, 67,null,65,null, 62,null,null,null], bassV:0.14, padV:0.07, hatV:0.03, leadV:0.085 }
+  };
+  function schedStep(t){ var p=PROG[cur]; if(!p) return; var s=step%p.len;
+    if(s%4===0){ var ci=(s/4)%p.chords.length, ch=p.chords[ci]; chord(t, ch[0], p.sd*4*0.96, p.pad, p.padV, ch[1]); }
+    if(p.bass){ var b=p.bass[s]; if(b!=null) voice(t, mtof(b), p.sd*0.92, p.wave, p.bassV, 0.008); }
+    if(p.lead){ var l=p.lead[s]; if(l!=null) voice(t, mtof(l), p.sd*1.7, 'sine', p.leadV, 0.03); }
+    if(p.kick&&p.kick[s]) kick(t, p.kickV);
+    if(p.snare&&p.snare[s]) hit(t, p.snareV, 1600, 0.09);
+    if(p.hat&&p.hat[s]) hit(t, p.hatV, 8000, 0.03);
+  }
+  function scheduler(){ var c=ac(); if(!c||!cur){ return; } while(nextT < c.currentTime+0.28){ schedStep(nextT); nextT+=PROG[cur].sd; step++; } }
+  function fade(v,ms){ if(!master||!ctx) return; var t=ctx.currentTime, cv=Math.max(0.0001, master.gain.value||0.0001); master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(cv,t); master.gain.linearRampToValueAtTime(Math.max(0.0001,v), t+(ms||900)/1000); }
+  function play(theme){ wanted=theme; if(!PROG[theme]) return; if(!want()) return; var c=ac(); if(!c) return; if(c.state==='suspended'){ try{ c.resume(); }catch(e){} } if(cur===theme && timer){ fade(PROG[theme].vol); return; } cur=theme; step=0; nextT=c.currentTime+0.1; if(!timer) timer=setInterval(scheduler,70); fade(PROG[theme].vol); }
+  function stop(){ wanted=null; cur=null; fade(0,700); if(timer){ clearInterval(timer); timer=null; } }
+  function refresh(){ if(wanted && want()){ var w=wanted; cur=null; play(w); } else { cur=null; fade(0,300); if(timer){ clearInterval(timer); timer=null; } } }
+  return { play:play, stop:stop, refresh:refresh, get current(){ return cur; }, get wanted(){ return wanted; } };
 })();
 function playAbilityFX(name, caption){
   if(typeof SFX!=='undefined') SFX.play('ability');
@@ -5810,6 +5847,7 @@ function show(id, btn){
   if(id==='market') buildMarket();
   if(id==='legend') buildLegendBoard();
   if(id==='profile') buildProfile();
+  if(typeof MUSIC!=='undefined'){ if(id==='turn') MUSIC.play('combat'); else if(id==='asc') MUSIC.play('ascension'); else MUSIC.stop(); }
 }
 
 // ── MARKETPLACE ──
@@ -9396,6 +9434,7 @@ body:has(#v-turn.on) .set-btn{display:none}
   <div class="set-panel">
     <div class="set-title">Settings</div>
     <div class="set-row"><div><div class="sr-lbl">Sound</div><div class="sr-sub">Combat + UI effects</div></div><div id="set-sound" class="set-tgl" onclick="toggleSound()"></div></div>
+    <div class="set-row"><div><div class="sr-lbl">Music</div><div class="sr-sub">Background score — combat + Ascension</div></div><div id="set-music" class="set-tgl" onclick="toggleMusic()"></div></div>
     <div class="set-row"><div><div class="sr-lbl">Reduce Motion</div><div class="sr-sub">Fewer animations — smoother on phones</div></div><div id="set-motion" class="set-tgl" onclick="toggleMotion()"></div></div>
     <button class="set-link" onclick="closeSettings();showHowTo()">🃏 How to Play</button>
     <button class="set-link" onclick="closeSettings()">Close</button>
@@ -9408,12 +9447,14 @@ body:has(#v-turn.on) .set-btn{display:none}
     var snd=document.getElementById('set-sound'), mot=document.getElementById('set-motion');
     var muted=(typeof SFX!=='undefined'&&SFX.muted); if(snd) snd.classList.toggle('on', !muted);
     var rm=false; try{ rm=localStorage.getItem('sf_rm')==='1'; }catch(e){} if(mot) mot.classList.toggle('on', rm);
+    var mus=document.getElementById('set-music'); var mon=true; try{ mon=localStorage.getItem('sf_music')!=='0'; }catch(e){} if(mus) mus.classList.toggle('on', mon);
   }
   var rm0=false; try{ rm0=localStorage.getItem('sf_rm')==='1'; }catch(e){} if(rm0) document.body.classList.add('rm');
   window.openSettings=function(){ sync(); var o=document.getElementById('set-ov'); if(o)o.classList.add('on'); };
   window.closeSettings=function(){ var o=document.getElementById('set-ov'); if(o)o.classList.remove('on'); };
   window.toggleSound=function(){ if(typeof SFX!=='undefined'){ SFX.setMuted(!SFX.muted); } sync(); };
   window.toggleMotion=function(){ var on=!document.body.classList.contains('rm'); document.body.classList.toggle('rm',on); try{ localStorage.setItem('sf_rm', on?'1':'0'); }catch(e){} sync(); };
+  window.toggleMusic=function(){ var on=true; try{ on=localStorage.getItem('sf_music')!=='0'; }catch(e){} on=!on; try{ localStorage.setItem('sf_music', on?'1':'0'); }catch(e){} if(typeof MUSIC!=='undefined')MUSIC.refresh(); sync(); };
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var o=document.getElementById('set-ov'); if(o&&o.classList.contains('on')) closeSettings(); } });
 })();
 </script>
