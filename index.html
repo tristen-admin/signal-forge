@@ -2216,7 +2216,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <button class="nav-grp-head" onclick="toggleNavGroup('grp-collection')"><span class="ni-icon">🗂</span><span class="brand-text">Collection</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
         <button class="navitem" id="nav-vault" onclick="show('vault',this)"><span class="ni-icon">🗄</span><span class="brand-text">Vault</span><span class="ni-badge" id="vault-badge">19</span></button>
-        <button class="navitem" id="nav-deck" onclick="show('deck',this)"><span class="ni-icon">🃏</span><span class="brand-text">Deck Builder</span><span class="ni-badge" id="deck-badge">0/10</span></button>
+        <button class="navitem" id="nav-deck" onclick="show('deck',this)"><span class="ni-icon">🃏</span><span class="brand-text">Deck Builder</span><span class="ni-badge" id="deck-badge">0/12</span></button>
         <button class="navitem" id="nav-mastery" onclick="show('mastery',this);buildMastery()"><span class="ni-icon">⭐</span><span class="brand-text">Mastery &amp; Bonds</span></button>
         <button class="navitem" id="nav-trade" onclick="show('trade',this);buildTrade()"><span class="ni-icon">🤝</span><span class="brand-text">Trade</span></button>
       </div>
@@ -2342,7 +2342,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <button class="dst on" id="dst-deck" onclick="deckTab('deck')">Deck</button>
         <button class="dst" id="dst-backs" onclick="deckTab('backs')">🎴 Card Backs</button><button class="dst" id="dst-sleeves" onclick="deckTab('sleeves')">🃏 Sleeves</button><button class="dst" id="dst-energy" onclick="deckTab('energy')">&#x26a1; Energy</button>
       </div>
-      <span class="dh-count" id="deck-count-label">0 / 15</span>
+      <span class="dh-count" id="deck-count-label">0 / 12</span>
       <span class="dh-status" id="deck-status">Add 10 more</span>
       <span class="dh-power" id="deck-power"></span>
     </div>
@@ -6095,7 +6095,7 @@ function loadState(){
       if(Array.isArray(s.wonInstances)){ wonInstances=s.wonInstances; if(typeof s.wonCounter==='number') wonCounter=s.wonCounter; wonInstances.forEach(function(w){ var m=/-(\d+)$/.exec(w.uid||''); if(m) wonCounter=Math.max(wonCounter, +m[1]); }); materializeWon(); }
       if(s.ownedCopies){ ownedCopies={}; for(const n in s.ownedCopies){ ownedCopies[n]=s.ownedCopies[n]; } }  // REPLACE the boot 1-of-each, don't merge — else onboarding's limited roster reverts to all cards
       if(s.freshCopies){ freshCopies=s.freshCopies; }
-      if(Array.isArray(s.activeDeck)) activeDeck=new Set(s.activeDeck);
+      if(Array.isArray(s.activeDeck)) activeDeck=new Set(s.activeDeck.slice(0, (typeof DECK_SIZE!=='undefined'?DECK_SIZE:12)));
       if(Array.isArray(s.energyLoadout) && s.energyLoadout.length) energyLoadout=s.energyLoadout.slice(0,5);
     }
     // pre-v2 saves were name-keyed (a won card wrongly stacked base + variant) — discard those counts for a clean instance-keyed vault
@@ -6174,7 +6174,7 @@ function startNewPlayer(){
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']);
   STARTER_SET.forEach(nm=>{ const c=COLLECTION.find(x=>x.name===nm && !x.uid); if(c){ ownedCopies[nm]=1; cardRecords[nm]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Starter deck'}]}; } });
-  activeDeck=new Set(STARTER_SET.filter(nm=>!!COLLECTION.find(x=>x.name===nm && !x.uid)));
+  activeDeck=new Set(STARTER_SET.filter(nm=>!!COLLECTION.find(x=>x.name===nm && !x.uid)).slice(0, DECK_SIZE));
   featuredCards=['Ella Ballora']; featuredShuffle=false; featuredRotIdx=0;
   equipped={aura:'gold',back:'sealed',emblem:'crest',title:'integrator',sleeves:'standard',summon:'golden'};
   ownedCosmetics.clear(); ['aura:gold','back:sealed','emblem:crest','title:integrator','sleeves:standard','summon:golden'].forEach(k=>ownedCosmetics.add(k));
@@ -7007,7 +7007,7 @@ let firstTurn = true;           // opening turn of a match: no auto-draw
 let roundTimer = null;          // 3s round-start countdown handle
 let decisionTimer = null;       // 15s decision clock handle
 const STARTING_HAND = 4;
-const DECK_SIZE = 15;
+const DECK_SIZE = 12;
 const MIN_DECK = 12;   // decks are 12–15 cards (min 12 to play, max 15)            // decks are exactly 10 unique cards
 // Curated 10-card starter deck (used when no full custom deck is built)
 const DEFAULT_DECK = ['Kotei','Lagertha Waltz','Kiana','Melanie','Arch-Grim Korrin','Darwin','Ruffius Rufeldro','King Joris','Ahdor','Valcarion','Bram the Bulwark','Old Garrick'];
@@ -7347,9 +7347,9 @@ let activeBot = null;
 function oppInitDeck(){
   var d=(activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool.slice():[];
   var extra=OPP_CARDS.slice(); for(var i=extra.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=extra[i];extra[i]=extra[j];extra[j]=t; }
-  for(var e=0;e<extra.length && d.length<14;e++){ if(d.indexOf(extra[e])<0) d.push(extra[e]); }   // pad the themed pool up to a full 14-card deck
+  for(var e=0;e<extra.length && d.length<DECK_SIZE;e++){ if(d.indexOf(extra[e])<0) d.push(extra[e]); }   // pad the themed pool up to a full 14-card deck
   for(var i=d.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=d[i];d[i]=d[j];d[j]=t; }
-  oppDeckBot=d.slice(0,14); oppHandBot=[]; oppBanishBot=[]; _oppInPlay=[]; oppDrawOppHand();
+  oppDeckBot=d.slice(0,DECK_SIZE); oppHandBot=[]; oppBanishBot=[]; _oppInPlay=[]; oppDrawOppHand();
 }
 function oppDrawOppHand(){ while(oppHandBot.length<OPP_HAND_SIZE && oppDeckBot.length){ oppHandBot.push(oppDeckBot.shift()); } }
 function oppEndDuelCycle(){
