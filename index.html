@@ -4642,15 +4642,25 @@ function _injectResolveCSS(){
   +'.rc-card.rc-fallen{opacity:.4;filter:grayscale(.6)}'
   +'.rc-card.rc-tie{border-color:var(--text3)}'
   +'.rc-slot{position:relative;display:flex;align-items:center;justify-content:center}'
-  +'.rc-slot .bigcard.tframe{width:210px}' /* reveal-tension-v1 */
+  +'.rc-slot .bigcard.tframe{width:104px}'
   +'.rc-slot .bigcard{animation:rc-flip .55s cubic-bezier(.2,.75,.3,1) both;transform-origin:center;backface-visibility:hidden}'
-  +'.rc-slot.me .bigcard{animation-delay:.06s}'
+  +'.rc-slot.me .bigcard{animation-delay:.30s}'
   +'.rc-slot.opp .bigcard{animation-delay:.42s}'
   +'.rc-slot .rc-fx{position:absolute;left:0;right:0;top:30%;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:3px;z-index:6}'
   +'.rc-slot.pu .bigcard{animation:rc-gu .42s ease}.rc-slot.pd .bigcard{animation:rc-gd .42s ease}'
   +'.rc-slot.rc-victor .bigcard{filter:drop-shadow(0 0 26px rgba(212,168,67,.7));animation:rc-vic .5s ease}'
   +'.rc-slot.rc-fallen{opacity:.42;filter:grayscale(.55)}'
   +'.rc-slot .tf-pow.rc-pow.tick{animation:rc-pop .32s cubic-bezier(.2,1.6,.4,1)}'
+  +'.rc-slot.rc-clash{z-index:20}'
+  +'.rc-slot.rc-clash .bigcard{animation:rc-cclash .62s cubic-bezier(.34,1.5,.5,1) forwards}'
+  +'@keyframes rc-cclash{0%{transform:scale(1)}52%{transform:scale(1.74)}74%{transform:scale(1.46)}100%{transform:scale(1.6)}}'
+  +'.rc-dim{opacity:.26!important;filter:grayscale(.6)!important;transition:opacity .45s,filter .45s}'
+  +'#v-turn .field.rc-shake{animation:rc-cshake .5s ease}'
+  +'@keyframes rc-cshake{0%,100%{transform:translate(0,0)}18%{transform:translate(-7px,4px)}38%{transform:translate(6px,-4px)}58%{transform:translate(-5px,3px)}78%{transform:translate(4px,-2px)}}'
+  +'.rc-flash{position:absolute;left:50%;top:42%;width:160px;height:160px;margin:-80px 0 0 -80px;border-radius:50%;pointer-events:none;z-index:25;background:radial-gradient(circle,rgba(255,244,214,.95),rgba(245,194,77,.42) 42%,transparent 70%);opacity:0}'
+  +'.rc-flash.go{animation:rc-cflash .55s ease-out}'
+  +'@keyframes rc-cflash{0%{transform:scale(.2);opacity:0}25%{opacity:.95}100%{transform:scale(2);opacity:0}}'
+  +'.rc-slot.rc-fallen .bigcard{animation:none!important;transform:scale(.9)!important;transition:transform .45s}'
   +'@media (prefers-reduced-motion:reduce){.rc-card,.rc-slot .bigcard,.rc-pow.tick,.rc-chip{animation:none!important}}';
   document.head.appendChild(s);
 }
@@ -4667,6 +4677,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     }
     if(pf) pf.innerHTML=faceCard(pc,'me');
     if(of) of.innerHTML=faceCard(oc,'opp');
+    if(!reduce){ try{ document.querySelectorAll('#player-rear .bigcard,#player-rear2 .bigcard,#opp-rear .bigcard,#opp-rear2 .bigcard').forEach(function(el,ix){ el.style.animation='rc-flip .5s cubic-bezier(.2,.75,.3,1) both'; el.style.animationDelay=(0.04+ix*0.06)+'s'; }); }catch(e){} }
     function tagPow(side,val){ var slot=document.getElementById('rc-card-'+side); if(!slot) return; var p=slot.querySelector('.tf-pow'); if(p){ p.id='rc-pow-'+side; p.classList.add('rc-pow'); p.textContent=R(val); } var v=slot.querySelector('video'); if(v){ try{ v.muted=true; v.play(); }catch(e){} } }
     tagPow('me',basePP); tagPow('opp',baseOP);
     function pw(side){ return document.getElementById('rc-pow-'+side); }
@@ -4674,6 +4685,19 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     function chip(side,d,m){ var h=document.getElementById('rc-fx-'+side); if(!h) return; var c=document.createElement('div'); c.className='rc-chip '+(d>0?'up':(d<0?'down':'flat')); c.textContent=(d?((d>0?'+':'')+d+'  '):'')+lbl(m); h.appendChild(c); setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); },1200); }
     function tic(side,v){ var e=pw(side); if(!e) return; e.textContent=R(v); e.classList.remove('tick'); void e.offsetWidth; e.classList.add('tick'); }
     function pulse(side,k){ var c=document.getElementById('rc-card-'+side); if(c){ c.classList.remove('pu','pd'); void c.offsetWidth; c.classList.add(k); } }
+    function clash(){
+      var cm=document.getElementById('rc-card-me'), co=document.getElementById('rc-card-opp');
+      if(cm) cm.classList.add('rc-clash'); if(co) co.classList.add('rc-clash');
+      ['player-rear','player-rear2','opp-rear','opp-rear2'].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.add('rc-dim'); });
+      var fld=document.querySelector('#v-turn .field');
+      setTimeout(function(){
+        if(fld){ fld.classList.remove('rc-shake'); void fld.offsetWidth; fld.classList.add('rc-shake');
+          var fl=document.createElement('div'); fl.className='rc-flash'; fld.appendChild(fl); void fl.offsetWidth; fl.classList.add('go');
+          setTimeout(function(){ if(fl.parentNode) fl.parentNode.removeChild(fl); if(fld) fld.classList.remove('rc-shake'); }, 640); }
+        if(typeof SFX!=='undefined') SFX.play('commit');
+      }, 330);
+      setTimeout(finish, 880);
+    }
     function finish(){
       var pm=pw('me'), po=pw('opp'); if(pm) pm.textContent=R(finalPP); if(po) po.textContent=R(finalOP);
       var cm=document.getElementById('rc-card-me'), co=document.getElementById('rc-card-opp');
@@ -4684,11 +4708,11 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     }
     var ps=(steps||[]).filter(function(s){ return s.dp||s.dop; });
     if(reduce){ finish(); return; }
-    var HOLD=1050; // let the flip land + a tension beat before effects tic
-    if(ps.length===0){ setTimeout(finish, HOLD+300); return; }
-    var i=0, per = ps.length>6?520:760;
+    var HOLD=780; // let the flip land + a brief tension beat before effects tic
+    if(ps.length===0){ setTimeout(clash, HOLD+300); return; }
+    var i=0, per = ps.length>6?380:540;
     setTimeout(function(){ (function step(){
-      if(i>=ps.length){ finish(); return; }
+      if(i>=ps.length){ clash(); return; }
       var s=ps[i++];
       if(s.dp){ tic('me',s.pp); chip('me',s.dp,s.m); pulse('me', s.dp>0?'pu':'pd'); }
       if(s.dop){ tic('opp',s.op); chip('opp',s.dop,s.m); pulse('opp', s.dop>0?'pu':'pd'); }
