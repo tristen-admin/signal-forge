@@ -398,7 +398,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 #kw-tip{position:fixed;z-index:110;width:262px;pointer-events:none;opacity:0;transform:translate(-50%,-100%) scale(0.94);transform-origin:bottom center;transition:opacity 0.12s ease,transform 0.12s ease;background:var(--panel);border:1px solid var(--border2);border-radius:9px;padding:10px 12px;box-shadow:0 14px 38px rgba(0,0,0,0.6)}
 #kw-tip.show{opacity:1;transform:translate(-50%,-100%) scale(1)}
 #kw-tip .kwt-title{font-size:11px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;color:var(--electric);margin-bottom:5px}
-#kw-tip .kwt-def{font-size:11.5px;color:var(--text);line-height:1.5}
+#kw-tip .kwt-def{font-size:11.5px;color:var(--text);line-height:1.5}.kw-chiprow{display:flex;flex-wrap:wrap;gap:3px;align-items:center;justify-content:center}.kw-chip{font-size:9px;font-weight:700;color:var(--electric);background:rgba(91,192,235,0.1);border:1px solid rgba(91,192,235,0.28);border-radius:10px;padding:1px 7px;white-space:nowrap;cursor:help;line-height:1.55}.kw-chip:hover{background:rgba(91,192,235,0.22)}.kw-chip.gold{color:var(--gold);background:rgba(245,194,77,0.1);border-color:rgba(245,194,77,0.3)}.kw-chip.gold:hover{background:rgba(245,194,77,0.22)}.kw-stat{font-size:9px;font-weight:800;color:var(--gold);background:rgba(245,194,77,0.1);border:1px solid rgba(245,194,77,0.28);border-radius:10px;padding:1px 7px;white-space:nowrap}.kw-stat.dim{color:var(--text3);background:rgba(255,255,255,0.03);border-color:var(--border);font-weight:600}.rcard .kw-chiprow{justify-content:flex-start;margin:2px 0 5px}
 
 /* ── MATCH-END (WIN / LOSS) SCREEN ── */
 .match-end{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,rgba(7,9,15,0.86),rgba(7,9,15,0.97));backdrop-filter:blur(3px)}
@@ -7131,7 +7131,15 @@ const KEYWORDS = {
   'Elemental Flurry': 'On commit, gains power, plus extra power when a chaos condition is active.',
   'Winners Circle': 'Cards you win with go here. After a lost round you may recover one at random (re-risking its record) instead of drawing a spell.',
   'Pristine': 'A card with zero deaths on its permanent record — a perfect, never-beaten history.',
-  'Purity': 'The value carried by a Pristine record — a card that has never been beaten. Effects that "drain purity" turn an opponent\'s spotless 0-death history into an advantage against it.'
+  'Purity': 'The value carried by a Pristine record — a card that has never been beaten. Effects that "drain purity" turn an opponent\'s spotless 0-death history into an advantage against it.',
+  'Charge': 'Builds Energy over the duel. Spend Energy on Interrupt spells mid-fight.',
+  'Called': 'A free Support effect. Drop this card into a rear slot to fire it — it never costs Energy and boosts your fighter.',
+  'Link': 'When a support shares a lore group with your fighter, it adds bonus power. Same-family cards fight better together.',
+  'Recur': 'Returns cards from your banish pile back to your hand — often stronger than they left.',
+  'Banish': 'Sends cards to your banish pile. That pile is the fuel your Recur cards feed on.',
+  'Trigger': 'Revealed off the top of your deck after a lost duel, it fires a free comeback reward.',
+  'Conjure': 'The Energy cost to deploy this card as your fighter. Bigger bodies cost more Energy.',
+  'Regeneration': 'The first time it would lose, the duel ties instead and it returns to your hand.'
 };
 const KW_FILTERABLE = ['Instant','Death Remnant','Record Guard','Kill Escalation','Last Stand','Pre-commit','Bloodrage','Elemental Flurry'];
 const KW_KEYS = Object.keys(KEYWORDS).sort((a,b) => b.length - a.length);
@@ -7149,6 +7157,26 @@ function glossify(text){
     const key = KW_KEYS.find(k => k.toLowerCase() === m.toLowerCase());
     return `<span class="kw" data-kw="${key}">${m}</span>`;
   });
+}
+const KW_ICON = { 'Charge':'⚡','Called':'📣','Link':'🔗','Recur':'♻','Banish':'☠','Trigger':'✨','Conjure':'🎴','Regeneration':'👁','Death Remnant':'💀','Record Guard':'🛡','Kill Escalation':'⚔️','Last Stand':'🌙','Bloodrage':'🩸','Banish Surge':'☠','Pre-commit':'📌','Instant':'⚡','Pristine':'◈','Elemental Flurry':'🌪️' };
+function cardKeywords(c){
+  if(!c) return [];
+  var out=[], seen={}; function add(k){ if(k&&KEYWORDS[k]&&!seen[k]){ seen[k]=1; out.push(k); } }
+  ['Record Guard','Last Stand','Regeneration','Kill Escalation','Death Remnant','Bloodrage','Elemental Flurry','Banish Surge','Pre-commit'].forEach(function(k){ if(typeof cardHasKeyword==='function'&&cardHasKeyword(c,k)) add(k); });
+  var called=(typeof CALLED!=='undefined')&&CALLED[c.name];
+  if(called){ if(called.chargeGain) add('Charge'); if(called.banishOwn||called.bothBanish) add('Banish'); if(called.recurBuff||called.recurPlain) add('Recur'); }
+  if((c.abil||'').toLowerCase().indexOf('charge')>=0) add('Charge');
+  if(typeof cardHasKeyword==='function'&&cardHasKeyword(c,'Instant')) add('Instant');
+  if(typeof TRIGGERS!=='undefined'&&TRIGGERS[c.name]) add('Trigger');
+  if(typeof LINK_GROUPS!=='undefined'&&LINK_GROUPS.some(function(g){return g.members&&g.members.indexOf(c.name)>=0;})) add('Link');
+  return out;
+}
+function keywordChipsHTML(c){
+  var chips=cardKeywords(c).map(function(k){ return '<span class="kw-chip" data-kw="'+k+'">'+((typeof KW_ICON!=='undefined'&&KW_ICON[k])||'◈')+' '+k+'</span>'; });
+  var called=(typeof CALLED!=='undefined')&&CALLED[c.name];
+  if(called&&(called.add||called.draw)){ var t='📣 '+(called.add?'+'+called.add:'')+(called.draw?((called.add?' · ':'')+'draw '+called.draw):''); chips.push('<span class="kw-chip gold" data-kw="Called">'+t+'</span>'); }
+  if(!chips.length) chips.push('<span class="kw-stat dim">Pure power — no ability</span>');
+  return '<div class="kw-chiprow">'+chips.join('')+'</div>';
 }
 
 // ══ DECK STATE ══
@@ -7927,7 +7955,7 @@ function bigCardHTML(c){
     <div class="tf-name">${c.name}</div>
     <div class="tf-pow"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${(c.pow||0)+(c._bo||0)}</div>
     <div class="tf-kd"><span class="k">${c.kills}K</span>/<span class="d">${c.deaths}D</span>${c.deaths===0?' ◈':''}</div>
-    <div class="tf-text"><div class="tf-abil"><b class="tf-lbl">⚔️</b>${c.abil}</div>${CALLED[c.name]?`<div class="tf-called"><b class="tf-lbl gold">📣</b>${CALLED[c.name].text}</div>`:``}</div>
+    <div class="tf-text">${typeof keywordChipsHTML==='function'?keywordChipsHTML(c):''}</div>
   </div>`;
 }
 function readableCardHTML(c){
@@ -7943,8 +7971,9 @@ function readableCardHTML(c){
     + '<div class="rc-art"'+(art?' style="'+art+'"':'')+'>'+sig+'</div>'
     + '<div class="rc-top"><span class="rc-cost">⚡'+cost+'</span><span class="rc-name">'+c.name+'</span><span class="rc-pow">'+((c.pow||0)+(c._bo||0))+'</span></div>'
     + '<div class="rc-meta">'+String(c.rarity).toUpperCase()+' · <span class="k">'+kd.k+'K</span> / <span class="d">'+kd.d+'D</span>'+pristine+'</div>'
+    + (typeof keywordChipsHTML==='function'?keywordChipsHTML(c):'')
     + '<div class="rc-sec"><span class="rc-lbl">⚔ Conjured — Fighter</span>'+gl(c.abil)+'</div>'
-    + (called?'<div class="rc-sec rc-called"><span class="rc-lbl">📣 Called — Support</span>'+called.text+'</div>':'')
+    + (called?'<div class="rc-sec rc-called"><span class="rc-lbl">📣 Called — Support</span>'+gl(called.text)+'</div>':'')
     + '</div>';
 }
 function previewCardEl(c, el, readable){
