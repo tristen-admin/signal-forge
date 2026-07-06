@@ -4217,7 +4217,15 @@ function selectCard(i, el){
 function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview();
   var c=hand[i]; if(!c || c.timing==='instant') return;
   if(phase!=='revealed' && phase!=='selecting') return;
-  if(conjureCost(c) > charge){ if(typeof toast==='function') toast('Not enough energy — '+c.name+' costs ⚡'+conjureCost(c)+' (you have '+charge+')', false); return; }
+  { var _cc=conjureCost(c);
+    if(_cc > charge){
+      var _fcosts=hand.filter(function(h){return h && h.timing!=='instant';}).map(conjureCost);
+      var _minC=_fcosts.length?Math.min.apply(null,_fcosts):0;
+      if(charge >= _minC){ if(typeof toast==='function') toast('Not enough energy — '+c.name+' costs ⚡'+_cc+'. Conjure a cheaper card (⚡'+charge+' available).', false); return; }
+      if(_cc > _minC){ if(typeof toast==='function') toast('Energy-starved — only your cheapest fighter (⚡'+_minC+') conjures free. Pick it.', false); return; }
+      if(typeof toast==='function') toast('⚡ Energy-starved — '+c.name+' conjured free. You can always field a fighter.', true);
+    }
+  }
   if(typeof SFX!=='undefined')SFX.play('deploy');
   preSelectedCard = i; rearGuardIdxs = [];
   if(!pendingOppCard){ pendingOppCard = pickOppCard(); pendingOppRears = pickOppRears(pendingOppCard); }
