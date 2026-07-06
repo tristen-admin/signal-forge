@@ -4661,7 +4661,10 @@ function _injectResolveCSS(){
   +'.rc-flash.go{animation:rc-cflash .55s ease-out}'
   +'@keyframes rc-cflash{0%{transform:scale(.2);opacity:0}25%{opacity:.95}100%{transform:scale(2);opacity:0}}'
   +'.rc-slot.rc-fallen .bigcard{animation:none!important;transform:scale(.9)!important;transition:transform .45s}'
-  +'@media (prefers-reduced-motion:reduce){.rc-card,.rc-slot .bigcard,.rc-pow.tick,.rc-chip{animation:none!important}}';
+  +'.rc-quake{animation:rc-quake .46s ease;z-index:15}'
+  +'@keyframes rc-quake{0%,100%{transform:translateX(0) rotate(0)}14%{transform:translateX(-6px) rotate(-3deg)}30%{transform:translateX(6px) rotate(3deg)}46%{transform:translateX(-4px) rotate(-2deg)}62%{transform:translateX(4px) rotate(1.4deg)}80%{transform:translateX(-2px) rotate(0)}}'
+  +'.rear-slot.rc-quake{box-shadow:0 0 16px rgba(245,194,77,.55)}'
+  +'@media (prefers-reduced-motion:reduce){.rc-card,.rc-slot .bigcard,.rc-pow.tick,.rc-chip,.rc-quake{animation:none!important}}';
   document.head.appendChild(s);
 }
 function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP, won, onDone){
@@ -4685,6 +4688,22 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     function chip(side,d,m){ var h=document.getElementById('rc-fx-'+side); if(!h) return; var c=document.createElement('div'); c.className='rc-chip '+(d>0?'up':(d<0?'down':'flat')); c.textContent=(d?((d>0?'+':'')+d+'  '):'')+lbl(m); h.appendChild(c); setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); },1200); }
     function tic(side,v){ var e=pw(side); if(!e) return; e.textContent=R(v); e.classList.remove('tick'); void e.offsetWidth; e.classList.add('tick'); }
     function pulse(side,k){ var c=document.getElementById('rc-card-'+side); if(c){ c.classList.remove('pu','pd'); void c.offsetWidth; c.classList.add(k); } }
+    function allCardEls(){
+      var out=[];
+      [['me',pc,['player-rear','player-rear2'],(typeof rearGuards!=='undefined'?rearGuards:[])],
+       ['opp',oc,['opp-rear','opp-rear2'],(typeof pendingOppRears!=='undefined'?pendingOppRears:[])]].forEach(function(row){
+        var side=row[0], fCard=row[1], ids=row[2], sups=row[3]||[];
+        (sups||[]).forEach(function(sc,k){ if(sc && ids[k]){ var e=document.getElementById(ids[k]); if(e) out.push({name:sc.name, el:e}); } });
+        var fEl=document.getElementById('rc-card-'+side); if(fEl && fCard) out.push({name:fCard.name, el:fEl});
+      });
+      return out;
+    }
+    function shakeSource(side, m){
+      var msg=String(m||''); var list=allCardEls(); var hit=null, hk='';
+      for(var j=0;j<list.length;j++){ var nm=list[j].name; if(!nm) continue; var key=nm.split(/[ ,\u2014]/)[0]; if(key.length>2 && msg.indexOf(key)>=0 && key.length>hk.length){ hit=list[j]; hk=key; } }
+      var t = hit ? hit.el : document.getElementById('rc-card-'+side);
+      if(t){ t.classList.remove('rc-quake'); void t.offsetWidth; t.classList.add('rc-quake'); setTimeout(function(){ if(t) t.classList.remove('rc-quake'); }, 480); }
+    }
     function clash(){
       var cm=document.getElementById('rc-card-me'), co=document.getElementById('rc-card-opp');
       if(cm) cm.classList.add('rc-clash'); if(co) co.classList.add('rc-clash');
@@ -4716,6 +4735,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
       var s=ps[i++];
       if(s.dp){ tic('me',s.pp); chip('me',s.dp,s.m); pulse('me', s.dp>0?'pu':'pd'); }
       if(s.dop){ tic('opp',s.op); chip('opp',s.dop,s.m); pulse('opp', s.dop>0?'pu':'pd'); }
+      shakeSource((s.dp?'me':'opp'), s.m);
       if(typeof SFX!=='undefined') SFX.play('commit');
       setTimeout(step, per);
     })(); }, HOLD);
