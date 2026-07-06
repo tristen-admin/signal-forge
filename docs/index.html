@@ -4131,6 +4131,8 @@ const CARD_RACE = {
   // everything else defaults to 'Human' (see raceOf)
 };
 let raceOverride = {};   // design-time per-card race edits (persisted); wins over CARD_RACE
+let NAME_OVERRIDE = {};  // dev display-name overrides (card FACE only; canonical rename handed to Claude via Export)
+function dispName(nm){ return (NAME_OVERRIDE && NAME_OVERRIDE[nm]) || nm; }
 function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Human'; }
 function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.race=r; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83e\uddec Race set: '+name+' \u2192 '+r, true); }
 function conjureCost(c){ if(!c) return 1; if(c.cost!=null) return c.cost; if(COST_OVERRIDE[c.name]!=null) return COST_OVERRIDE[c.name]; var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; }
@@ -8178,7 +8180,7 @@ function bigCardHTML(c){
   return `<div class="bigcard tframe ${c.rarity||''} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})">
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
-    <div class="tf-name">${c.name}</div>
+    <div class="tf-name">${dispName(c.name)}</div>
     <div class="tf-pow"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${(c.pow||0)+(c._bo||0)}</div>
     <div class="tf-kd"><span class="k">${c.kills}K</span>/<span class="d">${c.deaths}D</span>${c.deaths===0?' ◈':''}</div>
     <div class="tf-text">${typeof keywordChipsHTML==='function'?keywordChipsHTML(c):''}</div>
@@ -8196,7 +8198,7 @@ function readableCardHTML(c){
   var sig=hasArt?'':('<span class="rc-sig">'+(((typeof CARD_SIGIL!=='undefined')&&CARD_SIGIL[c.name])||'◈')+'</span>');
   return '<div class="rcard '+c.rarity+' '+(typeof cardStateClasses==='function'?cardStateClasses(c):'')+'">'
     + '<div class="rc-art"'+(art?' style="'+art+'"':'')+'>'+sig+'</div>'
-    + '<div class="rc-top"><span class="rc-cost">⚡'+cost+'</span><span class="rc-name">'+c.name+'</span><span class="rc-pow">'+((c.pow||0)+(c._bo||0))+'</span></div>'
+    + '<div class="rc-top"><span class="rc-cost">⚡'+cost+'</span><span class="rc-name">'+dispName(c.name)+'</span><span class="rc-pow">'+((c.pow||0)+(c._bo||0))+'</span></div>'
     + '<div class="rc-meta">'+String(c.rarity).toUpperCase()+' · <span class="k">'+kd.k+'K</span> / <span class="d">'+kd.d+'D</span>'+pristine+'</div>'
     + (typeof keywordChipsHTML==='function'?keywordChipsHTML(c):'')
     + '<div class="rc-sec"><span class="rc-lbl">⚔ Conjured — Fighter</span>'+gl(c.abil)+'</div>'
@@ -9842,7 +9844,11 @@ body::before{background:
     function loadOV(){try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return {};}}
     var OV=loadOV();
     function saveOV(){try{localStorage.setItem(KEY,JSON.stringify(OV));}catch(e){}}
-    function applyAll(){Object.keys(OV).forEach(function(n){var o=OV[n];if(o.p!=null)setProp(n,'pow',o.p);if(o.r!=null)setProp(n,'rarity',o.r);if(o.t!=null)setProp(n,'timing',o.t);if(o.a!=null)setProp(n,'abil',o.a);if(o.cost!=null&&typeof COST_OVERRIDE!=='undefined')COST_OVERRIDE[n]=o.cost;if(o.called!=null&&typeof CALLED!=='undefined'){try{CALLED[n]=JSON.parse(o.called);}catch(e){}}if(o.rules!=null&&typeof CARD_RULES!=='undefined'){try{CARD_RULES[n]=JSON.parse(o.rules);}catch(e){}}});}
+    var GRP_KEY='sf_dev_groups_v1';
+    function loadUserGroups(){ try{var a=JSON.parse(localStorage.getItem(GRP_KEY)||'[]'); if(typeof LINK_GROUPS!=='undefined'){a.forEach(function(g){ if(!LINK_GROUPS.some(function(x){return x.id===g.id;})) LINK_GROUPS.push(g); });} }catch(e){} }
+    function saveUserGroups(){ try{ if(typeof LINK_GROUPS==='undefined')return; var mine=LINK_GROUPS.filter(function(g){return /^usr-/.test(g.id);}); localStorage.setItem(GRP_KEY, JSON.stringify(mine)); }catch(e){} }
+    function applyLinksFor(n){ if(typeof LINK_GROUPS==='undefined')return; var want=(OV[n]&&OV[n].links)?OV[n].links:null; if(!want)return; LINK_GROUPS.forEach(function(g){ var i=g.members.indexOf(n); var should=want.indexOf(g.id)>=0; if(should&&i<0)g.members.push(n); else if(!should&&i>=0)g.members.splice(i,1); }); }
+    function applyAll(){loadUserGroups();Object.keys(OV).forEach(function(n){var o=OV[n];if(o.p!=null)setProp(n,'pow',o.p);if(o.r!=null)setProp(n,'rarity',o.r);if(o.t!=null)setProp(n,'timing',o.t);if(o.a!=null)setProp(n,'abil',o.a);if(o.cost!=null&&typeof COST_OVERRIDE!=='undefined')COST_OVERRIDE[n]=o.cost;if(o.rename&&typeof NAME_OVERRIDE!=='undefined')NAME_OVERRIDE[n]=o.rename;if(o.links)applyLinksFor(n);if(o.called!=null&&typeof CALLED!=='undefined'){try{CALLED[n]=JSON.parse(o.called);}catch(e){}}if(o.rules!=null&&typeof CARD_RULES!=='undefined'){try{CARD_RULES[n]=JSON.parse(o.rules);}catch(e){}}});}
     applyAll(); try{if(typeof buildVault==='function')buildVault();}catch(e){}
     var vt; function schedVault(){clearTimeout(vt);vt=setTimeout(function(){try{if(typeof buildVault==='function')buildVault();}catch(e){}},400);}
     function model(){return baseList().map(function(c){return {n:c.name,r:c.rarity,p:c.pow,t:c.timing||'—',a:c.abil||''};});}
@@ -9900,7 +9906,7 @@ body::before{background:
         var cc=(typeof CALLED!=='undefined'&&CALLED[n])?CALLED[n]:{};
         var note=(OV[n]&&OV[n].note)?OV[n].note:'';
         var rules=(typeof CARD_RULES!=='undefined'&&CARD_RULES[n])?JSON.stringify(CARD_RULES[n]):'';
-        h+='<div class="dfx-card" data-n="'+esc(n)+'"><div class="dfx-h"><b>'+esc(n)+'</b><span class="dfx-cost">⚡ <input type="number" data-fx="cost" value="'+cost+'" min="0" max="6"></span></div>'
+        h+='<div class="dfx-card" data-n="'+esc(n)+'"><div class="dfx-h"><input class="dfx-name" data-fx="rename" value="'+esc(NAME_OVERRIDE[n]||n)+'" title="Display name (card face). Export hands the canonical rename to Claude."><span class="dfx-cost">⚡ <input type="number" data-fx="cost" value="'+cost+'" min="0" max="6"></span></div>'+'<div class="dfx-pr"><span class="dfx-q"><i>Power</i><input type="number" data-fx="pow" class="dfx-qin" value="'+(c.pow||0)+'" min="0" max="40"></span><span class="dfx-q"><i>Rarity</i><select data-fx="rar" class="dfx-qin">'+['genesis','ultra','rare','common'].map(function(r){return '<option'+(c.rarity===r?' selected':'')+'>'+r+'</option>';}).join('')+'</select></span></div>'
           +'<label class="dfx-l">Conjured ability — display text</label><textarea data-fx="abil" class="dfx-ta">'+esc(c.abil||'')+'</textarea>'
           +'<label class="dfx-l">📣 Called — quick build (flat effect)</label>'
           +'<div class="dfx-quick">'
@@ -9911,7 +9917,7 @@ body::before{background:
             +'<span class="dfx-q wide"><i>Card text (shown on support)</i><input type="text" data-q="text" class="dfx-qin wide" value="'+esc(cc.text||'')+'"></span>'
             +'<button class="dfx-build" type="button">↓ Fill JSON</button>'
           +'</div>'
-          +'<label class="dfx-l">📣 Describe the Called effect — plain words, I’ll turn it into code</label><textarea data-fx="note" class="dfx-ta dfx-note" placeholder="e.g. give my fighter +5 while I’m behind, and draw a card">'+esc(note)+'</textarea>'
+          +'<label class="dfx-l">🔗 Link skills — groups this card belongs to (a same-group ally in hand triggers the bonus)</label>'+'<div class="dfx-links">'+((typeof LINK_GROUPS!=='undefined'?LINK_GROUPS:[]).map(function(g){var inG=g.members.indexOf(n)>=0;return '<label class="dfx-lk'+(inG?' on':'')+'"><input type="checkbox" data-lk="'+esc(g.id)+'"'+(inG?' checked':'')+'>'+esc(g.icon||'🔗')+' '+esc(g.name)+'</label>';}).join(''))+'<button type="button" class="dfx-newgrp">+ New group</button></div>'+'<label class="dfx-l">📣 Describe ANY change or new effect — plain words, Claude implements it</label><textarea data-fx="note" class="dfx-ta dfx-note" placeholder="e.g. rename to X; +5 while behind and draw a card; link with Kotei; costs 2 energy">'+esc(note)+'</textarea>'
           +'<details class="dfx-adv"'+((called||rules)?' open':'')+'><summary>⚙ Raw code — CALLED / CARD_RULES JSON (I fill this; you can ignore it)</summary>'
           +'<label class="dfx-l">📣 Called effect — CALLED (JSON object; blank = fighter-only)</label><textarea data-fx="called" class="dfx-ta mono" placeholder="{}">'+esc(called)+'</textarea>'
           +'<label class="dfx-l">Conjured behavior — CARD_RULES (JSON array; blank = none)</label><textarea data-fx="rules" class="dfx-ta mono" placeholder="[]">'+esc(rules)+'</textarea>'
@@ -9921,6 +9927,12 @@ body::before{background:
       BODY.querySelectorAll('[data-fx=cost]').forEach(function(inp){ inp.addEventListener('change',function(){ var card=inp.closest('.dfx-card'),n=card.getAttribute('data-n'); var cv=parseInt(inp.value,10); if(isNaN(cv))return; cv=Math.max(0,Math.min(6,cv)); inp.value=cv; if(typeof COST_OVERRIDE!=='undefined')COST_OVERRIDE[n]=cv; recordFx(n,'cost',cv); schedVault(); inp.classList.add('flash'); setTimeout(function(){inp.classList.remove('flash');},600); }); });
       BODY.querySelectorAll('.dfx-build').forEach(function(btn){ btn.onclick=function(){ var card=btn.closest('.dfx-card'); function qv(k){var el=card.querySelector('[data-q='+k+']');return el?el.value.trim():'';} var o={},txt=qv('text'),add=parseInt(qv('add'),10),opp=parseInt(qv('opp'),10),dr=parseInt(qv('draw'),10),cg=parseInt(qv('chg'),10); if(txt)o.text=txt; if(!isNaN(add)&&add!==0)o.add=add; if(!isNaN(opp)&&opp!==0)o.oppadd=-Math.abs(opp); if(!isNaN(dr)&&dr!==0)o.draw=dr; if(!isNaN(cg)&&cg!==0)o.chargeGain=cg; var ta=card.querySelector('[data-fx=called]'); ta.value=Object.keys(o).length?JSON.stringify(o):''; ta.focus(); }; });
       BODY.querySelectorAll('[data-fx=note]').forEach(function(ta){ ta.addEventListener('blur',function(){ var card=ta.closest('.dfx-card'),n=card.getAttribute('data-n'); recordFx(n,'note',ta.value.trim()||null); }); });
+      BODY.querySelectorAll('[data-fx=rename]').forEach(function(inp){ inp.addEventListener('change',function(){ var n=inp.closest('.dfx-card').getAttribute('data-n'); var v=inp.value.trim(); if(v&&v!==n){NAME_OVERRIDE[n]=v;recordFx(n,'rename',v);} else {delete NAME_OVERRIDE[n];recordFx(n,'rename',null);} schedVault(); }); });
+      BODY.querySelectorAll('[data-fx=pow]').forEach(function(inp){ inp.addEventListener('change',function(){ var n=inp.closest('.dfx-card').getAttribute('data-n'); var v=parseInt(inp.value,10); if(isNaN(v))return; v=Math.max(0,Math.min(40,v)); inp.value=v; record(n,'p',v); }); });
+      BODY.querySelectorAll('[data-fx=rar]').forEach(function(sel){ sel.addEventListener('change',function(){ var n=sel.closest('.dfx-card').getAttribute('data-n'); record(n,'r',sel.value); }); });
+      function syncLinks(n){ var ids=(typeof LINK_GROUPS!=='undefined'?LINK_GROUPS:[]).filter(function(g){return g.members.indexOf(n)>=0;}).map(function(g){return g.id;}); recordFx(n,'links',ids.length?ids:null); }
+      BODY.querySelectorAll('.dfx-lk input[data-lk]').forEach(function(cb){ cb.addEventListener('change',function(){ var card=cb.closest('.dfx-card'),n=card.getAttribute('data-n'),gid=cb.getAttribute('data-lk'); var g=(typeof LINK_GROUPS!=='undefined'?LINK_GROUPS:[]).find(function(x){return x.id===gid;}); if(!g)return; var i=g.members.indexOf(n); if(cb.checked&&i<0)g.members.push(n); else if(!cb.checked&&i>=0)g.members.splice(i,1); cb.closest('.dfx-lk').classList.toggle('on',cb.checked); syncLinks(n); schedVault(); }); });
+      BODY.querySelectorAll('.dfx-newgrp').forEach(function(btn){ btn.onclick=function(){ var n=btn.closest('.dfx-card').getAttribute('data-n'); var nm=prompt('New link-group name (e.g. Tosa Pact):'); if(!nm)return; nm=nm.trim(); if(!nm)return; var id='usr-'+nm.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); if(typeof LINK_GROUPS==='undefined')return; if(!LINK_GROUPS.some(function(x){return x.id===id;})) LINK_GROUPS.push({id:id,name:nm,icon:'🔗',pow:1,members:[n]}); else { var g=LINK_GROUPS.find(function(x){return x.id===id;}); if(g.members.indexOf(n)<0)g.members.push(n); } saveUserGroups(); syncLinks(n); schedVault(); renderEffects(); }; });
       BODY.querySelectorAll('.dfx-apply').forEach(function(btn){btn.onclick=function(){
         var card=btn.closest('.dfx-card'),n=card.getAttribute('data-n'),msg=card.querySelector('.dfx-msg');
         try{
@@ -9941,7 +9953,7 @@ body::before{background:
     function render(){R[cur]();}
     document.getElementById('dev-tabs').addEventListener('click',function(e){var b=e.target.closest('.dev-t');if(!b)return;document.querySelectorAll('.dev-t').forEach(function(t){t.classList.remove('on');});b.classList.add('on');cur=b.getAttribute('data-v');render();});
     Q.addEventListener('input',function(){if(cur==='table')renderTable();else if(cur==='effects')renderEffects();});
-    document.getElementById('dev-exp').onclick=function(){var lines=Object.keys(OV).map(function(n){var o=OV[n],g=ORIG[n]||{},c=[];if(o.p!=null)c.push('pow '+g.p+'→'+o.p);if(o.r!=null)c.push('rarity '+g.r+'→'+o.r);if(o.t!=null)c.push('timing '+g.t+'→'+o.t);if(o.a!=null)c.push('ability → "'+o.a+'"');if(o.cost!=null)c.push('cost →'+o.cost);if(o.called!=null)c.push('CALLED →'+o.called);if(o.rules!=null)c.push('CARD_RULES →'+o.rules);if(o.note!=null)c.push('note: "'+o.note+'"');return n+': '+c.join(', ');});EXP.hidden=false;EXP.innerHTML='<textarea readonly>'+esc(lines.length?lines.join('\n'):'No changes yet.')+'</textarea>';try{EXP.querySelector('textarea').select();}catch(_){}};
+    document.getElementById('dev-exp').onclick=function(){var lines=Object.keys(OV).map(function(n){var o=OV[n],g=ORIG[n]||{},c=[];if(o.p!=null)c.push('pow '+g.p+'→'+o.p);if(o.r!=null)c.push('rarity '+g.r+'→'+o.r);if(o.t!=null)c.push('timing '+g.t+'→'+o.t);if(o.a!=null)c.push('ability → "'+o.a+'"');if(o.cost!=null)c.push('cost →'+o.cost);if(o.rename!=null)c.push('RENAME → "'+o.rename+'" (canonical rename — Claude to apply)');if(o.links!=null)c.push('links → ['+o.links.join(', ')+']');if(o.called!=null)c.push('CALLED →'+o.called);if(o.rules!=null)c.push('CARD_RULES →'+o.rules);if(o.note!=null)c.push('note: "'+o.note+'"');return n+': '+c.join(', ');});EXP.hidden=false;EXP.innerHTML='<textarea readonly>'+esc(lines.length?lines.join('\n'):'No changes yet.')+'</textarea>';try{EXP.querySelector('textarea').select();}catch(_){}};
     var _rq=document.getElementById('dev-req'); if(_rq) _rq.onclick=function(){ var lines=Object.keys(OV).filter(function(n){return OV[n]&&OV[n].note;}).map(function(n){ var cur=(typeof CALLED!=='undefined'&&CALLED[n])?JSON.stringify(CALLED[n]):'(none yet)'; var cst=(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[n]!=null)?(' [⚡'+COST_OVERRIDE[n]+']'):''; return n+cst+': '+OV[n].note+'   (current: '+cur+')'; }); EXP.hidden=false; EXP.innerHTML='<textarea readonly>'+esc(lines.length?('CALLED-EFFECT REQUESTS — paste to Claude:\n\n'+lines.join('\n\n')):'No descriptions yet — open ⚡ Abilities and describe a card in the plain-words box.')+'</textarea>'; try{EXP.querySelector('textarea').select();}catch(_){} };
     document.getElementById('dev-rst').onclick=function(){if(!confirm('Reset ALL dev edits back to original values?'))return;Object.keys(OV).forEach(function(n){var o=ORIG[n];if(o){setProp(n,'pow',o.p);setProp(n,'rarity',o.r);setProp(n,'timing',o.t);setProp(n,'abil',o.a);}});OV={};saveOV();chg();try{if(typeof buildVault==='function')buildVault();}catch(e){}render();};
     var _np=document.getElementById('dev-newplayer'); if(_np) _np.onclick=function(){ if(typeof newPlayerReset==='function'){ closeDev(); newPlayerReset(); } };
@@ -9957,6 +9969,7 @@ body::before{background:
 </script>
 <style>
 /* ═══ WEEKEND TOURNAMENT ═══ */
+.dfx-name{flex:1;min-width:0;background:rgba(255,255,255,.05);border:1px solid var(--border2);color:var(--gold);font-weight:800;font-size:13px;border-radius:6px;padding:4px 8px;margin-right:8px}.dfx-name:focus{border-color:var(--gold);outline:none}.dfx-pr{display:flex;gap:12px;margin:6px 0 2px}.dfx-links{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}.dfx-lk{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--text3);background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:3px 10px;cursor:pointer;user-select:none}.dfx-lk.on{color:var(--electric);border-color:var(--electric);background:rgba(91,192,235,.12)}.dfx-lk input{margin:0;width:12px;height:12px}.dfx-newgrp{font-size:11px;font-weight:700;color:var(--gold);background:none;border:1px dashed var(--gold);border-radius:14px;padding:3px 10px;cursor:pointer}.dfx-newgrp:hover{background:rgba(245,194,77,.12)}
 .tourney-wrap{max-width:820px;margin:0 auto;padding:16px}
 .tourney-status{display:flex;align-items:center;gap:9px;padding:12px 16px;border-radius:12px;margin:14px 0;font-weight:700;font-size:13px}
 .tourney-status.open{background:linear-gradient(135deg,rgba(70,204,138,.15),rgba(70,204,138,.04));border:1px solid rgba(70,204,138,.4);color:var(--win)}
