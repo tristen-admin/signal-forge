@@ -2321,6 +2321,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           
           <button class="filter-chip" onclick="filterVault('common',this)">Common</button>
           <button class="filter-chip" onclick="filterVault('deck',this)">🃏 In Deck</button>
+          <button class="filter-chip" onclick="filterVault('variant',this)">🏆 Variants</button>
           <button class="filter-chip" id="vault-own-toggle" onclick="toggleVaultOwned(this)">🔒 Owned Only</button>
         </div>
       </div>
@@ -7782,7 +7783,7 @@ function vaultTrackerHTML(){
 function buildVault(){
   const grid=document.getElementById('vault-grid');
   const base=COLLECTION.filter(c=>{
-    const rOk = vaultFilter==='all' ? true : vaultFilter==='deck' ? activeDeck.has(c.uid||c.name) : c.rarity===vaultFilter;
+    const rOk = vaultFilter==='all' ? true : vaultFilter==='deck' ? activeDeck.has(c.uid||c.name) : vaultFilter==='variant' ? !!c.variant : c.rarity===vaultFilter;
     const kOk = !vaultKeyword || cardHasKeyword(c, vaultKeyword);
     return rOk && kOk;
   });
@@ -7804,7 +7805,7 @@ function buildVault(){
   const totalCards=entries.reduce((s,e)=>s+(e.locked?0:e.count),0);
   document.getElementById('vault-count').textContent=`${totalCards} cards${vaultKeyword?' · '+vaultKeyword:''}${sortLabel}`;
   { var _vt=document.getElementById('vault-tracker'); if(_vt) _vt.innerHTML=vaultTrackerHTML(); }
-  if(!entries.length){ grid.innerHTML='<div class="vault-empty">'+((vaultKeyword||vaultFilter!=='all')?'No cards match this filter — try clearing it.':'Your vault is empty — open a pack in the Shop or win a duel.')+'</div>'; return; }
+  if(!entries.length){ var _emsg = vaultFilter==='variant' ? 'No variant cards yet — variants come from Forge summons (paid, play-only copies).' : (vaultKeyword||vaultFilter!=='all') ? 'No cards match this filter — try clearing it.' : 'Your vault is empty — open a pack in the Shop or win a duel.'; grid.innerHTML='<div class="vault-empty">'+_emsg+'</div>'; return; }
   grid.innerHTML=entries.map(e=>{
     const c=e.c;
     const pristine=e.d===0?`<span class="vc-pristine">◈ Pristine</span>`:'';
