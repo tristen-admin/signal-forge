@@ -1529,6 +1529,10 @@ body.rm body.nav-collapsed #nav-hub .ni-icon,body.rm.nav-collapsed #nav-hub .ni-
 .pack-name{font-size:16.5px;font-weight:800;color:var(--text)}
 .pack-desc{font-size:10.5px;color:var(--text2);line-height:1.4;flex:1}
 .pack-buy{background:var(--gold);color:#150E00;font-size:13.5px;font-weight:800;border:none;border-radius:8px;padding:11px 20px;cursor:pointer;width:100%;transition:transform 0.12s,box-shadow 0.12s;box-shadow:0 3px 12px rgba(212,168,67,0.2)}
+.pack-buy-row{display:flex;gap:6px;margin-top:auto}
+.pack-buy-row .pack-buy{width:auto;flex:1;margin-top:0}
+.pack-buy5{flex:0 0 auto!important;background:var(--surface2)!important;color:var(--gold)!important;border:1px solid var(--gold)!important;box-shadow:none!important;padding:11px 14px!important}
+.pack-buy5:hover{background:var(--gold-dim)!important}
 .pack-buy:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(212,168,67,0.35)}
 .listing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:12px}
 .listing{border-radius:10px;border:1px solid;overflow:hidden;display:flex;flex-direction:column;background:var(--panel);transition:transform 0.14s}
@@ -6205,7 +6209,7 @@ function startNewPlayer(){
 const SEASON = { chapter:'Chapter 1', name:'Rebirth', pack:'Legends Reborn' };
 const PACKS = [
   {id:'std', name:'Legends Reborn Booster', icon:'📦', price:500, blurb:'Common through Rare — a whisper of higher.', odds:{common:63.9, uncommon:25, rare:8, ultra:2.3, genesis:0.8}},
-  {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare through Ultra — where real pulls live.', odds:{common:1, uncommon:21, rare:56, ultra:20, genesis:2}},
+  {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & a Genesis shot — no commons.', odds:{rare:78, ultra:20, genesis:2}},
   {id:'genesis', name:'Legends Reborn Genesis Vault', icon:'💠', price:5000, blurb:'Rares and Ultras in force — a 5% Genesis shot.', odds:{rare:50, ultra:45, genesis:5}},
 ];
 const PREMIUM_PACKS = [
@@ -6228,11 +6232,46 @@ function packCardHTML(p){
   return `<div class="pack-card wide">
     <div class="pack-head"><div class="pack-icon">${p.icon}</div><div><div class="pack-name">${p.name}</div><div class="pack-blurb">${p.blurb}</div></div></div>
     <div class="pack-odds">${odds}</div>
-    <button class="pack-buy" ${soldOut?'disabled':''} onclick="openPack('${p.id}')">${soldOut?'Minted Out':'Open Pack · ◈ '+fmtPts(p.price)}</button>
+    <div class="pack-buy-row"><button class="pack-buy" ${soldOut?'disabled':''} onclick="openPack('${p.id}')">${soldOut?'Minted Out':'Open · ◈ '+fmtPts(p.price)}</button>${soldOut?'':`<button class="pack-buy pack-buy5" onclick="openPack5('${p.id}')" title="Open five at once">5× · ◈ ${fmtPts(p.price*5)}</button>`}</div>
   </div>`;
 }
 function packsSectionHTML(){
   return `<div class="season-banner"><div class="sb-chapter">${SEASON.chapter} · ${SEASON.name}</div><div class="sb-name">${SEASON.pack}</div><div class="sb-tag">The inaugural set — every legend re-minted for the first chapter, drawn from the finite shared mint. Once a rarity is gone, it is gone for everyone.</div></div>`+mintLedgerHTML()+`<div class="odds-note">🎲 <b>Published pull odds.</b> Each pack lists its exact rarity chances below — outcomes are random. Every card is obtainable with <b>earned Signal</b> (win it in play) — no purchase is ever required to progress, and nothing here cashes out.</div>`+`<div class="banner-head">◈ Basic Summon · Signal <span class="banner-sub">Earned currency — pulls are <b>Forged</b> (tradeable + wagerable). Generous odds to build your repertoire.</span></div>`+`<div class="pack-grid">`+PACKS.map(packCardHTML).join('')+`</div>`;
+}
+function _pullFrom(p){
+  var avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;});
+  if(!avail.length) return null;
+  var total=avail.reduce(function(a,r){return a+p.odds[r];},0);
+  var roll=Math.random()*total, rar=avail[avail.length-1];
+  for(var i=0;i<avail.length;i++){ roll-=p.odds[avail[i]]; if(roll<=0){ rar=avail[i]; break; } }
+  supply[rar].left=Math.max(0,supply[rar].left-1);
+  var poolC=COLLECTION.filter(function(c){return c.rarity===rar && !c.uid;});
+  var card=poolC[Math.floor(Math.random()*poolC.length)]||COLLECTION[0];
+  var _mint=mintPulled(card.name, p.name+' pull', 'forged');
+  if(cardSupply[card.name] && cardSupply[card.name].left>0) cardSupply[card.name].left--;
+  return {card:card, rar:rar, mint:_mint};
+}
+function openPack5(id){
+  var p=PACKS.find(function(x){return x.id===id;}) || PREMIUM_PACKS.find(function(x){return x.id===id;}); if(!p) return;
+  var avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;});
+  if(!avail.length){ toast(p.name+' \u2014 every rarity it offers is minted out',false); return; }
+  var cost=p.price*5;
+  if(signalPoints<cost){ toast('Not enough Signal for a 5\u00d7 summon (\u25c8 '+fmtPts(cost)+')',false); return; }
+  if(!confirm('Open 5\u00d7 '+p.name+' for \u25c8 '+fmtPts(cost)+' Signal?\n\nMints you five random cards.')) return;
+  signalPoints-=cost;
+  var results=[];
+  for(var i=0;i<5;i++){ var pull=_pullFrom(p); if(!pull) break; results.push(pull); }
+  saveState(); updateBalance(); buildShop();
+  (function revealNext(k){
+    if(k>=results.length){
+      var summ=results.map(function(r){return rlab(r.rar);}).join(' ');
+      toast('5\u00d7 '+p.name+' \u2014 pulled '+summ+' \u2192 your Vault', true);
+      if(typeof buildVault==='function') buildVault();
+      return;
+    }
+    var r=results[k];
+    playSummon(r.card, r.rar, r.mint, p.name+' ('+(k+1)+'/'+results.length+')', function(){ revealNext(k+1); });
+  })(0);
 }
 function openPack(id){
   const p=PACKS.find(x=>x.id===id) || PREMIUM_PACKS.find(x=>x.id===id); if(!p) return;
