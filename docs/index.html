@@ -3208,7 +3208,7 @@ const DECK_POOL = [
   {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'On commit: if 3rd+ commit this match, +5 power. Returns from Winners Circle: banish from hand to curse opponent\'s next committed card −10 power.'},
   {name:'Hanse Waltz',pow:9,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.'},
   // Rares
-  {name:'Arch-Grim Korrin',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if opponent\'s card has fewer career kills than this card, +6 power.'},
+  {name:'Arch-Grim Korrin',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Death Remnant: when he falls, +8 to your cards until an enemy dies. On commit: draw 1 for each Remnant you hold — the Unburied commands the dead."},
   {name:'Cletus Gwyndull',pow:15,kills:0,deaths:0,rarity:'rare',timing:'pre',abil:'Pre-commit: lock the active condition this turn — opponent cannot shift it.'},
   {name:'Val Kreigh',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if this is the 1st duel of the match, +6 power.'},
   {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'genesis',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
@@ -3216,7 +3216,7 @@ const DECK_POOL = [
   {name:'Lagertha Waltz',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 if you lost your last duel. -2 if you won your last duel.'},
   {name:'Valcarion',pow:7,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if there is a card in your banish zone, add it to your hand — or call it to an open support circle.'},
   {name:'Ella Ballora',pow:14,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Bloodrage: on commit +3 power, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
-  {name:'Kiana',pow:15,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Wingblade: on commit +3 power, and +4 more if you have 2 or more cards in your banish zone — a Black Wings edge sharpened by every sacrifice.'},
+  {name:'Kiana',pow:12,cost:2,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Order Initiate: on commit, banish a card from your hand, then +6 power.'},
   // ── KOTEI Series 1 Expansion ──
   {name:'Melanie',pow:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'No ability. Keawe\'s mother — a civilian, not a fighter. At 1 power she quietly wins under Lowest Wins.'},
   {name:'Uso Oso\'s Skeletal Summons',pow:5,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: these bones don\'t stay down — when the summons falls it lingers on the field, your committed cards gaining its power until an opponent\'s card is killed.'},
@@ -3229,13 +3229,13 @@ const DECK_POOL = [
   {name:'Forgemask',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Reforged: on commit, +3 power, and +4 more if you lost your last duel — the forge tempers what breaks.'},
   {name:'Lagertha Waltz — Werewolf Form',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Alpha\'s Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack\'s fury peaks in mourning.'},
   {name:'Hanse Waltz — Werewolf Form',pow:18,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 power while you are behind in the match — rage completes the transformation.'},
-  {name:'La "La" Ballora, the Broodqueen',pow:17,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw a card — her brood is her hand.'},
+  {name:'La "La" Ballora, the Broodqueen',pow:15,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw a card — her brood is her hand.'},
   {name:'Ourevos, the Golden Dragon',pow:24,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.'},
   {name:'Keawe, A Legend Reborn',pow:8,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 18 or higher from your deck to your hand. Called (support): snipe the opposing support in the mirrored slot — it is removed before it can fire.'},
-  {name:'Rhaess Korvain',pow:13,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Assassin\'s Mark: on commit, +6 power if the opponent\'s card has more career kills than this one — Rhaess hunts the notable.'},
-  {name:'Ossian Drell',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone — the captain of the Black Wings turns sacrifice into force.'},
-  {name:'Corvus',pow:10,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Raven\'s Feast: on commit, banish the top card of your deck, then +2 power for every card in your banish zone — Corvus grows the pyre and feeds on it.'},
+  {name:'Rhaess Korvain',pow:8,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish the top card of your deck, then +2 power for every card in your banish zone.'},
+  {name:'Ossian Drell',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Wing Commander: on commit, +3 power, and +2 more for every card in your banish zone.'},
+  {name:'Corvus',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Raven's Feast: on commit, banish the top 2 cards of your deck, then +2 power for every card in your banish zone."},
   {name:'Wren',pow:9,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wingmate: on commit, return a banished card to your hand, then +4 power — Wren never leaves one behind.'},
   {name:'Rook',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Scout: on commit, banish the top card of your deck, then +1 power for every card in your banish zone.'},
   {name:'Falk',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Dive: on commit, +2 power for every card in your banish zone.'},
@@ -3252,7 +3252,38 @@ const DECK_POOL = [
   {name:'Heir of Kaiga',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast.'},
   {name:'Josef',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Master Tailor: on commit, +4 power once he has taken the measure of the fight (any commit after your first).'},
   {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, your committed cards gaining her power until an opponent\'s card is killed.'},
-  {name:'Kleydson',pow:11,kills:0,deaths:0,rarity:'ultra',abil:'Blackened Order Boss — Conjure: +2 power per card in your banish zone. Feed the Order, ride harder.'},];
+  {name:'Kleydson',pow:13,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Lesser Chaos (once per match): warp every spell in your deck into Draw Surge (2⚡ draw 3, banish 1) and Godhand (1⚡ your card +10) — a splashable echo of Anorith."},
+  // ── THE BLACK WINGS (banish to fuel, reclaim & recur) ──
+  {name:'Grave-Tithe Acolyte',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: banish the top card of your deck, then +5 power.'},
+  {name:'Ashen Reclaimer',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: return a banished card to your hand with +3 power.'},
+  {name:'Cinder-Marked Hound',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your banish zone.'},
+  {name:'The Black Ledger',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish 2 cards from your hand, then draw 2.'},
+  {name:'Pyre-Keeper Vayle',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power while 2 or more cards are banished.'},
+  {name:'Hollow Mendicant',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Support: banish a card from your hand; your Fighter +4.'},
+  // ── THE DEATHLESS (Death Remnants linger + draw to replenish) ──
+  {name:'Bone Choirmaster',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +5 to your cards until an enemy dies. On a win, draw a card.'},
+  {name:'Grave-Fed Ghoul',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Death Remnant: when it falls, +4 to your cards until an enemy dies.'},
+  {name:'Marrow Priest',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Support: your Fighter +3; if a Remnant is on the field, draw a card.'},
+  {name:'Ossuary Titan',pow:15,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Death Remnant: when it falls, +7 to your cards until an enemy dies. On commit: +3 power for each Remnant you hold.'},
+  {name:'Pale Gravedigger',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: draw a card if you have a Remnant on the field.'},
+  {name:'Widow of the Vigil',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you have a Remnant, draw 2; otherwise +3 power.'},
+  // ── THE WARPATH (early champ, Winners-Circle recycle, Kill Escalation) ──
+  {name:'Bloodwake Duelist',pow:11,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: on commit, +2 power for every kill you have earned this match.'},
+  {name:'Warpath Vanguard',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power on the 1st or 2nd duel of the match.'},
+  {name:'Skullchain Reaver',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power per kill earned this match; when it wins, it returns to your hand instead of the Winners Circle.'},
+  {name:'Trophy-Hunter Kessa',pow:15,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'On commit: +3 power for every card in your Winners Circle.'},
+  {name:'First-Blood Squire',pow:12,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +4 power on the 1st duel of the match only.'},
+  {name:'The Undefeated',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every duel you have already won this match.'},
+  {name:"Kravyn's Protege",pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +3 power once this card has earned 6 or more career kills.'},
+  // ── THE BROODSWARM (draw + convert a full hand to power) ──
+  {name:'Web-Spinner Acolyte',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your hand.'},
+  {name:"Hoarder's Gambit",pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: draw 2, then +2 power for every card in your hand.'},
+  {name:'The Gathering Swarm',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +4 power while you hold 3 or more cards; the opponent −4 power while you hold 5 or more.'},
+  {name:'Silkbound Sentinel',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Support: draw a card; your Fighter +2.'},
+  {name:"Widow's Patience",pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +5 power if your hand is full (6 cards).'},
+  // ── NOVELTY / TECH (splashes into any deck) ──
+  {name:'Mirror Shade',pow:6,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"On commit: your power becomes the opponent's committed power +1."},
+  {name:'Tosa Envoy',pow:13,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +3 power and lock the active condition. [Tosa Pact]'},];
 
 // ── SET 2 — held for post-launch release (NOT loaded into COLLECTION) ──
 const SET2_POOL = [
@@ -3303,8 +3334,9 @@ let winnersCircle = [];
 let banishPile = [];
 let banishSurge = 0;
 let divinerBonusNext = 0;
-let deathRemnantPow = 0;
-let lingeringRem = [];   // The Deathless: supports that stay on the field as Remnants, stacking until an enemy is killed
+let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + lingering supports); each {name,pow}; persists until an enemy card is killed
+function remnantPowSum(){ return deathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
+const REMNANT_POW = {'Arch-Grim Korrin':8,'Ossuary Titan':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4};
 const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk Skullbrand','Sister Mire','Kiba'];
 let lastResult = null;
 let matchCommits = 0;
@@ -4145,7 +4177,7 @@ const CARD_RACE = {
   // everything else defaults to 'Human' (see raceOf)
 };
 let raceOverride = {};   // design-time per-card race edits (persisted); wins over CARD_RACE
-let NAME_OVERRIDE = {};  // dev display-name overrides (card FACE only; canonical rename handed to Claude via Export)
+let NAME_OVERRIDE = {'Corvus':'Black Wings, Corvus the Raven','Ossian Drell':'Ossian Drell of the Black Wings','Arch-Grim Korrin':'Arch-Grim Korrin, the Unburied','Kiana':'Black Wings Initiate, Kiana'};  // display-name epithets (card FACE only; keys stay short to preserve links/rules/ascension refs)
 function dispName(nm){ return (NAME_OVERRIDE && NAME_OVERRIDE[nm]) || nm; }
 function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Human'; }
 function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.race=r; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83e\uddec Race set: '+name+' \u2192 '+r, true); }
@@ -4162,10 +4194,10 @@ const CALLED = {
   "Sunforged Colossus":            {text:"your Fighter +3", add:3},
   "Kessuae, Tide of Ruin":         {text:"your Fighter +3", add:3},
   "Kotei":                         {text:"your Fighter +2", add:2},
-  "Kleydson":                      {text:"Blackened Order — return 2 banished cards to hand, +2 power each", recurBuff:2},
+  "Kleydson":                      {text:"your Fighter +3 · gain 1 charge", add:3, chargeGain:1},
   "Lagertha Waltz":                {text:"your Fighter +3", add:3},
   "Hanse Waltz":                   {text:"your Fighter +5", add:5},
-  "Kiana":                         {text:"your Fighter +2", add:2},
+  "Kiana":                         {text:"banish a card from your hand; your Fighter +4", banishOwn:1, add:4},
   "Heir of Kaiga":                 {text:"your Fighter +5 · draw 1", add:5, draw:1},
   "Melanie":                       {text:"your Fighter +5 · draw 1", add:5, draw:1},
   "Darwin":                        {text:"your Fighter +2", add:2},
@@ -4206,6 +4238,34 @@ const CALLED = {
   "Rook":                          {text:"your Fighter +2", add:2},
   "Falk":                          {text:"your Fighter +3", add:3},
   "Sable":                         {text:"banish a card from your hand, your Fighter +5", banishOwn:1, add:5},
+  "Rhaess Korvain":                {text:"banish 1 from your hand; your Fighter +3", banishOwn:1, add:3},
+  "Grave-Tithe Acolyte":           {text:"banish 1 from your hand; your Fighter +3", banishOwn:1, add:3},
+  "Ashen Reclaimer":               {text:"return a banished card to your hand; your Fighter +2", recurPlain:1, add:2},
+  "Cinder-Marked Hound":           {text:"your Fighter +3", add:3},
+  "The Black Ledger":              {text:"draw 1; your Fighter +2", draw:1, add:2},
+  "Pyre-Keeper Vayle":             {text:"your Fighter +4", add:4},
+  "Hollow Mendicant":              {text:"banish a card from your hand; your Fighter +4", banishOwn:1, add:4},
+  "Arch-Grim Korrin":              {text:"your Fighter +4; if you hold a Remnant, draw 1", add:4, drawIfRemnant:true},
+  "Bone Choirmaster":              {text:"your Fighter +3 · draw 1", add:3, draw:1},
+  "Grave-Fed Ghoul":               {text:"your Fighter +3", add:3},
+  "Marrow Priest":                 {text:"your Fighter +3; if a Remnant is on the field, draw 1", add:3, drawIfRemnant:true},
+  "Ossuary Titan":                 {text:"your Fighter +5", add:5},
+  "Pale Gravedigger":              {text:"your Fighter +2; if you hold a Remnant, draw 1", add:2, drawIfRemnant:true},
+  "Widow of the Vigil":            {text:"your Fighter +3 · draw 1", add:3, draw:1},
+  "Bloodwake Duelist":             {text:"your Fighter +3", add:3},
+  "Warpath Vanguard":              {text:"your Fighter +4", add:4},
+  "Skullchain Reaver":             {text:"your Fighter +4", add:4},
+  "Trophy-Hunter Kessa":           {text:"your Fighter +4", add:4},
+  "First-Blood Squire":            {text:"your Fighter +3", add:3},
+  "The Undefeated":                {text:"your Fighter +3", add:3},
+  "Kravyn's Protege":              {text:"your Fighter +2", add:2},
+  "Web-Spinner Acolyte":           {text:"draw 1; your Fighter +1", draw:1, add:1},
+  "Hoarder's Gambit":              {text:"draw 1; your Fighter +2", draw:1, add:2},
+  "The Gathering Swarm":           {text:"your Fighter +3", add:3},
+  "Silkbound Sentinel":            {text:"draw a card; your Fighter +2", draw:1, add:2},
+  "Widow's Patience":              {text:"your Fighter +3", add:3},
+  "Mirror Shade":                  {text:"your Fighter +2", add:2},
+  "Tosa Envoy":                    {text:"your Fighter +3", add:3},
   "Bram the Bulwark":              {text:"your Fighter +3", add:3},
   "Cletus Gwyndull":                     {text:"your Fighter +3", add:3},
   "Chieftain Reyva Vosh":          {text:"draw 2 cards", draw:2},
@@ -4251,7 +4311,7 @@ function calledCtx(){
 function projectPlay(){
   var f=(preSelectedCard!=null && hand[preSelectedCard]) ? hand[preSelectedCard] : null;
   if(!f) return null;
-  var base=(f.pow||0)+(f._bo||0)+(f.name==='Kleydson'?2*banishPile.length:0), spell=(banishSurge||0)+(deathRemnantPow||0)+((typeof spellSelfPow!=='undefined'&&spellSelfPow)||0);
+  var base=(f.pow||0)+(f._bo||0), spell=(banishSurge||0)+remnantPowSum()+((typeof spellSelfPow!=='undefined'&&spellSelfPow)||0);
   var called=0, oppDelta=((typeof spellOppPow!=='undefined'&&spellOppPow)||0), link=0, linkName=null;
   rearGuardIdxs.forEach(function(ix){ var sup=hand[ix]; if(!sup) return; var d=projectCalled(CALLED[sup.name], calledCtx()); called+=d[0]; oppDelta+=d[1]; var lk=fieldLink(f,sup); if(lk){ link+=lk.pow; linkName=linkName?linkName+', '+lk.name:lk.name; } });
   var oppShown=pendingOppCard?(pendingOppCard.pow||0):null;
@@ -4269,6 +4329,7 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
   if(e.chargeGain && !isOpp){ charge=Math.min(ENERGY_CAP,charge+e.chargeGain); if(typeof renderCharge==="function") renderCharge(); }
   if(e.spellDiscountGain && !isOpp && typeof spellDiscount!=='undefined'){ spellDiscount+=e.spellDiscountGain; }
   if(e.draw && !isOpp){ drawToHand(e.draw); }
+  if(e.drawIfRemnant && !isOpp && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(1); abilLog.push('☠ '+support.name+' — a Remnant stirs: draw a card'); }
   if(e.banishOwn && !isOpp){ for(var _b=0;_b<e.banishOwn;_b++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } abilLog.push("☠ Banished "+e.banishOwn+" from your hand — into the Order"); if(typeof buildHand==="function")buildHand(); }
   if(e.recurBuff && !isOpp){ var _got=0; for(var _r=0;_r<e.recurBuff;_r++){ if(banishPile.length){ var _rc=banishPile.pop(); _rc._bo=(_rc._bo||0)+2; hand.push(_rc); _got++; } } if(_got) abilLog.push("♻ "+support.name+" — returned "+_got+" from banish, +2 power each"); if(typeof buildHand==="function")buildHand(); }
   if(e.recurPlain && !isOpp){ var _gp=0; for(var _rp2=0;_rp2<e.recurPlain;_rp2++){ if(banishPile.length){ hand.push(banishPile.pop()); _gp++; } } if(_gp) abilLog.push("↩ Returned "+_gp+" from banish to hand"); if(typeof buildHand==="function")buildHand(); }
@@ -4662,9 +4723,8 @@ function commitCard(){
   rearGuards = rearGuardIdxs.filter(function(ix){return ix!==selectedCard && hand[ix];}).map(function(ix){return hand[ix];});
   { const _conjCost = conjureCost(pc); charge = Math.max(0, charge - _conjCost); if(typeof renderCharge==='function') renderCharge(); var _cm=document.querySelector('.charge-meter'); if(_cm && _conjCost>0){ _cm.classList.remove('spent'); void _cm.offsetWidth; _cm.classList.add('spent'); } }
   matchCommits++;
-  const committedPow = (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow) + banishSurge + deathRemnantPow + (typeof lingeringRem!=='undefined'?lingeringRem.reduce(function(a,r){return a+(r.pow||0);},0):0);
+  const committedPow = (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow) + banishSurge + remnantPowSum();
   banishSurge = 0;
-  deathRemnantPow = 0;
 
   // close record reveal — opponent identity now revealed on field
   document.getElementById('record-reveal').style.display = 'none';
@@ -4672,7 +4732,16 @@ function commitCard(){
   { var _idxs=[selectedCard].concat(rearGuardIdxs.filter(function(ix){return ix!==selectedCard;})); _idxs.sort(function(a,b){return b-a;}); _idxs.forEach(function(_ix){hand.splice(_ix,1);}); }
   rearGuardIdxs=[];
   // ── conjure summons ──
-  if((pc.name==='Corvus'||pc.name==='Rook') && drawPile.length){ banishPile.push(drawPile.shift()); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof updatePiles==='function') updatePiles(); }
+  { var _btmap={'Corvus':2,'Rook':1,'Grave-Tithe Acolyte':1,'Rhaess Korvain':1}; var _btn=_btmap[pc.name]; if(_btn){ for(var _bti=0;_bti<_btn && drawPile.length;_bti++) banishPile.push(drawPile.pop()); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof updatePiles==='function') updatePiles(); } }
+  if(pc.name==='Kiana' && typeof banishFromHand==='function'){ banishFromHand(1); }
+  if(pc.name==='The Black Ledger'){ if(typeof banishFromHand==='function') banishFromHand(2); if(typeof drawToHand==='function') drawToHand(2); }
+  if(pc.name==='Ashen Reclaimer' && banishPile.length){ var _ar=banishPile.pop(); _ar._bo=(_ar._bo||0)+3; hand.push(_ar); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
+  if(pc.name==="Hoarder's Gambit" && typeof drawToHand==='function'){ drawToHand(2); }
+  if(pc.name==='Arch-Grim Korrin' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(deathRemnants.length); }
+  if(pc.name==='Pale Gravedigger' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(1); }
+  if(pc.name==='Widow of the Vigil' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(2); }
+  if(pc.name==='Kleydson'){ energyLoadout=['drawsurge','godhand']; spellHand=['drawsurge','godhand']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Lesser Chaos — your spells warp into Draw Surge + Godhand.', true); }
+  if(pc.name==='Tosa Envoy'){ conditionLocked=true; if(typeof toast==='function') toast('🤝 Tosa Envoy — the active condition is locked in.', true); }
   if(pc.name==='Wren' && banishPile.length){ hand.push(banishPile.pop()); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='La "La" Ballora, the Broodqueen' && typeof drawToHand==='function'){ drawToHand(1); }
   if(pc.name==="Web-Weaver's Return"){ if(banishPile.length){ var _rb=banishPile.splice(0,banishPile.length); drawPile=drawPile.concat(_rb); if(typeof shuffle==='function') shuffle(drawPile); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof toast==='function') toast('🕸 Web-Weaver\'s Return \u2014 '+_rb.length+' banished cards rewoven into your deck.', true); } if(typeof drawToHand==='function') drawToHand(1); if(typeof updatePiles==='function') updatePiles(); }
@@ -5378,8 +5447,7 @@ const CARD_RULES = {
   }
  ],
  "Kiana": [
-  { "add": 3, "log": "🪶 Wingblade: +3" },
-  { "if": { "v": "banish_len", "op": ">=", "n": 2 }, "add": 4, "log": "🪶 armed: +4" }
+  { "add": 6, "log": "🪶 Order Initiate: +6" }
  ],
  "King Joris": [
   {
@@ -5510,17 +5578,10 @@ const CARD_RULES = {
   }
  ],
  "Rhaess Korvain": [
-  {
-   "if": {
-    "v": "opp_kills",
-    "op": ">",
-    "v2": "pc_kills"
-   },
-   "add": 6,
-   "log": "🗡 Assassin's Mark: +6"
-  }
+  { "addvar": "banish_len", "x": 2, "log": "🪶 Rhaess: +2×banish" }
  ],
  "Ossian Drell": [
+  { "add": 3, "log": "🪶 Wing Command: +3" },
   { "addvar": "banish_len", "x": 2, "log": "🪶 Wing Command: +2×banish" }
  ],
  "Corvus": [
@@ -5534,7 +5595,25 @@ const CARD_RULES = {
  ],
  "Wren": [
   { "add": 4, "log": "🪶 Wingmate: +4" }
- ]
+ ],
+ "Grave-Tithe Acolyte": [{ "add": 5, "log": "☠ Grave-Tithe: +5" }],
+ "Cinder-Marked Hound": [{ "addvar": "banish_len", "x": 1, "log": "☠ Cinder: +1×banish" }],
+ "Pyre-Keeper Vayle": [{ "if": { "v": "banish_len", "op": ">=", "n": 2 }, "add": 5, "log": "☠ Pyre-Keeper: +5" }],
+ "Ossuary Titan": [{ "addvar": "remnant_count", "x": 3, "log": "⚰ Ossuary: +3×remnant" }],
+ "Widow of the Vigil": [{ "if": { "v": "remnant_count", "op": "==", "n": 0 }, "add": 3, "log": "⚰ Vigil: +3 (no remnant)" }],
+ "Bloodwake Duelist": [{ "addvar": "skullchain", "x": 2, "log": "💀 Bloodwake: +2×kill" }],
+ "Warpath Vanguard": [{ "if": { "v": "match_commits", "op": "<=", "n": 2 }, "add": 5, "log": "⚔ Vanguard: +5 (early)" }],
+ "Skullchain Reaver": [{ "addvar": "skullchain", "x": 2, "log": "💀 Reaver: +2×kill" }],
+ "Trophy-Hunter Kessa": [{ "addvar": "wc_len", "x": 3, "log": "🏆 Kessa: +3×trophy" }],
+ "First-Blood Squire": [{ "if": { "v": "match_commits", "op": "==", "n": 1 }, "add": 4, "log": "⚔ First Blood: +4" }],
+ "The Undefeated": [{ "addvar": "player_wins", "x": 2, "log": "⚔ Undefeated: +2×win" }],
+ "Kravyn's Protege": [{ "if": { "v": "pc_kills", "op": ">=", "n": 6 }, "add": 3, "log": "💀 Protege: +3" }],
+ "Web-Spinner Acolyte": [{ "addvar": "hand_len", "x": 1, "log": "🕷 Web-Spinner: +1×hand" }],
+ "Hoarder's Gambit": [{ "addvar": "hand_len", "x": 2, "log": "🕷 Hoarder: +2×hand" }],
+ "The Gathering Swarm": [{ "if": { "v": "hand_len", "op": ">=", "n": 3 }, "add": 4, "log": "🕷 Swarm: +4" }, { "if": { "v": "hand_len", "op": ">=", "n": 5 }, "oppadd": -4, "log": "🕷 Swarm: opp −4" }],
+ "Widow's Patience": [{ "if": { "v": "hand_len", "op": ">=", "n": 6 }, "add": 5, "log": "🕷 Patience: +5 (full hand)" }],
+ "Mirror Shade": [{ "set": "opp_pow", "log": "🔄 Mirror: copy opp" }, { "add": 1, "log": "🔄 Mirror: +1" }],
+ "Tosa Envoy": [{ "add": 3, "log": "🤝 Tosa Envoy: +3" }]
 };
 function evalRuleCond(cond, ctx){
   if(!cond) return true;
@@ -5628,7 +5707,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   // ── FIRE ON-COMMIT ABILITIES (before condition) ──
   if(!abilityLocked){
     // Kotei: +3 if opponent is 0-death OR you lost your last duel; whole effect repeats if Keawe already won a duel this match
-    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),banish_len:banishPile.length,wc_names:winnersCircle.map(function(c){return c.name;})};
+    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),banish_len:banishPile.length,remnant_count:(typeof deathRemnants!=='undefined'?deathRemnants.length:0),wc_names:winnersCircle.map(function(c){return c.name;})};
     if(pc.name==='Veronica'){
       var _oa=oc.abil||'';
       if(!_oa||_oa.indexOf('No ability')===0){ abilLog.push('🔄 Veronica: opponent has no ability — no effect'); }
@@ -5767,22 +5846,23 @@ function resolve(pc, oc, cond, playerCommittedPow){
   if(won === 'win'){
     label.textContent = 'DUEL WON';
     label.className = 'result-label win';
-    if(typeof lingeringRem!=='undefined' && lingeringRem.length){ abilLog.push('☠ your Remnants disperse — an enemy card was killed'); lingeringRem=[]; }
-    const remnantCleared = deathRemnantPow > 0;
+    const remnantCleared = deathRemnants.length > 0;
     if(remnantCleared){
-      deathRemnantPow = 0;
+      abilLog.push('☠ your Remnants disperse — an enemy card was killed');
+      deathRemnants = [];
       _deferField = function(){ document.getElementById('player-field').innerHTML = '<span class="placeholder">remnant cleared</span>'; };
       sub.textContent = `${pc.name} (${playerCommittedPow}) defeated ${oc.name} (${oc.pow}) — Remnant cleared · to Winners Circle`;
     } else {
       sub.textContent = `${pc.name} (${playerCommittedPow}) defeated ${oc.name} (${oc.pow}) — to Winners Circle`;
     }
     playerScore[0]++;
-    winnersCircle.push({...pc});
+    if(pc.name==='Skullchain Reaver'){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push('💀 Skullchain Reaver returns to your hand instead of the Winners Circle'); } else { winnersCircle.push({...pc}); }
     lastResult = 'win';
     recordDuel(pc,'win'); signalPoints += 20;   // playtest: every match tracks K/D + pays
     if(pc.name === 'Signal Diviner'){ divinerBonusNext=2; abilLog.push('Signal Diviner: +2 max Charge next turn'); }
     if(pc.name === 'Tange Sazen') skullchainKills++;
     if(pc.name === 'Kotei') ragwingWins++;
+    if(pc.name === 'Bone Choirmaster' && typeof drawToHand==='function'){ drawToHand(1); abilLog.push('☠ Bone Choirmaster — the win feeds the choir: draw a card'); }
   } else if(won === 'lose'){
     label.textContent = 'DUEL LOST';
     label.className = 'result-label lose';
@@ -5792,13 +5872,14 @@ function resolve(pc, oc, cond, playerCommittedPow){
     recordDuel(pc,'death');   // playtest: every match records the death
     { if(typeof drawPile!=='undefined' && drawPile.length){ var _tt=drawPile[drawPile.length-1]; var _tr=_tt&&TRIGGERS[_tt.name]; if(_tr){ drawPile.pop(); hand.push(_tt); if(_tr.draw) drawToHand(_tr.draw); if(_tr.recur){ for(var _tri=0;_tri<_tr.recur;_tri++){ if(banishPile.length) hand.push(banishPile.pop()); } } abilLog.push("✨ Trigger — "+_tt.name+": "+_tr.text); if(typeof toast==='function') toast("✨ Trigger! "+_tt.name+" — "+_tr.text, true); if(typeof buildHand==='function') buildHand(); } } }
     if(isDeathRemnant){
-      deathRemnantPow = pc.pow;
-      sub.textContent = `${oc.name} (${oc.pow}) defeated ${pc.name} (${playerCommittedPow}) — Death Remnant active`;
+      var _rp=(typeof REMNANT_POW!=='undefined'&&REMNANT_POW[pc.name]!=null)?REMNANT_POW[pc.name]:pc.pow;
+      deathRemnants.push({name:pc.name,pow:_rp});
+      sub.textContent = `${oc.name} (${oc.pow}) defeated ${pc.name} (${playerCommittedPow}) — Death Remnant active (+${_rp}, ${deathRemnants.length} on field)`;
       _deferField = function(){ document.getElementById('player-field').innerHTML = `<div class="card field-card ${pc.rarity}" style="opacity:0.55;border-color:rgba(184,58,58,0.55)">
         <div class="c-rarity">☠</div>
         <div class="c-name">${pc.name}</div>
-        <div class="c-pow" style="color:var(--lose)">+${pc.pow}↑</div>
-        <div class="c-abil" style="font-size:8px;color:var(--lose)">Remnant — next card gains +${pc.pow}</div>
+        <div class="c-pow" style="color:var(--lose)">+${_rp}↑</div>
+        <div class="c-abil" style="font-size:8px;color:var(--lose)">Remnant — your cards gain +${remnantPowSum()}</div>
       </div>`; };
     } else {
       sub.textContent = `${oc.name} (${oc.pow}) defeated ${pc.name} (${playerCommittedPow}) — to deck bottom`;
@@ -5824,7 +5905,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
 
   if(bloodthirstyActive && won === 'win'){ if(typeof drawToHand==='function') drawToHand(1); abilLog.push('⚔️ Bloodthirsty: the win feeds it — draw a card'); }
 
-  rearGuards.forEach(function(rg){ if(!rg) return; if(typeof LINGERING_SUPPORTS!=='undefined' && LINGERING_SUPPORTS.indexOf(rg.name)>=0){ lingeringRem.push({name:rg.name,pow:rg.pow||0}); abilLog.push('☠ '+rg.name+' lingers as a Remnant (+'+(rg.pow||0)+' to your commits until an enemy dies)'); } else { drawPile.unshift(rg); abilLog.push('↩ '+rg.name+' (support) → deck bottom'); } }); if(rearGuards.length) deckSize=drawPile.length;
+  rearGuards.forEach(function(rg){ if(!rg) return; if(typeof LINGERING_SUPPORTS!=='undefined' && LINGERING_SUPPORTS.indexOf(rg.name)>=0){ deathRemnants.push({name:rg.name,pow:rg.pow||0}); abilLog.push('☠ '+rg.name+' lingers as a Remnant (+'+(rg.pow||0)+' to your commits until an enemy dies)'); } else { drawPile.unshift(rg); abilLog.push('↩ '+rg.name+' (support) → deck bottom'); } }); if(rearGuards.length) deckSize=drawPile.length;
   rearGuards=[]; pendingOppRears=[];
   abilLogEl.innerHTML = abilLog.map(e => `<div class="abil-log-entry">${e}</div>`).join('');
   const _revealOutcome = function(){
@@ -5897,13 +5978,13 @@ function nextTurn(){
   flameVeilFromWC = false;
 
   // keep remnant on field if still active
-  if(deathRemnantPow === 0){
+  if(deathRemnants.length === 0){
     document.getElementById('player-field').innerHTML = '<span class="placeholder">your card</span>';
   }
   document.getElementById('opp-field').innerHTML = '<span class="placeholder">opponent card</span>';
   document.getElementById('opp-area').className = 'opp-waiting';
   document.getElementById('opp-area').innerHTML = '⏳ Waiting for draw…';
-  { var _lr=(typeof lingeringRem!=='undefined')?lingeringRem.reduce(function(a,r){return a+(r.pow||0);},0):0; var _rt=(deathRemnantPow||0)+_lr; document.getElementById('select-hint').textContent = _rt>0 ? `Remnants active — next commit gets +${_rt} · auto-drawing…` : '⟳ Auto-drawing your card…'; }
+  { var _rt=remnantPowSum(); document.getElementById('select-hint').textContent = _rt>0 ? `Remnants active — next commit gets +${_rt} · auto-drawing…` : '⟳ Auto-drawing your card…'; }
   document.getElementById('commit-hint').textContent = 'Auto-drawing to start the turn…';
 
   setPhase('predraw');
@@ -9518,7 +9599,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true;
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
-  banishSurge=0; divinerBonusNext=0; deathRemnantPow=0; lingeringRem=[]; lastResult=null; matchCommits=0; skullchainKills=0;
+  banishSurge=0; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false;
   charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellDiscount=0; if(typeof renderCharge==='function') renderCharge();
