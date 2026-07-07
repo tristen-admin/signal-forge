@@ -3243,6 +3243,16 @@ const DECK_POOL = [
   {name:'Rook',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Scout: on commit, banish the top card of your deck, then +1 power for every card in your banish zone.'},
   {name:'Falk',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Dive: on commit, +2 power for every card in your banish zone.'},
   {name:'Sable',pow:9,cost:1,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Quartermaster: as a support (Called), banish a card from your hand and give your Fighter +5.'},
+  {name:'Bannerlord Cassian',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rally 3: on commit, +3 power for each ally you have — your called supports this duel and every card in your Winners Circle.'},
+  {name:'Ironsworn Vanguard',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rally 2: +2 power for each of your allies (supports called this duel + your Winners Circle).'},
+  {name:'Warden of the Wall',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rally 2: +2 power per ally. A wall is only as strong as the line beside it.'},
+  {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rally 2: +2 per ally. As a support (Called), give your Fighter +2.'},
+  {name:'Muster-Sergeant Bryn',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), give your Fighter +1 for every card in your Winners Circle.'},
+  {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rally 2: +2 power for each of your allies.'},
+  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rally 1: +1 power for each of your allies.'},
+  {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the banner lifts the whole line.'},
+  {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2.'},
+  {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rally 1: +1 power for each of your allies. Weak alone, unbroken together.'},
   {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
   // ── art-swapped in from Set 2 storage ──
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you are down 2 or more duels this match, double this card\'s power.'},
@@ -3342,6 +3352,7 @@ let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + li
 function remnantPowSum(){ return deathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
 const REMNANT_POW = {'Arch-Grim Korrin':8,'Ossuary Titan':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk Skullbrand':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5};
 const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5};   // PROACTIVE: raise a Death Remnant on commit — no death needed
+const RALLY = {'Bannerlord Cassian':3,'Ironsworn Vanguard':2,'Warden of the Wall':2,'Oathkeeper Sena':2,'Oathbound Shield':2,'Sworn Duelist':1,'Shieldwall Recruit':1};   // COMRADERY: +N power per ally (called supports this duel + Winners Circle)
 const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk Skullbrand','Sister Mire','Kiba','Grave-Fed Ghoul','Bone Choirmaster','Gravecaller Voss',"Uso Oso's Skeletal Summons"];
 let lastResult = null;
 let matchCommits = 0;
@@ -4254,6 +4265,10 @@ const CALLED = {
   "Arch-Grim Korrin":              {text:"your Fighter +4; if you hold a Remnant, draw 1", add:4, drawIfRemnant:true},
   "Bone Choirmaster":              {text:"your Fighter +3 · draw 1", add:3, draw:1},
   "Grave-Fed Ghoul":               {text:"your Fighter +3", add:3},
+  "Rank-Sworn Levy":               {text:"your Fighter +2", add:2},
+  "Standard-Bearer Halden":        {text:"your Fighter +3", add:3},
+  "Oathkeeper Sena":               {text:"your Fighter +2", add:2},
+  "Muster-Sergeant Bryn":          {text:"your Fighter +1 per Winners Circle card", perWC:1, perWCcap:8},
   "Marrow Priest":                 {text:"your Fighter +3; if a Remnant is on the field, draw 1", add:3, drawIfRemnant:true},
   "Ossuary Titan":                 {text:"your Fighter +5", add:5},
   "Pale Gravedigger":              {text:"your Fighter +2; if you hold a Remnant, draw 1", add:2, drawIfRemnant:true},
@@ -4320,8 +4335,9 @@ function projectPlay(){
   var base=(f.pow||0)+(f._bo||0), spell=(banishSurge||0)+remnantPowSum()+((typeof spellSelfPow!=='undefined'&&spellSelfPow)||0);
   var called=0, oppDelta=((typeof spellOppPow!=='undefined'&&spellOppPow)||0), link=0, linkName=null;
   rearGuardIdxs.forEach(function(ix){ var sup=hand[ix]; if(!sup) return; var d=projectCalled(CALLED[sup.name], calledCtx()); called+=d[0]; oppDelta+=d[1]; var lk=fieldLink(f,sup); if(lk){ link+=lk.pow; var _tb=(CALLED[sup.name]&&CALLED[sup.name].twinBuff)||0; if(_tb) link+=_tb; linkName=linkName?linkName+', '+lk.name:lk.name; } });
+  var rally=0; if(typeof RALLY!=='undefined'&&RALLY[f.name]){ rally = RALLY[f.name]*( rearGuardIdxs.filter(function(ix){return hand[ix];}).length + ((typeof winnersCircle!=='undefined'&&winnersCircle)?winnersCircle.length:0) ); }
   var oppShown=pendingOppCard?(pendingOppCard.pow||0):null;
-  return {base:base, called:called, link:link, spell:spell, total:base+called+link+spell, oppDelta:oppDelta, oppShown:oppShown, linkName:linkName};
+  return {base:base, called:called, link:link, spell:spell, rally:rally, total:base+called+link+spell+rally, oppDelta:oppDelta, oppShown:oppShown, linkName:linkName};
 }
 function drawToHand(n){ if(typeof drawPile==='undefined'||typeof hand==='undefined') return 0; var got=0; for(var i=0;i<(n||0);i++){ if(!drawPile.length) break; hand.push(drawPile.pop()); got++; } if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(got && typeof buildHand==='function') buildHand(); return got; }
 function banishFromHand(n){ for(var _bi=0;_bi<(n||0);_bi++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } if(typeof buildHand==='function') buildHand(); }
@@ -5160,6 +5176,7 @@ const LINK_GROUPS = [
   {id:'waltz',   name:'Waltz Twins',     icon:'🐺', pow:1, members:['Lagertha Waltz','Hanse Waltz','Lagertha Waltz, Wrathful Transformation','The Bronzed Beast, Hanse Waltz','Kessuae, Tide of Ruin']},
   {id:'tosa',    name:'Tosa Pact',      icon:'🤝', pow:1, members:['Cletus Gwyndull']},
   {id:'blackwings', name:'The Black Wings', icon:'🖤', pow:1, members:['Ossian Drell','Kiana','Corvus','Wren','Rook','Falk','Sable','Rhaess Korvain']},
+  {id:'ironsworn', name:'The Ironsworn', icon:'✊', pow:2, members:['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit']},
 {id:'legend',  name:'Split Legend',    icon:'✨', pow:1, members:['Kotei','Ahdorah Khaan, Determined Soul','Kleydson','Anorith Keeling','Anorith Prime','Sunforged Colossus']},
 ];
 function cardLinkGroups(name){ return LINK_GROUPS.filter(function(g){ return g.members.indexOf(name)>=0; }); }
@@ -5673,6 +5690,11 @@ function resolve(pc, oc, cond, playerCommittedPow){
       var _or3=applyCalled(og, _orc, oppPow, playerPow, abilLog, true); oppPow=_or3[0]; playerPow=_or3[1];
       var _lk2=fieldLink(oc, og); if(_lk2){ oppPow+=_lk2.pow; abilLog.push('🔗 Opp '+_lk2.name+' Link — '+oc.name+' + '+og.name+': +'+_lk2.pow); var _tb2=(typeof CALLED!=='undefined'&&CALLED[og.name]&&CALLED[og.name].twinBuff)||0; if(_tb2){ oppPow+=_tb2; } }
     });
+  }
+  // ── RALLY: comradery — bonus power per ally (supports this duel + Winners Circle) ──
+  if(typeof RALLY!=='undefined'){
+    if(RALLY[pc.name]){ var _pac=(rearGuards?rearGuards.filter(Boolean).length:0)+((typeof winnersCircle!=='undefined'&&winnersCircle)?winnersCircle.length:0); var _prb=RALLY[pc.name]*_pac; if(_prb>0){ playerPow+=_prb; abilLog.push('🤝 Rally — '+pc.name+': +'+_prb+' ('+_pac+' all'+(_pac===1?'y':'ies')+' × '+RALLY[pc.name]+')'); } }
+    if(RALLY[oc.name]){ var _oac=((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0)+((typeof oppWonBot!=='undefined'&&oppWonBot&&oppWonBot.size)?oppWonBot.size:0); var _orb=RALLY[oc.name]*_oac; if(_orb>0){ oppPow+=_orb; abilLog.push('🤝 Opp Rally — '+oc.name+': +'+_orb); } }
   }
   // ── LIVING CARD TRAITS — ONE conditional trait per card (fires only in-context) ──
   let bloodthirstyActive=false, untouchableActive=false;
@@ -7398,6 +7420,7 @@ function buildDNA(){
 // ══ KEYWORD GLOSSARY ══
 const KEYWORDS = {
   'Instant': 'Activate from your hand during either Instant Window (before or after commit) without spending your commit for the turn.',
+  'Rally': 'On commit, this card gains bonus power for each ally you have — your called supports this duel plus every card in your Winners Circle. Weak alone, unstoppable together; the buff grows as your company proves itself.',
   'Death Remnant': 'When this card dies it stays on the field as a Remnant, buffing your committed cards until one of the opponent\'s cards is killed.',
   'Record Guard': 'Once per match: if this card would lose, the duel ties instead and no death is written to its permanent record.',
   'Kill Escalation': 'Gains power for every kill this card has earned this match — it snowballs the longer it keeps winning.',
@@ -7436,7 +7459,7 @@ function glossify(text){
     return `<span class="kw" data-kw="${key}">${m}</span>`;
   });
 }
-const KW_ICON = { 'Charge':'⚡','Called':'📣','Link':'🔗','Recur':'♻','Banish':'☠','Trigger':'✨','Conjure':'🎴','Regeneration':'👁','Death Remnant':'💀','Record Guard':'🛡','Kill Escalation':'⚔️','Last Stand':'🌙','Bloodrage':'🩸','Banish Surge':'☠','Pre-commit':'📌','Instant':'⚡','Pristine':'◈','Elemental Flurry':'🌪️' };
+const KW_ICON = { 'Charge':'⚡','Called':'📣','Link':'🔗','Rally':'🤝','Recur':'♻','Banish':'☠','Trigger':'✨','Conjure':'🎴','Regeneration':'👁','Death Remnant':'💀','Record Guard':'🛡','Kill Escalation':'⚔️','Last Stand':'🌙','Bloodrage':'🩸','Banish Surge':'☠','Pre-commit':'📌','Instant':'⚡','Pristine':'◈','Elemental Flurry':'🌪️' };
 const KW_DEMO = {
   'Charge': '<div class="kwd kwd-charge"><span class="kwd-pip"></span><span class="kwd-pip"></span><span class="kwd-pip"></span><span class="kwd-box">⚡ spell</span></div>',
   'Link': '<div class="kwd"><span class="kwd-card blue">A</span><span class="kwd-link">🔗</span><span class="kwd-card blue">B</span><span class="kwd-plus">+3</span></div>',
@@ -7462,6 +7485,7 @@ function cardKeywords(c){
   if(typeof cardHasKeyword==='function'&&cardHasKeyword(c,'Instant')) add('Instant');
   if(typeof TRIGGERS!=='undefined'&&TRIGGERS[c.name]) add('Trigger');
   if(typeof LINK_GROUPS!=='undefined'&&LINK_GROUPS.some(function(g){return g.members&&g.members.indexOf(c.name)>=0;})) add('Link');
+  if(typeof RALLY!=='undefined'&&RALLY[c.name]) add('Rally');
   return out;
 }
 function keywordChipsHTML(c){
@@ -7662,8 +7686,9 @@ const BLACKWING_PRESET = ['Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren
 const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ossuary Titan','Ghorruk Skullbrand','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Uso Oso',"Uso Oso's Skeletal Summons",'Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','Signal Diviner','The Regenerating Horror','Gravecaller Voss','Melanie'];   // The Deathless — Death-Remnant stack + draw
 const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Moro'];   // The Warpath — early champ + WC recycle + kill escalation
 const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte',"Hoarder's Gambit",'The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Ella Ballora',"Web-Weaver's Return",'The Black Ledger','Signal Diviner','Melanie','Heir of Kaiga','Faye Quicksilver','Chieftain Reyva Vosh'];   // The Broodswarm — hand-size draw + power
+const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Signal Diviner','Heir of Kaiga','Melanie','Faye Quicksilver','Chieftain Reyva Vosh','The Black Ledger'];   // The Ironsworn — strength in numbers (Rally: +power per ally)
 let deckPresets = lsGet('sf_presets', {});
-(function(){ var _seed={blackwing:BLACKWING_PRESET, deathless:DEATHLESS_PRESET, warpath:WARPATH_PRESET, broodswarm:BROODSWARM_PRESET}; var _ch=false; Object.keys(_seed).forEach(function(k){ if(!deckPresets[k] && !lsGet('sf_seed_'+k,0)){ deckPresets[k]=_seed[k].slice(); lsSet('sf_seed_'+k,1); _ch=true; } }); if(!lsGet('sf_bw_seeded',0)) lsSet('sf_bw_seeded',1); if(!lsGet('sf_seed_deathless_v2',0)){ deckPresets.deathless = DEATHLESS_PRESET.slice(); lsSet('sf_seed_deathless_v2',1); _ch=true; } if(_ch) lsSet('sf_presets', deckPresets); })();
+(function(){ var _seed={blackwing:BLACKWING_PRESET, deathless:DEATHLESS_PRESET, warpath:WARPATH_PRESET, broodswarm:BROODSWARM_PRESET, ironsworn:IRONSWORN_PRESET}; var _ch=false; Object.keys(_seed).forEach(function(k){ if(!deckPresets[k] && !lsGet('sf_seed_'+k,0)){ deckPresets[k]=_seed[k].slice(); lsSet('sf_seed_'+k,1); _ch=true; } }); if(!lsGet('sf_bw_seeded',0)) lsSet('sf_bw_seeded',1); if(!lsGet('sf_seed_deathless_v2',0)){ deckPresets.deathless = DEATHLESS_PRESET.slice(); lsSet('sf_seed_deathless_v2',1); _ch=true; } if(_ch) lsSet('sf_presets', deckPresets); })();
 function refreshPresets(){
   lsSet('sf_presets', deckPresets);
   const wrap = document.getElementById('preset-list'); if(!wrap) return;
