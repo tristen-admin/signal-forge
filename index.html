@@ -3329,7 +3329,7 @@ let playerScore = [1,0];
 let seasonWins=0, seasonLosses=0, seasonRewardClaimed=false;
 let charge=3/*energy start*/;                                   // energy resource, per match
 let spellHand=[];                               // Stage 2: spells you've drawn (a hand you spend)
-let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellDiscount=0;  // per-duel armed effects  // Rebirth season — cumulative match W/L across ranked + staked
+let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellHalveField=false, spellDiscount=0;  // per-duel armed effects  // Rebirth season — cumulative match W/L across ranked + staked
 let hand = [...HAND_CARDS];
 let deckSize = 12;
 let winnersCircle = [];
@@ -3637,7 +3637,7 @@ function beginTurnAutoDraw(){
 
 // Start-of-turn opener: no draw on the opening turn, auto-draw on every turn after.
 function openTurn(){
-  charge=Math.min(duelEnergyCap(),Math.max(charge+ENERGY_REGEN,duelEnergyFloor())); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  charge=Math.min(duelEnergyCap(),Math.max(charge+ENERGY_REGEN,duelEnergyFloor())); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -4143,17 +4143,14 @@ function skipInstant(){
 }
 // ── ENERGY SPELLS (Stage 1: fueled by Charge, armed during your turn) ──
 const ENERGY_SPELLS = [
-  {id:'overclock', name:'Overclock', cost:1, fx:'+2 Charge'},
-  {id:'staticpulse', name:'Static Pulse', cost:1, fx:'Opponent \u22123 power'},
-  {id:'amplify', name:'Amplify', cost:1, fx:'Your card +3 power'},
-  {id:'overload', name:'Overload', cost:2, fx:'Opponent \u22126 power'},
-  {id:'jammer', name:'Jammer', cost:2, fx:'Negate condition'},
-  {id:'recall', name:'Recall', cost:2, fx:'Pull a Winners-Circle card to hand'},
-  {id:'nullwave', name:'Nullwave', cost:3, fx:'Negate opp ability'},
-  {id:'ledgerward', name:'Ledger Ward', cost:3, fx:'Block a death'},
-  {id:'drawsurge', name:'Draw Surge', cost:2, fx:'Draw 3, banish 1'},
-  {id:'godhand', name:'Godhand', cost:1, fx:'Your card +10 power'},
-  {id:'sornshift', name:'Sorn-Vallis Shift', cost:3, fx:'Warp location to Sorn-Vallis'},
+  {id:'sift', name:'Sift', cost:1, fx:'Draw 1, discard 1'},
+  {id:'empower', name:'Empower', cost:1, fx:'Your unit +3 power'},
+  {id:'hex', name:'Hex', cost:1, fx:'Opponent unit -3 power'},
+  {id:'collapse', name:'Collapse', cost:3, fx:'Halve every card power on field'},
+  {id:'locus', name:'Locus Shift', cost:3, fx:'Change the location + reset the timer'},
+  {id:'drawsurge', name:'Draw Surge', cost:2, fx:'Draw 3, banish 1', anorith:true},
+  {id:'godhand', name:'Godhand', cost:1, fx:'Your card +10 power', anorith:true},
+  {id:'sornshift', name:'Sorn-Vallis Shift', cost:3, fx:'Warp location to Sorn-Vallis', anorith:true},
 ];
 // ══ REAR-GUARD / CALLED SYSTEM (v1) ══
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
@@ -4398,19 +4395,16 @@ function castSpell(i){
   if(charge < cost){ toast('Not enough Charge for '+s.name+' ('+cost+'\u26a1)', false); return; }
   if(s.id==='recall' && !winnersCircle.length){ toast('Winners Circle empty \u2014 nothing to recall.', false); return; }
   charge -= cost;
-  if(s.id==='overclock') charge=Math.min(ENERGY_CAP,charge+2);
-  else if(s.id==='staticpulse') spellOppPow -= 3;
-  else if(s.id==='overload') spellOppPow -= 6;
-  else if(s.id==='amplify') spellSelfPow += 3;
-  else if(s.id==='jammer') spellJam=true;
-  else if(s.id==='recall'){ const idx=Math.floor(Math.random()*winnersCircle.length); const card=winnersCircle.splice(idx,1)[0]; if(card.name==='Ourevos, the Golden Dragon'){ card.pow=Math.max(1,card.pow-3); } if(card.name==='Darwin'){ flameVeilFromWC=true; } hand.push(card); if(typeof buildHand==='function') buildHand(); }
-  else if(s.id==='nullwave') spellNullOpp=true;
-  else if(s.id==='ledgerward') spellShield=true;
+  if(s.id==='sift'){ if(typeof drawToHand==='function') drawToHand(1); if(typeof banishFromHand==='function') banishFromHand(1); }
+  else if(s.id==='empower') spellSelfPow += 3;
+  else if(s.id==='hex') spellOppPow -= 3;
+  else if(s.id==='collapse') spellHalveField = true;
+  else if(s.id==='locus'){ var _nc=Math.floor(Math.random()*CONDITIONS.length); if(typeof revealCondition==='function') revealCondition(_nc); if(typeof startDecisionClock==='function') startDecisionClock(15,'to decide'); }
   else if(s.id==='drawsurge'){ if(typeof drawToHand==='function') drawToHand(3); if(typeof banishFromHand==='function') banishFromHand(1); }
   else if(s.id==='godhand') spellSelfPow += 10;
   else if(s.id==='sornshift'){ var _li=CONDITIONS.findIndex(function(x){return x.id==='lowest';}); if(_li>=0 && typeof revealCondition==='function'){ revealCondition(_li); conditionLocked=true; } }
   spellDiscount=0;
-  spellHand.splice(i,1);
+  /* spells are PERMANENT — a spell drawn after a lost round stays for the rest of the match (no splice) */
   renderCharge();
   toast('\u26a1 '+s.name+' \u2014 '+s.fx+' (spent)', true);
 }
@@ -4746,13 +4740,13 @@ function commitCard(){
   if(pc.name==='Arch-Grim Korrin' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(deathRemnants.length); }
   if(pc.name==='Pale Gravedigger' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(1); }
   if(pc.name==='Widow of the Vigil' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(2); }
-  if(pc.name==='Kleydson'){ energyLoadout=['drawsurge','godhand']; spellHand=['drawsurge','godhand']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Lesser Chaos — your spells warp into Draw Surge + Godhand.', true); }
+  if(pc.name==='Kleydson'){ spellHand=['drawsurge','godhand']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Lesser Chaos — your spells warp into Draw Surge + Godhand.', true); }
   if(pc.name==='Tosa Envoy'){ conditionLocked=true; if(typeof toast==='function') toast('🤝 Tosa Envoy — the active condition is locked in.', true); }
   if(pc.name==='Wren' && banishPile.length){ hand.push(banishPile.pop()); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='La "La" Ballora, the Broodqueen' && typeof drawToHand==='function'){ drawToHand(1); }
   if(pc.name==="Web-Weaver's Return"){ if(banishPile.length){ var _rb=banishPile.splice(0,banishPile.length); drawPile=drawPile.concat(_rb); if(typeof shuffle==='function') shuffle(drawPile); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof toast==='function') toast('🕸 Web-Weaver\'s Return \u2014 '+_rb.length+' banished cards rewoven into your deck.', true); } if(typeof drawToHand==='function') drawToHand(1); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='Keawe, A Legend Reborn'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=18;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+') to your hand.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 18+ left in your deck to tutor.', false); } }
-  if(pc.name==='Anorith Keeling'){ energyLoadout=['drawsurge','godhand','sornshift']; spellHand=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your spells into the Chaos Trinity.', true); }
+  if(pc.name==='Anorith Keeling'){ spellHand=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your spells into the Chaos Trinity.', true); }
   if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
   if(pc.name==='Uso Oso' && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
   if(pc.name==='Valcarion' && banishPile.length){ var _rec=banishPile.pop(); if(rearGuards.length < RG_SLOTS){ rearGuards.push(_rec); if(typeof toast==='function') toast('🩸 Valcarion calls '+_rec.name+' from banish to support.', true); } else { hand.push(_rec); if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🩸 Valcarion reclaims '+_rec.name+' from banish to hand.', true); } if(typeof updatePiles==='function') updatePiles(); }
@@ -5657,7 +5651,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
   // ── ENERGY SPELL / BODY EFFECTS (Stage 1) ──
   if(spellJam){ cond = {id:'jammed', mech:'Jammed', name:'Signal Jammed', icon:'\ud83d\udce1', rule:'Condition negated by an Interrupt.', strat:''}; abilLog.push('\ud83d\udce1 Jammer: active condition negated'); }
   if(spellOppPow){ oppPow += spellOppPow; abilLog.push('\u26a1 Interrupt: opponent '+spellOppPow+' power'); }
-  if(spellSelfPow){ playerPow += spellSelfPow; abilLog.push('\u26a1 Amplify: your card +'+spellSelfPow+' power'); }
+  if(spellSelfPow){ playerPow += spellSelfPow; abilLog.push('\u26a1 Spell: your card +'+spellSelfPow+' power'); }
+  if(typeof spellHalveField!=='undefined' && spellHalveField){ playerPow=Math.ceil(playerPow/2); oppPow=Math.ceil(oppPow/2); abilLog.push('\u26a1 Collapse: field power halved (both sides)'); }
   if(spellNullOpp) abilLog.push('\ud83d\udce1 Nullwave: opponent card ability suppressed this duel');
   { const _al = cond.id === 'abilitylock';
     if(!_al && pc.name === 'Conduit Adept'){ charge=Math.min(ENERGY_CAP,charge+1); abilLog.push('\u26a1 Conduit Adept: +1 Charge'); if(typeof renderCharge==='function') renderCharge(); }
@@ -6403,7 +6398,7 @@ function loadState(){
       if(s.ownedCopies){ ownedCopies={}; for(const n in s.ownedCopies){ ownedCopies[n]=s.ownedCopies[n]; } }  // REPLACE the boot 1-of-each, don't merge — else onboarding's limited roster reverts to all cards
       if(s.freshCopies){ freshCopies=s.freshCopies; }
       if(Array.isArray(s.activeDeck)) activeDeck=new Set(s.activeDeck.slice(0, (typeof DECK_SIZE!=='undefined'?DECK_SIZE:12)));
-      if(Array.isArray(s.energyLoadout) && s.energyLoadout.length) energyLoadout=s.energyLoadout.slice(0,5);
+      if(Array.isArray(s.energyLoadout)){ var _vl=s.energyLoadout.filter(function(id){return ['sift','empower','hex','collapse','locus'].indexOf(id)>=0;}); energyLoadout = _vl.length ? _vl.slice(0,3) : ['sift','empower','hex']; }
     }
     // pre-v2 saves were name-keyed (a won card wrongly stacked base + variant) — discard those counts for a clean instance-keyed vault
     if(s.equipped) equipped=Object.assign(equipped, s.equipped);
@@ -7475,7 +7470,7 @@ function keywordChipsHTML(c){
 
 // ══ DECK STATE ══
 let activeDeck = new Set();      // card names selected into deck
-let energyLoadout = ['overclock','staticpulse','amplify','jammer','ledgerward'];  // Stage 2: the 5 Interrupts you draw from on a lost round
+let energyLoadout = ['sift','empower','hex'];  // the 3 spells (pick in deck builder) you draw from on a lost round
 let activeDeckPool = null;       // built from activeDeck when >0
 let vaultFilter = 'all';
 let vaultSort = 'rarity';
@@ -7724,24 +7719,25 @@ function equipSleeveDeck(id){
   if(!owned){ if(forgeBalance<it.price){ toast('Not enough Forge — unlock in the Shop.', false); return; } forgeBalance-=it.price; ownedCosmetics.add('sleeves:'+id); updateBalance(); toast('Unlocked & equipped '+it.name, true); }
   equipped.sleeves=id; applyCosmetics(); saveState(); buildSleeves(); buildDeckBuilder(); if(typeof buildShop==='function') buildShop();
 }
-const SPELL_AXIS = {overclock:'Ramp',staticpulse:'Offense',amplify:'Offense',overload:'Offense',jammer:'Control',recall:'Utility',nullwave:'Control',ledgerward:'Defense'};
+const SPELL_AXIS = {sift:'Utility',empower:'Offense',hex:'Offense',collapse:'Control',locus:'Control',drawsurge:'Utility',godhand:'Offense',sornshift:'Control'};
 function buildEnergyLoadout(){
   const grid=document.getElementById('energy-grid'); if(!grid) return;
-  const cnt=document.getElementById('energy-count'); if(cnt) cnt.textContent=energyLoadout.length+' / 5';
-  grid.innerHTML=ENERGY_SPELLS.map(function(s){
-    const on=energyLoadout.indexOf(s.id)>-1; const full=energyLoadout.length>=5 && !on;
+  const SEL=ENERGY_SPELLS.filter(function(s){return !s.anorith;});
+  const cnt=document.getElementById('energy-count'); if(cnt) cnt.textContent=energyLoadout.length+' / 3';
+  grid.innerHTML=SEL.map(function(s){
+    const on=energyLoadout.indexOf(s.id)>-1; const full=energyLoadout.length>=3 && !on;
     return '<div class="en-card'+(on?' sel':'')+(full?' full':'')+'" onclick="toggleEnergySpell(\''+s.id+'\')">'
       +'<div class="en-top"><span class="en-name">'+s.name+'</span><span class="en-cost">'+s.cost+'\u26a1</span></div>'
       +'<div class="en-axis">'+(SPELL_AXIS[s.id]||'Spell')+'</div>'
       +'<div class="en-fx">'+s.fx+'</div>'
-      +'<div class="en-check">'+(on?'\u2713 In loadout':(full?'Loadout full':'+ Add'))+'</div>'
+      +'<div class="en-check">'+(on?'\u2713 In loadout':(full?'Pick 3':'+ Add'))+'</div>'
       +'</div>';
   }).join('');
 }
 function toggleEnergySpell(id){
   const i=energyLoadout.indexOf(id);
   if(i>-1){ if(energyLoadout.length<=1){ toast('Keep at least 1 Interrupt in your loadout.', false); return; } energyLoadout.splice(i,1); }
-  else { if(energyLoadout.length>=5){ toast('Loadout full \u2014 remove one first (max 5).', false); return; } energyLoadout.push(id); }
+  else { if(energyLoadout.length>=3){ toast('Loadout full \u2014 pick 3 spells (remove one first).', false); return; } energyLoadout.push(id); }
   saveState(); buildEnergyLoadout();
 }
 
@@ -9621,7 +9617,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   banishSurge=0; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false;
-  charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellDiscount=0; if(typeof renderCharge==='function') renderCharge();
+  charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; spellDiscount=0; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
