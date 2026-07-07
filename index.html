@@ -3252,6 +3252,19 @@ const DECK_POOL = [
   {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the banner lifts the whole line.'},
   {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2.'},
   {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rally 1: +1 power for each of your allies. Weak alone, unbroken together.'},
+  {name:'Brood-Tender',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: on commit, +1 power for each card in your hand.'},
+  {name:'Skittering Drone',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: on commit, +1 power for each card in your hand.'},
+  {name:'Hatchling Tide',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: +4 power while your hand is full (4+ cards).'},
+  {name:'Silk-Spinner Drone',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), draw a card to feed the brood.'},
+  {name:'Web-Tender Matron',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), draw 2 cards.'},
+  {name:'Venombrood Queen',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Broodswarm: on commit, +2 power for each card in your hand.'},
+  {name:'Talon-Trooper',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Wingblade: on commit, +1 power for every card in your banish zone.'},
+  {name:'Wingblade Scout',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Wingblade: on commit, +1 power for every card in your banish zone.'},
+  {name:'Feather-Marked Skirmisher',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), banish a card from your hand and give your Fighter +4.'},
+  {name:'Squad-Captain Vesk',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone.'},
+  {name:'Grave-Warden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Death Remnant: when it falls, +3 to your cards until an enemy dies.'},
+  {name:'Bone-Stitcher',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), your Fighter +3; if a Remnant is on the field, draw a card.'},
+  {name:'Sworn Pikeman',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rally 1: +1 power for each of your allies (supports + Winners Circle).'},
   {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
   // ── art-swapped in from Set 2 storage ──
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you are down 2 or more duels this match, double this card\'s power.'},
@@ -3349,9 +3362,9 @@ let banishSurge = 0;
 let divinerBonusNext = 0;
 let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + lingering supports); each {name,pow}; persists until an enemy card is killed
 function remnantPowSum(){ return deathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
-const REMNANT_POW = {'Arch-Grim Korrin':8,'Ossuary Titan':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk Skullbrand':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5};
+const REMNANT_POW = {'Arch-Grim Korrin':8,'Ossuary Titan':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk Skullbrand':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5,'Grave-Warden':3};
 const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5};   // PROACTIVE: raise a Death Remnant on commit — no death needed
-const RALLY = {'Bannerlord Cassian':3,'Ironsworn Vanguard':2,'Warden of the Wall':2,'Oathkeeper Sena':2,'Oathbound Shield':2,'Sworn Duelist':1,'Shieldwall Recruit':1};   // COMRADERY: +N power per ally (called supports this duel + Winners Circle)
+const RALLY = {'Bannerlord Cassian':3,'Ironsworn Vanguard':2,'Warden of the Wall':2,'Oathkeeper Sena':2,'Oathbound Shield':2,'Sworn Duelist':1,'Shieldwall Recruit':1,'Sworn Pikeman':1};   // COMRADERY: +N power per ally (called supports this duel + Winners Circle)
 const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk Skullbrand','Sister Mire','Kiba','Grave-Fed Ghoul','Bone Choirmaster','Gravecaller Voss',"Uso Oso's Skeletal Summons"];
 let lastResult = null;
 let matchCommits = 0;
@@ -4264,6 +4277,10 @@ const CALLED = {
   "Arch-Grim Korrin":              {text:"your Fighter +4; if you hold a Remnant, draw 1", add:4, drawIfRemnant:true},
   "Bone Choirmaster":              {text:"your Fighter +3 · draw 1", add:3, draw:1},
   "Grave-Fed Ghoul":               {text:"your Fighter +3", add:3},
+  "Silk-Spinner Drone":            {text:"draw a card", draw:1},
+  "Web-Tender Matron":             {text:"draw 2 cards", draw:2},
+  "Feather-Marked Skirmisher":     {text:"banish 1 from hand \u00b7 your Fighter +4", banishOwn:1, add:4},
+  "Bone-Stitcher":                 {text:"your Fighter +3; draw if a Remnant is out", add:3, drawIfRemnant:true},
   "Rank-Sworn Levy":               {text:"your Fighter +2", add:2},
   "Standard-Bearer Halden":        {text:"your Fighter +3", add:3},
   "Oathkeeper Sena":               {text:"your Fighter +2", add:2},
@@ -5174,8 +5191,8 @@ const LINK_GROUPS = [
   {id:'dragon',  name:'Dragon-Pact',     icon:'🐉', pow:1, members:['Tange Sazen','Ourevos, the Golden Dragon','Kiba','Kleydson','Kaelthar the Ascendant']},
   {id:'waltz',   name:'Waltz Twins',     icon:'🐺', pow:1, members:['Lagertha Waltz','Hanse Waltz','Lagertha Waltz, Wrathful Transformation','The Bronzed Beast, Hanse Waltz','Kessuae, Tide of Ruin']},
   {id:'tosa',    name:'Tosa Pact',      icon:'🤝', pow:1, members:['Cletus Gwyndull']},
-  {id:'blackwings', name:'The Black Wings', icon:'🖤', pow:1, members:['Ossian Drell','Kiana','Corvus','Wren','Rook','Falk','Sable','Rhaess Korvain','The Black Ledger','Tannis']},
-  {id:'ironsworn', name:'The Ironsworn', icon:'✊', pow:2, members:['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh']},
+  {id:'blackwings', name:'The Black Wings', icon:'🖤', pow:1, members:['Ossian Drell','Kiana','Corvus','Wren','Rook','Falk','Sable','Rhaess Korvain','The Black Ledger','Tannis','Talon-Trooper','Wingblade Scout','Feather-Marked Skirmisher','Squad-Captain Vesk']},
+  {id:'ironsworn', name:'The Ironsworn', icon:'✊', pow:2, members:['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh','Sworn Pikeman']},
 {id:'legend',  name:'Split Legend',    icon:'✨', pow:1, members:['Kotei','Ahdorah Khaan, Determined Soul','Kleydson','Anorith Keeling','Anorith Prime','Sunforged Colossus']},
 ];
 function cardLinkGroups(name){ return LINK_GROUPS.filter(function(g){ return g.members.indexOf(name)>=0; }); }
@@ -5256,6 +5273,15 @@ function legendMiniHTML(c){ const s=legendScore(c); if(s<180) return ''; const t
 // ── DATA-DRIVEN ABILITY SPEC — shared with server/rules.json (one source of truth). ──
 // Regenerate this const from server/rules.json when the spec changes; the server is canonical.
 const CARD_RULES = {
+ "Silk-Spinner Drone": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"🕷 Swarm: +1×hand"}],
+ "Web-Tender Matron": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"🕸 Swarm: +1×hand"}],
+ "Brood-Tender": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"\ud83d\udd77 Swarm: +1\u00d7hand"}],
+ "Skittering Drone": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"\ud83d\udd77 Swarm: +1\u00d7hand"}],
+ "Hatchling Tide": [{"if":{"v":"hand_len","op":">=","n":4},"add":4,"log":"\ud83d\udd78 Swarm: +4 (full hand)"}],
+ "Venombrood Queen": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":2,"log":"\ud83d\udd78 Broodswarm: +2\u00d7hand"}],
+ "Talon-Trooper": [{"if":{"v":"banish_len","op":">","n":0},"addvar":"banish_len","x":1,"log":"\ud83d\udda4 Wingblade: +1\u00d7banish"}],
+ "Wingblade Scout": [{"if":{"v":"banish_len","op":">","n":0},"addvar":"banish_len","x":1,"log":"\ud83d\udda4 Wingblade: +1\u00d7banish"}],
+ "Squad-Captain Vesk": [{"if":{"v":"banish_len","op":">","n":0},"addvar":"banish_len","x":2,"log":"\ud83d\udda4 Wing Commander: +2\u00d7banish"}],
  "Bixie Bee": [
   {
    "if": { "v": "banish_len", "op": ">", "n": 0 },
