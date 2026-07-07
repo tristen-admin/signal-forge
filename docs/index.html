@@ -3165,7 +3165,7 @@ const ABILITIES = {
     {icon:'⚡',name:'Surge Copy',timing:'On-Commit',rule:'Copy the power of the highest-power card in your hand (not this card). Only lasts this duel.',ex:'e.g. Chameleon — 1 base power. Becomes whatever you hold.'},
   ],
   resolution: [
-    {icon:'⚰️',name:'Death Remnant',timing:'Resolution',rule:'When this card dies, it remains on the field as a Remnant instead of going to deck bottom. Your cards committed here gain power equal to this card\'s base power until one of your opponent\'s cards is killed. Remnant is then removed.',ex:'e.g. Uso Oso — 7 power. Death becomes a lasting field presence. Opponent must kill something of theirs to remove the buff.'},
+    {icon:'⚰️',name:'Death Remnant',timing:'Resolution',rule:'When this card dies, it remains on the field as a Remnant instead of going to deck bottom. Your cards committed here gain the fixed Remnant amount printed on the fallen card until one of your opponent\'s cards is killed. Remnant is then removed.',ex:'e.g. a fallen Uso Oso lends a fixed +10 to your cards. Death becomes a lasting field presence. Opponent must kill something of theirs to remove the buff.'},
     {icon:'🔁',name:'Death Trigger',timing:'Resolution',rule:'If this card dies this duel, draw two cards from deck top immediately.',ex:'e.g. Martyrbone — 5 power. Death is the payoff.'},
     {icon:'⬆️',name:'Kill Escalation',timing:'Resolution',rule:'Each kill this card earns in a match adds +1 power to its next commit (cumulative, resets after match).',ex:'e.g. Warchain — 10 base, scales to 15+ if unchained.'},
     {icon:'🌙',name:'Vault Pull',timing:'Resolution',rule:'After this card wins a duel, it is automatically vaulted until your next match. Record is sealed at this win.',ex:'e.g. Pristine Seal — 16 power. Win and retire. Protects the record peak.'},
@@ -3219,7 +3219,7 @@ const DECK_POOL = [
   {name:'Kiana',pow:15,cost:2,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Order Initiate: on commit, banish a card from your hand, then +6 power.'},
   // ── KOTEI Series 1 Expansion ──
   {name:'Melanie',pow:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'No ability. Keawe\'s mother — a civilian, not a fighter. At 1 power she quietly wins under Lowest Wins.'},
-  {name:'Uso Oso\'s Skeletal Summons',pow:5,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: these bones don\'t stay down — when the summons falls it lingers on the field, your committed cards gaining its power until an opponent\'s card is killed.'},
+  {name:'Uso Oso\'s Skeletal Summons',pow:5,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: these bones don\'t stay down — when the summons falls it lingers on the field, +5 to your committed cards until an opponent\'s card is killed.'},
   {name:'King Joris',pow:12,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rightful Claim: on commit, +1 power for every death on the opponent\'s record — the betrayed king judges every usurper\'s sins.'},
   {name:'The Regenerating Horror',pow:11,kills:0,deaths:0,rarity:'uncommon',timing:'resolution',abil:'Regeneration (one use per match): the first time this card would lose, it regrows instead — the duel ties, no death is recorded, and it returns to your hand. Only a finisher truly ends it.'},
   {name:'Broodmother',pow:13,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Spiderling Swarm: on commit, +1 power for every card in your hand — the brood answers her call.'},
@@ -3251,7 +3251,7 @@ const DECK_POOL = [
   {name:'Anorith Keeling',pow:0,cost:3,chaosPow:true,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Chaos Deity — base power is a ? (unknown). On commit its power becomes the duels completed this match × the cards left in your hand, and every spell in your deck warps into the Chaos Trinity: Draw Surge (2⚡ draw 3, banish 1), Godhand (1⚡ your card +10), and Sorn-Vallis Shift (3⚡ warp the location to Sorn-Vallis — lowest power wins).'},
   {name:'Heir of Kaiga',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast.'},
   {name:'Josef',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Master Tailor: on commit, +4 power once he has taken the measure of the fight (any commit after your first).'},
-  {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, your committed cards gaining her power until an opponent\'s card is killed.'},
+  {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, +6 to your committed cards until an opponent\'s card is killed.'},
   {name:'Kleydson',pow:11,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Lesser Chaos (once per match): warp every spell in your deck into Draw Surge (2⚡ draw 3, banish 1) and Godhand (1⚡ your card +10) — a splashable echo of Anorith."},
   // ── THE BLACK WINGS (banish to fuel, reclaim & recur) ──
   {name:'Grave-Tithe Acolyte',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: banish the top card of your deck, then +5 power.'},
@@ -3336,7 +3336,7 @@ let banishSurge = 0;
 let divinerBonusNext = 0;
 let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + lingering supports); each {name,pow}; persists until an enemy card is killed
 function remnantPowSum(){ return deathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
-const REMNANT_POW = {'Arch-Grim Korrin':8,'Ossuary Titan':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10};
+const REMNANT_POW = {'Arch-Grim Korrin':8,'Ossuary Titan':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk Skullbrand':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5};
 const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk Skullbrand','Sister Mire','Kiba'];
 let lastResult = null;
 let matchCommits = 0;
