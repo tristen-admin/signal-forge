@@ -4721,7 +4721,7 @@ function commitCard(){
   const c = CONDITIONS[conditionIndex];
   const pc = hand[selectedCard];
   rearGuards = rearGuardIdxs.filter(function(ix){return ix!==selectedCard && hand[ix];}).map(function(ix){return hand[ix];});
-  { const _conjCost = conjureCost(pc); charge = Math.max(0, charge - _conjCost); if(typeof renderCharge==='function') renderCharge(); var _cm=document.querySelector('.charge-meter'); if(_cm && _conjCost>0){ _cm.classList.remove('spent'); void _cm.offsetWidth; _cm.classList.add('spent'); } }
+  /* Energy model: Charge is the CAP on what you can conjure — the gate lives in stageFighter (conjureCost <= charge). Conjuring a Fighter does NOT spend Charge; only spells spend it (see castSpell). */
   matchCommits++;
   const committedPow = (pc.name==='Anorith Keeling' ? Math.max(1,(playerScore[0]+playerScore[1])*Math.max(0,hand.length-1)) : (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow)) + banishSurge + remnantPowSum();
   banishSurge = 0;
@@ -7395,13 +7395,13 @@ const KEYWORDS = {
   'Winners Circle': 'Cards you win with go here. After a lost round you may recover one at random (re-risking its record) instead of drawing a spell.',
   'Pristine': 'A card with zero deaths on its permanent record — a perfect, never-beaten history.',
   'Purity': 'The value carried by a Pristine record — a card that has never been beaten. Effects that "drain purity" turn an opponent\'s spotless 0-death history into an advantage against it.',
-  'Charge': 'Builds Energy over the duel. Spend Energy on Interrupt spells mid-fight.',
+  'Charge': 'Your Energy pool. It caps how big a Fighter you can conjure — conjuring never spends it. Only Interrupt spells spend Energy.',
   'Called': 'A free Support effect. Drop this card into a rear slot to fire it — it never costs Energy and boosts your fighter.',
   'Link': 'When a support shares a lore group with your fighter, it adds bonus power. Same-family cards fight better together.',
   'Recur': 'Returns cards from your banish pile back to your hand — often stronger than they left.',
   'Banish': 'Sends cards to your banish pile. That pile is the fuel your Recur cards feed on.',
   'Trigger': 'Revealed off the top of your deck after a lost duel, it fires a free comeback reward.',
-  'Conjure': 'The Energy cost to deploy this card as your fighter. Bigger bodies cost more Energy.',
+  'Conjure': 'The Energy you must have available to deploy this card as your Fighter. Bigger bodies need more Energy — but conjuring never spends it; only spells do.',
   'Regeneration': 'The first time it would lose, the duel ties instead and it returns to your hand.'
 };
 const KW_FILTERABLE = ['Instant','Death Remnant','Record Guard','Kill Escalation','Last Stand','Pre-commit','Bloodrage','Elemental Flurry'];
@@ -9763,7 +9763,7 @@ body:has(#v-turn.on) .howto-btn{display:none}
     <div class="howto-body">
       <div class="ht-step"><span class="ht-n">1</span><div><b>Draw</b><p>Tap to draw and start the turn.</p></div></div>
       <div class="ht-step"><span class="ht-n">2</span><div><b>Reveal the Condition</b><p>A rule that reshapes this duel, shown up top. Read it — it can flip the whole fight.</p></div></div>
-      <div class="ht-step"><span class="ht-n">3</span><div><b>Conjure a Fighter ⚡</b><p>Drag a card onto the field (or tap it). It costs Energy, shown on the card. This card does the fighting.</p></div></div>
+      <div class="ht-step"><span class="ht-n">3</span><div><b>Conjure a Fighter ⚡</b><p>Drag a card onto the field (or tap it). You need enough Energy (shown on the card) to conjure it — but conjuring doesn't spend Energy. This card does the fighting.</p></div></div>
       <div class="ht-step"><span class="ht-n">4</span><div><b>Call Supports 📣 (free)</b><p>Drag up to 2 more cards to the rear slots. Their Called ability fires automatically and boosts your Fighter — no energy cost.</p></div></div>
       <div class="ht-step"><span class="ht-n">5</span><div><b>Links 🔗</b><p>When a support shares a lore group with your Fighter, the Link fires for bonus power. Tap a link name to see its members.</p></div></div>
       <div class="ht-step"><span class="ht-n">6</span><div><b>Commit</b><p>Lock it in. Both cards reveal and clash — the higher total power wins the duel.</p></div></div>
