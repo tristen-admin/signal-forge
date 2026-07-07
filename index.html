@@ -10028,9 +10028,13 @@ body::before{background:
         var card=btn.closest('.dfx-card'),n=card.getAttribute('data-n'),msg=card.querySelector('.dfx-msg');
         try{
           var cost=parseInt(card.querySelector('[data-fx=cost]').value,10);
+          var powv=parseInt(card.querySelector('[data-fx=pow]').value,10);
+          var rarsel=card.querySelector('[data-fx=rar]');
           var abil=card.querySelector('[data-fx=abil]').value;
           var rt=card.querySelector('[data-fx=rules]').value.trim();
           var ct=card.querySelector('[data-fx=called]').value.trim();
+          if(!isNaN(powv)){powv=Math.max(0,Math.min(40,powv));record(n,'p',powv);}   // Apply now commits the stats block too (pow/rarity), not just the ability/cost
+          if(rarsel&&rarsel.value){record(n,'r',rarsel.value);}
           if(!isNaN(cost)){if(typeof COST_OVERRIDE!=='undefined')COST_OVERRIDE[n]=cost;recordFx(n,'cost',cost);}
           record(n,'a',abil);
           if(typeof CARD_RULES!=='undefined'){if(rt){CARD_RULES[n]=JSON.parse(rt);}else{delete CARD_RULES[n];}recordFx(n,'rules',rt||null);}
