@@ -3223,11 +3223,13 @@ const DECK_POOL = [
   {name:'King Joris',pow:12,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rightful Claim: on commit, +1 power for every death on the opponent\'s record — the betrayed king judges every usurper\'s sins.'},
   {name:'The Regenerating Horror',pow:11,kills:0,deaths:0,rarity:'uncommon',timing:'resolution',abil:'Regeneration (one use per match): the first time this card would lose, it regrows instead — the duel ties, no death is recorded, and it returns to your hand. Only a finisher truly ends it.'},
   {name:'Broodmother',pow:13,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Spiderling Swarm: on commit, +2 power for every card in your hand — the brood answers her call.'},
+  {name:'Fledgling Broodmother',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Lesser Swarm: on commit, +1 power for every card in your hand.'},
+  {name:"Web-Weaver's Return",pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: shuffle your banish pile back into your deck, then draw a card — the web is rewoven.'},
   {name:'Chieftain Reyva Vosh',pow:14,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Warriors in Reserve: on commit, +2 power for each card in your Winners Circle — she commits her hold\'s warriors once the stakes are undeniable.'},
   {name:'Forgemask',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Reforged: on commit, +3 power, and +4 more if you lost your last duel — the forge tempers what breaks.'},
   {name:'Lagertha Waltz — Werewolf Form',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Alpha\'s Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack\'s fury peaks in mourning.'},
   {name:'Hanse Waltz — Werewolf Form',pow:18,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 power while you are behind in the match — rage completes the transformation.'},
-  {name:'Ella Ballora — True Form',pow:17,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Devour: on commit, +3 power, and +4 more if you have already won a duel this match — the Spider-Queen grows with every kill she feeds on.'},
+  {name:'La "La" Ballora, the Broodqueen',pow:17,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw a card — her brood is her hand.'},
   {name:'Ourevos, the Golden Dragon',pow:24,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.'},
   {name:'Keawe, A Legend Reborn',pow:8,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 18 or higher from your deck to your hand. Called (support): snipe the opposing support in the mirrored slot — it is removed before it can fire.'},
@@ -3297,6 +3299,8 @@ let banishPile = [];
 let banishSurge = 0;
 let divinerBonusNext = 0;
 let deathRemnantPow = 0;
+let lingeringRem = [];   // The Deathless: supports that stay on the field as Remnants, stacking until an enemy is killed
+const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk Skullbrand','Sister Mire','Kiba'];
 let lastResult = null;
 let matchCommits = 0;
 let skullchainKills = 0;
@@ -4160,7 +4164,7 @@ const CALLED = {
   "Heir of Kaiga":                 {text:"your Fighter +5 · draw 1", add:5, draw:1},
   "Melanie":                       {text:"your Fighter +5 · draw 1", add:5, draw:1},
   "Darwin":                        {text:"your Fighter +2", add:2},
-  "Ella Ballora — True Form":      {text:"your Fighter +3", add:3},
+  "La \"La\" Ballora, the Broodqueen":      {text:"your Fighter +3", add:3},
   "Ella Ballora":                  {text:"your Fighter +3", add:3},
   "Arch-Grim Korrin":              {text:"your Fighter +3", add:3},
   "Valcarion":            {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
@@ -4648,7 +4652,7 @@ function commitCard(){
   rearGuards = rearGuardIdxs.filter(function(ix){return ix!==selectedCard && hand[ix];}).map(function(ix){return hand[ix];});
   { const _conjCost = conjureCost(pc); charge = Math.max(0, charge - _conjCost); if(typeof renderCharge==='function') renderCharge(); var _cm=document.querySelector('.charge-meter'); if(_cm && _conjCost>0){ _cm.classList.remove('spent'); void _cm.offsetWidth; _cm.classList.add('spent'); } }
   matchCommits++;
-  const committedPow = (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow) + banishSurge + deathRemnantPow;
+  const committedPow = (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow) + banishSurge + deathRemnantPow + (typeof lingeringRem!=='undefined'?lingeringRem.reduce(function(a,r){return a+(r.pow||0);},0):0);
   banishSurge = 0;
   deathRemnantPow = 0;
 
@@ -4658,6 +4662,8 @@ function commitCard(){
   { var _idxs=[selectedCard].concat(rearGuardIdxs.filter(function(ix){return ix!==selectedCard;})); _idxs.sort(function(a,b){return b-a;}); _idxs.forEach(function(_ix){hand.splice(_ix,1);}); }
   rearGuardIdxs=[];
   // ── conjure summons ──
+  if(pc.name==='La "La" Ballora, the Broodqueen' && typeof drawToHand==='function'){ drawToHand(1); }
+  if(pc.name==="Web-Weaver's Return"){ if(banishPile.length){ var _rb=banishPile.splice(0,banishPile.length); drawPile=drawPile.concat(_rb); if(typeof shuffle==='function') shuffle(drawPile); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof toast==='function') toast('🕸 Web-Weaver\'s Return \u2014 '+_rb.length+' banished cards rewoven into your deck.', true); } if(typeof drawToHand==='function') drawToHand(1); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='Keawe, A Legend Reborn'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=18;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+') to your hand.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 18+ left in your deck to tutor.', false); } }
   if(pc.name==='Anorith Keeling'){ energyLoadout=['drawsurge','godhand','sornshift']; spellHand=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your spells into the Chaos Trinity.', true); }
   if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
@@ -5063,7 +5069,7 @@ const LINK_GROUPS = [
   {id:'keawe',   name:"Keawe's Circle", icon:'🔵', pow:1, members:['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga']},
   {id:'kelrua',  name:"Kel'rua Blood",   icon:'👪', pow:1, members:['Kiana','Keawe Kel\'rua','Keawe, A Legend Reborn']},
 {id:'squad19', name:'Squad 19',       icon:'🛡', pow:1, members:['Ahdor','Val Kreigh','Ruffius Rufeldro']},
-  {id:'court',   name:"Darwin's Court",  icon:'🩸', pow:1, members:['Darwin','Valcarion','Zerith Var','Veronica','Ella Ballora','Ella Ballora — True Form','Arch-Grim Korrin','Grim Korrin','Ruffius Rufeldro','Voidmaw the Unmaker']},
+  {id:'court',   name:"Darwin's Court",  icon:'🩸', pow:1, members:['Darwin','Valcarion','Zerith Var','Veronica','Ella Ballora','La "La" Ballora, the Broodqueen','Arch-Grim Korrin','Grim Korrin','Ruffius Rufeldro','Voidmaw the Unmaker']},
   {id:'royalty', name:'Exiled Royalty',  icon:'👑', pow:1, members:['Moro','Malia','King Joris']},
   {id:'dragon',  name:'Dragon-Pact',     icon:'🐉', pow:1, members:['Tange Sazen','Ourevos, the Golden Dragon','Kiba','Kleydson','Kaelthar the Ascendant']},
   {id:'waltz',   name:'Waltz Twins',     icon:'🐺', pow:1, members:['Lagertha Waltz','Hanse Waltz','Lagertha Waltz — Werewolf Form','Hanse Waltz — Werewolf Form','Kessuae, Tide of Ruin']},
@@ -5404,6 +5410,13 @@ const CARD_RULES = {
    "log": "🕷 Swarm: +2×hand"
   }
  ],
+ "Fledgling Broodmother": [
+  {
+   "addvar": "hand_len",
+   "x": 1,
+   "log": "🕷 Lesser Swarm: +1×hand"
+  }
+ ],
  "Forgemask": [
   {
    "add": 3,
@@ -5441,19 +5454,11 @@ const CARD_RULES = {
    "log": "🧵 Master Tailor: +4"
   }
  ],
- "Ella Ballora — True Form": [
+ "La \"La\" Ballora, the Broodqueen": [
   {
-   "add": 3,
-   "log": "🕸 Devour: +3"
-  },
-  {
-   "if": {
-    "v": "wc_len",
-    "op": ">",
-    "n": 0
-   },
-   "add": 4,
-   "log": "🕸 fed: +4"
+   "addvar": "hand_len",
+   "x": 2,
+   "log": "🕸 Broodswarm: +2×hand"
   }
  ],
  "Korrin's Possessed Legion": [
@@ -5760,6 +5765,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   if(won === 'win'){
     label.textContent = 'DUEL WON';
     label.className = 'result-label win';
+    if(typeof lingeringRem!=='undefined' && lingeringRem.length){ abilLog.push('☠ your Remnants disperse — an enemy card was killed'); lingeringRem=[]; }
     const remnantCleared = deathRemnantPow > 0;
     if(remnantCleared){
       deathRemnantPow = 0;
@@ -5816,7 +5822,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
 
   if(bloodthirstyActive && won === 'win'){ if(typeof drawToHand==='function') drawToHand(1); abilLog.push('⚔️ Bloodthirsty: the win feeds it — draw a card'); }
 
-  rearGuards.forEach(function(rg){ if(rg){ drawPile.unshift(rg); abilLog.push('↩ '+rg.name+' (support) → deck bottom'); } }); if(rearGuards.length) deckSize=drawPile.length;
+  rearGuards.forEach(function(rg){ if(!rg) return; if(typeof LINGERING_SUPPORTS!=='undefined' && LINGERING_SUPPORTS.indexOf(rg.name)>=0){ lingeringRem.push({name:rg.name,pow:rg.pow||0}); abilLog.push('☠ '+rg.name+' lingers as a Remnant (+'+(rg.pow||0)+' to your commits until an enemy dies)'); } else { drawPile.unshift(rg); abilLog.push('↩ '+rg.name+' (support) → deck bottom'); } }); if(rearGuards.length) deckSize=drawPile.length;
   rearGuards=[]; pendingOppRears=[];
   abilLogEl.innerHTML = abilLog.map(e => `<div class="abil-log-entry">${e}</div>`).join('');
   const _revealOutcome = function(){
@@ -5895,7 +5901,7 @@ function nextTurn(){
   document.getElementById('opp-field').innerHTML = '<span class="placeholder">opponent card</span>';
   document.getElementById('opp-area').className = 'opp-waiting';
   document.getElementById('opp-area').innerHTML = '⏳ Waiting for draw…';
-  document.getElementById('select-hint').textContent = deathRemnantPow > 0 ? `Remnant active — next commit gets +${deathRemnantPow} · auto-drawing…` : '⟳ Auto-drawing your card…';
+  { var _lr=(typeof lingeringRem!=='undefined')?lingeringRem.reduce(function(a,r){return a+(r.pow||0);},0):0; var _rt=(deathRemnantPow||0)+_lr; document.getElementById('select-hint').textContent = _rt>0 ? `Remnants active — next commit gets +${_rt} · auto-drawing…` : '⟳ Auto-drawing your card…'; }
   document.getElementById('commit-hint').textContent = 'Auto-drawing to start the turn…';
 
   setPhase('predraw');
@@ -6122,7 +6128,7 @@ let marketListings = [];
 let marketFocus = null;  // when set, market compares/filters to this card name
 let marketSort = 'recent';  // 'recent' | 'legend' | 'price'
 function seedMarket(){
-  const names = ['Arch-Grim Korrin','Lagertha Waltz','Tange Sazen','Zerith Var','Val Kreigh','Kiana','Valcarion','Ella Ballora','Malia','Moro','Anorith Keeling','Forgemask','Cletus Gwyndull','Chieftain Reyva Vosh','Rhaess Korvain','Ossian Drell','Tannis','Broodmother','King Joris','Sister Mire','Heir of Kaiga','Ella Ballora — True Form','Hanse Waltz','Uso Oso','Melanie','Bixie Bee'];
+  const names = ['Arch-Grim Korrin','Lagertha Waltz','Tange Sazen','Zerith Var','Val Kreigh','Kiana','Valcarion','Ella Ballora','Malia','Moro','Anorith Keeling','Forgemask','Cletus Gwyndull','Chieftain Reyva Vosh','Rhaess Korvain','Ossian Drell','Tannis','Broodmother','King Joris','Sister Mire','Heir of Kaiga','La "La" Ballora, the Broodqueen','Hanse Waltz','Uso Oso','Melanie','Bixie Bee'];
   const reg = names.map(name => {
     const c = COLLECTION.find(x => x.name === name); if(!c || isStarter(c)) return null; const h = hashStr(name);
     const seller = '0x' + ((h*2654435761)>>>0).toString(16).slice(0,4) + '…' + (h>>>16).toString(16).padStart(4,'0').slice(0,4);
@@ -6673,7 +6679,7 @@ const VARIANT_DEFS = [
   {id:'v-tange-shogun', unit:'Tange Sazen', label:'Shogun', tier:'genesis', foil:'gold'},
   {id:'v-ahdor-warden', unit:'Ahdor', label:'Eternal Warden', tier:'genesis', foil:'gold'},
   {id:'v-ella-crimson', unit:'Ella Ballora', label:'Crimson', tier:'ultra', foil:'prism'},
-  {id:'v-ella-radiant', unit:'Ella Ballora — True Form', label:'Radiant', tier:'ultra', foil:'prism'},
+  {id:'v-ella-radiant', unit:'La "La" Ballora, the Broodqueen', label:'Radiant', tier:'ultra', foil:'prism'},
   {id:'v-hanse-bloodmoon', unit:'Hanse Waltz — Werewolf Form', label:'Bloodmoon', tier:'ultra', foil:'prism'},
   {id:'v-lagertha-frost', unit:'Lagertha Waltz — Werewolf Form', label:'Frost', tier:'ultra', foil:'prism'},
   {id:'v-forgemask-molten', unit:'Forgemask', label:'Molten', tier:'rare', foil:'holo'},
@@ -7081,7 +7087,7 @@ const CARD_ART = {
   "Uso Oso's Skeletal Summons":'assets/img/c38ecea15574.jpg',
   'kotei-tournament':'assets/img/5f0ac8b353ea.jpg',
   'Ourevos, the Golden Dragon':'assets/img/f07fd8da5102.jpg',
-  'Ella Ballora — True Form':'assets/img/6f54f1f4d850.jpg',
+  'La "La" Ballora, the Broodqueen':'assets/img/6f54f1f4d850.jpg',
   'Hanse Waltz — Werewolf Form':'assets/img/b934414aa4f4.jpg',
   'Lagertha Waltz — Werewolf Form':'assets/img/47a92a2ee0aa.jpg',
   'Keawe Kel\'rua':'assets/img/ffb1df0dd296.jpg',
@@ -7125,7 +7131,7 @@ const CARD_ART_FULL = {
   "Uso Oso's Skeletal Summons":'assets/img/389cdb02b010.jpg',
   'kotei-tournament':'assets/img/53e65759fc3a.jpg',
   'Ourevos, the Golden Dragon':'assets/img/51c787c7fb43.jpg',
-  'Ella Ballora — True Form':'assets/img/2ff8a09bef37.jpg',
+  'La "La" Ballora, the Broodqueen':'assets/img/2ff8a09bef37.jpg',
   'Hanse Waltz — Werewolf Form':'assets/img/67806431d3a6.jpg',
   'Lagertha Waltz — Werewolf Form':'assets/img/c0cea1c7d044.jpg',
   'Keawe Kel\'rua':'assets/img/4ebc5e8c90fb.jpg',
@@ -7185,7 +7191,7 @@ const CARD_SIGIL = {
   'Tange Sazen':'🗡','Lagertha Waltz':'🪓','Anorith Keeling':'🦂',
   'Valcarion':'🩸','Ella Ballora':'⚔️','Kiana':'🔥',
   'King Joris':'👑','Chieftain Reyva Vosh':'🏔','Broodmother':'🕷','Forgemask':'🔨','Sister Mire':'🌱',
-  'Heir of Kaiga':'🗡','Melanie':'🌷','Josef':'🧵','Ourevos, the Golden Dragon':'🐉','Ella Ballora — True Form':'🕸',
+  'Heir of Kaiga':'🗡','Melanie':'🌷','Josef':'🧵','Ourevos, the Golden Dragon':'🐉','La "La" Ballora, the Broodqueen':'🕸',
   "Korrin's Possessed Legion":'🪖','Hanse Waltz — Werewolf Form':'🐺','Lagertha Waltz — Werewolf Form':'🌕','The Regenerating Horror':'👁','Uso Oso\'s Skeletal Summons':'🦴'
 };
 const TIMING_LABEL = {on:'On-Commit',instant:'Instant',pre:'Pre-Commit',resolution:'Resolution'};
@@ -8696,7 +8702,7 @@ const ASC_STORY_CH2=[
    beat:"Noctreach keeps its dead close. Something old wears the name Anorith Keeling here, stitched together from an age that ended in fire, and it remembers being a legend before the land broke it. It would like company in the ruin."},
   {loc:'Yozai-no-Sato', title:'The Sleeping Pact', champ:'Kiba', art:'Kiba', type:'elite',
    beat:"The illusion village remembers you, and this time it does not bother to hide. A dragon-pact stirs in Kiba, gold beneath the skin, and the great eye that judged you once now weighs whether you have grown enough to be worth waking for."},
-  {loc:'The Black Citadel', title:"The Court's Last Stand", champ:'Ella Ballora — True Form', art:'Ella Ballora — True Form', type:'boss',
+  {loc:'The Black Citadel', title:"The Court's Last Stand", champ:'La "La" Ballora, the Broodqueen', art:'La "La" Ballora, the Broodqueen', type:'boss',
    beat:"Darwin fell, but his Court did not scatter, and the throne room is not empty theatre. Ella Ballora sheds the shape you would recognize; what unfolds in the dark is what the Court always was underneath, and it has been waiting for you to climb this high a second time."},
   {loc:'The Gray', title:'The Deeper Master', champ:'Valcarion', art:'Valcarion', type:'boss',
    beat:"Past the Rift's last edge, the voice that whispered a Mad King into ruin steps into the light at last. Valcarion was old when Ahdor-Khaan was young, and he has been patient far longer than you have been alive. The Undying Flame does not end with a king. It only asks who carries it next."}
@@ -9510,7 +9516,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true;
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
-  banishSurge=0; divinerBonusNext=0; deathRemnantPow=0; lastResult=null; matchCommits=0; skullchainKills=0;
+  banishSurge=0; divinerBonusNext=0; deathRemnantPow=0; lingeringRem=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false;
   charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellDiscount=0; if(typeof renderCharge==='function') renderCharge();
