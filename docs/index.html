@@ -3239,7 +3239,8 @@ const DECK_POOL = [
   {name:'Malia',pow:10,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: your power becomes the opponent\'s committed card power for this duel.'},
   {name:'Moro',pow:14,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: if opponent\'s card has 6+ career kills, gain +3 power.'},
   {name:'Zerith Var',pow:19,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'On commit: if you are losing this duel (opponent\'s base power is higher), +4 power.'},
-  {name:'Anorith Keeling',pow:12,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: if opponent\'s base power is higher than this card, gain +2 power for every card in your hand.'},
+  {name:'Pit Thrall',pow:12,kills:0,deaths:0,rarity:'common',timing:null,abil:'No ability — a nameless conscript of the Sorn-Vallis pits. (Placeholder, will be redesigned.)'},
+  {name:'Anorith Keeling',pow:0,cost:4,chaosPow:true,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Chaos Deity — its power is unknown (?), rolled anew by chaos each commit. On commit, warp every spell in your deck into the Chaos Trinity: Draw Surge (2⚡ draw 3, banish 1), Godhand (1⚡ your card +10), and Sorn-Vallis Shift (3⚡ warp the location to Sorn-Vallis — lowest power wins).'},
   {name:'Heir of Kaiga',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast.'},
   {name:'Josef',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Master Tailor: on commit, +4 power once he has taken the measure of the fight (any commit after your first).'},
   {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, your committed cards gaining her power until an opponent\'s card is killed.'},
@@ -3361,7 +3362,7 @@ const OPP_CARDS = [
   {name:'Lagertha Waltz',pow:15,kills:0,deaths:0,rarity:'rare',abil:'On commit: +2 if lost last, -2 if won last.'},
   {name:'Kleydson',pow:4,kills:0,deaths:0,rarity:'common',abil:'No ability.'},
   {name:'Arch-Grim Korrin',pow:14,kills:0,deaths:0,rarity:'rare',abil:'On commit: +6 if opponent has fewer career kills.'},
-  {name:'Anorith Keeling',pow:12,kills:0,deaths:0,rarity:'common',abil:'On commit: underdog hand bonus.'},
+  {name:'Anorith Keeling',pow:13,kills:0,deaths:0,rarity:'genesis',abil:'Chaos Deity — chaos incarnate.'},
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'genesis',abil:'On commit: +3 if 0-death OR lost last; repeats if won a duel.'},
   {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'ultra',abil:'On commit: if 3rd+ commit, +3 power.'},
   {name:'Kiba',pow:2,kills:0,deaths:0,rarity:'common',abil:'Death Remnant: +2 power to next cards until opp kill.'},
@@ -3976,11 +3977,11 @@ function matchEndAgain(){
   resetMatchState();
 }
 
-function revealCondition(){
-  if(phase !== 'drawn') return;
+function revealCondition(forceIdx){
+  if(forceIdx==null && phase !== 'drawn') return;
   if(roundTimer){ clearInterval(roundTimer); roundTimer = null; }
   document.getElementById('round-countdown').classList.remove('show');
-  const idx = Math.floor(Math.random() * CONDITIONS.length);
+  const idx = (forceIdx!=null) ? forceIdx : Math.floor(Math.random() * CONDITIONS.length);
   conditionIndex = idx;
   const c = CONDITIONS[idx];
 
@@ -4102,6 +4103,9 @@ const ENERGY_SPELLS = [
   {id:'recall', name:'Recall', cost:2, fx:'Pull a Winners-Circle card to hand'},
   {id:'nullwave', name:'Nullwave', cost:3, fx:'Negate opp ability'},
   {id:'ledgerward', name:'Ledger Ward', cost:3, fx:'Block a death'},
+  {id:'drawsurge', name:'Draw Surge', cost:2, fx:'Draw 3, banish 1'},
+  {id:'godhand', name:'Godhand', cost:1, fx:'Your card +10 power'},
+  {id:'sornshift', name:'Sorn-Vallis Shift', cost:3, fx:'Warp location to Sorn-Vallis'},
 ];
 // ══ REAR-GUARD / CALLED SYSTEM (v1) ══
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
@@ -4319,6 +4323,9 @@ function castSpell(i){
   else if(s.id==='recall'){ const idx=Math.floor(Math.random()*winnersCircle.length); const card=winnersCircle.splice(idx,1)[0]; if(card.name==='Ourevos, the Golden Dragon'){ card.pow=Math.max(1,card.pow-3); } if(card.name==='Darwin'){ flameVeilFromWC=true; } hand.push(card); if(typeof buildHand==='function') buildHand(); }
   else if(s.id==='nullwave') spellNullOpp=true;
   else if(s.id==='ledgerward') spellShield=true;
+  else if(s.id==='drawsurge'){ if(typeof drawToHand==='function') drawToHand(3); if(typeof banishFromHand==='function') banishFromHand(1); }
+  else if(s.id==='godhand') spellSelfPow += 10;
+  else if(s.id==='sornshift'){ var _li=CONDITIONS.findIndex(function(x){return x.id==='lowest';}); if(_li>=0 && typeof revealCondition==='function'){ revealCondition(_li); conditionLocked=true; } }
   spellDiscount=0;
   spellHand.splice(i,1);
   renderCharge();
@@ -4639,7 +4646,7 @@ function commitCard(){
   rearGuards = rearGuardIdxs.filter(function(ix){return ix!==selectedCard && hand[ix];}).map(function(ix){return hand[ix];});
   { const _conjCost = conjureCost(pc); charge = Math.max(0, charge - _conjCost); if(typeof renderCharge==='function') renderCharge(); var _cm=document.querySelector('.charge-meter'); if(_cm && _conjCost>0){ _cm.classList.remove('spent'); void _cm.offsetWidth; _cm.classList.add('spent'); } }
   matchCommits++;
-  const committedPow = pc.pow + banishSurge + deathRemnantPow;
+  const committedPow = (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow) + banishSurge + deathRemnantPow;
   banishSurge = 0;
   deathRemnantPow = 0;
 
@@ -4649,6 +4656,7 @@ function commitCard(){
   { var _idxs=[selectedCard].concat(rearGuardIdxs.filter(function(ix){return ix!==selectedCard;})); _idxs.sort(function(a,b){return b-a;}); _idxs.forEach(function(_ix){hand.splice(_ix,1);}); }
   rearGuardIdxs=[];
   // ── conjure summons ──
+  if(pc.name==='Anorith Keeling'){ energyLoadout=['drawsurge','godhand','sornshift']; spellHand=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your spells into the Chaos Trinity.', true); }
   if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
   if(pc.name==='Uso Oso' && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
   if(pc.name==='Valcarion' && banishPile.length){ var _rec=banishPile.pop(); if(rearGuards.length < RG_SLOTS){ rearGuards.push(_rec); if(typeof toast==='function') toast('🩸 Valcarion calls '+_rec.name+' from banish to support.', true); } else { hand.push(_rec); if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🩸 Valcarion reclaims '+_rec.name+' from banish to hand.', true); } if(typeof updatePiles==='function') updatePiles(); }
@@ -5257,18 +5265,7 @@ const CARD_RULES = {
    "log": "🧬 Darwin: +5 (3rd+ commit)"
   }
  ],
- "Anorith Keeling": [
-  {
-   "if": {
-    "v": "opp_pow",
-    "op": ">",
-    "v2": "pc_pow"
-   },
-   "addvar": "hand_len",
-   "x": 2,
-   "log": "✨ Anorith: +2×hand"
-  }
- ],
+ "Anorith Keeling": [],
  "Malia": [
   {
    "set": "opp_pow",
@@ -8183,7 +8180,7 @@ function bigCardHTML(c){
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
     <div class="tf-name">${dispName(c.name)}</div>
-    <div class="tf-pow"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${(c.pow||0)+(c._bo||0)}</div>
+    <div class="tf-pow"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${c.chaosPow?'?':((c.pow||0)+(c._bo||0))}</div>
     <div class="tf-kd"><span class="k">${c.kills}K</span>/<span class="d">${c.deaths}D</span>${c.deaths===0?' ◈':''}</div>
     <div class="tf-text">${typeof keywordChipsHTML==='function'?keywordChipsHTML(c):''}</div>
     ${(typeof stateIcon==='function'&&stateIcon(c))?`<div class="sf-pip" title="${stateTitle(c)}">${stateIcon(c)}</div>`:``}
@@ -8200,7 +8197,7 @@ function readableCardHTML(c){
   var sig=hasArt?'':('<span class="rc-sig">'+(((typeof CARD_SIGIL!=='undefined')&&CARD_SIGIL[c.name])||'◈')+'</span>');
   return '<div class="rcard '+c.rarity+' '+(typeof cardStateClasses==='function'?cardStateClasses(c):'')+'">'
     + '<div class="rc-art"'+(art?' style="'+art+'"':'')+'>'+sig+'</div>'
-    + '<div class="rc-top"><span class="rc-cost">⚡'+cost+'</span><span class="rc-name">'+dispName(c.name)+'</span><span class="rc-pow">'+((c.pow||0)+(c._bo||0))+'</span></div>'
+    + '<div class="rc-top"><span class="rc-cost">⚡'+cost+'</span><span class="rc-name">'+dispName(c.name)+'</span><span class="rc-pow">'+(c.chaosPow?'?':((c.pow||0)+(c._bo||0)))+'</span></div>'
     + '<div class="rc-meta">'+String(c.rarity).toUpperCase()+' · <span class="k">'+kd.k+'K</span> / <span class="d">'+kd.d+'D</span>'+pristine+'</div>'
     + (typeof keywordChipsHTML==='function'?keywordChipsHTML(c):'')
     + '<div class="rc-sec"><span class="rc-lbl">⚔ Conjured — Fighter</span>'+gl(c.abil)+'</div>'
