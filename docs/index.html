@@ -7660,7 +7660,9 @@ function deckTab(t){
 }
 
 // ══ DECK PRESETS (saved decks) ══
+const BLACKWING_PRESET = ['Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Bixie Bee'];   // built-in Black Wings banish deck
 let deckPresets = lsGet('sf_presets', {});
+if(!deckPresets['blackwing'] && !lsGet('sf_bw_seeded',0)){ deckPresets['blackwing'] = BLACKWING_PRESET.slice(); lsSet('sf_presets', deckPresets); lsSet('sf_bw_seeded',1); }
 function refreshPresets(){
   lsSet('sf_presets', deckPresets);
   const wrap = document.getElementById('preset-list'); if(!wrap) return;
