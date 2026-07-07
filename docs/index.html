@@ -2298,7 +2298,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <div class="hero-left">
           <div class="hero-welcome">
             <div class="hw-eyebrow">Welcome back, Integrator</div>
-            <h1 id="hub-headline">Your vault holds 41 cards. Genesis records run deep.</h1>
+            <h1 id="hub-headline">Your vault holds 41 cards. Apex records run deep.</h1>
             <p>Every card is a permanent collectible with its own match history. Win duels to grow a card's record — but each loss is written to that record forever. Build a deck, then test it against a bot.</p>
           </div>
           <div class="stat-row" id="hub-stats"></div>
@@ -3067,7 +3067,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 <script>
 // ── DATA ──
 const CONDITIONS = [
-  {id:'lowest',mech:'Lowest Wins',icon:'🔻',name:'Sorn-Vallis',rule:'In the slaver-city\'s pits the lowest are made to rise — lowest base power wins the duel. Abilities that add power are traps.',strat:'Your 3-power Starter might take out that 18-power Genesis. Build for this.',tag:'flip',prob:'15%'},
+  {id:'lowest',mech:'Lowest Wins',icon:'🔻',name:'Sorn-Vallis',rule:'In the slaver-city\'s pits the lowest are made to rise — lowest base power wins the duel. Abilities that add power are traps.',strat:'Your 3-power Starter might take out that 18-power Apex. Build for this.',tag:'flip',prob:'15%'},
   {id:'noretreat',mech:'No Retreat',icon:'🔒',name:'The Black Citadel',rule:'Darwin\'s fortress permits no escape — Withdraw is locked. Once you confirm your selection you must commit. The only exit is losing.',strat:'Read the record carefully before confirming. There is no fold.',tag:'lock',prob:'13%'},
   {id:'abilitylock',mech:'Ability Lock',icon:'⚡',name:'Gnulför',rule:'On the homeland\'s hard ground tricks fail and only strength counts — no card abilities activate this turn. Raw power only, no on-commit or resolution effects.',strat:'Strips your tech cards entirely. High-power decks love this.',tag:'lock',prob:'11%'},
   {id:'forceswap',mech:'Force Swap',icon:'🎲',name:'The Twisted Vivarium',rule:'In Darwin\'s menagerie specimens are shuffled on a whim — after commit, each player\'s card is replaced by a random card from their hand. You commit a sacrifice, not a fighter.',strat:'Send your worst card. Pray the swap lands something useful.',tag:'chaos',prob:'10%'},
@@ -3093,7 +3093,7 @@ const CONDITIONS = [
   {id:"momentumtide",mech:"Momentum's Tide",icon:"🌊",name:"The Turning Shore",rule:"The trailing side surges — whoever is behind in the match gains +6.",strat:"A comeback engine when you are down.",tag:"boost",prob:"3%"},
   {id:"eldersreach",mech:"Elder's Reach",icon:"📜",name:"The Long Memory",rule:"Experience tells — +1 power per 4 duels fought (kills + deaths).",strat:"Field cards with long histories.",tag:"boost",prob:"3%"},
   {id:"doubleedged",mech:"Double-Edged",icon:"⚔️",name:"The Twin Blades",rule:"History is a blade both ways — net record (kills − deaths) swings power.",strat:"Great records soar; losing records sink.",tag:"neutral",prob:"3%"},
-  {id:"legendsclash",mech:"Legends' Clash",icon:"👑",name:"The Hall of Legends",rule:"A stage for the great — Apex cards gain +4, all others suffer −2.",strat:"Reserve this for your Genesis legends.",tag:"boost",prob:"3%"},
+  {id:"legendsclash",mech:"Legends' Clash",icon:"👑",name:"The Hall of Legends",rule:"A stage for the great — Apex cards gain +4, all others suffer −2.",strat:"Reserve this for your Apex legends.",tag:"boost",prob:"3%"},
   {id:"woundedbeast",mech:"Wounded Beast",icon:"🐺",name:"The Broken Fang",rule:"The grizzled fight hardest — cards with 3 or more deaths gain +5.",strat:"Field your battle-worn survivors.",tag:"boost",prob:"3%"},
   {id:"survivorsground",mech:"Survivor's Ground",icon:"⚰️",name:"Last Light Hold",rule:"Endurance is rewarded — the card with fewer deaths gains +3.",strat:"Cleaner records edge it out.",tag:"neutral",prob:"3%"},
   {id:"purereflection",mech:"Pure Reflection",icon:"🪞",name:"The Mirror Deep",rule:"You fight with your enemy's past — each card's power becomes the OPPONENT's career kills.",strat:"Turns their record against them.",tag:"flip",prob:"3%"},
@@ -6422,7 +6422,7 @@ function startFreshSession(){ if(!confirm('Start a fresh session? This clears ev
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']);
   COLLECTION.forEach(c=>{ const k=c.uid||c.name; ownedCopies[k]=1;
-    cardRecords[k]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:c.variant?'Tournament variant':(c.rarity==='genesis'?'Genesis mint':'Fresh vault mint')}]}; });
+    cardRecords[k]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:c.variant?'Tournament variant':(c.rarity==='genesis'?'Apex mint':'Fresh vault mint')}]}; });
   if(typeof activeDeck!=='undefined' && activeDeck.clear) activeDeck.clear();
   featuredCards=['Kotei']; featuredShuffle=false; featuredRotIdx=0;
   equipped={aura:'gold',back:'sealed',emblem:'crest',title:'integrator',sleeves:'standard',summon:'golden'};
@@ -6490,13 +6490,13 @@ function startNewPlayer(){
 const SEASON = { chapter:'Chapter 1', name:'Rebirth', pack:'Legends Reborn' };
 const PACKS = [
   {id:'std', name:'Legends Reborn Booster', icon:'📦', price:500, blurb:'Common through Rare — a whisper of higher.', odds:{common:63.9, uncommon:25, rare:8, ultra:2.3, genesis:0.8}},
-  {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & a Genesis shot — no commons.', odds:{rare:78, ultra:20, genesis:2}},
-  {id:'genesis', name:'Legends Reborn Genesis Vault', icon:'💠', price:3000, blurb:'Ultra-dense — a 40% Ultra pull with a 5% Genesis shot.', odds:{rare:55, ultra:40, genesis:5}},
+  {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & an Apex shot — no commons.', odds:{rare:78, ultra:20, genesis:2}},
+  {id:'genesis', name:'Legends Reborn Apex Vault', icon:'💠', price:3000, blurb:'Ultra-dense — a 40% Ultra pull with a 5% Apex shot.', odds:{rare:55, ultra:40, genesis:5}},
 ];
 const PREMIUM_PACKS = [
   {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{uncommon:14, rare:60, ultra:23, genesis:3}},
-  {id:'fforge', name:'Forgemaster Vault', icon:'❖', price:5000, blurb:'Ultra-dense with a real Genesis shot.', odds:{rare:44, ultra:48, genesis:8}},
-  {id:'fmythic', name:'Mythic Rite', icon:'👑', price:12000, blurb:'The whale summon — highest Genesis rate in the game.', odds:{ultra:78, genesis:22}},
+  {id:'fforge', name:'Forgemaster Vault', icon:'❖', price:5000, blurb:'Ultra-dense with a real Apex shot.', odds:{rare:44, ultra:48, genesis:8}},
+  {id:'fmythic', name:'Mythic Rite', icon:'👑', price:12000, blurb:'The whale summon — highest Apex rate in the game.', odds:{ultra:78, genesis:22}},
 ];
 function mintLedgerHTML(){
   const t=rarityTypeCounts();
@@ -6773,7 +6773,7 @@ const VARIANT_DEFS = [
 ];
 function variantDef(id){ return VARIANT_DEFS.find(function(v){return v.id===id;}); }
 const GACHA_BANNERS = [
-  {id:'b-genesis', name:'Genesis Legends', blurb:'Apex-focused summon. Rate-up on three genesis Apexes. Ultra & rare skins round out a tight pool.', cost:900, featured:'v-akatosh-eclipse', rateUp:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal'], pool:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal','v-ella-crimson','v-hanse-bloodmoon','v-forgemask-molten','v-valcarion-astral','v-voltcaller-surge']},
+  {id:'b-genesis', name:'Apex Legends', blurb:'Apex-focused summon. Rate-up on three genesis Apexes. Ultra & rare skins round out a tight pool.', cost:900, featured:'v-akatosh-eclipse', rateUp:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal'], pool:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal','v-ella-crimson','v-hanse-bloodmoon','v-forgemask-molten','v-valcarion-astral','v-voltcaller-surge']},
   {id:'b-vanguard', name:'Vanguard Rites', blurb:'Rate-up on three genesis Apexes. A curated pool of apex, ultra & rare champions.', cost:600, featured:'v-tange-shogun', rateUp:['v-tange-shogun','v-ahdor-warden','v-darwin-primal'], pool:['v-darwin-primal','v-tange-shogun','v-ahdor-warden','v-ella-radiant','v-lagertha-frost','v-alucard-nightfall','v-korrin-warlord','v-lagertha-storm']},
 ];
 function bannerByIdx(i){ return GACHA_BANNERS[i]; }
@@ -6990,7 +6990,7 @@ function mysteryCache(){
 // ── REPLAY DATA ──
 const REPLAY_STEPS = [
   {id:0,label:'Pre-Match',sublabel:'Match Setup — Best of 7',stake:'1×',series:[0,0],condition:null,condActive:false,playerCard:null,oppCard:null,events:[],result:null,
-   annotation:'Player A runs an aggressive finisher deck built around Darwin — 15-power Genesis, 41-3 record, with a Momentum ability that adds +3 once it is his 3rd commit of the match. Player B runs disruption, built around Stormcaller Prime — 14-power Genesis, 23-0, Pristine status intact. Player B\'s plan: end the match fast, before Darwin\'s Momentum comes online and the power gap widens.',kdAfter:{}},
+   annotation:'Player A runs an aggressive finisher deck built around Darwin — 15-power Apex, 41-3 record, with a Momentum ability that adds +3 once it is his 3rd commit of the match. Player B runs disruption, built around Stormcaller Prime — 14-power Apex, 23-0, Pristine status intact. Player B\'s plan: end the match fast, before Darwin\'s Momentum comes online and the power gap widens.',kdAfter:{}},
 
   {id:1,label:'Duel 1 · Turn 1',sublabel:'Condition Revealed',stake:'1×',series:[0,0],
    condition:{icon:'⚔️',name:'Standard',rule:'Highest base power wins. Abilities resolve normally.'},condActive:true,
@@ -7309,7 +7309,7 @@ function getRec(c){
   const key = recKey(c);
   if(!cardRecords[key]){
     cardRecords[key] = { k: c.kills||0, d: c.deaths||0, ok: 0, od: 0,
-      chain: [{ owner: ME_ADDR, date: todayISO(), via: c.variant ? 'Tournament variant' : (c.rarity==='genesis' ? 'Genesis mint' : 'Held in vault') }] };
+      chain: [{ owner: ME_ADDR, date: todayISO(), via: c.variant ? 'Tournament variant' : (c.rarity==='genesis' ? 'Apex mint' : 'Held in vault') }] };
   }
   return cardRecords[key];
 }
@@ -7805,8 +7805,8 @@ const BOT_OPPONENTS = [
   {id:'anorith',name:'Anorith Prime',avatar:'🦂',color:'var(--r-ultra)',arch:'Disruption Control',diff:3,
    desc:'Plays for the asset, not the duel. Uses Record Guard and underdog scaling to protect Pristine cards while stealing close rounds.',
    sig:'Anorith Keeling (8)', pool:pick(['Anorith Keeling','Zerith Var','Darwin','Malia','Lagertha Waltz','Moro','Ella Ballora']),bias:2},
-  {id:'keawe',name:'Mirror Kotei',avatar:'⚡',color:'var(--r-genesis)',arch:'Genesis Finisher',diff:4,
-   desc:'The hardest opponent — a mirror of your own finisher deck. Commits high-power Genesis and never gives you a free round.',
+  {id:'keawe',name:'Mirror Kotei',avatar:'⚡',color:'var(--r-genesis)',arch:'Apex Finisher',diff:4,
+   desc:'The hardest opponent — a mirror of your own finisher deck. Commits high-power Apex and never gives you a free round.',
    sig:'Kotei (18)', pool:pick(['Kotei','Lagertha Waltz','Arch-Grim Korrin','Zerith Var','Darwin','Valcarion']),bias:3},
   {id:'ascendant',name:'The Ascendant',avatar:'👑',color:'var(--gold)',arch:'Trait Trial — maxed veterans',diff:4,
    desc:'A Living-Traits test dummy: every card it fields is a maxed legend — its record equips its single strongest trait (Scarred, +2) plus a peak stat boost. One trait, not a stack. Bring an average build and see if base power can still hang.',
@@ -8386,12 +8386,12 @@ function rivalStakeFor(b){
   return pool.length ? pool[hashStr(b.id)%pool.length].name : 'Ahdorah Khaan, Determined Soul';
 }
 function buildPvP(){
-  const FLOORS=[{k:'any',l:'Any'},{k:'rare',l:'Rare+'},{k:'ultra',l:'Ultra+'},{k:'genesis',l:'Genesis'}];
+  const FLOORS=[{k:'any',l:'Any'},{k:'rare',l:'Rare+'},{k:'ultra',l:'Ultra+'},{k:'genesis',l:'Apex'}];
   const fl=document.getElementById('pvp-floor'); if(fl) fl.innerHTML=FLOORS.map(x=>'<button class="pvp-floor-btn '+(pvpFloor===x.k?'sel':'')+'" onclick="setPvpFloor(\''+x.k+'\')">'+x.l+'</button>').join('');
   const rivals=BOT_OPPONENTS.filter(b=> pvpFloor==='any' || RARITY_ORDER[RIVAL_TIER[b.diff]] <= RARITY_ORDER[pvpFloor]).slice(0,3);
   document.getElementById('pvp-rival-grid').innerHTML = rivals.map(b=>{
     const pips=[1,2,3,4].map(i=>`<div class="pip ${i<=b.diff?'on':''}"></div>`).join('');
-    const tierName={uncommon:'Uncommon',rare:'Rare',ultra:'Ultra',genesis:'Genesis'}[RIVAL_TIER[b.diff]||'rare'];
+    const tierName={uncommon:'Uncommon',rare:'Rare',ultra:'Ultra',genesis:'Apex'}[RIVAL_TIER[b.diff]||'rare'];
     return `<div class="bot-card ${pvpRival===b.id?'sel':''}" onclick="selectPvpRival('${b.id}')">
       <div class="bot-top"><div class="bot-avatar" style="background:linear-gradient(135deg,${b.color},var(--surface2))">${b.avatar}</div>
       <div><div class="bot-name">${b.name}</div><div class="bot-arch">${b.arch}</div><div class="bot-diff">${pips}</div></div></div>
@@ -8556,7 +8556,7 @@ function masteryTrackHTML(c){
     return '<div class="mastery-item '+(on?'on':'')+'"><span class="mi-icon">'+(on?r.icon:'🔒')+'</span><span class="mi-lbl">'+nm+'</span>'+tail+'</div>'; }).join('')+'</div>';
   return h;
 }
-// mastery capstone: Lv 25 mints a free Ascendant Variant; Genesis Lv 20 unlocks a global stylized frame
+// mastery capstone: Lv 25 mints a free Ascendant Variant; Apex Lv 20 unlocks a global stylized frame
 function mintAscendant(name){ const base=COLLECTION.find(c=>c.name===name && !c.uid)||COLLECTION.find(c=>c.name===name); if(!base) return null; const uid='asc-'+name.replace(/[^A-Za-z0-9]/g,'')+'-'+(++wonCounter); wonInstances.push({uid,name,ascendant:true}); COLLECTION.push(Object.assign({},base,{uid,won:true,ascendant:true,artKey:base.artKey||base.name})); ownedCopies[uid]=1; cardRecords[uid]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Ascendant Variant — Mastery Lv 25'}]}; return uid; }
 function claimMasteryVariant(key){
   const c=COLLECTION.find(x=>(x.uid||x.name)===key); if(!c) return;
@@ -8571,7 +8571,7 @@ function claimMasteryVariant(key){
 function hasAscendantFrame(){ return COLLECTION.some(function(c){ return c.rarity==='genesis' && masteryLevelOf(c)>=20; }); }
 function applyAscendantFrame(){ if(document.body) document.body.classList.toggle('frame-ascendant', equipped.frame==='ascendant' && hasAscendantFrame()); }
 function toggleAscendantFrame(){
-  if(!hasAscendantFrame()){ toast('Master a Genesis card to Lv 20 to unlock the Ascendant Frame.'); return; }
+  if(!hasAscendantFrame()){ toast('Master a Apex card to Lv 20 to unlock the Ascendant Frame.'); return; }
   equipped.frame = equipped.frame==='ascendant'?'none':'ascendant'; applyAscendantFrame(); saveState();
   toast(equipped.frame==='ascendant'?'🖼 Ascendant Frame applied to all your cards.':'Ascendant Frame removed.', equipped.frame==='ascendant');
   if(document.querySelector('.drawer')) closeDrawer();
@@ -9930,7 +9930,7 @@ body::before{background:
     var OVL=document.getElementById('dev-ov'); if(!OVL)return;
     var FAB=document.getElementById('dev-fab'), BODY=document.getElementById('dev-body'), Q=document.getElementById('dev-q'), RARF=document.getElementById('dev-rar'), EXP=document.getElementById('dev-expbox');
     var KEY='sf_dev_overrides_v1', ORDER=['genesis','ultra','rare','common'], SCALE=30;
-    var RAR={genesis:{c:'#F5C24D',n:'Genesis'},ultra:{c:'#B36AF0',n:'Ultra'},rare:{c:'#5B86F5',n:'Rare'},common:{c:'#8b98ad',n:'Common'}};
+    var RAR={genesis:{c:'#F5C24D',n:'Apex'},ultra:{c:'#B36AF0',n:'Ultra'},rare:{c:'#5B86F5',n:'Rare'},common:{c:'#8b98ad',n:'Common'}};
     var HAND=(typeof HAND_CARDS!=='undefined')?HAND_CARDS:[];
     function baseList(){var s={},l=[];HAND.concat(DECK_POOL).forEach(function(c){if(!s[c.name]){s[c.name]=1;l.push(c);}});return l;}
     var ORIG={}; baseList().forEach(function(c){ORIG[c.name]={p:c.pow,r:c.rarity,t:c.timing||'—',a:c.abil||'',cost:(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[c.name]!=null)?COST_OVERRIDE[c.name]:((typeof conjureCost==='function')?conjureCost(c):null),called:(typeof CALLED!=='undefined'&&CALLED[c.name])?JSON.stringify(CALLED[c.name]):null,rules:(typeof CARD_RULES!=='undefined'&&CARD_RULES[c.name])?JSON.stringify(CARD_RULES[c.name]):null};});
