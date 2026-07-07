@@ -280,7 +280,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .tframe .tf-art{position:absolute;left:16.2%;right:15.6%;top:16.2%;height:37%;background-size:cover;background-position:center 22%;background-repeat:no-repeat;z-index:1;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .tframe .tf-art::after{content:'';position:absolute;left:0;right:0;bottom:0;height:52%;background:linear-gradient(180deg,transparent,rgba(5,6,11,0.72));pointer-events:none;z-index:2}
 .tframe .tf-art .bc-sigil{font-size:44px;opacity:0.92;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.7))}
-.tframe .tf-media,.tframe .bc-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 20%;transform:scale(1.18);transform-origin:center 26%}
+.tframe .tf-media,.tframe .bc-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;transform:scale(1.06);transform-origin:center top}
 .tframe .tf-name{position:absolute;left:26%;right:25%;top:6.4%;height:7.6%;z-index:3;display:flex;align-items:center;justify-content:center;text-align:center;color:#2a1b06;font-weight:800;font-size:10px;letter-spacing:-0.015em;white-space:nowrap;overflow:hidden;text-shadow:0 1px 0 rgba(255,240,200,0.35)}
 .tframe .tf-pow{position:absolute;left:3.4%;width:20%;top:79.4%;height:14.5%;z-index:4;display:flex;align-items:center;justify-content:center;color:#2e1a04;font-weight:800;font-size:23px;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 rgba(255,244,214,0.6)}
 .tframe .tf-text{position:absolute;left:19.5%;right:17.5%;top:57%;bottom:12.8%;z-index:2;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:2px}
@@ -4621,8 +4621,8 @@ function confirmSelection(){
     <div class="ac-crest">${CARD_SIGIL[c.artKey||c.name]||'◈'}</div>
     <div class="ac-label">YOUR CARD</div>
     <div class="ac-name">${c.name}</div>
-    <div class="ac-rec"><span class="k">${c.kills}</span><span class="s">K / </span><span class="d">${c.deaths}</span><span class="s">D</span></div>
-    ${c.deaths === 0 ? '<div class="ac-pristine">◈ Pristine</div>' : ''}
+    <div class="ac-rec"><span class="k">${kdOf(c).k}</span><span class="s">K / </span><span class="d">${kdOf(c).d}</span><span class="s">D</span></div>
+    ${kdOf(c).d === 0 ? '<div class="ac-pristine">◈ Pristine</div>' : ''}
   </div>`;
 
   // enemy card — a sealed, stylized cover (or the exposed face under Open Book)
@@ -4648,10 +4648,10 @@ function confirmSelection(){
   document.getElementById('rr-opp-k').textContent = pendingOppCard.kills;
   document.getElementById('rr-opp-d').textContent = pendingOppCard.deaths;
   document.getElementById('rr-opp-pristine').textContent = pendingOppCard.deaths === 0 ? '◈ Pristine' : '';
-  document.getElementById('rr-you-k').textContent = c.kills;
-  document.getElementById('rr-you-d').textContent = c.deaths;
+  document.getElementById('rr-you-k').textContent = kdOf(c).k;
+  document.getElementById('rr-you-d').textContent = kdOf(c).d;
   document.getElementById('rr-you-id').textContent = c.name;
-  document.getElementById('rr-you-pristine').textContent = c.deaths === 0 ? '◈ Pristine' : '';
+  document.getElementById('rr-you-pristine').textContent = kdOf(c).d === 0 ? '◈ Pristine' : '';
 
   const noRetreat = activeCond && activeCond.id === 'noretreat';
 
@@ -4783,7 +4783,7 @@ function commitCard(){
     <div class="c-rarity">${rlab1(pc.rarity)}</div>
     <div class="c-name">${pc.name}</div>
     <div class="c-pow">${committedPow}${committedPow>pc.pow?'*':''}</div>
-    <div class="c-kd"><span class="k">${pc.kills}K</span> <span class="d">${pc.deaths}D</span></div>
+    <div class="c-kd"><span class="k">${kdOf(pc).k}K</span> <span class="d">${kdOf(pc).d}D</span></div>
     <div class="c-abil">${pc.abil}</div>
   </div>`;
   { const _fv=pf.querySelector('.field-vid'); if(_fv){ _fv.muted=true; _fv.play().catch(()=>{}); } }
@@ -5786,8 +5786,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
     else if(oc.pow > pc.pow){ oppPow = Math.max(1, oppPow - 5); abilLog.push(`⛰️ Proving Ground: opponent is the favorite (${oc.pow} vs ${pc.pow}) — −5`); }
     else abilLog.push('⛰️ Proving Ground: evenly matched — no penalty');
   } else if(cond.id === 'hollowreckoning'){
-    playerPow = pc.kills; oppPow = oc.kills;
-    abilLog.push(`🌫️ Hollow Reckoning: power → career kills (you ${pc.kills} vs opp ${oc.kills})`);
+    playerPow = (typeof getRec==='function'?getRec(pc).k:pc.kills); oppPow = oc.kills;
+    abilLog.push(`🌫️ Hollow Reckoning: power → career kills (you ${playerPow} vs opp ${oppPow})`);
   }
   }
 
@@ -5799,8 +5799,9 @@ function resolve(pc, oc, cond, playerCommittedPow){
 
   // Record Breaks Ties: resolve tie by career kills
   if(won === 'tie' && cond.id === 'recordties' && !akatoshUnmakes){
-    if(pc.kills > oc.kills){ won = 'win'; abilLog.push(`💀 Record Breaks Ties: ${pc.kills}K vs ${oc.kills}K — you win`); }
-    else if(pc.kills < oc.kills){ won = 'lose'; abilLog.push(`💀 Record Breaks Ties: ${pc.kills}K vs ${oc.kills}K — you lose`); }
+    var _pck=(typeof getRec==='function'?getRec(pc).k:pc.kills), _ock=oc.kills;
+    if(_pck > _ock){ won = 'win'; abilLog.push(`💀 Record Breaks Ties: ${_pck}K vs ${_ock}K — you win`); }
+    else if(_pck < _ock){ won = 'lose'; abilLog.push(`💀 Record Breaks Ties: ${_pck}K vs ${_ock}K — you lose`); }
     else { abilLog.push('💀 Record Breaks Ties: kills equal — true tie'); }
   }
 
@@ -7325,8 +7326,9 @@ COLLECTION.sort((a,b)=>(RARITY_ORDER[a.rarity]-RARITY_ORDER[b.rarity])||(b.pow-a
 function hashStr(s){let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))>>>0;}return h;}
 function provenance(c){
   const h=hashStr(c.name);
-  const total=c.kills+c.deaths;
-  const winRate=total>0?Math.round(c.kills/total*100):0;
+  var _pk=(typeof kdOf==='function')?kdOf(c):{k:c.kills||0,d:c.deaths||0};
+  const total=_pk.k+_pk.d;
+  const winRate=total>0?Math.round(_pk.k/total*100):0;
   const supply=c.variant?(c.tourneyOpened||12):(RARITY_SUPPLY[c.rarity]||1000);
   const idx=c.mintIndex?c.mintIndex:(h%supply)+1;
   const transfers=c.rarity==='genesis'?0:(h%5);
@@ -7576,7 +7578,7 @@ function buildDeckSlots(){
         <span class="ds-sigil">${glyph}</span>
         <div class="ds-body">
           <div class="ds-name">${c.name}</div>
-          <div class="ds-meta"><span class="ds-rar">${rlab(c.rarity)}</span> · <span class="k">${c.kills}K</span>/<span class="d">${c.deaths}D</span></div>
+          <div class="ds-meta"><span class="ds-rar">${rlab(c.rarity)}</span> · <span class="k">${kdOf(c).k}K</span>/<span class="d">${kdOf(c).d}D</span></div>
         </div>
         <span class="ds-pow">${c.pow}</span>
         <button class="ds-remove" title="Remove" onclick="event.stopPropagation();removeFromDeck('${(c.uid||c.name).replace(/'/g,"\\'")}')">✕</button>
@@ -7602,7 +7604,7 @@ function buildDeckPool(){
     const nm = (c.uid||c.name).replace(/'/g,"\\'");
     const inDeck = activeDeck.has(c.uid||c.name);
     const owned = (ownedCopies[c.uid||c.name]||0) > 0;
-    const pristine = c.deaths===0 ? `<span class="vc-pristine">◈</span>` : '';
+    const pristine = ((typeof kdOf==='function')?kdOf(c).d:c.deaths)===0 ? `<span class="vc-pristine">◈</span>` : '';
     return `<div class="vault-card ${c.rarity} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="previewPoolCard('${nm}',this)" onmouseleave="hideCardPreview()">
       <div class="vc-art" style="${artFillStyle(c.artKey||c.name)}">
         ${sigilFor(c.artKey||c.name)}
@@ -8131,7 +8133,7 @@ function openCardDetail(id, fresh, tab){
   const c=COLLECTION.find(x=>(x.uid||x.name)===id);
   if(!c) return;
   drawerCard=c; drawerFresh=!!fresh;
-  var _tab = tab || ((document.getElementById('v-deck')&&document.getElementById('v-deck').classList.contains('on'))?'card':'ledger');
+  var _tab = tab || 'card';   // owner: card tab first, over ledger
   const p=provenance(c);
   const _kd=kdOf(c); const _k=fresh?0:_kd.k, _d=fresh?0:_kd.d, _tot=_k+_d;
   const _wr=_tot>0?Math.round(_k/_tot*100):0;
@@ -8308,17 +8310,18 @@ function bigCardHTML(c){
   const key = c.artKey||c.name;
   const vid = VIDEO_PREVIEW[key];
   const art = CARD_ART[key];
+  var _kd=(typeof kdOf==='function')?kdOf(c):{k:c.kills||0,d:c.deaths||0};
   let artStyle='', artInner='';
   if(vid){ artInner=`<video class="bc-vid"${artFoc(key)} src="${vid}" autoplay muted loop playsinline></video>`; }
   else if(art){ artInner=`<img class="tf-media"${artFoc(key)} src="${art}" alt="">`; }
   else { artStyle='background:radial-gradient(circle at 50% 35%,rgba(255,255,255,0.05),transparent 70%)'; artInner=`<span class="bc-sigil">${CARD_SIGIL[key]||'◈'}</span>`; }
-  const pristine = c.deaths === 0 ? ' · ◈ Pristine' : '';
+  const pristine = _kd.d === 0 ? ' · ◈ Pristine' : '';
   return `<div class="bigcard tframe ${c.rarity||''} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})">
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
     <div class="tf-name">${dispName(c.name)}</div>
     <div class="tf-pow"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${c.chaosPow?'?':((c.pow||0)+(c._bo||0))}</div>
-    <div class="tf-kd"><span class="k">${c.kills}K</span>/<span class="d">${c.deaths}D</span>${c.deaths===0?' ◈':''}</div>
+    <div class="tf-kd"><span class="k">${_kd.k}K</span>/<span class="d">${_kd.d}D</span>${_kd.d===0?' ◈':''}</div>
     <div class="tf-text">${typeof keywordChipsHTML==='function'?keywordChipsHTML(c):''}</div>
     ${(typeof stateIcon==='function'&&stateIcon(c))?`<div class="sf-pip" title="${stateTitle(c)}">${stateIcon(c)}</div>`:``}
   </div>`;
