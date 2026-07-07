@@ -3216,7 +3216,7 @@ const DECK_POOL = [
   {name:'Lagertha Waltz',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 if you lost your last duel. -2 if you won your last duel.'},
   {name:'Valcarion',pow:7,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if there is a card in your banish zone, add it to your hand — or call it to an open support circle.'},
   {name:'Ella Ballora',pow:14,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Bloodrage: on commit +3 power, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
-  {name:'Kiana',pow:15,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Elemental Flurry: on commit +3 power, and +4 more if you have 4 or more cards in your hand.'},
+  {name:'Kiana',pow:15,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Wingblade: on commit +3 power, and +4 more if you have 2 or more cards in your banish zone — a Black Wings edge sharpened by every sacrifice.'},
   // ── KOTEI Series 1 Expansion ──
   {name:'Melanie',pow:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'No ability. Keawe\'s mother — a civilian, not a fighter. At 1 power she quietly wins under Lowest Wins.'},
   {name:'Uso Oso\'s Skeletal Summons',pow:5,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: these bones don\'t stay down — when the summons falls it lingers on the field, your committed cards gaining its power until an opponent\'s card is killed.'},
@@ -3234,7 +3234,12 @@ const DECK_POOL = [
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.'},
   {name:'Keawe, A Legend Reborn',pow:8,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 18 or higher from your deck to your hand. Called (support): snipe the opposing support in the mirrored slot — it is removed before it can fire.'},
   {name:'Rhaess Korvain',pow:13,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Assassin\'s Mark: on commit, +6 power if the opponent\'s card has more career kills than this one — Rhaess hunts the notable.'},
-  {name:'Ossian Drell',pow:13,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Field Command: on commit, +3 power, and +3 more if you are ahead in the match — a veteran presses the advantage.'},
+  {name:'Ossian Drell',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone — the captain of the Black Wings turns sacrifice into force.'},
+  {name:'Corvus',pow:10,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Raven\'s Feast: on commit, banish the top card of your deck, then +2 power for every card in your banish zone — Corvus grows the pyre and feeds on it.'},
+  {name:'Wren',pow:9,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wingmate: on commit, return a banished card to your hand, then +4 power — Wren never leaves one behind.'},
+  {name:'Rook',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Scout: on commit, banish the top card of your deck, then +1 power for every card in your banish zone.'},
+  {name:'Falk',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Dive: on commit, +2 power for every card in your banish zone.'},
+  {name:'Sable',pow:9,cost:1,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Quartermaster: as a support (Called), banish a card from your hand and give your Fighter +5.'},
   {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
   // ── art-swapped in from Set 2 storage ──
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you are down 2 or more duels this match, double this card\'s power.'},
@@ -4195,7 +4200,12 @@ const CALLED = {
   "Old Garrick":                   {text:"your Fighter +4", add:4},
   "Keawe Kel'rua":                 {text:"your Fighter +3", add:3},
   "Rhaess Korvain":                {text:"return 1 banished card to hand", recurPlain:1},
-  "Ossian Drell":                  {text:"your Fighter +4 · draw 1", add:4, draw:1},
+  "Ossian Drell":                  {text:"Black Wings — return a banished card to your hand, +2 power", recurBuff:1},
+  "Corvus":                        {text:"your Fighter +4", add:4},
+  "Wren":                          {text:"return a banished card to your hand, your Fighter +3", recurPlain:1, add:3},
+  "Rook":                          {text:"your Fighter +2", add:2},
+  "Falk":                          {text:"your Fighter +3", add:3},
+  "Sable":                         {text:"banish a card from your hand, your Fighter +5", banishOwn:1, add:5},
   "Bram the Bulwark":              {text:"your Fighter +3", add:3},
   "Cletus Gwyndull":                     {text:"your Fighter +3", add:3},
   "Chieftain Reyva Vosh":          {text:"draw 2 cards", draw:2},
@@ -4260,7 +4270,7 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
   if(e.spellDiscountGain && !isOpp && typeof spellDiscount!=='undefined'){ spellDiscount+=e.spellDiscountGain; }
   if(e.draw && !isOpp){ drawToHand(e.draw); }
   if(e.banishOwn && !isOpp){ for(var _b=0;_b<e.banishOwn;_b++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } abilLog.push("☠ Banished "+e.banishOwn+" from your hand — into the Order"); if(typeof buildHand==="function")buildHand(); }
-  if(e.recurBuff && !isOpp){ var _got=0; for(var _r=0;_r<e.recurBuff;_r++){ if(banishPile.length){ var _rc=banishPile.pop(); _rc._bo=(_rc._bo||0)+2; hand.push(_rc); _got++; } } if(_got) abilLog.push("♻ Blackened Order — returned "+_got+" from banish, +2 power each"); if(typeof buildHand==="function")buildHand(); }
+  if(e.recurBuff && !isOpp){ var _got=0; for(var _r=0;_r<e.recurBuff;_r++){ if(banishPile.length){ var _rc=banishPile.pop(); _rc._bo=(_rc._bo||0)+2; hand.push(_rc); _got++; } } if(_got) abilLog.push("♻ "+support.name+" — returned "+_got+" from banish, +2 power each"); if(typeof buildHand==="function")buildHand(); }
   if(e.recurPlain && !isOpp){ var _gp=0; for(var _rp2=0;_rp2<e.recurPlain;_rp2++){ if(banishPile.length){ hand.push(banishPile.pop()); _gp++; } } if(_gp) abilLog.push("↩ Returned "+_gp+" from banish to hand"); if(typeof buildHand==="function")buildHand(); }
   if(e.bothBanish && !isOpp){ for(var _bb=0;_bb<e.bothBanish;_bb++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } oppPow-=2*e.bothBanish; abilLog.push("☠ Both discard — you banish "+e.bothBanish+", opponent −"+(2*e.bothBanish)); if(typeof buildHand==="function")buildHand(); }
   playerPow+=d[0]; oppPow+=d[1];
@@ -4662,6 +4672,8 @@ function commitCard(){
   { var _idxs=[selectedCard].concat(rearGuardIdxs.filter(function(ix){return ix!==selectedCard;})); _idxs.sort(function(a,b){return b-a;}); _idxs.forEach(function(_ix){hand.splice(_ix,1);}); }
   rearGuardIdxs=[];
   // ── conjure summons ──
+  if((pc.name==='Corvus'||pc.name==='Rook') && drawPile.length){ banishPile.push(drawPile.shift()); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof updatePiles==='function') updatePiles(); }
+  if(pc.name==='Wren' && banishPile.length){ hand.push(banishPile.pop()); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='La "La" Ballora, the Broodqueen' && typeof drawToHand==='function'){ drawToHand(1); }
   if(pc.name==="Web-Weaver's Return"){ if(banishPile.length){ var _rb=banishPile.splice(0,banishPile.length); drawPile=drawPile.concat(_rb); if(typeof shuffle==='function') shuffle(drawPile); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof toast==='function') toast('🕸 Web-Weaver\'s Return \u2014 '+_rb.length+' banished cards rewoven into your deck.', true); } if(typeof drawToHand==='function') drawToHand(1); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='Keawe, A Legend Reborn'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=18;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+') to your hand.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 18+ left in your deck to tutor.', false); } }
@@ -5074,6 +5086,7 @@ const LINK_GROUPS = [
   {id:'dragon',  name:'Dragon-Pact',     icon:'🐉', pow:1, members:['Tange Sazen','Ourevos, the Golden Dragon','Kiba','Kleydson','Kaelthar the Ascendant']},
   {id:'waltz',   name:'Waltz Twins',     icon:'🐺', pow:1, members:['Lagertha Waltz','Hanse Waltz','Lagertha Waltz — Werewolf Form','Hanse Waltz — Werewolf Form','Kessuae, Tide of Ruin']},
   {id:'tosa',    name:'Tosa Pact',      icon:'🤝', pow:1, members:['Cletus Gwyndull']},
+  {id:'blackwings', name:'The Black Wings', icon:'🖤', pow:1, members:['Ossian Drell','Kiana','Corvus','Wren','Rook','Falk','Sable','Rhaess Korvain']},
 {id:'legend',  name:'Split Legend',    icon:'✨', pow:1, members:['Kotei','Ahdor','Kleydson','Anorith Keeling','Anorith Prime','Sunforged Colossus']},
 ];
 function cardLinkGroups(name){ return LINK_GROUPS.filter(function(g){ return g.members.indexOf(name)>=0; }); }
@@ -5365,19 +5378,8 @@ const CARD_RULES = {
   }
  ],
  "Kiana": [
-  {
-   "add": 3,
-   "log": "🔥 Flurry: +3"
-  },
-  {
-   "if": {
-    "v": "hand_len",
-    "op": ">=",
-    "n": 4
-   },
-   "add": 4,
-   "log": "🔥 Full hand: +4"
-  }
+  { "add": 3, "log": "🪶 Wingblade: +3" },
+  { "if": { "v": "banish_len", "op": ">=", "n": 2 }, "add": 4, "log": "🪶 armed: +4" }
  ],
  "King Joris": [
   {
@@ -5519,19 +5521,19 @@ const CARD_RULES = {
   }
  ],
  "Ossian Drell": [
-  {
-   "add": 3,
-   "log": "🎖 Field Command: +3"
-  },
-  {
-   "if": {
-    "v": "player_wins",
-    "op": ">",
-    "v2": "player_losses"
-   },
-   "add": 3,
-   "log": "🎖 Advantage: +3"
-  }
+  { "addvar": "banish_len", "x": 2, "log": "🪶 Wing Command: +2×banish" }
+ ],
+ "Corvus": [
+  { "addvar": "banish_len", "x": 2, "log": "🪶 Raven's Feast: +2×banish" }
+ ],
+ "Rook": [
+  { "addvar": "banish_len", "x": 1, "log": "🪶 Scout: +1×banish" }
+ ],
+ "Falk": [
+  { "addvar": "banish_len", "x": 2, "log": "🪶 Dive: +2×banish" }
+ ],
+ "Wren": [
+  { "add": 4, "log": "🪶 Wingmate: +4" }
  ]
 };
 function evalRuleCond(cond, ctx){
