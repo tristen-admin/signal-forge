@@ -3230,6 +3230,7 @@ const DECK_POOL = [
   {name:'Ella Ballora — True Form',pow:17,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Devour: on commit, +3 power, and +4 more if you have already won a duel this match — the Spider-Queen grows with every kill she feeds on.'},
   {name:'Ourevos, the Golden Dragon',pow:24,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.'},
+  {name:'Keawe, A Legend Reborn',pow:8,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 18 or higher from your deck to your hand. Called (support): snipe the opposing support in the mirrored slot — it is removed before it can fire.'},
   {name:'Rhaess Korvain',pow:13,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Assassin\'s Mark: on commit, +6 power if the opponent\'s card has more career kills than this one — Rhaess hunts the notable.'},
   {name:'Ossian Drell',pow:13,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Field Command: on commit, +3 power, and +3 more if you are ahead in the match — a veteran presses the advantage.'},
   {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
@@ -4145,6 +4146,7 @@ function duelEnergyFloor(){ return Math.max(3, duelEnergyCap()-1); } /* guarante
 // CALLED - universal rear-guard keyword; fires ALWAYS when a support is called (no group gate).
 // Inverse-scaling: fighter cards -> simple static (+N / opp -N); low-power/support -> rich combos.
 const CALLED = {
+  "Keawe, A Legend Reborn":        {text:"snipe the opposing support in the mirrored slot", snipeSupport:true},
   // Support buff scales INVERSE to conjure cost: ⚡1=+5, ⚡2=+4, ⚡3=+3, ⚡4=+2 (cheap body = better support). Utility/recur/draw Calleds unchanged.
   "Kaelthar the Ascendant":        {text:"your Fighter +2", add:2},
   "Voidmaw the Unmaker":           {text:"your Fighter +3", add:3},
@@ -4656,6 +4658,7 @@ function commitCard(){
   { var _idxs=[selectedCard].concat(rearGuardIdxs.filter(function(ix){return ix!==selectedCard;})); _idxs.sort(function(a,b){return b-a;}); _idxs.forEach(function(_ix){hand.splice(_ix,1);}); }
   rearGuardIdxs=[];
   // ── conjure summons ──
+  if(pc.name==='Keawe, A Legend Reborn'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=18;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+') to your hand.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 18+ left in your deck to tutor.', false); } }
   if(pc.name==='Anorith Keeling'){ energyLoadout=['drawsurge','godhand','sornshift']; spellHand=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your spells into the Chaos Trinity.', true); }
   if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
   if(pc.name==='Uso Oso' && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
@@ -5058,7 +5061,7 @@ const FORMATION_TIERS=[{n:3,name:'Allied',bonus:1},{n:8,name:'Brothers-in-Arms',
 const LINK_POW_CAP = 4;   // max total power from active links per commit (keeps it subtle)
 const LINK_GROUPS = [
   {id:'keawe',   name:"Keawe's Circle", icon:'🔵', pow:1, members:['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga']},
-  {id:'kelrua',  name:"Kel'rua Blood",   icon:'👪', pow:1, members:['Kiana','Keawe Kel\'rua']},
+  {id:'kelrua',  name:"Kel'rua Blood",   icon:'👪', pow:1, members:['Kiana','Keawe Kel\'rua','Keawe, A Legend Reborn']},
 {id:'squad19', name:'Squad 19',       icon:'🛡', pow:1, members:['Ahdor','Val Kreigh','Ruffius Rufeldro']},
   {id:'court',   name:"Darwin's Court",  icon:'🩸', pow:1, members:['Darwin','Valcarion','Zerith Var','Veronica','Ella Ballora','Ella Ballora — True Form','Arch-Grim Korrin','Grim Korrin','Ruffius Rufeldro','Voidmaw the Unmaker']},
   {id:'royalty', name:'Exiled Royalty',  icon:'👑', pow:1, members:['Moro','Malia','King Joris']},
@@ -5570,7 +5573,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
     if(!_al && pc.name === 'Voltcaller'){ spellDiscount += 2; abilLog.push('\u26a1 Voltcaller: your next Interrupt costs 2 less'); } }
   // ── REAR-GUARD: Called (always fires) + same-group Link Skill ──
   { var _rgc={match_commits:matchCommits, last_result:lastResult, hand_len:hand.length, opp_deaths:oc.deaths||0, opp_kills:oc.kills||0, wins:playerScore[0], losses:playerScore[1], wc_len:winnersCircle.length, chaos:(cond.tag==='chaos')};
-    rearGuards.forEach(function(rg){ if(!rg) return;
+    rearGuards.forEach(function(rg,_rgi){ if(!rg) return;
+      { var _kc=(typeof CALLED!=='undefined')?CALLED[rg.name]:null; if(_kc && _kc.snipeSupport && pendingOppRears[_rgi]){ var _sn=pendingOppRears[_rgi]; pendingOppRears[_rgi]=null; abilLog.push('🎯 '+rg.name+': sniped '+_sn.name+' — opposing support removed'); } }
       var _rr=applyCalled(rg, _rgc, playerPow, oppPow, abilLog, false); playerPow=_rr[0]; oppPow=_rr[1];
       var _lk=fieldLink(pc, rg); if(_lk){ playerPow+=_lk.pow; abilLog.push('🔗 '+_lk.name+' Link — '+pc.name+' + '+rg.name+': +'+_lk.pow); }
     });
