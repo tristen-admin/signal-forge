@@ -6490,7 +6490,7 @@ const SEASON = { chapter:'Chapter 1', name:'Rebirth', pack:'Legends Reborn' };
 const PACKS = [
   {id:'std', name:'Legends Reborn Booster', icon:'📦', price:500, blurb:'Common through Rare — a whisper of higher.', odds:{common:63.9, uncommon:25, rare:8, ultra:2.3, genesis:0.8}},
   {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & a Genesis shot — no commons.', odds:{rare:78, ultra:20, genesis:2}},
-  {id:'genesis', name:'Legends Reborn Genesis Vault', icon:'💠', price:5000, blurb:'Rares and Ultras in force — a 5% Genesis shot.', odds:{rare:50, ultra:45, genesis:5}},
+  {id:'genesis', name:'Legends Reborn Genesis Vault', icon:'💠', price:3000, blurb:'Ultra-dense — a 40% Ultra pull with a 5% Genesis shot.', odds:{rare:55, ultra:40, genesis:5}},
 ];
 const PREMIUM_PACKS = [
   {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{uncommon:14, rare:60, ultra:23, genesis:3}},
@@ -9577,6 +9577,8 @@ function grantDraftedCards(){
   if(typeof saveState==='function') saveState(); if(typeof updateBalance==='function') updateBalance(); if(typeof buildVault==='function') buildVault();
 }
 function enterDraftMatch(){ if(draftPool.length<DRAFT_PICKS) return; draftDeckNext=draftPool.slice(); drafting=false; if(!selectedBot){ selectedBot=BOT_OPPONENTS[Math.floor(Math.random()*BOT_OPPONENTS.length)].id; } startMatch(); }
+function draftHover(i,el){ if(window.matchMedia&&window.matchMedia('(hover:none)').matches)return; var c=(typeof _draftRow!=='undefined'&&_draftRow)?_draftRow[i]:null; if(c&&typeof previewCardEl==='function') previewCardEl(c, el, true); }
+function draftInspect(i){ var c=(typeof _draftRow!=='undefined'&&_draftRow)?_draftRow[i]:null; if(!c) return; var pv=document.getElementById('card-preview'); if(!pv) return; if(typeof SFX!=='undefined')SFX.play('hover'); pv.innerHTML=(typeof readableCardHTML==='function'?readableCardHTML(c):bigCardHTML(c))+'<div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><button style="background:var(--gold-dim,#3a2f12);border:1px solid var(--gold);color:var(--gold);font-size:12px;font-weight:800;padding:9px 18px;border-radius:8px;cursor:pointer" onclick="event.stopPropagation();hideCardPreview();pickDraftCard('+i+');">⚔ Draft this card</button><button style="background:none;border:1px solid var(--border2);color:var(--text2);font-size:12px;padding:9px 14px;border-radius:8px;cursor:pointer" onclick="event.stopPropagation();hideCardPreview();">← Back</button></div>'; pv.classList.add('show','pinned'); pv.style.pointerEvents='auto'; var sc=document.getElementById('preview-scrim'); if(!sc){ sc=document.createElement('div'); sc.id='preview-scrim'; document.body.appendChild(sc); } sc.onclick=hideCardPreview; sc.ontouchstart=function(e){e.preventDefault();hideCardPreview();}; }
 function buildDraft(){
   const s=document.getElementById('draft-stage'); if(!s) return;
   if(!drafting){ s.innerHTML='<div class="draft-start"><div class="ds-vortex">🌀</div><button class="enter-btn" onclick="startDraft()">Enter the Vortex \u2014 Begin Draft</button></div>'; return; }
@@ -9585,7 +9587,7 @@ function buildDraft(){
     return;
   }
   if(!_draftRow) dealDraftRow();
-  s.innerHTML='<div class="draft-prog">Pick '+(draftPool.length+1)+' of '+DRAFT_PICKS+'</div><div class="draft-row">'+_draftRow.map(function(c,i){ return '<div class="draft-card '+c.rarity+'" onclick="pickDraftCard('+i+')"><div class="dc-pow">'+c.pow+'</div><div class="dc-name">'+c.name+'</div><div class="dc-rar">'+c.rarity+'</div></div>'; }).join('')+'</div>'+(draftPool.length?'<div class="draft-picked">Drafted: '+draftPool.join(' \u00b7 ')+'</div>':'');
+  s.innerHTML='<div class="draft-prog">Pick '+(draftPool.length+1)+' of '+DRAFT_PICKS+'</div><div class="draft-row">'+_draftRow.map(function(c,i){ return '<div class="draft-card '+c.rarity+'" onclick="draftInspect('+i+')" onmouseenter="draftHover('+i+',this)" onmouseleave="hideCardPreview()"><div class="dc-pow">'+c.pow+'</div><div class="dc-name">'+(typeof dispName==="function"?dispName(c.name):c.name)+'</div><div class="dc-rar">'+c.rarity+'</div><div class="dc-hint" style="font-size:9px;color:var(--text3);margin-top:5px;letter-spacing:.03em">👁 view / draft</div></div>'; }).join('')+'</div>'+(draftPool.length?'<div class="draft-picked">Drafted: '+draftPool.join(' \u00b7 ')+'</div>':'');
 }
 function exitMatch(){ if(typeof SFX!=='undefined')SFX.stopCrowd();
   clearTurnTimers();
