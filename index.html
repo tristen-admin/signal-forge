@@ -3757,7 +3757,7 @@ function playMatchIntro(){
 }
 // 15-second clock to act; on expiry, auto-commit the best available play.
 function startDecisionClock(seconds, label){ if(typeof tutorialMode!=='undefined'&&tutorialMode) return;
-  seconds = seconds || 15;
+  seconds = seconds || 40;
   if(decisionTimer){ clearInterval(decisionTimer); decisionTimer = null; }
   const strip = document.getElementById('clock-strip');
   const num = document.getElementById('clock-num');
@@ -4703,7 +4703,7 @@ function confirmSelection(){
         +'<span class="rp-vs">vs</span><span class="rp-opp">opp shows <b>'+(_pp.oppShown!=null?_pp.oppShown:'?')+'</b>'+(_pp.oppDelta?' <i>'+(_pp.oppDelta>0?'+':'')+_pp.oppDelta+' your Called</i>':'')+'</span>';
     } else if(_rp){ _rp.style.display='none'; } }
   setPhase('select');
-  startDecisionClock(12, 'to decide');   // withdraw phase runs on a fast 5s clock
+  startDecisionClock(22, 'to decide');   // withdraw phase — relaxed clock
 }
 
 function retreatCard(){
@@ -4967,7 +4967,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     tagPow('me',basePP); tagPow('opp',baseOP);
     function pw(side){ return document.getElementById('rc-pow-'+side); }
     function lbl(m){ var t=String(m).split(':')[0].split(' — ')[0].split(' · ')[0].trim(); return t.length>24?t.slice(0,24):t; }
-    function chip(side,d,m){ var h=document.getElementById('rc-fx-'+side); if(!h) return; var c=document.createElement('div'); c.className='rc-chip '+(d>0?'up':(d<0?'down':'flat')); c.textContent=(d?((d>0?'+':'')+d+'  '):'')+lbl(m); h.appendChild(c); setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); },1200); }
+    function chip(side,d,m){ var h=document.getElementById('rc-fx-'+side); if(!h) return; var c=document.createElement('div'); c.className='rc-chip '+(d>0?'up':(d<0?'down':'flat')); c.textContent=(d?((d>0?'+':'')+d+'  '):'')+lbl(m); h.appendChild(c); setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); },1650); }
     function tic(side,v){ var e=pw(side); if(!e) return; e.textContent=R(v); e.classList.remove('tick'); void e.offsetWidth; e.classList.add('tick'); }
     function pulse(side,k){ var c=document.getElementById('rc-card-'+side); if(c){ c.classList.remove('pu','pd'); void c.offsetWidth; c.classList.add(k); } }
     function allCardEls(){
@@ -4984,7 +4984,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
       var msg=String(m||''); var list=allCardEls(); var hit=null, hk='';
       for(var j=0;j<list.length;j++){ var nm=list[j].name; if(!nm) continue; var key=nm.split(/[ ,\u2014]/)[0]; if(key.length>2 && msg.indexOf(key)>=0 && key.length>hk.length){ hit=list[j]; hk=key; } }
       var t = hit ? hit.el : document.getElementById('rc-card-'+side);
-      if(t){ t.classList.remove('rc-quake'); void t.offsetWidth; t.classList.add('rc-quake'); setTimeout(function(){ if(t) t.classList.remove('rc-quake'); }, 480); }
+      if(t){ t.classList.remove('rc-quake'); void t.offsetWidth; t.classList.add('rc-quake'); var _os=t.style.boxShadow, _oz=t.style.zIndex; t.style.transition='box-shadow .18s ease'; t.style.boxShadow='0 0 30px 8px rgba(245,201,92,.9)'; t.style.zIndex='45'; setTimeout(function(){ if(t){ t.classList.remove('rc-quake'); t.style.boxShadow=_os||''; t.style.zIndex=_oz||''; } }, 1050); }
     }
     function clash(){
       var cm=document.getElementById('rc-card-me'), co=document.getElementById('rc-card-opp');
@@ -5011,13 +5011,13 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
       else if(won==='lose'){ if(co)co.classList.add('rc-victor'); if(cm)cm.classList.add('rc-fallen'); if(typeof SFX!=='undefined')SFX.play('defeat');
         if(typeof FX!=='undefined'){ FX.stamp('Defeat','lose'); FX.vignette('lose',1000); } }
       else { if(cm)cm.classList.add('rc-tie'); if(co)co.classList.add('rc-tie'); if(typeof FX!=='undefined')FX.stamp('Draw','tie'); }
-      setTimeout(done, won==='tie'?760:1300);
+      setTimeout(done, won==='tie'?1150:2000);
     }
     var ps=(steps||[]).filter(function(s){ return s.dp||s.dop; });
     if(reduce){ finish(); return; }
-    var HOLD=780; // let the flip land + a brief tension beat before effects tic
+    var HOLD=1050; // let the flip land + a longer tension beat before effects tic
     if(ps.length===0){ setTimeout(clash, HOLD+300); return; }
-    var i=0, per = ps.length>6?380:540;
+    var i=0, per = ps.length>8?950:(ps.length>5?1200:1400);
     setTimeout(function(){ (function step(){
       if(i>=ps.length){ clash(); return; }
       var s=ps[i++];
@@ -5817,6 +5817,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
   }
   }
 
+  // ── BOT COMEBACK: mirror the player's on-loss spell/WC economy so the bot doesn't get swung on late ──
+  if(typeof oppLossStreak!=='undefined' && oppLossStreak>0 && (typeof pvpMode==='undefined'||!pvpMode)){ var _cb=Math.min(6,oppLossStreak*2); oppPow+=_cb; abilLog.push('🩸 '+oc.name+' rallies from behind — comeback +'+_cb); }
   // ── DETERMINE WINNER ──
   let won;
   if(playerPow > oppPow) won = 'win';
@@ -7981,6 +7983,10 @@ function oppEndDuelCycle(){
     _oppInPlay.forEach(function(c,i){ if(botWon && i===0) return;   // bot's winning fighter leaves to its WC (tallied via oppWC), doesn't recycle
       oppDeckBot.push(c); });                                       // losers + supports recycle to deck bottom
     _oppInPlay=[]; }
+  { var _bw=(typeof lastResult!=='undefined' && lastResult==='lose');
+    if(_bw){ oppLossStreak=0; }
+    else { oppLossStreak=Math.min(3,(oppLossStreak||0)+1);
+      try{ if(typeof oppWonBot!=='undefined' && oppWonBot.size){ var _pool=[].concat(typeof OPP_CARDS!=='undefined'?OPP_CARDS:[], typeof COLLECTION!=='undefined'?COLLECTION:[]); var _best=null,_bp=-1; oppWonBot.forEach(function(nm){ var _c=_pool.find(function(x){return x.name===nm;}); var _pw=_c?(_c.pow||0):0; if(_pw>_bp){_bp=_pw;_best=nm;} }); if(_best){ oppWonBot.delete(_best); if(typeof oppWC!=='undefined') oppWC=oppWonBot.size; var _bc=_pool.find(function(x){return x.name===_best;}); if(_bc) oppHandBot.push(Object.assign({},_bc)); } } }catch(e){} } }
   for(var _bd=0;_bd<DRAW_PER_TURN;_bd++){ if(oppDeckBot.length) oppHandBot.push(oppDeckBot.shift()); }   // draw DRAW_PER_TURN per turn — same speed as player
 }
 function _oppStamp(card){ var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null; return Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{}); }
@@ -10439,7 +10445,7 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
 <script>
 /* ═══ REAL OPPONENT DECK — bots draw from a per-match deck WITHOUT replacement; ═══
    ═══ a card the bot WINS with goes to its Winners Circle and never returns.     ═══ */
-var oppDrawPileBot=[], oppWonBot=new Set();
+var oppDrawPileBot=[], oppWonBot=new Set(), oppLossStreak=0;
 function _oppShuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 /* rebuild the bot deck at the start of every match */
 if(typeof resetMatchState==='function'){ var _oppRMS=resetMatchState; resetMatchState=function(){ oppDrawPileBot=[]; oppWonBot=new Set(); if(typeof oppWC!=='undefined') oppWC=0; if(typeof oppInitDeck==='function') oppInitDeck(); return _oppRMS.apply(this,arguments); }; }
