@@ -3268,7 +3268,8 @@ const DECK_POOL = [
   {name:'Grave-Fed Ghoul',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Death Remnant: when it falls, +4 to your cards until an enemy dies.'},
   {name:'Marrow Priest',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Support: your Fighter +3; if a Remnant is on the field, draw a card.'},
   {name:'Ossuary Titan',pow:15,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Death Remnant: when it falls, +7 to your cards until an enemy dies. On commit: +3 power for each Remnant you hold.'},
-  {name:'Pale Gravedigger',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: draw a card if you have a Remnant on the field.'},
+  {name:'Pale Gravedigger',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: raise a +3 Death Remnant, then draw a card while you hold a Remnant.'},
+  {name:'Gravecaller Voss',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish a card from your hand to raise a Death Remnant worth +5 — no death required. Called as a support: lingers as a +5 Remnant.'},
   {name:'Widow of the Vigil',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you have a Remnant, draw 2; otherwise +3 power.'},
   // ── THE WARPATH (early champ, Winners-Circle recycle, Kill Escalation) ──
   {name:'Bloodwake Duelist',pow:11,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: on commit, +2 power for every kill you have earned this match.'},
@@ -3339,8 +3340,9 @@ let banishSurge = 0;
 let divinerBonusNext = 0;
 let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + lingering supports); each {name,pow}; persists until an enemy card is killed
 function remnantPowSum(){ return deathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
-const REMNANT_POW = {'Arch-Grim Korrin':8,'Ossuary Titan':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk Skullbrand':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5};
-const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk Skullbrand','Sister Mire','Kiba'];
+const REMNANT_POW = {'Arch-Grim Korrin':8,'Ossuary Titan':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk Skullbrand':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5};
+const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5};   // PROACTIVE: raise a Death Remnant on commit — no death needed
+const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk Skullbrand','Sister Mire','Kiba','Grave-Fed Ghoul','Bone Choirmaster','Gravecaller Voss',"Uso Oso's Skeletal Summons"];
 let lastResult = null;
 let matchCommits = 0;
 let skullchainKills = 0;
@@ -4733,6 +4735,7 @@ function commitCard(){
   { var _idxs=[selectedCard].concat(rearGuardIdxs.filter(function(ix){return ix!==selectedCard;})); _idxs.sort(function(a,b){return b-a;}); _idxs.forEach(function(_ix){hand.splice(_ix,1);}); }
   rearGuardIdxs=[];
   // ── conjure summons ──
+  if(typeof RAISE_REMNANT!=='undefined' && RAISE_REMNANT[pc.name]!=null){ if(pc.name==='Gravecaller Voss' && typeof banishFromHand==='function') banishFromHand(1); if(typeof deathRemnants!=='undefined') deathRemnants.push({name:pc.name, pow:RAISE_REMNANT[pc.name]}); if(typeof updatePiles==='function') updatePiles(); if(typeof toast==='function') toast('☠ '+pc.name+' raises a +'+RAISE_REMNANT[pc.name]+' Death Remnant — no death needed.', true); }
   { var _btmap={'Corvus':2,'Rook':1,'Grave-Tithe Acolyte':1,'Rhaess Korvain':1}; var _btn=_btmap[pc.name]; if(_btn){ for(var _bti=0;_bti<_btn && drawPile.length;_bti++) banishPile.push(drawPile.pop()); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof updatePiles==='function') updatePiles(); } }
   if(pc.name==='Kiana' && typeof banishFromHand==='function'){ banishFromHand(1); }
   if(pc.name==='The Black Ledger'){ if(typeof banishFromHand==='function') banishFromHand(2); if(typeof drawToHand==='function') drawToHand(2); }
@@ -5906,7 +5909,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
 
   if(bloodthirstyActive && won === 'win'){ if(typeof drawToHand==='function') drawToHand(1); abilLog.push('⚔️ Bloodthirsty: the win feeds it — draw a card'); }
 
-  rearGuards.forEach(function(rg){ if(!rg) return; if(typeof LINGERING_SUPPORTS!=='undefined' && LINGERING_SUPPORTS.indexOf(rg.name)>=0){ deathRemnants.push({name:rg.name,pow:rg.pow||0}); abilLog.push('☠ '+rg.name+' lingers as a Remnant (+'+(rg.pow||0)+' to your commits until an enemy dies)'); } else { drawPile.unshift(rg); abilLog.push('↩ '+rg.name+' (support) → deck bottom'); } }); if(rearGuards.length) deckSize=drawPile.length;
+  rearGuards.forEach(function(rg){ if(!rg) return; if(typeof LINGERING_SUPPORTS!=='undefined' && LINGERING_SUPPORTS.indexOf(rg.name)>=0){ var _lp=(typeof REMNANT_POW!=='undefined'&&REMNANT_POW[rg.name]!=null)?REMNANT_POW[rg.name]:(rg.pow||0); deathRemnants.push({name:rg.name,pow:_lp}); abilLog.push('☠ '+rg.name+' lingers as a Remnant (+'+_lp+' to your commits until an enemy dies)'); } else { drawPile.unshift(rg); abilLog.push('↩ '+rg.name+' (support) → deck bottom'); } }); if(rearGuards.length) deckSize=drawPile.length;
   rearGuards=[]; pendingOppRears=[];
   abilLogEl.innerHTML = abilLog.map(e => `<div class="abil-log-entry">${e}</div>`).join('');
   const _revealOutcome = function(){
@@ -7656,11 +7659,11 @@ function deckTab(t){
 
 // ══ DECK PRESETS (saved decks) ══
 const BLACKWING_PRESET = ['Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Bixie Bee'];   // Black Wings — banish/discard
-const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ossuary Titan','Ghorruk Skullbrand','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Uso Oso',"Uso Oso's Skeletal Summons",'Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','Signal Diviner','The Regenerating Horror','Melanie','Heir of Kaiga'];   // The Deathless — Death-Remnant stack + draw
+const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ossuary Titan','Ghorruk Skullbrand','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Uso Oso',"Uso Oso's Skeletal Summons",'Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','Signal Diviner','The Regenerating Horror','Gravecaller Voss','Melanie'];   // The Deathless — Death-Remnant stack + draw
 const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Moro'];   // The Warpath — early champ + WC recycle + kill escalation
 const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte',"Hoarder's Gambit",'The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Ella Ballora',"Web-Weaver's Return",'The Black Ledger','Signal Diviner','Melanie','Heir of Kaiga','Faye Quicksilver','Chieftain Reyva Vosh'];   // The Broodswarm — hand-size draw + power
 let deckPresets = lsGet('sf_presets', {});
-(function(){ var _seed={blackwing:BLACKWING_PRESET, deathless:DEATHLESS_PRESET, warpath:WARPATH_PRESET, broodswarm:BROODSWARM_PRESET}; var _ch=false; Object.keys(_seed).forEach(function(k){ if(!deckPresets[k] && !lsGet('sf_seed_'+k,0)){ deckPresets[k]=_seed[k].slice(); lsSet('sf_seed_'+k,1); _ch=true; } }); if(!lsGet('sf_bw_seeded',0)) lsSet('sf_bw_seeded',1); if(_ch) lsSet('sf_presets', deckPresets); })();
+(function(){ var _seed={blackwing:BLACKWING_PRESET, deathless:DEATHLESS_PRESET, warpath:WARPATH_PRESET, broodswarm:BROODSWARM_PRESET}; var _ch=false; Object.keys(_seed).forEach(function(k){ if(!deckPresets[k] && !lsGet('sf_seed_'+k,0)){ deckPresets[k]=_seed[k].slice(); lsSet('sf_seed_'+k,1); _ch=true; } }); if(!lsGet('sf_bw_seeded',0)) lsSet('sf_bw_seeded',1); if(!lsGet('sf_seed_deathless_v2',0)){ deckPresets.deathless = DEATHLESS_PRESET.slice(); lsSet('sf_seed_deathless_v2',1); _ch=true; } if(_ch) lsSet('sf_presets', deckPresets); })();
 function refreshPresets(){
   lsSet('sf_presets', deckPresets);
   const wrap = document.getElementById('preset-list'); if(!wrap) return;
