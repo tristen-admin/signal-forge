@@ -3824,7 +3824,7 @@ function afterResult(){
   if(window._afterResultBusy) return; window._afterResultBusy=true; setTimeout(function(){ window._afterResultBusy=false; }, 500);
   if(matchComplete){ matchComplete=false; resetMatchState(); return; }
   if(matchOver()){ matchComplete=true; showMatchComplete(); return; }
-  nextTurn();
+  if((rankedMode||pvpMode) && typeof enterWagerPhase==='function'){ enterWagerPhase(); } else { nextTurn(); }
 }
 let wagerTimer=null, wagerLeft=15, playerReady=false, botReady=false, wagerDone=false, raisedThisPhase=false;
 let pendingBotRaise=0;   // a rival raise proposal awaiting YOUR agreement (0 = none)
@@ -7654,9 +7654,12 @@ function deckTab(t){
 }
 
 // ══ DECK PRESETS (saved decks) ══
-const BLACKWING_PRESET = ['Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Bixie Bee'];   // built-in Black Wings banish deck
+const BLACKWING_PRESET = ['Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Bixie Bee'];   // Black Wings — banish/discard
+const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ossuary Titan','Ghorruk Skullbrand','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Uso Oso',"Uso Oso's Skeletal Summons",'Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','Signal Diviner','The Regenerating Horror','Melanie','Heir of Kaiga'];   // The Deathless — Death-Remnant stack + draw
+const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Moro'];   // The Warpath — early champ + WC recycle + kill escalation
+const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte',"Hoarder's Gambit",'The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Ella Ballora',"Web-Weaver's Return",'The Black Ledger','Signal Diviner','Melanie','Heir of Kaiga','Faye Quicksilver','Chieftain Reyva Vosh'];   // The Broodswarm — hand-size draw + power
 let deckPresets = lsGet('sf_presets', {});
-if(!deckPresets['blackwing'] && !lsGet('sf_bw_seeded',0)){ deckPresets['blackwing'] = BLACKWING_PRESET.slice(); lsSet('sf_presets', deckPresets); lsSet('sf_bw_seeded',1); }
+(function(){ var _seed={blackwing:BLACKWING_PRESET, deathless:DEATHLESS_PRESET, warpath:WARPATH_PRESET, broodswarm:BROODSWARM_PRESET}; var _ch=false; Object.keys(_seed).forEach(function(k){ if(!deckPresets[k] && !lsGet('sf_seed_'+k,0)){ deckPresets[k]=_seed[k].slice(); lsSet('sf_seed_'+k,1); _ch=true; } }); if(!lsGet('sf_bw_seeded',0)) lsSet('sf_bw_seeded',1); if(_ch) lsSet('sf_presets', deckPresets); })();
 function refreshPresets(){
   lsSet('sf_presets', deckPresets);
   const wrap = document.getElementById('preset-list'); if(!wrap) return;
@@ -8536,7 +8539,7 @@ function rankedFindMatch(){
   setTimeout(function(){
     const q2=document.getElementById('ranked-queue');
     if(q2) q2.innerHTML='<div class="rq-searching"><div class="rq-found">✓ Match found — '+chosen.name+'</div><div class="rq-sub">'+chosen.arch+' · Difficulty '+chosen.diff+'/4 · entering ranked duel…</div></div>';
-    setTimeout(function(){ selectedBot=chosen.id; startMatch(); rankedMode=true; }, 950);
+    setTimeout(function(){ selectedBot=chosen.id; startMatch(); rankedMode=true; if(typeof updateStake==='function') updateStake(); }, 950);
   }, 1600 + Math.floor(Math.random()*900));
 }
 // ══ MASTERY — per-card progression to Lv 25, rarity-gated reward ladder, fueled by Ascension bond ══
