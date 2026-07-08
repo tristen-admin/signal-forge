@@ -4114,7 +4114,7 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   document.getElementById('commit-btn').style.display = 'none';
   document.getElementById('select-hint').textContent = 'Click a card to enter the Select phase';
   buildHand();
-  startDecisionClock();
+  startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:30);   // casual = 30s round timer; ranked keeps 40
 }
 
 function tangeSurgeReady(c){ return !!c && c.name==='Tange Sazen' && typeof skullchainKills!=='undefined' && skullchainKills>0 && typeof playerScore!=='undefined' && playerScore[1]>=3; }
