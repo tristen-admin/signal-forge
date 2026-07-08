@@ -3242,16 +3242,16 @@ const DECK_POOL = [
   {name:'Rook',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Scout: on commit, banish the top card of your deck, then +1 power for every card in your banish zone.'},
   {name:'Falk',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Dive: on commit, +2 power for every card in your banish zone.'},
   {name:'Sable',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Quartermaster: as a support (Called), banish a card from your hand and give your Fighter +5.'},
-  {name:'Bannerlord Cassian',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rally 3: on commit, +3 power for each ally you have — your called supports this duel and every card in your Winners Circle.'},
-  {name:'Ironsworn Vanguard',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rally 2: +2 power for each of your allies (supports called this duel + your Winners Circle).'},
-  {name:'Warden of the Wall',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rally 2: +2 power per ally. A wall is only as strong as the line beside it.'},
-  {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rally 2: +2 per ally. As a support (Called), give your Fighter +2.'},
+  {name:'Bannerlord Cassian',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 5: on commit, +5 power for each 1-cost ally — your 1-cost supports this duel plus every 1-cost card in your Winners Circle. The banner of the cheap and the many.'},
+  {name:'Ironsworn Vanguard',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 power per 1-cost ally (1-cost supports this duel + 1-cost cards in your Winners Circle).'},
+  {name:'Warden of the Wall',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. A wall is only as strong as the line beside it.'},
+  {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.'},
   {name:'Muster-Sergeant Bryn',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), give your Fighter +1 for every card in your Winners Circle.'},
-  {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rally 2: +2 power for each of your allies.'},
-  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rally 1: +1 power for each of your allies.'},
+  {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
+  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
   {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the banner lifts the whole line.'},
   {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2.'},
-  {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rally 1: +1 power for each of your allies. Weak alone, unbroken together.'},
+  {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 per 1-cost ally. Weak alone, unbroken together.'},
   
   {name:'Skittering Drone',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: on commit, +1 power for each card in your hand.'},
   {name:'Hatchling Tide',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: +4 power while your hand is full (4+ cards).'},
@@ -3353,7 +3353,8 @@ let playerScore = [1,0];
 let seasonWins=0, seasonLosses=0, seasonRewardClaimed=false;
 let charge=3/*energy start*/;                                   // energy resource, per match
 let spellHand=[];                               // Stage 2: spells you've drawn (a hand you spend)
-let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellHalveField=false, condNeutralized=false, spellDiscount=0;  // per-duel armed effects  // Rebirth season — cumulative match W/L across ranked + staked
+let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellHalveField=false, condNeutralized=false, spellDiscount=0;  // per-duel armed effects
+let spellsUsedRound=[];  // each spell castable only ONCE per round  // Rebirth season — cumulative match W/L across ranked + staked
 let hand = [...HAND_CARDS];
 let deckSize = 12;
 let winnersCircle = [];
@@ -3364,7 +3365,7 @@ let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + li
 function remnantPowSum(){ return deathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
 const REMNANT_POW = {'Arch-Grim Korrin':8,'Summoned Skull Soldiers':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk "Gnarly" Judarr':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5,'Grave-Warden':3};
 const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5};   // PROACTIVE: raise a Death Remnant on commit — no death needed
-const RALLY = {'Bannerlord Cassian':3,'Ironsworn Vanguard':2,'Warden of the Wall':2,'Oathkeeper Sena':2,'Oathbound Shield':2,'Sworn Duelist':1,'Shieldwall Recruit':1,'Sworn Pikeman':1};   // COMRADERY: +N power per ally (called supports this duel + Winners Circle)
+const RALLY = {'Bannerlord Cassian':5,'Ironsworn Vanguard':3,'Warden of the Wall':3,'Oathkeeper Sena':3,'Oathbound Shield':3,'Sworn Duelist':3,'Shieldwall Recruit':3};   // MUSTER: +N power per 1-COST ally (1-cost called supports this duel + 1-cost cards in Winners Circle)
 const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk "Gnarly" Judarr','Sister Mire','Kiba','Grave-Fed Ghoul','Bone Choirmaster','Gravecaller Voss',"Uso Oso's Skeletal Summons"];
 let lastResult = null;
 let matchCommits = 0;
@@ -3663,7 +3664,7 @@ function beginTurnAutoDraw(){
 
 // Start-of-turn opener: no draw on the opening turn, auto-draw on every turn after.
 function openTurn(){
-  charge=Math.min(duelEnergyCap(),Math.max(charge+ENERGY_REGEN,duelEnergyFloor())); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  charge=Math.min(duelEnergyCap(),Math.max(charge+ENERGY_REGEN,duelEnergyFloor())); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -4351,7 +4352,7 @@ function projectPlay(){
   var base=(f.pow||0)+(f._bo||0), spell=(banishSurge||0)+remnantPowSum()+((typeof spellSelfPow!=='undefined'&&spellSelfPow)||0);
   var called=0, oppDelta=((typeof spellOppPow!=='undefined'&&spellOppPow)||0), link=0, linkName=null;
   rearGuardIdxs.forEach(function(ix){ var sup=hand[ix]; if(!sup) return; var d=projectCalled(CALLED[sup.name], calledCtx()); called+=d[0]; oppDelta+=d[1]; var lk=fieldLink(f,sup); if(lk){ link+=lk.pow; var _tb=(CALLED[sup.name]&&CALLED[sup.name].twinBuff)||0; if(_tb) link+=_tb; linkName=linkName?linkName+', '+lk.name:lk.name; } });
-  var rally=0; if(typeof RALLY!=='undefined'&&RALLY[f.name]){ rally = RALLY[f.name]*( rearGuardIdxs.filter(function(ix){return hand[ix];}).length + ((typeof winnersCircle!=='undefined'&&winnersCircle)?winnersCircle.length:0) ); }
+  var rally=0; if(typeof RALLY!=='undefined'&&RALLY[f.name]){ rally = RALLY[f.name]*( rearGuardIdxs.filter(function(ix){return hand[ix]&&conjureCost(hand[ix])===1;}).length + ((typeof winnersCircle!=='undefined'&&winnersCircle)?winnersCircle.filter(function(c){return conjureCost(c)===1;}).length:0) ); }
   var oppShown=pendingOppCard?(pendingOppCard.pow||0):null;
   return {base:base, called:called, link:link, spell:spell, rally:rally, total:base+called+link+spell+rally, oppDelta:oppDelta, oppShown:oppShown, linkName:linkName};
 }
@@ -4418,8 +4419,8 @@ function buildSpellTray(){
   const t=document.getElementById('spell-tray-cards'); if(!t) return;
   const castable = (phase==='revealed'||phase==='selecting'||phase==='select');
   if(!spellHand.length){ t.innerHTML='<span class="tray-empty">No spells in hand \u2014 lose a round to draw one.</span>'; return; }
-  t.innerHTML = spellHand.map(function(id,i){ const s=ENERGY_SPELLS.find(function(x){return x.id===id;}); if(!s) return ''; const cost=Math.max(0,s.cost-spellDiscount); const can=castable && charge>=cost;
-    return '<button class="spell-chip'+(can?'':' dim')+'" onclick="castSpell('+i+')"><span class="sc-top"><span class="sc-name">'+s.name+'</span><span class="sc-cost">'+cost+'\u26a1</span></span><span class="sc-fx">'+s.fx+'</span></button>';
+  t.innerHTML = spellHand.map(function(id,i){ const s=ENERGY_SPELLS.find(function(x){return x.id===id;}); if(!s) return ''; const cost=Math.max(0,s.cost-spellDiscount); const used=(typeof spellsUsedRound!=='undefined'&&spellsUsedRound.indexOf(id)>=0); const can=castable && charge>=cost && !used;
+    return '<button class="spell-chip'+(can?'':' dim')+'" onclick="castSpell('+i+')"><span class="sc-top"><span class="sc-name">'+s.name+'</span><span class="sc-cost">'+cost+'\u26a1</span></span><span class="sc-fx">'+(used?'\u2713 used this round':s.fx)+'</span></button>';
   }).join('');
 }
 function castSpell(i){
@@ -4428,6 +4429,7 @@ function castSpell(i){
   if(!(phase==='revealed'||phase==='selecting'||phase==='select')){ toast('Cast spells during your turn, before you commit.', false); return; }
   const cost=Math.max(0, s.cost - spellDiscount);
   if(charge < cost){ toast('Not enough Charge for '+s.name+' ('+cost+'\u26a1)', false); return; }
+  if(spellsUsedRound.indexOf(id)>=0){ toast(s.name+' \u2014 already cast this round.', false); return; }
   if(s.id==='recall' && !winnersCircle.length){ toast('Winners Circle empty \u2014 nothing to recall.', false); return; }
   charge -= cost;
   if(s.id==='sift'){ if(typeof drawToHand==='function') drawToHand(1); if(typeof banishFromHand==='function') banishFromHand(1); }
@@ -4439,7 +4441,8 @@ function castSpell(i){
   else if(s.id==='godhand') spellSelfPow += 10;
   else if(s.id==='sornshift'){ var _li=CONDITIONS.findIndex(function(x){return x.id==='lowest';}); if(_li>=0 && typeof revealCondition==='function'){ revealCondition(_li); conditionLocked=true; } }
   spellDiscount=0;
-  /* spells are PERMANENT — a spell drawn after a lost round stays for the rest of the match (no splice) */
+  spellsUsedRound.push(id);
+  /* spells stay in hand all match (no splice), but each is castable only ONCE per round */
   renderCharge();
   toast('\u26a1 '+s.name+' \u2014 '+s.fx+' (spent)', true);
 }
@@ -5753,8 +5756,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
   }
   // ── RALLY: comradery — bonus power per ally (supports this duel + Winners Circle) ──
   if(typeof RALLY!=='undefined'){
-    if(RALLY[pc.name]){ var _pac=(rearGuards?rearGuards.filter(Boolean).length:0)+((typeof winnersCircle!=='undefined'&&winnersCircle)?winnersCircle.length:0); var _prb=RALLY[pc.name]*_pac; if(_prb>0){ playerPow+=_prb; abilLog.push('🤝 Rally — '+pc.name+': +'+_prb+' ('+_pac+' all'+(_pac===1?'y':'ies')+' × '+RALLY[pc.name]+')'); } }
-    if(RALLY[oc.name]){ var _oac=((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0)+((typeof oppWonBot!=='undefined'&&oppWonBot&&oppWonBot.size)?oppWonBot.size:0); var _orb=RALLY[oc.name]*_oac; if(_orb>0){ oppPow+=_orb; abilLog.push('🤝 Opp Rally — '+oc.name+': +'+_orb); } }
+    if(RALLY[pc.name]){ var _pac=(rearGuards?rearGuards.filter(function(c){return c&&conjureCost(c)===1;}).length:0)+((typeof winnersCircle!=='undefined'&&winnersCircle)?winnersCircle.filter(function(c){return conjureCost(c)===1;}).length:0); var _prb=RALLY[pc.name]*_pac; if(_prb>0){ playerPow+=_prb; abilLog.push('🤝 Muster — '+pc.name+': +'+_prb+' ('+_pac+' one-cost all'+(_pac===1?'y':'ies')+' × '+RALLY[pc.name]+')'); } }
+    if(RALLY[oc.name]){ var _oac=((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(function(c){return c&&conjureCost(c)===1;}).length:0)+((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot).filter(function(nm){var _c=(typeof OPP_CARDS!=='undefined'?OPP_CARDS.find(function(x){return x.name===nm;}):null)||((typeof COLLECTION!=='undefined'&&COLLECTION)?COLLECTION.find(function(x){return x.name===nm&&!x.uid;}):null); return _c&&conjureCost(_c)===1;}).length:0); var _orb=RALLY[oc.name]*_oac; if(_orb>0){ oppPow+=_orb; abilLog.push('🤝 Opp Muster — '+oc.name+': +'+_orb); } }
   }
   // ── LIVING CARD TRAITS — ONE conditional trait per card (fires only in-context) ──
   let bloodthirstyActive=false, untouchableActive=false;
@@ -9814,7 +9817,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   banishSurge=0; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false;
-  charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellDiscount=0; if(typeof renderCharge==='function') renderCharge();
+  charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
