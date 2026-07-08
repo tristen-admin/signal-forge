@@ -4988,6 +4988,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
       if(t){ t.classList.remove('rc-quake'); void t.offsetWidth; t.classList.add('rc-quake'); var _os=t.style.boxShadow, _oz=t.style.zIndex; t.style.transition='box-shadow .18s ease'; t.style.boxShadow='0 0 30px 8px rgba(245,201,92,.9)'; t.style.zIndex='45'; setTimeout(function(){ if(t){ t.classList.remove('rc-quake'); t.style.boxShadow=_os||''; t.style.zIndex=_oz||''; } }, 1050); }
     }
     function clash(){
+      try{ if(typeof cardVFXKind==='function'&&typeof playSkillVFX==='function'){ var _mk=cardVFXKind(pc); if(_mk) playSkillVFX(_mk, document.getElementById('rc-card-me')); var _ok=cardVFXKind(oc); if(_ok) playSkillVFX(_ok, document.getElementById('rc-card-opp')); } }catch(e){}
       var cm=document.getElementById('rc-card-me'), co=document.getElementById('rc-card-opp');
       if(cm) cm.classList.add('rc-clash'); if(co) co.classList.add('rc-clash');
       ['player-rear','player-rear2','opp-rear','opp-rear2'].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.add('rc-dim'); });
@@ -5030,6 +5031,20 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     })(); }, HOLD);
   }catch(e){ done(); }
 }
+;/* ===== SKILL VFX — per-element combat overlays (transparent looping pixel-art GIFs) ===== */
+const SKILL_VFX = { lightning: [
+'assets/img/3de6ca26ba25.gif',
+'assets/img/da372010e934.gif',
+'assets/img/c7784f36a8f0.gif',
+'assets/img/d6ad937fbba3.gif',
+'assets/img/14b2723b583d.gif',
+'assets/img/90a279612255.gif'
+] };
+const CARD_STYLE = { 'Veyra Stormcaller':'lightning' };   /* owner populates: cardName -> element/style; heuristic fallback below */
+function cardVFXKind(c){ if(!c) return null; var n=c.name||''; if(typeof CARD_STYLE!=='undefined'&&CARD_STYLE[n]) return CARD_STYLE[n]; var t=((c.abil||'')+' '+n).toLowerCase(); if(/lightning|storm|volt|thunder|tempest|spark/.test(t)) return 'lightning'; return null; }
+function playSkillVFX(kind, targetEl, opts){ try{ var set=SKILL_VFX[kind]; if(!set||!set.length) return; opts=opts||{}; var src=set[Math.floor(Math.random()*set.length)]; if(typeof targetEl==='string') targetEl=document.querySelector(targetEl); if(!targetEl) targetEl=document.querySelector('#v-turn .field')||document.body; var img=document.createElement('img'); img.src=src; img.className='skill-vfx'; img.style.cssText='position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale('+(opts.scale||2.6)+');image-rendering:pixelated;pointer-events:none;z-index:60;filter:drop-shadow(0 0 9px rgba(120,180,255,.75))'; if(getComputedStyle(targetEl).position==='static') targetEl.style.position='relative'; targetEl.appendChild(img); setTimeout(function(){ img.style.transition='opacity .3s'; img.style.opacity='0'; setTimeout(function(){ if(img.parentNode) img.parentNode.removeChild(img); }, 320); }, opts.hold||1000); }catch(e){} }
+window.playSkillVFX=playSkillVFX; window.previewVFX=function(k){ playSkillVFX(k||'lightning', document.querySelector('#v-turn .field')||document.body, {scale:3.2,hold:1400}); };
+
 // Keep card videos looping — browsers pause/defer muted video-only media (esp. heavier clips); re-play any paused, ready, visible card video.
 setInterval(function(){ try{ var _drw=document.getElementById('card-drawer'); var _drwOpen=_drw&&_drw.classList.contains('open'); document.querySelectorAll('video.field-vid,video.bc-vid,video.fc-vid').forEach(function(v){ if(_drwOpen && !_drw.contains(v)){ try{ if(!v.paused) v.pause(); }catch(e){} return; } if(v.paused && !v.ended && v.readyState>=2 && v.offsetParent!==null){ if(v._stallT!==undefined && Math.abs(v.currentTime-v._stallT)<0.01){ try{ v.currentTime=(v.currentTime+0.25)%((v.duration&&isFinite(v.duration))?v.duration:9); }catch(e){} } v._stallT=v.currentTime; v.muted=true; var p=v.play(); if(p&&p.catch)p.catch(function(){}); } else { v._stallT=undefined; } }); }catch(e){} }, 800);
 // Ability-activation cinematic — plays a card's signature clip once, centered, then fades.
