@@ -7599,7 +7599,7 @@ const DRAW_PER_TURN = 1;   // cards drawn per turn — 1/turn, symmetric w/ bot 
 const DECK_SIZE = 16;
 const MIN_DECK = 12;   // decks are 12–16 (min 12 to play, max 16)
 // Curated 10-card starter deck (used when no full custom deck is built)
-const DEFAULT_DECK = ['Kotei','Lagertha Waltz','Kiana','Melanie','Arch-Grim Korrin','Darwin','Ruffius Rufeldro','King Joris','Ahdorah Khaan, Determined Soul','Cletus Gwyndull','Bram the Bulwark','Old Garrick'];
+const DEFAULT_DECK = ['Kotei','Lagertha Waltz','Kiana','Zerith Var','Arch-Grim Korrin','Darwin','Ruffius Rufeldro','King Joris','Ahdorah Khaan, Determined Soul','Cletus Gwyndull','Bram the Bulwark','Old Garrick'];
 
 // Fisher–Yates shuffle in place
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
@@ -7770,7 +7770,7 @@ const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess K
 const DEATHLESS_PRESET = ['Arch-Grim Korrin','Summoned Skull Soldiers','Ghorruk "Gnarly" Judarr','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Uso Oso',"Uso Oso's Skeletal Summons",'Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','Signal Diviner','The Regenerating Horror','Gravecaller Voss','Melanie'];   // The Deathless — Death-Remnant stack + draw
 const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Moro'];   // The Warpath — early champ + WC recycle + kill escalation
 const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte',"Hoarder's Gambit",'The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'The Black Ledger','Signal Diviner','Melanie','Heir of Kaiga','Faye Quicksilver','Chieftain Reyva Vosh'];   // The Broodswarm — hand-size draw + power
-const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Signal Diviner','Heir of Kaiga','Melanie','Faye Quicksilver','Chieftain Reyva Vosh','The Black Ledger'];   // The Ironsworn — strength in numbers (Rally: +power per ally)
+const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Signal Diviner','Heir of Kaiga','Melanie','Faye Quicksilver','Chieftain Reyva Vosh','The Black Ledger'];   // The Ironsworn — strength in numbers (Muster: +power per 1-cost ally)
 let deckPresets = lsGet('sf_presets', {});
 (function(){ var _seed={blackwing:BLACKWING_PRESET, deathless:DEATHLESS_PRESET, warpath:WARPATH_PRESET, broodswarm:BROODSWARM_PRESET, ironsworn:IRONSWORN_PRESET}; var _ch=false; Object.keys(_seed).forEach(function(k){ if(!deckPresets[k] && !lsGet('sf_seed_'+k,0)){ deckPresets[k]=_seed[k].slice(); lsSet('sf_seed_'+k,1); _ch=true; } }); if(!lsGet('sf_bw_seeded',0)) lsSet('sf_bw_seeded',1); if(!lsGet('sf_seed_deathless_v2',0)){ deckPresets.deathless = DEATHLESS_PRESET.slice(); lsSet('sf_seed_deathless_v2',1); _ch=true; } if(_ch) lsSet('sf_presets', deckPresets); })();
 ;/* PICK YOUR PATH - starter archetype chooser (onboarding) */
@@ -9862,6 +9862,29 @@ loadState();
 applyAscendantFrame();
 if(!_hadSave && typeof startNewPlayer==='function') startNewPlayer();
 try{ if(localStorage.getItem('sf_deckfill16')!=='1'){ localStorage.setItem('sf_deckfill16','1'); if(typeof fillDeckToCap==='function' && fillDeckToCap()>0 && typeof saveState==='function') saveState(); } }catch(e){}  /* one-time: top up saved decks to the 16 cap (additive — only adds owned cards you already have) */
+/* ── 2026-07-07 deck migration: rename renamed cards + drop cut cards across owned/records/cosmetics/decks, and re-seed the 5 archetype presets ── */
+try{ if(localStorage.getItem('sf_deckmigrate_0707')!=='1'){
+  var _REN={'Voidmaw the Unmaker':'Young Darwin, Predetermined Dictator','Sunforged Colossus':'Courtroom Colossus','Veyra Stormcaller':'Fifth Frequency Stormcaller','Ossian Drell':'Black Wings, Ossian Drell',"Keawe, A Legend Reborn":"Legend Reborn, Keawe Kel'rua",'Kleydson':'Conduit of Chaos, Kleydson','Ossuary Titan':'Summoned Skull Soldiers','Ella Ballora':'Envoy of Tyrants, Ella Ballora','Ghorruk Skullbrand':'Ghorruk "Gnarly" Judarr'};
+  var _CUT={'Pit Thrall':1,'Brood-Tender':1,'Mirror Shade':1,'Sworn Pikeman':1,'Talon-Trooper':1};
+  var _mk=function(k){ return _REN[k]||k; };
+  var _mapKeys=function(obj){ if(!obj||typeof obj!=='object') return obj; var out={}; Object.keys(obj).forEach(function(k){ if(_CUT[k]) return; out[_mk(k)]=obj[k]; }); return out; };
+  if(typeof ownedCopies!=='undefined') ownedCopies=_mapKeys(ownedCopies);
+  if(typeof freshCopies!=='undefined') freshCopies=_mapKeys(freshCopies);
+  if(typeof cardRecords!=='undefined') cardRecords=_mapKeys(cardRecords);
+  if(typeof cardFoils!=='undefined') cardFoils=_mapKeys(cardFoils);
+  if(typeof cardFoilMax!=='undefined') cardFoilMax=_mapKeys(cardFoilMax);
+  if(typeof cardFrames!=='undefined') cardFrames=_mapKeys(cardFrames);
+  if(typeof activeDeck!=='undefined' && activeDeck && activeDeck.forEach){ var _nd=[]; activeDeck.forEach(function(k){ if(!_CUT[k]) _nd.push(_mk(k)); }); activeDeck=new Set(_nd); }
+  try{ var _dp=lsGet('sf_presets',{})||{}; Object.keys(_dp).forEach(function(pk){ if(Array.isArray(_dp[pk])){ var _o=[]; _dp[pk].forEach(function(n){ if(!_CUT[n]) _o.push(_mk(n)); }); _dp[pk]=_o; } });
+    _dp.blackwing=BLACKWING_PRESET.slice(); _dp.deathless=DEATHLESS_PRESET.slice(); _dp.warpath=WARPATH_PRESET.slice(); _dp.broodswarm=BROODSWARM_PRESET.slice(); _dp.ironsworn=IRONSWORN_PRESET.slice();
+    if(typeof deckPresets!=='undefined') deckPresets=_dp; lsSet('sf_presets',_dp);
+  }catch(e){}
+  localStorage.setItem('sf_deckmigrate_0707','1');
+  if(typeof saveState==='function') saveState();
+  if(typeof buildDeckBuilder==='function') buildDeckBuilder();
+  if(typeof refreshPresets==='function') refreshPresets();
+  if(typeof buildVault==='function') buildVault();
+}}catch(e){}
 try{ localStorage.setItem('sf_clearrec_v1','1'); }catch(e){}  /* removed one-time cardRecords wipe — it was resetting legit records on reload; playtest tracks persistently */
 try{ localStorage.setItem('sf_grant50k_v1','1'); }catch(e){}  /* playtest: no auto 50k — new player uses startNewPlayer's 5,000 */
 try{ localStorage.setItem('sf_grantcards_v1','1'); }catch(e){}  /* playtest: no auto grant-all — starter is the 15-card deck; rest via shop */
