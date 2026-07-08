@@ -3189,14 +3189,14 @@ const MATCH_STEPS = [
 
 // ── DECK POOL ──
 const DECK_POOL = [
-  {name:"Kaelthar the Ascendant",pow:19,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Ascendant: +6 while you hold the match lead — a finisher for a winning board, dead weight when behind."},
-  {name:"Voidmaw the Unmaker",pow:18,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Devastation: +4 on commit, and the opponent takes −3 if their card is Pristine (0 deaths)."},
-  {name:"Sunforged Colossus",pow:17,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Colossus: +3, and +5 more from the 3rd commit onward — a late-game bomb."},
-  {name:"Kessuae, Tide of Ruin",pow:17,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Reckoning: +7 while you are behind in the match — a comeback finisher."},
+  {name:"Kaelthar the Ascendant",pow:20,cost:3,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Ascendant: on commit, −20 while you hold the match lead, +20 while you are behind. Your Support effects do not fire when he is conjured."},
+  {name:"Young Darwin, Predetermined Dictator",pow:14,cost:2,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"On commit: +4, and the opponent takes −3 if their card is Pristine (0 deaths)."},
+  {name:"Courtroom Colossus",pow:15,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Colossus: +3, and +5 more from the 3rd commit onward — a late-game bomb."},
+  {name:"Kessuae, Tide of Ruin",pow:17,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: while you are behind, this destroys the active location (nullifies it). +5 if both support slots are full."},
   {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Purity: +5 while this card is Pristine (0 deaths)."},
-  {name:"Kravyn the Collector",pow:17,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Kill Escalation: +5 at 20+ career kills."},
-  {name:"Veyra Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Elemental Flurry: +3, and +4 more under a chaos condition."},
-  {name:"Ghorruk Skullbrand",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"resolution",abil:"Death Remnant: when he falls he holds the field, +6 to your committed cards until an enemy is killed."},
+  {name:"Kravyn the Collector",pow:17,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +3 at 10+ career kills. Kill Escalation: +5 at 20+ career kills."},
+  {name:"Fifth Frequency Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Elemental Flurry: +3, +4 more with 5+ cards in hand, +7 more with 4+ cards in your banish zone."},
+  {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +1 power for every card remaining in your deck. Death Remnant: when he falls he holds the field, +8 to your committed cards until an enemy is killed."},
   {name:"Ilma the Patient",pow:13,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Late Bloomer: +5 from the 3rd commit onward."},
   {name:"Old Garrick",pow:12,kills:0,deaths:0,rarity:"common",timing:"on",abil:"Grizzled Veteran: +5 at 20+ kills; +5 more at 8+ deaths."},
   {name:"Faye Quicksilver",pow:14,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Snowball: +2 for every round you have already won this match."},
@@ -3211,14 +3211,14 @@ const DECK_POOL = [
   {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: if 3rd+ commit this match, +5 power. Returns from Winners Circle: banish from hand to curse opponent\'s next committed card −10 power.'},
   {name:'Hanse Waltz',pow:13,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.'},
   // Rares
-  {name:'Arch-Grim Korrin',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Death Remnant: when he falls, +8 to your cards until an enemy dies. On commit: draw 1 for each Remnant you hold — the Unburied commands the dead."},
+  {name:'Arch-Grim Korrin',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: +4 per Death Remnant on the field, and draw 1 for each Remnant you hold. Death Remnant: when he falls, +8 to your cards until an enemy dies — the Unburied commands the dead."},
   {name:'Cletus Gwyndull',pow:15,kills:0,deaths:0,rarity:'rare',timing:'pre',abil:'Pre-commit: lock the active condition this turn — opponent cannot shift it.'},
   {name:'Val Kreigh',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if this is the 1st duel of the match, +6 power.'},
   {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'genesis',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
   // Ultras
   {name:'Lagertha Waltz',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 if you lost your last duel. -2 if you won your last duel.'},
   {name:'Valcarion',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if there is a card in your banish zone, add it to your hand — or call it to an open support circle.'},
-  {name:'Ella Ballora',pow:14,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Bloodrage: on commit +3 power, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
+  {name:'Envoy of Tyrants, Ella Ballora',pow:14,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Bloodrage: on commit +3 with 3+ cards in hand, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
   {name:'Kiana',pow:15,cost:2,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Order Initiate: on commit, banish a card from your hand, then +6 power.'},
   // ── KOTEI Series 1 Expansion ──
   {name:'Melanie',pow:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'No ability. Keawe\'s mother — a civilian, not a fighter. At 1 power she quietly wins under Lowest Wins.'},
@@ -3231,13 +3231,13 @@ const DECK_POOL = [
   {name:'Chieftain Reyva Vosh',pow:14,kills:0,deaths:0,rarity:'uncommon',timing:'on',abil:'Warriors in Reserve: on commit, +2 power for each card in your Winners Circle — she commits her hold\'s warriors once the stakes are undeniable.'},
   {name:'Forgemask',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Reforged: on commit, +3 power, and +4 more if you lost your last duel — the forge tempers what breaks.'},
   {name:'Lagertha Waltz, Wrathful Transformation',pow:18,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Alpha\'s Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack\'s fury peaks in mourning.'},
-  {name:'The Bronzed Beast, Hanse Waltz',pow:20,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 power while you are behind in the match — rage completes the transformation.'},
-  {name:'La "La" Ballora, the Broodqueen',pow:15,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw a card — her brood is her hand.'},
+  {name:'The Bronzed Beast, Hanse Waltz',pow:20,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 while behind — if you were behind when you kill an opponent fighter, this returns to your hand at its original power.'},
+  {name:'La "La" Ballora, the Broodqueen',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw 2 cards — her brood is her hand.'},
   {name:'Ourevos, the Golden Dragon',pow:24,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.'},
-  {name:'Keawe, A Legend Reborn',pow:8,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 18 or higher from your deck to your hand. Called (support): snipe the opposing support in the mirrored slot — it is removed before it can fire.'},
+  {name:'Legend Reborn, Keawe Kel\'rua',pow:8,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 15 or higher from your deck to your hand. Called (support): snipe the opposing support in the mirrored slot — it is removed before it can fire.'},
   {name:'Rhaess Korvain',pow:13,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish the top card of your deck, then +2 power for every card in your banish zone.'},
-  {name:'Ossian Drell',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone.'},
+  {name:'Black Wings, Ossian Drell',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone.'},
   {name:'Corvus',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Raven's Feast: on commit, banish the top 2 cards of your deck, then +2 power for every card in your banish zone."},
   {name:'Wren',pow:9,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wingmate: on commit, return a banished card to your hand, then +4 power — Wren never leaves one behind.'},
   {name:'Rook',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Scout: on commit, banish the top card of your deck, then +1 power for every card in your banish zone.'},
@@ -3278,7 +3278,7 @@ const DECK_POOL = [
   {name:'Heir of Kaiga',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast.'},
   {name:'Josef',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Master Tailor: on commit, +4 power once he has taken the measure of the fight (any commit after your first).'},
   {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, +6 to your committed cards until an opponent\'s card is killed.'},
-  {name:'Kleydson',pow:11,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Lesser Chaos (once per match): warp every spell in your deck into Draw Surge (2⚡ draw 3, banish 1) and Godhand (1⚡ your card +10) — a splashable echo of Anorith."},
+  {name:'Conduit of Chaos, Kleydson',pow:11,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Lesser Chaos (once per match): warp every spell in your deck into Draw Surge (2⚡ draw 3, banish 1) and Godhand (1⚡ your card +10) — a splashable echo of Anorith."},
   // ── THE BLACK WINGS (banish to fuel, reclaim & recur) ──
   {name:'Grave-Tithe Acolyte',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: banish the top card of your deck, then +5 power.'},
   {name:'Ashen Reclaimer',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: return a banished card to your hand with +3 power.'},
@@ -3290,7 +3290,7 @@ const DECK_POOL = [
   {name:'Bone Choirmaster',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +5 to your cards until an enemy dies. On a win, draw a card.'},
   {name:'Grave-Fed Ghoul',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Death Remnant: when it falls, +4 to your cards until an enemy dies.'},
   {name:'Marrow Priest',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Support: your Fighter +3; if a Remnant is on the field, draw a card.'},
-  {name:'Ossuary Titan',pow:15,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Death Remnant: when it falls, +7 to your cards until an enemy dies. On commit: +3 power for each Remnant you hold.'},
+  {name:'Summoned Skull Soldiers',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +7 to your cards until an enemy dies. On commit: +3 power for each Remnant you hold.'},
   {name:'Pale Gravedigger',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: raise a +3 Death Remnant, then draw a card while you hold a Remnant.'},
   {name:'Gravecaller Voss',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish a card from your hand to raise a Death Remnant worth +5 — no death required. Called as a support: lingers as a +5 Remnant.'},
   {name:'Widow of the Vigil',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you have a Remnant, draw 2; otherwise +3 power.'},
@@ -3298,7 +3298,7 @@ const DECK_POOL = [
   {name:'Bloodwake Duelist',pow:11,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: on commit, +2 power for every kill you have earned this match.'},
   {name:'Warpath Vanguard',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power on the 1st or 2nd duel of the match.'},
   {name:'Skullchain Reaver',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power per kill earned this match; when it wins, it returns to your hand instead of the Winners Circle.'},
-  {name:'Trophy-Hunter Kessa',pow:15,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'On commit: +2 power for every card in your Winners Circle.'},
+  {name:'Trophy-Hunter Kessa',pow:15,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'On commit: +2 power for every card in BOTH players Winners Circle.'},
   {name:'First-Blood Squire',pow:12,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +4 power on the 1st duel of the match only.'},
   {name:'The Undefeated',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every duel you have already won this match.'},
   {name:"Kravyn's Protege",pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +3 power once this card has earned 6 or more career kills.'},
@@ -3363,10 +3363,10 @@ let banishSurge = 0;
 let divinerBonusNext = 0;
 let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + lingering supports); each {name,pow}; persists until an enemy card is killed
 function remnantPowSum(){ return deathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
-const REMNANT_POW = {'Arch-Grim Korrin':8,'Ossuary Titan':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk Skullbrand':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5,'Grave-Warden':3};
+const REMNANT_POW = {'Arch-Grim Korrin':8,'Summoned Skull Soldiers':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk "Gnarly" Judarr':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5,'Grave-Warden':3};
 const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5};   // PROACTIVE: raise a Death Remnant on commit — no death needed
 const RALLY = {'Bannerlord Cassian':3,'Ironsworn Vanguard':2,'Warden of the Wall':2,'Oathkeeper Sena':2,'Oathbound Shield':2,'Sworn Duelist':1,'Shieldwall Recruit':1,'Sworn Pikeman':1};   // COMRADERY: +N power per ally (called supports this duel + Winners Circle)
-const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk Skullbrand','Sister Mire','Kiba','Grave-Fed Ghoul','Bone Choirmaster','Gravecaller Voss',"Uso Oso's Skeletal Summons"];
+const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk "Gnarly" Judarr','Sister Mire','Kiba','Grave-Fed Ghoul','Bone Choirmaster','Gravecaller Voss',"Uso Oso's Skeletal Summons"];
 let lastResult = null;
 let matchCommits = 0;
 let skullchainKills = 0;
@@ -3400,8 +3400,8 @@ const OPP_CARDS = [
   {name:"Mordezh, Blood Prophet",pow:15,kills:0,deaths:0,rarity:"ultra",abil:"Bloodrage: +5 while behind; +2 if you lost last."},
   {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:"ultra",abil:"Purity: +5 while this card is Pristine (0 deaths)."},
   {name:"Kravyn the Collector",pow:17,kills:0,deaths:0,rarity:"ultra",abil:"Kill Escalation: +5 at 20+ career kills."},
-  {name:"Veyra Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Elemental Flurry: +3, and +4 more under a chaos condition."},
-  {name:"Ghorruk Skullbrand",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Death Remnant: when he falls he holds the field, +6 to your committed cards until an enemy is killed."},
+  {name:"Fifth Frequency Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Elemental Flurry: +3, and +4 more under a chaos condition."},
+  {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Death Remnant: when he falls he holds the field, +6 to your committed cards until an enemy is killed."},
   {name:"Sable the Unseen",pow:14,kills:0,deaths:0,rarity:"ultra",abil:"On commit: a Pristine opponent is drained — opponent −4."},
   {name:"Torvald Ninefingers",pow:15,kills:0,deaths:0,rarity:"ultra",abil:"Last Stand. On commit: +3 with 2 or fewer cards in hand."},
   {name:"Kessa Brightblade",pow:13,kills:0,deaths:0,rarity:"rare",abil:"On commit: +4 vs a Pristine opponent."},
@@ -3431,7 +3431,7 @@ const OPP_CARDS = [
   {name:"Calla Thorn",pow:7,kills:0,deaths:0,rarity:"common",abil:"Last Stand — a narrow loss becomes a tie."},
   {name:"Grum the Steady",pow:11,kills:0,deaths:0,rarity:"common",abil:"Giant-Killer: +4 if the opponent has more career kills."},
   {name:'Lagertha Waltz',pow:14,kills:0,deaths:0,rarity:'rare',abil:'On commit: +2 if lost last, -2 if won last.'},
-  {name:'Kleydson',pow:4,kills:0,deaths:0,rarity:'common',abil:'No ability.'},
+  {name:'Conduit of Chaos, Kleydson',pow:4,kills:0,deaths:0,rarity:'common',abil:'No ability.'},
   {name:'Arch-Grim Korrin',pow:14,kills:0,deaths:0,rarity:'rare',abil:'On commit: +6 if opponent has fewer career kills.'},
   {name:'Anorith Keeling',pow:13,kills:0,deaths:0,rarity:'genesis',abil:'Chaos Deity — chaos incarnate.'},
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'genesis',abil:'On commit: +3 if 0-death OR lost last; repeats if won a duel.'},
@@ -3442,7 +3442,7 @@ const OPP_CARDS = [
   {name:'Ahdorah Khaan, Determined Soul',pow:17,kills:0,deaths:0,rarity:'genesis',abil:'On commit: underdog hand bonus.'},
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',abil:'On commit: comeback double.'},
   {name:'Valcarion',pow:15,kills:0,deaths:0,rarity:'rare',abil:'On commit: reclaim a banished card to hand or support.'},
-  {name:'Ella Ballora',pow:14,kills:0,deaths:0,rarity:'ultra',abil:'Bloodrage: +3, and +3 more when wounded.'},
+  {name:'Envoy of Tyrants, Ella Ballora',pow:14,kills:0,deaths:0,rarity:'ultra',abil:'Bloodrage: +3, and +3 more when wounded.'},
   {name:'Kiana',pow:15,kills:0,deaths:0,rarity:'uncommon',abil:'Elemental Flurry: +3, +4 more in chaos conditions.'},
 ];
 
@@ -4195,11 +4195,11 @@ const CARD_RACE = {
   // Revenant (undead)
   'Revenant':'Revenant','Revenant Mercy':'Revenant','The Regenerating Horror':'Revenant','Hollow Ravager':'Revenant','Twisted Specimen':'Revenant','Nyx, Devourer of Legends':'Revenant','Sythe Marrow':'Revenant','Soul Harvest':'Revenant','Grave Chill':'Revenant','Death Remnant':'Revenant','Phantom Cut':'Revenant','The Hollow King':'Revenant',
   // Ork
-  'Ghorruk Skullbrand':'Uroth','Doru Blacktooth':'Uroth','Arch-Grim Korrin':'Uroth','Ruven Ashwalker':'Uroth','Skullchain Strike':'Uroth',
+  'Ghorruk "Gnarly" Judarr':'Uroth','Doru Blacktooth':'Uroth','Arch-Grim Korrin':'Uroth','Ruven Ashwalker':'Uroth','Skullchain Strike':'Uroth',
   // Celestial
-  'Valkyrie':'Celestial','Valkyrie Rush':'Celestial','Elowen Dawnspear':'Celestial','Kessa Brightblade':'Celestial','Sister Mire':'Celestial','Aurelion Prime':'Celestial','Stormcaller Prime':'Celestial','Veyra Stormcaller':'Celestial','Rallying Cry':'Celestial','Sovereign':'Celestial','Sovereign Charge':'Celestial','Crownfall':'Celestial',
+  'Valkyrie':'Celestial','Valkyrie Rush':'Celestial','Elowen Dawnspear':'Celestial','Kessa Brightblade':'Celestial','Sister Mire':'Celestial','Aurelion Prime':'Celestial','Stormcaller Prime':'Celestial','Fifth Frequency Stormcaller':'Celestial','Rallying Cry':'Celestial','Sovereign':'Celestial','Sovereign Charge':'Celestial','Crownfall':'Celestial',
   // Construct
-  'Forgemask':'Construct','Anvil':'Construct','Bulwark':'Construct','Sunforged Colossus':'Construct','Aegis Protocol':'Construct','Reforge':'Construct','Shield Wall':'Construct','Shieldwall':'Construct','Shield Break':'Construct','Golden Maw':'Construct','Kingsmourne':'Construct',
+  'Forgemask':'Construct','Anvil':'Construct','Bulwark':'Construct','Courtroom Colossus':'Construct','Aegis Protocol':'Construct','Reforge':'Construct','Shield Wall':'Construct','Shieldwall':'Construct','Shield Break':'Construct','Golden Maw':'Construct','Kingsmourne':'Construct',
   // Beast
   'Bixie Bee':'Beast','Anorith Keeling':'Beast','Little Pox':'Beast','Broodmother':'Beast','Mip':'Beast',
   // Spirit
@@ -4207,7 +4207,7 @@ const CARD_RACE = {
   // everything else defaults to 'Human' (see raceOf)
 };
 let raceOverride = {};   // design-time per-card race edits (persisted); wins over CARD_RACE
-let NAME_OVERRIDE = {'Corvus':'Black Wings, Corvus the Raven','Ossian Drell':'Ossian Drell of the Black Wings','Arch-Grim Korrin':'Arch-Grim Korrin, the Unburied','Kiana':'Black Wings Initiate, Kiana'};  // display-name epithets (card FACE only; keys stay short to preserve links/rules/ascension refs)
+let NAME_OVERRIDE = {'Corvus':'Black Wings, Corvus the Raven','Arch-Grim Korrin':'Arch-Grim Korrin, the Unburied','Kiana':'Black Wings Initiate, Kiana'};  // display-name epithets (card FACE only; keys stay short to preserve links/rules/ascension refs)
 function dispName(nm){ return (NAME_OVERRIDE && NAME_OVERRIDE[nm]) || nm; }
 function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Human'; }
 function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.race=r; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83e\uddec Race set: '+name+' \u2192 '+r, true); }
@@ -4217,14 +4217,14 @@ function duelEnergyFloor(){ return Math.max(3, duelEnergyCap()-1); } /* guarante
 // CALLED - universal rear-guard keyword; fires ALWAYS when a support is called (no group gate).
 // Inverse-scaling: fighter cards -> simple static (+N / opp -N); low-power/support -> rich combos.
 const CALLED = {
-  "Keawe, A Legend Reborn":        {text:"snipe the opposing support in the mirrored slot", snipeSupport:true},
+  "Legend Reborn, Keawe Kel'rua":        {text:"snipe the opposing support in the mirrored slot", snipeSupport:true},
   // Support buff scales INVERSE to conjure cost: ⚡1=+5, ⚡2=+4, ⚡3=+3, ⚡4=+2 (cheap body = better support). Utility/recur/draw Calleds unchanged.
   "Kaelthar the Ascendant":        {text:"your Fighter +2", add:2},
-  "Voidmaw the Unmaker":           {text:"your Fighter +3", add:3},
-  "Sunforged Colossus":            {text:"your Fighter +3", add:3},
+  "Young Darwin, Predetermined Dictator":           {text:"your Fighter +3", add:3},
+  "Courtroom Colossus":            {text:"your Fighter +3", add:3},
   "Kessuae, Tide of Ruin":         {text:"your Fighter +3", add:3},
   "Kotei":                         {text:"your Fighter +2", add:2},
-  "Kleydson":                      {text:"your Fighter +3 · gain 1 charge", add:3, chargeGain:1},
+  "Conduit of Chaos, Kleydson":                      {text:"your Fighter +3 · gain 1 charge", add:3, chargeGain:1},
   "Lagertha Waltz":                {text:"your Fighter +3; a Waltz twin you support gains +5", add:3, twinBuff:5},
   "Hanse Waltz":                   {text:"your Fighter +5; a Waltz twin you support gains +5", add:5, twinBuff:5},
   "Kiana":                         {text:"banish a card from your hand; your Fighter +4", banishOwn:1, add:4},
@@ -4232,7 +4232,7 @@ const CALLED = {
   "Melanie":                       {text:"your Fighter +5 · draw 1", add:5, draw:1},
   "Darwin":                        {text:"your Fighter +2", add:2},
   "La \"La\" Ballora, the Broodqueen":      {text:"your Fighter +3", add:3},
-  "Ella Ballora":                  {text:"your Fighter +3", add:3},
+  "Envoy of Tyrants, Ella Ballora":                  {text:"your Fighter +3", add:3},
   "Arch-Grim Korrin":              {text:"your Fighter +3", add:3},
   "Valcarion":            {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
   "Zerith Var":                    {text:"your Fighter +2", add:2},
@@ -4262,7 +4262,7 @@ const CALLED = {
   "Old Garrick":                   {text:"your Fighter +4", add:4},
   "Keawe Kel'rua":                 {text:"your Fighter +3", add:3},
   "Rhaess Korvain":                {text:"return 1 banished card to hand", recurPlain:1},
-  "Ossian Drell":                  {text:"Black Wings — return a banished card to your hand, +2 power", recurBuff:1},
+  "Black Wings, Ossian Drell":                  {text:"Black Wings — return a banished card to your hand, +2 power", recurBuff:1},
   "Corvus":                        {text:"your Fighter +4", add:4},
   "Wren":                          {text:"return a banished card to your hand, your Fighter +3", recurPlain:1, add:3},
   "Rook":                          {text:"your Fighter +2", add:2},
@@ -4287,7 +4287,7 @@ const CALLED = {
   "Oathkeeper Sena":               {text:"your Fighter +2", add:2},
   "Muster-Sergeant Bryn":          {text:"your Fighter +1 per Winners Circle card", perWC:1, perWCcap:8},
   "Marrow Priest":                 {text:"your Fighter +3; if a Remnant is on the field, draw 1", add:3, drawIfRemnant:true},
-  "Ossuary Titan":                 {text:"your Fighter +5", add:5},
+  "Summoned Skull Soldiers":                 {text:"your Fighter +5", add:5},
   "Pale Gravedigger":              {text:"your Fighter +2; if you hold a Remnant, draw 1", add:2, drawIfRemnant:true},
   "Widow of the Vigil":            {text:"your Fighter +3 · draw 1", add:3, draw:1},
   "Bloodwake Duelist":             {text:"your Fighter +3", add:3},
@@ -4309,8 +4309,8 @@ const CALLED = {
   "Chieftain Reyva Vosh":          {text:"draw 2 cards", draw:2},
   "Kravyn the Collector":          {text:"both players banish 1 from hand; opponent −2", bothBanish:1},
   "Forgemask":                     {text:"your Fighter +3", add:3},
-  "Veyra Stormcaller":             {text:"your Fighter +3", add:3},
-  "Ghorruk Skullbrand":            {text:"return 1 banished card to hand, +2 power", recurBuff:1},
+  "Fifth Frequency Stormcaller":             {text:"your Fighter +3", add:3},
+  "Ghorruk \"Gnarly\" Judarr":            {text:"return 1 banished card to hand, +2 power", recurBuff:1},
   "Elowen Dawnspear":              {text:"your Fighter +3", add:3},
   "Bixie Bee":                     {text:"your Fighter +3", add:3},
   "Uso Oso":                       {text:"your Fighter +3", add:3},
@@ -4788,12 +4788,12 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   if(pc.name==='Arch-Grim Korrin' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(deathRemnants.length); }
   if(pc.name==='Pale Gravedigger' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(1); }
   if(pc.name==='Widow of the Vigil' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(2); }
-  if(pc.name==='Kleydson'){ spellHand=['drawsurge','godhand']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Lesser Chaos — your spells warp into Draw Surge + Godhand.', true); }
-  if(pc.name==='Tosa Envoy'){ condNeutralized=true; if(typeof toast==='function') toast('🤝 Tosa Envoy renegotiates the arena — the active location is neutralized this duel.', true); }
+  if(pc.name==='Conduit of Chaos, Kleydson'){ spellHand=['drawsurge','godhand']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Lesser Chaos — your spells warp into Draw Surge + Godhand.', true); }
+  if(pc.name==='Kessuae, Tide of Ruin' && playerScore[1] > playerScore[0]){ condNeutralized=true; } if(pc.name==='Tosa Envoy'){ condNeutralized=true; if(typeof toast==='function') toast('🤝 Tosa Envoy renegotiates the arena — the active location is neutralized this duel.', true); }
   if(pc.name==='Wren' && banishPile.length){ hand.push(banishPile.pop()); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
-  if(pc.name==='La "La" Ballora, the Broodqueen' && typeof drawToHand==='function'){ drawToHand(1); }
+  if(pc.name==='La "La" Ballora, the Broodqueen' && typeof drawToHand==='function'){ drawToHand(2); }
   if(pc.name==="Web-Weaver's Return"){ if(banishPile.length){ var _rb=banishPile.splice(0,banishPile.length); drawPile=drawPile.concat(_rb); if(typeof shuffle==='function') shuffle(drawPile); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof toast==='function') toast('🕸 Web-Weaver\'s Return \u2014 '+_rb.length+' banished cards rewoven into your deck.', true); } if(typeof drawToHand==='function') drawToHand(1); if(typeof updatePiles==='function') updatePiles(); }
-  if(pc.name==='Keawe, A Legend Reborn'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=18;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+') to your hand.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 18+ left in your deck to tutor.', false); } }
+  if(pc.name==='Legend Reborn, Keawe Kel\'rua'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=15;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+') to your hand.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 18+ left in your deck to tutor.', false); } }
   if(pc.name==='Anorith Keeling'){ spellHand=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your spells into the Chaos Trinity.', true); }
   if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
   if(pc.name==='Uso Oso' && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
@@ -5058,7 +5058,7 @@ SKILL_VFX.slash=[
 'assets/img/b0f1d9046eaa.gif',
 'assets/img/8f28fa5e461f.gif'
 ];   /* warrior/blade: 0 quick·1 heavy·2 crit·3 flurry·4 power-up/nova */
-const CARD_STYLE = { 'Veyra Stormcaller':'lightning' };   /* owner populates: cardName -> element/style; heuristic fallback below */
+const CARD_STYLE = { 'Fifth Frequency Stormcaller':'lightning' };   /* owner populates: cardName -> element/style; heuristic fallback below */
 function cardVFXKind(c){ if(!c) return null; var n=c.name||''; if(typeof CARD_STYLE!=='undefined'&&CARD_STYLE[n]) return CARD_STYLE[n]; var t=((c.abil||'')+' '+n).toLowerCase(); if(/lightning|storm|volt|thunder|tempest|spark/.test(t)) return 'lightning'; if(/blade|sword|warrior|rogue|knight|soldier|duelist|reaver|skirmish|vanguard|legion|pikeman|oathsworn|oathkeeper|shield|banner|slash|strike|steel|iron|halberd|spear|axe|champion/.test(t)) return 'slash'; return null; }
 function slashClip(card, buff, winning){ if(winning && (buff||0)>=4) return 4; if((card&&card.pow||0)>=15) return 1; if(/rogue|dagger|assassin|skirmish|duelist|bloodwake|reaver|berserk/i.test(((card&&card.name)||'')+' '+((card&&card.abil)||''))) return 3; return [0,2][Math.floor(Math.random()*2)]; }
 function playSkillVFX(kind, targetEl, opts){ try{ var set=SKILL_VFX[kind]; if(!set||!set.length) return; opts=opts||{}; var src=(opts.idx!=null && set[opts.idx])?set[opts.idx]:set[Math.floor(Math.random()*set.length)]; if(typeof targetEl==='string') targetEl=document.querySelector(targetEl); if(!targetEl) targetEl=document.querySelector('#v-turn .field')||document.body; var img=document.createElement('img'); img.src=src; img.className='skill-vfx'; img.style.cssText='position:absolute;inset:0;width:100%;height:100%;object-fit:'+(opts.fit||'contain')+';image-rendering:pixelated;pointer-events:none;z-index:60;filter:drop-shadow(0 0 5px rgba(255,255,255,.28))'; if(getComputedStyle(targetEl).overflow==='visible') targetEl.style.overflow='hidden'; if(getComputedStyle(targetEl).position==='static') targetEl.style.position='relative'; targetEl.appendChild(img); setTimeout(function(){ img.style.transition='opacity .3s'; img.style.opacity='0'; setTimeout(function(){ if(img.parentNode) img.parentNode.removeChild(img); }, 320); }, opts.hold||1000); }catch(e){} }
@@ -5219,16 +5219,16 @@ const FORMATION_TIERS=[{n:3,name:'Allied',bonus:1},{n:8,name:'Brothers-in-Arms',
 const LINK_POW_CAP = 4;   // max total power from active links per commit (keeps it subtle)
 const LINK_GROUPS = [
   {id:'keawe',   name:"Keawe's Circle", icon:'🔵', pow:1, members:['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga']},
-  {id:'kelrua',  name:"Kel'rua Blood",   icon:'👪', pow:1, members:['Kiana','Keawe Kel\'rua','Keawe, A Legend Reborn']},
+  {id:'kelrua',  name:"Kel'rua Blood",   icon:'👪', pow:1, members:['Kiana','Keawe Kel\'rua','Legend Reborn, Keawe Kel\'rua']},
 {id:'squad19', name:'Squad 19',       icon:'🛡', pow:1, members:['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro']},
-  {id:'court',   name:"Darwin's Court",  icon:'🩸', pow:1, members:['Darwin','Valcarion','Zerith Var','Veronica','Ella Ballora','La "La" Ballora, the Broodqueen','Arch-Grim Korrin','Grim Korrin','Ruffius Rufeldro','Voidmaw the Unmaker']},
+  {id:'court',   name:"Darwin's Court",  icon:'🩸', pow:1, members:['Darwin','Valcarion','Zerith Var','Veronica','Envoy of Tyrants, Ella Ballora','La "La" Ballora, the Broodqueen','Arch-Grim Korrin','Grim Korrin','Ruffius Rufeldro','Young Darwin, Predetermined Dictator']},
   {id:'royalty', name:'Exiled Royalty',  icon:'👑', pow:1, members:['Moro','Malia','King Joris']},
-  {id:'dragon',  name:'Dragon-Pact',     icon:'🐉', pow:1, members:['Tange Sazen','Ourevos, the Golden Dragon','Kiba','Kleydson','Kaelthar the Ascendant']},
+  {id:'dragon',  name:'Dragon-Pact',     icon:'🐉', pow:1, members:['Tange Sazen','Ourevos, the Golden Dragon','Kiba','Conduit of Chaos, Kleydson','Kaelthar the Ascendant']},
   {id:'waltz',   name:'Waltz Twins',     icon:'🐺', pow:1, members:['Lagertha Waltz','Hanse Waltz','Lagertha Waltz, Wrathful Transformation','The Bronzed Beast, Hanse Waltz','Kessuae, Tide of Ruin']},
   {id:'tosa',    name:'Tosa Pact',      icon:'🤝', pow:1, members:['Cletus Gwyndull']},
-  {id:'blackwings', name:'The Black Wings', icon:'🖤', pow:1, members:['Ossian Drell','Kiana','Corvus','Wren','Rook','Falk','Sable','Rhaess Korvain','The Black Ledger','Tannis','Talon-Trooper','Wingblade Scout','Feather-Marked Skirmisher','Squad-Captain Vesk']},
+  {id:'blackwings', name:'The Black Wings', icon:'🖤', pow:1, members:['Black Wings, Ossian Drell','Kiana','Corvus','Wren','Rook','Falk','Sable','Rhaess Korvain','The Black Ledger','Tannis','Talon-Trooper','Wingblade Scout','Feather-Marked Skirmisher','Squad-Captain Vesk']},
   {id:'ironsworn', name:'The Ironsworn', icon:'✊', pow:2, members:['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh','Sworn Pikeman']},
-{id:'legend',  name:'Split Legend',    icon:'✨', pow:1, members:['Kotei','Ahdorah Khaan, Determined Soul','Kleydson','Anorith Keeling','Anorith Prime','Sunforged Colossus']},
+{id:'legend',  name:'Split Legend',    icon:'✨', pow:1, members:['Kotei','Ahdorah Khaan, Determined Soul','Conduit of Chaos, Kleydson','Anorith Keeling','Anorith Prime','Courtroom Colossus']},
 ];
 function cardLinkGroups(name){ return LINK_GROUPS.filter(function(g){ return g.members.indexOf(name)>=0; }); }
 // active links for a committed card given the current hand (partner must be a DIFFERENT lore character in hand)
@@ -5326,8 +5326,8 @@ const CARD_RULES = {
   }
  ],
  "Kaelthar the Ascendant": [{"if":{"v":"player_wins","op":">","v2":"player_losses"},"add":6,"log":"🐉 Ascendant: +6 (holding the lead)"}],
- "Voidmaw the Unmaker": [{"add":4,"log":"🌑 Voidmaw: +4"},{"if":{"v":"opp_deaths","op":"==","n":0},"oppadd":-3,"log":"🌑 Voidmaw: opponent −3 (Pristine prey)"}],
- "Sunforged Colossus": [{"add":3,"log":"☀️ Colossus: +3"},{"if":{"v":"match_commits","op":">=","n":3},"add":5,"log":"☀️ Colossus: +5 (late game)"}],
+ "Young Darwin, Predetermined Dictator": [{"add":4,"log":"🌑 Voidmaw: +4"},{"if":{"v":"opp_deaths","op":"==","n":0},"oppadd":-3,"log":"🌑 Voidmaw: opponent −3 (Pristine prey)"}],
+ "Courtroom Colossus": [{"add":3,"log":"☀️ Colossus: +3"},{"if":{"v":"match_commits","op":">=","n":3},"add":5,"log":"☀️ Colossus: +5 (late game)"}],
  "Kessuae, Tide of Ruin": [{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":7,"log":"🌊 Kessuae: +7 (behind)"}],
  "Vharos, the Iron Crown": [{"if": {"v": "opp_deaths", "op": "==", "n": 0}, "add": 5, "log": "👑 Vharos: +5 vs Pristine"}],
  "Nyx, Devourer of Legends": [{"add": 4, "log": "🌑 Nyx: +4"}, {"if": {"v": "last_result", "op": "==", "s": "lose"}, "add": 4, "log": "🌑 Nyx: +4 vengeance"}],
@@ -5337,7 +5337,7 @@ const CARD_RULES = {
  "Mordezh, Blood Prophet": [{"if": {"v": "player_losses", "op": ">", "v2": "player_wins"}, "add": 5, "log": "🩸 Mordezh: +5 (behind)"}, {"if": {"v": "last_result", "op": "==", "s": "lose"}, "add": 2, "log": "🩸 Mordezh: +2 (lost last)"}],
  "Elowen Dawnspear": [{"if": {"v": "pc_deaths", "op": "==", "n": 0}, "add": 5, "log": "✨ Elowen: +5 (Pristine)"}],
  "Kravyn the Collector": [{"if": {"v": "pc_kills", "op": ">=", "n": 20}, "add": 5, "log": "⚔️ Kravyn: +5 (20+ kills)"}],
- "Veyra Stormcaller": [{"add": 3, "log": "🌪️ Veyra: +3"}, {"if": {"chaos": true}, "add": 4, "log": "🌪️ Veyra: +4 (chaos)"}],
+ "Fifth Frequency Stormcaller": [{"add": 3, "log": "🌪️ Veyra: +3"}, {"if": {"chaos": true}, "add": 4, "log": "🌪️ Veyra: +4 (chaos)"}],
  "Sable the Unseen": [{"if": {"v": "opp_deaths", "op": "==", "n": 0}, "oppadd": -4, "log": "🕷️ Sable: opponent −4 (purity drained)"}],
  "Torvald Ninefingers": [{"if": {"v": "hand_len", "op": "<=", "n": 2}, "add": 3, "log": "🪓 Torvald: +3 (low hand)"}],
  "Kessa Brightblade": [{"if": {"v": "opp_deaths", "op": "==", "n": 0}, "add": 4, "log": "⚔️ Kessa: +4 vs Pristine"}],
@@ -5512,7 +5512,7 @@ const CARD_RULES = {
   }
  ],
  "Valcarion": [],
- "Ella Ballora": [
+ "Envoy of Tyrants, Ella Ballora": [
   {
    "add": 3,
    "log": "⚔️ Bloodrage: +3"
@@ -5661,7 +5661,7 @@ const CARD_RULES = {
  "Rhaess Korvain": [
   { "addvar": "banish_len", "x": 2, "log": "🪶 Rhaess: +2×banish" }
  ],
- "Ossian Drell": [
+ "Black Wings, Ossian Drell": [
   { "addvar": "banish_len", "x": 2, "log": "🪶 Wing Command: +2×banish" }
  ],
  "Corvus": [
@@ -5679,7 +5679,7 @@ const CARD_RULES = {
  "Grave-Tithe Acolyte": [{ "add": 5, "log": "☠ Grave-Tithe: +5" }],
  "Cinder-Marked Hound": [{ "addvar": "banish_len", "x": 1, "log": "☠ Cinder: +1×banish" }],
  "Pyre-Keeper Vayle": [{ "if": { "v": "banish_len", "op": ">=", "n": 2 }, "add": 5, "log": "☠ Pyre-Keeper: +5" }],
- "Ossuary Titan": [{ "addvar": "remnant_count", "x": 3, "log": "⚰ Ossuary: +3×remnant" }],
+ "Summoned Skull Soldiers": [{ "addvar": "remnant_count", "x": 3, "log": "⚰ Ossuary: +3×remnant" }],
  "Widow of the Vigil": [{ "if": { "v": "remnant_count", "op": "==", "n": 0 }, "add": 3, "log": "⚰ Vigil: +3 (no remnant)" }],
  "Bloodwake Duelist": [{ "addvar": "skullchain", "x": 2, "log": "💀 Bloodwake: +2×kill" }],
  "Warpath Vanguard": [{ "if": { "v": "match_commits", "op": "<=", "n": 2 }, "add": 5, "log": "⚔ Vanguard: +5 (early)" }],
@@ -5720,7 +5720,7 @@ function applyCardRules(name, ctx, playerPow, oppPow, abilLog, stepSink){
   return [playerPow, oppPow];
 }
 function resolve(pc, oc, cond, playerCommittedPow){
-  let playerPow = playerCommittedPow != null ? playerCommittedPow : ((pc.pow||0)+(pc._bo||0)+(pc.name==='Kleydson'?2*banishPile.length:0));
+  let playerPow = playerCommittedPow != null ? playerCommittedPow : ((pc.pow||0)+(pc._bo||0)+(pc.name==='Conduit of Chaos, Kleydson'?2*banishPile.length:0));
   let oppPow = oc.pow;
 
   const abilLog = [];
@@ -5741,7 +5741,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     if(!_al && pc.name === 'Voltcaller'){ spellDiscount += 2; abilLog.push('\u26a1 Voltcaller: your next Interrupt costs 2 less'); } }
   // ── REAR-GUARD: Called (always fires) + same-group Link Skill ──
   { var _rgc={match_commits:matchCommits, last_result:lastResult, hand_len:hand.length, opp_deaths:oc.deaths||0, opp_kills:oc.kills||0, wins:playerScore[0], losses:playerScore[1], wc_len:winnersCircle.length, chaos:(cond.tag==='chaos')};
-    rearGuards.forEach(function(rg,_rgi){ if(!rg) return;
+    rearGuards.forEach(function(rg,_rgi){ if(!rg) return; if(pc&&pc.name==='Kaelthar the Ascendant') return;
       { var _kc=(typeof CALLED!=='undefined')?CALLED[rg.name]:null; if(_kc && _kc.snipeSupport && pendingOppRears[_rgi]){ var _sn=pendingOppRears[_rgi]; pendingOppRears[_rgi]=null; abilLog.push('🎯 '+rg.name+': sniped '+_sn.name+' — opposing support removed'); } }
       var _rr=applyCalled(rg, _rgc, playerPow, oppPow, abilLog, false); playerPow=_rr[0]; oppPow=_rr[1];
       var _lk=fieldLink(pc, rg); if(_lk){ playerPow+=_lk.pow; abilLog.push('🔗 '+_lk.name+' Link — '+pc.name+' + '+rg.name+': +'+_lk.pow); var _tb=(typeof CALLED!=='undefined'&&CALLED[rg.name]&&CALLED[rg.name].twinBuff)||0; if(_tb){ playerPow+=_tb; abilLog.push('🐺 '+rg.name+' rallies the twins — '+pc.name+' +'+_tb); } }
@@ -5794,7 +5794,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   // ── FIRE ON-COMMIT ABILITIES (before condition) ──
   if(!abilityLocked){
     // Kotei: +3 if opponent is 0-death OR you lost your last duel; whole effect repeats if Keawe already won a duel this match
-    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),banish_len:banishPile.length,remnant_count:(typeof deathRemnants!=='undefined'?deathRemnants.length:0),wc_names:winnersCircle.map(function(c){return c.name;})};
+    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),banish_len:banishPile.length,remnant_count:(typeof deathRemnants!=='undefined'?deathRemnants.length:0),deck_len:(typeof drawPile!=='undefined'?drawPile.length:0),both_wc:(winnersCircle.length+((typeof oppWonBot!=='undefined'&&oppWonBot&&oppWonBot.size)?oppWonBot.size:0)),rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0),wc_names:winnersCircle.map(function(c){return c.name;})};
     if(pc.name==='Veronica'){
       var _oa=oc.abil||'';
       if(!_oa||_oa.indexOf('No ability')===0){ abilLog.push('🔄 Veronica: opponent has no ability — no effect'); }
@@ -5946,7 +5946,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
       sub.textContent = `${pc.name} (${playerCommittedPow}) defeated ${oc.name} (${oc.pow}) — to Winners Circle`;
     }
     playerScore[0]++;
-    if(pc.name==='Skullchain Reaver'){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push('💀 Skullchain Reaver returns to your hand instead of the Winners Circle'); } else { winnersCircle.push({...pc}); }
+    if(pc.name==='Skullchain Reaver' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); } else { winnersCircle.push({...pc}); }
     lastResult = 'win';
     recordDuel(pc,'win'); signalPoints += 20;   // playtest: every match tracks K/D + pays
     if(pc.name === 'Signal Diviner'){ divinerBonusNext=2; abilLog.push('Signal Diviner: +2 max Charge next turn'); }
@@ -6301,7 +6301,7 @@ let marketListings = [];
 let marketFocus = null;  // when set, market compares/filters to this card name
 let marketSort = 'recent';  // 'recent' | 'legend' | 'price'
 function seedMarket(){
-  const names = ['Arch-Grim Korrin','Lagertha Waltz','Tange Sazen','Zerith Var','Val Kreigh','Kiana','Valcarion','Ella Ballora','Malia','Moro','Anorith Keeling','Forgemask','Cletus Gwyndull','Chieftain Reyva Vosh','Rhaess Korvain','Ossian Drell','Tannis','Broodmother','King Joris','Sister Mire','Heir of Kaiga','La "La" Ballora, the Broodqueen','Hanse Waltz','Uso Oso','Melanie','Bixie Bee'];
+  const names = ['Arch-Grim Korrin','Lagertha Waltz','Tange Sazen','Zerith Var','Val Kreigh','Kiana','Valcarion','Envoy of Tyrants, Ella Ballora','Malia','Moro','Anorith Keeling','Forgemask','Cletus Gwyndull','Chieftain Reyva Vosh','Rhaess Korvain','Black Wings, Ossian Drell','Tannis','Broodmother','King Joris','Sister Mire','Heir of Kaiga','La "La" Ballora, the Broodqueen','Hanse Waltz','Uso Oso','Melanie','Bixie Bee'];
   const reg = names.map(name => {
     const c = COLLECTION.find(x => x.name === name); if(!c || isStarter(c)) return null; const h = hashStr(name);
     const seller = '0x' + ((h*2654435761)>>>0).toString(16).slice(0,4) + '…' + (h>>>16).toString(16).padStart(4,'0').slice(0,4);
@@ -6527,7 +6527,7 @@ function startFreshSession(){ if(!confirm('Start a fresh session? This clears ev
   if(typeof startFeaturedRotation==='function') startFeaturedRotation();
   toast('Fresh session started \u2014 1 clean copy of every card, all records 0-0.', true);
 }
-const NEW_PLAYER_DECK = ['Melanie','Heir of Kaiga','Kiana','Hanse Waltz','Moro','King Joris','Malia','Conduit Adept','Broodmother','Old Garrick','Bram the Bulwark','Ossian Drell'];
+const NEW_PLAYER_DECK = ['Melanie','Heir of Kaiga','Kiana','Hanse Waltz','Moro','King Joris','Malia','Conduit Adept','Broodmother','Old Garrick','Bram the Bulwark','Black Wings, Ossian Drell'];
 function newPlayerReset(){
   if(!confirm('Wipe to a fresh NEW-PLAYER state?\n\n• 12 starter cards (no ultras)\n• 10,000 Signal · 0 Forge · 0 Bounty\n• all records 0-0, everything else cleared\n\nCannot be undone.')) return;
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
@@ -6567,7 +6567,7 @@ function startNewPlayer(){
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']);
   STARTER_SET.forEach(nm=>{ const c=COLLECTION.find(x=>x.name===nm && !x.uid); if(c){ ownedCopies[nm]=1; cardRecords[nm]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Starter deck'}]}; } });
   activeDeck=new Set(STARTER_SET.filter(nm=>!!COLLECTION.find(x=>x.name===nm && !x.uid)).slice(0, DECK_SIZE));
-  featuredCards=['Ella Ballora']; featuredShuffle=false; featuredRotIdx=0;
+  featuredCards=['Envoy of Tyrants, Ella Ballora']; featuredShuffle=false; featuredRotIdx=0;
   equipped={aura:'gold',back:'sealed',emblem:'crest',title:'integrator',sleeves:'standard',summon:'golden'};
   ownedCosmetics.clear(); ['aura:gold','back:sealed','emblem:crest','title:integrator','sleeves:standard','summon:golden'].forEach(k=>ownedCosmetics.add(k));
   saveState();
@@ -6861,7 +6861,7 @@ const VARIANT_DEFS = [
   {id:'v-darwin-primal', unit:'Darwin', label:'Primal', tier:'genesis', foil:'ethereal'},
   {id:'v-tange-shogun', unit:'Tange Sazen', label:'Shogun', tier:'genesis', foil:'gold'},
   {id:'v-ahdor-warden', unit:'Ahdorah Khaan, Determined Soul', label:'Eternal Warden', tier:'genesis', foil:'gold'},
-  {id:'v-ella-crimson', unit:'Ella Ballora', label:'Crimson', tier:'ultra', foil:'prism'},
+  {id:'v-ella-crimson', unit:'Envoy of Tyrants, Ella Ballora', label:'Crimson', tier:'ultra', foil:'prism'},
   {id:'v-ella-radiant', unit:'La "La" Ballora, the Broodqueen', label:'Radiant', tier:'ultra', foil:'prism'},
   {id:'v-hanse-bloodmoon', unit:'The Bronzed Beast, Hanse Waltz', label:'Bloodmoon', tier:'ultra', foil:'prism'},
   {id:'v-lagertha-frost', unit:'Lagertha Waltz, Wrathful Transformation', label:'Frost', tier:'ultra', foil:'prism'},
@@ -7277,7 +7277,7 @@ const CARD_ART = {
   'Lagertha Waltz, Wrathful Transformation':'assets/img/47a92a2ee0aa.jpg',
   'Keawe Kel\'rua':'assets/img/ffb1df0dd296.jpg',
   'Rhaess Korvain':'assets/img/a552d2f2e191.jpg',
-  'Ossian Drell':'assets/img/cfffed729ba5.jpg',
+  'Black Wings, Ossian Drell':'assets/img/cfffed729ba5.jpg',
   'King Joris':'assets/img/f1177c2e6979.jpg',
   'Chieftain Reyva Vosh':'assets/img/29af9f868db9.jpg',
   'Broodmother':'assets/img/9cf6bca32ce3.jpg',
@@ -7290,7 +7290,7 @@ const CARD_ART = {
   'Arch-Grim Korrin':'assets/img/340ebdfa2a23.jpg',
   'Veronica':'assets/img/7c0c9a4c8953.jpg',
   'Zerith Var':'assets/img/7f0d0f540c73.jpg',
-  'Ella Ballora':'assets/img/b6c5f3d2c7ad.jpg',
+  'Envoy of Tyrants, Ella Ballora':'assets/img/b6c5f3d2c7ad.jpg',
   'Valcarion':'assets/img/743366c68ab4.jpg',
   'Darwin':'assets/img/7e877fb90b21.jpg',
   'Tange Sazen':'assets/img/ee660de00747.jpg',
@@ -7303,7 +7303,7 @@ const CARD_ART = {
   'Hanse Waltz':'assets/img/7095cf58d6cf.jpg',
   'Lagertha Waltz':'assets/img/2932baf86eee.jpg',
   'Val Kreigh':'assets/img/d2be99c7b39f.jpg',
-  'Kleydson':'assets/img/49b211c2dc24.jpg',
+  'Conduit of Chaos, Kleydson':'assets/img/49b211c2dc24.jpg',
   'Kiana':'assets/img/8ad786f00fc0.jpg',
   'Anorith Keeling':'assets/img/68b6c0fd2b75.jpg',
   'Cletus Gwyndull':'assets/img/5d73a80a5a0c.jpg',
@@ -7321,7 +7321,7 @@ const CARD_ART_FULL = {
   'Lagertha Waltz, Wrathful Transformation':'assets/img/c0cea1c7d044.jpg',
   'Keawe Kel\'rua':'assets/img/4ebc5e8c90fb.jpg',
   'Rhaess Korvain':'assets/img/9f9a1fa52c46.jpg',
-  'Ossian Drell':'assets/img/73b5b5645881.jpg',
+  'Black Wings, Ossian Drell':'assets/img/73b5b5645881.jpg',
   'King Joris':'assets/img/aae7ba14dc18.jpg',
   'Chieftain Reyva Vosh':'assets/img/5012cd8f3fbd.jpg',
   'Broodmother':'assets/img/1ec4d2279014.jpg',
@@ -7334,7 +7334,7 @@ const CARD_ART_FULL = {
   'Arch-Grim Korrin':'assets/img/42ebe757c0ce.jpg',
   'Veronica':'assets/img/aea3ba3562dd.jpg',
   'Zerith Var':'assets/img/026d03f91aea.jpg',
-  'Ella Ballora':'assets/img/88dd9987f851.jpg',
+  'Envoy of Tyrants, Ella Ballora':'assets/img/88dd9987f851.jpg',
   'Valcarion':'assets/img/3efa65f5ff4e.jpg',
   'Darwin':'assets/img/2941a257059c.jpg',
   'Tange Sazen':'assets/img/e78285411325.jpg',
@@ -7347,7 +7347,7 @@ const CARD_ART_FULL = {
   'Hanse Waltz':'assets/img/4ed16090bcdc.jpg',
   'Lagertha Waltz':'assets/img/09c93c9e868b.jpg',
   'Val Kreigh':'assets/img/9b82a4e8dabd.jpg',
-  'Kleydson':'assets/img/333000007ac2.jpg',
+  'Conduit of Chaos, Kleydson':'assets/img/333000007ac2.jpg',
   'Kiana':'assets/img/c2c10e252581.jpg',
   'Anorith Keeling':'assets/img/608f5a5e300d.jpg',
   'Cletus Gwyndull':'assets/img/da3a7929f040.jpg',
@@ -7367,14 +7367,14 @@ const LOCATION_ART = {
   'Tosa':'assets/img/f247a0906449.jpg',
 };
 const CARD_SIGIL = {
-  'Kaelthar the Ascendant':'🐉','Voidmaw the Unmaker':'🌑','Sunforged Colossus':'☀️','Kessuae, Tide of Ruin':'🌊',
+  'Kaelthar the Ascendant':'🐉','Young Darwin, Predetermined Dictator':'🌑','Courtroom Colossus':'☀️','Kessuae, Tide of Ruin':'🌊',
   'kotei-tournament':'🏆',
-  'Keawe Kel\'rua':'⚡','Rhaess Korvain':'🗡','Ossian Drell':'🎖',
+  'Keawe Kel\'rua':'⚡','Rhaess Korvain':'🗡','Black Wings, Ossian Drell':'🎖',
   'Kotei':'⚡','Uso Oso':'🐻','Tannis':'⚡','Bixie Bee':'🐝','Veronica':'🎭',
   'Ahdorah Khaan, Determined Soul':'🛡','Ruffius Rufeldro':'🗡','Kiba':'🐺','Darwin':'🧬','Malia':'🪞','Moro':'🐾',
   'Hanse Waltz':'🎻','Arch-Grim Korrin':'💀','Zerith Var':'🔥','Cletus Gwyndull':'🔒','Val Kreigh':'⚔',
   'Tange Sazen':'🗡','Lagertha Waltz':'🪓','Anorith Keeling':'🦂',
-  'Valcarion':'🩸','Ella Ballora':'⚔️','Kiana':'🔥',
+  'Valcarion':'🩸','Envoy of Tyrants, Ella Ballora':'⚔️','Kiana':'🔥',
   'King Joris':'👑','Chieftain Reyva Vosh':'🏔','Broodmother':'🕷','Forgemask':'🔨','Sister Mire':'🌱',
   'Heir of Kaiga':'🗡','Melanie':'🌷','Josef':'🧵','Ourevos, the Golden Dragon':'🐉','La "La" Ballora, the Broodqueen':'🕸',
   "Korrin's Possessed Legion":'🪖','The Bronzed Beast, Hanse Waltz':'🐺','Lagertha Waltz, Wrathful Transformation':'🌕','The Regenerating Horror':'👁','Uso Oso\'s Skeletal Summons':'🦴'
@@ -7759,10 +7759,10 @@ function deckTab(t){
 }
 
 // ══ DECK PRESETS (saved decks) ══
-const BLACKWING_PRESET = ['Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Bixie Bee'];   // Black Wings — banish/discard
-const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ossuary Titan','Ghorruk Skullbrand','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Uso Oso',"Uso Oso's Skeletal Summons",'Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','Signal Diviner','The Regenerating Horror','Gravecaller Voss','Melanie'];   // The Deathless — Death-Remnant stack + draw
+const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Bixie Bee'];   // Black Wings — banish/discard
+const DEATHLESS_PRESET = ['Arch-Grim Korrin','Summoned Skull Soldiers','Ghorruk "Gnarly" Judarr','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Uso Oso',"Uso Oso's Skeletal Summons",'Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','Signal Diviner','The Regenerating Horror','Gravecaller Voss','Melanie'];   // The Deathless — Death-Remnant stack + draw
 const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Moro'];   // The Warpath — early champ + WC recycle + kill escalation
-const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte',"Hoarder's Gambit",'The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Ella Ballora',"Web-Weaver's Return",'The Black Ledger','Signal Diviner','Melanie','Heir of Kaiga','Faye Quicksilver','Chieftain Reyva Vosh'];   // The Broodswarm — hand-size draw + power
+const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte',"Hoarder's Gambit",'The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'The Black Ledger','Signal Diviner','Melanie','Heir of Kaiga','Faye Quicksilver','Chieftain Reyva Vosh'];   // The Broodswarm — hand-size draw + power
 const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Signal Diviner','Heir of Kaiga','Melanie','Faye Quicksilver','Chieftain Reyva Vosh','The Black Ledger'];   // The Ironsworn — strength in numbers (Rally: +power per ally)
 let deckPresets = lsGet('sf_presets', {});
 (function(){ var _seed={blackwing:BLACKWING_PRESET, deathless:DEATHLESS_PRESET, warpath:WARPATH_PRESET, broodswarm:BROODSWARM_PRESET, ironsworn:IRONSWORN_PRESET}; var _ch=false; Object.keys(_seed).forEach(function(k){ if(!deckPresets[k] && !lsGet('sf_seed_'+k,0)){ deckPresets[k]=_seed[k].slice(); lsSet('sf_seed_'+k,1); _ch=true; } }); if(!lsGet('sf_bw_seeded',0)) lsSet('sf_bw_seeded',1); if(!lsGet('sf_seed_deathless_v2',0)){ deckPresets.deathless = DEATHLESS_PRESET.slice(); lsSet('sf_seed_deathless_v2',1); _ch=true; } if(_ch) lsSet('sf_presets', deckPresets); })();
@@ -7770,10 +7770,10 @@ let deckPresets = lsGet('sf_presets', {});
 var STARTER_PATHS=[
   {key:'ironsworn',name:'The Ironsworn',tag:'Strength in Numbers',blurb:'Weak alone, unstoppable together — your soldiers grow stronger with every ally you field and every duel you win. The most forgiving path for a new commander.',rep:'Bannerlord Cassian',icon:'✊',accent:'#8fb3ff'},
   {key:'broodswarm',name:'The Broodswarm',tag:'Swarm & Overwhelm',blurb:'Draw, hoard, and turn a full hand into raw power. Bury your opponent under numbers that never stop coming.',rep:'La "La" Ballora, the Broodqueen',icon:'🕷',accent:'#c9a0ff'},
-  {key:'blackwings',name:'The Black Wings',tag:'Banish & Reclaim',blurb:'Sacrifice your own cards to fuel devastating power, then pull them back stronger. High risk, high reward — for the bold.',rep:'Ossian Drell',icon:'🖤',accent:'#e0913a'}
+  {key:'blackwings',name:'The Black Wings',tag:'Banish & Reclaim',blurb:'Sacrifice your own cards to fuel devastating power, then pull them back stronger. High risk, high reward — for the bold.',rep:'Black Wings, Ossian Drell',icon:'🖤',accent:'#e0913a'}
 ];
 var STARTER_DECKS={
-  ironsworn:['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh','Signal Diviner','Heir of Kaiga','Melanie','Faye Quicksilver','Conduit Adept'],
+  ironsworn:['Kessuae, Tide of Ruin','Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh','Signal Diviner','Heir of Kaiga','Melanie','Faye Quicksilver','Conduit Adept'],
   blackwings:['Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','The Black Ledger','Tannis','Bixie Bee','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Heir of Kaiga'],
   broodswarm:['Broodmother','Fledgling Broodmother','Web-Spinner Acolyte',"Hoarder's Gambit",'The Gathering Swarm','Silkbound Sentinel',"Widow's Patience","Web-Weaver's Return",'Signal Diviner','Melanie','Heir of Kaiga','Faye Quicksilver','Conduit Adept','Voltcaller','Mirror Shade','Tosa Envoy']
 };   /* STARTER decks: SEPARATE from the *_PRESET full builds; NO ultras/apex so chase cards stay earnable */
@@ -7783,6 +7783,18 @@ function chooseStarterPath(key){ var p=STARTER_PATHS.find(function(x){return x.k
 function _pathChooserCSS(){ if(document.getElementById('pc-style')) return; var st=document.createElement('style'); st.id='pc-style'; st.textContent=`.path-chooser{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center}.path-chooser.on{display:flex}.path-chooser .pc-scrim{position:absolute;inset:0;background:rgba(4,6,11,.87)}.path-chooser .pc-panel{position:relative;z-index:1;max-width:min(96vw,940px);max-height:92vh;overflow-y:auto;padding:26px 22px 30px;text-align:center}.path-chooser .pc-eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px}.path-chooser .pc-title{font-size:34px;font-weight:800;color:#fff;margin-bottom:6px}.path-chooser .pc-sub{font-size:13px;color:var(--text2);max-width:520px;margin:0 auto 22px;line-height:1.5}.path-chooser .pc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.path-chooser .pc-card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--border2);border-radius:14px;padding-bottom:16px;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,border-color .15s,box-shadow .15s}.path-chooser .pc-card:hover{transform:translateY(-4px);border-color:var(--acc);box-shadow:0 16px 40px rgba(0,0,0,.55)}.path-chooser .pc-art{height:148px;background-size:cover;background-position:center top;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border2)}.path-chooser .pc-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(10,12,18,.82))}.path-chooser .pc-icon{position:relative;z-index:1;font-size:38px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.75))}.path-chooser .pc-body{padding:13px 15px 10px;flex:1;text-align:left}.path-chooser .pc-name{font-size:18px;font-weight:800;color:#fff}.path-chooser .pc-tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);margin:2px 0 9px}.path-chooser .pc-blurb{font-size:12px;color:var(--text2);line-height:1.5}.path-chooser .pc-pick{margin:0 15px;padding:10px 0;border-radius:9px;border:1px solid var(--acc);background:rgba(255,255,255,.06);color:#fff;font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:background .15s,color .15s}.path-chooser .pc-card:hover .pc-pick{background:var(--acc);color:#0a0d14}@media(max-width:720px){.path-chooser .pc-grid{grid-template-columns:1fr}.path-chooser .pc-panel{padding:18px 14px}.path-chooser .pc-title{font-size:26px}.path-chooser .pc-art{height:118px}}`; document.head.appendChild(st); }
 function showStarterChooser(){ _pathChooserCSS(); var ov=document.getElementById('path-chooser'); if(!ov){ ov=document.createElement('div'); ov.id='path-chooser'; ov.className='path-chooser'; document.body.appendChild(ov); } ov.innerHTML='<div class="pc-scrim"></div><div class="pc-panel"><div class="pc-eyebrow">New Commander</div><div class="pc-title">Choose Your Path</div><div class="pc-sub">Pick a starter deck — real cards you own and can build on. You can collect the others later.</div><div class="pc-grid">'+STARTER_PATHS.map(function(p){ var repC=COLLECTION.find(function(x){return x.name===p.rep && !x.uid;}); var art=(repC && typeof artFillStyle==='function')?artFillStyle(repC.artKey||repC.name):''; return '<div class="pc-card" style="--acc:'+p.accent+'" onclick="chooseStarterPath(\''+p.key+'\')"><div class="pc-art" style="'+art+'"><span class="pc-icon">'+p.icon+'</span></div><div class="pc-body"><div class="pc-name">'+p.name+'</div><div class="pc-tag">'+p.tag+'</div><div class="pc-blurb">'+p.blurb+'</div></div><button class="pc-pick">Choose '+p.name.replace('The ','')+'</button></div>'; }).join('')+'</div></div>'; ov.classList.add('on'); }
 window.showStarterChooser=showStarterChooser; window.chooseStarterPath=chooseStarterPath;
+;/* ── BALANCE PASS 2026-07-07 (owner spec): reworked CARD_RULES + remnant values ── */
+CARD_RULES['Kravyn the Collector']=[{"if":{"v":"pc_kills","op":">=","n":10},"add":3,"log":"⚔️ Kravyn: +3 (10+ kills)"},{"if":{"v":"pc_kills","op":">=","n":20},"add":5,"log":"⚔️ Kravyn: +5 Kill Escalation (20+)"}];
+CARD_RULES['Fifth Frequency Stormcaller']=[{"add":3,"log":"🌪️ Flurry: +3"},{"if":{"v":"hand_len","op":">=","n":5},"add":4,"log":"🌪️ Flurry: +4 (5+ hand)"},{"if":{"v":"banish_len","op":">=","n":4},"add":7,"log":"🌪️ Flurry: +7 (4+ banish)"}];
+CARD_RULES['Envoy of Tyrants, Ella Ballora']=[{"if":{"v":"hand_len","op":">=","n":3},"add":3,"log":"⚔️ Bloodrage: +3 (3+ hand)"},{"if":{"v":"player_losses","op":">","n":0},"add":3,"log":"⚔️ Bloodrage: +3 (wounded)"}];
+CARD_RULES['Arch-Grim Korrin']=[{"addvar":"remnant_count","x":4,"log":"👻 Unburied: +4 per Remnant"}];
+CARD_RULES['Kessuae, Tide of Ruin']=[{"if":{"v":"rear_count","op":">=","n":2},"add":5,"log":"🌊 Kessuae: +5 (both supports)"}];
+CARD_RULES['Kaelthar the Ascendant']=[{"if":{"v":"player_wins","op":">","v2":"player_losses"},"add":-20,"log":"🐉 Ascendant: −20 (winning)"},{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":20,"log":"🐉 Ascendant: +20 (losing)"}];
+CARD_RULES['Trophy-Hunter Kessa']=[{"addvar":"both_wc","x":2,"log":"🏆 Kessa: +2 per trophy (both Circles)"}];
+CARD_RULES['Ghorruk "Gnarly" Judarr']=[{"if":{"v":"deck_len","op":">","n":0},"addvar":"deck_len","x":1,"log":"💀 Ghorruk: +1 per card left in deck"}];
+CARD_RULES['The Bronzed Beast, Hanse Waltz']=[{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":5,"log":"🌑 Blood Moon: +5 (behind)"}];
+if(typeof REMNANT_POW!=='undefined'){ REMNANT_POW['Ghorruk "Gnarly" Judarr']=8; REMNANT_POW['Arch-Grim Korrin']=8; }
+
 ;/* ===== COACHED TUTORIAL (stage 1: overlay + spotlight + step engine; gated by tutorialMode) ===== */
 var tutorialMode=false, tutorialStep=0;
 var TUTORIAL_SCRIPT=[
@@ -7986,21 +7998,21 @@ function applySavedCosmetics(){ applyCosmetics(); }
 // ══ BOTS ══
 const pick = names => OPP_CARDS.filter(c=>names.includes(c.name));
 const BOT_OPPONENTS = [
-  {id:'kleydson',name:'Kleydson',avatar:'🐣',color:'var(--r-common)',arch:'Rookie Sparring Bot',diff:1,
+  {id:'kleydson',name:'Conduit of Chaos, Kleydson',avatar:'🐣',color:'var(--r-common)',arch:'Rookie Sparring Bot',diff:1,
    desc:'Learning the ropes. Commits low-power starters and rarely reads the condition. Good for testing new decks safely.',
-   sig:'Kleydson (4)', pool:pick(['Kleydson','Ahdorah Khaan, Determined Soul','Ruffius Rufeldro','Kiba','Malia']),bias:0},
+   sig:'Kleydson (4)', pool:pick(['Conduit of Chaos, Kleydson','Ahdorah Khaan, Determined Soul','Ruffius Rufeldro','Kiba','Malia']),bias:0},
   {id:'korrin',name:'Grim Korrin',avatar:'💀',color:'var(--r-rare)',arch:'Attrition Grinder',diff:2,
    desc:'Runs a kill-escalation engine. Grinds duels late and snowballs Arch-Grim Korrin as the match goes long.',
    sig:'Arch-Grim Korrin (11→)', pool:pick(['Arch-Grim Korrin','Zerith Var','Kiba','Darwin','Malia','Ahdorah Khaan, Determined Soul']),bias:1},
   {id:'anorith',name:'Anorith Prime',avatar:'🦂',color:'var(--r-ultra)',arch:'Disruption Control',diff:3,
    desc:'Plays for the asset, not the duel. Uses Record Guard and underdog scaling to protect Pristine cards while stealing close rounds.',
-   sig:'Anorith Keeling (8)', pool:pick(['Anorith Keeling','Zerith Var','Darwin','Malia','Lagertha Waltz','Moro','Ella Ballora']),bias:2},
+   sig:'Anorith Keeling (8)', pool:pick(['Anorith Keeling','Zerith Var','Darwin','Malia','Lagertha Waltz','Moro','Envoy of Tyrants, Ella Ballora']),bias:2},
   {id:'keawe',name:'Mirror Kotei',avatar:'⚡',color:'var(--r-genesis)',arch:'Apex Finisher',diff:4,
    desc:'The hardest opponent — a mirror of your own finisher deck. Commits high-power Apex and never gives you a free round.',
    sig:'Kotei (18)', pool:pick(['Kotei','Lagertha Waltz','Arch-Grim Korrin','Zerith Var','Darwin','Valcarion']),bias:3},
   {id:'ascendant',name:'The Ascendant',avatar:'👑',color:'var(--gold)',arch:'Trait Trial — maxed veterans',diff:4,
    desc:'A Living-Traits test dummy: every card it fields is a maxed legend — its record equips its single strongest trait (Scarred, +2) plus a peak stat boost. One trait, not a stack. Bring an average build and see if base power can still hang.',
-   sig:'maxed legends', pool:pick(['Kotei','Valcarion','Arch-Grim Korrin','Darwin','Lagertha Waltz','Ella Ballora']),bias:3,maxed:true},
+   sig:'maxed legends', pool:pick(['Kotei','Valcarion','Arch-Grim Korrin','Darwin','Lagertha Waltz','Envoy of Tyrants, Ella Ballora']),bias:3,maxed:true},
 ];
 let selectedBot = null;
 let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward gate)
@@ -8973,7 +8985,7 @@ const ASC_STORY=[
 const ASC_STORY_CH2=[
   {loc:'Sekihar', title:'The Smiling Man', champ:'Ruffius Rufeldro', art:'Ruffius Rufeldro', type:'elite',
    beat:"Sekihar welcomes you with open arms, and the warmest belong to Ruffius Rufeldro, who has never once been caught being what he is. He offers help you did not ask for, in a voice built to be trusted. Behind the smile he is already deciding how you will be useful."},
-  {loc:'North Kasac', title:'The Blackened Order', champ:'Kleydson', art:'Kleydson', type:'elite',
+  {loc:'North Kasac', title:'The Blackened Order', champ:'Conduit of Chaos, Kleydson', art:'Conduit of Chaos, Kleydson', type:'elite',
    beat:"A rider crosses the frost with fire in one hand and killing cold in the other, raised by the Blackened Order to hunt exactly the kind of legend you are becoming. Kleydson does not hate you. That is what makes him dangerous."},
   {loc:'Noctreach', title:'What The Wound Remembers', champ:'Anorith Keeling', art:'Anorith Keeling', type:'elite',
    beat:"Noctreach keeps its dead close. Something old wears the name Anorith Keeling here, stitched together from an age that ended in fire, and it remembers being a legend before the land broke it. It would like company in the ruin."},
