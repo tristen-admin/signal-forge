@@ -4381,7 +4381,7 @@ function pickOppRears(fighter){
   var out=[];
   for(var k=0;k<RG_SLOTS;k++){
     if(!oppHandBot.length) break;
-    if(Math.random()<0.45) continue;
+    if(Math.random() < Math.max(0.05, 0.45 - 0.12*((activeBot&&activeBot.bias)?activeBot.bias:0))) continue;
     var pref=oppHandBot.filter(function(c){ return CALLED[c.name] && !CALLED[c.name].chargeGain; });   // prefer a card with a Called effect
     var linked=pref.filter(function(c){ return fieldLink(fighter,{name:c.name}); });
     var choose=(linked.length&&Math.random()<0.5)?linked:((pref.length&&Math.random()<0.7)?pref:oppHandBot);
@@ -5801,6 +5801,11 @@ function resolve(pc, oc, cond, playerCommittedPow){
       else { abilLog.push('🔄 Veronica copies: '+oc.name); RS._inRules=true; var _vv=applyCardRules(oc.name,_ctx,playerPow,oppPow,abilLog,RS); playerPow=_vv[0]; oppPow=_vv[1]; RS._inRules=false; RS._resync(); }
     } else {
       RS._inRules=true; var _rr=applyCardRules(pc.name,_ctx,playerPow,oppPow,abilLog,RS); playerPow=_rr[0]; oppPow=_rr[1]; RS._inRules=false; RS._resync();
+    }
+    /* BOT fighter fires its OWN on-commit ability — bot-centric ctx, pow args swapped so its +power lands on the bot */
+    if(oc && oc.name && (typeof CARD_RULES!=='undefined') && CARD_RULES[oc.name] && CARD_RULES[oc.name].length){
+      var _octx={opp_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_pow:pc.pow,pc_pow:oc.pow,last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)),match_commits:matchCommits,player_wins:playerScore[1],player_losses:playerScore[0],hand_len:(typeof oppHandBot!=='undefined'?oppHandBot.length:0),wc_len:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0),skullchain:0,ragwing:0,chaos:(cond.tag==='chaos'),banish_len:(typeof oppBanishBot!=='undefined'?oppBanishBot.length:0),remnant_count:0,deck_len:(typeof oppDeckBot!=='undefined'?oppDeckBot.length:0),both_wc:(((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+winnersCircle.length),rear_count:((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0),wc_names:((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot):[])};
+      var _ov=applyCardRules(oc.name,_octx,oppPow,playerPow,abilLog,null); oppPow=_ov[0]; playerPow=_ov[1]; if(RS&&typeof RS._resync==='function') RS._resync();
     }
   }
 
