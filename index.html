@@ -6414,7 +6414,7 @@ function buyMarket(idx){
   buildMarket();
 }
 // ══ CARD PACKS · GLOBAL MINT LEDGER (finite, shared, persisted) ══
-const COPIES_PER = {genesis:100, ultra:250, rare:600, uncommon:1800, common:5000}; // copies minted per individual card of each rarity
+const COPIES_PER = {genesis:100, ultra:1000, rare:2500, uncommon:4000, common:5000}; // copies minted per individual card of each rarity — AR 100 : UR 1000 (1:10), matches RARITY_SUPPLY, ladder stays rarer=fewer
 const SUPPLY_FRAC = {genesis:0.10, ultra:0.17, rare:0.38, uncommon:0.52, common:0.60}; // fraction of the mint still unclaimed in packs (rest already in circulation)
 function rarityTypeCounts(){ const c={}; COLLECTION.forEach(x=>{ c[x.rarity]=(c[x.rarity]||0)+1; }); return c; }
 function defaultSupply(){ const t=rarityTypeCounts(); const s={}; for(const r in COPIES_PER){ const mint=(t[r]||0)*COPIES_PER[r]; s[r]={mint, left:Math.round(mint*SUPPLY_FRAC[r])}; } return s; }
