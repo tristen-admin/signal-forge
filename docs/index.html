@@ -5869,7 +5869,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   }
 
   // ── BOT COMEBACK: mirror the player's on-loss spell/WC economy so the bot doesn't get swung on late ──
-  if(typeof oppLossStreak!=='undefined' && oppLossStreak>0 && (typeof pvpMode==='undefined'||!pvpMode)){ var _cb=Math.min(6,oppLossStreak*2); oppPow+=_cb; abilLog.push('🩸 '+oc.name+' rallies from behind — comeback +'+_cb); }
+  if(typeof oppLossStreak!=='undefined' && oppLossStreak>0 && (typeof pvpMode==='undefined'||!pvpMode) && cond.id!=='mirror' && cond.id!=='hollowreckoning'){ var _cb=Math.min(6,oppLossStreak*2); oppPow+=_cb; abilLog.push('🩸 '+oc.name+' rallies from behind — comeback +'+_cb); }
   // ── DETERMINE WINNER ──
   let won;
   if(playerPow > oppPow) won = 'win';
@@ -5886,7 +5886,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
 
   // ── RESOLUTION EFFECTS ──
   const isDeathRemnant = pc.abil.includes('Death Remnant');
-  const isShellward = pc.name === 'Hanse Waltz';
+  const isShellward = /last stand/i.test(pc.abil||'');   // Bram, Torvald, Calla, Hanse Waltz — any Last Stand fighter
   const isAhdor = pc.name === 'Ahdorah Khaan, Determined Soul';
 
   // Ahdor Record Guard — block loss, force tie, return to hand, bonus +4 (one use)
