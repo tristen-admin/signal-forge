@@ -7767,11 +7767,11 @@ function deckTab(t){
 }
 
 // ══ DECK PRESETS (saved decks) ══
-const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Bixie Bee'];   // Black Wings — banish/discard
-const DEATHLESS_PRESET = ['Arch-Grim Korrin','Summoned Skull Soldiers','Ghorruk "Gnarly" Judarr','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Uso Oso',"Uso Oso's Skeletal Summons",'Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','Signal Diviner','The Regenerating Horror','Gravecaller Voss','Melanie'];   // The Deathless — Death-Remnant stack + draw
-const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Moro'];   // The Warpath — early champ + WC recycle + kill escalation
-const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte',"Hoarder's Gambit",'The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'The Black Ledger','Signal Diviner','Melanie','Heir of Kaiga','Faye Quicksilver','Chieftain Reyva Vosh'];   // The Broodswarm — hand-size draw + power
-const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Signal Diviner','Heir of Kaiga','Melanie','Faye Quicksilver','Chieftain Reyva Vosh','The Black Ledger'];   // The Ironsworn — strength in numbers (Muster: +power per 1-cost ally)
+const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Zerith Var'];   // Black Wings — banish/discard
+const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned Skull Soldiers','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Gravecaller Voss','Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Grave-Warden','Kiba','Bone-Stitcher','The Regenerating Horror','Signal Diviner','Zerith Var'];   // The Deathless — Death-Remnant stack + draw
+const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Zerith Var'];   // The Warpath — early champ + WC recycle + kill escalation
+const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte','Skittering Drone','Hatchling Tide',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Signal Diviner','Faye Quicksilver'];   // The Broodswarm — hand-size draw + power
+const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Shieldwall Recruit','Standard-Bearer Halden','Rank-Sworn Levy','Heir of Kaiga','Conduit Adept','Signal Diviner','Chieftain Reyva Vosh','Faye Quicksilver','Zerith Var'];   // The Ironsworn — go wide with 1-cost bodies, Cassian scales biggest (Muster: +power per 1-cost ally)
 let deckPresets = lsGet('sf_presets', {});
 (function(){ var _seed={blackwing:BLACKWING_PRESET, deathless:DEATHLESS_PRESET, warpath:WARPATH_PRESET, broodswarm:BROODSWARM_PRESET, ironsworn:IRONSWORN_PRESET}; var _ch=false; Object.keys(_seed).forEach(function(k){ if(!deckPresets[k] && !lsGet('sf_seed_'+k,0)){ deckPresets[k]=_seed[k].slice(); lsSet('sf_seed_'+k,1); _ch=true; } }); if(!lsGet('sf_bw_seeded',0)) lsSet('sf_bw_seeded',1); if(!lsGet('sf_seed_deathless_v2',0)){ deckPresets.deathless = DEATHLESS_PRESET.slice(); lsSet('sf_seed_deathless_v2',1); _ch=true; } if(_ch) lsSet('sf_presets', deckPresets); })();
 ;/* PICK YOUR PATH - starter archetype chooser (onboarding) */
@@ -9864,7 +9864,7 @@ applyAscendantFrame();
 if(!_hadSave && typeof startNewPlayer==='function') startNewPlayer();
 try{ if(localStorage.getItem('sf_deckfill16')!=='1'){ localStorage.setItem('sf_deckfill16','1'); if(typeof fillDeckToCap==='function' && fillDeckToCap()>0 && typeof saveState==='function') saveState(); } }catch(e){}  /* one-time: top up saved decks to the 16 cap (additive — only adds owned cards you already have) */
 /* ── 2026-07-07 deck migration: rename renamed cards + drop cut cards across owned/records/cosmetics/decks, and re-seed the 5 archetype presets ── */
-try{ if(localStorage.getItem('sf_deckmigrate_0707')!=='1'){
+try{ if(localStorage.getItem('sf_deckmigrate_0707b')!=='1'){
   var _REN={'Voidmaw the Unmaker':'Young Darwin, Predetermined Dictator','Sunforged Colossus':'Courtroom Colossus','Veyra Stormcaller':'Fifth Frequency Stormcaller','Ossian Drell':'Black Wings, Ossian Drell',"Keawe, A Legend Reborn":"Legend Reborn, Keawe Kel'rua",'Kleydson':'Conduit of Chaos, Kleydson','Ossuary Titan':'Summoned Skull Soldiers','Ella Ballora':'Envoy of Tyrants, Ella Ballora','Ghorruk Skullbrand':'Ghorruk "Gnarly" Judarr'};
   var _CUT={'Pit Thrall':1,'Brood-Tender':1,'Mirror Shade':1,'Sworn Pikeman':1,'Talon-Trooper':1};
   var _mk=function(k){ return _REN[k]||k; };
@@ -9880,7 +9880,7 @@ try{ if(localStorage.getItem('sf_deckmigrate_0707')!=='1'){
     _dp.blackwing=BLACKWING_PRESET.slice(); _dp.deathless=DEATHLESS_PRESET.slice(); _dp.warpath=WARPATH_PRESET.slice(); _dp.broodswarm=BROODSWARM_PRESET.slice(); _dp.ironsworn=IRONSWORN_PRESET.slice();
     if(typeof deckPresets!=='undefined') deckPresets=_dp; lsSet('sf_presets',_dp);
   }catch(e){}
-  localStorage.setItem('sf_deckmigrate_0707','1');
+  localStorage.setItem('sf_deckmigrate_0707b','1');
   if(typeof saveState==='function') saveState();
   if(typeof buildDeckBuilder==='function') buildDeckBuilder();
   if(typeof refreshPresets==='function') refreshPresets();
