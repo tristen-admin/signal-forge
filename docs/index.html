@@ -3354,7 +3354,7 @@ let playerScore = [1,0];
 let seasonWins=0, seasonLosses=0, seasonRewardClaimed=false;
 let charge=3/*energy start*/;                                   // energy resource, per match
 let spellHand=[];                               // Stage 2: spells you've drawn (a hand you spend)
-let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellHalveField=false, spellDiscount=0;  // per-duel armed effects  // Rebirth season — cumulative match W/L across ranked + staked
+let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellHalveField=false, condNeutralized=false, spellDiscount=0;  // per-duel armed effects  // Rebirth season — cumulative match W/L across ranked + staked
 let hand = [...HAND_CARDS];
 let deckSize = 12;
 let winnersCircle = [];
@@ -3664,7 +3664,7 @@ function beginTurnAutoDraw(){
 
 // Start-of-turn opener: no draw on the opening turn, auto-draw on every turn after.
 function openTurn(){
-  charge=Math.min(duelEnergyCap(),Math.max(charge+ENERGY_REGEN,duelEnergyFloor())); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  charge=Math.min(duelEnergyCap(),Math.max(charge+ENERGY_REGEN,duelEnergyFloor())); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -4789,7 +4789,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   if(pc.name==='Pale Gravedigger' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(1); }
   if(pc.name==='Widow of the Vigil' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(2); }
   if(pc.name==='Kleydson'){ spellHand=['drawsurge','godhand']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Lesser Chaos — your spells warp into Draw Surge + Godhand.', true); }
-  if(pc.name==='Tosa Envoy'){ conditionLocked=true; if(typeof toast==='function') toast('🤝 Tosa Envoy — the active condition is locked in.', true); }
+  if(pc.name==='Tosa Envoy'){ condNeutralized=true; if(typeof toast==='function') toast('🤝 Tosa Envoy renegotiates the arena — the active location is neutralized this duel.', true); }
   if(pc.name==='Wren' && banishPile.length){ hand.push(banishPile.pop()); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='La "La" Ballora, the Broodqueen' && typeof drawToHand==='function'){ drawToHand(1); }
   if(pc.name==="Web-Weaver's Return"){ if(banishPile.length){ var _rb=banishPile.splice(0,banishPile.length); drawPile=drawPile.concat(_rb); if(typeof shuffle==='function') shuffle(drawPile); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof toast==='function') toast('🕸 Web-Weaver\'s Return \u2014 '+_rb.length+' banished cards rewoven into your deck.', true); } if(typeof drawToHand==='function') drawToHand(1); if(typeof updatePiles==='function') updatePiles(); }
@@ -5731,6 +5731,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     RS._resync = function(){ _rp = playerPow; _ro = oppPow; }; }
   // ── ENERGY SPELL / BODY EFFECTS (Stage 1) ──
   if(spellJam){ cond = {id:'jammed', mech:'Jammed', name:'Signal Jammed', icon:'\ud83d\udce1', rule:'Condition negated by an Interrupt.', strat:''}; abilLog.push('\ud83d\udce1 Jammer: active condition negated'); }
+  if(typeof condNeutralized!=='undefined' && condNeutralized){ cond = {id:'neutral', mech:'Neutral Ground', name:'Renegotiated Ground', icon:'🤝', rule:'Tosa Envoy neutralized the location.', strat:''}; abilLog.push('🤝 Tosa Envoy: the location is renegotiated — its effect is nullified this duel'); }
   if(spellOppPow){ oppPow += spellOppPow; abilLog.push('\u26a1 Interrupt: opponent '+spellOppPow+' power'); }
   if(spellSelfPow){ playerPow += spellSelfPow; abilLog.push('\u26a1 Spell: your card +'+spellSelfPow+' power'); }
   if(typeof spellHalveField!=='undefined' && spellHalveField){ playerPow=Math.ceil(playerPow/2); oppPow=Math.ceil(oppPow/2); abilLog.push('\u26a1 Collapse: field power halved (both sides)'); }
@@ -9797,7 +9798,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   banishSurge=0; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false;
-  charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; spellDiscount=0; if(typeof renderCharge==='function') renderCharge();
+  charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellDiscount=0; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
