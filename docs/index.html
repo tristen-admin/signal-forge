@@ -4382,7 +4382,9 @@ function pickOppRears(fighter){
   var out=[];
   for(var k=0;k<RG_SLOTS;k++){
     if(!oppHandBot.length) break;
-    if(Math.random() < Math.max(0.05, 0.45 - 0.12*((activeBot&&activeBot.bias)?activeBot.bias:0))) continue;
+    if(oppHandBot.length<=1) break;   // never spend the bot's literal last card on a support — always reserve one for next turn's fighter, or the hand can never recover (was: bottoms out at hand=1 forever, 0 supports, once drained)
+    var handConserve = oppHandBot.length<=3 ? 0.35 : 0;   // thin hand -> back off supports so the 1/turn refill can catch back up, instead of staying drained
+    if(Math.random() < Math.max(0.05, 0.45 - 0.12*((activeBot&&activeBot.bias)?activeBot.bias:0) + handConserve)) continue;
     var pref=oppHandBot.filter(function(c){ return CALLED[c.name] && !CALLED[c.name].chargeGain; });   // prefer a card with a Called effect
     var linked=pref.filter(function(c){ return fieldLink(fighter,{name:c.name}); });
     var choose=(linked.length&&Math.random()<0.5)?linked:((pref.length&&Math.random()<0.7)?pref:oppHandBot);
