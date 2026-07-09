@@ -123,14 +123,24 @@ def main():
     t = threading.Thread(target=watcher_loop, args=(cfg, stop_evt), daemon=True)
     t.start()
     port = int(os.environ.get("PORT", cfg["port"]))
+    backoff = 1
     while True:
         try:
             with socketserver.ThreadingTCPServer(("127.0.0.1", port), Handler) as httpd:
                 print(f"[devwatch] serving http://127.0.0.1:{port}  (watching {cfg['source']})", flush=True)
+                backoff = 1  # reset once we're actually up
                 httpd.serve_forever()
+        except OSError as e:
+            if e.errno == 48:  # EADDRINUSE — a prior instance is still releasing the port; back off, don't spam
+                print(f"[devwatch] port {port} still in use (prior instance releasing?) — retrying in {backoff}s", flush=True)
+            else:
+                print(f"[devwatch] server OS error, restarting in {backoff}s: {e}", flush=True)
+            time.sleep(backoff)
+            backoff = min(backoff * 2, 10)
         except Exception as e:
-            print(f"[devwatch] server crashed, restarting in 1s: {e}", flush=True)
-            time.sleep(1)
+            print(f"[devwatch] server crashed, restarting in {backoff}s: {e}", flush=True)
+            time.sleep(backoff)
+            backoff = min(backoff * 2, 10)
 
 if __name__ == "__main__":
     main()
