@@ -4362,7 +4362,7 @@ function projectPlay(){
 function drawToHand(n){ if(typeof drawPile==='undefined'||typeof hand==='undefined') return 0; var got=0; for(var i=0;i<(n||0);i++){ if(!drawPile.length) break; hand.push(drawPile.pop()); got++; } if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(got && typeof buildHand==='function') buildHand(); return got; }
 function banishFromHand(n){ for(var _bi=0;_bi<(n||0);_bi++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } if(typeof buildHand==='function') buildHand(); }
 function oppDrawN(n){ for(var _oi=0;_oi<(n||0);_oi++){ if(typeof oppDeckBot!=='undefined'&&oppDeckBot.length) oppHandBot.push(oppDeckBot.shift()); } }
-function oppBanishN(n){ for(var _oj=0;_oj<(n||0);_oj++){ if(typeof oppHandBot!=='undefined'&&oppHandBot.length){ oppBanishBot.push(oppHandBot.splice(Math.floor(Math.random()*oppHandBot.length),1)[0]); } } }
+function oppBanishN(n){ for(var _oj=0;_oj<(n||0);_oj++){ if(typeof oppHandBot!=='undefined'&&oppHandBot.length>1){ oppBanishBot.push(oppHandBot.splice(Math.floor(Math.random()*oppHandBot.length),1)[0]); } } }   // never drain the bot's last card -- same floor as pickOppRears, or dredge strands it at 0 with no supports for the rest of the match
 function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
   if(!support) return [playerPow, oppPow];
   var e = CALLED[support.name];
