@@ -8177,9 +8177,11 @@ let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward 
 let activeBot = null;
 
 function oppInitDeck(){
+  var _won=(typeof oppWonBot!=='undefined'&&oppWonBot&&oppWonBot.size)?oppWonBot:null;   // cards already banked to the bot's Winners Circle this match must never come back into its deck
   var d=(activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool.slice():[];
+  if(_won) d=d.filter(function(c){return !_won.has(c.name);});
   var extra=OPP_CARDS.slice(); for(var i=extra.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=extra[i];extra[i]=extra[j];extra[j]=t; }
-  for(var e=0;e<extra.length && d.length<DECK_SIZE;e++){ if(d.indexOf(extra[e])<0) d.push(extra[e]); }   // pad the themed pool up to a full 14-card deck
+  for(var e=0;e<extra.length && d.length<DECK_SIZE;e++){ if(d.indexOf(extra[e])<0 && !(_won&&_won.has(extra[e].name))) d.push(extra[e]); }   // pad the themed pool up to a full 14-card deck
   for(var i=d.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=d[i];d[i]=d[j];d[j]=t; }
   oppDeckBot=d.slice(0,DECK_SIZE); oppHandBot=[]; oppBanishBot=[]; _oppInPlay=[]; oppDrawOppHand();
 }
