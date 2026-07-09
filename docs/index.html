@@ -4368,14 +4368,32 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
   var e = CALLED[support.name];
   if(!e){ if(support.name) abilLog.push("📣 "+(isOpp?"Opp ":"")+support.name+" called — fighter-only (no support effect)"); return [playerPow, oppPow]; }
   var d = projectCalled(e, ctx);
-  if(e.chargeGain && !isOpp){ charge=Math.min(ENERGY_CAP,charge+e.chargeGain); if(typeof renderCharge==="function") renderCharge(); }
-  if(e.spellDiscountGain && !isOpp && typeof spellDiscount!=='undefined'){ spellDiscount+=e.spellDiscountGain; }
-  if(e.draw && !isOpp){ drawToHand(e.draw); }
-  if(e.drawIfRemnant && !isOpp && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(1); abilLog.push('☠ '+support.name+' — a Remnant stirs: draw a card'); }
-  if(e.banishOwn && !isOpp){ for(var _b=0;_b<e.banishOwn;_b++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } abilLog.push("☠ Banished "+e.banishOwn+" from your hand — into the Order"); if(typeof buildHand==="function")buildHand(); }
-  if(e.recurBuff && !isOpp){ var _got=0; for(var _r=0;_r<e.recurBuff;_r++){ if(banishPile.length){ var _rc=banishPile.pop(); _rc._bo=(_rc._bo||0)+2; hand.push(_rc); _got++; } } if(_got) abilLog.push("♻ "+support.name+" — returned "+_got+" from banish, +2 power each"); if(typeof buildHand==="function")buildHand(); }
-  if(e.recurPlain && !isOpp){ var _gp=0; for(var _rp2=0;_rp2<e.recurPlain;_rp2++){ if(banishPile.length){ hand.push(banishPile.pop()); _gp++; } } if(_gp) abilLog.push("↩ Returned "+_gp+" from banish to hand"); if(typeof buildHand==="function")buildHand(); }
-  if(e.bothBanish && !isOpp){ for(var _bb=0;_bb<e.bothBanish;_bb++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } oppPow-=2*e.bothBanish; abilLog.push("☠ Both discard — you banish "+e.bothBanish+", opponent −"+(2*e.bothBanish)); if(typeof buildHand==="function")buildHand(); }
+  if(e.chargeGain && !isOpp){ charge=Math.min(ENERGY_CAP,charge+e.chargeGain); if(typeof renderCharge==="function") renderCharge(); }   // no bot-side energy resource -- correctly player-only
+  if(e.spellDiscountGain && !isOpp && typeof spellDiscount!=='undefined'){ spellDiscount+=e.spellDiscountGain; }   // bot never casts spells -- correctly player-only
+  if(e.draw){
+    if(!isOpp){ drawToHand(e.draw); }
+    else if(typeof oppDrawN==='function'){ oppDrawN(e.draw); }
+  }
+  if(e.drawIfRemnant && typeof deathRemnants!=='undefined' && deathRemnants.length){
+    if(!isOpp && typeof drawToHand==='function'){ drawToHand(1); abilLog.push('☠ '+support.name+' — a Remnant stirs: draw a card'); }
+    else if(isOpp && typeof oppDrawN==='function'){ oppDrawN(1); abilLog.push('☠ Opp '+support.name+' — a Remnant stirs: draw a card'); }
+  }
+  if(e.banishOwn){
+    if(!isOpp){ for(var _b=0;_b<e.banishOwn;_b++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } abilLog.push("☠ Banished "+e.banishOwn+" from your hand — into the Order"); if(typeof buildHand==="function")buildHand(); }
+    else if(typeof oppBanishN==='function'){ oppBanishN(e.banishOwn); abilLog.push("☠ Opp banished from hand — into the Order"); }
+  }
+  if(e.recurBuff){
+    if(!isOpp){ var _got=0; for(var _r=0;_r<e.recurBuff;_r++){ if(banishPile.length){ var _rc=banishPile.pop(); _rc._bo=(_rc._bo||0)+2; hand.push(_rc); _got++; } } if(_got) abilLog.push("♻ "+support.name+" — returned "+_got+" from banish, +2 power each"); if(typeof buildHand==="function")buildHand(); }
+    else { var _ogot=0; for(var _or2=0;_or2<e.recurBuff;_or2++){ if(oppBanishBot.length){ var _orc2=oppBanishBot.pop(); _orc2._bo=(_orc2._bo||0)+2; oppHandBot.push(_orc2); _ogot++; } } if(_ogot) abilLog.push("♻ Opp "+support.name+" — returned "+_ogot+" from banish, +2 power each"); }
+  }
+  if(e.recurPlain){
+    if(!isOpp){ var _gp=0; for(var _rp2=0;_rp2<e.recurPlain;_rp2++){ if(banishPile.length){ hand.push(banishPile.pop()); _gp++; } } if(_gp) abilLog.push("↩ Returned "+_gp+" from banish to hand"); if(typeof buildHand==="function")buildHand(); }
+    else { var _ogp=0; for(var _orp=0;_orp<e.recurPlain;_orp++){ if(oppBanishBot.length){ oppHandBot.push(oppBanishBot.pop()); _ogp++; } } if(_ogp) abilLog.push("↩ Opp returned "+_ogp+" from banish to hand"); }
+  }
+  if(e.bothBanish){
+    if(!isOpp){ for(var _bb=0;_bb<e.bothBanish;_bb++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } oppPow-=2*e.bothBanish; abilLog.push("☠ Both discard — you banish "+e.bothBanish+", opponent −"+(2*e.bothBanish)); if(typeof buildHand==="function")buildHand(); }
+    else { if(typeof oppBanishN==='function') oppBanishN(e.bothBanish); oppPow-=2*e.bothBanish; abilLog.push("☠ Both discard — opp banishes "+e.bothBanish+", you −"+(2*e.bothBanish)); }
+  }
   playerPow+=d[0]; oppPow+=d[1];
   abilLog.push("📣 "+(isOpp?"Opp ":"")+"Called — "+support.name+": "+e.text);
   return [playerPow, oppPow];
