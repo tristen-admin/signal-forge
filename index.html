@@ -10538,13 +10538,39 @@ function _oppShuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.ra
 /* rebuild the bot deck at the start of every match */
 if(typeof resetMatchState==='function'){ var _oppRMS=resetMatchState; resetMatchState=function(){ oppDrawPileBot=[]; oppWonBot=new Set(); if(typeof oppWC!=='undefined') oppWC=0; if(typeof oppInitDeck==='function') oppInitDeck(); return _oppRMS.apply(this,arguments); }; }
 /* replace random-with-replacement selection with a real deck draw */
+function oppEvalPow(card){
+  // "does the bot understand its own cards" -- estimate a candidate's REAL power
+  // (base + its own on-commit CARD_RULES), not just the printed stat, so a bot
+  // choosing between e.g. a flat pow19 and a pow17-that-becomes-25-under-these-
+  // conditions picks the one that actually wins, not the bigger number on the tin.
+  if(!card) return 0;
+  try{
+    var rec=(typeof kdOf==='function')?kdOf(card):{k:card.kills||0,d:card.deaths||0};
+    var ctx={
+      pc_kills:rec.k, pc_deaths:rec.d, pc_pow:card.pow||0,
+      opp_deaths:0, opp_kills:0, opp_pow:0,   // unknown before commit -- neutral, non-cheating default
+      last_result:(typeof lastResult!=='undefined')?(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)):null,
+      match_commits:(typeof matchCommits!=='undefined')?matchCommits:0,
+      player_wins:(typeof playerScore!=='undefined')?playerScore[1]:0,
+      player_losses:(typeof playerScore!=='undefined')?playerScore[0]:0,
+      hand_len:Math.max(0,(typeof oppHandBot!=='undefined'?oppHandBot.length:1)-1),
+      wc_len:(typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0,
+      both_wc:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+((typeof winnersCircle!=='undefined')?winnersCircle.length:0),
+      banish_len:(typeof oppBanishBot!=='undefined')?oppBanishBot.length:0,
+      remnant_count:0, rear_count:0, skullchain:0, ragwing:0,
+      deck_len:(typeof oppDeckBot!=='undefined')?oppDeckBot.length:0,
+      chaos:(typeof cond!=='undefined'&&cond&&cond.tag==='chaos')
+    };
+    return applyCardRules(card.name, ctx, card.pow||0, 0, [], null)[0];
+  }catch(e){ return card.pow||0; }
+}
 if(typeof pickOppCard==='function'){ pickOppCard=function(){
   if(!oppHandBot||!oppHandBot.length){ if(oppDeckBot && oppDeckBot.length){ oppHandBot.push(oppDeckBot.shift()); } }
   if(!oppHandBot.length){ if(typeof oppInitDeck==='function') oppInitDeck(); }
   if(!oppHandBot.length){ var _p=(typeof activeBot!=='undefined'&&activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool:OPP_CARDS; oppHandBot=[_p[Math.floor(Math.random()*_p.length)]]; }
   var bias=(typeof activeBot!=='undefined'&&activeBot)?(activeBot.bias||0):0;
   var bi=Math.floor(Math.random()*oppHandBot.length);
-  for(var b=0;b<bias;b++){ var a=Math.floor(Math.random()*oppHandBot.length); if((oppHandBot[a].pow||0)>(oppHandBot[bi].pow||0)) bi=a; }   // difficulty bias
+  for(var b=0;b<bias;b++){ var a=Math.floor(Math.random()*oppHandBot.length); if(oppEvalPow(oppHandBot[a])>oppEvalPow(oppHandBot[bi])) bi=a; }   // difficulty bias: keep the higher ESTIMATED power (ability-aware, not just the printed stat)
   var card=oppHandBot.splice(bi,1)[0]; _oppInPlay=[card];   // COMMIT from the bot's hand
   var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null;
   var _out=Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{});
