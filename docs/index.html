@@ -3599,8 +3599,8 @@ function buildMatchView(){
 }
 
 // ── TURN LOGIC ──
-function drawCard(){ if(typeof tutorialAdvance==='function')setTimeout(function(){tutorialAdvance('draw');},90);
-  if(phase !== 'predraw') return;
+function drawCard(force){ if(typeof tutorialAdvance==='function')setTimeout(function(){tutorialAdvance('draw');},90);
+  if(phase !== 'predraw' && !force) return;
 
   // Winners Circle when recovering after a loss; otherwise the top of the shuffled deck.
   const useWC = false;  // Stage 2: WC recovery is the explicit draw-on-loss choice, not an auto-draw
@@ -3656,13 +3656,20 @@ function drawCard(){ if(typeof tutorialAdvance==='function')setTimeout(function(
 }
 
 // Auto-draw: fired at the start of every turn instead of a manual button.
+let _autoDrawToken = 0;
 function beginTurnAutoDraw(){
   if(phase !== 'predraw') return;
   document.getElementById('draw-btn').style.display = 'none';
   document.getElementById('cond-eyebrow').textContent = '⟳ Auto-drawing…';
   document.getElementById('select-hint').textContent = '⟳ Auto-drawing your card…';
   document.getElementById('commit-hint').textContent = 'Auto-drawing to start the turn…';
-  setTimeout(() => { if(phase === 'predraw') drawCard(); }, 550);
+  // Token-gated, not phase-gated: a genuinely NEW turn (another beginTurnAutoDraw call)
+  // correctly cancels this stale draw, but an unrelated phase blip in the 550ms window
+  // no longer silently eats the player's card for the turn (that was the actual bug --
+  // the old `if(phase==='predraw')` re-check at fire time had no memory of WHY phase
+  // moved, so anything that touched it in that window quietly cancelled the refill).
+  var _myDraw = ++_autoDrawToken;
+  setTimeout(() => { if(_myDraw === _autoDrawToken) drawCard(true); }, 550);
 }
 
 // Start-of-turn opener: no draw on the opening turn, auto-draw on every turn after.
