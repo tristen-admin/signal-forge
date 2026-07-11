@@ -3429,6 +3429,16 @@ let preSelectedCard = null;
 let rearGuardIdxs = [];
 let rearGuards = [];
 let pendingOppRears = []; // card held face-down before confirmation
+// pickOppCard()/pickOppRears() splice the bot's picks out of oppHandBot as soon as you stage a
+// fighter -- well before you actually commit. Any path that abandons a staged pick (deselecting,
+// withdrawing after seeing records, a timeout with nothing confirmed) MUST restore those cards or
+// they silently vanish from the bot's hand -- was NOT restored, so backing out of a selection a
+// few times in one turn (or ever using Withdraw) could burn the bot's hand toward zero for real.
+function restorePendingOppPick(){
+  if(pendingOppCard){ oppHandBot.push(pendingOppCard); pendingOppCard = null; }
+  if(pendingOppRears && pendingOppRears.length){ pendingOppRears.forEach(function(c){ if(c) oppHandBot.push(c); }); pendingOppRears = []; }
+  if(typeof updatePiles==='function') updatePiles();
+}
 let oppWC = 0;
 let flameVeilFromWC = false;
 let oppNextDebuff = 0;
@@ -3873,7 +3883,7 @@ function onDecisionTimeout(){
   document.getElementById('opp-field').innerHTML = '<span class="placeholder">no contest</span>';
   playerScore[1]++;
   lastResult = 'lose';
-  selectedCard = null; preSelectedCard = null; pendingOppCard = null;
+  selectedCard = null; preSelectedCard = null; restorePendingOppPick();
   document.getElementById('result-label').textContent = '\u23f1 ROUND SURRENDERED';
   document.getElementById('result-label').className = 'result-label lose';
   document.getElementById('result-sub').textContent = 'No card committed before the clock expired \u2014 the round is forfeited. Your cards stay safe (no death recorded).';
@@ -4677,8 +4687,7 @@ function applyStageMove(src, z){ if(!src) return; if(z==='hand'){ if(src.t==='fi
 function deselectCard(){ if(typeof hideCardPreview==='function')hideCardPreview();
   preSelectedCard = null;
   rearGuardIdxs = [];
-  pendingOppCard = null;
-  pendingOppRears = [];
+  restorePendingOppPick();
   document.getElementById('player-field').innerHTML = '<span class="placeholder">your card</span>';
   document.getElementById('opp-field').innerHTML = '<span class="placeholder">opponent card</span>';
   document.getElementById('opp-area').className = 'opp-waiting';
@@ -4828,7 +4837,7 @@ function retreatCard(){
   lastResult = 'lose';
   selectedCard = null;
   preSelectedCard = null;
-  pendingOppCard = null;
+  restorePendingOppPick();
 
   document.getElementById('result-label').textContent = 'WITHDRAWN';
   document.getElementById('result-label').className = 'result-label tie';
