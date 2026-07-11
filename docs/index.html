@@ -180,6 +180,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .rear-slot.rg-card .rg-eff{font-size:9px;line-height:1.3;color:var(--gold);text-align:center;max-width:118px;background:rgba(10,7,4,.72);border:1px solid rgba(245,194,77,.28);border-radius:5px;padding:2px 5px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .rear-slot.rg-card.enemy .rg-eff{color:var(--lose);border-color:rgba(224,80,60,.35)}
 .rear-slot.rg-card.linked .rg-eff{color:var(--electric);border-color:rgba(91,192,235,.45)}
+.seat-toggle{display:none}
 @media (min-width:1025px){
   /* TRIANGLE: conjured fighter on top (spans 2 cols), its two supports side-by-side beneath */
   .field{overflow:visible;align-content:center;grid-template-columns:repeat(4,1fr);row-gap:8px;column-gap:10px}
@@ -195,7 +196,26 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
   .field-half .placeholder{width:104px;height:139px}
   #opp-field .field-card,#player-field .field-card{max-height:150px;overflow:hidden}
   #opp-field .field-card .c-abil,#player-field .field-card .c-abil{display:none}
+
+  /* CAMERA SWITCH: solo (your V-formation alone, pre-commit) <-> duo (both sides, resolution) */
+  .field.cam-swing{animation:fieldSwing .5s cubic-bezier(.4,0,.2,1)}
+  .field.cam-solo #opp-field,.field.cam-solo #opp-rear,.field.cam-solo #opp-rear2{opacity:0;pointer-events:none;transition:opacity .3s ease}
+  .field.cam-solo #player-field{grid-column:1/5;grid-row:1;justify-self:center}
+  .field.cam-solo #player-rear{grid-column:2;grid-row:2;justify-self:end}
+  .field.cam-solo #player-rear2{grid-column:3;grid-row:2;justify-self:start}
+  /* seat side: default is opponent-left/you-right (matches the original hardcoded layout above) */
+  .field.seat-left #opp-field{grid-column:3/5}
+  .field.seat-left #player-field{grid-column:1/3}
+  .field.seat-left #opp-rear{grid-column:3}
+  .field.seat-left #opp-rear2{grid-column:4}
+  .field.seat-left #player-rear{grid-column:1}
+  .field.seat-left #player-rear2{grid-column:2}
+
+  .seat-toggle{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--text3)}
+  .seat-toggle .seat-btn{padding:4px 10px;font-size:10px}
 }
+@keyframes fieldSwing{0%{opacity:1;transform:scale(1)}40%{opacity:.6;transform:scale(.965)}100%{opacity:1;transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){ .field.cam-swing{animation:none} }
 
 /* ── REVEAL IMPACT FX ── */
 .impact-fx{position:absolute;inset:0;pointer-events:none;z-index:6;display:flex;align-items:center;justify-content:center;opacity:0}
@@ -2680,6 +2700,11 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <button class="match-exit" onclick="exitMatch()">⟵ Exit to Lobby</button>
     <div class="match-vs">vs <span class="mv-bot" id="match-bot-name">Bot</span></div>
     <span id="match-bot-tag" style="font-size:10px;color:var(--text3)"></span>
+    <div class="seat-toggle" title="Choose which side your field renders on during resolution">
+      <span>Seat</span>
+      <button class="tt-btn seat-btn" data-seat="left" onclick="setCameraSeat('left')">Left</button>
+      <button class="tt-btn seat-btn" data-seat="right" onclick="setCameraSeat('right')">Right</button>
+    </div>
     <div class="wager-hud" style="margin-left:auto"><div class="match-stake" id="match-stake"></div><button class="whud-btn raise" id="hud-raise-btn" onclick="hudRaise()">⚡ Raise</button><button class="whud-btn fold" id="hud-fold-btn" onclick="hudFold()">🏳 Fold</button></div>
   </div>
   <div class="duel-strip" style="position:relative">
@@ -3350,6 +3375,7 @@ const SET2_POOL = [
 
 // ── STATE ──
 let phase = 'predraw';
+let cameraSeat = (function(){ try{ return localStorage.getItem('sf_seat_side')||'right'; }catch(e){ return 'right'; } })();
 let conditionIndex = -1;
 let selectedCard = null;
 let playerScore = [1,0];
@@ -3454,6 +3480,7 @@ const PHASE_MAP = {predraw:'ph-draw',drawn:'ph-reveal',revealed:'ph-instant1',se
 
 function setPhase(p){
   phase = p; try{ window._phaseAt = Date.now(); }catch(e){}
+  if(p==='predraw') setCameraMode('solo'); else if(p==='committed') setCameraMode('duo');
   if(typeof buildSpellTray==='function') buildSpellTray();  // keep the energy tray's castability in sync with the phase
   PHASE_IDS.forEach(id => {
     const el = document.getElementById(id);
@@ -3468,6 +3495,25 @@ function setPhase(p){
     if(id === activeId){ el.classList.add('active'); found = true; }
     else if(!found){ el.classList.add('done'); }
   });
+}
+
+// desktop-only camera switch: 'solo' = your V-formation alone (pre-commit turn phases),
+// 'duo' = both sides' formations, seat-side controls which physical side you're on.
+function setCameraMode(mode){
+  var f = document.querySelector('.field');
+  if(!f) return;
+  var wantSolo = mode!=='duo';
+  if(f.classList.contains('cam-solo') === wantSolo) return;
+  f.classList.toggle('cam-solo', wantSolo);
+  f.classList.add('cam-swing');
+  setTimeout(function(){ f.classList.remove('cam-swing'); }, 600);
+}
+function setCameraSeat(side){
+  cameraSeat = side==='left' ? 'left' : 'right';
+  try{ localStorage.setItem('sf_seat_side', cameraSeat); }catch(e){}
+  var f = document.querySelector('.field');
+  if(f) f.classList.toggle('seat-left', cameraSeat==='left');
+  document.querySelectorAll('.seat-btn').forEach(function(b){ b.classList.toggle('on', b.dataset.seat===cameraSeat); });
 }
 
 function updatePiles(){
@@ -10003,6 +10049,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   document.getElementById('select-hint').textContent='⟳ Auto-drawing your card…';
   document.getElementById('commit-hint').textContent='Auto-drawing to start the turn…';
   setPhase('predraw');
+  setCameraSeat(cameraSeat);
   buildHand(); updateScore(); updatePiles();
   openTurn();
 }
