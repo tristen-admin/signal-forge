@@ -5861,8 +5861,14 @@ function resolve(pc, oc, cond, playerCommittedPow){
     if(!_al && pc.name === 'Voltcaller'){ spellDiscount += 2; abilLog.push('\u26a1 Voltcaller: your next Interrupt costs 2 less'); } }
   // ── REAR-GUARD: Called (always fires) + same-group Link Skill ──
   { var _rgc={match_commits:matchCommits, last_result:lastResult, hand_len:hand.length, opp_deaths:oc.deaths||0, opp_kills:oc.kills||0, wins:playerScore[0], losses:playerScore[1], wc_len:winnersCircle.length, chaos:(cond.tag==='chaos')};
+    // SNIPE pass runs first, both directions, before either side's Called/Link effects below --
+    // otherwise a sniped support could still have already contributed its power/ability this duel,
+    // and a bot-fielded snipe card (e.g. Legend Reborn, Keawe Kel'rua) had no effect at all since
+    // only the player-side loop ever checked snipeSupport.
+    rearGuards.forEach(function(rg,_rgi){ if(!rg) return; var _kc=(typeof CALLED!=='undefined')?CALLED[rg.name]:null; if(_kc && _kc.snipeSupport && pendingOppRears[_rgi]){ var _sn=pendingOppRears[_rgi]; pendingOppRears[_rgi]=null; abilLog.push('🎯 '+rg.name+': sniped '+_sn.name+' — opposing support removed'); } });
+    pendingOppRears.forEach(function(og,_ogi){ if(!og) return; var _okc=(typeof CALLED!=='undefined')?CALLED[og.name]:null; if(_okc && _okc.snipeSupport && rearGuards[_ogi]){ var _osn=rearGuards[_ogi]; rearGuards[_ogi]=null; abilLog.push('🎯 Opp '+og.name+': sniped '+_osn.name+' — your support removed'); } });
+
     rearGuards.forEach(function(rg,_rgi){ if(!rg) return; if(pc&&pc.name==='Kaelthar the Ascendant') return;
-      { var _kc=(typeof CALLED!=='undefined')?CALLED[rg.name]:null; if(_kc && _kc.snipeSupport && pendingOppRears[_rgi]){ var _sn=pendingOppRears[_rgi]; pendingOppRears[_rgi]=null; abilLog.push('🎯 '+rg.name+': sniped '+_sn.name+' — opposing support removed'); } }
       var _rr=applyCalled(rg, _rgc, playerPow, oppPow, abilLog, false); playerPow=_rr[0]; oppPow=_rr[1];
       var _lk=fieldLink(pc, rg); if(_lk){ playerPow+=_lk.pow; abilLog.push('🔗 '+_lk.name+' Link — '+pc.name+' + '+rg.name+': +'+_lk.pow); var _tb=(typeof CALLED!=='undefined'&&CALLED[rg.name]&&CALLED[rg.name].twinBuff)||0; if(_tb){ playerPow+=_tb; abilLog.push('🐺 '+rg.name+' rallies the twins — '+pc.name+' +'+_tb); } }
     });
