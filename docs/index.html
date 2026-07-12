@@ -9292,7 +9292,7 @@ function rankedFindMatch(){
   setTimeout(function(){
     const q2=document.getElementById('ranked-queue');
     if(q2) q2.innerHTML='<div class="rq-searching"><div class="rq-found">✓ Match found — '+chosen.name+'</div><div class="rq-sub">'+chosen.arch+' · Difficulty '+chosen.diff+'/4 · entering ranked duel…</div></div>';
-    setTimeout(function(){ selectedBot=chosen.id; startMatch(); rankedMode=true; if(typeof updateStake==='function') updateStake(); }, 950);
+    setTimeout(function(){ selectedBot=chosen.id; startMatch('ranked'); if(typeof updateStake==='function') updateStake(); }, 950);
   }, 1600 + Math.floor(Math.random()*900));
 }
 // ══ MASTERY — per-card progression to Lv 25, rarity-gated reward ladder, fueled by Ascension bond ══
@@ -10308,13 +10308,19 @@ function updateLaunch(){
     btn.disabled=true;
   }
 }
-function startMatch(){
+function startMatch(mode){
   const b=BOT_OPPONENTS.find(x=>x.id===selectedBot);
   if(!b) return;
   activeBot=b;
   pvpMode=false;
-  rankedMode=false;
-  deckMasterMode=false;
+  // Flags MUST be set to their final value before resetMatchState()/dealNewDeck() run below —
+  // those functions read deckMasterMode (guaranteed opening-hand draw, badge paint) synchronously
+  // during this same call. Setting the flag AFTER startMatch() returns (the old "call shared fn,
+  // flip flag after" idiom) is too late: the hand is already dealt and the first paint already
+  // happened with the flag still false. Real bug found via playtest (7/12/26) — fixed at the root
+  // by taking the mode as a parameter instead of a post-hoc flag flip.
+  rankedMode=(mode==='ranked');
+  deckMasterMode=(mode==='deckmaster');
   resetMatchState();
   toast('Best of 7 — good luck.', true);
   document.getElementById('match-bot-name').textContent=b.name;
@@ -10329,8 +10335,7 @@ function startMatch(){
 // the bot is untouched, same activeBot/BOT_OPPONENTS as every other mode.
 function startDeckMasterMatch(){
   if(!deckMasterCard || !activeDeck.has(deckMasterCard)){ toast('Name a Deck Master in the Deck Builder first — must be AR/Ultra/Rare and in your deck.', false); return; }
-  startMatch();
-  deckMasterMode=true;
+  startMatch('deckmaster');
   document.getElementById('nav-lobby').classList.add('on');
   document.getElementById('tb-title').textContent='Deck Master — vs '+activeBot.name;
   toast('★ Deck Master: '+deckMasterCard, true);
