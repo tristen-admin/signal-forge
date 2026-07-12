@@ -1500,6 +1500,9 @@ body.rm body.nav-collapsed #nav-hub .ni-icon,body.rm.nav-collapsed #nav-hub .ni-
 .ds-dm.on{color:var(--gold)}
 .deck-slot.filled.dm-master{border-left-color:var(--gold);box-shadow:inset 0 0 0 1px rgba(212,168,67,.35)}
 .deck-slot.filled.dm-master .ds-name{color:var(--gold)}
+.dm-badge{display:inline-flex;align-items:center;gap:6px;padding:2px 9px 2px 2px;border-radius:20px;background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.4)}
+.dm-badge-portrait{width:22px;height:22px;border-radius:50%;background-size:cover;background-position:center top;background-color:rgba(212,168,67,0.15);border:1px solid var(--gold);flex-shrink:0}
+.dm-badge-label{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.02em;white-space:nowrap}
 .deck-pool-col .vault-grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}
 
 /* ── MARKETPLACE ── */
@@ -2860,6 +2863,10 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="player-zone">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span class="zone-label">Your Hand</span>
+        <span id="dm-badge" class="dm-badge" style="display:none" title="Your Deck Master this match">
+          <span id="dm-badge-portrait" class="dm-badge-portrait"></span>
+          <span class="dm-badge-label">★ <span id="dm-badge-name"></span></span>
+        </span>
         <span id="select-hint" style="font-size:10px;color:var(--text3)">Draw a card to start</span>
         <div class="pile-strip" style="margin-left:auto">
           <div class="pile-chip" title="Your hand"><span class="pile-icon">✋</span><span class="pile-count" id="hand-count">4</span><span class="pile-label">Hand</span></div>
@@ -3576,6 +3583,15 @@ function updatePiles(){
   const si = document.getElementById('surge-indicator');
   if(banishSurge > 0){ si.style.display='inline'; si.textContent=`+${banishSurge} Surge Ready`; }
   else { si.style.display='none'; }
+  { var _dmb=document.getElementById('dm-badge');
+    if(_dmb){
+      if(typeof deckMasterMode!=='undefined' && deckMasterMode && deckMasterCard){
+        _dmb.style.display='inline-flex';
+        var _dmc=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===deckMasterCard && !x.uid;}):null;
+        var _dmp=document.getElementById('dm-badge-portrait'); if(_dmp && typeof artFillStyle==='function') _dmp.style.cssText=artFillStyle((_dmc&&_dmc.artKey)||deckMasterCard);
+        var _dmn=document.getElementById('dm-badge-name'); if(_dmn) _dmn.textContent=deckMasterCard;
+      } else { _dmb.style.display='none'; }
+    } }
 }
 
 // ── INIT ──
@@ -5137,6 +5153,16 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     }
     function clash(){
       try{ if(typeof playSkillVFX==='function'){ playSkillVFX('reveal', document.getElementById('rc-card-me'), {hold:550}); playSkillVFX('reveal', document.getElementById('rc-card-opp'), {hold:550}); } }catch(e){}
+      // Deck Master tier-1 flourish — additive on top of whatever VFX the card already plays, gated
+      // entirely to the exact named Deck Master card conjuring itself. Localized to the card, not a
+      // full-screen takeover, so it never competes with the WIN/LOSE stamp a beat later.
+      try{ if(typeof deckMasterMode!=='undefined' && deckMasterMode && deckMasterCard && pc && pc.name===deckMasterCard && typeof FX!=='undefined'){
+        var _dmEl=document.getElementById('rc-card-me');
+        if(_dmEl){ var _dmR=_dmEl.getBoundingClientRect(), _dmX=_dmR.left+_dmR.width/2, _dmY=_dmR.top+_dmR.height/2;
+          FX.ring(_dmX, _dmY, {c:'rgba(212,168,67,.95)', r0:12, vr:11, w:6});
+          FX.burst(_dmX, _dmY, {n:48, speed:6.5, colors:['#f7e3a1','#d4a843','#fff2c9'], up:1.1});
+        }
+      } }catch(e){}
       try{ if(typeof cardVFXKind==='function'&&typeof playSkillVFX==='function'){ var _mk=cardVFXKind(pc); if(_mk){ var _mo=(_mk==='slash'&&typeof slashClip==='function')?{idx:slashClip(pc,(finalPP-basePP),won==='win')}:{}; playSkillVFX(_mk, document.getElementById('rc-card-me'), _mo); } var _ok=cardVFXKind(oc); if(_ok){ var _oo=(_ok==='slash'&&typeof slashClip==='function')?{idx:slashClip(oc,(finalOP-baseOP),won==='lose')}:{}; playSkillVFX(_ok, document.getElementById('rc-card-opp'), _oo); } } }catch(e){}
       var cm=document.getElementById('rc-card-me'), co=document.getElementById('rc-card-opp');
       if(cm) cm.classList.add('rc-clash'); if(co) co.classList.add('rc-clash');
