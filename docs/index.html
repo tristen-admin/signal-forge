@@ -3284,6 +3284,11 @@ const DECK_POOL = [
   {name:'Cletus Gwyndull',pow:15,kills:0,deaths:0,rarity:'rare',timing:'pre',abil:'Pre-commit: lock the active condition this turn — opponent cannot shift it.'},
   {name:'Val Kreigh',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if this is the 1st duel of the match, +6 power.'},
   {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'genesis',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
+  // Warpath combo pieces (7/12/26) — makes the empty-Winners-Circle Deck Master mechanic (Tange/Kravyn)
+  // a sustainable loop instead of a one-time front-loaded bonus. Not in WARPATH_PRESET by default —
+  // available in the Vault/deck builder for anyone building around the combo.
+  {name:'Unbanked Victory',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +3 power if your Winners Circle is empty — an unclaimed victory is worth more than a banked one.'},
+  {name:'Reclaim the Colors',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your Winners Circle.'},
   // Ultras
   {name:'Lagertha Waltz',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 if you lost your last duel. -2 if you won your last duel.'},
   {name:'Valcarion',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if there is a card in your banish zone, add it to your hand — or call it to an open support circle.'},
@@ -3577,6 +3582,8 @@ const OPP_CARDS = [
   {name:'First-Blood Squire',pow:12,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +4 power on the 1st duel of the match only.'},
   {name:"Kravyn's Protege",pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +3 power once this card has earned 6 or more career kills.'},
   {name:'King Joris',pow:12,kills:0,deaths:0,rarity:'common',timing:'on',abil:"Rightful Claim: on commit, +1 power for every death on the opponent's record — the betrayed king judges every usurper's sins."},
+  {name:'Unbanked Victory',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +3 power if your Winners Circle is empty — an unclaimed victory is worth more than a banked one.'},
+  {name:'Reclaim the Colors',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your Winners Circle.'},
 ];
 
 const PHASE_IDS = ['ph-draw','ph-reveal','ph-instant1','ph-precommit','ph-commit','ph-instant2','ph-resolve'];
@@ -4488,6 +4495,11 @@ const CALLED = {
   "Elowen Dawnspear":              {text:"your Fighter +3", add:3},
   "Bixie Bee":                     {text:"your Fighter +3", add:3},
   "Uso Oso":                       {text:"your Fighter +3", add:3},
+  // Warpath combo pieces (7/12/26) — genuinely new effect kinds, not reusable from the existing
+  // vocabulary above: nothing here lets a Called support redirect where a FUTURE win banks to, or
+  // pull a card back OUT of the Winners Circle once it's there.
+  "Unbanked Victory":              {text:"your next win returns to your hand instead of banking to the Winners Circle", unbankNextWin:true},
+  "Reclaim the Colors":            {text:"return 1 card from your Winners Circle to the bottom of your deck", reclaimWC:1},
 };
 const TRIGGERS = {   // fire when revealed off the top of your deck on a LOST duel (comeback aid)
   "Faye Quicksilver":{draw:1, text:"draw a card"},
@@ -4564,6 +4576,26 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
   if(e.bothBanish){
     if(!isOpp){ for(var _bb=0;_bb<e.bothBanish;_bb++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } oppPow-=2*e.bothBanish; abilLog.push("☠ Both discard — you banish "+e.bothBanish+", opponent −"+(2*e.bothBanish)); if(typeof buildHand==="function")buildHand(); }
     else { if(typeof oppBanishN==='function') oppBanishN(e.bothBanish); oppPow-=2*e.bothBanish; abilLog.push("☠ Both discard — opp banishes "+e.bothBanish+", you −"+(2*e.bothBanish)); }
+  }
+  // Warpath combo pieces (7/12/26) — unbankNextWin is a delayed flag, consumed at the next win's
+  // WC-banking decision in resolve(); reclaimWC is immediate, fires right here.
+  if(e.unbankNextWin){
+    if(!isOpp){ unbankNextWin=true; abilLog.push("🏳 "+support.name+" — your next win returns to hand instead of banking"); }
+    else { oppUnbankNextWin=true; abilLog.push("🏳 Opp "+support.name+" — their next win returns to hand instead of banking"); }
+  }
+  if(e.reclaimWC){
+    if(!isOpp){
+      if(typeof winnersCircle!=='undefined' && winnersCircle.length){ var _rc4=winnersCircle.pop(); if(typeof drawPile!=='undefined'){ drawPile.unshift(_rc4); if(typeof deckSize!=='undefined') deckSize=drawPile.length; } abilLog.push("↩ "+support.name+" — reclaimed "+_rc4.name+" from your Winners Circle to the bottom of your deck"); }
+      else { abilLog.push("↩ "+support.name+" — Winners Circle empty, nothing to reclaim"); }
+    } else {
+      if(typeof oppWonBot!=='undefined' && oppWonBot && oppWonBot.size){
+        var _oarr=Array.from(oppWonBot); var _opick=_oarr[_oarr.length-1]; oppWonBot.delete(_opick);
+        if(typeof oppWC!=='undefined') oppWC=oppWonBot.size;
+        var _opool=(typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]); var _ocard=_opool.find(function(x){return x.name===_opick;});
+        if(_ocard && typeof oppDeckBot!=='undefined') oppDeckBot.unshift(Object.assign({},_ocard));
+        abilLog.push("↩ Opp "+support.name+" — reclaimed "+_opick+" from their Winners Circle to the bottom of their deck");
+      } else { abilLog.push("↩ Opp "+support.name+" — Winners Circle empty, nothing to reclaim"); }
+    }
   }
   playerPow+=d[0]; oppPow+=d[1];
   abilLog.push("📣 "+(isOpp?"Opp ":"")+"Called — "+support.name+": "+e.text);
@@ -5938,6 +5970,29 @@ const CARD_RULES = {
    "log": "⚔️ Val Kreigh: +6 (first duel)"
   }
  ],
+ "Unbanked Victory": [
+  {
+   "if": {
+    "v": "wc_len",
+    "op": "==",
+    "n": 0
+   },
+   "add": 3,
+   "log": "🏳 Unbanked Victory: your Winners Circle is empty — +3"
+  }
+ ],
+ "Reclaim the Colors": [
+  {
+   "if": {
+    "v": "wc_len",
+    "op": ">",
+    "n": 0
+   },
+   "addvar": "wc_len",
+   "x": 1,
+   "log": "↩ Reclaim the Colors: +1×WC"
+  }
+ ],
  "Tange Sazen": [
   {
    "if": {
@@ -6415,6 +6470,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     }
     playerScore[0]++;
     if(pc.name==='Skullchain Reaver' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); }
+    else if(unbankNextWin){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); unbankNextWin=false; abilLog.push('🏳 Unbanked Victory — '+pc.name+' returns to your hand instead of banking to the Winners Circle'); }
     else if(deckMasterMode && deckMasterCard && pc.name===deckMasterCard){ drawPile.unshift({...pc}); deckSize=drawPile.length; abilLog.push('★ '+pc.name+' — your Deck Master recycles to the deck instead of the Winners Circle, ready to be conjured again'); }
     else { winnersCircle.push({...pc}); }
     lastResult = 'win';
@@ -8660,6 +8716,8 @@ let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward 
 let deckMasterMode = false;   // true only for Deck Master matches — player-only mechanic, bot plays unmodified
 let deckMasterRecord = lsGet('sf_dm_record', {k:0,d:0});   // Phase E: assimilated K/D, ADDITIVE alongside the card's own normal cardRecords/kdOf() — never replaces it
 let dmForfeitDrawBonus = false;   // Phase F: set by dmForfeit(), consumed for +1 extra draw on the very next drawCard() call
+let unbankNextWin = false;        // Warpath combo (7/12/26): set by Unbanked Victory's Called effect, consumed at the player's next WC-banking decision in resolve()
+let oppUnbankNextWin = false;     // same, bot-side — consumed in the resolve() win-tracking wrapper near the bottom of this file
 let activeBot = null;
 
 function oppInitDeck(){
@@ -10509,7 +10567,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   winnersCircle=[]; banishPile=[]; dealNewDeck();
   banishSurge=0; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
-  oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false;
+  oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
   charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
@@ -11265,7 +11323,10 @@ if(typeof pickOppCard==='function'){ pickOppCard=function(){
 if(typeof resolve==='function'){ var _oppRes=resolve; resolve=function(pc,oc,cond,pcpow){
   var _b1 = (typeof playerScore!=='undefined') ? playerScore[1] : 0;
   var r = _oppRes.apply(this, arguments);
-  try{ if(oc && oc.name && typeof playerScore!=='undefined' && playerScore[1] > _b1){ if(!oppWonBot) oppWonBot=new Set(); oppWonBot.add(oc.name); if(typeof oppWC!=='undefined') oppWC=oppWonBot.size; } }catch(e){}
+  try{ if(oc && oc.name && typeof playerScore!=='undefined' && playerScore[1] > _b1){
+    if(typeof oppUnbankNextWin!=='undefined' && oppUnbankNextWin){ oppUnbankNextWin=false; if(typeof oppHandBot!=='undefined') oppHandBot.push(Object.assign({},oc)); }
+    else { if(!oppWonBot) oppWonBot=new Set(); oppWonBot.add(oc.name); if(typeof oppWC!=='undefined') oppWC=oppWonBot.size; }
+  } }catch(e){}
   return r;
 }; }
 </script>
