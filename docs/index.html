@@ -8096,6 +8096,19 @@ function dealNewDeck(){
   shuffle(deckCards);
   hand = deckCards.slice(0, STARTING_HAND);
   drawPile = deckCards.slice(STARTING_HAND);
+  // Deck Master (7/12/26 playtest finding): the identity card is otherwise just one of 16 in the
+  // random draw pool — a whole match can go by without it ever coming up. Guarantee it in the
+  // OPENING hand only (not re-forced later) so the mode's own signature moment isn't a lottery,
+  // while still leaving the choice of WHEN to conjure it entirely up to the player.
+  if(typeof deckMasterMode!=='undefined' && deckMasterMode && deckMasterCard && !hand.some(function(c){return c.name===deckMasterCard;})){
+    var _dmIdx=drawPile.findIndex(function(c){return c.name===deckMasterCard;});
+    if(_dmIdx>=0){
+      var _dmCard=drawPile.splice(_dmIdx,1)[0];
+      drawPile.push(hand.pop());
+      hand.push(_dmCard);
+      shuffle(drawPile);
+    }
+  }
   deckSize = drawPile.length;
 }
 
