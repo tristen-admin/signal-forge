@@ -10520,6 +10520,11 @@ function startMatch(mode){
 // the bot is untouched, same activeBot/BOT_OPPONENTS as every other mode.
 function startDeckMasterMatch(){
   if(!deckMasterCard || !activeDeck.has(deckMasterCard)){ toast('Name a Deck Master in the Deck Builder first — must be AR/Ultra/Rare and in your deck.', false); return; }
+  // Real bug (7/12/26): this guard only checked membership, not deck size. dealNewDeck() silently
+  // falls back to the hardcoded DEFAULT_DECK whenever activeDeck.size < MIN_DECK — if the named
+  // Deck Master isn't one of DEFAULT_DECK's 12 cards, the whole match ran on a different deck
+  // entirely and the guarantee had nothing to find, while the stale badge still claimed it was in play.
+  if(activeDeck.size < MIN_DECK){ toast('Your deck needs at least '+MIN_DECK+' cards before playing Deck Master — build it up in the Deck Builder first.', false); return; }
   startMatch('deckmaster');
   document.getElementById('nav-lobby').classList.add('on');
   document.getElementById('tb-title').textContent='Deck Master — vs '+activeBot.name;
