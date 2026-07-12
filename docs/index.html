@@ -3514,18 +3514,69 @@ const OPP_CARDS = [
   {name:"Grum the Steady",pow:11,kills:0,deaths:0,rarity:"common",abil:"Giant-Killer: +4 if the opponent has more career kills."},
   {name:'Lagertha Waltz',pow:14,kills:0,deaths:0,rarity:'rare',abil:'On commit: +2 if lost last, -2 if won last.'},
   {name:'Conduit of Chaos, Kleydson',pow:4,kills:0,deaths:0,rarity:'common',abil:'No ability.'},
-  {name:'Arch-Grim Korrin',pow:14,kills:0,deaths:0,rarity:'rare',abil:'On commit: +6 if opponent has fewer career kills.'},
+  {name:'Arch-Grim Korrin',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'On commit: +4 per Death Remnant on the field, and draw 1 for each Remnant you hold. Death Remnant: when he falls, +8 to your cards until an enemy dies.'},
   {name:'Anorith Keeling',pow:13,kills:0,deaths:0,rarity:'genesis',abil:'Chaos Deity — chaos incarnate.'},
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'genesis',abil:'On commit: +3 if 0-death OR lost last; repeats if won a duel.'},
   {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'genesis',abil:'On commit: if 3rd+ commit, +3 power.'},
   {name:'Kiba',pow:2,kills:0,deaths:0,rarity:'common',abil:'Death Remnant: +2 power to next cards until opp kill.'},
-  {name:'Zerith Var',pow:19,kills:0,deaths:0,rarity:'uncommon',abil:'On commit: if opp outpowers you, +4.'},
+  {name:'Zerith Var',pow:19,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"On commit: if you are losing this duel (opponent's base power is higher), +4 power."},
   {name:'Malia',pow:10,kills:0,deaths:0,rarity:'common',abil:'On commit: mirror opponent power.'},
   {name:'Ahdorah Khaan, Determined Soul',pow:17,kills:0,deaths:0,rarity:'genesis',abil:'On commit: underdog hand bonus.'},
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',abil:'On commit: comeback double.'},
   {name:'Valcarion',pow:15,kills:0,deaths:0,rarity:'rare',abil:'On commit: reclaim a banished card to hand or support.'},
-  {name:'Envoy of Tyrants, Ella Ballora',pow:14,kills:0,deaths:0,rarity:'ultra',abil:'Bloodrage: +3, and +3 more when wounded.'},
+  {name:'Envoy of Tyrants, Ella Ballora',pow:14,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Bloodrage: on commit +3 with 3+ cards in hand, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
   {name:'Kiana',pow:15,kills:0,deaths:0,rarity:'uncommon',abil:'Elemental Flurry: +3, +4 more in chaos conditions.'},
+  // ── Bot identity backfill (7/12/26) — real COLLECTION stats/abil, not invented, so pick(PRESET) can
+  // resolve a genuine 16-card themed deck instead of silently padding with unrelated random cards. ──
+  // (Ghorruk "Gnarly" Judarr already existed above at pow:16/ultra — not duplicated here.)
+  {name:'Summoned Skull Soldiers',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +7 to your cards until an enemy dies. On commit: +3 power for each Remnant you hold.'},
+  {name:'Uso Oso',pow:16,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:"Death Remnant: when Uso dies he stays on field. Your cards here gain +10 power until an opponent's card is killed, then Remnant is removed. When this card is conjured, call a \"Oso's skeletal summons\" from outside of your deck to an open support circle."},
+  {name:"Uso Oso's Skeletal Summons",pow:5,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:"Death Remnant: these bones don't stay down — when the summons falls it lingers on the field, +5 to your committed cards until an opponent's card is killed."},
+  {name:'Bone Choirmaster',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +5 to your cards until an enemy dies. On a win, draw a card.'},
+  {name:'Marrow Priest',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Support: your Fighter +3; if a Remnant is on the field, draw a card.'},
+  {name:'Widow of the Vigil',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you have a Remnant, draw 2; otherwise +3 power.'},
+  {name:'Gravecaller Voss',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish a card from your hand to raise a Death Remnant worth +5 — no death required. Called as a support: lingers as a +5 Remnant.'},
+  {name:'Grave-Fed Ghoul',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Death Remnant: when it falls, +4 to your cards until an enemy dies.'},
+  {name:'Pale Gravedigger',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: raise a +3 Death Remnant, then draw a card while you hold a Remnant.'},
+  {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:"Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, +6 to your committed cards until an opponent's card is killed."},
+  {name:'The Regenerating Horror',pow:11,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Regeneration (one use per match): the first time this card would lose, it regrows instead — the duel ties, no death is recorded, and it returns to your hand. Only a finisher truly ends it.'},
+  {name:'Signal Diviner',pow:12,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Foresight: on commit, draw a card. On win: next turn gain 2 max Charge.'},
+  {name:'Bannerlord Cassian',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 5: on commit, +5 power for each 1-cost ally — your 1-cost supports this duel plus every 1-cost card in your Winners Circle. The banner of the cheap and the many.'},
+  {name:'Ironsworn Vanguard',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 power per 1-cost ally (1-cost supports this duel + 1-cost cards in your Winners Circle).'},
+  {name:'Warden of the Wall',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. A wall is only as strong as the line beside it.'},
+  {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.'},
+  {name:'Muster-Sergeant Bryn',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), give your Fighter +1 for every card in your Winners Circle.'},
+  {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
+  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
+  {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 per 1-cost ally. Weak alone, unbroken together.'},
+  {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the banner lifts the whole line.'},
+  {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2.'},
+  {name:'Heir of Kaiga',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast.'},
+  {name:'Conduit Adept',pow:6,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: gain 1 Charge.'},
+  {name:'Chieftain Reyva Vosh',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"Warriors in Reserve: on commit, +2 power for each card in your Winners Circle — she commits her hold's warriors once the stakes are undeniable."},
+  {name:'La "La" Ballora, the Broodqueen',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw 2 cards — her brood is her hand.'},
+  {name:'Venombrood Queen',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Broodswarm: on commit, +2 power for each card in your hand.'},
+  {name:'Broodmother',pow:13,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Spiderling Swarm: on commit, +1 power for every card in your hand — the brood answers her call.'},
+  {name:'Fledgling Broodmother',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Lesser Swarm: on commit, +1 power for every card in your hand.'},
+  {name:'Web-Spinner Acolyte',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your hand.'},
+  {name:'Skittering Drone',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: on commit, +1 power for each card in your hand.'},
+  {name:'Hatchling Tide',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: +4 power while your hand is full (4+ cards).'},
+  {name:"Hoarder's Gambit",pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: draw 2, then +1 power for every card in your hand.'},
+  {name:'Web-Tender Matron',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), draw 2 cards.'},
+  {name:'The Gathering Swarm',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +4 power while you hold 3 or more cards; the opponent − 4 power while you hold 5 or more.'},
+  {name:'Silkbound Sentinel',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Support: draw a card; your Fighter +2.'},
+  {name:"Widow's Patience",pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +5 power if your hand is full (6 cards).'},
+  {name:"Web-Weaver's Return",pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: shuffle your banish pile back into your deck, then draw a card — the web is rewoven.'},
+  {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'genesis',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
+  {name:'Trophy-Hunter Kessa',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every card in BOTH players Winners Circle.'},
+  {name:'Skullchain Reaver',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power per kill earned this match; when it wins, it returns to your hand instead of the Winners Circle.'},
+  {name:'Warpath Vanguard',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power on the 1st or 2nd duel of the match.'},
+  {name:'The Undefeated',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every duel you have already won this match.'},
+  {name:'Val Kreigh',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if this is the 1st duel of the match, +6 power.'},
+  {name:'Bloodwake Duelist',pow:11,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: on commit, +2 power for every kill you have earned this match.'},
+  {name:'First-Blood Squire',pow:12,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +4 power on the 1st duel of the match only.'},
+  {name:"Kravyn's Protege",pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +3 power once this card has earned 6 or more career kills.'},
+  {name:'King Joris',pow:12,kills:0,deaths:0,rarity:'common',timing:'on',abil:"Rightful Claim: on commit, +1 power for every death on the opponent's record — the betrayed king judges every usurper's sins."},
 ];
 
 const PHASE_IDS = ['ph-draw','ph-reveal','ph-instant1','ph-precommit','ph-commit','ph-instant2','ph-resolve'];
@@ -5494,7 +5545,15 @@ function legendMiniHTML(c){ const s=legendScore(c); if(s<180) return ''; const t
 // change Deck Master tier eligibility — so this list is its own source of truth.
 const ARCHETYPE_MEMBERS = {
   'Death Remnant': ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned Skull Soldiers','Uso Oso','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Gravecaller Voss'],
-  'Muster': ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Chieftain Reyva Vosh']
+  'Muster': ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Chieftain Reyva Vosh'],
+  // Broodswarm + Warpath added 7/12/26 for the bot identity build — same "non-Common only, excludes
+  // proven cross-deck generic staples (Signal Diviner/Faye Quicksilver/Heir of Kaiga/Zerith Var, each
+  // seen in 2+ presets)" rule as Death Remnant/Muster above.
+  'Broodswarm': ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return"],
+  // corrected against real rarity data: Bloodwake Duelist/First-Blood Squire are Common (tier 4, not
+  // tier 2); Ruffius Rufeldro/Bram the Bulwark are Rare and NOT proven cross-deck generic (only
+  // appear in Warpath's own preset), so they belong here instead.
+  'Warpath': ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bram the Bulwark']
 };
 function archetypeOf(cardName){
   for(var arch in ARCHETYPE_MEMBERS){ if(ARCHETYPE_MEMBERS[arch].indexOf(cardName)>=0) return arch; }
@@ -5515,6 +5574,21 @@ const DM_EXCLUSIVE = {
   ],
   'Bannerlord Cassian': [
     {"addvar":"dm_all_allies","x":2,"log":"🤝 Bannerlord's Muster: fires for every ally regardless of cost — +2 power each"}
+  ],
+  // La Ballora already has +2 pow/hand-card + draw 2 printed and unchanged — the new exclusive
+  // extends her counting scope to what she's already claimed, not just her current brood.
+  'La "La" Ballora, the Broodqueen': [
+    {"addvar":"wc_len","x":1,"log":"🕷 The Broodqueen's Dominion: +1 power per card in your Winners Circle — nothing she's claimed is ever wasted"}
+  ],
+  // Tange's real printed ability (Kill Escalation) is untouched — this is the NEW exclusive the
+  // user asked for 7/12/26: reliant on an EMPTY Winners Circle, to force a real choice between
+  // banking a win (safe, but shuts this off for the rest of the match) or finding a way to keep
+  // recycling it. NOTE: no card in this build yet returns a WC card to hand/deck, so today this
+  // is a front-loaded bonus (live pre-first-win or after a reset), not yet a sustainable loop —
+  // the 2 support cards from the design doc (Unbanked Victory / Reclaim the Colors) would need to
+  // be built as their own new CALLED effect kinds to make it a true combo engine. Flagged, not built.
+  'Tange Sazen': [
+    {"if":{"v":"wc_len","op":"==","n":0},"add":8,"log":"⚔ Warpath Ascendant: your Winners Circle is empty — the war never stops, +8 power"}
   ]
 };
 // Tier 2 — in-archetype vanilla: ONE shared rule per archetype, additive on top of whatever
@@ -5522,7 +5596,12 @@ const DM_EXCLUSIVE = {
 // override the shared rule entirely via DM_VANILLA_OVERRIDE, checked first.
 const ARCHETYPE_VANILLA = {
   'Death Remnant': [{"if":{"v":"remnant_count","op":">","n":0},"draw":1,"log":"☠ Remnant Kinship: you control a Remnant — draw 1 on conjure"}],
-  'Muster': []   // 4 of its 5 members already carry Muster 3 in their own printed CARD_RULES/RALLY text — nothing new needed
+  'Muster': [],   // 4 of its 5 members already carry Muster 3 in their own printed CARD_RULES/RALLY text — nothing new needed
+  // Rewards deliberately hoarding cards (the archetype's own stated theme) with a flat threshold
+  // bonus, distinct from each member's own varied per-card-scaling ability.
+  'Broodswarm': [{"if":{"v":"hand_len","op":">=","n":4},"add":2,"log":"🕷 Brood Instinct: +2 power with 4 or more cards in hand"}],
+  // Kravyn gets the same empty-WC theme as Tange's exclusive, at a smaller vanilla-tier rate.
+  'Warpath': [{"if":{"v":"wc_len","op":"==","n":0},"add":4,"log":"⚔ Warpath's Momentum: your Winners Circle is empty — +4 power"}]
 };
 const DM_VANILLA_OVERRIDE = {
   // her signature draw stays stronger than the archetype baseline (draws 2, not 1)
@@ -5588,7 +5667,7 @@ function applyDeckMasterCommitEffects(pc){
 function applyDeckMasterResolveEffects(pc, playerPow, oppPow, abilLog, stepSink){
   if(typeof deckMasterMode==='undefined' || !deckMasterMode || !deckMasterCard || !pc) return [playerPow, oppPow];
   var tier = conjureTierOf(pc, deckMasterCard);
-  var ctx = {rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0), wc_len:(typeof winnersCircle!=='undefined'?winnersCircle.length:0)};
+  var ctx = {rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0), wc_len:(typeof winnersCircle!=='undefined'?winnersCircle.length:0), hand_len:(typeof hand!=='undefined'&&hand?hand.length:0)};
   ctx.dm_all_allies = ctx.rear_count + ctx.wc_len;
   if(tier===1){
     var r1 = applyRuleList((DM_EXCLUSIVE[pc.name]||[]).filter(_dmIsPowRule), ctx, playerPow, oppPow, abilLog, stepSink);
@@ -5601,6 +5680,34 @@ function applyDeckMasterResolveEffects(pc, playerPow, oppPow, abilLog, stepSink)
   } else if(tier===3){
     if(typeof charge!=='undefined' && typeof ENERGY_CAP!=='undefined'){ charge=Math.min(ENERGY_CAP,charge+1); if(typeof renderCharge==='function') renderCharge(); }
     abilLog.push('⚡ Off-archetype splash: +1 Charge (scry option not yet built — flagged as a follow-up)');
+  }
+  return [playerPow, oppPow];
+}
+// Bot identity (7/12/26) — mirrors applyDeckMasterResolveEffects for the bot's own conjured card
+// (oc), keyed off activeBot.dmCard instead of the player's deckMasterCard. Deliberately NOT gated
+// behind deckMasterMode — this is a permanent trait of that bot, active in every mode, per explicit
+// direction. Tier 3 (universal off-archetype splash) is deliberately skipped for bots: it fires on
+// most non-archetype conjures, so including it would quietly raise these bots' difficulty across
+// every mode well beyond "give them an identity" — a bigger call than was asked for here.
+// Korrin's tier-1 (raiseRemnant/deathLingerBuffOverride) is STATEFUL and depends on deathRemnants —
+// a mechanic that, today, is written ONLY by the PLAYER's own losses/commits (oc never touches it;
+// bot ctx already hardcodes remnant_count:0 elsewhere in this file). That's a pre-existing bot-AI
+// gap, not something introduced here — so like the player-side filter, this correctly no-ops for
+// Korrin rather than faking a remnant system bot-side. Cassian/Tange/Kravyn/La Ballora's bonuses
+// don't depend on that missing mechanic and apply fully.
+function applyBotDeckMasterResolveEffects(oc, playerPow, oppPow, abilLog, stepSink){
+  if(!activeBot || !activeBot.dmCard || !oc) return [playerPow, oppPow];
+  var tier = conjureTierOf(oc, activeBot.dmCard);
+  var ctx = {rear_count:(typeof pendingOppRears!=='undefined'&&pendingOppRears?pendingOppRears.filter(Boolean).length:0), wc_len:(typeof oppWonBot!=='undefined'&&oppWonBot?oppWonBot.size:0), hand_len:(typeof oppHandBot!=='undefined'&&oppHandBot?oppHandBot.length:0)};
+  ctx.dm_all_allies = ctx.rear_count + ctx.wc_len;
+  if(tier===1){
+    var r1 = applyRuleList((DM_EXCLUSIVE[oc.name]||[]).filter(_dmIsPowRule), ctx, oppPow, playerPow, abilLog, stepSink);
+    oppPow=r1[0]; playerPow=r1[1];
+  } else if(tier===2){
+    var arch = archetypeOf(activeBot.dmCard);
+    var vrules = DM_VANILLA_OVERRIDE[oc.name] || (arch ? (ARCHETYPE_VANILLA[arch]||[]) : []);
+    var r2 = applyRuleList(vrules.filter(_dmIsPowRule), ctx, oppPow, playerPow, abilLog, stepSink);
+    oppPow=r2[0]; playerPow=r2[1];
   }
   return [playerPow, oppPow];
 }
@@ -6162,6 +6269,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
       var _octx={opp_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_pow:pc.pow,pc_pow:oc.pow,last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)),match_commits:matchCommits,player_wins:playerScore[1],player_losses:playerScore[0],hand_len:(typeof oppHandBot!=='undefined'?oppHandBot.length:0),wc_len:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0),skullchain:0,ragwing:0,chaos:(cond.tag==='chaos'),banish_len:(typeof oppBanishBot!=='undefined'?oppBanishBot.length:0),remnant_count:0,deck_len:(typeof oppDeckBot!=='undefined'?oppDeckBot.length:0),both_wc:(((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+winnersCircle.length),rear_count:((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0),wc_names:((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot):[])};
       var _ov=applyCardRules(oc.name,_octx,oppPow,playerPow,abilLog,null); oppPow=_ov[0]; playerPow=_ov[1]; if(RS&&typeof RS._resync==='function') RS._resync();
     }
+    if(typeof applyBotDeckMasterResolveEffects==='function'){ RS._inRules=true; var _bdm=applyBotDeckMasterResolveEffects(oc,playerPow,oppPow,abilLog,RS); playerPow=_bdm[0]; oppPow=_bdm[1]; RS._inRules=false; RS._resync(); }
   }
 
   // ── APPLY CONDITION ──
@@ -8524,19 +8632,25 @@ function applySavedCosmetics(){ applyCosmetics(); }
 
 // ══ BOTS ══
 const pick = names => OPP_CARDS.filter(c=>names.includes(c.name));
+// Bot identity build (7/12/26) — 4 of the 5 bots below now play a REAL, full 16-card archetype
+// deck (via pick(PRESET), fully resolved after the OPP_CARDS backfill above — no random padding)
+// and carry their own Deck Master conjure bonus via dmCard, active in EVERY mode (not just Deck
+// Master mode) per explicit direction: bot identity is a permanent trait of that character, same
+// as their deck or difficulty. 'ascendant' (maxed-veterans test dummy) is untouched — a different,
+// unrelated purpose.
 const BOT_OPPONENTS = [
-  {id:'kleydson',name:'Conduit of Chaos, Kleydson',avatar:'🐣',color:'var(--r-common)',arch:'Rookie Sparring Bot',diff:1,
-   desc:'Learning the ropes. Commits low-power starters and rarely reads the condition. Good for testing new decks safely.',
-   sig:'Kleydson (4)', pool:pick(['Conduit of Chaos, Kleydson','Ahdorah Khaan, Determined Soul','Ruffius Rufeldro','Kiba','Malia']),bias:0},
-  {id:'korrin',name:'Grim Korrin',avatar:'💀',color:'var(--r-rare)',arch:'Attrition Grinder',diff:2,
-   desc:'Runs a kill-escalation engine. Grinds duels late and snowballs Arch-Grim Korrin as the match goes long.',
-   sig:'Arch-Grim Korrin (11→)', pool:pick(['Arch-Grim Korrin','Zerith Var','Kiba','Darwin','Malia','Ahdorah Khaan, Determined Soul']),bias:1},
-  {id:'anorith',name:'Anorith Prime',avatar:'🦂',color:'var(--r-ultra)',arch:'Disruption Control',diff:3,
-   desc:'Plays for the asset, not the duel. Uses Record Guard and underdog scaling to protect Pristine cards while stealing close rounds.',
-   sig:'Anorith Keeling (8)', pool:pick(['Anorith Keeling','Zerith Var','Darwin','Malia','Lagertha Waltz','Moro','Envoy of Tyrants, Ella Ballora']),bias:2},
-  {id:'keawe',name:'Mirror Kotei',avatar:'⚡',color:'var(--r-genesis)',arch:'Apex Finisher',diff:4,
-   desc:'The hardest opponent — a mirror of your own finisher deck. Commits high-power Apex and never gives you a free round.',
-   sig:'Kotei (18)', pool:pick(['Kotei','Lagertha Waltz','Arch-Grim Korrin','Zerith Var','Darwin','Valcarion']),bias:3},
+  {id:'kleydson',name:'Conduit of Chaos, Kleydson',avatar:'🐣',color:'var(--r-common)',arch:'The Ironsworn — Muster',diff:1,
+   desc:'Goes wide with cheap 1-cost bodies and lets Bannerlord Cassian scale off the crowd. The most forgiving deck to learn against — no combo pieces, just numbers.',
+   sig:'Bannerlord Cassian (13)', dmCard:'Bannerlord Cassian', pool:pick(IRONSWORN_PRESET),bias:0},
+  {id:'korrin',name:'Grim Korrin',avatar:'💀',color:'var(--r-rare)',arch:'The Deathless — Death Remnant',diff:2,
+   desc:'Runs the real Death-Remnant stack-and-draw engine. Every fallen card lingers on the field, and Arch-Grim Korrin feeds on the pile the longer the match runs.',
+   sig:'Arch-Grim Korrin (16)', dmCard:'Arch-Grim Korrin', pool:pick(DEATHLESS_PRESET),bias:1},
+  {id:'anorith',name:'Anorith Prime',avatar:'🦂',color:'var(--r-ultra)',arch:'The Broodswarm — hand-size',diff:3,
+   desc:'Hoards cards and turns a full hand into raw power. La "La" Ballora, the Broodqueen commands the swarm — the longer you let her sit, the more the brood answers her call.',
+   sig:'La "La" Ballora, the Broodqueen (16)', dmCard:'La "La" Ballora, the Broodqueen', pool:pick(BROODSWARM_PRESET),bias:2},
+  {id:'keawe',name:'Mirror Kotei',avatar:'⚡',color:'var(--r-genesis)',arch:'The Warpath — kill escalation',diff:4,
+   desc:'The hardest opponent — early-champion aggression backed by Tange Sazen\'s kill escalation. Bank a win against him and his Winners Circle bonus goes quiet; keep him scoreless and he only gets more dangerous.',
+   sig:'Tange Sazen (17)', dmCard:'Tange Sazen', pool:pick(WARPATH_PRESET),bias:3},
   {id:'ascendant',name:'The Ascendant',avatar:'👑',color:'var(--gold)',arch:'Trait Trial — maxed veterans',diff:4,
    desc:'A Living-Traits test dummy: every card it fields is a maxed legend — its record equips its single strongest trait (Scarred, +2) plus a peak stat boost. One trait, not a stack. Bring an average build and see if base power can still hang.',
    sig:'maxed legends', pool:pick(['Kotei','Valcarion','Arch-Grim Korrin','Darwin','Lagertha Waltz','Envoy of Tyrants, Ella Ballora']),bias:3,maxed:true},
