@@ -2761,6 +2761,10 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <!-- OPPONENT ZONE -->
     <div class="opp-zone">
       <span class="zone-label">Opponent</span>
+      <span id="opp-dm-badge" class="dm-badge" style="display:none" title="Their Deck Master">
+        <span id="opp-dm-badge-portrait" class="dm-badge-portrait"></span>
+        <span class="dm-badge-label">★ <span id="opp-dm-badge-name"></span></span>
+      </span>
       <div class="pile-strip" style="margin-right:4px">
         <div class="pile-chip" title="Opponent's hand"><span class="pile-icon">✋</span><span class="pile-count" id="opp-hand-count">4</span><span class="pile-label">Hand</span></div>
         <div class="pile-chip" title="Opponent's deck remaining"><span class="pile-icon">🂠</span><span class="pile-count" id="opp-deck-count">8</span><span class="pile-label">Deck</span></div>
@@ -3649,6 +3653,15 @@ function updatePiles(){
         var _dmp=document.getElementById('dm-badge-portrait'); if(_dmp && typeof artFillStyle==='function') _dmp.style.cssText=artFillStyle((_dmc&&_dmc.artKey)||deckMasterCard);
         var _dmn=document.getElementById('dm-badge-name'); if(_dmn) _dmn.textContent=deckMasterCard;
       } else { _dmb.style.display='none'; }
+    } }
+  { var _odmb=document.getElementById('opp-dm-badge');
+    if(_odmb){
+      if(typeof activeBot!=='undefined' && activeBot && activeBot.dmCard){
+        _odmb.style.display='inline-flex';
+        var _odmc=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===activeBot.dmCard && !x.uid;}):null;
+        var _odmp=document.getElementById('opp-dm-badge-portrait'); if(_odmp && typeof artFillStyle==='function') _odmp.style.cssText=artFillStyle((_odmc&&_odmc.artKey)||activeBot.dmCard);
+        var _odmn=document.getElementById('opp-dm-badge-name'); if(_odmn) _odmn.textContent=activeBot.dmCard;
+      } else { _odmb.style.display='none'; }
     } }
 }
 
