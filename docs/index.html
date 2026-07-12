@@ -6219,9 +6219,12 @@ function resolve(pc, oc, cond, playerCommittedPow){
       sub.textContent = `${pc.name} (${playerCommittedPow}) defeated ${oc.name} (${oc.pow}) — to Winners Circle`;
     }
     playerScore[0]++;
-    if(pc.name==='Skullchain Reaver' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); } else { winnersCircle.push({...pc}); }
+    if(pc.name==='Skullchain Reaver' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); }
+    else if(deckMasterMode && deckMasterCard && pc.name===deckMasterCard){ drawPile.unshift({...pc}); deckSize=drawPile.length; abilLog.push('★ '+pc.name+' — your Deck Master recycles to the deck instead of the Winners Circle, ready to be conjured again'); }
+    else { winnersCircle.push({...pc}); }
     lastResult = 'win';
     recordDuel(pc,'win'); signalPoints += 20;   // playtest: every match tracks K/D + pays
+    if(deckMasterMode && deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.k=(deckMasterRecord.k||0)+1; lsSet('sf_dm_record', deckMasterRecord); }
     if(pc.name === 'Signal Diviner'){ divinerBonusNext=2; abilLog.push('Signal Diviner: +2 max Charge next turn'); }
     if(pc.name === 'Tange Sazen') skullchainKills++;
     if(pc.name === 'Kotei') ragwingWins++;
@@ -6233,6 +6236,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     playerScore[1]++;
     charge=Math.min(ENERGY_CAP,charge+1); if(typeof renderCharge==='function') renderCharge();
     recordDuel(pc,'death');   // playtest: every match records the death
+    if(deckMasterMode && deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.d=(deckMasterRecord.d||0)+1; lsSet('sf_dm_record', deckMasterRecord); }
     { if(typeof drawPile!=='undefined' && drawPile.length){ var _tt=drawPile[drawPile.length-1]; var _tr=_tt&&TRIGGERS[_tt.name]; if(_tr){ drawPile.pop(); hand.push(_tt); if(_tr.draw) drawToHand(_tr.draw); if(_tr.recur){ for(var _tri=0;_tri<_tr.recur;_tri++){ if(banishPile.length) hand.push(banishPile.pop()); } } abilLog.push("✨ Trigger — "+_tt.name+": "+_tr.text); if(typeof toast==='function') toast("✨ Trigger! "+_tt.name+" — "+_tr.text, true); if(typeof buildHand==='function') buildHand(); } } }
     if(isDeathRemnant){
       var _rp=(typeof dmRemnantPowOverride!=='undefined'&&dmRemnantPowOverride!=null)?dmRemnantPowOverride:((typeof REMNANT_POW!=='undefined'&&REMNANT_POW[pc.name]!=null)?REMNANT_POW[pc.name]:pc.pow);
@@ -8440,6 +8444,7 @@ const BOT_OPPONENTS = [
 let selectedBot = null;
 let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward gate)
 let deckMasterMode = false;   // true only for Deck Master matches — player-only mechanic, bot plays unmodified
+let deckMasterRecord = lsGet('sf_dm_record', {k:0,d:0});   // Phase E: assimilated K/D, ADDITIVE alongside the card's own normal cardRecords/kdOf() — never replaces it
 let activeBot = null;
 
 function oppInitDeck(){
