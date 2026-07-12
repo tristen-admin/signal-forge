@@ -4774,7 +4774,7 @@ function confirmSelection(){
   const oc = pendingOppCard;
 
   // your card — face-down cover; you know its identity
-  document.getElementById('player-field').innerHTML = `<div class="card field-card ally-cover">
+  document.getElementById('player-field').innerHTML = `<div class="card field-card ally-cover" data-cn="${(c.name||'').replace(/"/g,'&quot;')}">
     <div class="ac-crest">${CARD_SIGIL[c.artKey||c.name]||'◈'}</div>
     <div class="ac-label">YOUR CARD</div>
     <div class="ac-name">${c.name}</div>
@@ -4784,7 +4784,7 @@ function confirmSelection(){
 
   // enemy card — a sealed, stylized cover (or the exposed face under Open Book)
   document.getElementById('opp-field').innerHTML = openBook
-    ? `<div class="card field-card ${oc.rarity} enemy" ${CARD_ART[oc.artKey||oc.name] ? `style="background-image:linear-gradient(180deg,rgba(7,9,15,0.4),rgba(7,9,15,0.93)),url(${CARD_ART[oc.artKey||oc.name]});background-size:cover;background-position:center top"` : ''}>
+    ? `<div class="card field-card ${oc.rarity} enemy" ${CARD_ART[oc.artKey||oc.name] ? `style="background-image:linear-gradient(180deg,rgba(7,9,15,0.4),rgba(7,9,15,0.93)),url(${CARD_ART[oc.artKey||oc.name]});background-size:cover;background-position:center top"` : ''} data-cn="${(oc.name||'').replace(/"/g,'&quot;')}">
         <div class="c-rarity">${rlab1(oc.rarity)}</div>
         <div class="c-name">${oc.name}</div>
         <div class="c-pow" style="color:var(--lose)">${oc.pow}</div>
@@ -4936,7 +4936,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   const _pk = pc.artKey||pc.name;
   const _pv = VIDEO_PREVIEW[_pk];
   const pcArt = (!_pv && CARD_ART[_pk]) ? `style="background-image:linear-gradient(180deg,rgba(7,9,15,0.4),rgba(7,9,15,0.93)),url(${CARD_ART[_pk]});background-size:cover;background-position:center top"` : '';
-  pf.innerHTML = `<div class="card field-card ${pc.rarity} locked ${_pv?'video-card':''}" ${pcArt}>
+  pf.innerHTML = `<div class="card field-card ${pc.rarity} locked ${_pv?'video-card':''}" ${pcArt} data-cn="${(pc.name||'').replace(/"/g,'&quot;')}">
     ${_pv?`<video class="field-vid" src="${_pv}" autoplay muted loop playsinline></video><div class="fv-scrim"></div>`:''}
     <div class="c-rarity">${rlab1(pc.rarity)}</div>
     <div class="c-name">${pc.name}</div>
@@ -8968,7 +8968,7 @@ function bigCardHTML(c){
   else if(art){ artInner=`<img class="tf-media"${artFoc(key)} src="${art}" alt="">`; }
   else { artStyle='background:radial-gradient(circle at 50% 35%,rgba(255,255,255,0.05),transparent 70%)'; artInner=`<span class="bc-sigil">${CARD_SIGIL[key]||'◈'}</span>`; }
   const pristine = _kd.d === 0 ? ' · ◈ Pristine' : '';
-  return `<div class="bigcard tframe ${c.rarity||''} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})">
+  return `<div class="bigcard tframe ${c.rarity||''} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})" data-cn="${(c.name||'').replace(/"/g,'&quot;')}">
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
     <div class="tf-name">${dispName(c.name)}</div>
@@ -9017,6 +9017,37 @@ function showCardPreview(i){ if(window.matchMedia&&window.matchMedia('(hover:non
 }
 function previewPoolCard(name, el){ if(typeof SFX!=='undefined') SFX.play('hover'); const c = COLLECTION.find(x => (x.uid||x.name) === name); if(c) previewCardEl(c, el); }
 function hideCardPreview(){ var p=document.getElementById('card-preview'); if(p){ p.classList.remove('show','pinned'); p.onclick=null; } var sc=document.getElementById('preview-scrim'); if(sc) sc.remove(); }
+// Field-card hover/tap preview — every card on the field (staged, committed, resolution cinematic,
+// both sides) gets the same enlarged-detail preview hand cards already have. Delegated (mouseover/
+// mouseout bubble; mouseenter/mouseleave don't, so those can't be used for delegation) and scoped to
+// #player-field/#opp-field only — never overlaps #hand-row, so hand cards' own existing wiring is untouched.
+// Reads data-cn (stamped on bigCardHTML()'s root + the commit-time locked template), not visible
+// text, since dispName() can alias a card's DISPLAYED name away from its real COLLECTION key.
+function _dmFieldCardFromEl(el){ var cn=el&&el.getAttribute('data-cn'); if(!cn) return null; return COLLECTION.find(function(x){ return (x.uid||x.name)===cn; })||null; }
+function wireFieldCardPreview(){
+  ['player-field','opp-field'].forEach(function(id){
+    var el=document.getElementById(id); if(!el || el._dmPreviewWired) return; el._dmPreviewWired=true;
+    el.addEventListener('mouseover', function(e){
+      if(window.matchMedia && window.matchMedia('(hover:none)').matches) return;
+      var t=e.target.closest && e.target.closest('[data-cn]'); if(!t || el.contains(e.relatedTarget)) return;
+      var c=_dmFieldCardFromEl(t); if(c){ if(typeof SFX!=='undefined') SFX.play('hover'); previewCardEl(c, t, true); }
+    });
+    el.addEventListener('mouseout', function(e){
+      var t=e.target.closest && e.target.closest('[data-cn]'); if(!t || el.contains(e.relatedTarget)) return;
+      hideCardPreview();
+    });
+    el.addEventListener('touchstart', function(e){
+      var t=e.target.closest && e.target.closest('[data-cn]'); if(!t) return;
+      var c=_dmFieldCardFromEl(t); if(!c) return;
+      previewCardEl(c, t, true);
+      var p=document.getElementById('card-preview'); if(!p) return;
+      p.classList.add('pinned'); p.style.pointerEvents='auto'; p.onclick=hideCardPreview;
+      var sc=document.getElementById('preview-scrim'); if(!sc){ sc=document.createElement('div'); sc.id='preview-scrim'; document.body.appendChild(sc); }
+      sc.onclick=hideCardPreview; sc.ontouchstart=function(ev){ ev.preventDefault(); hideCardPreview(); };
+    }, {passive:true});
+  });
+}
+if(typeof document!=='undefined'){ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', wireFieldCardPreview); else wireFieldCardPreview(); }
 function pinPreview(i){ showCardPreview(i); var p=document.getElementById('card-preview'); if(!p) return; p.classList.add('pinned'); p.style.pointerEvents='auto'; p.onclick=hideCardPreview; var sc=document.getElementById('preview-scrim'); if(!sc){ sc=document.createElement('div'); sc.id='preview-scrim'; document.body.appendChild(sc); } sc.onclick=hideCardPreview; sc.ontouchstart=function(e){e.preventDefault();hideCardPreview();}; }
 
 // ── KEYWORD DEFINITION TOOLTIP (hover any .kw term) ──
