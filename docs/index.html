@@ -1495,6 +1495,11 @@ body.rm body.nav-collapsed #nav-hub .ni-icon,body.rm.nav-collapsed #nav-hub .ni-
 .ds-empty{font-size:10px;color:var(--text3);font-style:italic}
 .ds-remove{background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;flex-shrink:0;padding:2px 5px;border-radius:3px;transition:color 0.12s,background 0.12s}
 .ds-remove:hover{color:#E08080;background:rgba(184,58,58,0.12)}
+.ds-dm{background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;flex-shrink:0;padding:2px 5px;border-radius:3px;transition:color 0.12s,background 0.12s}
+.ds-dm:hover{color:var(--gold);background:rgba(212,168,67,0.12)}
+.ds-dm.on{color:var(--gold)}
+.deck-slot.filled.dm-master{border-left-color:var(--gold);box-shadow:inset 0 0 0 1px rgba(212,168,67,.35)}
+.deck-slot.filled.dm-master .ds-name{color:var(--gold)}
 .deck-pool-col .vault-grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}
 
 /* ── MARKETPLACE ── */
@@ -2650,6 +2655,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         </div>
         <button class="enter-btn" id="enter-btn" onclick="startMatch()" disabled>Enter Match ⚔</button>
         <button class="enter-btn" onclick="playSandbox()" style="background:linear-gradient(180deg,#14303a,#0a1c22);box-shadow:inset 0 0 0 1px rgba(111,211,255,0.4)">🌐 Sandbox · all cards</button>
+        <button class="enter-btn" id="dm-enter-btn" onclick="startDeckMasterMatch()" disabled title="Prototype mode — name a Deck Master in the Deck Builder first" style="background:linear-gradient(180deg,#3a2f14,#221a0a);box-shadow:inset 0 0 0 1px rgba(212,168,67,0.4)">★ Deck Master ⚔</button>
       </div>
     </div>
   </div>
@@ -3442,6 +3448,7 @@ function restorePendingOppPick(){
 let oppWC = 0;
 let flameVeilFromWC = false;
 let oppNextDebuff = 0;
+let dmRemnantPowOverride = null;   // Deck Master Phase D: one-duel override for a fighter's own Death-Remnant fall value; set in applyDeckMasterCommitEffects, consumed+reset at the loss branch in resolve()
 let conditionLocked = false;
 let matchWager = 1000;
 let stakeMult = 1;
@@ -4903,6 +4910,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   if(pc.name==='Uso Oso' && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
   if(pc.name==='Valcarion' && banishPile.length){ var _rec=banishPile.pop(); if(rearGuards.length < RG_SLOTS){ rearGuards.push(_rec); if(typeof toast==='function') toast('🩸 Valcarion calls '+_rec.name+' from banish to support.', true); } else { hand.push(_rec); if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🩸 Valcarion reclaims '+_rec.name+' from banish to hand.', true); } if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name === 'Darwin') flameVeilFromWC = false;
+  if(typeof applyDeckMasterCommitEffects==='function') applyDeckMasterCommitEffects(pc);
   document.getElementById('commit-btn').disabled = true;
   document.getElementById('commit-btn').style.display = 'none';
   document.getElementById('commit-hint').textContent = 'Committed — waiting for resolution…';
@@ -5425,6 +5433,134 @@ function legendSectionHTML(c){
   return h;
 }
 function legendMiniHTML(c){ const s=legendScore(c); if(s<180) return ''; const t=legendTier(s); return '<span class="lg-badge '+t.cls+'">'+t.name+'</span>'; }
+// ══════════════════════════════════════════════════════════════════════════
+// DECK MASTER MODE — data layer (Phase A, 7/11/26). NOT wired into resolve()
+// yet — conjureTierOf() has zero callers until Phase D. Player-only mechanic;
+// bots have no archetype identity today (activeBot.pool is a fixed hand-authored
+// list, unconnected to LINK_GROUPS/presets) so this never touches bot resolution.
+// Everything here is ADDITIVE per deck-master-concept.html §06's ruling: a
+// card's own existing printed ability (CARD_RULES/RAISE_REMNANT/RALLY/CALLED)
+// is never replaced, only layered on top of when its Deck Master tier procs.
+// ══════════════════════════════════════════════════════════════════════════
+// Explicit, standalone archetype membership — deliberately NOT sourced live from
+// LINK_GROUPS (whose 'ironsworn'/'court' entries mix in cards this system's own
+// approved cardlist marks Common/no-bonus, e.g. Oathbound Shield, Kiba) or from
+// deck presets (which include proven cross-archetype generic staples like Signal
+// Diviner/Zerith Var/Heir of Kaiga, seen in 2+ different archetype presets).
+// Editing an unrelated Link Skill group or preset in dev mode must never silently
+// change Deck Master tier eligibility — so this list is its own source of truth.
+const ARCHETYPE_MEMBERS = {
+  'Death Remnant': ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned Skull Soldiers','Uso Oso','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Gravecaller Voss'],
+  'Muster': ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Chieftain Reyva Vosh']
+};
+function archetypeOf(cardName){
+  for(var arch in ARCHETYPE_MEMBERS){ if(ARCHETYPE_MEMBERS[arch].indexOf(cardName)>=0) return arch; }
+  return null;
+}
+// Tier 1 — fires ONLY when the player's own named Deck Master card is the one conjured.
+// Rule-object shape matches CARD_RULES (if/add/addvar/x/log) wherever the effect is pure
+// power math; a few keys are new (draw / raiseRemnant / deathLingerBuffOverride) because
+// these two exclusives need stateful actions CARD_RULES's add/addvar/mult/set/oppadd can't
+// express — Phase D extends applyCardRules()'s executor with them, same pattern as its 5
+// existing keys, only once this is actually live-tested via preview_start.
+const DM_EXCLUSIVE = {
+  // Korrin already draws 1-per-Remnant unconditionally today (~line 4891, untouched by this
+  // mode) and already has a flat +8 death-linger buff — so only the two NEW pieces live here.
+  'Arch-Grim Korrin': [
+    {"raiseRemnant":"self_pow","log":"👻 The Unburied Throne: raises a Death Remnant equal to his own power — no death needed"},
+    {"deathLingerBuffOverride":10,"log":"👻 The Unburied Throne: his death-buff strengthens to +10 until an enemy dies"}
+  ],
+  'Bannerlord Cassian': [
+    {"addvar":"dm_all_allies","x":2,"log":"🤝 Bannerlord's Muster: fires for every ally regardless of cost — +2 power each"}
+  ]
+};
+// Tier 2 — in-archetype vanilla: ONE shared rule per archetype, additive on top of whatever
+// the conjured card already does. Named per-card exceptions (from the approved cardlist)
+// override the shared rule entirely via DM_VANILLA_OVERRIDE, checked first.
+const ARCHETYPE_VANILLA = {
+  'Death Remnant': [{"if":{"v":"remnant_count","op":">","n":0},"draw":1,"log":"☠ Remnant Kinship: you control a Remnant — draw 1 on conjure"}],
+  'Muster': []   // 4 of its 5 members already carry Muster 3 in their own printed CARD_RULES/RALLY text — nothing new needed
+};
+const DM_VANILLA_OVERRIDE = {
+  // her signature draw stays stronger than the archetype baseline (draws 2, not 1)
+  'Widow of the Vigil': [{"if":{"v":"remnant_count","op":">","n":0},"draw":2,"log":"☠ Remnant Kinship (Widow's signature): draw 2 on conjure"}],
+  // currently support-only — gains the standard Muster 3 conjure skill it lacks today
+  'Muster-Sergeant Bryn': [{"addvar":"rear_count","x":3,"log":"🤝 Muster 3 (new): +3 power per 1-cost ally in support"}]
+};
+// Tier 3 — off-archetype universal: ONE skill, identical for every AR/Ultra/Rare splash card
+// regardless of which archetype it's actually from. Matches the interactive prototype's
+// OFFARCH_SKILL text exactly (deck-master-prototype.html). Player choice, not auto-resolved —
+// Phase D's UI hook presents both options at conjure time.
+const OFFARCH_VANILLA = {choice:[{key:'charge',log:'⚡ +1 Charge'},{key:'scry',log:'👁 Scry 1 — look at the top of your deck, keep or bottom it'}]};
+
+// Pure classifier — no side effects, zero callers until Phase D wires it into resolve().
+// Tier order matches the already-shipped interactive prototype's tierOf() exactly:
+// exact-name match beats everything; Common rarity floors to tier 4 BEFORE archetype is
+// even checked (an in-archetype Common still gets no bonus, per the approved cardlist);
+// then archetype match; anything else lands on the tier-3 universal splash skill.
+function conjureTierOf(card, deckMasterName){
+  if(!card || !deckMasterName) return 4;
+  if(card.name === deckMasterName) return 1;
+  if(card.rarity === 'common') return 4;
+  var dmArch = archetypeOf(deckMasterName);
+  var cardArch = archetypeOf(card.name);
+  if(dmArch && cardArch && dmArch === cardArch) return 2;
+  return 3;
+}
+function _dmIsPowRule(r){ return 'add' in r || 'addvar' in r || 'mult' in r || 'set' in r || 'oppadd' in r; }
+// Deck Master Phase D — COMMIT-time pieces (raiseRemnant, deathLingerBuffOverride, tier-2 draw).
+// Called once from commitCard(), same category as this file's existing RAISE_REMNANT / on-commit
+// draw checks (instant effects that don't need the opponent's card revealed yet). Only ever acts
+// on the specific stateful keys it checks for — a pure power-math rule (e.g. Cassian's addvar) is
+// never touched here, so it can't double-fire alongside applyDeckMasterResolveEffects below.
+function applyDeckMasterCommitEffects(pc){
+  if(typeof deckMasterMode==='undefined' || !deckMasterMode || !deckMasterCard || !pc) return;
+  var tier = conjureTierOf(pc, deckMasterCard);
+  if(tier===1){
+    (DM_EXCLUSIVE[pc.name]||[]).forEach(function(r){
+      if('raiseRemnant' in r && typeof deathRemnants!=='undefined'){
+        var amt = (r.raiseRemnant==='self_pow') ? (pc.pow||0) : (r.raiseRemnant||0);
+        deathRemnants.push({name:pc.name, pow:amt});
+        if(typeof updatePiles==='function') updatePiles();
+        if(typeof toast==='function') toast(r.log||('☠ '+pc.name+' raises a +'+amt+' Death Remnant.'), true);
+      }
+      if('deathLingerBuffOverride' in r){ dmRemnantPowOverride = r.deathLingerBuffOverride; }
+    });
+  } else if(tier===2){
+    var arch = archetypeOf(deckMasterCard);
+    var vrules = DM_VANILLA_OVERRIDE[pc.name] || (arch ? (ARCHETYPE_VANILLA[arch]||[]) : []);
+    vrules.forEach(function(r){
+      if('draw' in r && typeof drawToHand==='function' && evalRuleCond(r.if, {remnant_count:(typeof deathRemnants!=='undefined'?deathRemnants.length:0)})){
+        drawToHand(r.draw);
+        if(typeof toast==='function') toast(r.log||('Draw '+r.draw+'.'), true);
+      }
+    });
+  }
+}
+// Deck Master Phase D — RESOLVE-time pieces: pure power math (tier 1 Cassian, tier 2 Muster/Bryn,
+// tier 3 universal splash), same category as the existing RALLY / Conduit-Adept-style effects that
+// already live inside resolve() rather than commitCard(). Filters to power-math-only rule keys so a
+// stateful rule already handled in applyDeckMasterCommitEffects (e.g. Death Remnant's "draw") can't
+// also log/no-op a second time here.
+function applyDeckMasterResolveEffects(pc, playerPow, oppPow, abilLog, stepSink){
+  if(typeof deckMasterMode==='undefined' || !deckMasterMode || !deckMasterCard || !pc) return [playerPow, oppPow];
+  var tier = conjureTierOf(pc, deckMasterCard);
+  var ctx = {rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0), wc_len:(typeof winnersCircle!=='undefined'?winnersCircle.length:0)};
+  ctx.dm_all_allies = ctx.rear_count + ctx.wc_len;
+  if(tier===1){
+    var r1 = applyRuleList((DM_EXCLUSIVE[pc.name]||[]).filter(_dmIsPowRule), ctx, playerPow, oppPow, abilLog, stepSink);
+    playerPow=r1[0]; oppPow=r1[1];
+  } else if(tier===2){
+    var arch = archetypeOf(deckMasterCard);
+    var vrules = DM_VANILLA_OVERRIDE[pc.name] || (arch ? (ARCHETYPE_VANILLA[arch]||[]) : []);
+    var r2 = applyRuleList(vrules.filter(_dmIsPowRule), ctx, playerPow, oppPow, abilLog, stepSink);
+    playerPow=r2[0]; oppPow=r2[1];
+  } else if(tier===3){
+    if(typeof charge!=='undefined' && typeof ENERGY_CAP!=='undefined'){ charge=Math.min(ENERGY_CAP,charge+1); if(typeof renderCharge==='function') renderCharge(); }
+    abilLog.push('⚡ Off-archetype splash: +1 Charge (scry option not yet built — flagged as a follow-up)');
+  }
+  return [playerPow, oppPow];
+}
 // ── DATA-DRIVEN ABILITY SPEC — shared with server/rules.json (one source of truth). ──
 // Regenerate this const from server/rules.json when the spec changes; the server is canonical.
 const CARD_RULES = {
@@ -5825,8 +5961,10 @@ function evalRuleCond(cond, ctx){
   switch(cond.op){case '==':return lhs===rhs;case '!=':return lhs!==rhs;case '>':return lhs>rhs;case '<':return lhs<rhs;case '>=':return lhs>=rhs;case '<=':return lhs<=rhs;}
   return false;
 }
-function applyCardRules(name, ctx, playerPow, oppPow, abilLog, stepSink){
-  var rs=CARD_RULES[name]||[];
+// Shared interpreter for CARD_RULES-shaped rule arrays — extracted so Deck Master's tier rules
+// (same object shape, different lookup key) can reuse this instead of a second parallel interpreter.
+// Pure power math only (add/addvar/mult/set/oppadd); unchanged from before the extraction.
+function applyRuleList(rs, ctx, playerPow, oppPow, abilLog, stepSink){
   for(var i=0;i<rs.length;i++){ var r=rs[i];
     if(!evalRuleCond(r.if, ctx)) continue;
     var _bp=playerPow, _bo=oppPow;
@@ -5838,6 +5976,9 @@ function applyCardRules(name, ctx, playerPow, oppPow, abilLog, stepSink){
     if(r.log){ abilLog.push(r.log); if(stepSink) stepSink.push({m:r.log, dp:playerPow-_bp, dop:oppPow-_bo, pp:playerPow, op:oppPow}); }
   }
   return [playerPow, oppPow];
+}
+function applyCardRules(name, ctx, playerPow, oppPow, abilLog, stepSink){
+  return applyRuleList(CARD_RULES[name]||[], ctx, playerPow, oppPow, abilLog, stepSink);
 }
 function resolve(pc, oc, cond, playerCommittedPow){
   let playerPow = playerCommittedPow != null ? playerCommittedPow : ((pc.pow||0)+(pc._bo||0)+(pc.name==='Conduit of Chaos, Kleydson'?2*banishPile.length:0));
@@ -5928,6 +6069,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     } else {
       RS._inRules=true; var _rr=applyCardRules(pc.name,_ctx,playerPow,oppPow,abilLog,RS); playerPow=_rr[0]; oppPow=_rr[1]; RS._inRules=false; RS._resync();
     }
+    if(typeof applyDeckMasterResolveEffects==='function'){ RS._inRules=true; var _dmr=applyDeckMasterResolveEffects(pc,playerPow,oppPow,abilLog,RS); playerPow=_dmr[0]; oppPow=_dmr[1]; RS._inRules=false; RS._resync(); }
     /* BOT fighter fires its OWN on-commit ability — bot-centric ctx, pow args swapped so its +power lands on the bot */
     if(oc && oc.name && (typeof CARD_RULES!=='undefined') && CARD_RULES[oc.name] && CARD_RULES[oc.name].length){
       var _octx={opp_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_pow:pc.pow,pc_pow:oc.pow,last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)),match_commits:matchCommits,player_wins:playerScore[1],player_losses:playerScore[0],hand_len:(typeof oppHandBot!=='undefined'?oppHandBot.length:0),wc_len:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0),skullchain:0,ragwing:0,chaos:(cond.tag==='chaos'),banish_len:(typeof oppBanishBot!=='undefined'?oppBanishBot.length:0),remnant_count:0,deck_len:(typeof oppDeckBot!=='undefined'?oppDeckBot.length:0),both_wc:(((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+winnersCircle.length),rear_count:((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0),wc_names:((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot):[])};
@@ -6093,7 +6235,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
     recordDuel(pc,'death');   // playtest: every match records the death
     { if(typeof drawPile!=='undefined' && drawPile.length){ var _tt=drawPile[drawPile.length-1]; var _tr=_tt&&TRIGGERS[_tt.name]; if(_tr){ drawPile.pop(); hand.push(_tt); if(_tr.draw) drawToHand(_tr.draw); if(_tr.recur){ for(var _tri=0;_tri<_tr.recur;_tri++){ if(banishPile.length) hand.push(banishPile.pop()); } } abilLog.push("✨ Trigger — "+_tt.name+": "+_tr.text); if(typeof toast==='function') toast("✨ Trigger! "+_tt.name+" — "+_tr.text, true); if(typeof buildHand==='function') buildHand(); } } }
     if(isDeathRemnant){
-      var _rp=(typeof REMNANT_POW!=='undefined'&&REMNANT_POW[pc.name]!=null)?REMNANT_POW[pc.name]:pc.pow;
+      var _rp=(typeof dmRemnantPowOverride!=='undefined'&&dmRemnantPowOverride!=null)?dmRemnantPowOverride:((typeof REMNANT_POW!=='undefined'&&REMNANT_POW[pc.name]!=null)?REMNANT_POW[pc.name]:pc.pow);
+      dmRemnantPowOverride=null;
       deathRemnants.push({name:pc.name,pow:_rp});
       sub.textContent = `${oc.name} (${oc.pow}) defeated ${pc.name} (${playerCommittedPow}) — Death Remnant active (+${_rp}, ${deathRemnants.length} on field)`;
       _deferField = function(){ document.getElementById('player-field').innerHTML = `<div class="card field-card ${pc.rarity}" style="opacity:0.55;border-color:rgba(184,58,58,0.55)">
@@ -7878,6 +8021,7 @@ function updateDeckCount(){
 
 // ══ DECK BUILDER ══
 function buildDeckBuilder(){
+  if(typeof validateDeckMaster==='function') validateDeckMaster();
   buildDeckSlots();
   buildDeckPool();
   if(typeof updateDeckKwToggle==='function') updateDeckKwToggle();
@@ -7900,14 +8044,18 @@ function buildDeckSlots(){
     if(name){
       const c=COLLECTION.find(x=>(x.uid||x.name)===name);
       const glyph=CARD_ART[c.artKey||c.name]?'🖼':(CARD_SIGIL[c.artKey||c.name]||'◈');
-      slots.push(`<div class="deck-slot filled ${c.rarity}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}')" style="cursor:pointer">
+      const dmKey=(c.uid||c.name);
+      const isDM = (typeof deckMasterCard!=='undefined') && deckMasterCard===dmKey;
+      const dmBtn = c.rarity!=='common' ? `<button class="ds-dm${isDM?' on':''}" title="${isDM?'Your Deck Master':'Name as Deck Master'}" onclick="event.stopPropagation();setDeckMaster('${dmKey.replace(/'/g,"\\'")}')">★</button>` : '';
+      slots.push(`<div class="deck-slot filled ${c.rarity}${isDM?' dm-master':''}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}')" style="cursor:pointer">
         <span class="ds-num">${i+1}</span>
         <span class="ds-sigil">${glyph}</span>
         <div class="ds-body">
-          <div class="ds-name">${c.name}</div>
+          <div class="ds-name">${isDM?'★ ':''}${c.name}</div>
           <div class="ds-meta"><span class="ds-rar">${rlab(c.rarity)}</span> · <span class="k">${kdOf(c).k}K</span>/<span class="d">${kdOf(c).d}D</span></div>
         </div>
         <span class="ds-pow">${c.pow}</span>
+        ${dmBtn}
         <button class="ds-remove" title="Remove" onclick="event.stopPropagation();removeFromDeck('${(c.uid||c.name).replace(/'/g,"\\'")}')">✕</button>
       </div>`);
     } else {
@@ -7980,6 +8128,30 @@ function fillDeckToCap(){ if(typeof activeDeck==='undefined'||activeDeck.size>=D
 const LS = (() => { try { const k='__sf__'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return localStorage; } catch(e){ const m={}; return {getItem:k=>k in m?m[k]:null, setItem:(k,v)=>{m[k]=String(v);}, removeItem:k=>{delete m[k];}}; } })();
 function lsGet(k, def){ try { const v = LS.getItem(k); return v==null ? def : JSON.parse(v); } catch(e){ return def; } }
 function lsSet(k, v){ try { LS.setItem(k, JSON.stringify(v)); } catch(e){} }
+
+// ══ DECK MASTER (Phase B, 7/11/26) — one standalone persisted pick, same idiom as selectedCardBack below.
+// Deliberately NOT nested inside deckPresets' flat {name:[cardKeys]} shape — reshaping that would mean
+// touching savePreset/loadPreset/refreshPresets for no real gain. This is its own variable instead. ══
+let deckMasterCard = lsGet('sf_deckmaster', null);
+function setDeckMaster(name){
+  if(deckMasterCard===name){ deckMasterCard=null; lsSet('sf_deckmaster', null); buildDeckBuilder(); return; }
+  const c=COLLECTION.find(x=>(x.uid||x.name)===name);
+  if(!c) return;
+  if(c.rarity==='common'){ toast('Common-rarity cards cannot be a Deck Master.', false); return; }
+  if(!activeDeck.has(name)){ toast(c.name+' must be in your deck to name it Deck Master.', false); return; }
+  deckMasterCard=name; lsSet('sf_deckmaster', name);
+  toast('★ '+c.name+' is now your Deck Master.', true);
+  buildDeckBuilder();
+}
+// Re-validates on every deck-builder render (called from buildDeckBuilder, which every deck-mutating
+// path already funnels through — toggleDeckCard/addToDeck/removeFromDeck/clearDeck/loadStarterDeck).
+function validateDeckMaster(){
+  if(deckMasterCard && !activeDeck.has(deckMasterCard)){
+    const oldName=deckMasterCard;
+    deckMasterCard=null; lsSet('sf_deckmaster', null);
+    toast(oldName+' left your deck — Deck Master cleared.', false);
+  }
+}
 
 // ══ DECK-BUILDER FILTER / SORT / KEYWORD ══
 let deckFilter='all', deckSort='rarity', deckKeyword=null, deckOwnFilter='all';
@@ -8267,6 +8439,7 @@ const BOT_OPPONENTS = [
 ];
 let selectedBot = null;
 let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward gate)
+let deckMasterMode = false;   // true only for Deck Master matches — player-only mechanic, bot plays unmodified
 let activeBot = null;
 
 function oppInitDeck(){
@@ -8883,7 +9056,7 @@ function updatePvpLaunch(){
 function startPvpMatch(){
   if(!pvpRival||!pvpStakeMine) return;
   const b=BOT_OPPONENTS.find(x=>x.id===pvpRival); if(!b) return;
-  pvpMode=true; activeBot=b; pvpStakeTheirs=rivalStakeFor(b);
+  pvpMode=true; activeBot=b; pvpStakeTheirs=rivalStakeFor(b); deckMasterMode=false;
   pvpPotMine=[pvpStakeMine]; pvpPotTheirs=[pvpStakeTheirs]; pvpForced=null;
   resetMatchState();
   const mine=COLLECTION.find(c=>(c.uid||c.name)===pvpStakeMine)||{name:'your card'};
@@ -8927,7 +9100,7 @@ function enterAgreedDuel(){ const o=document.getElementById('approve-overlay'); 
 function autoSimPvp(){
   const o=document.getElementById('approve-overlay'); if(o) o.classList.remove('show');
   const b=BOT_OPPONENTS.find(x=>x.id===pvpRival); if(!b) return;
-  pvpMode=true; activeBot=b; pvpStakeTheirs=rivalStakeFor(b);
+  pvpMode=true; activeBot=b; pvpStakeTheirs=rivalStakeFor(b); deckMasterMode=false;
   pvpPotMine=[pvpStakeMine]; pvpPotTheirs=[pvpStakeTheirs]; pvpForced=null;
   resetMatchState();
   const myPool=(activeDeck.size===DECK_SIZE)?[...activeDeck].map(k=>COLLECTION.find(c=>(c.uid||c.name)===k)).filter(Boolean):COLLECTION.filter(c=>(ownedCopies[c.uid||c.name]||0)>0);
@@ -9977,6 +10150,12 @@ function selectBot(id){
 function updateLaunch(){
   const b=BOT_OPPONENTS.find(x=>x.id===selectedBot);
   const btn=document.getElementById('enter-btn');
+  const dmBtn=document.getElementById('dm-enter-btn');
+  const dmReady = (typeof deckMasterCard!=='undefined') && deckMasterCard && activeDeck.has(deckMasterCard);
+  if(dmBtn){
+    dmBtn.disabled = !(b && dmReady);
+    dmBtn.title = dmReady ? 'Play with '+deckMasterCard+' as your Deck Master' : 'Prototype mode — name a Deck Master in the Deck Builder first';
+  }
   if(b){
     document.getElementById('ll-title').textContent=`${b.name} — ${b.arch}`;
     const deckLine = activeDeck.size === DECK_SIZE
@@ -9998,6 +10177,7 @@ function startMatch(){
   activeBot=b;
   pvpMode=false;
   rankedMode=false;
+  deckMasterMode=false;
   resetMatchState();
   toast('Best of 7 — good luck.', true);
   document.getElementById('match-bot-name').textContent=b.name;
@@ -10006,6 +10186,17 @@ function startMatch(){
   document.getElementById('nav-lobby').classList.add('on');
   document.getElementById('tb-title').textContent='Match — vs '+b.name;
   if(typeof SFX!=='undefined')SFX.startCrowd();
+}
+// Deck Master (Phase C, 7/11/26) — same shared-function-then-flag idiom as Ranked Ladder
+// (rankedFindMatch calls startMatch() then sets rankedMode=true right after). Player-only:
+// the bot is untouched, same activeBot/BOT_OPPONENTS as every other mode.
+function startDeckMasterMatch(){
+  if(!deckMasterCard || !activeDeck.has(deckMasterCard)){ toast('Name a Deck Master in the Deck Builder first — must be AR/Ultra/Rare and in your deck.', false); return; }
+  startMatch();
+  deckMasterMode=true;
+  document.getElementById('nav-lobby').classList.add('on');
+  document.getElementById('tb-title').textContent='Deck Master — vs '+activeBot.name;
+  toast('★ Deck Master: '+deckMasterCard, true);
 }
 function playSandbox(){
   if(!selectedBot){ selectedBot = BOT_OPPONENTS[Math.floor(Math.random()*BOT_OPPONENTS.length)].id; }
@@ -10611,7 +10802,7 @@ function enterTournament(){
 function tourneyStartRound(){
   var b=tourneyQueue[tourneyIdx]; if(!b){ tourneyFinish(); return; }
   var ov=document.getElementById('tourney-overlay'); if(ov) ov.classList.remove('show');
-  activeBot=b; pvpMode=false; rankedMode=false;
+  activeBot=b; pvpMode=false; rankedMode=false; deckMasterMode=false;
   if(typeof resetMatchState==='function') resetMatchState();
   var bn=document.getElementById('match-bot-name'); if(bn) bn.textContent=b.name;
   var bt=document.getElementById('match-bot-tag'); if(bt) bt.textContent='Tournament · Round '+(tourneyIdx+1)+'/'+tourneyQueue.length+' · '+b.arch;
