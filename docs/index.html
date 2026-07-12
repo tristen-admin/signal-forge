@@ -2640,6 +2640,18 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   </div>
 </div>
 
+<div class="approve-overlay" id="dm-fallback-overlay">
+  <div class="approve-panel">
+    <div class="lh-eyebrow" style="color:var(--gold)">★ Deck Master</div>
+    <div class="approve-title">No Apex/Ultra/Rare card in hand</div>
+    <p style="color:var(--text2);font-size:13px;line-height:1.5;margin:0 0 16px">Every card in hand is Common-tier — no conjure skill would fire this turn. Choose how to proceed.</p>
+    <div class="approve-btns">
+      <button class="enter-btn" onclick="dmAutoRide()" style="background:linear-gradient(180deg,#14303a,#0a1c22);box-shadow:inset 0 0 0 1px rgba(111,211,255,0.4)">🔄 Auto-Ride<br><span style="font-weight:400;font-size:11px;opacity:0.85">Bottom your hand, redraw fresh — no score cost</span></button>
+      <button class="enter-btn" onclick="dmForfeit()" style="background:linear-gradient(180deg,#3a1414,#220a0a);box-shadow:inset 0 0 0 1px rgba(184,58,58,0.4)">🏳 Forfeit<br><span style="font-weight:400;font-size:11px;opacity:0.85">Concede the round — draw 2 next turn</span></button>
+    </div>
+  </div>
+</div>
+
   <div class="view" id="v-lobby">
     <div class="lobby">
       <div class="lobby-head">
@@ -3707,6 +3719,7 @@ function drawCard(force){ if(typeof tutorialAdvance==='function')setTimeout(func
   }
   hand.push(drawn);
   for(var _xd=1;_xd<DRAW_PER_TURN;_xd++){ if(drawPile.length){ hand.push(drawPile.pop()); } } deckSize=drawPile.length;
+  if(typeof dmForfeitDrawBonus!=='undefined' && dmForfeitDrawBonus){ dmForfeitDrawBonus=false; if(drawPile.length){ hand.push(drawPile.pop()); deckSize=drawPile.length; } if(typeof toast==='function') toast('★ Deck Master — forfeit bonus: drew an extra card.', true); }
 
   // Ourevos loses 3 power for good each time the god is dragged back from the Winners Circle
   if(fromWC && drawn.name === 'Ourevos, the Golden Dragon'){
@@ -4203,6 +4216,10 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   document.getElementById('commit-btn').style.display = 'none';
   document.getElementById('select-hint').textContent = 'Click a card to enter the Select phase';
   buildHand();
+  if(typeof dmShouldOfferFallback==='function' && dmShouldOfferFallback()){
+    var _dmov=document.getElementById('dm-fallback-overlay'); if(_dmov) _dmov.classList.add('show');
+    return;   // no conjure-eligible card — Auto-Ride/Forfeit only, no normal decision clock
+  }
   startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:30);   // casual = 30s round timer; ranked keeps 40
 }
 
@@ -5560,6 +5577,50 @@ function applyDeckMasterResolveEffects(pc, playerPow, oppPow, abilLog, stepSink)
     abilLog.push('⚡ Off-archetype splash: +1 Charge (scry option not yet built — flagged as a follow-up)');
   }
   return [playerPow, oppPow];
+}
+// Deck Master Phase F — cannot-conjure fallback. True only when every card in hand is Common
+// (no tier 1/2/3 conjure skill could possibly fire this turn), Deck Master mode only.
+function dmShouldOfferFallback(){
+  return !!(typeof deckMasterMode!=='undefined' && deckMasterMode && deckMasterCard && typeof hand!=='undefined' && hand.length>0 && !hand.some(function(c){ return c && c.rarity!=='common'; }));
+}
+// Auto-Ride: bottom the whole hand, redraw fresh — no match-score cost, pure variance risk.
+function dmAutoRide(){
+  var ov=document.getElementById('dm-fallback-overlay'); if(ov) ov.classList.remove('show');
+  var n=hand.length;
+  drawPile=drawPile.concat(hand); hand=[];
+  if(typeof shuffle==='function') shuffle(drawPile);
+  if(typeof drawToHand==='function') drawToHand(n);
+  deckSize=drawPile.length;
+  if(typeof buildHand==='function') buildHand();
+  if(typeof updatePiles==='function') updatePiles();
+  if(typeof toast==='function') toast('🔄 Auto-Ride — hand bottomed and redrawn, no score change.', true);
+  setPhase('revealed');
+  if(dmShouldOfferFallback()){ if(ov) ov.classList.add('show'); }   // unlucky redraw — offer again rather than leave a stuck all-Common hand
+}
+// Forfeit: concede the round (scored exactly like a normal loss/surrender), guaranteed +1 extra
+// draw next turn. Mirrors onDecisionTimeout()'s existing surrender presentation almost exactly.
+function dmForfeit(){
+  var ov=document.getElementById('dm-fallback-overlay'); if(ov) ov.classList.remove('show');
+  clearTurnTimers();
+  document.getElementById('record-reveal').style.display = 'none';
+  document.getElementById('instant-strip').style.display = 'none';
+  document.getElementById('confirm-btn').style.display = 'none';
+  document.getElementById('commit-btn').style.display = 'none';
+  document.getElementById('player-field').innerHTML = '<span class="placeholder">🏳 forfeited</span>';
+  document.getElementById('opp-field').innerHTML = '<span class="placeholder">no contest</span>';
+  playerScore[1]++;
+  lastResult = 'lose';
+  dmForfeitDrawBonus = true;
+  document.getElementById('result-label').textContent = '🏳 ROUND FORFEITED';
+  document.getElementById('result-label').className = 'result-label lose';
+  document.getElementById('result-sub').textContent = 'No Apex/Ultra/Rare card in hand — you forfeited the round. Draw 2 next turn.';
+  document.getElementById('abil-log').innerHTML = '<div class="abil-log-entry">🏳 Deck Master: no conjure-eligible card — round forfeited</div>';
+  if(typeof updateScore==='function') updateScore();
+  var _nb=document.querySelector('#result-overlay .next-btn'); if(_nb) _nb.textContent=(playerScore[0]>=4||playerScore[1]>=4)?'View Match Result →':'Continue →';
+  if(typeof updateStake==='function') updateStake();
+  document.getElementById('result-overlay').classList.add('show');
+  setPhase('resolved');
+  if(typeof updatePiles==='function') updatePiles();
 }
 // ── DATA-DRIVEN ABILITY SPEC — shared with server/rules.json (one source of truth). ──
 // Regenerate this const from server/rules.json when the spec changes; the server is canonical.
@@ -8445,6 +8506,7 @@ let selectedBot = null;
 let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward gate)
 let deckMasterMode = false;   // true only for Deck Master matches — player-only mechanic, bot plays unmodified
 let deckMasterRecord = lsGet('sf_dm_record', {k:0,d:0});   // Phase E: assimilated K/D, ADDITIVE alongside the card's own normal cardRecords/kdOf() — never replaces it
+let dmForfeitDrawBonus = false;   // Phase F: set by dmForfeit(), consumed for +1 extra draw on the very next drawCard() call
 let activeBot = null;
 
 function oppInitDeck(){
