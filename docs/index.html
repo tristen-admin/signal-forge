@@ -1500,9 +1500,9 @@ body.rm body.nav-collapsed #nav-hub .ni-icon,body.rm.nav-collapsed #nav-hub .ni-
 .ds-dm.on{color:var(--gold)}
 .deck-slot.filled.dm-master{border-left-color:var(--gold);box-shadow:inset 0 0 0 1px rgba(212,168,67,.35)}
 .deck-slot.filled.dm-master .ds-name{color:var(--gold)}
-.dm-badge{display:inline-flex;align-items:center;gap:6px;padding:2px 9px 2px 2px;border-radius:20px;background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.4)}
-.dm-badge-portrait{width:22px;height:22px;border-radius:50%;background-size:cover;background-position:center top;background-color:rgba(212,168,67,0.15);border:1px solid var(--gold);flex-shrink:0}
-.dm-badge-label{font-size:10px;font-weight:700;color:var(--gold);letter-spacing:.02em;white-space:nowrap}
+.dm-badge{display:inline-flex;align-items:center;gap:8px;padding:3px 12px 3px 3px;border-radius:24px;background:rgba(212,168,67,0.1);border:1px solid rgba(212,168,67,0.4)}
+.dm-badge-portrait{width:40px;height:40px;border-radius:50%;background-size:cover;background-position:center top;background-color:rgba(212,168,67,0.15);border:2px solid var(--gold);flex-shrink:0;box-shadow:0 0 8px rgba(212,168,67,0.35)}
+.dm-badge-label{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.02em;white-space:nowrap}
 .deck-pool-col .vault-grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}
 
 /* ── MARKETPLACE ── */
@@ -3647,7 +3647,7 @@ function updatePiles(){
   else { si.style.display='none'; }
   { var _dmb=document.getElementById('dm-badge');
     if(_dmb){
-      if(typeof deckMasterMode!=='undefined' && deckMasterMode && deckMasterCard){
+      if(deckMasterCard){   // 7/12/26: universal, no longer gated to deckMasterMode — see the note by its declaration
         _dmb.style.display='inline-flex';
         var _dmc=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===deckMasterCard && !x.uid;}):null;
         var _dmp=document.getElementById('dm-badge-portrait'); if(_dmp && typeof artFillStyle==='function') _dmp.style.cssText=artFillStyle((_dmc&&_dmc.artKey)||deckMasterCard);
@@ -4242,12 +4242,12 @@ function matchEndAgain(){
   // Real gap (7/12/26): this bypasses startDeckMasterMatch()'s guard entirely by calling
   // resetMatchState() directly — if activeDeck or deckMasterCard became invalid since the match
   // started (deck edited mid-session, card traded away, etc.), Play Again would silently continue
-  // in a broken half-Deck-Master state: deckMasterMode still true, but the guarantee/badge quietly
-  // has nothing valid to point at. Re-validate here the same way, but degrade visibly instead of
-  // silently — tell the player what happened instead of just dropping the mechanic with no signal.
-  if(deckMasterMode && (!deckMasterCard || !activeDeck.has(deckMasterCard) || activeDeck.size < MIN_DECK)){
-    deckMasterMode = false;
-    if(typeof toast==='function') toast('Deck Master ended — your deck or Deck Master pick changed. Continuing as a regular match.', false);
+  // pointing the guarantee/badge at nothing. Re-validate here the same way, but degrade visibly
+  // instead of silently. deckMasterCard (not deckMasterMode) is the universal source of truth now
+  // — see the note by deckMasterMode's declaration — so clearing IT is what actually turns this off.
+  if(deckMasterCard && (!activeDeck.has(deckMasterCard) || activeDeck.size < MIN_DECK)){
+    deckMasterCard = null; lsSet('sf_deckmaster', null);
+    if(typeof toast==='function') toast('Deck Master cleared — your deck changed since it was named. Continuing as a regular match.', false);
   }
   resetMatchState();
 }
@@ -5299,7 +5299,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
       // Deck Master tier-1 flourish — additive on top of whatever VFX the card already plays, gated
       // entirely to the exact named Deck Master card conjuring itself. Localized to the card, not a
       // full-screen takeover, so it never competes with the WIN/LOSE stamp a beat later.
-      try{ if(typeof deckMasterMode!=='undefined' && deckMasterMode && deckMasterCard && pc && pc.name===deckMasterCard && typeof FX!=='undefined'){
+      try{ if(deckMasterCard && pc && pc.name===deckMasterCard && typeof FX!=='undefined'){
         var _dmEl=document.getElementById('rc-card-me');
         if(_dmEl){ var _dmR=_dmEl.getBoundingClientRect(), _dmX=_dmR.left+_dmR.width/2, _dmY=_dmR.top+_dmR.height/2;
           FX.ring(_dmX, _dmY, {c:'rgba(212,168,67,.95)', r0:12, vr:11, w:6});
@@ -5728,7 +5728,7 @@ function _dmIsPowRule(r){ return 'add' in r || 'addvar' in r || 'mult' in r || '
 // on the specific stateful keys it checks for — a pure power-math rule (e.g. Cassian's addvar) is
 // never touched here, so it can't double-fire alongside applyDeckMasterResolveEffects below.
 function applyDeckMasterCommitEffects(pc){
-  if(typeof deckMasterMode==='undefined' || !deckMasterMode || !deckMasterCard || !pc) return;
+  if(!deckMasterCard || !pc) return;   // 7/12/26: universal, matches applyBotDeckMasterResolveEffects's un-gated pattern
   var tier = conjureTierOf(pc, deckMasterCard);
   if(tier===1){
     (DM_EXCLUSIVE[pc.name]||[]).forEach(function(r){
@@ -5757,7 +5757,7 @@ function applyDeckMasterCommitEffects(pc){
 // stateful rule already handled in applyDeckMasterCommitEffects (e.g. Death Remnant's "draw") can't
 // also log/no-op a second time here.
 function applyDeckMasterResolveEffects(pc, playerPow, oppPow, abilLog, stepSink){
-  if(typeof deckMasterMode==='undefined' || !deckMasterMode || !deckMasterCard || !pc) return [playerPow, oppPow];
+  if(!deckMasterCard || !pc) return [playerPow, oppPow];   // 7/12/26: universal, see the note by deckMasterMode's declaration
   var tier = conjureTierOf(pc, deckMasterCard);
   var ctx = {rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0), wc_len:(typeof winnersCircle!=='undefined'?winnersCircle.length:0), hand_len:(typeof hand!=='undefined'&&hand?hand.length:0)};
   ctx.dm_all_allies = ctx.rear_count + ctx.wc_len;
@@ -5804,9 +5804,10 @@ function applyBotDeckMasterResolveEffects(oc, playerPow, oppPow, abilLog, stepSi
   return [playerPow, oppPow];
 }
 // Deck Master Phase F — cannot-conjure fallback. True only when every card in hand is Common
-// (no tier 1/2/3 conjure skill could possibly fire this turn), Deck Master mode only.
+// (no tier 1/2/3 conjure skill could possibly fire this turn). Universal (7/12/26) — fires whenever
+// a Deck Master is named, in any mode, not just the dedicated one.
 function dmShouldOfferFallback(){
-  return !!(typeof deckMasterMode!=='undefined' && deckMasterMode && deckMasterCard && typeof hand!=='undefined' && hand.length>0 && !hand.some(function(c){ return c && c.rarity!=='common'; }));
+  return !!(deckMasterCard && typeof hand!=='undefined' && hand.length>0 && !hand.some(function(c){ return c && c.rarity!=='common'; }));
 }
 // Auto-Ride: bottom the whole hand, redraw fresh — no match-score cost, pure variance risk.
 function dmAutoRide(){
@@ -6531,11 +6532,11 @@ function resolve(pc, oc, cond, playerCommittedPow){
     playerScore[0]++;
     if(pc.name==='Skullchain Reaver' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); }
     else if(unbankNextWin){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); unbankNextWin=false; abilLog.push('🏳 Unbanked Victory — '+pc.name+' returns to your hand instead of banking to the Winners Circle'); }
-    else if(deckMasterMode && deckMasterCard && pc.name===deckMasterCard){ drawPile.unshift({...pc}); deckSize=drawPile.length; abilLog.push('★ '+pc.name+' — your Deck Master recycles to the deck instead of the Winners Circle, ready to be conjured again'); }
+    else if(deckMasterCard && pc.name===deckMasterCard){ drawPile.unshift({...pc}); deckSize=drawPile.length; abilLog.push('★ '+pc.name+' — your Deck Master recycles to the deck instead of the Winners Circle, ready to be conjured again'); }
     else { winnersCircle.push({...pc}); }
     lastResult = 'win';
     recordDuel(pc,'win'); signalPoints += 20;   // playtest: every match tracks K/D + pays
-    if(deckMasterMode && deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.k=(deckMasterRecord.k||0)+1; lsSet('sf_dm_record', deckMasterRecord); }
+    if(deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.k=(deckMasterRecord.k||0)+1; lsSet('sf_dm_record', deckMasterRecord); }
     if(pc.name === 'Signal Diviner'){ divinerBonusNext=2; abilLog.push('Signal Diviner: +2 max Charge next turn'); }
     if(pc.name === 'Tange Sazen') skullchainKills++;
     if(pc.name === 'Kotei') ragwingWins++;
@@ -6547,7 +6548,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     playerScore[1]++;
     charge=Math.min(ENERGY_CAP,charge+1); if(typeof renderCharge==='function') renderCharge();
     recordDuel(pc,'death');   // playtest: every match records the death
-    if(deckMasterMode && deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.d=(deckMasterRecord.d||0)+1; lsSet('sf_dm_record', deckMasterRecord); }
+    if(deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.d=(deckMasterRecord.d||0)+1; lsSet('sf_dm_record', deckMasterRecord); }
     { if(typeof drawPile!=='undefined' && drawPile.length){ var _tt=drawPile[drawPile.length-1]; var _tr=_tt&&TRIGGERS[_tt.name]; if(_tr){ drawPile.pop(); hand.push(_tt); if(_tr.draw) drawToHand(_tr.draw); if(_tr.recur){ for(var _tri=0;_tri<_tr.recur;_tri++){ if(banishPile.length) hand.push(banishPile.pop()); } } abilLog.push("✨ Trigger — "+_tt.name+": "+_tr.text); if(typeof toast==='function') toast("✨ Trigger! "+_tt.name+" — "+_tr.text, true); if(typeof buildHand==='function') buildHand(); } } }
     if(isDeathRemnant){
       var _rp=(typeof dmRemnantPowOverride!=='undefined'&&dmRemnantPowOverride!=null)?dmRemnantPowOverride:((typeof REMNANT_POW!=='undefined'&&REMNANT_POW[pc.name]!=null)?REMNANT_POW[pc.name]:pc.pow);
@@ -8314,18 +8315,22 @@ let draftDeckNext=null;   // one-shot: next deal uses the drafted deck (onboardi
 function dealNewDeck(){
   // Public Server sandbox = a random all-card deck (zero consequence); else the player's 10 (or starter).
   let names;
+  let _sandboxDealt=false;
   if(draftDeckNext){ names=draftDeckNext.slice(0,DECK_SIZE); draftDeckNext=null; }
-  else if(sandboxNext){ sandboxNext=false; const pool=COLLECTION.filter(c=>!c.uid).map(c=>c.name); shuffle(pool); names=pool.slice(0, DECK_SIZE); }
+  else if(sandboxNext){ sandboxNext=false; const pool=COLLECTION.filter(c=>!c.uid).map(c=>c.name); shuffle(pool); names=pool.slice(0, DECK_SIZE); _sandboxDealt=true; }
   else names = (activeDeck.size >= MIN_DECK) ? [...activeDeck] : DEFAULT_DECK;
   const deckCards = names.map(n => COLLECTION.find(c => (c.uid||c.name) === n)).filter(Boolean).map(c => ({...c}));
   shuffle(deckCards);
   hand = deckCards.slice(0, STARTING_HAND);
   drawPile = deckCards.slice(STARTING_HAND);
-  // Deck Master (7/12/26 playtest finding): the identity card is otherwise just one of 16 in the
+  // Deck Master (7/12/26 playtest finding): the identity card is otherwise just one of 20 in the
   // random draw pool — a whole match can go by without it ever coming up. Guarantee it in the
   // OPENING hand only (not re-forced later) so the mode's own signature moment isn't a lottery,
-  // while still leaving the choice of WHEN to conjure it entirely up to the player.
-  if(typeof deckMasterMode!=='undefined' && deckMasterMode && deckMasterCard && !hand.some(function(c){return c.name===deckMasterCard;})){
+  // while still leaving the choice of WHEN to conjure it entirely up to the player. Universal
+  // (7/12/26) — no longer gated to deckMasterMode, fires in every mode whenever a Deck Master is
+  // named, EXCEPT Sandbox specifically: that mode's whole point is a random deck with zero deck
+  // influence, so forcing your Deck Master into it would work against its own stated purpose.
+  if(!_sandboxDealt && deckMasterCard && !hand.some(function(c){return c.name===deckMasterCard;})){
     var _dmIdx=drawPile.findIndex(function(c){return c.name===deckMasterCard;});
     if(_dmIdx>=0){
       var _dmCard=drawPile.splice(_dmIdx,1)[0];
@@ -8776,7 +8781,13 @@ const BOT_OPPONENTS = [
 ];
 let selectedBot = null;
 let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward gate)
-let deckMasterMode = false;   // true only for Deck Master matches — player-only mechanic, bot plays unmodified
+// 7/12/26: no longer gates the Deck Master mechanic itself — deckMasterCard alone does that now,
+// universally, in every mode (matching activeBot.dmCard's un-gated bot-side pattern, and the user's
+// own stated intent that Deck Master was meant to be the game's baseline behavior, not a separate
+// opt-in mode). This flag is kept only for the dedicated-entry title override ("Deck Master — vs X"
+// in startDeckMasterMatch()) — a cosmetic/framing distinction, not a mechanic gate. Player-only
+// either way; the bot side has its own separate, always-on activeBot.dmCard path.
+let deckMasterMode = false;
 let deckMasterRecord = lsGet('sf_dm_record', {k:0,d:0});   // Phase E: assimilated K/D, ADDITIVE alongside the card's own normal cardRecords/kdOf() — never replaces it
 let dmForfeitDrawBonus = false;   // Phase F: set by dmForfeit(), consumed for +1 extra draw on the very next drawCard() call
 let unbankNextWin = false;        // Warpath combo (7/12/26): set by Unbanked Victory's Called effect, consumed at the player's next WC-banking decision in resolve()
