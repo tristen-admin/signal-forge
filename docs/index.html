@@ -4239,6 +4239,16 @@ function matchEndHome(){
 function matchEndAgain(){
   document.getElementById('match-end').classList.remove('show');
   matchComplete = false;
+  // Real gap (7/12/26): this bypasses startDeckMasterMatch()'s guard entirely by calling
+  // resetMatchState() directly — if activeDeck or deckMasterCard became invalid since the match
+  // started (deck edited mid-session, card traded away, etc.), Play Again would silently continue
+  // in a broken half-Deck-Master state: deckMasterMode still true, but the guarantee/badge quietly
+  // has nothing valid to point at. Re-validate here the same way, but degrade visibly instead of
+  // silently — tell the player what happened instead of just dropping the mechanic with no signal.
+  if(deckMasterMode && (!deckMasterCard || !activeDeck.has(deckMasterCard) || activeDeck.size < MIN_DECK)){
+    deckMasterMode = false;
+    if(typeof toast==='function') toast('Deck Master ended — your deck or Deck Master pick changed. Continuing as a regular match.', false);
+  }
   resetMatchState();
 }
 
