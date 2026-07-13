@@ -3812,7 +3812,7 @@ function drawCard(force){ if(typeof tutorialAdvance==='function')setTimeout(func
     document.getElementById('commit-hint').textContent = 'Deck exhausted — reveal the condition.';
     document.getElementById('opp-area').innerHTML = '⏳ Opponent drew. Waiting…';
     buildHand(); updatePiles();
-    startRoundCountdown();
+    startRoundCountdown('Deck empty — no card drawn. Play from your hand.');
     return;
   }
   hand.push(drawn);
@@ -3895,7 +3895,7 @@ function clearTurnTimers(){
   const cs = document.getElementById('clock-strip'); if(cs){ cs.style.display = 'none'; cs.classList.remove('urgent'); }
 }
 // 3-second get-ready countdown, then the condition auto-reveals for both players.
-function startRoundCountdown(){
+function startRoundCountdown(msg){
   clearTurnTimers();
   const rc = document.getElementById('round-countdown');
   const rn = document.getElementById('rc-num');
@@ -3903,7 +3903,12 @@ function startRoundCountdown(){
   const tick = () => {
     if(rn) rn.textContent = n; else rc.textContent = n;
     rc.classList.add('show'); rc.classList.remove('pop'); void rc.offsetWidth; rc.classList.add('pop');
-    document.getElementById('cond-eyebrow').textContent = `Condition auto-reveals in ${n}…`;
+    // Real bug (7/13/26, found via forced deck-exhaustion test): this used to unconditionally
+    // stomp cond-eyebrow with the generic countdown text every tick — so drawCard()'s own "Deck
+    // empty — no card drawn" notice (set one line before calling this) survived under a
+    // millisecond before getting overwritten, making it invisible in practice. Callers with a
+    // more specific message now pass it through and it persists across every tick instead.
+    document.getElementById('cond-eyebrow').textContent = msg || `Condition auto-reveals in ${n}…`;
   };
   tick();
   roundTimer = setInterval(() => {
