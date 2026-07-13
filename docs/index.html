@@ -1343,7 +1343,7 @@ body.rm body.nav-collapsed #nav-hub .ni-icon,body.rm.nav-collapsed #nav-hub .ni-
 .dr-header.common .dr-rarity{color:var(--r-common)} .dr-header.uncommon .dr-rarity{color:#5FB878}
 .dr-header.rare .dr-rarity{color:#6C8CF0} .dr-header.ultra .dr-rarity{color:#C080E0}
 .dr-header.genesis .dr-rarity{color:var(--gold)}
-.dr-race-row{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11px;color:var(--text3)}.dr-race-lbl{letter-spacing:.04em;text-transform:uppercase;font-weight:700}.dr-race-sel{background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer}.dr-race-sel:hover{border-color:var(--gold)}
+.dr-race-row{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11px;color:var(--text3)}.dr-race-lbl{letter-spacing:.04em;text-transform:uppercase;font-weight:700}.dr-race-sel{background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer}.dr-race-sel:hover{border-color:var(--gold)}.dr-disc-stats{font-variant-numeric:tabular-nums;color:var(--text2);letter-spacing:0}
 .dr-name{font-size:22px;font-weight:800;color:#fff;line-height:1.05;margin-bottom:6px;text-shadow:0 2px 8px #000;text-wrap:balance}
 .dr-powline{display:flex;align-items:baseline;gap:8px}
 .dr-pow{font-size:28px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1}
@@ -3179,7 +3179,9 @@ const CONDITIONS = [
   {id:"purereflection",mech:"Pure Reflection",icon:"🪞",name:"The Mirror Deep",rule:"You fight with your enemy's past — each card's power becomes the OPPONENT's career kills.",strat:"Turns their record against them.",tag:"flip",prob:"3%"},
   {id:'reinforce',mech:'Reinforcements',icon:'🃏',name:'The Muster Yard',rule:'The banners call fresh blood to the line — both players draw 1 card when this ground is revealed.',strat:'Pure card advantage. Great when your hand runs thin.',tag:'boost',prob:'6%'},
   {id:'dredge',mech:'Dredge',icon:'🌊',name:'The Drowned Vault',rule:'The tide gives and takes — both players draw 2 cards, then discard 2 to the banish pile.',strat:'Digs deep and fuels banish-recur engines.',tag:'chaos',prob:'5%'},
-  {id:'wildpit',mech:'Wild Pit',icon:'🎲',name:'The Feral Menagerie',rule:'Beasts are loosed at random — both players draw 1 card, then after commit each conjured fighter is chosen at random from the hand.',strat:'Draw fuels the chaos. Commit knowing the pit decides.',tag:'chaos',prob:'5%'}
+  {id:'wildpit',mech:'Wild Pit',icon:'🎲',name:'The Feral Menagerie',rule:'Beasts are loosed at random — both players draw 1 card, then after commit each conjured fighter is chosen at random from the hand.',strat:'Draw fuels the chaos. Commit knowing the pit decides.',tag:'chaos',prob:'5%'},
+  {id:'bloodlinesclash',mech:'Bloodlines Clash',icon:'🔱',name:'Thricefold Vale',rule:'Every bloodline answers to another — Wardbound (order) overwhelms Nightbound (predators), Nightbound overwhelms Wildbound (the untamed), and Wildbound overwhelms Wardbound in turn. Whoever\'s camp beats the other\'s gets +6 power. Same camp on both sides means no swing.',strat:'Check a card\'s Camp in its detail view before you commit — the wheel decides this one, not the printed power.',tag:'boost',prob:'4%'},
+  {id:'disciplinetrial',mech:'Discipline Trial',icon:'🎯',name:'Kaeloth\'s Gauntlet',rule:'The Gauntlet tests one trait and nothing else — Might, Cunning, or Grit is chosen at random, and whoever\'s committed card is higher in that one discipline gets +6 power. A tie swings nothing.',strat:'A high-power card with a weak discipline spread can still lose this one. Check the full spread, not just the headline number.',tag:'chaos',prob:'4%'}
 ];
 const COND_EFF = {
   lowest:"Lowest base power wins — power-adding abilities backfire.",
@@ -3214,7 +3216,9 @@ const COND_EFF = {
   legendsclash:"Apex cards gain +4; all others take −2.",
   woundedbeast:"Cards with 3+ deaths gain +5.",
   survivorsground:"The card with fewer deaths gains +3.",
-  purereflection:"Each card's power becomes the opponent's career kills."
+  purereflection:"Each card's power becomes the opponent's career kills.",
+  bloodlinesclash:"Camp beats camp (Wardbound>Nightbound>Wildbound>Wardbound) for +6; same camp = no swing.",
+  disciplinetrial:"One of Might/Cunning/Grit is chosen at random; the higher card in it gains +6."
 };
 
 const HAND_CARDS = [
@@ -4462,6 +4466,52 @@ let NAME_OVERRIDE = {'Corvus':'Black Wings, Corvus the Raven','Arch-Grim Korrin'
 function dispName(nm){ return (NAME_OVERRIDE && NAME_OVERRIDE[nm]) || nm; }
 function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Human'; }
 function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.race=r; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83e\uddec Race set: '+name+' \u2192 '+r, true); }
+
+/* Race Camps (7/13/26) \u2014 a 3-way affinity wheel bucketing the 16 races for the new "Bloodlines
+   Clash" Condition: Wardbound (order/wards) beats Nightbound (predators/undeath) beats Wildbound
+   (primal/untamed) beats Wardbound (the wild reclaims civilization). Placeholder first-pass assignment
+   for races with no established card-lore yet (Kaldrei/Vashiri/Nimkatta/Kaidrun/Marrowen) \u2014 rename/
+   reassign freely, this just stands the mechanic up with real, working data. */
+const RACE_CAMP = {
+  Human:'Wardbound', Kaldrei:'Wardbound', Kaidrun:'Wardbound', Celestial:'Wardbound', Construct:'Wardbound',
+  Marrowen:'Nightbound', Lycan:'Nightbound', Vampire:'Nightbound', Revenant:'Nightbound',
+  Vashiri:'Wildbound', Nimkatta:'Wildbound', Uroth:'Wildbound', Dragonkin:'Wildbound', Beast:'Wildbound', Spirit:'Wildbound', Fae:'Wildbound'
+};
+const CAMP_BEATS = {Wardbound:'Nightbound', Nightbound:'Wildbound', Wildbound:'Wardbound'};
+const CAMP_ICON = {Wardbound:'\ud83d\udee1\ufe0f', Nightbound:'\ud83c\udf19', Wildbound:'\ud83c\udf3f'};
+let campOverride = {};   // design-time per-card camp edits (persisted); wins over RACE_CAMP
+function campOf(nameOrCard){
+  var name=(nameOrCard && typeof nameOrCard==='object')?nameOrCard.name:nameOrCard;
+  if(name && campOverride[name]) return campOverride[name];
+  // Only trust RACE_CAMP when the card actually has explicit race lore (CARD_RACE entry or a
+  // player-set raceOverride) — otherwise raceOf() silently falls through to 'Human' for ~90% of
+  // the collection, which would make every unassigned card Wardbound and Bloodlines Clash a near
+  // no-op. Cards with no race lore yet get a deterministic hash-spread across the 3 camps instead.
+  if(name && (raceOverride[name] || CARD_RACE[name])) return RACE_CAMP[raceOf(name)] || 'Wardbound';
+  var _camps=['Wardbound','Nightbound','Wildbound'];
+  return _camps[_nameHash(name)%3];
+}
+function campBeats(a,b){ return CAMP_BEATS[a]===b; }
+function setCamp(name, camp){ if(!name) return; campOverride[name]=camp; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.camp=camp; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83c\udfd5 Camp set: '+name+' \u2192 '+camp, true); }
+
+/* Discipline stats (7/13/26): Might/Cunning/Grit \u2014 a second numeric axis under the headline `pow`,
+   for the new "Discipline Trial" Condition. Deterministically DERIVED from a name-hash (not hand-
+   authored) so every existing card gets real, stable, working numbers immediately \u2014 this is placeholder
+   content to stand the mechanic up; DISC_OVERRIDE lets the owner hand-tune specific cards later without
+   re-deriving the rest. */
+let DISC_OVERRIDE = {};   // design-time per-card {might,cunning,grit} edits (persisted); wins over the derivation
+function _nameHash(s){ var h=0; s=String(s||''); for(var i=0;i<s.length;i++){ h=((h<<5)-h+s.charCodeAt(i))|0; } return Math.abs(h); }
+function deriveDisciplines(c){
+  if(!c) return {might:8,cunning:8,grit:8};
+  if(DISC_OVERRIDE[c.name]) return DISC_OVERRIDE[c.name];
+  var h=_nameHash(c.name), base=Math.max(4,Math.min(20,Math.round((c.pow||10)*0.7))), spread=8, half=Math.floor(spread/2);
+  return {
+    might:  Math.max(1, base + (h%spread) - half),
+    cunning:Math.max(1, base + (Math.floor(h/7)%spread) - half),
+    grit:   Math.max(1, base + (Math.floor(h/49)%spread) - half)
+  };
+}
+function setDisciplines(name, might, cunning, grit){ if(!name) return; DISC_OVERRIDE[name]={might:might,cunning:cunning,grit:grit}; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name){ c.might=might; c.cunning=cunning; c.grit=grit; } }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\u2694\ufe0f Disciplines set: '+name+' \u2192 M'+might+'/C'+cunning+'/G'+grit, true); }
 function conjureCost(c){ if(!c) return 1; if(c.cost!=null) return c.cost; if(COST_OVERRIDE[c.name]!=null) return COST_OVERRIDE[c.name]; var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; }
 // Energy rework (7/12/26, direct spec): both players start at 2 max energy, gaining +1 max per duel
 // through duel 4, then +2 max per duel from duel 5 onward — no fixed ceiling (Hearthstone-style
@@ -6444,6 +6494,19 @@ function resolve(pc, oc, cond, playerCommittedPow){
   else if(cond.id==="woundedbeast"){ if((pc.deaths||0)>=3){playerPow+=5;} if((oc.deaths||0)>=3){oppPow+=5;} abilLog.push("🐺 Wounded Beast: 3+ deaths veterans +5"); }
   else if(cond.id==="survivorsground"){ if((pc.deaths||0)<(oc.deaths||0)){playerPow+=3;} else if((oc.deaths||0)<(pc.deaths||0)){oppPow+=3;} abilLog.push("⚰️ Survivor's Ground: fewer deaths +3"); }
   else if(cond.id==="purereflection"){ playerPow=(oc.kills||0); oppPow=(pc.kills||0); abilLog.push("🪞 Pure Reflection: power becomes the opponent's career kills"); }
+  else if(cond.id==="bloodlinesclash"){
+    var _campP=(typeof campOf==='function')?campOf(pc):'Wardbound', _campO=(typeof campOf==='function')?campOf(oc):'Wardbound';
+    if(_campP!==_campO && campBeats(_campP,_campO)){ playerPow+=6; abilLog.push("🔱 Bloodlines Clash: "+_campP+" overwhelms "+_campO+" — +6"); }
+    else if(_campP!==_campO && campBeats(_campO,_campP)){ oppPow+=6; abilLog.push("🔱 Bloodlines Clash: "+_campO+" overwhelms "+_campP+" — +6"); }
+    else { abilLog.push("🔱 Bloodlines Clash: same camp ("+_campP+") — no swing"); }
+  }
+  else if(cond.id==="disciplinetrial"){
+    var _dks=['might','cunning','grit'], _dk=_dks[Math.floor(Math.random()*3)], _dLbl={might:'Might',cunning:'Cunning',grit:'Grit'}[_dk];
+    var _pv=pc[_dk]||0, _ov=oc[_dk]||0;
+    if(_pv>_ov){ playerPow+=6; abilLog.push("🎯 Discipline Trial ("+_dLbl+"): "+_pv+" vs "+_ov+" — +6"); }
+    else if(_ov>_pv){ oppPow+=6; abilLog.push("🎯 Discipline Trial ("+_dLbl+"): "+_ov+" vs "+_pv+" — +6"); }
+    else { abilLog.push("🎯 Discipline Trial ("+_dLbl+"): tied at "+_pv+" — no swing"); }
+  }
   else if(cond.id === 'lowest'){
     playerPow = -playerPow; oppPow = -oppPow;
   } else if(cond.id === 'surge'){
@@ -7075,7 +7138,7 @@ function rlab(r){ return RARITY_LABEL[r]||cap(r||''); }
 function rlab1(r){ var l=RARITY_LABEL[r]||cap(r||''); return l.length<=2?l:l.charAt(0); }
 const SAVE_KEY = 'signalforge_save_v2';
 function saveState(){
-  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
 }
 function loadState(){
   try{
@@ -7102,6 +7165,9 @@ function loadState(){
       if(typeof s.packPityUltra==='number') packPityUltra=s.packPityUltra; if(typeof s.packPityApex==='number') packPityApex=s.packPityApex;
       if(s.essenceCosmetics && typeof s.essenceCosmetics==='object') essenceCosmetics=s.essenceCosmetics;
       if(s.raceOverride && typeof s.raceOverride==='object'){ raceOverride=s.raceOverride; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c) c.race=raceOf(c.name); }); }catch(e){} }
+      if(s.campOverride && typeof s.campOverride==='object'){ campOverride=s.campOverride; }
+      if(s.DISC_OVERRIDE && typeof s.DISC_OVERRIDE==='object'){ DISC_OVERRIDE=s.DISC_OVERRIDE; }
+      try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(!c) return; c.camp=campOf(c.name); var _d=deriveDisciplines(c); c.might=_d.might; c.cunning=_d.cunning; c.grit=_d.grit; }); }catch(e){}
       if(s.cardFoilMax && typeof s.cardFoilMax==='object') cardFoilMax=s.cardFoilMax;
       if(s.cardFrames && typeof s.cardFrames==='object') cardFrames=s.cardFrames;
       if(Array.isArray(s.ownedFrames)) ownedFrames=new Set(s.ownedFrames);
@@ -9135,6 +9201,7 @@ function openCardDetail(id, fresh, tab){
       <div class="dr-rarity">${rlab(c.rarity)}${pristine?' · ◈ Pristine':''}${fresh?' · ✦ Fresh Mint':''}</div>
       <div class="dr-name">${dispName(c.name)}</div>
       <div class="dr-race-row">🧬 <span class="dr-race-lbl">Race</span> <select class="dr-race-sel" data-cardname="${(c.name||'').replace(/"/g,'&quot;')}" onchange="setRace(this.dataset.cardname, this.value)">${RACES.map(function(r){return '<option'+(raceOf(c.name)===r?' selected':'')+'>'+r+'</option>';}).join('')}</select></div>
+      <div class="dr-race-row">${CAMP_ICON[c.camp||campOf(c.name)]||'🏕'} <span class="dr-race-lbl">${c.camp||campOf(c.name)}</span> <span class="dr-disc-stats">⚔ ${c.might||0} Might &middot; 🧠 ${c.cunning||0} Cunning &middot; 🪨 ${c.grit||0} Grit</span></div>
       <div class="dr-powline"><span class="dr-pow">${c.pow}</span><span class="dr-pow-label">Base Power</span><span class="dr-pow" style="color:var(--electric);margin-left:16px">⚡${conjureCost(c)}</span><span class="dr-pow-label">Conjure</span></div>
     </div>
     <div class="dr-tabs">
@@ -10743,7 +10810,7 @@ buildMatchView();
 updateScore();
 rpRender();
 initOwnedCopies();
-(function(){ try{ if(typeof COLLECTION!=='undefined') COLLECTION.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); }); if(typeof OPP_CARDS!=='undefined') OPP_CARDS.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); }); var _pk=[]; if(typeof PACKS!=='undefined')_pk=_pk.concat(PACKS); if(typeof FORGE_PACKS!=='undefined')_pk=_pk.concat(FORGE_PACKS); _pk.forEach(function(p){ if(p.odds&&p.odds.uncommon!=null){ p.odds.common=(p.odds.common||0)+p.odds.uncommon; delete p.odds.uncommon; } }); }catch(e){} })();
+(function(){ try{ if(typeof COLLECTION!=='undefined') COLLECTION.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.camp=campOf(c.name); var _d=deriveDisciplines(c); c.might=_d.might; c.cunning=_d.cunning; c.grit=_d.grit; }); if(typeof OPP_CARDS!=='undefined') OPP_CARDS.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.camp=campOf(c.name); var _d2=deriveDisciplines(c); c.might=_d2.might; c.cunning=_d2.cunning; c.grit=_d2.grit; }); var _pk=[]; if(typeof PACKS!=='undefined')_pk=_pk.concat(PACKS); if(typeof FORGE_PACKS!=='undefined')_pk=_pk.concat(FORGE_PACKS); _pk.forEach(function(p){ if(p.odds&&p.odds.uncommon!=null){ p.odds.common=(p.odds.common||0)+p.odds.uncommon; delete p.odds.uncommon; } }); }catch(e){} })();
   supply = defaultSupply(); cardSupply=defaultCardSupply();
 const _hadSave=(function(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}})();
 loadState();
@@ -11058,7 +11125,7 @@ body::before{background:
     var RAR={genesis:{c:'#F5C24D',n:'Apex'},ultra:{c:'#B36AF0',n:'Ultra'},rare:{c:'#5B86F5',n:'Rare'},common:{c:'#8b98ad',n:'Common'}};
     var HAND=(typeof HAND_CARDS!=='undefined')?HAND_CARDS:[];
     function baseList(){var s={},l=[];HAND.concat(DECK_POOL).forEach(function(c){if(!s[c.name]){s[c.name]=1;l.push(c);}});return l;}
-    var ORIG={}; baseList().forEach(function(c){ORIG[c.name]={p:c.pow,r:c.rarity,t:c.timing||'—',a:c.abil||'',cost:(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[c.name]!=null)?COST_OVERRIDE[c.name]:((typeof conjureCost==='function')?conjureCost(c):null),called:(typeof CALLED!=='undefined'&&CALLED[c.name])?JSON.stringify(CALLED[c.name]):null,rules:(typeof CARD_RULES!=='undefined'&&CARD_RULES[c.name])?JSON.stringify(CARD_RULES[c.name]):null};});
+    var ORIG={}; baseList().forEach(function(c){ORIG[c.name]={p:c.pow,r:c.rarity,t:c.timing||'—',a:c.abil||'',cost:(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[c.name]!=null)?COST_OVERRIDE[c.name]:((typeof conjureCost==='function')?conjureCost(c):null),might:c.might,cunning:c.cunning,grit:c.grit,camp:c.camp,called:(typeof CALLED!=='undefined'&&CALLED[c.name])?JSON.stringify(CALLED[c.name]):null,rules:(typeof CARD_RULES!=='undefined'&&CARD_RULES[c.name])?JSON.stringify(CARD_RULES[c.name]):null};});
     function setProp(n,k,v){DECK_POOL.forEach(function(c){if(c.name===n)c[k]=v;});COLLECTION.forEach(function(c){if(c.name===n)c[k]=v;});}
     function loadOV(){try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return {};}}
     var OV=loadOV();
@@ -11067,7 +11134,7 @@ body::before{background:
     function loadUserGroups(){ try{var a=JSON.parse(localStorage.getItem(GRP_KEY)||'[]'); if(typeof LINK_GROUPS!=='undefined'){a.forEach(function(g){ if(!LINK_GROUPS.some(function(x){return x.id===g.id;})) LINK_GROUPS.push(g); });} }catch(e){} }
     function saveUserGroups(){ try{ if(typeof LINK_GROUPS==='undefined')return; var mine=LINK_GROUPS.filter(function(g){return /^usr-/.test(g.id);}); localStorage.setItem(GRP_KEY, JSON.stringify(mine)); }catch(e){} }
     function applyLinksFor(n){ if(typeof LINK_GROUPS==='undefined')return; var want=(OV[n]&&OV[n].links)?OV[n].links:null; if(!want)return; LINK_GROUPS.forEach(function(g){ var i=g.members.indexOf(n); var should=want.indexOf(g.id)>=0; if(should&&i<0)g.members.push(n); else if(!should&&i>=0)g.members.splice(i,1); }); }
-    function applyAll(){loadUserGroups();Object.keys(OV).forEach(function(n){var o=OV[n];if(o.p!=null)setProp(n,'pow',o.p);if(o.r!=null)setProp(n,'rarity',o.r);if(o.t!=null)setProp(n,'timing',o.t);if(o.a!=null)setProp(n,'abil',o.a);if(o.cost!=null&&typeof COST_OVERRIDE!=='undefined')COST_OVERRIDE[n]=o.cost;if(o.rename&&typeof NAME_OVERRIDE!=='undefined')NAME_OVERRIDE[n]=o.rename;if(o.links)applyLinksFor(n);if(o.called!=null&&typeof CALLED!=='undefined'){try{CALLED[n]=JSON.parse(o.called);}catch(e){}}if(o.rules!=null&&typeof CARD_RULES!=='undefined'){try{CARD_RULES[n]=JSON.parse(o.rules);}catch(e){}}});}
+    function applyAll(){loadUserGroups();Object.keys(OV).forEach(function(n){var o=OV[n];if(o.p!=null)setProp(n,'pow',o.p);if(o.r!=null)setProp(n,'rarity',o.r);if(o.t!=null)setProp(n,'timing',o.t);if(o.a!=null)setProp(n,'abil',o.a);if(o.cost!=null&&typeof COST_OVERRIDE!=='undefined')COST_OVERRIDE[n]=o.cost;if((o.might!=null||o.cunning!=null||o.grit!=null)&&typeof setDisciplines==='function'){var _b=baseList().find(function(x){return x.name===n;})||{};setDisciplines(n,o.might!=null?o.might:_b.might,o.cunning!=null?o.cunning:_b.cunning,o.grit!=null?o.grit:_b.grit);}if(o.camp!=null&&typeof setCamp==='function')setCamp(n,o.camp);if(o.rename&&typeof NAME_OVERRIDE!=='undefined')NAME_OVERRIDE[n]=o.rename;if(o.links)applyLinksFor(n);if(o.called!=null&&typeof CALLED!=='undefined'){try{CALLED[n]=JSON.parse(o.called);}catch(e){}}if(o.rules!=null&&typeof CARD_RULES!=='undefined'){try{CARD_RULES[n]=JSON.parse(o.rules);}catch(e){}}});}
     applyAll(); try{if(typeof buildVault==='function')buildVault();}catch(e){}
     var vt; function schedVault(){clearTimeout(vt);vt=setTimeout(function(){try{if(typeof buildVault==='function')buildVault();}catch(e){}},400);}
     function model(){return baseList().map(function(c){return {n:c.name,r:c.rarity,p:c.pow,t:c.timing||'—',a:c.abil||''};});}
@@ -11126,6 +11193,7 @@ body::before{background:
         var note=(OV[n]&&OV[n].note)?OV[n].note:'';
         var rules=(typeof CARD_RULES!=='undefined'&&CARD_RULES[n])?JSON.stringify(CARD_RULES[n]):'';
         h+='<div class="dfx-card" data-n="'+esc(n)+'"><div class="dfx-h"><input class="dfx-name" data-fx="rename" value="'+esc(NAME_OVERRIDE[n]||n)+'" title="Display name (card face). Export hands the canonical rename to Claude."><span class="dfx-cost">⚡ <input type="number" data-fx="cost" value="'+cost+'" min="0" max="6"></span></div>'+'<div class="dfx-pr"><span class="dfx-q"><i>Power</i><input type="number" data-fx="pow" class="dfx-qin" value="'+(c.pow||0)+'" min="0" max="40"></span><span class="dfx-q"><i>Rarity</i><select data-fx="rar" class="dfx-qin">'+['genesis','ultra','rare','common'].map(function(r){return '<option'+(c.rarity===r?' selected':'')+'>'+r+'</option>';}).join('')+'</select></span></div>'
+          +'<div class="dfx-pr dfx-disc"><span class="dfx-q"><i>Might</i><input type="number" data-fx="might" class="dfx-qin" value="'+(c.might||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Cunning</i><input type="number" data-fx="cunning" class="dfx-qin" value="'+(c.cunning||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Grit</i><input type="number" data-fx="grit" class="dfx-qin" value="'+(c.grit||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Camp</i><select data-fx="camp" class="dfx-qin">'+Object.keys(CAMP_BEATS).map(function(cm){return '<option'+((c.camp||campOf(n))===cm?' selected':'')+'>'+cm+'</option>';}).join('')+'</select></span></div>'
           +'<label class="dfx-l">Conjured ability — display text</label><textarea data-fx="abil" class="dfx-ta">'+esc(c.abil||'')+'</textarea>'
           +'<label class="dfx-l">📣 Called — quick build (flat effect)</label>'
           +'<div class="dfx-quick">'
@@ -11144,6 +11212,9 @@ body::before{background:
           +'<div class="dfx-foot"><button class="dfx-apply">Apply</button><span class="dfx-msg"></span></div></div>';});
       BODY.innerHTML=h;
       BODY.querySelectorAll('[data-fx=cost]').forEach(function(inp){ inp.addEventListener('change',function(){ var card=inp.closest('.dfx-card'),n=card.getAttribute('data-n'); var cv=parseInt(inp.value,10); if(isNaN(cv))return; cv=Math.max(0,Math.min(6,cv)); inp.value=cv; if(typeof COST_OVERRIDE!=='undefined')COST_OVERRIDE[n]=cv; recordFx(n,'cost',cv); schedVault(); inp.classList.add('flash'); setTimeout(function(){inp.classList.remove('flash');},600); }); });
+      function _discChange(inp){ var card=inp.closest('.dfx-card'),n=card.getAttribute('data-n'); var dv=parseInt(card.querySelector('[data-fx=might]').value,10),cv=parseInt(card.querySelector('[data-fx=cunning]').value,10),gv=parseInt(card.querySelector('[data-fx=grit]').value,10); dv=isNaN(dv)?1:Math.max(1,Math.min(30,dv)); cv=isNaN(cv)?1:Math.max(1,Math.min(30,cv)); gv=isNaN(gv)?1:Math.max(1,Math.min(30,gv)); setDisciplines(n,dv,cv,gv); recordFx(n,'might',dv); recordFx(n,'cunning',cv); recordFx(n,'grit',gv); inp.classList.add('flash'); setTimeout(function(){inp.classList.remove('flash');},600); }
+      BODY.querySelectorAll('[data-fx=might],[data-fx=cunning],[data-fx=grit]').forEach(function(inp){ inp.addEventListener('change',function(){ _discChange(inp); }); });
+      BODY.querySelectorAll('[data-fx=camp]').forEach(function(sel){ sel.addEventListener('change',function(){ var card=sel.closest('.dfx-card'),n=card.getAttribute('data-n'); setCamp(n,sel.value); recordFx(n,'camp',sel.value); }); });
       BODY.querySelectorAll('.dfx-build').forEach(function(btn){ btn.onclick=function(){ var card=btn.closest('.dfx-card'); function qv(k){var el=card.querySelector('[data-q='+k+']');return el?el.value.trim():'';} var o={},txt=qv('text'),add=parseInt(qv('add'),10),opp=parseInt(qv('opp'),10),dr=parseInt(qv('draw'),10),cg=parseInt(qv('chg'),10); if(txt)o.text=txt; if(!isNaN(add)&&add!==0)o.add=add; if(!isNaN(opp)&&opp!==0)o.oppadd=-Math.abs(opp); if(!isNaN(dr)&&dr!==0)o.draw=dr; if(!isNaN(cg)&&cg!==0)o.chargeGain=cg; var ta=card.querySelector('[data-fx=called]'); ta.value=Object.keys(o).length?JSON.stringify(o):''; ta.focus(); }; });
       BODY.querySelectorAll('[data-fx=note]').forEach(function(ta){ ta.addEventListener('blur',function(){ var card=ta.closest('.dfx-card'),n=card.getAttribute('data-n'); recordFx(n,'note',ta.value.trim()||null); }); });
       BODY.querySelectorAll('[data-fx=rename]').forEach(function(inp){ inp.addEventListener('change',function(){ var n=inp.closest('.dfx-card').getAttribute('data-n'); var v=inp.value.trim(); if(v&&v!==n){NAME_OVERRIDE[n]=v;recordFx(n,'rename',v);} else {delete NAME_OVERRIDE[n];recordFx(n,'rename',null);} schedVault(); }); });
