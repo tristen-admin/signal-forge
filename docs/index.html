@@ -341,9 +341,10 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .mi-count.pop{animation:mi-pop 1s cubic-bezier(.2,.8,.3,1)}
 @keyframes mi-pop{0%{opacity:0;transform:scale(1.7)}18%{opacity:1;transform:scale(1)}82%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.85)}}
 @media(prefers-reduced-motion:reduce){.match-intro{display:none!important}}
-.round-countdown{position:absolute;inset:0;z-index:7;display:none;align-items:center;justify-content:center;pointer-events:none;font-size:96px;font-weight:800;color:var(--gold);text-shadow:0 0 34px rgba(212,168,67,0.6),0 0 8px rgba(0,0,0,0.5);font-variant-numeric:tabular-nums}
-.round-countdown.show{display:flex}
+.round-countdown{position:absolute;inset:0;z-index:7;display:none;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;font-size:96px;font-weight:800;color:var(--gold);text-shadow:0 0 34px rgba(212,168,67,0.6),0 0 8px rgba(0,0,0,0.5);font-variant-numeric:tabular-nums}
+.round-countdown.show{display:flex;pointer-events:auto;cursor:pointer}
 .round-countdown.pop{animation:rc-pop 0.9s cubic-bezier(0.2,0.8,0.3,1)}
+.rc-skip-hint{font-size:11px;font-weight:600;color:var(--text3);text-shadow:none;letter-spacing:.04em;margin-top:2px}
 @keyframes rc-pop{0%{transform:scale(1.7);opacity:0}22%{opacity:1}100%{transform:scale(1);opacity:0.92}}
 .clock-strip{display:flex;align-items:center;gap:10px;padding:6px 16px;background:rgba(10,11,15,0.5);border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0}
 .spell-tray{display:flex;align-items:center;gap:12px;padding:8px 16px;background:transparent;border-top:none;flex-shrink:0;flex-wrap:wrap}
@@ -2814,7 +2815,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="rear-slot" id="player-rear" style="display:none"></div>
       <div class="rear-slot" id="player-rear2" style="display:none"></div>
       <div class="impact-fx" id="impact-fx"><span class="shock"></span><span class="shock shock2"></span></div>
-      <div class="round-countdown" id="round-countdown"></div>
+      <div class="round-countdown" id="round-countdown" onclick="skipRoundCountdown()"><span id="rc-num"></span><span class="rc-skip-hint">tap to skip</span></div>
     </div>
 
     <!-- INSTANT WINDOW (hidden by default) -->
@@ -3884,9 +3885,10 @@ function clearTurnTimers(){
 function startRoundCountdown(){
   clearTurnTimers();
   const rc = document.getElementById('round-countdown');
+  const rn = document.getElementById('rc-num');
   let n = 3;
   const tick = () => {
-    rc.textContent = n;
+    if(rn) rn.textContent = n; else rc.textContent = n;
     rc.classList.add('show'); rc.classList.remove('pop'); void rc.offsetWidth; rc.classList.add('pop');
     document.getElementById('cond-eyebrow').textContent = `Condition auto-reveals in ${n}…`;
   };
@@ -3901,6 +3903,15 @@ function startRoundCountdown(){
     }
   }, 1000);
 }
+// Real pacing fix (7/12/26): this 3s countdown fires on EVERY round, not just match start — a
+// repeated, unskippable tax the user flagged as "lag after every fight result." Click/tap anywhere
+// on it to jump straight to the condition reveal instead of waiting out the remaining ticks.
+function skipRoundCountdown(){
+  if(!roundTimer) return;   // already past the countdown window, nothing to skip
+  clearInterval(roundTimer); roundTimer=null;
+  const rc=document.getElementById('round-countdown'); if(rc) rc.classList.remove('show');
+  revealCondition();
+}
 function boardWipe(cb){
   var w=document.getElementById('bg-wipe');
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -3911,11 +3922,13 @@ function boardWipe(cb){
   w.addEventListener('animationend', function ae(){ w.removeEventListener('animationend',ae); w.classList.remove('go'); doSwap(); }, {once:true});
 }
 var _miSeq=0,_miCd=null,_miSafe=null;
+let _skipMatchIntro=false;   // real pacing fix (7/12/26): "Play Again" sets this so the cinematic doesn't replay every rematch — you already saw it this session. Fresh entries from the lobby leave it false.
 function playMatchIntro(){
   var ov=document.getElementById('match-intro'), v=document.getElementById('mi-vid'), cnt=document.getElementById('mi-count');
   var myseq=++_miSeq, done=false, cdStarted=false;
   if(_miCd){ clearInterval(_miCd); _miCd=null; } if(_miSafe){ clearTimeout(_miSafe); _miSafe=null; }
   function fallback(){ if(done) return; done=true; if(_miCd){clearInterval(_miCd);_miCd=null;} if(ov){ ov.classList.remove('on','fade'); } if(typeof startRoundCountdown==='function') startRoundCountdown(); }
+  if(_skipMatchIntro){ _skipMatchIntro=false; fallback(); return; }
   var reduce = (document.body.classList.contains('rm')) || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   if(reduce || !ov || !v || typeof MATCH_INTRO_VID==='undefined' || !MATCH_INTRO_VID){ fallback(); return; }
   cnt.textContent=''; cnt.classList.remove('pop');
@@ -4239,6 +4252,7 @@ function matchEndHome(){
 function matchEndAgain(){
   document.getElementById('match-end').classList.remove('show');
   matchComplete = false;
+  _skipMatchIntro = true;   // real pacing fix (7/12/26) — don't replay the cinematic on every rematch
   // Real gap (7/12/26): this bypasses startDeckMasterMatch()'s guard entirely by calling
   // resetMatchState() directly — if activeDeck or deckMasterCard became invalid since the match
   // started (deck edited mid-session, card traded away, etc.), Play Again would silently continue
