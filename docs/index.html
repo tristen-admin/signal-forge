@@ -2436,7 +2436,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
               <button class="deck-btn danger" onclick="clearDeck()">Clear</button>
             </div>
           </div>
-          <div class="dlc-title" id="dlc-deck-title">Your 12-Card Deck</div>
+          <div class="dlc-title" id="dlc-deck-title">Your 20-Card Deck</div>
           <div class="deck-slots" id="deck-slots" ondragover="deckDragOver(event)" ondragleave="deckDragLeave(event)" ondrop="dropDeckCard(event)"></div>
           <div class="deck-formations" id="deck-formations"></div>
         </div>
@@ -8249,11 +8249,12 @@ let matchComplete = false;
 let firstTurn = true;           // opening turn of a match: no auto-draw
 let roundTimer = null;          // 3s round-start countdown handle
 let decisionTimer = null;       // 15s decision clock handle
-const STARTING_HAND = 4;
+const STARTING_HAND = 5;
 const DRAW_PER_TURN = 1;   // cards drawn per turn — 1/turn, symmetric w/ bot (owner flagged the draw-2 surplus). Draw-heavy decks use their own draw cards.
-const DECK_SIZE = 16;
-const MIN_DECK = 12;   // decks are 12–16 (min 12 to play, max 16)
-// Curated 10-card starter deck (used when no full custom deck is built)
+const DECK_SIZE = 20;
+const MIN_DECK = 15;   // decks are 15–20 (min 15 to play, max 20) — 7/12/26 resize, same 0.75 ratio as the prior 12/16
+// Curated fallback starter deck (used when no full custom deck is built) — NOT resized to the new
+// 15/20 format (still 12 cards); a content decision left for the owner, not silently expanded here.
 const DEFAULT_DECK = ['Kotei','Lagertha Waltz','Kiana','Zerith Var','Arch-Grim Korrin','Darwin','Ruffius Rufeldro','King Joris','Ahdorah Khaan, Determined Soul','Cletus Gwyndull','Bram the Bulwark','Old Garrick'];
 
 // Fisher–Yates shuffle in place
@@ -10482,7 +10483,7 @@ function updateLaunch(){
     document.getElementById('ll-title').textContent=`${b.name} — ${b.arch}`;
     const deckLine = activeDeck.size === DECK_SIZE
       ? `Your deck: ${DECK_SIZE} cards — shuffled, one of each`
-      : `Deck ${activeDeck.size}/${DECK_SIZE} — using the default 10-card starter until full`;
+      : `Deck ${activeDeck.size}/${DECK_SIZE} — using the default ${DEFAULT_DECK.length}-card starter until full`;
     document.getElementById('ll-sub').textContent=`Difficulty ${b.diff}/4 · ${deckLine}`;
     document.getElementById('ll-sub').classList.remove('ll-none');
     btn.disabled=false;
