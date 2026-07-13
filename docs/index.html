@@ -10573,6 +10573,11 @@ function startDeckMasterMatch(){
 function playSandbox(){
   if(!selectedBot){ selectedBot = BOT_OPPONENTS[Math.floor(Math.random()*BOT_OPPONENTS.length)].id; }
   sandboxNext=true; startMatch();
+  // Real gap (7/12/26): the only mode indicator used to be this toast, which fades in a few seconds —
+  // after that, the persistent title just said generic "Match — vs X", identical to every other mode,
+  // with nothing distinguishing "this hand is random, not your built deck" once you're a few turns in.
+  // Deck Master already overrides tb-title the same way; Sandbox never did.
+  { var _tb=document.getElementById('tb-title'); if(_tb && activeBot) _tb.textContent='Sandbox — vs '+activeBot.name; }
   if(typeof toast==='function') toast('🌐 Sandbox — random all-card deck · zero consequence', true);
 }
 let draftPool=[], _draftRow=null, drafting=false, draftGranted=false;
