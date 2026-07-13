@@ -6367,7 +6367,19 @@ function applyRuleList(rs, ctx, playerPow, oppPow, abilLog, stepSink){
     else if('mult' in r) playerPow*=r.mult;
     else if('set' in r) playerPow=ctx[r.set];
     else if('oppadd' in r) oppPow+=r.oppadd;
-    if(r.log){ abilLog.push(r.log); if(stepSink) stepSink.push({m:r.log, dp:playerPow-_bp, dop:oppPow-_bo, pp:playerPow, op:oppPow}); }
+    if(r.log){
+      var _delta=playerPow-_bp;
+      /* Real bug (7/13/26, user-reported): "addvar"/"mult"/"set" rules scale off a runtime variable
+         the author can't hardcode into the authored log string (e.g. Raven's Feast's static
+         "+2×banish" text) — the plain-text ability log showed that literal placeholder forever,
+         never the actual resolved number, even though playerPow itself was computed correctly all
+         along. The "Why?" breakdown modal was never affected (it reads dp/pp numerically, not this
+         string) — only the flat in-duel log players actually see by default. Append the real
+         resolved delta so the placeholder-style text always shows a real number too. */
+      var _msg=(('addvar' in r || 'mult' in r || 'set' in r) && _delta) ? r.log+' → '+(_delta>0?'+':'')+Math.round(_delta) : r.log;
+      abilLog.push(_msg);
+      if(stepSink) stepSink.push({m:r.log, dp:playerPow-_bp, dop:oppPow-_bo, pp:playerPow, op:oppPow});
+    }
   }
   return [playerPow, oppPow];
 }
