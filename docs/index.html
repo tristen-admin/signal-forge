@@ -2762,7 +2762,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <!-- OPPONENT ZONE -->
     <div class="opp-zone">
       <span class="zone-label">Opponent</span>
-      <span id="opp-dm-badge" class="dm-badge" style="display:none" title="Their Deck Master">
+      <span id="opp-dm-badge" class="dm-badge" style="display:none" title="Their Deck Master" onmouseenter="if(typeof activeBot!=='undefined'&&activeBot&&activeBot.dmCard)previewPoolCard(activeBot.dmCard,this)" onmouseleave="hideCardPreview()">
         <span id="opp-dm-badge-portrait" class="dm-badge-portrait"></span>
         <span class="dm-badge-label">★ <span id="opp-dm-badge-name"></span></span>
       </span>
@@ -2868,7 +2868,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="player-zone">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span class="zone-label">Your Hand</span>
-        <span id="dm-badge" class="dm-badge" style="display:none" title="Your Deck Master this match">
+        <span id="dm-badge" class="dm-badge" style="display:none" title="Your Deck Master this match" onmouseenter="if(typeof deckMasterCard!=='undefined'&&deckMasterCard)previewPoolCard(deckMasterCard,this)" onmouseleave="hideCardPreview()">
           <span id="dm-badge-portrait" class="dm-badge-portrait"></span>
           <span class="dm-badge-label">★ <span id="dm-badge-name"></span></span>
         </span>
