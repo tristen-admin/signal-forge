@@ -3432,7 +3432,8 @@ let conditionIndex = -1;
 let selectedCard = null;
 let playerScore = [1,0];
 let seasonWins=0, seasonLosses=0, seasonRewardClaimed=false;
-let charge=3/*energy start*/;                                   // energy resource, per match
+let charge=2/*energy start (7/12/26 rework: 2, was 3)*/;         // energy resource, per match
+let oppCharge=2;   // bot-side energy (7/12/26): bots never had this resource before -- mirrors charge exactly, same duelEnergyCap() growth
 let spellHand=[];                               // Stage 2: spells you've drawn (a hand you spend)
 let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellHalveField=false, condNeutralized=false, spellDiscount=0;  // per-duel armed effects
 let spellsUsedRound=[];  // each spell castable only ONCE per round  // Rebirth season — cumulative match W/L across ranked + staked
@@ -3855,7 +3856,10 @@ function beginTurnAutoDraw(){
 
 // Start-of-turn opener: no draw on the opening turn, auto-draw on every turn after.
 function openTurn(){
-  charge=Math.min(duelEnergyCap(),Math.max(charge+ENERGY_REGEN,duelEnergyFloor())); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  // Energy rework (7/12/26): full refill to the (growing) cap each turn, both sides — mana-crystal
+  // model, not the old partial-regen-with-floor. oppCharge mirrors charge exactly (bots get the same
+  // starting/growth rule as the player, per direct spec — no separate bot formula).
+  charge=duelEnergyCap(); oppCharge=duelEnergyCap(); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -4360,7 +4364,7 @@ function activateInstant(i){
     // Data-driven override (7/12/26) — a specific card can define its own instant effect instead of
     // the universal Surge below. Same cost either way: banished once resolved.
     if(e.draw) drawToHand(e.draw);
-    if(e.chargeGain){ charge=Math.min(ENERGY_CAP,charge+e.chargeGain); if(typeof renderCharge==='function') renderCharge(); }
+    if(e.chargeGain){ charge=Math.min(duelEnergyCap(),charge+e.chargeGain); if(typeof renderCharge==='function') renderCharge(); }
     hintSelect = `${c.name} — ${e.text} (banished)`;
     hintCommit = `${c.name} — ${e.text}. Now commit a card.`;
   } else {
@@ -4423,7 +4427,6 @@ const ENERGY_SPELLS = [
 ];
 // ══ REAR-GUARD / CALLED SYSTEM (v1) ══
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
-const ENERGY_CAP = 6, ENERGY_REGEN = 2;   // energy pool — max 6; per-duel floor scales so late turns never drop low
 const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdorah Khaan, Determined Soul":2, "Tange Sazen":2, "Kotei":3, "Darwin":3, "Lagertha Waltz":2, "The Bronzed Beast, Hanse Waltz":3, "Hanse Waltz":1};   // ability-strength nudges above the power band (balance dial)
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
 const RACES = ['Human','Kaldrei','Vashiri','Nimkatta','Uroth','Kaidrun','Marrowen','Dragonkin','Lycan','Vampire','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
@@ -4454,8 +4457,12 @@ function dispName(nm){ return (NAME_OVERRIDE && NAME_OVERRIDE[nm]) || nm; }
 function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Human'; }
 function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.race=r; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83e\uddec Race set: '+name+' \u2192 '+r, true); }
 function conjureCost(c){ if(!c) return 1; if(c.cost!=null) return c.cost; if(COST_OVERRIDE[c.name]!=null) return COST_OVERRIDE[c.name]; var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; }
-function duelEnergyCap(){ var d=(typeof matchCommits!=='undefined')?((matchCommits||0)+1):1; return Math.min(ENERGY_CAP, 3 + Math.max(0, d-3)); }  /* d = true duel number — counts ties, so it never stalls */
-function duelEnergyFloor(){ return Math.max(3, duelEnergyCap()-1); } /* guaranteed energy per duel: d1-4≈3, d5≈4, d6-7≈5; cap 6 — never 2 */
+// Energy rework (7/12/26, direct spec): both players start at 2 max energy, gaining +1 max per duel
+// through duel 4, then +2 max per duel from duel 5 onward — no fixed ceiling (Hearthstone-style
+// mana-crystal model: max energy GROWS every turn, current energy fully refills to the new max in
+// openTurn(), rather than the old partial-regen-with-floor system). d1=2,d2=3,d3=4,d4=5,d5=7,d6=9...
+// d = true duel number (matchCommits+1, counts ties so it never stalls, unchanged from before).
+function duelEnergyCap(){ var d=(typeof matchCommits!=='undefined')?((matchCommits||0)+1):1; return d<=4 ? (d+1) : (2*d-3); }
 // CALLED - universal rear-guard keyword; fires ALWAYS when a support is called (no group gate).
 // Inverse-scaling: fighter cards -> simple static (+N / opp -N); low-power/support -> rich combos.
 const CALLED = {
@@ -4612,7 +4619,10 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
   var e = CALLED[support.name];
   if(!e){ if(support.name) abilLog.push("📣 "+(isOpp?"Opp ":"")+support.name+" called — fighter-only (no support effect)"); return [playerPow, oppPow]; }
   var d = projectCalled(e, ctx);
-  if(e.chargeGain && !isOpp){ charge=Math.min(ENERGY_CAP,charge+e.chargeGain); if(typeof renderCharge==="function") renderCharge(); }   // no bot-side energy resource -- correctly player-only
+  // Energy rework (7/12/26): bots now have their own real energy pool (oppCharge), so a Called
+  // chargeGain effect correctly benefits whichever side triggered it, instead of being skipped
+  // bot-side as it was when bots had no energy resource at all.
+  if(e.chargeGain){ if(isOpp){ oppCharge=Math.min(duelEnergyCap(),oppCharge+e.chargeGain); } else { charge=Math.min(duelEnergyCap(),charge+e.chargeGain); if(typeof renderCharge==="function") renderCharge(); } }
   if(e.spellDiscountGain && !isOpp && typeof spellDiscount!=='undefined'){ spellDiscount+=e.spellDiscountGain; }   // bot never casts spells -- correctly player-only
   if(e.draw){
     if(!isOpp){ drawToHand(e.draw); }
@@ -5069,7 +5079,11 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   const c = CONDITIONS[conditionIndex];
   const pc = hand[selectedCard];
   rearGuards = rearGuardIdxs.filter(function(ix){return ix!==selectedCard && hand[ix];}).map(function(ix){return hand[ix];});
-  /* Energy model: Charge is the CAP on what you can conjure — the gate lives in stageFighter (conjureCost <= charge). Conjuring a Fighter does NOT spend Charge; only spells spend it (see castSpell). */
+  /* Energy rework (7/12/26, direct spec): every conjure now actually spends Charge equal to its
+     conjureCost(), reversing the prior "conjuring doesn't spend Charge, only spells do" model.
+     Clamped at 0 (the energy-starved "cheapest conjures free" case in stageFighter() can let a
+     card through that costs slightly more than current charge). */
+  charge=Math.max(0, charge-conjureCost(pc)); if(typeof renderCharge==='function') renderCharge();
   matchCommits++;
   const committedPow = (pc.name==='Anorith Keeling' ? Math.max(1,(playerScore[0]+playerScore[1])*Math.max(0,hand.length-1)) : (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow)) + banishSurge + remnantPowSum();
   banishSurge = 0;
@@ -5784,7 +5798,7 @@ function applyDeckMasterResolveEffects(pc, playerPow, oppPow, abilLog, stepSink)
     var r2 = applyRuleList(vrules.filter(_dmIsPowRule), ctx, playerPow, oppPow, abilLog, stepSink);
     playerPow=r2[0]; oppPow=r2[1];
   } else if(tier===3){
-    if(typeof charge!=='undefined' && typeof ENERGY_CAP!=='undefined'){ charge=Math.min(ENERGY_CAP,charge+1); if(typeof renderCharge==='function') renderCharge(); }
+    if(typeof charge!=='undefined'){ charge=Math.min(duelEnergyCap(),charge+1); if(typeof renderCharge==='function') renderCharge(); }
     abilLog.push('⚡ Off-archetype splash: +1 Charge (scry option not yet built — flagged as a follow-up)');
   }
   return [playerPow, oppPow];
@@ -6322,7 +6336,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   if(typeof spellHalveField!=='undefined' && spellHalveField){ playerPow=Math.ceil(playerPow/2); oppPow=Math.ceil(oppPow/2); abilLog.push('\u26a1 Collapse: field power halved (both sides)'); }
   if(spellNullOpp) abilLog.push('\ud83d\udce1 Nullwave: opponent card ability suppressed this duel');
   { const _al = cond.id === 'abilitylock';
-    if(!_al && pc.name === 'Conduit Adept'){ charge=Math.min(ENERGY_CAP,charge+1); abilLog.push('\u26a1 Conduit Adept: +1 Charge'); if(typeof renderCharge==='function') renderCharge(); }
+    if(!_al && pc.name === 'Conduit Adept'){ charge=Math.min(duelEnergyCap(),charge+1); abilLog.push('\u26a1 Conduit Adept: +1 Charge'); if(typeof renderCharge==='function') renderCharge(); }
     if(!_al && pc.name === 'Voltcaller'){ spellDiscount += 2; abilLog.push('\u26a1 Voltcaller: your next Interrupt costs 2 less'); } }
   // ── REAR-GUARD: Called (always fires) + same-group Link Skill ──
   { var _rgc={match_commits:matchCommits, last_result:lastResult, hand_len:hand.length, opp_deaths:oc.deaths||0, opp_kills:oc.kills||0, wins:playerScore[0], losses:playerScore[1], wc_len:winnersCircle.length, chaos:(cond.tag==='chaos')};
@@ -6560,7 +6574,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     label.className = 'result-label lose';
     lastResult = 'lose';
     playerScore[1]++;
-    charge=Math.min(ENERGY_CAP,charge+1); if(typeof renderCharge==='function') renderCharge();
+    charge=Math.min(duelEnergyCap(),charge+1); if(typeof renderCharge==='function') renderCharge();
     recordDuel(pc,'death');   // playtest: every match records the death
     if(deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.d=(deckMasterRecord.d||0)+1; lsSet('sf_dm_record', deckMasterRecord); }
     { if(typeof drawPile!=='undefined' && drawPile.length){ var _tt=drawPile[drawPile.length-1]; var _tr=_tt&&TRIGGERS[_tt.name]; if(_tr){ drawPile.pop(); hand.push(_tt); if(_tr.draw) drawToHand(_tr.draw); if(_tr.recur){ for(var _tri=0;_tri<_tr.recur;_tri++){ if(banishPile.length) hand.push(banishPile.pop()); } } abilLog.push("✨ Trigger — "+_tt.name+": "+_tr.text); if(typeof toast==='function') toast("✨ Trigger! "+_tt.name+" — "+_tr.text, true); if(typeof buildHand==='function') buildHand(); } } }
@@ -8842,6 +8856,12 @@ function oppEndDuelCycle(){
   for(var _bd=0;_bd<DRAW_PER_TURN;_bd++){ if(oppDeckBot.length) oppHandBot.push(oppDeckBot.shift()); }   // draw DRAW_PER_TURN per turn — same speed as player
 }
 function _oppStamp(card){ var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null; return Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{}); }
+// NOTE: this definition is superseded near the end of the file by a monkey-patch
+// (`if(typeof pickOppCard==='function'){ pickOppCard=function(){...}; }`, ability-aware bias via
+// oppEvalPow()) — that reassignment always runs at script load, so this body never actually
+// executes. The energy-cost gate (7/12/26) lives in THAT version, not here — caught only by
+// testing pickOppCard() directly and finding oppCharge wasn't being respected. Left unedited
+// (matches pre-rework behavior) to avoid dead, misleading duplicate logic sitting in two places.
 function pickOppCard(){
   if(!oppHandBot.length) oppInitDeck();
   if(!oppHandBot.length){ var pool=(activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool:OPP_CARDS; oppHandBot=[pool[Math.floor(Math.random()*pool.length)]]; }
@@ -10678,7 +10698,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   banishSurge=0; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
-  charge=3/*energy start*/; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
+  charge=2/*energy start (7/12/26 rework)*/; oppCharge=2; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
@@ -11420,10 +11440,22 @@ if(typeof pickOppCard==='function'){ pickOppCard=function(){
   if(!oppHandBot||!oppHandBot.length){ if(oppDeckBot && oppDeckBot.length){ oppHandBot.push(oppDeckBot.shift()); } }
   if(!oppHandBot.length){ if(typeof oppInitDeck==='function') oppInitDeck(); }
   if(!oppHandBot.length){ var _p=(typeof activeBot!=='undefined'&&activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool:OPP_CARDS; oppHandBot=[_p[Math.floor(Math.random()*_p.length)]]; }
+  // Energy rework (7/12/26): bots now have their own real energy pool (oppCharge, mirrors the
+  // player's charge exactly). Restrict the ability-aware pick below to cards the bot can actually
+  // afford, falling back to its single cheapest card if nothing is affordable (never stuck with
+  // zero legal options, same as the player's own energy-starved "cheapest conjures free" rule in
+  // stageFighter()). Found and fixed only by testing pickOppCard() directly — an earlier edit to
+  // the OTHER pickOppCard definition (the one before this monkey-patch) silently never ran, since
+  // this reassignment always overwrites it at load.
+  var _afford = oppHandBot.filter(function(c){ return conjureCost(c) <= oppCharge; });
+  var _pool = _afford.length ? _afford : [oppHandBot.reduce(function(a,c){ return conjureCost(a)<=conjureCost(c) ? a : c; })];
   var bias=(typeof activeBot!=='undefined'&&activeBot)?(activeBot.bias||0):0;
-  var bi=Math.floor(Math.random()*oppHandBot.length);
-  for(var b=0;b<bias;b++){ var a=Math.floor(Math.random()*oppHandBot.length); if(oppEvalPow(oppHandBot[a])>oppEvalPow(oppHandBot[bi])) bi=a; }   // difficulty bias: keep the higher ESTIMATED power (ability-aware, not just the printed stat)
-  var card=oppHandBot.splice(bi,1)[0]; _oppInPlay=[card];   // COMMIT from the bot's hand
+  var bi=Math.floor(Math.random()*_pool.length);
+  for(var b=0;b<bias;b++){ var a=Math.floor(Math.random()*_pool.length); if(oppEvalPow(_pool[a])>oppEvalPow(_pool[bi])) bi=a; }   // difficulty bias: keep the higher ESTIMATED power (ability-aware, not just the printed stat)
+  var chosen=_pool[bi];
+  var realIdx=oppHandBot.indexOf(chosen);
+  var card=oppHandBot.splice(realIdx,1)[0]; _oppInPlay=[card];   // COMMIT from the bot's hand
+  oppCharge=Math.max(0, oppCharge-conjureCost(card));
   var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null;
   var _out=Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{});
   if(typeof activeBot!=='undefined'&&activeBot&&activeBot.maxed){ _out.kills=99;_out.deaths=5;_out.pow=(_out.pow||8)+6; }
