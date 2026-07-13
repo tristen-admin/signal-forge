@@ -485,8 +485,6 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .hc-info:hover{color:var(--electric)}
 .hc-called{position:absolute;top:2px;right:3px;font-size:11px;z-index:6;filter:drop-shadow(0 1px 2px #000);pointer-events:none}
 .hc-darwin{position:absolute;bottom:2px;left:2px;font-size:7px;color:#e2c3ff;background:rgba(120,48,184,0.55);border-radius:3px;padding:1px 3px;z-index:6;cursor:pointer;pointer-events:auto}
-.hc-qp{position:absolute;bottom:2px;left:2px;font-size:7px;font-weight:800;color:#0a1a24;background:var(--electric);border-radius:3px;padding:1px 4px;z-index:6;cursor:pointer;pointer-events:auto;box-shadow:0 1px 3px rgba(0,0,0,.5)}
-.hc-qp:hover{filter:brightness(1.15)}
 .rcard{width:268px;background:linear-gradient(162deg,#17110a,#0b0805);border:1px solid #8a6a2f;border-radius:12px;padding:13px 15px;box-shadow:0 18px 50px rgba(0,0,0,.72);color:var(--text)}
 .rcard.rare{border-color:var(--r-rare)}.rcard.ultra{border-color:var(--r-ultra)}.rcard.genesis{border-color:var(--r-genesis)}.rcard.uncommon{border-color:var(--r-uncommon)}
 .rc-top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
@@ -3685,13 +3683,11 @@ function buildHand(){
     const el = document.createElement('div');
     el.className = `card hand-card ${c.rarity}${i===preSelectedCard?' selected':''}${rearGuardIdxs.indexOf(i)>=0?' called':''}`;
     el.id = `hcard-${i}`;
-    const isInstant = c.timing === 'instant';
-    const qpEligible = QUICK_PLAY[c.name] && i!==preSelectedCard && rearGuardIdxs.indexOf(i)<0 && (phase==='revealed'||phase==='selecting');
+    const isInstant = c.timing === 'instant' || !!INSTANT_EFFECTS[c.name];
     el.innerHTML = bigCardHTML(c)
       + `<div class="hc-info" onclick="event.stopPropagation();pinPreview(${i})" title="Details">ⓘ</div>`
       + (CALLED[c.name] ? `<div class="hc-called" title="Has a Called support ability">📣</div>` : '')
-      + ((c.name === 'Darwin' && flameVeilFromWC) ? `<div class="hc-darwin" onclick="event.stopPropagation();activateFlameVeilCurse(${i})">🧬 WC → −10</div>` : '')
-      + (qpEligible ? `<div class="hc-qp" onclick="event.stopPropagation();quickPlayIdx(${i})" title="Quick Play — ${QUICK_PLAY[c.name].text}, then banished">⚡ Quick Play</div>` : '');
+      + ((c.name === 'Darwin' && flameVeilFromWC) ? `<div class="hc-darwin" onclick="event.stopPropagation();activateFlameVeilCurse(${i})">🧬 WC → −10</div>` : '');
     if(isInstant && phase === 'revealed'){
       el.style.borderColor = 'var(--electric)';
       el.style.boxShadow = '0 0 8px rgba(91,192,235,0.25)';
@@ -4292,12 +4288,13 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   document.getElementById('opp-area').innerHTML = '⏳ Opponent in instant window…';
 
   // show instant + pre-commit action window
-  const actionCards = hand.filter(c => c.timing === 'instant' || c.timing === 'pre' || tangeSurgeReady(c));
+  const actionCards = hand.filter(c => c.timing === 'instant' || c.timing === 'pre' || tangeSurgeReady(c) || INSTANT_EFFECTS[c.name]);
   if(actionCards.length > 0){
     document.getElementById('instant-strip').style.display = 'flex';
     document.getElementById('instant-options').innerHTML = actionCards.map(ic => {
       const idx = hand.indexOf(ic);
       if(tangeSurgeReady(ic)) return `<button class="instant-card-btn" style="border-color:rgba(240,98,95,0.6);color:#f2b8b8" onclick="activateInstant(${idx})">⚡ ${ic.name} — Banish Surge · sac +${ic.pow}</button>`;
+      if(INSTANT_EFFECTS[ic.name]) return `<button class="instant-card-btn" style="border-color:rgba(91,192,235,0.6);color:var(--electric)" onclick="activateInstant(${idx})">⚡ ${ic.name} — ${INSTANT_EFFECTS[ic.name].text}</button>`;
       if(ic.timing === 'instant') return `<button class="instant-card-btn" onclick="activateInstant(${idx})">⚡ ${ic.name} (+${ic.pow})</button>`;
       return `<button class="instant-card-btn" style="border-color:rgba(212,168,67,0.5);color:var(--gold)" onclick="activatePre(${idx})">📌 ${ic.name} — lock condition</button>`;
     }).join('');
@@ -4318,12 +4315,13 @@ function tangeSurgeReady(c){ return !!c && c.name==='Tange Sazen' && typeof skul
 function renderInstantStrip(){
   var strip=document.getElementById('instant-strip'); if(!strip) return;
   var opts=document.getElementById('instant-options');
-  var actionCards = hand.filter(function(c){ return c.timing === 'instant' || c.timing === 'pre' || tangeSurgeReady(c); });
+  var actionCards = hand.filter(function(c){ return c.timing === 'instant' || c.timing === 'pre' || tangeSurgeReady(c) || INSTANT_EFFECTS[c.name]; });
   if(!actionCards.length){ strip.style.display='none'; if(opts) opts.innerHTML=''; return; }
   strip.style.display='flex';
   if(opts) opts.innerHTML = actionCards.map(function(ic){
     var idx = hand.indexOf(ic);
     if(tangeSurgeReady(ic)) return '<button class="instant-card-btn" style="border-color:rgba(240,98,95,0.6);color:#f2b8b8" onclick="activateInstant('+idx+')">\u26a1 '+ic.name+' \u2014 Banish Surge \u00b7 sac +'+ic.pow+'</button>';
+    if(INSTANT_EFFECTS[ic.name]) return '<button class="instant-card-btn" style="border-color:rgba(91,192,235,0.6);color:var(--electric)" onclick="activateInstant('+idx+')">\u26a1 '+ic.name+' \u2014 '+INSTANT_EFFECTS[ic.name].text+'</button>';
     if(ic.timing === 'instant') return '<button class="instant-card-btn" onclick="activateInstant('+idx+')">\u26a1 '+ic.name+' (+'+ic.pow+')</button>';
     return '<button class="instant-card-btn" style="border-color:rgba(212,168,67,0.5);color:var(--gold)" onclick="activatePre('+idx+')">\ud83d\udccc '+ic.name+' \u2014 lock condition</button>';
   }).join('');
@@ -4331,15 +4329,37 @@ function renderInstantStrip(){
 function activateInstant(i){
   if(phase !== 'revealed' && phase !== 'selecting') return;
   const c = hand[i];
-  if(c.timing !== 'instant' && !tangeSurgeReady(c)) return;
-  // Banish Surge: banish this card, store its power
-  banishSurge = c.pow;
+  const e = INSTANT_EFFECTS[c.name];
+  if(c.timing !== 'instant' && !tangeSurgeReady(c) && !e) return;
+  let hintSelect, hintCommit;
+  if(e){
+    // Data-driven override (7/12/26) — a specific card can define its own instant effect instead of
+    // the universal Surge below. Same cost either way: banished once resolved.
+    if(e.draw) drawToHand(e.draw);
+    if(e.chargeGain){ charge=Math.min(ENERGY_CAP,charge+e.chargeGain); if(typeof renderCharge==='function') renderCharge(); }
+    hintSelect = `${c.name} — ${e.text} (banished)`;
+    hintCommit = `${c.name} — ${e.text}. Now commit a card.`;
+  } else {
+    // Default Surge: banish this card, store its power for your next commit. Unchanged behavior —
+    // every plain timing:'instant' card (Tannis) and Tange Sazen's conditional Banish Surge.
+    banishSurge = c.pow;
+    hintSelect = `${c.name} banished — next commit gains +${banishSurge} power`;
+    hintCommit = `Surge ready (+${banishSurge}). Now commit a card.`;
+  }
   banishPile.push(c);
-  hand.splice(i, 1);
-  document.getElementById('select-hint').textContent = `${c.name} banished — next commit gains +${banishSurge} power`;
-  document.getElementById('commit-hint').textContent = `Surge ready (+${banishSurge}). Now commit a card.`;
+  // Re-locate by identity rather than trusting index i: an effect (e.g. draw) can have already
+  // pushed new cards into hand before this splice runs. Then shift any OTHER tracked indices
+  // (staged fighter, called supports) that sat after the removed card, same bookkeeping the
+  // stage/call drag-and-drop code already does elsewhere in this file.
+  const idx = hand.indexOf(c);
+  if(idx>=0) hand.splice(idx, 1);
+  if(preSelectedCard!=null && preSelectedCard>idx) preSelectedCard--;
+  rearGuardIdxs = rearGuardIdxs.map(function(k){ return k>idx?k-1:k; });
+  document.getElementById('select-hint').textContent = hintSelect;
+  document.getElementById('commit-hint').textContent = hintCommit;
   if(typeof renderInstantStrip==='function') renderInstantStrip();
   buildHand();
+  if(typeof renderRearSlot==='function') renderRearSlot();
   updatePiles();
 }
 
@@ -4618,38 +4638,19 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
   abilLog.push("📣 "+(isOpp?"Opp ":"")+"Called — "+support.name+": "+e.text);
   return [playerPow, oppPow];
 }
-// QUICK PLAY (7/12/26) — deck cards playable directly from hand for an immediate effect: no field
-// presence, no rear-guard slot cost, card goes straight to Banish once resolved ("spent," matching
-// how a Quick-Play spell works). Deliberately a SEPARATE mechanic from ENERGY_SPELLS/castSpell() —
-// that system is a universal, non-deck Interrupt pool shared by both players; QUICK_PLAY is real
-// COLLECTION cards the owner tags with this effect. A card with BOTH a CALLED entry here and a
-// QUICK_PLAY entry gives the player a genuine per-use choice (call it as a sticky rear-guard vs.
-// spend it now for the quick effect) — that's the hybrid model, not a third always-on mode.
-// Rule vocabulary kept small for v1 (draw, chargeGain) — same key names as CALLED for familiarity;
-// extend per-card as the owner designs specific quick-play cards.
-const QUICK_PLAY = {
+// INSTANT_EFFECTS (7/12/26) — per-card override for activateInstant()'s effect. Every plain
+// timing:'instant' card (Tannis) and Tange Sazen's conditional Banish Surge default to the same
+// universal Surge behavior (banish, add this card's own power to your next commit) with ZERO entry
+// here. An entry OVERRIDES that default with a different effect on THIS specific card — same cost
+// (banished after use), different payoff. This was originally a separate "QUICK_PLAY" map + its own
+// activation function, built before finding that Signal Forge already has a real, named Instant
+// mechanic (timing:'instant', activateInstant(), the "Instant Window" keyword) — consolidated into
+// that existing system rather than left as a second parallel one. Kept small for v1 (draw,
+// chargeGain); extend per-card as the owner designs specific instant effects.
+const INSTANT_EFFECTS = {
   "Kiba":                          {text:"draw a card", draw:1},
   "Uso Oso's Skeletal Summons":    {text:"gain 2 Charge", chargeGain:2}
 };
-function quickPlayIdx(i){
-  if(phase!=='revealed' && phase!=='selecting') return;
-  var c = hand[i]; if(!c) return;
-  var e = QUICK_PLAY[c.name]; if(!e) return;
-  if(i===preSelectedCard){ if(typeof toast==='function') toast('Already staged as your Fighter — deselect it first.', false); return; }
-  if(rearGuardIdxs.indexOf(i)>=0){ if(typeof toast==='function') toast('Already called as a support — pull it back to hand first.', false); return; }
-  if(typeof hideCardPreview==='function') hideCardPreview();
-  if(e.draw) drawToHand(e.draw);
-  if(e.chargeGain){ charge=Math.min(ENERGY_CAP,charge+e.chargeGain); if(typeof renderCharge==='function') renderCharge(); }
-  var idx = hand.indexOf(c);   // re-locate by identity: drawToHand() may have shifted indices via splice/push
-  if(idx>=0){ banishPile.push(hand.splice(idx,1)[0]); }
-  if(preSelectedCard!=null && preSelectedCard>idx) preSelectedCard--;
-  rearGuardIdxs = rearGuardIdxs.map(function(k){ return k>idx?k-1:k; });
-  if(typeof SFX!=='undefined') SFX.play('deploy');
-  if(typeof toast==='function') toast('⚡ '+c.name+' — '+e.text+'. (Quick Play — banished)', true);
-  buildHand(); renderRearSlot();
-  if(typeof updatePiles==='function') updatePiles();
-  if(typeof updateLivePow==='function') updateLivePow();
-}
 function pickOppRears(fighter){
   var out=[];
   for(var k=0;k<RG_SLOTS;k++){
