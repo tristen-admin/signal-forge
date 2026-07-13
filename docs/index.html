@@ -4670,10 +4670,19 @@ function drawToHand(n){ if(typeof drawPile==='undefined'||typeof hand==='undefin
 function banishFromHand(n){ for(var _bi=0;_bi<(n||0);_bi++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } if(typeof buildHand==='function') buildHand(); }
 function oppDrawN(n){ for(var _oi=0;_oi<(n||0);_oi++){ if(typeof oppDeckBot!=='undefined'&&oppDeckBot.length) oppHandBot.push(oppDeckBot.shift()); } }
 function oppBanishN(n){ for(var _oj=0;_oj<(n||0);_oj++){ if(typeof oppHandBot!=='undefined'&&oppHandBot.length>1){ oppBanishBot.push(oppHandBot.splice(Math.floor(Math.random()*oppHandBot.length),1)[0]); } } }   // never drain the bot's last card -- same floor as pickOppRears, or dredge strands it at 0 with no supports for the rest of the match
-function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
+// stepSink (7/13/26): same real bug class as applyRuleList's fix — this function has NEVER taken a
+// stepSink, so its abilLog.push calls relied entirely on the outer RS monkeypatch, which reads
+// playerPow/oppPow from resolve()'s OUTER scope at push-time. Since this function computes on its
+// OWN local playerPow/oppPow and only returns the result for the caller to reassign AFTER the whole
+// call finishes, every push made DURING execution recorded a STALE snapshot (confirmed: a real +2 to
+// oppPow recorded as dp:0/dop:0/op:unchanged in isolation testing) — the breakdown ledger showed the
+// support's text but not its actual effect. Fixes the exact case the user reported (Zerith Var / Heir
+// of Kaiga "Opp Called" steps not matching their real numbers).
+function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
   if(!support) return [playerPow, oppPow];
   var e = CALLED[support.name];
   if(!e){ if(support.name) abilLog.push("📣 "+(isOpp?"Opp ":"")+support.name+" called — fighter-only (no support effect)"); return [playerPow, oppPow]; }
+  var _bp0=playerPow, _bo0=oppPow;   // whole-function baseline — bothBanish mutates power directly, outside projectCalled's d[], so only a start/end snapshot captures the true total
   var d = projectCalled(e, ctx);
   // Energy rework (7/12/26): bots now have their own real energy pool (oppCharge), so a Called
   // chargeGain effect correctly benefits whichever side triggered it, instead of being skipped
@@ -4725,7 +4734,13 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp){
     }
   }
   playerPow+=d[0]; oppPow+=d[1];
-  abilLog.push("📣 "+(isOpp?"Opp ":"")+"Called — "+support.name+": "+e.text);
+  var _clm="📣 "+(isOpp?"Opp ":"")+"Called — "+support.name+": "+e.text;
+  abilLog.push(_clm);
+  if(stepSink){
+    stepSink.push(isOpp
+      ? {m:_clm, dp:(oppPow-_bo0), dop:(playerPow-_bp0), pp:oppPow, op:playerPow}
+      : {m:_clm, dp:(playerPow-_bp0), dop:(oppPow-_bo0), pp:playerPow, op:oppPow});
+  }
   return [playerPow, oppPow];
 }
 // INSTANT_EFFECTS (7/12/26) — per-card override for activateInstant()'s effect. Every plain
@@ -6429,12 +6444,12 @@ function resolve(pc, oc, cond, playerCommittedPow){
     pendingOppRears.forEach(function(og,_ogi){ if(!og) return; var _okc=(typeof CALLED!=='undefined')?CALLED[og.name]:null; if(_okc && _okc.snipeSupport && rearGuards[_ogi]){ var _osn=rearGuards[_ogi]; rearGuards[_ogi]=null; abilLog.push('🎯 Opp '+og.name+': sniped '+_osn.name+' — your support removed'); } });
 
     rearGuards.forEach(function(rg,_rgi){ if(!rg) return; if(pc&&pc.name==='Kaelthar the Ascendant') return;
-      var _rr=applyCalled(rg, _rgc, playerPow, oppPow, abilLog, false); playerPow=_rr[0]; oppPow=_rr[1];
+      RS._inRules=true; var _rr=applyCalled(rg, _rgc, playerPow, oppPow, abilLog, false, RS); playerPow=_rr[0]; oppPow=_rr[1]; RS._inRules=false; RS._resync();
       var _lk=fieldLink(pc, rg); if(_lk){ playerPow+=_lk.pow; abilLog.push('🔗 '+_lk.name+' Link — '+pc.name+' + '+rg.name+': +'+_lk.pow); var _tb=(typeof CALLED!=='undefined'&&CALLED[rg.name]&&CALLED[rg.name].twinBuff)||0; if(_tb){ playerPow+=_tb; abilLog.push('🐺 '+rg.name+' rallies the twins — '+pc.name+' +'+_tb); } }
     });
     var _orc={match_commits:matchCommits, last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':'tie')), hand_len:0, opp_deaths:pc.deaths||0, opp_kills:pc.kills||0, wins:playerScore[1], losses:playerScore[0], wc_len:0, chaos:(cond.tag==='chaos')};
     pendingOppRears.forEach(function(og){ if(!og) return;
-      var _or3=applyCalled(og, _orc, oppPow, playerPow, abilLog, true); oppPow=_or3[0]; playerPow=_or3[1];
+      RS._inRules=true; var _or3=applyCalled(og, _orc, oppPow, playerPow, abilLog, true, RS); oppPow=_or3[0]; playerPow=_or3[1]; RS._inRules=false; RS._resync();
       var _lk2=fieldLink(oc, og); if(_lk2){ oppPow+=_lk2.pow; abilLog.push('🔗 Opp '+_lk2.name+' Link — '+oc.name+' + '+og.name+': +'+_lk2.pow); var _tb2=(typeof CALLED!=='undefined'&&CALLED[og.name]&&CALLED[og.name].twinBuff)||0; if(_tb2){ oppPow+=_tb2; } }
     });
   }
