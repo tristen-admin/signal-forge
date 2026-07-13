@@ -3459,7 +3459,7 @@ let matchTraitPow = {};   // Bloodthirsty snowball: per-card power gained this m
 let untouchableUsed = false;   // Untouchable trait tie-save (once per match)
 let matchPlayed = new Set();   // card keys committed this match — feeds Bonds & Formations
 let pendingOppCard = null;
-let oppHandBot=[], oppDeckBot=[], oppBanishBot=[], _oppInPlay=[]; const OPP_HAND_SIZE=4;
+let oppHandBot=[], oppDeckBot=[], oppBanishBot=[], _oppInPlay=[];
 let preSelectedCard = null;
 let rearGuardIdxs = [];
 let rearGuards = [];
@@ -8813,11 +8813,23 @@ function oppInitDeck(){
   var d=(activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool.slice():[];
   if(_won) d=d.filter(function(c){return !_won.has(c.name);});
   var extra=OPP_CARDS.slice(); for(var i=extra.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=extra[i];extra[i]=extra[j];extra[j]=t; }
-  for(var e=0;e<extra.length && d.length<DECK_SIZE;e++){ if(d.indexOf(extra[e])<0 && !(_won&&_won.has(extra[e].name))) d.push(extra[e]); }   // pad the themed pool up to a full 14-card deck
+  for(var e=0;e<extra.length && d.length<DECK_SIZE;e++){ if(d.indexOf(extra[e])<0 && !(_won&&_won.has(extra[e].name))) d.push(extra[e]); }   // pad the themed pool up to a full 20-card deck
   for(var i=d.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=d[i];d[i]=d[j];d[j]=t; }
   oppDeckBot=d.slice(0,DECK_SIZE); oppHandBot=[]; oppBanishBot=[]; _oppInPlay=[]; oppDrawOppHand();
+  // Real bug (7/12/26): bots never had the same opening-hand Deck Master guarantee the player gets
+  // in dealNewDeck() — mirrors that logic exactly, keyed off activeBot.dmCard instead of the
+  // player's deckMasterCard. Bot identity is always-on (no mode gate), so this always applies.
+  if(activeBot && activeBot.dmCard && !oppHandBot.some(function(c){return c.name===activeBot.dmCard;})){
+    var _dmIdx=oppDeckBot.findIndex(function(c){return c.name===activeBot.dmCard;});
+    if(_dmIdx>=0){
+      var _dmCard=oppDeckBot.splice(_dmIdx,1)[0];
+      oppDeckBot.push(oppHandBot.pop());
+      oppHandBot.push(_dmCard);
+      for(var k=oppDeckBot.length-1;k>0;k--){ var j2=Math.floor(Math.random()*(k+1)); var t2=oppDeckBot[k];oppDeckBot[k]=oppDeckBot[j2];oppDeckBot[j2]=t2; }
+    }
+  }
 }
-function oppDrawOppHand(){ while(oppHandBot.length<OPP_HAND_SIZE && oppDeckBot.length){ oppHandBot.push(oppDeckBot.shift()); } }
+function oppDrawOppHand(){ while(oppHandBot.length<STARTING_HAND && oppDeckBot.length){ oppHandBot.push(oppDeckBot.shift()); } }
 function oppEndDuelCycle(){
   if(_oppInPlay.length){ var botWon=(typeof lastResult!=='undefined' && lastResult==='lose');   // player 'lose' == bot won this duel
     _oppInPlay.forEach(function(c,i){ if(botWon && i===0) return;   // bot's winning fighter leaves to its WC (tallied via oppWC), doesn't recycle
