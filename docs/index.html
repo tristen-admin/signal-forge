@@ -140,11 +140,21 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 }
 .cond-main.live .cond-icon{filter:grayscale(0)}
 .cond-body{flex:1;min-width:0}
+.cond-name-row{display:flex;align-items:center;gap:6px;margin-bottom:2px}
 .cond-name{
   font-size:15px;font-weight:700;color:var(--text2);
-  letter-spacing:0.02em;transition:color 0.3s;margin-bottom:2px;
+  letter-spacing:0.02em;transition:color 0.3s;
 }
 .cond-main.live .cond-name{color:var(--electric)}
+/* Marvel-Snap-style declutter (7/13/26): the rule/strategy prose used to always render on desktop,
+   the single biggest chunk of pure text competing with the field for attention -- collapsed by
+   default behind .cond-toggle, same idea the two mobile breakpoints already use, just applied here
+   too. Zero change to the ~10 call sites that write into these same nodes; only visibility gates. */
+.cond-toggle{background:none;border:1px solid var(--border2);color:var(--text3);font-size:9px;width:16px;height:16px;line-height:1;border-radius:4px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .2s ease,color .2s,border-color .2s}
+.cond-toggle:hover{color:var(--gold);border-color:var(--gold)}
+.cond-rule,.cond-strat{display:none}
+.cond-main.expanded .cond-rule,.cond-main.expanded .cond-strat{display:block}
+.cond-main.expanded .cond-toggle{transform:rotate(180deg);color:var(--electric);border-color:var(--electric)}
 .cond-rule{font-size:11px;color:var(--text2);line-height:1.4}
 .cond-strat{font-size:10px;color:var(--text3);margin-top:3px;font-style:italic}
 
@@ -310,6 +320,11 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .tframe .tf-kd{position:absolute;left:56%;width:29%;top:85.8%;height:6.6%;z-index:4;display:flex;align-items:center;justify-content:center;gap:1px;font-size:8px;font-weight:800;font-variant-numeric:tabular-nums;color:#2c1904;text-shadow:0 1px 0 rgba(255,238,200,0.4)}
 .tf-cost{position:absolute;left:5%;width:17.2%;top:4%;height:12.7%;z-index:4;display:flex;align-items:center;justify-content:center;color:#3a2103;font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 rgba(255,240,205,0.6)}
 .tframe .tf-kd .k{color:var(--win);font-weight:700}.tframe .tf-kd .d{color:var(--lose);font-weight:700}
+/* Marvel-Snap-style battlefield mode (7/13/26): live-play cards read at a glance -- power only,
+   no name/K-D/keyword clutter competing for a 128px frame. Full detail stays one hover/tap away
+   via readableCardHTML() (see wireFieldCardPreview()) -- nothing is lost, just off the board. */
+.bigcard.mini .tf-name,.bigcard.mini .tf-text,.bigcard.mini .tf-kd{display:none}
+.bigcard.mini .tf-pow{left:3.4%;width:58%;top:74%;height:22%;font-size:30px}
 .tframe .tf-abil{font-size:9px;line-height:1.35;color:#eef2f8;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;text-shadow:0 1px 2px rgba(0,0,0,0.98),0 0 6px rgba(0,0,0,0.85)}
 .tf-lbl{font-weight:800;margin-right:2px;opacity:.85}.tf-lbl.gold{color:#ffcf5a}
 .tf-called{font-size:8.5px;line-height:1.3;color:#ffe0a3;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;flex-shrink:0;margin-top:1px;padding-top:3px;border-top:1px dashed rgba(245,194,77,0.45);text-shadow:0 1px 2px rgba(0,0,0,0.98),0 0 6px rgba(0,0,0,0.8)}
@@ -527,7 +542,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .field-card .c-kd{font-size:8.5px;font-variant-numeric:tabular-nums;margin-bottom:3px}
 .field-card .c-kd .k{color:var(--win)}
 .field-card .c-kd .d{color:var(--lose)}
-.field-card .c-abil{font-size:7.5px;color:var(--text2);line-height:1.3;border-top:1px solid rgba(255,255,255,0.06);padding-top:3px}
+.field-card .c-abil{display:none;font-size:7.5px;color:var(--text2);line-height:1.3;border-top:1px solid rgba(255,255,255,0.06);padding-top:3px}
 .field-card .c-rarity{position:absolute;top:4px;right:5px;font-size:7px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase}
 
 .card.locked{cursor:default}
@@ -2789,7 +2804,10 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <div class="cond-main" id="cond-main">
           <div class="cond-icon" id="cond-icon">?</div>
           <div class="cond-body">
-            <div class="cond-name" id="cond-name">Condition hidden</div>
+            <div class="cond-name-row">
+              <div class="cond-name" id="cond-name">Condition hidden</div>
+              <button class="cond-toggle" id="cond-toggle" onclick="toggleCondDetail()" title="Show condition details" aria-expanded="false">▾</button>
+            </div>
             <div class="cond-rule" id="cond-rule">Draw first, then reveal the condition.</div>
             <div class="cond-strat" id="cond-strat"></div>
           </div>
@@ -4285,6 +4303,13 @@ function matchEndAgain(){
   resetMatchState();
 }
 
+// Marvel-Snap-style declutter (7/13/26): rule/strategy prose starts collapsed, tap to read it --
+// purely a visibility class on #cond-main, so it doesn't touch any of the existing text writers.
+function toggleCondDetail(){
+  var m=document.getElementById('cond-main'); if(!m) return;
+  var open=m.classList.toggle('expanded');
+  var b=document.getElementById('cond-toggle'); if(b) b.setAttribute('aria-expanded', open?'true':'false');
+}
 function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTimeout(function(){tutorialAdvance('reveal');},90);
   if(forceIdx==null && phase !== 'drawn') return;
   if(roundTimer){ clearInterval(roundTimer); roundTimer = null; }
@@ -4785,7 +4810,7 @@ function fillRearSlot(el, card, isOpp, fighter){
   if(!card){ el.style.display='none'; el.innerHTML=''; el.className='rear-slot'+(isOpp?' enemy':''); return; }
   var e=CALLED[card.name]; var lk=fighter?fieldLink(fighter,card):null;
   el.style.display=''; el.className='rear-slot rg-card'+(isOpp?' enemy':'')+' filled'+(lk?' linked':'');
-  el.innerHTML = bigCardHTML(card)
+  el.innerHTML = bigCardHTML(card, {mini:true})
     + '<div class="rg-eff">📣 '+(e?e.text:'fighter-only')+(lk?' · 🔗'+lk.name+' +'+lk.pow:'')+'</div>';
   el.title=card.name+(e?' — '+e.text:' — fighter-only')+(lk?' · Link '+lk.name+' +'+lk.pow:'');
 }
@@ -4890,7 +4915,7 @@ function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview
   if(typeof SFX!=='undefined')SFX.play('deploy');
   preSelectedCard = i; rearGuardIdxs = [];
   if(!pendingOppCard){ pendingOppCard = pickOppCard(); pendingOppRears = pickOppRears(pendingOppCard); }
-  document.getElementById('player-field').innerHTML = bigCardHTML(c);  // face-up so you confirm what you're conjuring
+  document.getElementById('player-field').innerHTML = bigCardHTML(c, {mini:true});  // face-up so you confirm what you're conjuring
   if(typeof attachFighterDrag==='function') attachFighterDrag();
   if(typeof updateLivePow==='function') updateLivePow();
   document.getElementById('opp-field').innerHTML = '<div class="card field-card facedown enemy"><div class="fd-mark">▪▪▪</div></div>';
@@ -4963,7 +4988,7 @@ function stagePointerDown(e, source){ if(phase!=='selecting'||preSelectedCard==n
 function _sdragName(src){ if(src.t==='fighter'){ return (preSelectedCard!=null&&hand[preSelectedCard])?hand[preSelectedCard].name:''; } var ix=rearGuardIdxs[src.slot]; return (ix!=null&&hand[ix])?hand[ix].name:''; }
 function stagePointerMove(e){ if(!_sdrag) return; var dx=e.clientX-_sdrag.x0, dy=e.clientY-_sdrag.y0; if(!_sdrag.moved){ if(Math.abs(dx)+Math.abs(dy)<10) return; _sdrag.moved=true; var g=document.createElement('div'); g.className='drag-ghost'; g.textContent=_sdragName(_sdrag.src); document.body.appendChild(g); _sdrag.ghost=g; document.body.classList.add('sf-dragging'); } if(e.cancelable) e.preventDefault(); if(_sdrag.ghost){ _sdrag.ghost.style.left=e.clientX+'px'; _sdrag.ghost.style.top=e.clientY+'px'; } _clearHot(); var hz=document.querySelector('.player-zone'); if(hz) hz.classList.remove('drop-hot'); var top=hz?hz.getBoundingClientRect().top:1e9; if(e.clientY>=top-4){ if(hz) hz.classList.add('drop-hot'); } else { var z=_dropZoneAt(e.clientX,e.clientY); if(z==='fighter'){ var pf=document.getElementById('player-field'); if(pf) pf.classList.add('drop-hot'); } else if(z && z.zone==='rear'){ z.el.classList.add('drop-hot'); } } }
 function stagePointerUp(e){ window.removeEventListener('pointermove', stagePointerMove); window.removeEventListener('pointerup', stagePointerUp); window.removeEventListener('pointercancel', stagePointerUp); var d=_sdrag; _sdrag=null; _clearHot(); var hz=document.querySelector('.player-zone'); if(hz) hz.classList.remove('drop-hot'); document.body.classList.remove('sf-dragging'); if(d&&d.ghost) d.ghost.remove(); if(!d||!d.moved) return; _lastDragTime=Date.now(); var z=_dropZoneAt(e.clientX,e.clientY); if(!z){ var top2=hz?hz.getBoundingClientRect().top:1e9; if(e.clientY>=top2-4) z='hand'; } applyStageMove(d.src, z); }
-function _restage(){ var c=(preSelectedCard!=null)?hand[preSelectedCard]:null; if(!c){ deselectCard(); return; } var pf=document.getElementById('player-field'); if(pf) pf.innerHTML=bigCardHTML(c); attachFighterDrag(); buildHand(); renderRearSlot(); refreshStageHint(); if(typeof updateLivePow==='function') updateLivePow(); if(typeof SFX!=='undefined') SFX.play('deploy'); }
+function _restage(){ var c=(preSelectedCard!=null)?hand[preSelectedCard]:null; if(!c){ deselectCard(); return; } var pf=document.getElementById('player-field'); if(pf) pf.innerHTML=bigCardHTML(c, {mini:true}); attachFighterDrag(); buildHand(); renderRearSlot(); refreshStageHint(); if(typeof updateLivePow==='function') updateLivePow(); if(typeof SFX!=='undefined') SFX.play('deploy'); }
 function applyStageMove(src, z){ if(!src) return; if(z==='hand'){ if(src.t==='fighter') deselectCard(); else { var idx=rearGuardIdxs[src.slot]; if(idx!=null) callSupportIdx(idx); } return; } if(z==='fighter'){ if(src.t==='rear'){ var sIdx=rearGuardIdxs[src.slot]; if(sIdx==null) return; var oldF=preSelectedCard; var others=rearGuardIdxs.filter(function(_,k){return k!==src.slot;}); preSelectedCard=sIdx; rearGuardIdxs=others; if(oldF!=null && rearGuardIdxs.length<RG_SLOTS) rearGuardIdxs.push(oldF); _restage(); } return; } if(z && z.zone==='rear'){ var tSlot=(z.el.id==='player-rear2')?1:0; if(src.t==='fighter'){ var tIdx=rearGuardIdxs[tSlot]; if(tIdx!=null){ var oldF=preSelectedCard; preSelectedCard=tIdx; rearGuardIdxs[tSlot]=oldF; _restage(); } } else if(src.t==='rear' && src.slot!==tSlot){ var a=rearGuardIdxs[src.slot], b=rearGuardIdxs[tSlot]; if(b==null){ rearGuardIdxs.splice(src.slot,1); rearGuardIdxs.push(a); } else { rearGuardIdxs[src.slot]=b; rearGuardIdxs[tSlot]=a; } rearGuardIdxs=rearGuardIdxs.filter(function(x){return x!=null;}); _restage(); } } }
 
 // Back out of a staged selection (returns to the Select phase; opponent unlocks).
@@ -5382,7 +5407,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     function faceCard(card, side){
       return '<div class="rc-slot '+(side==='opp'?'opp':'me')+'" id="rc-card-'+side+'">'
-        + (typeof bigCardHTML==='function' ? bigCardHTML(card) : '')
+        + (typeof bigCardHTML==='function' ? bigCardHTML(card, {mini:true}) : '')
         + '<div class="rc-fx" id="rc-fx-'+side+'"></div></div>';
     }
     if(pf) pf.innerHTML=faceCard(pc,'me');
@@ -9423,7 +9448,7 @@ function stateTitle(c){
   var kd=(typeof kdOf==='function')?kdOf(c):{k:c.kills||0,d:c.deaths||0}; var m=(typeof masteryLevelOf==='function')?masteryLevelOf(c):0;
   if(m>=1) return 'Mastered \u2014 forged through the Rite'; if(kd.d===0 && kd.k>=2) return 'Pristine \u2014 '+kd.k+' wins, never beaten'; if(kd.k>=8) return 'Elite \u2014 '+kd.k+' career kills'; if(kd.k>=3) return 'Veteran \u2014 '+kd.k+' career kills'; if(kd.d>=3) return 'Battle-worn \u2014 '+kd.d+' deaths'; if(kd.d>=1) return 'Scarred \u2014 '+kd.d+' deaths'; return '';
 }
-function bigCardHTML(c){
+function bigCardHTML(c, opts){
   const key = c.artKey||c.name;
   const vid = VIDEO_PREVIEW[key];
   const art = CARD_ART[key];
@@ -9433,7 +9458,12 @@ function bigCardHTML(c){
   else if(art){ artInner=`<img class="tf-media"${artFoc(key)} src="${art}" alt="">`; }
   else { artStyle='background:radial-gradient(circle at 50% 35%,rgba(255,255,255,0.05),transparent 70%)'; artInner=`<span class="bc-sigil">${CARD_SIGIL[key]||'◈'}</span>`; }
   const pristine = _kd.d === 0 ? ' · ◈ Pristine' : '';
-  return `<div class="bigcard tframe ${c.rarity||''} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})" data-cn="${(c.name||'').replace(/"/g,'&quot;')}">
+  // Marvel-Snap-style battlefield mode (7/13/26): a live-play card only needs to read its power at
+  // a glance -- name/K-D/keyword chips stay one hover/tap away via readableCardHTML(), never gone,
+  // just off the board. Modifier class only -- same markup/classes every other hook (tagPow(),
+  // the rear-guard flip-in animation, cardStateClasses()) already depends on.
+  const miniCls = (opts && opts.mini) ? ' mini' : '';
+  return `<div class="bigcard tframe${miniCls} ${c.rarity||''} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})" data-cn="${(c.name||'').replace(/"/g,'&quot;')}">
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
     <div class="tf-name">${dispName(c.name)}</div>
@@ -9490,7 +9520,10 @@ function hideCardPreview(){ var p=document.getElementById('card-preview'); if(p)
 // text, since dispName() can alias a card's DISPLAYED name away from its real COLLECTION key.
 function _dmFieldCardFromEl(el){ var cn=el&&el.getAttribute('data-cn'); if(!cn) return null; return COLLECTION.find(function(x){ return (x.uid||x.name)===cn; })||null; }
 function wireFieldCardPreview(){
-  ['player-field','opp-field'].forEach(function(id){
+  // 7/13/26: rear-guard slots had zero rich preview before this -- only a bare native title
+  // tooltip (see fillRearSlot()) -- so mini-ing their card face (name/K-D/chips now hidden per
+  // .bigcard.mini) would have made that info genuinely inaccessible, not just decluttered.
+  ['player-field','opp-field','player-rear','player-rear2','opp-rear','opp-rear2'].forEach(function(id){
     var el=document.getElementById(id); if(!el || el._dmPreviewWired) return; el._dmPreviewWired=true;
     el.addEventListener('mouseover', function(e){
       if(window.matchMedia && window.matchMedia('(hover:none)').matches) return;
