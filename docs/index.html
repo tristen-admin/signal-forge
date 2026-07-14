@@ -2694,9 +2694,14 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 
 <!-- ── TURN VIEW ── -->
 <style>
+/* Marvel-Snap-style chrome trim, Phase 3 (7/14/26): the field is the only element that grows to
+   fill leftover space -- every bar around it (this one included) is fixed-height, so shaving each
+   one back adds up. Phase stepper keeps all 7 named steps (still needed -- more phases than Snap
+   has to track) just with tighter padding; pile chips drop their text label for icon+count only,
+   same compression the mobile breakpoints already used -- full wording lives in the title tooltip. */
 .phase-strip{display:flex;align-items:center;gap:0;background:var(--panel);border-bottom:1px solid var(--border);padding:0 12px;flex-shrink:0;overflow-x:auto}
 .phase-pip{display:flex;align-items:center;gap:0;flex-shrink:0}
-.phase-pill{font-size:9px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;padding:7px 10px;color:var(--text3);white-space:nowrap;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s}
+.phase-pill{font-size:9px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;padding:5px 8px;color:var(--text3);white-space:nowrap;border-bottom:2px solid transparent;transition:color 0.15s,border-color 0.15s}
 .phase-pill.active{color:var(--electric);border-bottom-color:var(--electric)}
 .phase-pill.done{color:var(--win);border-bottom-color:transparent}
 .phase-arrow{font-size:9px;color:var(--text3);padding:0 2px;flex-shrink:0}
@@ -2706,7 +2711,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 .pile-chip.banish{border-color:rgba(120,48,184,0.3);background:rgba(120,48,184,0.05)}
 .pile-icon{font-size:11px}
 .pile-count{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text)}
-.pile-label{font-size:9px;color:var(--text3);letter-spacing:0.05em}
+.pile-label{font-size:9px;color:var(--text3);letter-spacing:0.05em;display:none}
 .surge-active{background:rgba(212,168,67,0.12);border-color:var(--gold)!important}
 .surge-pip{font-size:9px;color:var(--gold);font-weight:700;padding:2px 6px;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:2px}
 .instant-strip{display:flex;gap:6px;align-items:center;padding:5px 16px;background:rgba(91,192,235,0.06);border-top:1px solid rgba(91,192,235,0.15);border-bottom:1px solid rgba(91,192,235,0.15);flex-shrink:0}
