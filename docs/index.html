@@ -3605,7 +3605,7 @@ const PHASE_IDS = ['ph-draw','ph-reveal','ph-instant1','ph-precommit','ph-commit
 const PHASE_MAP = {predraw:'ph-draw',drawn:'ph-reveal',revealed:'ph-instant1',selecting:'ph-precommit',select:'ph-precommit',committed:'ph-commit',instant2:'ph-instant2',resolved:'ph-resolve'};
 
 function setPhase(p){
-  phase = p; try{ window._phaseAt = Date.now(); }catch(e){}
+  phase = p; try{ window._phaseAt = Date.now(); if(p==='committed') window._cinBeat = window._phaseAt; }catch(e){}
   if(p==='predraw') setCameraMode('solo'); else if(p==='committed') setCameraMode('duo');
   if(typeof buildSpellTray==='function') buildSpellTray();  // keep the energy tray's castability in sync with the phase
   PHASE_IDS.forEach(id => {
@@ -5364,6 +5364,14 @@ let _lastBreakdown=null;
 let matchRoundLog=[];   // 7/13/26: every round's breakdown for this match (Match Recap) — _lastBreakdown alone is single-slot and only ever holds the FINAL round
 function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP, won, onDone){
   function done(){ try{ if(onDone) onDone(); }catch(e){} }
+  // Liveness heartbeat (7/13/26): the self-healing watchdog used to measure time-since-'committed',
+  // but this cinematic's own scripted length legitimately exceeds its old 12s threshold once a round
+  // has a few ability-swing steps (HOLD 1.6s + up to ~2.2s/step + a 1.7-2.8s finish tail) -- so the
+  // watchdog was force-advancing to the next round while this animation was still honestly running,
+  // which is why the win/lose reveal could land after the next round's countdown had already started.
+  // beat() marks real progress; the watchdog now keys off silence since the last beat, not total age.
+  function beat(){ try{ window._cinBeat = Date.now(); }catch(e){} }
+  beat();
   try{
     _injectResolveCSS();
     var R=Math.round, pf=document.getElementById('player-field'), of=document.getElementById('opp-field');
@@ -5400,6 +5408,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
       if(t){ t.classList.remove('rc-quake'); void t.offsetWidth; t.classList.add('rc-quake'); var _os=t.style.boxShadow, _oz=t.style.zIndex; t.style.transition='box-shadow .18s ease'; t.style.boxShadow='0 0 30px 8px rgba(245,201,92,.9)'; t.style.zIndex='45'; setTimeout(function(){ if(t){ t.classList.remove('rc-quake'); t.style.boxShadow=_os||''; t.style.zIndex=_oz||''; } }, 1050); }
     }
     function clash(){
+      beat();
       try{ if(typeof playSkillVFX==='function'){ playSkillVFX('reveal', document.getElementById('rc-card-me'), {hold:550}); playSkillVFX('reveal', document.getElementById('rc-card-opp'), {hold:550}); } }catch(e){}
       // Deck Master tier-1 flourish — additive on top of whatever VFX the card already plays, gated
       // entirely to the exact named Deck Master card conjuring itself. Localized to the card, not a
@@ -5429,6 +5438,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
       setTimeout(finish, 1250);
     }
     function finish(){
+      beat();
       var pm=pw('me'), po=pw('opp'); if(pm) pm.textContent=R(finalPP); if(po) po.textContent=R(finalOP);
       var cm=document.getElementById('rc-card-me'), co=document.getElementById('rc-card-opp');
       if(won==='win'){ if(cm)cm.classList.add('rc-victor'); if(co)co.classList.add('rc-fallen'); if(typeof SFX!=='undefined')SFX.play('win');
@@ -5444,6 +5454,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     if(ps.length===0){ setTimeout(clash, HOLD+300); return; }
     var i=0, per = ps.length>8?1500:(ps.length>5?1850:2200);
     setTimeout(function(){ (function step(){
+      beat();
       if(i>=ps.length){ clash(); return; }
       var s=ps[i++];
       if(s.dp){ tic('me',s.pp); chip('me',s.dp,s.m); pulse('me', s.dp>0?'pu':'pd'); }
@@ -11071,8 +11082,16 @@ body:has(#v-turn.on) .howto-btn{display:none}
     try{
       var vt=document.getElementById('v-turn'); if(!vt||!vt.classList.contains('on')) return;
       var p=(typeof phase!=='undefined')?phase:null; if(!p) return;
-      var age=Date.now()-(window._phaseAt||Date.now());
-      if(p==='committed' && !resultShown() && age>12000 && typeof afterResult==='function'){ afterResult(); }
+      // Real bug (7/13/26): this used to measure age since 'committed' began and fire past 12s --
+      // but playResolutionCinematic()'s own scripted length legitimately runs past 12s on rounds with
+      // a few ability-swing steps, so the watchdog was yanking the game into the next round while the
+      // resolution cinematic was still honestly mid-animation (next round's countdown would start,
+      // then the stale cinematic's win/lose reveal would land on top of it seconds later). Now keyed
+      // off silence since the cinematic's last real progress beat (window._cinBeat, refreshed every
+      // step/clash/finish) -- the longest legitimate gap between beats is the ~2.8s finish-to-reveal
+      // tail, so 6s of true silence still means genuinely stuck, not just a long-but-alive animation.
+      var age=Date.now()-(window._cinBeat||window._phaseAt||Date.now());
+      if(p==='committed' && !resultShown() && age>6000 && typeof afterResult==='function'){ afterResult(); }
     }catch(e){}
   }, 3000);
   function wireResultTap(){ var o=document.getElementById('result-overlay'); if(!o) return; o.addEventListener('click', function(e){ if(!o.classList.contains('show')) return; if(e.target.closest && (e.target.closest('button')||e.target.closest('a'))) return; if(typeof afterResult==='function') afterResult(); }); }
