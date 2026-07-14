@@ -2685,9 +2685,8 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <h3 id="ll-title">No opponent selected</h3>
           <p id="ll-sub" class="ll-none">Pick a bot above to begin.</p>
         </div>
-        <button class="enter-btn" id="enter-btn" onclick="startMatch()" disabled>Enter Match ⚔</button>
+        <button class="enter-btn" id="enter-btn" onclick="enterPublicMatch()" disabled>Enter Match ⚔</button>
         <button class="enter-btn" onclick="playSandbox()" style="background:linear-gradient(180deg,#14303a,#0a1c22);box-shadow:inset 0 0 0 1px rgba(111,211,255,0.4)">🌐 Sandbox · all cards</button>
-        <button class="enter-btn" id="dm-enter-btn" onclick="startDeckMasterMatch()" disabled title="Prototype mode — name a Deck Master in the Deck Builder first" style="background:linear-gradient(180deg,#3a2f14,#221a0a);box-shadow:inset 0 0 0 1px rgba(212,168,67,0.4)">★ Deck Master ⚔</button>
       </div>
     </div>
   </div>
@@ -10789,18 +10788,18 @@ function selectBot(id){
 function updateLaunch(){
   const b=BOT_OPPONENTS.find(x=>x.id===selectedBot);
   const btn=document.getElementById('enter-btn');
-  const dmBtn=document.getElementById('dm-enter-btn');
-  const dmReady = (typeof deckMasterCard!=='undefined') && deckMasterCard && activeDeck.has(deckMasterCard);
-  if(dmBtn){
-    dmBtn.disabled = !(b && dmReady);
-    dmBtn.title = dmReady ? 'Play with '+deckMasterCard+' as your Deck Master' : 'Prototype mode — name a Deck Master in the Deck Builder first';
-  }
+  const dmReady = deckMasterReady();
+  // Deck Master is the default now (7/13/26) -- Enter Match silently plays as your Deck Master
+  // whenever one's ready, same as the old dedicated button used to require a separate click for.
+  // Label/subtitle say so plainly rather than leaving it a silent surprise which mode fired.
+  btn.textContent = dmReady ? '★ Deck Master ⚔' : 'Enter Match ⚔';
   if(b){
     document.getElementById('ll-title').textContent=`${b.name} — ${b.arch}`;
     const deckLine = activeDeck.size === DECK_SIZE
       ? `Your deck: ${DECK_SIZE} cards — shuffled, one of each`
       : `Deck ${activeDeck.size}/${DECK_SIZE} — using the default ${DEFAULT_DECK.length}-card starter until full`;
-    document.getElementById('ll-sub').textContent=`Difficulty ${b.diff}/4 · ${deckLine}`;
+    const dmLine = dmReady ? ` · ★ ${deckMasterCard} as Deck Master` : '';
+    document.getElementById('ll-sub').textContent=`Difficulty ${b.diff}/4 · ${deckLine}${dmLine}`;
     document.getElementById('ll-sub').classList.remove('ll-none');
     btn.disabled=false;
   } else {
@@ -10846,6 +10845,18 @@ function startDeckMasterMatch(){
   document.getElementById('nav-lobby').classList.add('on');
   document.getElementById('tb-title').textContent='Deck Master — vs '+activeBot.name;
   toast('★ Deck Master: '+deckMasterCard, true);
+}
+// A valid, playable Deck Master is named and actually reachable this match (in the active deck,
+// deck built up past the minimum) -- same bar startDeckMasterMatch()'s own guard enforces, just a
+// plain boolean so callers that want to silently branch (not show a failure toast) can reuse it.
+function deckMasterReady(){
+  return !!((typeof deckMasterCard!=='undefined') && deckMasterCard && activeDeck.has(deckMasterCard) && activeDeck.size>=MIN_DECK);
+}
+// Deck Master is now the default for Public Server (7/13/26): auto-plays with it when the player
+// has one ready, same as clicking the old dedicated button -- but never blocks entry, so a player
+// who hasn't named one yet still gets a normal match instead of a dead end.
+function enterPublicMatch(){
+  if(deckMasterReady()){ startDeckMasterMatch(); } else { startMatch(); }
 }
 function playSandbox(){
   if(!selectedBot){ selectedBot = BOT_OPPONENTS[Math.floor(Math.random()*BOT_OPPONENTS.length)].id; }
