@@ -2345,7 +2345,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="tb-title" id="tb-title">Hub</div>
     <div class="tb-crumb" id="tb-crumb"></div>
     <div class="tb-right">
-      <div class="tb-stat pts"><span class="tbs-icon">◈</span><span class="tbs-val" id="tb-pts">48,200</span><span class="tbs-label">Signal</span></div>
+      <div class="tb-stat pts"><span class="tbs-icon">◈</span><span class="tbs-val" id="tb-pts">20,000</span><span class="tbs-label">Signal</span></div>
       <div class="tb-stat forge"><span class="tbs-icon">❖</span><span class="tbs-val" id="tb-forge">12,000</span><span class="tbs-label">Forge</span></div>
       <div class="tb-stat bounty" onclick="openBountyRedeem()" title="Bounty — earned through ranked skill, redeemable (locked)"><span class="tbs-icon">⬥</span><span class="tbs-val" id="tb-bounty">0</span><span class="tbs-label">Bounty</span></div>
       <div class="tb-stat deck"><span class="tbs-icon">🃏</span><span class="tbs-val" id="tb-deck">0</span><span class="tbs-label">In Deck</span></div>
@@ -2507,7 +2507,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <div>
           <div class="sh-eyebrow">Integrator Profile</div>
           <h1>Keanu · @keanu</h1>
-          <div class="profile-sub">◈ Trusted — Tier IV · 22 cards vaulted · 48,200 Signal Points</div>
+          <div class="profile-sub">◈ Trusted — Tier IV · 22 cards vaulted · 20,000 Signal Points</div>
         </div>
       </div>
       <div class="shop-section-title">Emblem — equip the one you've earned</div>
@@ -2538,8 +2538,8 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <h1>The Signal Shop</h1>
           <p id="shop-intro-desc">Spend Forge on cosmetic flair — accent auras, card backs, emblems, and duelist titles. Everything here is purely aesthetic and never affects play.</p>
         </div>
-        <div class="sh-balance"><span class="shb-icon" id="shop-bal-icon">◈</span><span class="shb-val" id="shop-balance">48,200</span><span class="shb-label" id="shop-bal-label">Signal Points</span></div>
-        <button class="sh-reset" title="Fresh playtest start" style="align-self:flex-start;margin-top:8px;background:none;border:1px solid var(--border2);color:var(--text2);font-size:12px;font-weight:700;padding:8px 14px;border-radius:9px;cursor:pointer" onclick="if(confirm('Reset to a fresh new-player start?\n\n\u2022 15-card starter deck (4 rares + 11 commons)\n\u2022 5,000 Signal\n\u2022 wipes current progress \u2014 for playtesting')){ startNewPlayer(); if(typeof show==='function') show('hub',null); }">🌱 Reset to New Player</button>
+        <div class="sh-balance"><span class="shb-icon" id="shop-bal-icon">◈</span><span class="shb-val" id="shop-balance">20,000</span><span class="shb-label" id="shop-bal-label">Signal Points</span></div>
+        <button class="sh-reset" title="Fresh playtest start" style="align-self:flex-start;margin-top:8px;background:none;border:1px solid var(--border2);color:var(--text2);font-size:12px;font-weight:700;padding:8px 14px;border-radius:9px;cursor:pointer" onclick="if(confirm('Reset to a fresh new-player start?\n\n\u2022 15-card starter deck (4 rares + 11 commons)\n\u2022 20,000 Signal\n\u2022 wipes current progress \u2014 for playtesting')){ startNewPlayer(); if(typeof show==='function') show('hub',null); }">🌱 Reset to New Player</button>
       </div>
       <div class="shop-tabs">
         <button class="shop-tab on" id="stab-cosmetics" onclick="setShopTab('cosmetics')">✦ Cosmetics</button>
@@ -2846,6 +2846,12 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <span class="instant-label">⚡ Instant Window</span>
       <div id="instant-options"></div>
       <button class="skip-instant-btn" onclick="skipInstant()">Skip →</button>
+    </div>
+
+    <!-- DECK MASTER ABILITY (hidden by default) -- unlike Instants, usable any pre-commit phase -->
+    <div class="instant-strip" id="dm-ability-strip" style="display:none">
+      <span class="instant-label">★ Deck Master Ability</span>
+      <div id="dm-ability-options"></div>
     </div>
 
     <!-- ENERGY / SPELL TRAY -->
@@ -3473,6 +3479,36 @@ let deckSize = 12;
 let winnersCircle = [];
 let banishPile = [];
 let banishSurge = 0;
+// Deck Master activated ability (7/15/26): a new, player-*activated* identity ability, separate
+// from the passive Tier-1/2/3 DM_EXCLUSIVE system -- usable any pre-commit phase (not gated to
+// the Instant Window), once per duel. dmNextConjureBonus is a deferred bonus consumed at the next
+// power computation, same shape as banishSurge, just earned by activating rather than banishing a card.
+let dmAbilityUsedThisDuel = false, dmNextConjureBonus = 0;
+const DM_ACTIVATED_ABILITY = {
+  'Bannerlord Cassian': {draw:1, nextConjureBonus:5, log:'Rally the Line'},
+  'Broodmother':        {draw:1, nextConjureBonus:5, log:"The Brood Answers"},
+  'Kiana':              {draw:1, nextConjureBonus:5, log:'Wings in the Dark'}
+};
+function activateDeckMasterAbility(){
+  if(!deckMasterCard || dmAbilityUsedThisDuel) return;
+  var ab = DM_ACTIVATED_ABILITY[deckMasterCard]; if(!ab) return;
+  if(phase==='committed' || phase==='resolved') return;   // any MAIN phase, not after you've locked in
+  dmAbilityUsedThisDuel = true;
+  if(ab.draw && typeof drawToHand==='function') drawToHand(ab.draw);
+  dmNextConjureBonus = ab.nextConjureBonus || 0;
+  if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
+  if(typeof buildHand==='function') buildHand();
+  if(typeof toast==='function') toast('★ '+deckMasterCard+' — '+ab.log+': draw '+ab.draw+', next conjure +'+ab.nextConjureBonus, true);
+}
+function renderDeckMasterAbilityStrip(){
+  var strip=document.getElementById('dm-ability-strip'); if(!strip) return;
+  var opts=document.getElementById('dm-ability-options');
+  var ab = deckMasterCard ? DM_ACTIVATED_ABILITY[deckMasterCard] : null;
+  var eligiblePhase = (typeof phase!=='undefined') && phase!=='committed' && phase!=='resolved';
+  if(!ab || dmAbilityUsedThisDuel || !eligiblePhase){ strip.style.display='none'; if(opts) opts.innerHTML=''; return; }
+  strip.style.display='flex';
+  if(opts) opts.innerHTML = '<button class="instant-card-btn" style="border-color:rgba(212,168,67,0.6);color:var(--gold)" onclick="activateDeckMasterAbility()">★ '+deckMasterCard+' — '+ab.log+' (draw '+ab.draw+', next conjure +'+ab.nextConjureBonus+')</button>';
+}
 let divinerBonusNext = 0;
 let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + lingering supports); each {name,pow}; persists until an enemy card is killed
 function remnantPowSum(){ return deathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
@@ -4442,6 +4478,7 @@ function activateInstant(i){
   document.getElementById('select-hint').textContent = hintSelect;
   document.getElementById('commit-hint').textContent = hintCommit;
   if(typeof renderInstantStrip==='function') renderInstantStrip();
+  if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
   buildHand();
   if(typeof renderRearSlot==='function') renderRearSlot();
   updatePiles();
@@ -4537,6 +4574,14 @@ function campOf(nameOrCard){
   var _camps=['Wardbound','Nightbound','Wildbound'];
   return _camps[_nameHash(name)%3];
 }
+// Deck Master identity inheritance (7/15/26): when a Deck Master is set, every card the owner
+// commits carries the Deck Master's own race/camp for faction-facing resolution (Bloodlines
+// Clash, etc.) instead of its own printed one -- "you and your Deck Master share one identity."
+// dmName is deckMasterCard for the player, activeBot.dmCard for the bot (symmetric, matches the
+// existing applyBotDeckMasterResolveEffects precedent). Falls through to the card's own identity
+// when no Deck Master is set -- unchanged behavior in every other mode/context.
+function effectiveRaceOf(card, dmName){ return dmName ? raceOf(dmName) : raceOf(card && card.name); }
+function effectiveCampOf(card, dmName){ return dmName ? campOf(dmName) : campOf(card); }
 function campBeats(a,b){ return CAMP_BEATS[a]===b; }
 function setCamp(name, camp){ if(!name) return; campOverride[name]=camp; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.camp=camp; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83c\udfd5 Camp set: '+name+' \u2192 '+camp, true); }
 
@@ -4709,7 +4754,7 @@ function calledCtx(){
 function projectPlay(){
   var f=(preSelectedCard!=null && hand[preSelectedCard]) ? hand[preSelectedCard] : null;
   if(!f) return null;
-  var base=(f.pow||0)+(f._bo||0), spell=(banishSurge||0)+remnantPowSum()+((typeof spellSelfPow!=='undefined'&&spellSelfPow)||0);
+  var base=(f.pow||0)+(f._bo||0), spell=(banishSurge||0)+(dmNextConjureBonus||0)+remnantPowSum()+((typeof spellSelfPow!=='undefined'&&spellSelfPow)||0);
   var called=0, oppDelta=((typeof spellOppPow!=='undefined'&&spellOppPow)||0), link=0, linkName=null;
   rearGuardIdxs.forEach(function(ix){ var sup=hand[ix]; if(!sup) return; var d=projectCalled(CALLED[sup.name], calledCtx()); called+=d[0]; oppDelta+=d[1]; var lk=fieldLink(f,sup); if(lk){ link+=lk.pow; var _tb=(CALLED[sup.name]&&CALLED[sup.name].twinBuff)||0; if(_tb) link+=_tb; linkName=linkName?linkName+', '+lk.name:lk.name; } });
   var rally=0; if(typeof RALLY!=='undefined'&&RALLY[f.name]){ rally = RALLY[f.name]*( rearGuardIdxs.filter(function(ix){return hand[ix]&&conjureCost(hand[ix])===1;}).length + ((typeof winnersCircle!=='undefined'&&winnersCircle)?winnersCircle.filter(function(c){return conjureCost(c)===1;}).length:0) ); }
@@ -4969,6 +5014,7 @@ function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview
   document.getElementById('opp-area').className = 'opp-waiting';
   document.getElementById('opp-area').innerHTML = '⏳ Opponent locked in — assemble your play';
   if(typeof renderInstantStrip==='function') renderInstantStrip();
+  if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
   document.getElementById('confirm-btn').style.display = 'flex';
   setPhase('selecting');
   buildHand(); renderRearSlot(); refreshStageHint();
@@ -5233,8 +5279,9 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
      card through that costs slightly more than current charge). */
   charge=Math.max(0, charge-conjureCost(pc)); if(typeof renderCharge==='function') renderCharge();
   matchCommits++;
-  const committedPow = (pc.name==='Anorith Keeling' ? Math.max(1,(playerScore[0]+playerScore[1])*Math.max(0,hand.length-1)) : (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow)) + banishSurge + remnantPowSum();
+  const committedPow = (pc.name==='Anorith Keeling' ? Math.max(1,(playerScore[0]+playerScore[1])*Math.max(0,hand.length-1)) : (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow)) + banishSurge + dmNextConjureBonus + remnantPowSum();
   banishSurge = 0;
+  dmNextConjureBonus = 0; dmAbilityUsedThisDuel = false;   // resets every duel -- usable again next round
 
   // close record reveal — opponent identity now revealed on field
   document.getElementById('record-reveal').style.display = 'none';
@@ -5873,6 +5920,18 @@ const DM_EXCLUSIVE = {
   // be built as their own new CALLED effect kinds to make it a true combo engine. Flagged, not built.
   'Tange Sazen': [
     {"if":{"v":"wc_len","op":"==","n":0},"add":8,"log":"⚔ Warpath Ascendant: your Winners Circle is empty — the war never stops, +8 power"}
+  ],
+  // Second Deck Master option per starter deck (7/15/26, direct request) -- simple stat-scaling
+  // exclusives extending each card's own printed theme, giving a real second identity choice
+  // inside the Ironsworn/Broodswarm/Black Wings starter decks, not just flavor.
+  'Chieftain Reyva Vosh': [
+    {"addvar":"wc_len","x":1,"log":"🏔 Hold's Last Stand: +1 power per Winners Circle card — stacks with her own Warriors in Reserve"}
+  ],
+  "Web-Weaver's Return": [
+    {"addvar":"banish_len","x":1,"log":"🕸 The Web Endures: +1 power per card in your banish zone"}
+  ],
+  'Rhaess Korvain': [
+    {"addvar":"banish_len","x":1,"log":"🐦‍⬛ Raven's Ledger: +1 additional power per card in your banish zone"}
   ]
 };
 // Tier 2 — in-archetype vanilla: ONE shared rule per archetype, additive on top of whatever
@@ -6636,7 +6695,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   else if(cond.id==="survivorsground"){ if((pc.deaths||0)<(oc.deaths||0)){playerPow+=3;} else if((oc.deaths||0)<(pc.deaths||0)){oppPow+=3;} abilLog.push("⚰️ Survivor's Ground: fewer deaths +3"); }
   else if(cond.id==="purereflection"){ playerPow=(oc.kills||0); oppPow=(pc.kills||0); abilLog.push("🪞 Pure Reflection: power becomes the opponent's career kills"); }
   else if(cond.id==="bloodlinesclash"){
-    var _campP=(typeof campOf==='function')?campOf(pc):'Wardbound', _campO=(typeof campOf==='function')?campOf(oc):'Wardbound';
+    var _campP=(typeof effectiveCampOf==='function')?effectiveCampOf(pc,deckMasterCard):'Wardbound', _campO=(typeof effectiveCampOf==='function')?effectiveCampOf(oc,(typeof activeBot!=='undefined'&&activeBot)?activeBot.dmCard:null):'Wardbound';
     if(_campP!==_campO && campBeats(_campP,_campO)){ playerPow+=6; abilLog.push("🔱 Bloodlines Clash: "+_campP+" overwhelms "+_campO+" — +6"); }
     else if(_campP!==_campO && campBeats(_campO,_campP)){ oppPow+=6; abilLog.push("🔱 Bloodlines Clash: "+_campO+" overwhelms "+_campP+" — +6"); }
     else { abilLog.push("🔱 Bloodlines Clash: same camp ("+_campP+") — no swing"); }
@@ -6962,7 +7021,7 @@ function show(id, btn){
 }
 
 // ── MARKETPLACE ──
-let signalPoints = 48200;
+let signalPoints = 20000;
 let lastDailyBonusDate = '';   // daily-return bonus (7/15/26): todayISO()-format, granted once per calendar day on Hub visit
 function fmtPts(n){ return n.toLocaleString('en-US'); }
 function updateBalance(){
@@ -7336,7 +7395,7 @@ function loadState(){
 }
 function resetProgress(){ if(!confirm('Reset ALL progress? This wipes your vault, records, Signal, RP, and cosmetics back to defaults and cannot be undone.')) return;
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
-  signalPoints=48200; rankRP=1000; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']); supply=defaultSupply(); cardSupply=defaultCardSupply(); ownedCopies={}; freshCopies={}; wonInstances=[]; wonCounter=0; for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); } COLLECTION.forEach(c=>{ ownedCopies[c.uid||c.name]=1; });
+  signalPoints=20000; rankRP=1000; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']); supply=defaultSupply(); cardSupply=defaultCardSupply(); ownedCopies={}; freshCopies={}; wonInstances=[]; wonCounter=0; for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); } COLLECTION.forEach(c=>{ ownedCopies[c.uid||c.name]=1; });
   avatarBond={}; pairBonds={}; ascRun=null; forgeBalance=12000; featuredCards=['Kotei']; featuredShuffle=false; featuredRotIdx=0; equipped={aura:'gold',back:'sealed',emblem:'crest',title:'integrator',sleeves:'standard',summon:'golden'};
   ownedCosmetics.clear(); ['aura:gold','back:sealed','emblem:crest','title:integrator','sleeves:standard','summon:golden'].forEach(k=>ownedCosmetics.add(k));
   applyCosmetics(); updateBalance(); buildShop();
@@ -7347,7 +7406,7 @@ function startFreshSession(){ if(!confirm('Start a fresh session? This clears ev
   for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); }
   wonInstances=[]; wonCounter=0;
   avatarBond={}; pairBonds={}; ascRun=null; forgeBalance=12000;
-  signalPoints=2000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false;
+  signalPoints=20000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false;
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']);
   COLLECTION.forEach(c=>{ const k=c.uid||c.name; ownedCopies[k]=1;
@@ -7366,11 +7425,11 @@ function startFreshSession(){ if(!confirm('Start a fresh session? This clears ev
 }
 const NEW_PLAYER_DECK = ['Melanie','Heir of Kaiga','Kiana','Hanse Waltz','Moro','King Joris','Malia','Conduit Adept','Broodmother','Old Garrick','Bram the Bulwark','Black Wings, Ossian Drell'];
 function newPlayerReset(){
-  if(!confirm('Wipe to a fresh NEW-PLAYER state?\n\n• 12 starter cards (no ultras)\n• 10,000 Signal · 0 Forge · 0 Bounty\n• all records 0-0, everything else cleared\n\nCannot be undone.')) return;
+  if(!confirm('Wipe to a fresh NEW-PLAYER state?\n\n• 12 starter cards (no ultras)\n• 20,000 Signal · 0 Forge · 0 Bounty\n• all records 0-0, everything else cleared\n\nCannot be undone.')) return;
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); }
   wonInstances=[]; wonCounter=0;
-  signalPoints=10000; forgeBalance=0; bountyBalance=0; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false;
+  signalPoints=20000; forgeBalance=0; bountyBalance=0; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false;
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFoilMax={}; cardFrames={}; ownedFrames=new Set(['none']);
   avatarBond={}; pairBonds={}; ascRun=null;
@@ -7384,7 +7443,7 @@ function newPlayerReset(){
   if(typeof applyCosmetics==='function') applyCosmetics(); if(typeof updateBalance==='function') updateBalance(); if(typeof buildShop==='function') buildShop();
   if(typeof buildVault==='function') buildVault(); if(typeof buildHub==='function') buildHub(); if(typeof renderFeatured==='function') renderFeatured();
   if(typeof show==='function') show('hub');
-  if(typeof toast==='function') toast('🌱 New-player state — 12 starter cards · 10,000 ◈ · 0 ❖ · 0 Bounty · records 0-0.', true);
+  if(typeof toast==='function') toast('🌱 New-player state — 12 starter cards · 20,000 ◈ · 0 ❖ · 0 Bounty · records 0-0.', true);
 }
 // ── STARTER SET — new-player onboarding deck; infinite / always-in-creation, so NOT tradeable ──
 const STARTER_SET = ['Keawe Kel\'rua','Lagertha Waltz','Hanse Waltz','Uso Oso','Melanie','Moro','Malia','King Joris','Bixie Bee','Ruffius Rufeldro','Kiba','Heir of Kaiga','Josef','Sister Mire','Veronica','Zerith Var'];
@@ -7393,13 +7452,13 @@ function isStarter(c){ const n=typeof c==='string'?c:(c&&c.name); return STARTER
 function cardProv(c){ if(!c) return 'forged'; if(c.variant) return 'variant'; if(c.prov) return c.prov; if(isStarter(c)) return 'starter'; return 'forged'; }
 function isTradeable(c){ return !isStarter(c) && !c.variant; }  // all non-starter cards tradeable (no paid/earned firewall)
 function provLabelText(c){ return c.variant?'✦ Variant · play-only, yours forever':isStarter(c)?'🔒 Starter · always in creation':'🏆 Forged · tradeable'; }
-// Real new-player onboarding: 5,000 Signal + the starter deck, fresh 0-0 records. Default for a brand-new vault (no save).
+// Real new-player onboarding: 20,000 Signal + the starter deck, fresh 0-0 records. Default for a brand-new vault (no save).
 function startNewPlayer(){
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); }
   wonInstances=[]; wonCounter=0;
   avatarBond={}; pairBonds={}; ascRun=null; forgeBalance=0;   /* new players start with NO Forge — premium currency, earned/bought later */
-  signalPoints=5000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false;
+  signalPoints=20000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false;
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']);
   STARTER_SET.forEach(nm=>{ const c=COLLECTION.find(x=>x.name===nm && !x.uid); if(c){ ownedCopies[nm]=1; cardRecords[nm]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Starter deck'}]}; } });
@@ -7414,7 +7473,7 @@ function startNewPlayer(){
   if(typeof updateDeckCount==='function') updateDeckCount();
   if(typeof renderFeatured==='function') renderFeatured();
   if(typeof startFeaturedRotation==='function') startFeaturedRotation();
-  toast('Welcome to Signal Forge \u2014 5,000 Signal and your starter deck are ready.', true);
+  toast('Welcome to Signal Forge \u2014 20,000 Signal and your starter deck are ready.', true);
   try{ localStorage.removeItem('sf_starter_chosen'); localStorage.removeItem('sf_howto_seen'); }catch(e){} window._needStarterChoice=true;
   if(typeof window.showHowTo==='function'){ setTimeout(function(){ window.showHowTo(); }, 300); }
 }
@@ -8782,15 +8841,35 @@ var STARTER_PATHS=[
   {key:'blackwings',name:'The Black Wings',tag:'Banish & Reclaim',blurb:'Sacrifice your own cards to fuel devastating power, then pull them back stronger. High risk, high reward — for the bold.',rep:'Black Wings, Ossian Drell',icon:'🖤',accent:'#e0913a'}
 ];
 var STARTER_DECKS={
-  ironsworn:['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh','Signal Diviner','Heir of Kaiga','Melanie','Faye Quicksilver','Conduit Adept'],
-  blackwings:['Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','The Black Ledger','Tannis','Bixie Bee','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Heir of Kaiga'],
-  broodswarm:['Broodmother','Fledgling Broodmother','Web-Spinner Acolyte',"Hoarder's Gambit",'The Gathering Swarm','Silkbound Sentinel',"Widow's Patience","Web-Weaver's Return",'Signal Diviner','Melanie','Heir of Kaiga','Faye Quicksilver','Conduit Adept','Voltcaller','Tosa Envoy']
-};   /* STARTER decks: SEPARATE from the *_PRESET full builds; NO ultras/apex so chase cards stay earnable */
+  ironsworn:['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh','Signal Diviner','Heir of Kaiga','Melanie','Faye Quicksilver','Conduit Adept','Sirefax the Warden'],
+  blackwings:['Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','The Black Ledger','Tannis','Bixie Bee','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Heir of Kaiga','Corvus'],
+  broodswarm:['Broodmother','Fledgling Broodmother','Web-Spinner Acolyte',"Hoarder's Gambit",'The Gathering Swarm','Silkbound Sentinel',"Widow's Patience","Web-Weaver's Return",'Signal Diviner','Melanie','Heir of Kaiga','Faye Quicksilver','Conduit Adept','Voltcaller','Tosa Envoy','Mordezh, Blood Prophet']
+};   /* STARTER decks: SEPARATE from the *_PRESET full builds. Each carries exactly 1 Ultra (7/15/26,
+        direct request) -- Sirefax/Corvus/Mordezh are off-archetype splashes, not perfect thematic
+        fits (Muster and Broodswarm have no in-theme Ultra outside the excluded rep cards), flagged
+        rather than silently forced; Black Wings' Corvus (banish-themed) is a clean match. */
 function _pathDeck(key){ return (typeof STARTER_DECKS!=='undefined'&&STARTER_DECKS[key])?STARTER_DECKS[key]:[]; }
 function grantStarterDeck(names){ ownedCopies={}; freshCopies={}; cardRecords={}; if(typeof activeDeck!=='undefined') activeDeck=new Set(); (names||[]).forEach(function(nm){ var c=COLLECTION.find(function(x){return x.name===nm && !x.uid;}); if(!c) return; var k=c.uid||c.name; ownedCopies[k]=1; cardRecords[k]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Starter deck'}]}; if(activeDeck&&activeDeck.add) activeDeck.add(k); }); }
 var STARTER_DECKMASTER={ironsworn:'Bannerlord Cassian',broodswarm:'Broodmother',blackwings:'Kiana'};   // each starter path is issued its own Deck Master on pick (7/15/26)
 function chooseStarterPath(key){ var p=STARTER_PATHS.find(function(x){return x.key===key;}); if(!p) return; grantStarterDeck(_pathDeck(key)); if(STARTER_DECKMASTER[key]){ deckMasterCard=STARTER_DECKMASTER[key]; lsSet('sf_deckmaster', deckMasterCard); } featuredCards=[p.rep]; featuredShuffle=false; featuredRotIdx=0; try{ localStorage.setItem('sf_starter_chosen', key); }catch(e){} window._needStarterChoice=false; if(typeof saveState==='function') saveState(); var ov=document.getElementById('path-chooser'); if(ov) ov.classList.remove('on'); if(typeof applyCosmetics==='function') applyCosmetics(); if(typeof buildVault==='function') buildVault(); if(typeof buildHub==='function') buildHub(); if(typeof buildDeckBuilder==='function') buildDeckBuilder(); if(typeof updateDeckCount==='function') updateDeckCount(); if(typeof renderFeatured==='function') renderFeatured(); if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('🃏 '+p.name+' — starter deck forged: '+_pathDeck(key).length+' cards, all yours.', true); if(typeof startTutorial==='function'){ var _td=true; try{ _td=!localStorage.getItem('sf_tutorial_done'); }catch(e){} if(_td) setTimeout(startTutorial, 550); } }
 function _pathChooserCSS(){ if(document.getElementById('pc-style')) return; var st=document.createElement('style'); st.id='pc-style'; st.textContent=`.path-chooser{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center}.path-chooser.on{display:flex}.path-chooser .pc-scrim{position:absolute;inset:0;background:rgba(4,6,11,.87)}.path-chooser .pc-panel{position:relative;z-index:1;max-width:min(96vw,940px);max-height:92vh;overflow-y:auto;padding:26px 22px 30px;text-align:center}.path-chooser .pc-eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px}.path-chooser .pc-title{font-size:34px;font-weight:800;color:#fff;margin-bottom:6px}.path-chooser .pc-sub{font-size:13px;color:var(--text2);max-width:520px;margin:0 auto 22px;line-height:1.5}.path-chooser .pc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.path-chooser .pc-card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--border2);border-radius:14px;padding-bottom:16px;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,border-color .15s,box-shadow .15s}.path-chooser .pc-card:hover{transform:translateY(-4px);border-color:var(--acc);box-shadow:0 16px 40px rgba(0,0,0,.55)}.path-chooser .pc-art{height:148px;background-size:cover;background-position:center top;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border2)}.path-chooser .pc-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(10,12,18,.82))}.path-chooser .pc-icon{position:relative;z-index:1;font-size:38px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.75))}.path-chooser .pc-body{padding:13px 15px 10px;flex:1;text-align:left}.path-chooser .pc-name{font-size:18px;font-weight:800;color:#fff}.path-chooser .pc-tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);margin:2px 0 9px}.path-chooser .pc-blurb{font-size:12px;color:var(--text2);line-height:1.5}.path-chooser .pc-pick{margin:0 15px;padding:10px 0;border-radius:9px;border:1px solid var(--acc);background:rgba(255,255,255,.06);color:#fff;font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:background .15s,color .15s}.path-chooser .pc-card:hover .pc-pick{background:var(--acc);color:#0a0d14}@media(max-width:720px){.path-chooser .pc-grid{grid-template-columns:1fr}.path-chooser .pc-panel{padding:18px 14px}.path-chooser .pc-title{font-size:26px}.path-chooser .pc-art{height:118px}}`; document.head.appendChild(st); }
+// Intro video (7/15/26): plays once, between How-to-Play and the starter-path chooser, framing
+// the "assimilate into your Deck Master" premise. src is a placeholder -- drop the real file at
+// assets/intro.mp4 (or change INTRO_VIDEO_SRC). Skippable (button + Escape); a missing/broken
+// video file falls straight through to the starter chooser instead of getting the player stuck.
+const INTRO_VIDEO_SRC = 'assets/intro.mp4';
+function _introVideoCSS(){ if(document.getElementById('iv-style')) return; var st=document.createElement('style'); st.id='iv-style'; st.textContent=`.intro-video-ov{position:fixed;inset:0;z-index:210;display:none;align-items:center;justify-content:center;background:#000}.intro-video-ov.on{display:flex}.intro-video-ov video{max-width:100%;max-height:100%}.iv-skip{position:absolute;top:18px;right:18px;padding:8px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.35);background:rgba(0,0,0,0.5);color:#fff;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.02em}.iv-skip:hover{background:rgba(255,255,255,0.15)}`; document.head.appendChild(st); }
+function _introVideoDone(){ var ov=document.getElementById('intro-video-ov'); if(ov) ov.classList.remove('on'); if(typeof showStarterChooser==='function') showStarterChooser(); }
+function showIntroVideo(){
+  _introVideoCSS();
+  var ov=document.getElementById('intro-video-ov');
+  if(!ov){ ov=document.createElement('div'); ov.id='intro-video-ov'; ov.className='intro-video-ov'; document.body.appendChild(ov); }
+  ov.innerHTML='<video id="intro-video-el" autoplay playsinline src="'+INTRO_VIDEO_SRC+'"></video><button class="iv-skip" onclick="_introVideoDone()">Skip →</button>';
+  ov.classList.add('on');
+  var v=document.getElementById('intro-video-el');
+  if(v){ v.onended=_introVideoDone; v.onerror=_introVideoDone; }
+  document.addEventListener('keydown', function _ivEsc(e){ if(e.key==='Escape'){ document.removeEventListener('keydown', _ivEsc); _introVideoDone(); } });
+}
 function showStarterChooser(){ _pathChooserCSS(); var ov=document.getElementById('path-chooser'); if(!ov){ ov=document.createElement('div'); ov.id='path-chooser'; ov.className='path-chooser'; document.body.appendChild(ov); } ov.innerHTML='<div class="pc-scrim"></div><div class="pc-panel"><div class="pc-eyebrow">New Commander</div><div class="pc-title">Choose Your Path</div><div class="pc-sub">Pick a starter deck — real cards you own and can build on. You can collect the others later.</div><div class="pc-grid">'+STARTER_PATHS.map(function(p){ var repC=COLLECTION.find(function(x){return x.name===p.rep && !x.uid;}); var art=(repC && typeof artFillStyle==='function')?artFillStyle(repC.artKey||repC.name):''; return '<div class="pc-card" style="--acc:'+p.accent+'" onclick="chooseStarterPath(\''+p.key+'\')"><div class="pc-art" style="'+art+'"><span class="pc-icon">'+p.icon+'</span></div><div class="pc-body"><div class="pc-name">'+p.name+'</div><div class="pc-tag">'+p.tag+'</div><div class="pc-blurb">'+p.blurb+'</div></div><button class="pc-pick">Choose '+p.name.replace('The ','')+'</button></div>'; }).join('')+'</div></div>'; ov.classList.add('on'); }
 window.showStarterChooser=showStarterChooser; window.chooseStarterPath=chooseStarterPath;
 ;/* ── BALANCE PASS 2026-07-07 (owner spec): reworked CARD_RULES + remnant values ── */
@@ -10991,7 +11070,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[];
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
-  banishSurge=0; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
+  banishSurge=0; dmNextConjureBonus=0; dmAbilityUsedThisDuel=false; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
   charge=2/*energy start (7/12/26 rework)*/; oppCharge=2; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
@@ -11193,7 +11272,7 @@ body:has(#v-turn.on) .howto-btn{display:none}
 <script>
 (function(){
   window.showHowTo=function(){ var o=document.getElementById('howto-ov'); if(o) o.classList.add('on'); };
-  window.closeHowTo=function(){ var o=document.getElementById('howto-ov'); if(o) o.classList.remove('on'); try{ localStorage.setItem('sf_howto_seen','1'); }catch(e){} if(window._needStarterChoice && typeof showStarterChooser==='function'){ var _sc=true; try{ _sc=!localStorage.getItem('sf_starter_chosen'); }catch(e){} if(_sc) setTimeout(showStarterChooser, 320); } };
+  window.closeHowTo=function(){ var o=document.getElementById('howto-ov'); if(o) o.classList.remove('on'); try{ localStorage.setItem('sf_howto_seen','1'); }catch(e){} if(window._needStarterChoice && typeof showStarterChooser==='function'){ var _sc=true; try{ _sc=!localStorage.getItem('sf_starter_chosen'); }catch(e){} if(_sc) setTimeout(function(){ if(typeof showIntroVideo==='function') showIntroVideo(); else showStarterChooser(); }, 320); } };
   try{ if(localStorage.getItem('sf_howto_seen')!=='1'){ setTimeout(function(){ if(window.showHowTo) showHowTo(); }, 1100); } }catch(e){}
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var o=document.getElementById('howto-ov'); if(o&&o.classList.contains('on')) closeHowTo(); } });
 })();
