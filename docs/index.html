@@ -3181,8 +3181,8 @@ const CONDITIONS = [
   {id:'hollowreckoning',mech:'Hollow Reckoning',icon:'🌫️',name:'The Gray',rule:'In the void identity falls away — each card\'s power becomes its career kills. Only what you have done remains.',strat:'Veterans dominate; fresh cards are helpless. Bring your record, not your power.',tag:'chaos',prob:'7%'},
   {id:"veteranedge",mech:"Veteran's Edge",icon:"🎖️",name:"The War College",rule:"Each card gains +1 power for every 3 kills on its record — the seasoned rise.",strat:"Field high-kill veterans; unproven cards gain nothing.",tag:"boost",prob:"3%"},
   {id:"freshblood",mech:"Fresh Blood",icon:"🌱",name:"Rookery Hollow",rule:"Cards with zero kills fight with everything to prove — 0-kill cards gain +6.",strat:"Deploy your untested rookies here.",tag:"flip",prob:"3%"},
-  {id:"puritytrial",mech:"Purity Trial",icon:"✨",name:"The White Sanctum",rule:"Flawless records are exalted — Pristine (0-death) cards gain +5.",strat:"Bring your never-beaten cards.",tag:"boost",prob:"3%"},
-  {id:"puritydrain",mech:"Purity Drain",icon:"🕷️",name:"The Tarnish Marsh",rule:"The spotless are hunted — Pristine (0-death) cards suffer −5.",strat:"Keep your Pristine cards home; field the scarred.",tag:"flip",prob:"3%"},
+  {id:"puritytrial",mech:"Purity Trial",icon:"✨",name:"The White Sanctum",rule:"Flawless records are exalted — Pristine (0 deaths, 1+ kill) cards gain +5.",strat:"Bring your never-beaten cards.",tag:"boost",prob:"3%"},
+  {id:"puritydrain",mech:"Purity Drain",icon:"🕷️",name:"The Tarnish Marsh",rule:"The spotless are hunted — Pristine (0 deaths, 1+ kill) cards suffer −5.",strat:"Keep your Pristine cards home; field the scarred.",tag:"flip",prob:"3%"},
   {id:"bloodreckoning",mech:"Blood Reckoning",icon:"💀",name:"Scarhold",rule:"Every scar is a weakness — each card loses 1 power per death on its record.",strat:"Field clean records; battered cards crumble.",tag:"flip",prob:"3%"},
   {id:"deathwish",mech:"Deathwish",icon:"☠️",name:"The Charnel Arena",rule:"Scars fuel fury — each card gains +1 power per death on its record.",strat:"Your most-beaten veterans hit hardest here.",tag:"boost",prob:"3%"},
   {id:"underdog",mech:"Underdog Rising",icon:"📉",name:"Dust Bowl",rule:"The lesser rises — the lower base-power card gains +7.",strat:"Commit a weak card into their strong one.",tag:"flip",prob:"3%"},
@@ -3221,8 +3221,8 @@ const COND_EFF = {
   hollowreckoning:"Each card's power becomes its career kills.",
   veteranedge:"+1 power per 3 kills on the card's record.",
   freshblood:"0-kill cards gain +6.",
-  puritytrial:"Pristine (0-death) cards gain +5.",
-  puritydrain:"Pristine (0-death) cards take −5.",
+  puritytrial:"Pristine (0 deaths, 1+ kill) cards gain +5.",
+  puritydrain:"Pristine (0 deaths, 1+ kill) cards take −5.",
   bloodreckoning:"−1 power per death on the card's record.",
   deathwish:"+1 power per death on the card's record.",
   underdog:"The lower base-power card gains +7.",
@@ -3298,7 +3298,7 @@ const DECK_POOL = [
   {name:"Young Darwin, Predetermined Dictator",pow:14,cost:2,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"On commit: +4, and the opponent takes −3 if their card is Pristine (0 deaths)."},
   {name:"Courtroom Colossus",pow:15,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Colossus: +3, and +5 more from the 3rd commit onward — a late-game bomb."},
   {name:"Kessuae, Tide of Ruin",pow:17,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: while you are behind, this destroys the active location (nullifies it). +5 if both support slots are full."},
-  {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:'rare',timing:"on",abil:"Purity: +5 while this card is Pristine (0 deaths)."},
+  {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:'rare',timing:"on",abil:"Purity: +5 while this card is Pristine (0 deaths, 1+ kill)."},
   {name:"Kravyn the Collector",pow:17,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +3 at 10+ career kills. Kill Escalation: +5 at 20+ career kills."},
   {name:"Fifth Frequency Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Elemental Flurry: +3, +4 more with 5+ cards in hand, +7 more with 4+ cards in your banish zone."},
   {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +1 power for every card remaining in your deck. Death Remnant: when he falls he holds the field, +8 to your committed cards until an enemy is killed."},
@@ -3424,7 +3424,7 @@ const DECK_POOL = [
 
 // ── SET 2 — held for post-launch release (NOT loaded into COLLECTION) ──
 const SET2_POOL = [
-  {name:"Vharos, the Iron Crown",pow:20,kills:0,deaths:0,rarity:"genesis",timing:"on",abil:"Record Guard. On commit: +5 against a Pristine opponent (0 deaths)."},
+  {name:"Vharos, the Iron Crown",pow:20,kills:0,deaths:0,rarity:"genesis",timing:"on",abil:"Record Guard. On commit: +5 against a Pristine opponent (0 deaths, 1+ kill)."},
   {name:"Nyx, Devourer of Legends",pow:18,kills:0,deaths:0,rarity:"genesis",timing:"on",abil:"On commit: +4; +4 more if you lost your last duel."},
   {name:"Aurelion Prime",pow:21,kills:0,deaths:0,rarity:"genesis",timing:"on",abil:"Kill Escalation: +6 at 30+ career kills, +3 at 15+."},
   {name:"The Hollow King",pow:16,kills:0,deaths:0,rarity:"genesis",timing:"on",abil:"Bloodrage: +7 while you are behind in the match."},
@@ -3516,13 +3516,13 @@ let stakeMult = 1;
 let rankRP = 1000;   // competitive ladder rating — what the snap wagers (NOT Signal)
 
 const OPP_CARDS = [
-  {name:"Vharos, the Iron Crown",pow:20,kills:0,deaths:0,rarity:"genesis",abil:"Record Guard. On commit: +5 against a Pristine opponent (0 deaths)."},
+  {name:"Vharos, the Iron Crown",pow:20,kills:0,deaths:0,rarity:"genesis",abil:"Record Guard. On commit: +5 against a Pristine opponent (0 deaths, 1+ kill)."},
   {name:"Nyx, Devourer of Legends",pow:18,kills:0,deaths:0,rarity:"genesis",abil:"On commit: +4; +4 more if you lost your last duel."},
   {name:"Aurelion Prime",pow:21,kills:0,deaths:0,rarity:"genesis",abil:"Kill Escalation: +6 at 30+ career kills, +3 at 15+."},
   {name:"The Hollow King",pow:16,kills:0,deaths:0,rarity:"genesis",abil:"Bloodrage: +7 while you are behind in the match."},
   {name:"Sirefax the Warden",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Record Guard. On commit: +3 vs a Pristine opponent."},
   {name:"Mordezh, Blood Prophet",pow:15,kills:0,deaths:0,rarity:"ultra",abil:"Bloodrage: +5 while behind; +2 if you lost last."},
-  {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:"ultra",abil:"Purity: +5 while this card is Pristine (0 deaths)."},
+  {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:"ultra",abil:"Purity: +5 while this card is Pristine (0 deaths, 1+ kill)."},
   {name:"Kravyn the Collector",pow:17,kills:0,deaths:0,rarity:"ultra",abil:"Kill Escalation: +5 at 20+ career kills."},
   {name:"Fifth Frequency Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Elemental Flurry: +3, and +4 more under a chaos condition."},
   {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Death Remnant: when he falls he holds the field, +6 to your committed cards until an enemy is killed."},
@@ -5110,7 +5110,7 @@ function confirmSelection(){
     <div class="ac-label">YOUR CARD</div>
     <div class="ac-name">${c.name}</div>
     <div class="ac-rec"><span class="k">${kdOf(c).k}</span><span class="s">K / </span><span class="d">${kdOf(c).d}</span><span class="s">D</span></div>
-    ${kdOf(c).d === 0 ? '<div class="ac-pristine">◈ Pristine</div>' : ''}
+    ${isPristine(c) ? '<div class="ac-pristine">◈ Pristine</div>' : ''}
   </div>`;
 
   // enemy card — a sealed, stylized cover (or the exposed face under Open Book)
@@ -5129,17 +5129,17 @@ function confirmSelection(){
         <div class="ec-label">OPPONENT</div>
         <div class="ec-sealed">🔒 Identity Sealed</div>
         <div class="ec-rec"><span class="k">${oc.kills}</span><span class="ec-slash">K / </span><span class="d">${oc.deaths}</span><span class="ec-slash">D</span></div>
-        ${oc.deaths === 0 ? '<div class="ec-pristine">◈ PRISTINE</div>' : ''}
+        ${isPristine(oc) ? '<div class="ec-pristine">◈ PRISTINE</div>' : ''}
       </div>`;
 
   // populate record reveal panel
   document.getElementById('rr-opp-k').textContent = pendingOppCard.kills;
   document.getElementById('rr-opp-d').textContent = pendingOppCard.deaths;
-  document.getElementById('rr-opp-pristine').textContent = pendingOppCard.deaths === 0 ? '◈ Pristine' : '';
+  document.getElementById('rr-opp-pristine').textContent = isPristine(pendingOppCard) ? '◈ Pristine' : '';
   document.getElementById('rr-you-k').textContent = kdOf(c).k;
   document.getElementById('rr-you-d').textContent = kdOf(c).d;
   document.getElementById('rr-you-id').textContent = c.name;
-  document.getElementById('rr-you-pristine').textContent = kdOf(c).d === 0 ? '◈ Pristine' : '';
+  document.getElementById('rr-you-pristine').textContent = isPristine(c) ? '◈ Pristine' : '';
 
   const noRetreat = activeCond && activeCond.id === 'noretreat';
 
@@ -6064,18 +6064,18 @@ const CARD_RULES = {
  "Young Darwin, Predetermined Dictator": [{"add":4,"log":"🌑 Voidmaw: +4"},{"if":{"v":"opp_deaths","op":"==","n":0},"oppadd":-3,"log":"🌑 Voidmaw: opponent −3 (Pristine prey)"}],
  "Courtroom Colossus": [{"add":3,"log":"☀️ Colossus: +3"},{"if":{"v":"match_commits","op":">=","n":3},"add":5,"log":"☀️ Colossus: +5 (late game)"}],
  "Kessuae, Tide of Ruin": [{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":7,"log":"🌊 Kessuae: +7 (behind)"}],
- "Vharos, the Iron Crown": [{"if": {"v": "opp_deaths", "op": "==", "n": 0}, "add": 5, "log": "👑 Vharos: +5 vs Pristine"}],
+ "Vharos, the Iron Crown": [{"if": {"and":[{"v": "opp_deaths", "op": "==", "n": 0},{"v":"opp_kills","op":">=","n":1}]}, "add": 5, "log": "👑 Vharos: +5 vs Pristine"}],
  "Nyx, Devourer of Legends": [{"add": 4, "log": "🌑 Nyx: +4"}, {"if": {"v": "last_result", "op": "==", "s": "lose"}, "add": 4, "log": "🌑 Nyx: +4 vengeance"}],
  "Aurelion Prime": [{"if": {"v": "pc_kills", "op": ">=", "n": 30}, "add": 6, "log": "⚔️ Aurelion: +6 (30+ kills)"}, {"if": {"and": [{"v": "pc_kills", "op": ">=", "n": 15}, {"v": "pc_kills", "op": "<", "n": 30}]}, "add": 3, "log": "⚔️ Aurelion: +3 (15+ kills)"}],
  "The Hollow King": [{"if": {"v": "player_losses", "op": ">", "v2": "player_wins"}, "add": 7, "log": "💀 Hollow King: +7 (behind)"}],
- "Sirefax the Warden": [{"if": {"v": "opp_deaths", "op": "==", "n": 0}, "add": 3, "log": "🛡 Sirefax: +3 vs Pristine"}],
+ "Sirefax the Warden": [{"if": {"and":[{"v": "opp_deaths", "op": "==", "n": 0},{"v":"opp_kills","op":">=","n":1}]}, "add": 3, "log": "🛡 Sirefax: +3 vs Pristine"}],
  "Mordezh, Blood Prophet": [{"if": {"v": "player_losses", "op": ">", "v2": "player_wins"}, "add": 5, "log": "🩸 Mordezh: +5 (behind)"}, {"if": {"v": "last_result", "op": "==", "s": "lose"}, "add": 2, "log": "🩸 Mordezh: +2 (lost last)"}],
- "Elowen Dawnspear": [{"if": {"v": "pc_deaths", "op": "==", "n": 0}, "add": 5, "log": "✨ Elowen: +5 (Pristine)"}],
+ "Elowen Dawnspear": [{"if": {"and":[{"v": "pc_deaths", "op": "==", "n": 0},{"v":"pc_kills","op":">=","n":1}]}, "add": 5, "log": "✨ Elowen: +5 (Pristine)"}],
  "Kravyn the Collector": [{"if": {"v": "pc_kills", "op": ">=", "n": 20}, "add": 5, "log": "⚔️ Kravyn: +5 (20+ kills)"}],
  "Fifth Frequency Stormcaller": [{"add": 3, "log": "🌪️ Veyra: +3"}, {"if": {"chaos": true}, "add": 4, "log": "🌪️ Veyra: +4 (chaos)"}],
  "Sable the Unseen": [{"if": {"v": "opp_deaths", "op": "==", "n": 0}, "oppadd": -4, "log": "🕷️ Sable: opponent −4 (purity drained)"}],
  "Torvald Ninefingers": [{"if": {"v": "hand_len", "op": "<=", "n": 2}, "add": 3, "log": "🪓 Torvald: +3 (low hand)"}],
- "Kessa Brightblade": [{"if": {"v": "opp_deaths", "op": "==", "n": 0}, "add": 4, "log": "⚔️ Kessa: +4 vs Pristine"}],
+ "Kessa Brightblade": [{"if": {"and":[{"v": "opp_deaths", "op": "==", "n": 0},{"v":"opp_kills","op":">=","n":1}]}, "add": 4, "log": "⚔️ Kessa: +4 vs Pristine"}],
  "Ruven Ashwalker": [{"if": {"v": "player_losses", "op": ">", "v2": "player_wins"}, "add": 5, "log": "🔥 Ruven: +5 (behind)"}],
  "Ilma the Patient": [{"if": {"v": "match_commits", "op": ">=", "n": 3}, "add": 5, "log": "⏳ Ilma: +5 (late game)"}],
  "Dragan Korr": [{"if": {"v": "pc_kills", "op": ">=", "n": 18}, "add": 4, "log": "⚔️ Dragan: +4 (18+ kills)"}],
@@ -6084,9 +6084,9 @@ const CARD_RULES = {
  "Old Garrick": [{"if": {"v": "pc_kills", "op": ">=", "n": 20}, "add": 5, "log": "🎖️ Garrick: +5 (veteran)"}, {"if": {"v": "pc_deaths", "op": ">=", "n": 8}, "add": 5, "log": "🎖️ Garrick: +5 (scarred)"}],
  "Faye Quicksilver": [{"if": {"v": "player_wins", "op": ">", "n": 0}, "addvar": "player_wins", "x": 2, "log": "⚡ Faye: +2 per round won"}],
  "Vessa Coil": [{"if": {"v": "last_result", "op": "==", "s": "lose"}, "add": 6, "log": "↩ Vessa: +6 (comeback)"}],
- "Tobin Reed": [{"if": {"v": "opp_deaths", "op": "==", "n": 0}, "add": 3, "log": "⚔️ Tobin: +3 vs Pristine"}],
+ "Tobin Reed": [{"if": {"and":[{"v": "opp_deaths", "op": "==", "n": 0},{"v":"opp_kills","op":">=","n":1}]}, "add": 3, "log": "⚔️ Tobin: +3 vs Pristine"}],
  "Marn the Digger": [{"if": {"v": "player_losses", "op": ">", "v2": "player_wins"}, "add": 4, "log": "🔥 Marn: +4 (behind)"}],
- "Gilda Fenn": [{"if": {"v": "pc_deaths", "op": "==", "n": 0}, "add": 3, "log": "✨ Gilda: +3 (Pristine)"}],
+ "Gilda Fenn": [{"if": {"and":[{"v": "pc_deaths", "op": "==", "n": 0},{"v":"pc_kills","op":">=","n":1}]}, "add": 3, "log": "✨ Gilda: +3 (Pristine)"}],
  "Rusk": [{"add": 3, "log": "🪨 Rusk: +3"}, {"if": {"v": "match_commits", "op": ">=", "n": 3}, "add": 2, "log": "🪨 Rusk: +2 (late)"}],
  "Two-Coin Tilly": [{"if": {"chaos": true}, "add": 5, "log": "🎲 Tilly: +5 (chaos)"}],
  "Bonnick": [{"if": {"v": "last_result", "op": "==", "s": "lose"}, "add": 4, "log": "↩ Bonnick: +4 (comeback)"}],
@@ -6617,8 +6617,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
   if(!akatoshUnmakes){
   if(cond.id==="veteranedge"){ playerPow+=Math.floor((pc.kills||0)/3); oppPow+=Math.floor((oc.kills||0)/3); abilLog.push("🎖️ Veteran's Edge: +1 power per 3 career kills"); }
   else if(cond.id==="freshblood"){ if((pc.kills||0)===0){playerPow+=6;} if((oc.kills||0)===0){oppPow+=6;} abilLog.push("🌱 Fresh Blood: unproven cards (0 kills) +6"); }
-  else if(cond.id==="puritytrial"){ if((pc.deaths||0)===0){playerPow+=5;} if((oc.deaths||0)===0){oppPow+=5;} abilLog.push("✨ Purity Trial: Pristine (0 deaths) +5"); }
-  else if(cond.id==="puritydrain"){ if((pc.deaths||0)===0){playerPow=Math.max(1,playerPow-5);} if((oc.deaths||0)===0){oppPow=Math.max(1,oppPow-5);} abilLog.push("🕷️ Purity Drain: Pristine cards are hunted −5"); }
+  else if(cond.id==="puritytrial"){ if((pc.deaths||0)===0&&(pc.kills||0)>=1){playerPow+=5;} if((oc.deaths||0)===0&&(oc.kills||0)>=1){oppPow+=5;} abilLog.push("✨ Purity Trial: Pristine (0 deaths, 1+ kill) +5"); }
+  else if(cond.id==="puritydrain"){ if((pc.deaths||0)===0&&(pc.kills||0)>=1){playerPow=Math.max(1,playerPow-5);} if((oc.deaths||0)===0&&(oc.kills||0)>=1){oppPow=Math.max(1,oppPow-5);} abilLog.push("🕷️ Purity Drain: Pristine cards are hunted −5"); }
   else if(cond.id==="bloodreckoning"){ playerPow=Math.max(1,playerPow-(pc.deaths||0)); oppPow=Math.max(1,oppPow-(oc.deaths||0)); abilLog.push("💀 Blood Reckoning: −1 power per death on record"); }
   else if(cond.id==="deathwish"){ playerPow+=(pc.deaths||0); oppPow+=(oc.deaths||0); abilLog.push("☠️ Deathwish: scars fuel fury — +1 power per death"); }
   else if(cond.id==="underdog"){ if((pc.pow||0)<(oc.pow||0)){playerPow+=7;} else if((oc.pow||0)<(pc.pow||0)){oppPow+=7;} abilLog.push("📉 Underdog Rising: the weaker base power +7"); }
@@ -6763,9 +6763,9 @@ function resolve(pc, oc, cond, playerCommittedPow){
       abilLog.push('☠ your Remnants disperse — an enemy card was killed');
       deathRemnants = [];
       _deferField = function(){ document.getElementById('player-field').innerHTML = '<span class="placeholder">remnant cleared</span>'; };
-      sub.textContent = `${pc.name} (${playerCommittedPow}) defeated ${oc.name} (${oc.pow}) — Remnant cleared · to Winners Circle`;
+      sub.textContent = `${pc.name} (${Math.round(playerPow)}) defeated ${oc.name} (${Math.round(oppPow)}) — Remnant cleared · to Winners Circle`;
     } else {
-      sub.textContent = `${pc.name} (${playerCommittedPow}) defeated ${oc.name} (${oc.pow}) — to Winners Circle`;
+      sub.textContent = `${pc.name} (${Math.round(playerPow)}) defeated ${oc.name} (${Math.round(oppPow)}) — to Winners Circle`;
     }
     playerScore[0]++;
     if(pc.name==='Skullchain Reaver' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); }
@@ -6792,7 +6792,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
       var _rp=(typeof dmRemnantPowOverride!=='undefined'&&dmRemnantPowOverride!=null)?dmRemnantPowOverride:((typeof REMNANT_POW!=='undefined'&&REMNANT_POW[pc.name]!=null)?REMNANT_POW[pc.name]:pc.pow);
       dmRemnantPowOverride=null;
       deathRemnants.push({name:pc.name,pow:_rp});
-      sub.textContent = `${oc.name} (${oc.pow}) defeated ${pc.name} (${playerCommittedPow}) — Death Remnant active (+${_rp}, ${deathRemnants.length} on field)`;
+      sub.textContent = `${oc.name} (${Math.round(oppPow)}) defeated ${pc.name} (${Math.round(playerPow)}) — Death Remnant active (+${_rp}, ${deathRemnants.length} on field)`;
       _deferField = function(){ document.getElementById('player-field').innerHTML = `<div class="card field-card ${pc.rarity}" style="opacity:0.55;border-color:rgba(184,58,58,0.55)">
         <div class="c-rarity">☠</div>
         <div class="c-name">${pc.name}</div>
@@ -6800,23 +6800,23 @@ function resolve(pc, oc, cond, playerCommittedPow){
         <div class="c-abil" style="font-size:8px;color:var(--lose)">Remnant — your cards gain +${remnantPowSum()}</div>
       </div>`; };
     } else {
-      sub.textContent = `${oc.name} (${oc.pow}) defeated ${pc.name} (${playerCommittedPow}) — to deck bottom`;
+      sub.textContent = `${oc.name} (${Math.round(oppPow)}) defeated ${pc.name} (${Math.round(playerPow)}) — to deck bottom`;
       drawPile.unshift(pc); deckSize=drawPile.length; abilLog.push('↩ '+pc.name+' recycles to the bottom of your deck');
     }
   } else {
     label.textContent = 'TIE';
     label.className = 'result-label tie';
     if(glacialForcedTie){
-      sub.textContent = `${pc.name} survives — forced tie, returned to hand. ${oc.name} (${oc.pow}) to deck bottom.`;
+      sub.textContent = `${pc.name} survives — forced tie, returned to hand. ${oc.name} (${Math.round(oppPow)}) to deck bottom.`;
       deckSize += 1;
     } else if((pc.abil||'').toLowerCase().includes('record guard')){
       hand.push({...pc});
       abilLog.push('🛡 Record Guard: tie — '+pc.name+' bounces back to your hand');
-      sub.textContent = `"${cond.name}" — tied (${playerCommittedPow} vs ${oc.pow}). 🛡 Record Guard — ${pc.name} bounces back to your hand.`;
+      sub.textContent = `"${cond.name}" — tied (${Math.round(playerPow)} vs ${Math.round(oppPow)}). 🛡 Record Guard — ${pc.name} bounces back to your hand.`;
     } else {
       drawPile.unshift({...pc}); deckSize=drawPile.length;
       abilLog.push('↩ '+pc.name+' — tie, recycles to the bottom of your deck');
-      sub.textContent = `"${cond.name}" — tied (${playerCommittedPow} vs ${oc.pow}). No death recorded — recycles to the bottom of your deck.`;
+      sub.textContent = `"${cond.name}" — tied (${Math.round(playerPow)} vs ${Math.round(oppPow)}). No death recorded — recycles to the bottom of your deck.`;
     }
     lastResult = 'tie';
   }
@@ -7116,7 +7116,7 @@ function marketPrice(c, kOv, dOv){
 function valuationHTML(c, k, d, showEst){
   const tot=(k||0)+(d||0), wr=tot>0?Math.round(k/tot*100):0;
   const sup=(typeof RARITY_SUPPLY!=='undefined'?(RARITY_SUPPLY[c.rarity]||1000):1000);
-  const hist = tot>0 ? (k+'K\u2013'+d+'D \u00b7 '+wr+'% win'+((d===0)?' \u00b7 \u25c8 Pristine':'')) : ((d===0)?'\u25c8 Pristine \u00b7 unplayed':'Fresh \u2014 unplayed');
+  const hist = tot>0 ? (k+'K\u2013'+d+'D \u00b7 '+wr+'% win'+((d===0&&k>=1)?' \u00b7 \u25c8 Pristine':'')) : 'Fresh \u2014 unplayed';   // an unplayed (0K/0D) card can never satisfy k>=1, so it's never Pristine
   const util = c.pow+' power'+((c.abil && !/no ability/i.test(c.abil))?' \u00b7 active ability':' \u00b7 vanilla');
   const _ap=(typeof ascUnitProg!=='undefined' && ascUnitProg[c.name])||null;
   const ascRow = _ap ? `<div class="dr-row"><span class="dr-key">👑 Ascension</span><span class="dr-val gold">Lv ${_ap.level} · ${_ap.rites||0} Rites · ${_ap.bosses||0} bosses felled</span></div>` : '';
@@ -7179,7 +7179,7 @@ function buildMarket(){
     if(marketFocus && l.name!==marketFocus) return '';
     const lk = l.k!=null?l.k:c.kills, ld = l.d!=null?l.d:c.deaths;
     const crown = l.legend ? '<span class="lst-crown">👑 Undefeated</span>' : '';
-    const pristine = ld === 0 ? '<span class="lst-pristine">◈</span>' : '';
+    const pristine = (ld === 0 && lk >= 1) ? '<span class="lst-pristine">◈</span>' : '';
     return `<div class="listing ${c.rarity} ${l.legend?'legend':''} ${l.sold?'sold':''}" onclick="openListingDetail(${idx})" style="cursor:pointer">
       <div class="lst-art" style="${artFillStyle(l.name)}">${sigilFor(l.name)}<span class="lst-rar">${rlab(c.rarity)}</span><span class="lst-pow">${c.pow}</span>${pristine}${crown}</div>
       <div class="lst-body">
@@ -8372,6 +8372,9 @@ function getRec(c){
   return cardRecords[key];
 }
 function kdOf(c){ const r=cardRecords[recKey(c)]; return r ? {k:r.k, d:r.d} : {k:c.kills||0, d:c.deaths||0}; }
+// Pristine (7/15/26): requires a real, undefeated WIN record -- 0 deaths AND at least 1 kill. A
+// fresh, never-fought card is no longer shown/treated as Pristine (it hasn't proven anything yet).
+function isPristine(c){ const kd=kdOf(c); return kd.d===0 && kd.k>=1; }
 function recordDuel(c, outcome){ const r=getRec(c); if(outcome==='win'){ r.k++; r.ok++; } else if(outcome==='death'){ r.d++; r.od++; } }
 function transferToMe(c, via){ const r=getRec(c); r.chain.push({ owner: ME_ADDR, date: todayISO(), via: via||'Won in duel' }); r.ok=0; r.od=0; }
 let dnaSelected = null;
@@ -8380,7 +8383,7 @@ function renderDNABody(c){
   const r=getRec(c);
   const cT=r.k+r.d, wr=cT>0?Math.round(r.k/cT*100):0;
   const oT=r.ok+r.od, owr=oT>0?Math.round(r.ok/oT*100):0;
-  const pristine=r.d===0;
+  const pristine=r.d===0 && r.k>=1;
   const p=provenance(c);
   const acq=r.chain[r.chain.length-1];
   const chainRows=r.chain.map((e,i)=>
@@ -8452,7 +8455,7 @@ const KEYWORDS = {
   'Bloodrage': 'Gains bonus power while you are behind in the match — it fights harder when wounded.',
   'Elemental Flurry': 'On commit, gains power, plus extra power when a chaos condition is active.',
   'Winners Circle': 'Cards you win with go here. After a lost round you may recover one at random (re-risking its record) instead of drawing a spell.',
-  'Pristine': 'A card with zero deaths on its permanent record — a perfect, never-beaten history.',
+  'Pristine': 'A card with at least one win and zero deaths on its permanent record — a proven, never-beaten history. An unfought card doesn\'t qualify.',
   'Purity': 'The value carried by a Pristine record — a card that has never been beaten. Effects that "drain purity" turn an opponent\'s spotless 0-death history into an advantage against it.',
   'Charge': 'Your Energy pool. It regenerates +1 a turn (+2 from the 5th duel on) against a cap that grows as the match goes on — leftover charge carries between turns, it does not refill to full. Conjuring a Fighter spends Charge equal to its cost; Interrupt spells and some abilities spend whatever is left.',
   'Called': 'A free Support effect. Drop this card into a rear slot to fire it — it never costs Energy and boosts your fighter.',
@@ -8657,7 +8660,7 @@ function buildDeckPool(){
     const nm = (c.uid||c.name).replace(/'/g,"\\'");
     const inDeck = activeDeck.has(c.uid||c.name);
     const owned = (ownedCopies[c.uid||c.name]||0) > 0;
-    const pristine = ((typeof kdOf==='function')?kdOf(c).d:c.deaths)===0 ? `<span class="vc-pristine">◈</span>` : '';
+    const pristine = ((typeof isPristine==='function')?isPristine(c):(c.deaths===0)) ? `<span class="vc-pristine">◈</span>` : '';
     return `<div class="vault-card ${c.rarity} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="previewPoolCard('${nm}',this)" onmouseleave="hideCardPreview()">
       <div class="vc-art" style="${artFillStyle(c.artKey||c.name)}">
         ${sigilFor(c.artKey||c.name)}
@@ -8776,13 +8779,14 @@ var STARTER_PATHS=[
   {key:'blackwings',name:'The Black Wings',tag:'Banish & Reclaim',blurb:'Sacrifice your own cards to fuel devastating power, then pull them back stronger. High risk, high reward — for the bold.',rep:'Black Wings, Ossian Drell',icon:'🖤',accent:'#e0913a'}
 ];
 var STARTER_DECKS={
-  ironsworn:['Kessuae, Tide of Ruin','Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh','Signal Diviner','Heir of Kaiga','Melanie','Faye Quicksilver','Conduit Adept'],
+  ironsworn:['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh','Signal Diviner','Heir of Kaiga','Melanie','Faye Quicksilver','Conduit Adept'],
   blackwings:['Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','The Black Ledger','Tannis','Bixie Bee','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','Pyre-Keeper Vayle','Hollow Mendicant','Valcarion','Heir of Kaiga'],
   broodswarm:['Broodmother','Fledgling Broodmother','Web-Spinner Acolyte',"Hoarder's Gambit",'The Gathering Swarm','Silkbound Sentinel',"Widow's Patience","Web-Weaver's Return",'Signal Diviner','Melanie','Heir of Kaiga','Faye Quicksilver','Conduit Adept','Voltcaller','Tosa Envoy']
 };   /* STARTER decks: SEPARATE from the *_PRESET full builds; NO ultras/apex so chase cards stay earnable */
 function _pathDeck(key){ return (typeof STARTER_DECKS!=='undefined'&&STARTER_DECKS[key])?STARTER_DECKS[key]:[]; }
 function grantStarterDeck(names){ ownedCopies={}; freshCopies={}; cardRecords={}; if(typeof activeDeck!=='undefined') activeDeck=new Set(); (names||[]).forEach(function(nm){ var c=COLLECTION.find(function(x){return x.name===nm && !x.uid;}); if(!c) return; var k=c.uid||c.name; ownedCopies[k]=1; cardRecords[k]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Starter deck'}]}; if(activeDeck&&activeDeck.add) activeDeck.add(k); }); }
-function chooseStarterPath(key){ var p=STARTER_PATHS.find(function(x){return x.key===key;}); if(!p) return; grantStarterDeck(_pathDeck(key)); featuredCards=[p.rep]; featuredShuffle=false; featuredRotIdx=0; try{ localStorage.setItem('sf_starter_chosen', key); }catch(e){} window._needStarterChoice=false; if(typeof saveState==='function') saveState(); var ov=document.getElementById('path-chooser'); if(ov) ov.classList.remove('on'); if(typeof applyCosmetics==='function') applyCosmetics(); if(typeof buildVault==='function') buildVault(); if(typeof buildHub==='function') buildHub(); if(typeof buildDeckBuilder==='function') buildDeckBuilder(); if(typeof updateDeckCount==='function') updateDeckCount(); if(typeof renderFeatured==='function') renderFeatured(); if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('🃏 '+p.name+' — starter deck forged: '+_pathDeck(key).length+' cards, all yours.', true); if(typeof startTutorial==='function'){ var _td=true; try{ _td=!localStorage.getItem('sf_tutorial_done'); }catch(e){} if(_td) setTimeout(startTutorial, 550); } }
+var STARTER_DECKMASTER={ironsworn:'Bannerlord Cassian',broodswarm:'Broodmother',blackwings:'Kiana'};   // each starter path is issued its own Deck Master on pick (7/15/26)
+function chooseStarterPath(key){ var p=STARTER_PATHS.find(function(x){return x.key===key;}); if(!p) return; grantStarterDeck(_pathDeck(key)); if(STARTER_DECKMASTER[key]){ deckMasterCard=STARTER_DECKMASTER[key]; lsSet('sf_deckmaster', deckMasterCard); } featuredCards=[p.rep]; featuredShuffle=false; featuredRotIdx=0; try{ localStorage.setItem('sf_starter_chosen', key); }catch(e){} window._needStarterChoice=false; if(typeof saveState==='function') saveState(); var ov=document.getElementById('path-chooser'); if(ov) ov.classList.remove('on'); if(typeof applyCosmetics==='function') applyCosmetics(); if(typeof buildVault==='function') buildVault(); if(typeof buildHub==='function') buildHub(); if(typeof buildDeckBuilder==='function') buildDeckBuilder(); if(typeof updateDeckCount==='function') updateDeckCount(); if(typeof renderFeatured==='function') renderFeatured(); if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('🃏 '+p.name+' — starter deck forged: '+_pathDeck(key).length+' cards, all yours.', true); if(typeof startTutorial==='function'){ var _td=true; try{ _td=!localStorage.getItem('sf_tutorial_done'); }catch(e){} if(_td) setTimeout(startTutorial, 550); } }
 function _pathChooserCSS(){ if(document.getElementById('pc-style')) return; var st=document.createElement('style'); st.id='pc-style'; st.textContent=`.path-chooser{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center}.path-chooser.on{display:flex}.path-chooser .pc-scrim{position:absolute;inset:0;background:rgba(4,6,11,.87)}.path-chooser .pc-panel{position:relative;z-index:1;max-width:min(96vw,940px);max-height:92vh;overflow-y:auto;padding:26px 22px 30px;text-align:center}.path-chooser .pc-eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px}.path-chooser .pc-title{font-size:34px;font-weight:800;color:#fff;margin-bottom:6px}.path-chooser .pc-sub{font-size:13px;color:var(--text2);max-width:520px;margin:0 auto 22px;line-height:1.5}.path-chooser .pc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.path-chooser .pc-card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--border2);border-radius:14px;padding-bottom:16px;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,border-color .15s,box-shadow .15s}.path-chooser .pc-card:hover{transform:translateY(-4px);border-color:var(--acc);box-shadow:0 16px 40px rgba(0,0,0,.55)}.path-chooser .pc-art{height:148px;background-size:cover;background-position:center top;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border2)}.path-chooser .pc-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(10,12,18,.82))}.path-chooser .pc-icon{position:relative;z-index:1;font-size:38px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.75))}.path-chooser .pc-body{padding:13px 15px 10px;flex:1;text-align:left}.path-chooser .pc-name{font-size:18px;font-weight:800;color:#fff}.path-chooser .pc-tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);margin:2px 0 9px}.path-chooser .pc-blurb{font-size:12px;color:var(--text2);line-height:1.5}.path-chooser .pc-pick{margin:0 15px;padding:10px 0;border-radius:9px;border:1px solid var(--acc);background:rgba(255,255,255,.06);color:#fff;font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:background .15s,color .15s}.path-chooser .pc-card:hover .pc-pick{background:var(--acc);color:#0a0d14}@media(max-width:720px){.path-chooser .pc-grid{grid-template-columns:1fr}.path-chooser .pc-panel{padding:18px 14px}.path-chooser .pc-title{font-size:26px}.path-chooser .pc-art{height:118px}}`; document.head.appendChild(st); }
 function showStarterChooser(){ _pathChooserCSS(); var ov=document.getElementById('path-chooser'); if(!ov){ ov=document.createElement('div'); ov.id='path-chooser'; ov.className='path-chooser'; document.body.appendChild(ov); } ov.innerHTML='<div class="pc-scrim"></div><div class="pc-panel"><div class="pc-eyebrow">New Commander</div><div class="pc-title">Choose Your Path</div><div class="pc-sub">Pick a starter deck — real cards you own and can build on. You can collect the others later.</div><div class="pc-grid">'+STARTER_PATHS.map(function(p){ var repC=COLLECTION.find(function(x){return x.name===p.rep && !x.uid;}); var art=(repC && typeof artFillStyle==='function')?artFillStyle(repC.artKey||repC.name):''; return '<div class="pc-card" style="--acc:'+p.accent+'" onclick="chooseStarterPath(\''+p.key+'\')"><div class="pc-art" style="'+art+'"><span class="pc-icon">'+p.icon+'</span></div><div class="pc-body"><div class="pc-name">'+p.name+'</div><div class="pc-tag">'+p.tag+'</div><div class="pc-blurb">'+p.blurb+'</div></div><button class="pc-pick">Choose '+p.name.replace('The ','')+'</button></div>'; }).join('')+'</div></div>'; ov.classList.add('on'); }
 window.showStarterChooser=showStarterChooser; window.chooseStarterPath=chooseStarterPath;
@@ -9116,7 +9120,7 @@ function buildHub(){
   const _rw=_mine.reduce((s,c)=>{const r=cardRecords[c.uid||c.name];return s+(r?(r.k||0):0);},0);
   const _trust=_duels<5?'Unverified':_duels<15?'Novice':_duels<30?'Reliable':'Trusted';
   const _tsub=_duels>0?(_rw/_duels).toFixed(2)+' quality \u00b7 '+_duels+' duels':'no duels yet';
-  const pristine=_mine.filter(c=>kdOf(c).d===0).length;
+  const pristine=_mine.filter(isPristine).length;
   const _hl=document.getElementById('hub-headline'); if(_hl) _hl.textContent=(typeof SEASON!=='undefined'?SEASON.chapter+' \u00b7 '+SEASON.name:'Your Vault');
   const stats=[
     {cls:'rank',icon:'🏅',val:rankTier(rankRP),label:'Ladder Rank',sub:fmtPts(rankRP)+' RP'},
@@ -9286,7 +9290,7 @@ function buildVault(){
   if(!entries.length){ var _emsg = vaultFilter==='variant' ? 'No variant cards yet — variants come from Forge summons (paid, play-only copies).' : (vaultKeyword||vaultFilter!=='all') ? 'No cards match this filter — try clearing it.' : 'Your vault is empty — open a pack in the Shop or win a duel.'; grid.innerHTML='<div class="vault-empty">'+_emsg+'</div>'; return; }
   grid.innerHTML=entries.map(e=>{
     const c=e.c;
-    const pristine=e.d===0?`<span class="vc-pristine">◈ Pristine</span>`:'';
+    const pristine=isPristine(c)?`<span class="vc-pristine">◈ Pristine</span>`:'';
     const inDeck=activeDeck.has(c.uid||c.name)?'in-deck':'';
     return `<div class="vault-card ${c.rarity} ${inDeck} ${e.fresh?'is-fresh':''} ${c.won?'is-won':''} ${foilClass(c)} ${frameClass(c)} ${e.locked?'locked-card':(typeof cardStateClasses==='function'?cardStateClasses(c):'')}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}',${e.fresh?'true':'false'})">
       <div class="vc-art vc-frame">
@@ -9346,7 +9350,7 @@ function openCardDetail(id, fresh, tab){
   const _kd=kdOf(c); const _k=fresh?0:_kd.k, _d=fresh?0:_kd.d, _tot=_k+_d;
   const _wr=_tot>0?Math.round(_k/_tot*100):0;
   const _t=ownedCopies[c.uid||c.name]||0, _f=Math.min(freshCopies[c.uid||c.name]||0,_t), _brk=_f>0?` · ${_t-_f} vet / ${_f} fresh`:'';
-  const pristine=_d===0;
+  const pristine=_d===0 && _k>=1;
   const body=document.getElementById('drawer-body');
   body.innerHTML=`
     <div class="dr-art ${CARD_ART_FULL[c.artKey||c.name]?'zoomable':''} ${foilClass(c)} ${frameClass(c)}" ${CARD_ART_FULL[c.artKey||c.name]?`onclick="openLightbox('${(c.artKey||c.name).replace(/'/g,"\\'")}')"`:''} style="${artFillStyle(c.artKey||c.name)}">${VIDEO_PREVIEW[c.artKey||c.name]?`<video class="fc-vid"${vidStyle(c.artKey||c.name)} src="${VIDEO_PREVIEW[c.artKey||c.name]}" autoplay muted loop playsinline></video>`:''}${CARD_ART[c.artKey||c.name]?'':`<span class="dr-sigil">${CARD_SIGIL[c.artKey||c.name]||'◈'}</span>`}${CARD_ART_FULL[c.artKey||c.name]?'<span class="dr-zoom-hint">⤢ Tap for full art</span>':''}</div>
@@ -9437,7 +9441,7 @@ function openListingDetail(idx){
   const l=marketListings[idx]; if(!l) return;
   const c=COLLECTION.find(x=>x.name===l.name); if(!c) return;
   const k=(l.k!=null?l.k:c.kills), d=(l.d!=null?l.d:c.deaths), tot=k+d, wr=tot>0?Math.round(k/tot*100):0;
-  const pristine=d===0; const p=provenance(c); const full=CARD_ART_FULL[c.artKey||c.name];
+  const pristine=d===0 && k>=1; const p=provenance(c); const full=CARD_ART_FULL[c.artKey||c.name];
   drawerCard=null;
   const buyBtn = l.sold ? '<button class="dr-deck-btn" style="width:100%;margin-top:9px" disabled>✓ Sold</button>'
     : '<button class="dr-deck-btn" style="width:100%;margin-top:9px" onclick="buyMarket('+idx+');closeDrawer()">'+(l.mine?'✕ Cancel your listing':'Buy · ◈ '+fmtPts(l.price)+' '+COIN)+'</button>';
@@ -9524,7 +9528,7 @@ function bigCardHTML(c, opts){
   if(vid){ artInner=`<video class="bc-vid"${artFoc(key)} src="${vid}" autoplay muted loop playsinline></video>`; }
   else if(art){ artInner=`<img class="tf-media"${artFoc(key)} src="${art}" alt="">`; }
   else { artStyle='background:radial-gradient(circle at 50% 35%,rgba(255,255,255,0.05),transparent 70%)'; artInner=`<span class="bc-sigil">${CARD_SIGIL[key]||'◈'}</span>`; }
-  const pristine = _kd.d === 0 ? ' · ◈ Pristine' : '';
+  const pristine = isPristine(c) ? ' · ◈ Pristine' : '';
   // Marvel-Snap-style battlefield mode (7/13/26): a live-play card only needs to read its power at
   // a glance -- name/K-D/keyword chips stay one hover/tap away via readableCardHTML(), never gone,
   // just off the board. Modifier class only -- same markup/classes every other hook (tagPow(),
@@ -9535,7 +9539,7 @@ function bigCardHTML(c, opts){
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
     <div class="tf-name">${dispName(c.name)}</div>
     <div class="tf-pow"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${c.chaosPow?'?':((c.pow||0)+(c._bo||0))}</div>
-    <div class="tf-kd"><span class="k">${_kd.k}K</span>/<span class="d">${_kd.d}D</span>${_kd.d===0?' ◈':''}</div>
+    <div class="tf-kd"><span class="k">${_kd.k}K</span>/<span class="d">${_kd.d}D</span>${isPristine(c)?' ◈':''}</div>
     <div class="tf-text">${typeof keywordChipsHTML==='function'?keywordChipsHTML(c,true):''}</div>
     ${(typeof stateIcon==='function'&&stateIcon(c))?`<div class="sf-pip" title="${stateTitle(c)}">${stateIcon(c)}</div>`:``}
   </div>`;
@@ -9543,7 +9547,7 @@ function bigCardHTML(c, opts){
 function readableCardHTML(c){
   var kd=(typeof kdOf==='function')?kdOf(c):{k:c.kills,d:c.deaths};
   var cost=(typeof conjureCost==='function')?conjureCost(c):(c.cost||0);
-  var pristine=kd.d===0?' · ◈ Pristine':'';
+  var pristine=isPristine(c)?' · ◈ Pristine':'';
   var called=CALLED[c.name];
   var gl=(typeof glossify==='function')?glossify:function(x){return x;};
   var art=(typeof artFillStyle==='function')?artFillStyle(c.name):'';
