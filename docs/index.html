@@ -3411,6 +3411,7 @@ const DECK_POOL = [
   {name:'Heir of Kaiga',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast.'},
   {name:'Josef',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Master Tailor: on commit, +4 power once he has taken the measure of the fight (any commit after your first).'},
   {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, +6 to your committed cards until an opponent\'s card is killed.'},
+  {name:'Sister Mire, Wailing Nightmare',pow:12,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'On commit: draw 2, return 1 to the bottom of your deck, then +2 power per card in your hand (+3 per card at 20+ career kills). Support: draw 2, banish 1 from hand, your Fighter +1 per card in your hand.'},
   {name:'Conduit of Chaos, Kleydson',pow:11,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Lesser Chaos (once per match): warp every spell in your deck into Draw Surge (2⚡ draw 3, banish 1) and Godhand (1⚡ your card +10) — a splashable echo of Anorith."},
   // ── THE BLACK WINGS (banish to fuel, reclaim & recur) ──
   {name:'Grave-Tithe Acolyte',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: banish the top card of your deck, then +5 power.'},
@@ -3491,6 +3492,9 @@ let oppCharge=3;   // bot-side energy (7/12/26): bots never had this resource be
 let spellHand=[];                               // Stage 2: spells you've drawn (a hand you spend)
 let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellHalveField=false, condNeutralized=false, condNeutralizedBy='', spellDiscount=0;  // per-duel armed effects
 let energyLoadoutOverride = null;   // set when a card (Kleydson/Anorith) warps the spell pool for the rest of the match; checked before the real energyLoadout so the player's deck-builder pick is never overwritten
+let dmSupportBonusThisDuel = 0;   // Kravyn DM skill: +N power per card called as support this duel
+let handBanishedThisTurn = false, oppHandBanishedThisTurn = false;   // Ossian Drell on-conjure condition -- was a card banished FROM HAND (not deck) this turn
+let handReturnCount = {};   // cardName -> times that exact card has returned to hand due to a card effect instead of its normal fate -- per MATCH, not per duel
 let spellsUsedRound=[];  // each spell castable only ONCE per round  // Rebirth season — cumulative match W/L across ranked + staked
 let hand = [...HAND_CARDS];
 let deckSize = 12;
@@ -3505,18 +3509,29 @@ let dmAbilityUsedThisDuel = false, dmNextConjureBonus = 0;
 const DM_ACTIVATED_ABILITY = {
   'Bannerlord Cassian': {draw:1, nextConjureBonus:5, log:'Rally the Line'},
   'Broodmother':        {draw:1, nextConjureBonus:5, log:"The Brood Answers"},
-  'Kiana':              {draw:1, nextConjureBonus:5, log:'Wings in the Dark'}
+  'Kiana':              {draw:1, nextConjureBonus:5, log:'Wings in the Dark'},
+  'Kravyn the Collector': {log:'Collector\u2019s Due', desc:'cards called as support this duel +5 power', run:function(){ dmSupportBonusThisDuel = 5; }},
+  'Sister Mire, Wailing Nightmare': {log:'Wailing Draw', desc:'draw 2, return 1 to deck bottom', run:function(){
+    drawToHand(2);
+    if(hand.length){ var _smi=Math.floor(Math.random()*hand.length); drawPile.unshift(hand.splice(_smi,1)[0]); if(typeof deckSize!=='undefined') deckSize=drawPile.length; }
+    if(typeof updatePiles==='function') updatePiles();
+  }},
+  'Black Wings, Ossian Drell': {log:"Wing Commander's Cull", desc:'banish the top 2 of your deck', run:function(){
+    for(var _od=0;_od<2;_od++){ if(drawPile.length) banishPile.push(drawPile.pop()); }
+    if(typeof deckSize!=='undefined') deckSize=drawPile.length;
+    if(typeof updatePiles==='function') updatePiles();
+  }}
 };
 function activateDeckMasterAbility(){
   if(!deckMasterCard || dmAbilityUsedThisDuel) return;
   var ab = DM_ACTIVATED_ABILITY[deckMasterCard]; if(!ab) return;
   if(phase==='committed' || phase==='resolved') return;   // any MAIN phase, not after you've locked in
   dmAbilityUsedThisDuel = true;
-  if(ab.draw && typeof drawToHand==='function') drawToHand(ab.draw);
-  dmNextConjureBonus = ab.nextConjureBonus || 0;
+  if(ab.run){ ab.run(); }
+  else { if(ab.draw && typeof drawToHand==='function') drawToHand(ab.draw); dmNextConjureBonus = ab.nextConjureBonus || 0; }
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
   if(typeof buildHand==='function') buildHand();
-  if(typeof toast==='function') toast('★ '+deckMasterCard+' — '+ab.log+': draw '+ab.draw+', next conjure +'+ab.nextConjureBonus, true);
+  if(typeof toast==='function') toast('★ '+deckMasterCard+' — '+ab.log+': '+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus)), true);
 }
 function renderDeckMasterAbilityStrip(){
   var strip=document.getElementById('dm-ability-strip'); if(!strip) return;
@@ -3525,7 +3540,7 @@ function renderDeckMasterAbilityStrip(){
   var eligiblePhase = (typeof phase!=='undefined') && phase!=='committed' && phase!=='resolved';
   if(!ab || dmAbilityUsedThisDuel || !eligiblePhase){ strip.style.display='none'; if(opts) opts.innerHTML=''; return; }
   strip.style.display='flex';
-  if(opts) opts.innerHTML = '<button class="instant-card-btn" style="border-color:rgba(212,168,67,0.6);color:var(--gold)" onclick="activateDeckMasterAbility()">★ '+deckMasterCard+' — '+ab.log+' (draw '+ab.draw+', next conjure +'+ab.nextConjureBonus+')</button>';
+  if(opts) opts.innerHTML = '<button class="instant-card-btn" style="border-color:rgba(212,168,67,0.6);color:var(--gold)" onclick="activateDeckMasterAbility()">★ '+deckMasterCard+' — '+ab.log+' ('+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus))+')</button>';
 }
 let divinerBonusNext = 0;
 let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + lingering supports); each {name,pow}; persists until an enemy card is killed
@@ -3945,7 +3960,7 @@ function openTurn(){
   // only energyRegenPerTurn() replenishes each turn, so leftover/spent charge carries across turns
   // and players have to play smaller conjures to bank enough for bigger plays or spells later.
   // oppCharge mirrors charge exactly (bots get the same regen/cap rule as the player).
-  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -4680,7 +4695,7 @@ const CALLED = {
   "Old Garrick":                   {text:"your Fighter +4", add:4},
   "Keawe Kel'rua":                 {text:"your Fighter +3", add:3},
   "Rhaess Korvain":                {text:"return 1 banished card to hand", recurPlain:1},
-  "Black Wings, Ossian Drell":                  {text:"Black Wings — return a banished card to your hand, +2 power", recurBuff:1},
+  "Black Wings, Ossian Drell":                  {text:"your Fighter +1 for every card in your banish zone", addPerBanish:1},
   "Corvus":                        {text:"your Fighter +4", add:4},
   "Wren":                          {text:"return a banished card to your hand, your Fighter +3", recurPlain:1, add:3},
   "Rook":                          {text:"your Fighter +2", add:2},
@@ -4725,7 +4740,8 @@ const CALLED = {
   "Bram the Bulwark":              {text:"your Fighter +3", add:3},
   "Cletus Gwyndull":                     {text:"your Fighter +3", add:3},
   "Chieftain Reyva Vosh":          {text:"draw 2 cards", draw:2},
-  "Kravyn the Collector":          {text:"both players banish 1 from hand; opponent −2", bothBanish:1},
+  "Kravyn the Collector":          {text:"draw 1; your Fighter +2 for every time it's returned to hand via a card effect this match", draw:1},
+  "Sister Mire, Wailing Nightmare": {text:"draw 2, banish 1 from hand; your Fighter +1 per card in your hand", draw:2, banishOwn:1, addPerHand:1},
   "Forgemask":                     {text:"your Fighter +3", add:3},
   "Fifth Frequency Stormcaller":             {text:"your Fighter +3", add:3},
   "Ghorruk \"Gnarly\" Judarr":            {text:"return 1 banished card to hand, +2 power", recurBuff:1},
@@ -4780,7 +4796,7 @@ function projectPlay(){
   return {base:base, called:called, link:link, spell:spell, rally:rally, total:base+called+link+spell+rally, oppDelta:oppDelta, oppShown:oppShown, linkName:linkName};
 }
 function drawToHand(n){ if(typeof drawPile==='undefined'||typeof hand==='undefined') return 0; var got=0; for(var i=0;i<(n||0);i++){ if(!drawPile.length) break; hand.push(drawPile.pop()); got++; } if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(got && typeof buildHand==='function') buildHand(); return got; }
-function banishFromHand(n){ for(var _bi=0;_bi<(n||0);_bi++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } if(typeof buildHand==='function') buildHand(); }
+function banishFromHand(n){ for(var _bi=0;_bi<(n||0);_bi++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); handBanishedThisTurn=true; } } if(typeof buildHand==='function') buildHand(); }
 function oppDrawN(n){ for(var _oi=0;_oi<(n||0);_oi++){ if(typeof oppDeckBot!=='undefined'&&oppDeckBot.length) oppHandBot.push(oppDeckBot.shift()); } }
 function oppBanishN(n){ for(var _oj=0;_oj<(n||0);_oj++){ if(typeof oppHandBot!=='undefined'&&oppHandBot.length>1){ oppBanishBot.push(oppHandBot.splice(Math.floor(Math.random()*oppHandBot.length),1)[0]); } } }   // never drain the bot's last card -- same floor as pickOppRears, or dredge strands it at 0 with no supports for the rest of the match
 // stepSink (7/13/26): same real bug class as applyRuleList's fix — this function has NEVER taken a
@@ -4818,8 +4834,16 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
     else if(isOpp && typeof oppDrawN==='function'){ oppDrawN(1); abilLog.push('☠ Opp '+support.name+' — a Remnant stirs: draw a card'); }
   }
   if(e.banishOwn){
-    if(!isOpp){ for(var _b=0;_b<e.banishOwn;_b++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } abilLog.push("☠ Banished "+e.banishOwn+" from your hand — into the Order"); if(typeof buildHand==="function")buildHand(); }
-    else if(typeof oppBanishN==='function'){ oppBanishN(e.banishOwn); abilLog.push("☠ Opp banished from hand — into the Order"); }
+    if(!isOpp){ for(var _b=0;_b<e.banishOwn;_b++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); handBanishedThisTurn=true; } } abilLog.push("☠ Banished "+e.banishOwn+" from your hand — into the Order"); if(typeof buildHand==="function")buildHand(); }
+    else if(typeof oppBanishN==='function'){ oppBanishN(e.banishOwn); oppHandBanishedThisTurn=true; abilLog.push("☠ Opp banished from hand — into the Order"); }
+  }
+  if(e.addPerHand){
+    if(!isOpp){ var _hlb=hand.length*e.addPerHand; if(_hlb){ playerPow+=_hlb; abilLog.push("🎴 "+support.name+": +"+_hlb+" ("+hand.length+" in hand)"); } }
+    else { var _ohl=(typeof oppHandBot!=='undefined'&&oppHandBot)?oppHandBot.length:0; var _ohlb=_ohl*e.addPerHand; if(_ohlb){ oppPow+=_ohlb; abilLog.push("🎴 Opp "+support.name+": +"+_ohlb+" ("+_ohl+" in hand)"); } }
+  }
+  if(e.addPerBanish){
+    if(!isOpp){ var _blb=banishPile.length*e.addPerBanish; if(_blb){ playerPow+=_blb; abilLog.push("🪶 "+support.name+": +"+_blb+" ("+banishPile.length+" banished)"); } }
+    else { var _obl=(typeof oppBanishBot!=='undefined'&&oppBanishBot)?oppBanishBot.length:0; var _oblb=_obl*e.addPerBanish; if(_oblb){ oppPow+=_oblb; abilLog.push("🪶 Opp "+support.name+": +"+_oblb+" ("+_obl+" banished)"); } }
   }
   if(e.recurBuff){
     if(!isOpp){ var _got=0; for(var _r=0;_r<e.recurBuff;_r++){ if(banishPile.length){ var _rc=banishPile.pop(); _rc._bo=(_rc._bo||0)+2; hand.push(_rc); _got++; } } if(_got) abilLog.push("♻ "+support.name+" — returned "+_got+" from banish, +2 power each"); if(typeof buildHand==="function")buildHand(); }
@@ -4830,8 +4854,8 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
     else { var _ogp=0; for(var _orp=0;_orp<e.recurPlain;_orp++){ if(oppBanishBot.length){ oppHandBot.push(oppBanishBot.pop()); _ogp++; } } if(_ogp) abilLog.push("↩ Opp returned "+_ogp+" from banish to hand"); }
   }
   if(e.bothBanish){
-    if(!isOpp){ for(var _bb=0;_bb<e.bothBanish;_bb++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); } } oppPow-=2*e.bothBanish; abilLog.push("☠ Both discard — you banish "+e.bothBanish+", opponent −"+(2*e.bothBanish)); if(typeof buildHand==="function")buildHand(); }
-    else { if(typeof oppBanishN==='function') oppBanishN(e.bothBanish); oppPow-=2*e.bothBanish; abilLog.push("☠ Both discard — opp banishes "+e.bothBanish+", you −"+(2*e.bothBanish)); }
+    if(!isOpp){ for(var _bb=0;_bb<e.bothBanish;_bb++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); handBanishedThisTurn=true; } } oppPow-=2*e.bothBanish; abilLog.push("☠ Both discard — you banish "+e.bothBanish+", opponent −"+(2*e.bothBanish)); if(typeof buildHand==="function")buildHand(); }
+    else { if(typeof oppBanishN==='function') oppBanishN(e.bothBanish); oppHandBanishedThisTurn=true; oppPow-=2*e.bothBanish; abilLog.push("☠ Both discard — opp banishes "+e.bothBanish+", you −"+(2*e.bothBanish)); }
   }
   // Warpath combo pieces (7/12/26) — unbankNextWin is a delayed flag, consumed at the next win's
   // WC-banking decision in resolve(); reclaimWC is immediate, fires right here.
@@ -5324,6 +5348,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   if(pc.name==="Web-Weaver's Return"){ if(banishPile.length){ var _rb=banishPile.splice(0,banishPile.length); drawPile=drawPile.concat(_rb); if(typeof shuffle==='function') shuffle(drawPile); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof toast==='function') toast('🕸 Web-Weaver\'s Return \u2014 '+_rb.length+' banished cards rewoven into your deck.', true); } if(typeof drawToHand==='function') drawToHand(1); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='Legend Reborn, Keawe Kel\'rua'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=15;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+') to your hand.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 18+ left in your deck to tutor.', false); } }
   if(pc.name==='Anorith Keeling'){ energyLoadoutOverride=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your future spell draws into the Chaos Trinity — lose a round to draw one.', true); }
+  if(pc.name==='Sister Mire, Wailing Nightmare'){ drawToHand(2); if(hand.length){ var _smci=Math.floor(Math.random()*hand.length); drawPile.unshift(hand.splice(_smci,1)[0]); if(typeof deckSize!=='undefined') deckSize=drawPile.length; } if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); if(typeof toast==='function') toast('🌫 Sister Mire wails — draw 2, one card sinks back into the deck.', true); }
   if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
   if(pc.name==='Uso Oso' && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
   if(pc.name==='Valcarion' && banishPile.length){ var _rec=banishPile.pop(); if(rearGuards.length < RG_SLOTS){ rearGuards.push(_rec); if(typeof toast==='function') toast('🩸 Valcarion calls '+_rec.name+' from banish to support.', true); } else { hand.push(_rec); if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🩸 Valcarion reclaims '+_rec.name+' from banish to hand.', true); } if(typeof updatePiles==='function') updatePiles(); }
@@ -6498,7 +6523,12 @@ const CARD_RULES = {
   { "addvar": "banish_len", "x": 2, "log": "🪶 Rhaess: +2×banish" }
  ],
  "Black Wings, Ossian Drell": [
-  { "addvar": "banish_len", "x": 2, "log": "🪶 Wing Command: +2×banish" }
+  { "addvar": "banish_len", "x": 2, "log": "🪶 Wing Command: +2×banish" },
+  { "if": { "v": "hand_banished", "op": "==", "n": true }, "addvar": "hand_len", "x": 2, "log": "🪶 Wing Command: +2×hand (banished from hand this turn)" }
+ ],
+ "Sister Mire, Wailing Nightmare": [
+  { "addvar": "hand_len", "x": 2, "log": "🌫️ Wailing Nightmare: +2×hand" },
+  { "if": { "v": "pc_kills", "op": ">=", "n": 20 }, "addvar": "hand_len", "x": 1, "log": "🌫️ Wailing Nightmare: +1×hand (20+ kills)" }
  ],
  "Corvus": [
   { "addvar": "banish_len", "x": 2, "log": "🪶 Raven's Feast: +2×banish" }
@@ -6625,6 +6655,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
     rearGuards.forEach(function(rg,_rgi){ if(!rg) return; if(pc&&pc.name==='Kaelthar the Ascendant') return;
       RS._inRules=true; var _rr=applyCalled(rg, _rgc, playerPow, oppPow, abilLog, false, RS); playerPow=_rr[0]; oppPow=_rr[1]; RS._inRules=false; RS._resync();
       var _lk=fieldLink(pc, rg); if(_lk){ playerPow+=_lk.pow; abilLog.push('🔗 '+_lk.name+' Link — '+pc.name+' + '+rg.name+': +'+_lk.pow); var _tb=(typeof CALLED!=='undefined'&&CALLED[rg.name]&&CALLED[rg.name].twinBuff)||0; if(_tb){ playerPow+=_tb; abilLog.push('🐺 '+rg.name+' rallies the twins — '+pc.name+' +'+_tb); } }
+      if(typeof dmSupportBonusThisDuel!=='undefined' && dmSupportBonusThisDuel){ playerPow+=dmSupportBonusThisDuel; abilLog.push('★ Collector\u2019s Due — '+rg.name+' as support: +'+dmSupportBonusThisDuel); }
+      if(rg.name==='Kravyn the Collector'){ var _hrc=(typeof handReturnCount!=='undefined'&&handReturnCount[pc.name])||0; if(_hrc){ playerPow+=2*_hrc; abilLog.push('📣 Kravyn — '+pc.name+' returned to hand '+_hrc+'x this match: +'+(2*_hrc)); } }
     });
     var _orc={match_commits:matchCommits, last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':'tie')), hand_len:0, opp_deaths:pc.deaths||0, opp_kills:pc.kills||0, wins:playerScore[1], losses:playerScore[0], wc_len:0, chaos:(cond.tag==='chaos')};
     pendingOppRears.forEach(function(og){ if(!og) return;
@@ -6674,7 +6706,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   // ── FIRE ON-COMMIT ABILITIES (before condition) ──
   if(!abilityLocked){
     // Kotei: +3 if opponent is 0-death OR you lost your last duel; whole effect repeats if Keawe already won a duel this match
-    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),banish_len:banishPile.length,remnant_count:(typeof deathRemnants!=='undefined'?deathRemnants.length:0),deck_len:(typeof drawPile!=='undefined'?drawPile.length:0),both_wc:(winnersCircle.length+((typeof oppWonBot!=='undefined'&&oppWonBot&&oppWonBot.size)?oppWonBot.size:0)),rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0),wc_names:winnersCircle.map(function(c){return c.name;})};
+    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),banish_len:banishPile.length,remnant_count:(typeof deathRemnants!=='undefined'?deathRemnants.length:0),deck_len:(typeof drawPile!=='undefined'?drawPile.length:0),both_wc:(winnersCircle.length+((typeof oppWonBot!=='undefined'&&oppWonBot&&oppWonBot.size)?oppWonBot.size:0)),rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0),wc_names:winnersCircle.map(function(c){return c.name;}),hand_banished:handBanishedThisTurn};
     if(pc.name==='Veronica'){
       var _oa=oc.abil||'';
       if(!_oa||_oa.indexOf('No ability')===0){ abilLog.push('🔄 Veronica: opponent has no ability — no effect'); }
@@ -6685,7 +6717,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     if(typeof applyDeckMasterResolveEffects==='function'){ RS._inRules=true; var _dmr=applyDeckMasterResolveEffects(pc,playerPow,oppPow,abilLog,RS); playerPow=_dmr[0]; oppPow=_dmr[1]; RS._inRules=false; RS._resync(); }
     /* BOT fighter fires its OWN on-commit ability — bot-centric ctx, pow args swapped so its +power lands on the bot */
     if(oc && oc.name && (typeof CARD_RULES!=='undefined') && CARD_RULES[oc.name] && CARD_RULES[oc.name].length){
-      var _octx={opp_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_pow:pc.pow,pc_pow:oc.pow,last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)),match_commits:matchCommits,player_wins:playerScore[1],player_losses:playerScore[0],hand_len:(typeof oppHandBot!=='undefined'?oppHandBot.length:0),wc_len:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0),skullchain:0,ragwing:0,chaos:(cond.tag==='chaos'),banish_len:(typeof oppBanishBot!=='undefined'?oppBanishBot.length:0),remnant_count:0,deck_len:(typeof oppDeckBot!=='undefined'?oppDeckBot.length:0),both_wc:(((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+winnersCircle.length),rear_count:((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0),wc_names:((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot):[])};
+      var _octx={opp_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_pow:pc.pow,pc_pow:oc.pow,last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)),match_commits:matchCommits,player_wins:playerScore[1],player_losses:playerScore[0],hand_len:(typeof oppHandBot!=='undefined'?oppHandBot.length:0),wc_len:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0),skullchain:0,ragwing:0,chaos:(cond.tag==='chaos'),banish_len:(typeof oppBanishBot!=='undefined'?oppBanishBot.length:0),remnant_count:0,deck_len:(typeof oppDeckBot!=='undefined'?oppDeckBot.length:0),both_wc:(((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+winnersCircle.length),rear_count:((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0),wc_names:((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot):[]),hand_banished:oppHandBanishedThisTurn};
       RS._inRules=true; var _ov=applyCardRules(oc.name,_octx,oppPow,playerPow,abilLog,RS,true); oppPow=_ov[0]; playerPow=_ov[1]; RS._inRules=false; RS._resync();
     }
     if(typeof applyBotDeckMasterResolveEffects==='function'){ RS._inRules=true; var _bdm=applyBotDeckMasterResolveEffects(oc,playerPow,oppPow,abilLog,RS); playerPow=_bdm[0]; oppPow=_bdm[1]; RS._inRules=false; RS._resync(); }
@@ -6780,6 +6812,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     glacialForcedTie = true;
     won = 'tie';
     hand.push({...pc});
+    if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1;
     playAbilityFX('Ahdorah Khaan, Determined Soul', '🛡 RECORD GUARD');
     if(hand.length > 2){
       var _rc=[]; for(var _ri=0;_ri<hand.length-1;_ri++) _rc.push(_ri);
@@ -6816,6 +6849,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   if(won === 'lose' && pc.name === 'The Regenerating Horror' && !horrorRegenUsed){
     horrorRegenUsed = true; glacialForcedTie = true; won = 'tie';
     hand.push({...pc});
+    if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1;
     abilLog.push('👁 Regeneration: severed and regrown — duel tied, no death, returns to your hand (spent this match)');
   }
 
@@ -6823,6 +6857,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   if(won === 'lose' && untouchableActive && !untouchableUsed){
     untouchableUsed = true; glacialForcedTie = true; won = 'tie';
     hand.push({...pc});
+    if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1;
     abilLog.push('🛡 Untouchable: a flawless record refuses this loss — duel tied, returns to hand (once per match)');
   }
 
@@ -6846,7 +6881,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
       sub.textContent = `${pc.name} (${Math.round(playerPow)}) defeated ${oc.name} (${Math.round(oppPow)}) — to Winners Circle`;
     }
     playerScore[0]++;
-    if(pc.name==='Skullchain Reaver' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); }
+    if(pc.name==='Skullchain Reaver' || pc.name==='Kravyn the Collector' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1; if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':pc.name==='Kravyn the Collector'?'💰 Kravyn the Collector':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); }
     else if(unbankNextWin){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); unbankNextWin=false; abilLog.push('🏳 Unbanked Victory — '+pc.name+' returns to your hand instead of banking to the Winners Circle'); }
     else if(deckMasterCard && pc.name===deckMasterCard){ drawPile.unshift({...pc}); deckSize=drawPile.length; abilLog.push('★ '+pc.name+' — your Deck Master recycles to the deck instead of the Winners Circle, ready to be conjured again'); }
     else { winnersCircle.push({...pc}); }
@@ -6878,6 +6913,10 @@ function resolve(pc, oc, cond, playerCommittedPow){
         <div class="c-pow" style="color:var(--lose)">+${_rp}↑</div>
         <div class="c-abil" style="font-size:8px;color:var(--lose)">Remnant — your cards gain +${remnantPowSum()}</div>
       </div>`; };
+    } else if(pc.name==='Kravyn the Collector' && Math.abs(playerPow-oppPow)<=3){
+      hand.push({...pc}); if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1; if(typeof buildHand==='function') buildHand();
+      sub.textContent = `${oc.name} (${Math.round(oppPow)}) defeated ${pc.name} (${Math.round(playerPow)}) — a close loss (\u2264 3), Kravyn returns to hand`;
+      abilLog.push('💰 Kravyn the Collector — lost by '+Math.round(Math.abs(playerPow-oppPow))+': returns to your hand instead of the deck');
     } else {
       sub.textContent = `${oc.name} (${Math.round(oppPow)}) defeated ${pc.name} (${Math.round(playerPow)}) — to deck bottom`;
       drawPile.unshift(pc); deckSize=drawPile.length; abilLog.push('↩ '+pc.name+' recycles to the bottom of your deck');
@@ -11227,7 +11266,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   banishSurge=0; dmNextConjureBonus=0; dmAbilityUsedThisDuel=false; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
-  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
+  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
