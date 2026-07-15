@@ -3489,7 +3489,8 @@ let seasonWins=0, seasonLosses=0, seasonRewardClaimed=false;
 let charge=2/*energy start (7/12/26 rework: 2, was 3)*/;         // energy resource, per match
 let oppCharge=2;   // bot-side energy (7/12/26): bots never had this resource before -- mirrors charge exactly, same duelEnergyCap() growth
 let spellHand=[];                               // Stage 2: spells you've drawn (a hand you spend)
-let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellHalveField=false, condNeutralized=false, spellDiscount=0;  // per-duel armed effects
+let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellHalveField=false, condNeutralized=false, condNeutralizedBy='', spellDiscount=0;  // per-duel armed effects
+let energyLoadoutOverride = null;   // set when a card (Kleydson/Anorith) warps the spell pool for the rest of the match; checked before the real energyLoadout so the player's deck-builder pick is never overwritten
 let spellsUsedRound=[];  // each spell castable only ONCE per round  // Rebirth season — cumulative match W/L across ranked + staked
 let hand = [...HAND_CARDS];
 let deckSize = 12;
@@ -3944,7 +3945,7 @@ function openTurn(){
   // only energyRegenPerTurn() replenishes each turn, so leftover/spent charge carries across turns
   // and players have to play smaller conjures to bank enough for bigger plays or spells later.
   // oppCharge mirrors charge exactly (bots get the same regen/cap rule as the player).
-  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -4979,7 +4980,7 @@ function renderLossChoice(show){
   if(nb) nb.style.display='none';
 }
 function lossChooseSpell(){
-  const pool = (typeof energyLoadout!=='undefined' && energyLoadout && energyLoadout.length) ? energyLoadout : ENERGY_SPELLS.map(function(s){return s.id;});
+  const pool = (typeof energyLoadoutOverride!=='undefined' && energyLoadoutOverride && energyLoadoutOverride.length) ? energyLoadoutOverride : ((typeof energyLoadout!=='undefined' && energyLoadout && energyLoadout.length) ? energyLoadout : ENERGY_SPELLS.map(function(s){return s.id;}));
   const id = pool[Math.floor(Math.random()*pool.length)];
   spellHand.push(id);
   const s=ENERGY_SPELLS.find(function(x){return x.id===id;});
@@ -5316,13 +5317,13 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   if(pc.name==='Arch-Grim Korrin' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(deathRemnants.length); }
   if(pc.name==='Pale Gravedigger' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(1); }
   if(pc.name==='Widow of the Vigil' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(2); }
-  if(pc.name==='Conduit of Chaos, Kleydson'){ spellHand=['drawsurge','godhand']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Lesser Chaos — your spells warp into Draw Surge + Godhand.', true); }
-  if(pc.name==='Kessuae, Tide of Ruin' && playerScore[1] > playerScore[0]){ condNeutralized=true; } if(pc.name==='Tosa Envoy'){ condNeutralized=true; if(typeof toast==='function') toast('🤝 Tosa Envoy renegotiates the arena — the active location is neutralized this duel.', true); }
+  if(pc.name==='Conduit of Chaos, Kleydson'){ energyLoadoutOverride=['drawsurge','godhand']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Lesser Chaos — lose a round and you\'ll draw Draw Surge or Godhand instead of your usual loadout.', true); }
+  if(pc.name==='Kessuae, Tide of Ruin' && playerScore[1] > playerScore[0]){ condNeutralized=true; condNeutralizedBy=pc.name; if(typeof toast==='function') toast('🌊 Kessuae, Tide of Ruin destroys the active location — the arena is neutralized this duel.', true); } if(pc.name==='Tosa Envoy'){ condNeutralized=true; condNeutralizedBy=pc.name; if(typeof toast==='function') toast('🤝 Tosa Envoy renegotiates the arena — the active location is neutralized this duel.', true); }
   if(pc.name==='Wren' && banishPile.length){ hand.push(banishPile.pop()); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='La "La" Ballora, the Broodqueen' && typeof drawToHand==='function'){ drawToHand(2); }
   if(pc.name==="Web-Weaver's Return"){ if(banishPile.length){ var _rb=banishPile.splice(0,banishPile.length); drawPile=drawPile.concat(_rb); if(typeof shuffle==='function') shuffle(drawPile); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof toast==='function') toast('🕸 Web-Weaver\'s Return \u2014 '+_rb.length+' banished cards rewoven into your deck.', true); } if(typeof drawToHand==='function') drawToHand(1); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='Legend Reborn, Keawe Kel\'rua'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=15;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+') to your hand.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 18+ left in your deck to tutor.', false); } }
-  if(pc.name==='Anorith Keeling'){ spellHand=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your spells into the Chaos Trinity.', true); }
+  if(pc.name==='Anorith Keeling'){ energyLoadoutOverride=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your future spell draws into the Chaos Trinity — lose a round to draw one.', true); }
   if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
   if(pc.name==='Uso Oso' && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
   if(pc.name==='Valcarion' && banishPile.length){ var _rec=banishPile.pop(); if(rearGuards.length < RG_SLOTS){ rearGuards.push(_rec); if(typeof toast==='function') toast('🩸 Valcarion calls '+_rec.name+' from banish to support.', true); } else { hand.push(_rec); if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🩸 Valcarion reclaims '+_rec.name+' from banish to hand.', true); } if(typeof updatePiles==='function') updatePiles(); }
@@ -6604,7 +6605,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     RS._resync = function(){ _rp = playerPow; _ro = oppPow; }; }
   // ── ENERGY SPELL / BODY EFFECTS (Stage 1) ──
   if(spellJam){ cond = {id:'jammed', mech:'Jammed', name:'Signal Jammed', icon:'\ud83d\udce1', rule:'Condition negated by an Interrupt.', strat:''}; abilLog.push('\ud83d\udce1 Jammer: active condition negated'); }
-  if(typeof condNeutralized!=='undefined' && condNeutralized){ cond = {id:'neutral', mech:'Neutral Ground', name:'Renegotiated Ground', icon:'🤝', rule:'Tosa Envoy neutralized the location.', strat:''}; abilLog.push('🤝 Tosa Envoy: the location is renegotiated — its effect is nullified this duel'); }
+  if(typeof condNeutralized!=='undefined' && condNeutralized){ var _cnb=condNeutralizedBy||'An effect'; cond = {id:'neutral', mech:'Neutral Ground', name:'Renegotiated Ground', icon:'🤝', rule:_cnb+' neutralized the location.', strat:''}; abilLog.push('🤝 '+_cnb+': the location is neutralized — its effect is nullified this duel'); }
   if(spellOppPow){ oppPow += spellOppPow; abilLog.push('\u26a1 Interrupt: opponent '+spellOppPow+' power'); }
   if(spellSelfPow){ playerPow += spellSelfPow; abilLog.push('\u26a1 Spell: your card +'+spellSelfPow+' power'); }
   if(typeof spellHalveField!=='undefined' && spellHalveField){ playerPow=Math.ceil(playerPow/2); oppPow=Math.ceil(oppPow/2); abilLog.push('\u26a1 Collapse: field power halved (both sides)'); }
@@ -11226,7 +11227,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   banishSurge=0; dmNextConjureBonus=0; dmAbilityUsedThisDuel=false; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
-  charge=2/*energy start (7/12/26 rework)*/; oppCharge=2; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
+  charge=2/*energy start (7/12/26 rework)*/; oppCharge=2; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
