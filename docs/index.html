@@ -4051,7 +4051,7 @@ function onDecisionTimeout(){
   document.getElementById('abil-log').innerHTML = '<div class="abil-log-entry">\u23f1 Decision clock hit zero \u2014 round surrendered</div>';
   updateScore();
   const _nb = document.querySelector('#result-overlay .next-btn');
-  if(_nb) _nb.textContent = (playerScore[0] >= 4 || playerScore[1] >= 4) ? 'View Match Result \u2192' : 'Continue \u2192';
+  if(_nb) _nb.textContent = (playerScore[0] >= matchWinThreshold() || playerScore[1] >= matchWinThreshold()) ? 'View Match Result \u2192' : 'Continue \u2192';
   updateStake();
   document.getElementById('result-overlay').classList.add('show');
   setPhase('resolved');
@@ -4084,7 +4084,7 @@ function updateStake(){
     else { const maxed=!pvpMode && stakeMult>=MAX_MULT, potFull=pvpMode && (pvpPotMine||[]).length>=MAX_POT; rb.disabled = raisedThisPhase || maxed || potFull || matchComplete; rb.textContent = pvpMode ? '🩸 Raise' : (maxed ? '⚡ Max ×'+MAX_MULT : (raisedThisPhase ? '⚡ Raised' : '⚡ Raise ×'+(stakeMult*2))); }
   }
 }
-function matchOver(){ return playerScore[0]>=4 || playerScore[1]>=4; }
+function matchOver(){ return playerScore[0]>=matchWinThreshold() || playerScore[1]>=matchWinThreshold(); }
 // ══ WAGER PHASE ══ (renamed from "Snap") — a real between-duels phase with a 30s window.
 // Either side may Raise the wager; both choosing Continue before the clock elapses skips the rest.
 // vs-bot stakes RANK (RP); PvP stakes CARDS (see PvP raise).
@@ -4279,7 +4279,7 @@ function showMatchComplete(mode, amt){ if(typeof SFX!=='undefined')SFX.stopCrowd
   document.getElementById('result-overlay').classList.remove('show');
   const end=document.getElementById('match-end');
   end.className='match-end show '+(won?'won':'lost');
-  document.getElementById('me-eyebrow').textContent=`Rebirth Season · Best of 7 · vs ${activeBot?activeBot.name:'Bot'}`+(rankedMode?` · Stake ×${stakeMult}`:' · Casual');
+  document.getElementById('me-eyebrow').textContent=`Rebirth Season · Best of ${rankedMode?3:7} · vs ${activeBot?activeBot.name:'Bot'}`+(rankedMode?` · Stake ×${stakeMult}`:' · Casual');
   document.getElementById('me-title').textContent = mode==='retreat-bot' ? 'THEY FOLDED' : mode==='retreat-player' ? 'CLEAN FOLD' : (won?'YOU WON':'YOU LOST');
   document.getElementById('me-score').textContent=`${playerScore[0]} – ${playerScore[1]}`;
   const _rankPart = rankedMode ? `Rank ${won?'gained':'lost'}: <b style="color:${won?'var(--gold)':'var(--lose)'}">${swing}</b> · now ${fmtPts(rankRP)} RP · ${rankTier(rankRP)}` : 'Casual match — no rank staked, records still count.';
@@ -6034,7 +6034,7 @@ function dmForfeit(){
   document.getElementById('result-sub').textContent = 'No Apex/Ultra/Rare card in hand — you forfeited the round. Draw 2 next turn.';
   document.getElementById('abil-log').innerHTML = '<div class="abil-log-entry">🏳 Deck Master: no conjure-eligible card — round forfeited</div>';
   if(typeof updateScore==='function') updateScore();
-  var _nb=document.querySelector('#result-overlay .next-btn'); if(_nb) _nb.textContent=(playerScore[0]>=4||playerScore[1]>=4)?'View Match Result →':'Continue →';
+  var _nb=document.querySelector('#result-overlay .next-btn'); if(_nb) _nb.textContent=(playerScore[0]>=matchWinThreshold()||playerScore[1]>=matchWinThreshold())?'View Match Result →':'Continue →';
   if(typeof updateStake==='function') updateStake();
   document.getElementById('result-overlay').classList.add('show');
   setPhase('resolved');
@@ -6831,8 +6831,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
     overlay.classList.add('show');
     updateScore();
     const _nb = document.querySelector('#result-overlay .next-btn');
-    if(_nb) _nb.textContent = (playerScore[0] >= 4 || playerScore[1] >= 4) ? 'View Match Result →' : 'Continue →';
-    if(typeof renderLossChoice==='function') renderLossChoice(won==='lose' && !(playerScore[0] >= 4 || playerScore[1] >= 4));
+    if(_nb) _nb.textContent = (playerScore[0] >= matchWinThreshold() || playerScore[1] >= matchWinThreshold()) ? 'View Match Result →' : 'Continue →';
+    if(typeof renderLossChoice==='function') renderLossChoice(won==='lose' && !(playerScore[0] >= matchWinThreshold() || playerScore[1] >= matchWinThreshold()));
     updateStake();
     buildHand();  // reflect any hand mutations (Ahdor +4, returns) immediately
     saveState();
@@ -6859,10 +6859,13 @@ function updateScore(){
   sd.innerHTML = html;
 }
 
+// Ranked (7/15/26): best-2-of-3 instead of best-of-7 -- fewer, higher-stakes duels per match.
+// Casual and Staked PvP are untouched (still best-of-7, first to 4).
+function matchWinThreshold(){ return rankedMode ? 2 : 4; }
 function nextTurn(){
-  // Best-of-7 gate: route to the match-complete screen, then to a rematch.
+  // Match-complete gate: route to the match-complete screen, then to a rematch.
   if(matchComplete){ matchComplete = false; resetMatchState(); return; }
-  if(playerScore[0] >= 4 || playerScore[1] >= 4){ matchComplete = true; showMatchComplete(); return; }
+  if(playerScore[0] >= matchWinThreshold() || playerScore[1] >= matchWinThreshold()){ matchComplete = true; showMatchComplete(); return; }
   clearTurnTimers();
   raisedThisPhase=false; pendingBotRaise=0; updateStake(); setTimeout(botMaybeRaise, 900);
   document.getElementById('result-overlay').classList.remove('show');
@@ -10895,7 +10898,7 @@ function startMatch(mode){
   rankedMode=(mode==='ranked');
   deckMasterMode=(mode==='deckmaster');
   resetMatchState();
-  toast('Best of 7 — good luck.', true);
+  toast(rankedMode ? 'Best of 3 — good luck.' : 'Best of 7 — good luck.', true);
   document.getElementById('match-bot-name').textContent=b.name;
   document.getElementById('match-bot-tag').textContent=`${b.arch} · Difficulty ${b.diff}/4`;
   show('turn', null);
