@@ -6943,7 +6943,7 @@ function show(id, btn){
   document.getElementById('tb-title').textContent = SCREEN_TITLES[id] || id;
   document.getElementById('tb-crumb').textContent = '';
   if(id==='vault') buildVault();
-  if(id==='hub') buildHub();
+  if(id==='hub'){ buildHub(); grantDailyBonusIfDue(); }
   if(id==='lobby') buildLobby();
   if(id==='pvp') buildPvP();
   if(id==='asc') buildAscension();
@@ -6960,6 +6960,7 @@ function show(id, btn){
 
 // ── MARKETPLACE ──
 let signalPoints = 48200;
+let lastDailyBonusDate = '';   // daily-return bonus (7/15/26): todayISO()-format, granted once per calendar day on Hub visit
 function fmtPts(n){ return n.toLocaleString('en-US'); }
 function updateBalance(){
   const s = fmtPts(signalPoints);
@@ -7280,13 +7281,14 @@ function rlab(r){ return RARITY_LABEL[r]||cap(r||''); }
 function rlab1(r){ var l=RARITY_LABEL[r]||cap(r||''); return l.length<=2?l:l.charAt(0); }
 const SAVE_KEY = 'signalforge_save_v2';
 function saveState(){
-  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
 }
 function loadState(){
   try{
     const raw=localStorage.getItem(SAVE_KEY); if(!raw) return;
     const s=JSON.parse(raw);
     if(typeof s.signalPoints==='number') signalPoints=s.signalPoints;
+    if(typeof s.lastDailyBonusDate==='string') lastDailyBonusDate=s.lastDailyBonusDate;
     if(typeof s.rankRP==='number') rankRP=s.rankRP;
     if(typeof s.seasonWins==='number') seasonWins=s.seasonWins;
     if(typeof s.seasonLosses==='number') seasonLosses=s.seasonLosses;
@@ -9098,6 +9100,15 @@ function artFillStyle(name){
 function sigilFor(name){ return CARD_ART[name] ? '' : `<span class="vc-sigil">${CARD_SIGIL[name]||'◈'}</span>`; }
 
 // ══ HUB ══
+function grantDailyBonusIfDue(){
+  var today = todayISO();
+  if(lastDailyBonusDate === today) return;
+  lastDailyBonusDate = today;
+  signalPoints += 600;
+  if(typeof updateBalance==='function') updateBalance();
+  if(typeof toast==='function') toast('◈ Daily Bonus — +600 Signal, welcome back!', true);
+  if(typeof saveState==='function') saveState();
+}
 function buildHub(){
   const wins=playerScore[0], losses=playerScore[1];
   const _mine=COLLECTION.filter(c=>(ownedCopies[c.uid||c.name]||0)>0);
