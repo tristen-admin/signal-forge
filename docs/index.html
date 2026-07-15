@@ -2286,7 +2286,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 <aside class="sidebar">
   <div class="brand"><span class="brand-mark">◈</span><span class="brand-text">SIGNAL FORGE<span class="brand-sub">TCG · PROTOTYPE</span></span></div>
   <nav class="nav">
-    <button class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon nav-toggle" onclick="event.stopPropagation();toggleSidebar()" title="Collapse / expand the menu">◆</span><span class="brand-text">Hub</span></button>
+    <button class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon nav-toggle" onclick="event.stopPropagation();toggleSidebar()" title="Collapse / expand the menu">◈</span><span class="brand-text">Hub</span></button>
     <div class="nav-group open" id="grp-play">
       <button class="nav-grp-head" onclick="toggleNavGroup('grp-play')"><span class="ni-icon">🎮</span><span class="brand-text">Play</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
@@ -4271,7 +4271,7 @@ function showMatchComplete(mode, amt){ if(typeof SFX!=='undefined')SFX.stopCrowd
     if(mode){ swing=(won?'+':'−')+fmtPts(amt)+' RP'; }
     else { const dRP=matchWager*stakeMult; rankRP=Math.max(0, rankRP+(won?dRP:-dRP)); swing=(won?'+':'−')+fmtPts(dRP)+' RP'; }
   }
-  if(won && rankedMode){ const rpGained = mode ? amt : (matchWager*stakeMult); sigGain=Math.round(rpGained/100*25); if(sigGain>0){ signalPoints+=sigGain; updateBalance(); } }  // Ranked only: 25 Signal per 100 RP collected (not Play-vs-Bot)
+  if(won && rankedMode){ const rpGained = mode ? amt : (matchWager*stakeMult); sigGain=Math.round(rpGained/100*3000); if(sigGain>0){ signalPoints+=sigGain; updateBalance(); } }  // Ranked only: 3000 Signal per 100 RP collected (7/15/26: 25->3000, sized so 25 base-stake wins = one premier summon (15,000 Signal / 5 pulls); RP/rank-tier/Bounty untouched, they read matchWager*stakeMult before this conversion) (not Play-vs-Bot)
   if(won && rankedMode){ const _rpB = mode ? amt : (matchWager*stakeMult); const _mult=bountyRankMult(rankRP); const _bg=Math.max(1,Math.round(_rpB/100*5*_mult)); bountyBalance+=_bg; if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('\u2b25 +'+fmtPts(_bg)+' Bounty \u2014 '+rankTier(rankRP)+' win (\u00d7'+_mult+')', true); }  // Bounty: EARN-ONLY via ranked skill, rank-scaled
   if(!rankedMode && !pvpMode){ signalPoints += (won ? 180 : 30); }
   if(typeof updateBalance==='function') updateBalance();
