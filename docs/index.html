@@ -4830,11 +4830,25 @@ function fieldLink(fighter, support){
   return null;
 }
 function renderCharge(){ const v=document.getElementById('charge-val'); if(v) v.textContent=charge; var cp=document.getElementById('charge-cap'); if(cp&&typeof duelEnergyCap==='function') cp.textContent=duelEnergyCap(); buildSpellTray(); }
+// Real bug (7/13/26, reported live: 3-cost Drell + 1-cost Empower at 3/3 max energy -- 4 spent
+// from a 3 pool): stageFighter()'s affordability check only looks at LIVE charge at the moment you
+// stage a fighter -- but commitCard() doesn't actually deduct until commit, so charge can still
+// look "free" for a spell cast in between (phase 'selecting'/'select'). castSpell() only checked
+// charge<cost, never accounting for a fighter already staged-but-uncommitted -- so a spell cast
+// after staging could spend charge the staged conjure was already counting on, and commitCard()'s
+// deduction (Math.max(0, charge-conjureCost(pc))) silently clamps to 0 instead of catching the
+// shortfall. This reserve is the fix: what the currently staged/confirmed fighter still owes.
+function stagedConjureReserve(){
+  var idx = (phase==='selecting') ? preSelectedCard : (phase==='select' ? selectedCard : null);
+  if(idx==null || !hand[idx]) return 0;
+  return conjureCost(hand[idx]);
+}
 function buildSpellTray(){
   const t=document.getElementById('spell-tray-cards'); if(!t) return;
   const castable = (phase==='revealed'||phase==='selecting'||phase==='select');
   if(!spellHand.length){ t.innerHTML='<span class="tray-empty">No spells in hand \u2014 lose a round to draw one.</span>'; return; }
-  t.innerHTML = spellHand.map(function(id,i){ const s=ENERGY_SPELLS.find(function(x){return x.id===id;}); if(!s) return ''; const cost=Math.max(0,s.cost-spellDiscount); const used=(typeof spellsUsedRound!=='undefined'&&spellsUsedRound.indexOf(id)>=0); const can=castable && charge>=cost && !used;
+  const spendable = charge - stagedConjureReserve();
+  t.innerHTML = spellHand.map(function(id,i){ const s=ENERGY_SPELLS.find(function(x){return x.id===id;}); if(!s) return ''; const cost=Math.max(0,s.cost-spellDiscount); const used=(typeof spellsUsedRound!=='undefined'&&spellsUsedRound.indexOf(id)>=0); const can=castable && spendable>=cost && !used;
     return '<button class="spell-chip'+(can?'':' dim')+'" onclick="castSpell('+i+')"><span class="sc-top"><span class="sc-name">'+s.name+'</span><span class="sc-cost">'+cost+'\u26a1</span></span><span class="sc-fx">'+(used?'\u2713 used this round':s.fx)+'</span></button>';
   }).join('');
 }
@@ -4843,7 +4857,13 @@ function castSpell(i){
   const s=ENERGY_SPELLS.find(function(x){return x.id===id;}); if(!s) return;
   if(!(phase==='revealed'||phase==='selecting'||phase==='select')){ toast('Cast spells during your turn, before you commit.', false); return; }
   const cost=Math.max(0, s.cost - spellDiscount);
-  if(charge < cost){ toast('Not enough Charge for '+s.name+' ('+cost+'\u26a1)', false); return; }
+  const reserve=stagedConjureReserve();
+  if(charge - reserve < cost){
+    toast(reserve>0
+      ? 'Not enough Charge for '+s.name+' ('+cost+'\u26a1) \u2014 '+reserve+'\u26a1 is already spoken for by your staged fighter.'
+      : 'Not enough Charge for '+s.name+' ('+cost+'\u26a1)', false);
+    return;
+  }
   if(spellsUsedRound.indexOf(id)>=0){ toast(s.name+' \u2014 already cast this round.', false); return; }
   if(s.id==='recall' && !winnersCircle.length){ toast('Winners Circle empty \u2014 nothing to recall.', false); return; }
   charge -= cost;
