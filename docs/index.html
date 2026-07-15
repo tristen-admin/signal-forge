@@ -3887,10 +3887,11 @@ function beginTurnAutoDraw(){
 
 // Start-of-turn opener: no draw on the opening turn, auto-draw on every turn after.
 function openTurn(){
-  // Energy rework (7/12/26): full refill to the (growing) cap each turn, both sides — mana-crystal
-  // model, not the old partial-regen-with-floor. oppCharge mirrors charge exactly (bots get the same
-  // starting/growth rule as the player, per direct spec — no separate bot formula).
-  charge=duelEnergyCap(); oppCharge=duelEnergyCap(); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  // Energy rework (7/15/26): partial regen against a growing cap, not a full mana-crystal refill --
+  // only energyRegenPerTurn() replenishes each turn, so leftover/spent charge carries across turns
+  // and players have to play smaller conjures to bank enough for bigger plays or spells later.
+  // oppCharge mirrors charge exactly (bots get the same regen/cap rule as the player).
+  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -4405,6 +4406,17 @@ function activateInstant(i){
   if(c.timing !== 'instant' && !tangeSurgeReady(c) && !e) return;
   let hintSelect, hintCommit;
   if(e){
+    // Energy-costed instants (7/15/26): fires pre-commit, so a staged fighter's own conjure cost is
+    // already spoken for -- same reserve check castSpell() uses, so an instant can't overspend into
+    // a fighter you've already staged this window.
+    if('energyCost' in e){
+      var _reserve = (typeof stagedConjureReserve==='function') ? stagedConjureReserve() : 0;
+      if(charge - _reserve < e.energyCost){
+        if(typeof toast==='function') toast(_reserve>0 ? (c.name+' needs '+e.energyCost+' energy — some is already spoken for by your staged fighter.') : (c.name+' needs '+e.energyCost+' energy.'), false);
+        return;
+      }
+      charge-=e.energyCost; if(typeof renderCharge==='function') renderCharge();
+    }
     // Data-driven override (7/12/26) — a specific card can define its own instant effect instead of
     // the universal Surge below. Same cost either way: banished once resolved.
     if(e.draw) drawToHand(e.draw);
@@ -4553,6 +4565,10 @@ function conjureCost(c){ if(!c) return 1; if(c.cost!=null) return c.cost; if(COS
 // openTurn(), rather than the old partial-regen-with-floor system). d1=2,d2=3,d3=4,d4=5,d5=7,d6=9...
 // d = true duel number (matchCommits+1, counts ties so it never stalls, unchanged from before).
 function duelEnergyCap(){ var d=(typeof matchCommits!=='undefined')?((matchCommits||0)+1):1; return d<=4 ? (d+1) : (2*d-3); }
+// Energy rework (7/15/26): the cap above is a ceiling to measure against, not an auto-refill target.
+// Only this much regenerates each turn -- 1 until the 5th duel, then 2 per turn after -- so charge
+// is a persistent pool the player must manage across turns, not a reset-to-max mana crystal.
+function energyRegenPerTurn(){ var d=(typeof matchCommits!=='undefined')?((matchCommits||0)+1):1; return d<5 ? 1 : 2; }
 // CALLED - universal rear-guard keyword; fires ALWAYS when a support is called (no group gate).
 // Inverse-scaling: fighter cards -> simple static (+N / opp -N); low-power/support -> rich combos.
 const CALLED = {
@@ -4716,6 +4732,13 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
   if(!support) return [playerPow, oppPow];
   var e = CALLED[support.name];
   if(!e){ if(support.name) abilLog.push("📣 "+(isOpp?"Opp ":"")+support.name+" called — fighter-only (no support effect)"); return [playerPow, oppPow]; }
+  // Energy-costed Called abilities (7/15/26): the whole support effect is gated on affordability --
+  // same pool convention as applyRuleList (isOpp's own energy is oppCharge, never charge).
+  if('energyCost' in e){
+    var _cpool = isOpp ? oppCharge : charge;
+    if(_cpool < e.energyCost){ abilLog.push("📣 "+(isOpp?"Opp ":"")+support.name+" called — not enough energy, support fizzles"); return [playerPow, oppPow]; }
+    if(isOpp){ oppCharge-=e.energyCost; } else { charge-=e.energyCost; if(typeof renderCharge==='function') renderCharge(); }
+  }
   var _bp0=playerPow, _bo0=oppPow;   // whole-function baseline — bothBanish mutates power directly, outside projectCalled's d[], so only a start/end snapshot captures the true total
   var d = projectCalled(e, ctx);
   // Energy rework (7/12/26): bots now have their own real energy pool (oppCharge), so a Called
@@ -6455,6 +6478,15 @@ function evalRuleCond(cond, ctx){
 function applyRuleList(rs, ctx, playerPow, oppPow, abilLog, stepSink, isOpp){
   for(var i=0;i<rs.length;i++){ var r=rs[i];
     if(!evalRuleCond(r.if, ctx)) continue;
+    // Energy-costed abilities (7/15/26): a rule can require spending charge to fire. isOpp tells us
+    // whose rule this is -- when a bot's own CARD_RULES fire, isOpp is true and its power is passed
+    // as the "playerPow" param here (see resolve()'s swapped-args bot call), so the bot's OWN energy
+    // pool is oppCharge, never charge.
+    if('energyCost' in r){
+      var _pool = isOpp ? oppCharge : charge;
+      if(_pool < r.energyCost){ abilLog.push((r.log||'Ability')+' — not enough energy, fizzles'); continue; }
+      if(isOpp){ oppCharge-=r.energyCost; } else { charge-=r.energyCost; if(typeof renderCharge==='function') renderCharge(); }
+    }
     var _bp=playerPow, _bo=oppPow;
     if('add' in r) playerPow+=r.add;
     else if('addvar' in r) playerPow+=ctx[r.addvar]*(r.x||1);
@@ -8420,7 +8452,7 @@ const KEYWORDS = {
   'Winners Circle': 'Cards you win with go here. After a lost round you may recover one at random (re-risking its record) instead of drawing a spell.',
   'Pristine': 'A card with zero deaths on its permanent record — a perfect, never-beaten history.',
   'Purity': 'The value carried by a Pristine record — a card that has never been beaten. Effects that "drain purity" turn an opponent\'s spotless 0-death history into an advantage against it.',
-  'Charge': 'Your Energy pool. It fully refills each turn to a cap that grows as the match goes on. Conjuring a Fighter spends Charge equal to its cost; Interrupt spells spend whatever is left.',
+  'Charge': 'Your Energy pool. It regenerates +1 a turn (+2 from the 5th duel on) against a cap that grows as the match goes on — leftover charge carries between turns, it does not refill to full. Conjuring a Fighter spends Charge equal to its cost; Interrupt spells and some abilities spend whatever is left.',
   'Called': 'A free Support effect. Drop this card into a rear slot to fire it — it never costs Energy and boosts your fighter.',
   'Link': 'When a support shares a lore group with your fighter, it adds bonus power. Same-family cards fight better together.',
   'Recur': 'Returns cards from your banish pile back to your hand — often stronger than they left.',
@@ -11132,7 +11164,7 @@ body:has(#v-turn.on) .howto-btn{display:none}
       <div class="ht-step"><span class="ht-n">4</span><div><b>Call Supports 📣 (free)</b><p>Drag up to 2 more cards to the rear slots. Their Called ability fires automatically and boosts your Fighter — no energy cost.</p></div></div>
       <div class="ht-step"><span class="ht-n">5</span><div><b>Links 🔗</b><p>When a support shares a lore group with your Fighter, the Link fires for bonus power. Tap a link name to see its members.</p></div></div>
       <div class="ht-step"><span class="ht-n">6</span><div><b>Commit</b><p>Lock it in. Both cards reveal and clash — the higher total power wins the duel.</p></div></div>
-      <div class="ht-note"><b>⚡ Energy</b> fully refills each turn to a cap that grows as the match goes on (2, 3, 4, 5, then +2 per duel). Conjuring a Fighter spends Energy equal to its cost; supports are free. Spend what is left on Spells.</div>
+      <div class="ht-note"><b>⚡ Energy</b> only regenerates +1 a turn (+2 from the 5th duel on), against a cap that grows as the match goes on (2, 3, 4, 5, then +2 per duel) — it does not refill to full. Leftover energy carries over, so play cheap Fighters to bank charge for bigger plays and Spells later. Conjuring a Fighter spends Energy equal to its cost; supports are free.</div>
       <div class="ht-note"><b>Records</b> — every card keeps a permanent Win/Loss record. Winners join your Winners Circle; deck cards together to forge Bonds.</div>
       <div class="ht-note"><b>Wager</b> — Raise to grow the stakes, or Fold to concede a duel cheaply.</div>
     </div>
