@@ -3486,8 +3486,8 @@ let conditionIndex = -1;
 let selectedCard = null;
 let playerScore = [1,0];
 let seasonWins=0, seasonLosses=0, seasonRewardClaimed=false;
-let charge=2/*energy start (7/12/26 rework: 2, was 3)*/;         // energy resource, per match
-let oppCharge=2;   // bot-side energy (7/12/26): bots never had this resource before -- mirrors charge exactly, same duelEnergyCap() growth
+let charge=3/*energy start (7/15/26: back to 3)*/;         // energy resource, per match
+let oppCharge=3;   // bot-side energy (7/12/26): bots never had this resource before -- mirrors charge exactly, same duelEnergyCap() growth
 let spellHand=[];                               // Stage 2: spells you've drawn (a hand you spend)
 let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellHalveField=false, condNeutralized=false, condNeutralizedBy='', spellDiscount=0;  // per-duel armed effects
 let energyLoadoutOverride = null;   // set when a card (Kleydson/Anorith) warps the spell pool for the rest of the match; checked before the real energyLoadout so the player's deck-builder pick is never overwritten
@@ -4627,7 +4627,7 @@ function conjureCost(c){ if(!c) return 1; if(c.cost!=null) return c.cost; if(COS
 // mana-crystal model: max energy GROWS every turn, current energy fully refills to the new max in
 // openTurn(), rather than the old partial-regen-with-floor system). d1=2,d2=3,d3=4,d4=5,d5=7,d6=9...
 // d = true duel number (matchCommits+1, counts ties so it never stalls, unchanged from before).
-function duelEnergyCap(){ var d=(typeof matchCommits!=='undefined')?((matchCommits||0)+1):1; return d<=4 ? (d+1) : (2*d-3); }
+function duelEnergyCap(){ var d=(typeof matchCommits!=='undefined')?((matchCommits||0)+1):1; return d<=4 ? (d+2) : (2*d-2); }
 // Energy rework (7/15/26): the cap above is a ceiling to measure against, not an auto-refill target.
 // Only this much regenerates each turn -- 1 until the 5th duel, then 2 per turn after -- so charge
 // is a persistent pool the player must manage across turns, not a reset-to-max mana crystal.
@@ -11227,7 +11227,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   banishSurge=0; dmNextConjureBonus=0; dmAbilityUsedThisDuel=false; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
-  charge=2/*energy start (7/12/26 rework)*/; oppCharge=2; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
+  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
