@@ -6667,6 +6667,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
 
     rearGuards.forEach(function(rg,_rgi){ if(!rg) return; if(pc&&pc.name==='Kaelthar the Ascendant') return;
       RS._inRules=true; var _rr=applyCalled(rg, _rgc, playerPow, oppPow, abilLog, false, RS); playerPow=_rr[0]; oppPow=_rr[1]; RS._inRules=false; RS._resync();
+      var _rgc2=(typeof conjureCost==='function')?conjureCost(rg):0; if(_rgc2){ playerPow+=_rgc2; abilLog.push('📣 '+rg.name+' called — +'+_rgc2+' (its own conjure cost)'); }
       var _lk=fieldLink(pc, rg); if(_lk){ playerPow+=_lk.pow; abilLog.push('🔗 '+_lk.name+' Link — '+pc.name+' + '+rg.name+': +'+_lk.pow); var _tb=(typeof CALLED!=='undefined'&&CALLED[rg.name]&&CALLED[rg.name].twinBuff)||0; if(_tb){ playerPow+=_tb; abilLog.push('🐺 '+rg.name+' rallies the twins — '+pc.name+' +'+_tb); } }
       var _bd=(typeof fieldBond==='function')?fieldBond(pc, rg):null; if(_bd){ playerPow+=_bd.bonus; abilLog.push('🤝 '+_bd.name+' Bond — '+pc.name+' + '+rg.name+': +'+_bd.bonus+' ('+_bd.count+' fought together in Ascension)'); }
       if(typeof dmSupportBonusThisDuel!=='undefined' && dmSupportBonusThisDuel){ playerPow+=dmSupportBonusThisDuel; abilLog.push('★ Collector\u2019s Due — '+rg.name+' as support: +'+dmSupportBonusThisDuel); }
@@ -6676,6 +6677,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     var _orc={match_commits:matchCommits, last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':'tie')), hand_len:0, opp_deaths:pc.deaths||0, opp_kills:pc.kills||0, wins:playerScore[1], losses:playerScore[0], wc_len:0, chaos:(cond.tag==='chaos')};
     pendingOppRears.forEach(function(og){ if(!og) return;
       RS._inRules=true; var _or3=applyCalled(og, _orc, oppPow, playerPow, abilLog, true, RS); oppPow=_or3[0]; playerPow=_or3[1]; RS._inRules=false; RS._resync();
+      var _ogc2=(typeof conjureCost==='function')?conjureCost(og):0; if(_ogc2){ oppPow+=_ogc2; abilLog.push('📣 Opp '+og.name+' called — +'+_ogc2+' (its own conjure cost)'); }
       var _lk2=fieldLink(oc, og); if(_lk2){ oppPow+=_lk2.pow; abilLog.push('🔗 Opp '+_lk2.name+' Link — '+oc.name+' + '+og.name+': +'+_lk2.pow); var _tb2=(typeof CALLED!=='undefined'&&CALLED[og.name]&&CALLED[og.name].twinBuff)||0; if(_tb2){ oppPow+=_tb2; } }
     });
   }
