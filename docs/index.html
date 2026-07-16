@@ -2292,9 +2292,9 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 </style>
 <script>(function(){try{var m=document.querySelector('meta[name="viewport"]');var w='width=device-width,initial-scale=1,viewport-fit=cover';if(m){if(!/viewport-fit/.test(m.getAttribute('content')||''))m.setAttribute('content',w);}else{m=document.createElement('meta');m.name='viewport';m.setAttribute('content',w);(document.head||document.documentElement).appendChild(m);}}catch(e){}})();</script>
 <aside class="sidebar">
-  <div class="brand"><span class="brand-mark">◈</span><span class="brand-text">SIGNAL FORGE<span class="brand-sub">TCG · PROTOTYPE</span></span></div>
+  <button class="brand nav-toggle" onclick="toggleSidebar()" title="Collapse / expand the menu"><span class="brand-mark">◈</span><span class="brand-text">SIGNAL FORGE<span class="brand-sub">TCG · PROTOTYPE</span></span></button>
   <nav class="nav">
-    <button class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon nav-toggle" onclick="event.stopPropagation();toggleSidebar()" title="Collapse / expand the menu">◈</span><span class="brand-text">Hub</span></button>
+    <button class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon">◈</span><span class="brand-text">Hub</span></button>
     <div class="nav-group open" id="grp-play">
       <button class="nav-grp-head" onclick="toggleNavGroup('grp-play')"><span class="ni-icon">🎮</span><span class="brand-text">Play</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
