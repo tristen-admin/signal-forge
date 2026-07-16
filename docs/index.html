@@ -4939,6 +4939,19 @@ function fieldLink(fighter, support){
   for(var i=0;i<fg.length;i++){ for(var j=0;j<sg.length;j++){ if(fg[i].id===sg[j].id) return fg[i]; } }
   return null;
 }
+// Ascension Bonds -> real combat power (7/15/26, direct spec): earned via repeated deckbuilding
+// choice + time invested in Ascension, not passive/invisible accumulation -- same shape as fieldLink,
+// just an earned pairing instead of a pre-authored lore group. supportOrName may be a card object
+// (rear-guard support) or a plain Deck Master name string (deckmaster case, per the original ask).
+function fieldBond(fighter, supportOrName){
+  if(!fighter||!supportOrName||typeof pairBondCount!=='function'||typeof formationTier!=='function') return null;
+  var fk=fighter.uid||fighter.name;
+  var sk=(typeof supportOrName==='object')?(supportOrName.uid||supportOrName.name):supportOrName;
+  if(!fk||!sk||fk===sk) return null;
+  var count=pairBondCount(fk, sk);
+  var tier=formationTier(count);
+  return tier ? {name:tier.name, bonus:tier.bonus, count:count} : null;
+}
 function renderCharge(){ const v=document.getElementById('charge-val'); if(v) v.textContent=charge; var cp=document.getElementById('charge-cap'); if(cp&&typeof duelEnergyCap==='function') cp.textContent=duelEnergyCap(); buildSpellTray(); }
 // Real bug (7/13/26, reported live: 3-cost Drell + 1-cost Empower at 3/3 max energy -- 4 spent
 // from a 3 pool): stageFighter()'s affordability check only looks at LIVE charge at the moment you
@@ -6655,9 +6668,11 @@ function resolve(pc, oc, cond, playerCommittedPow){
     rearGuards.forEach(function(rg,_rgi){ if(!rg) return; if(pc&&pc.name==='Kaelthar the Ascendant') return;
       RS._inRules=true; var _rr=applyCalled(rg, _rgc, playerPow, oppPow, abilLog, false, RS); playerPow=_rr[0]; oppPow=_rr[1]; RS._inRules=false; RS._resync();
       var _lk=fieldLink(pc, rg); if(_lk){ playerPow+=_lk.pow; abilLog.push('🔗 '+_lk.name+' Link — '+pc.name+' + '+rg.name+': +'+_lk.pow); var _tb=(typeof CALLED!=='undefined'&&CALLED[rg.name]&&CALLED[rg.name].twinBuff)||0; if(_tb){ playerPow+=_tb; abilLog.push('🐺 '+rg.name+' rallies the twins — '+pc.name+' +'+_tb); } }
+      var _bd=(typeof fieldBond==='function')?fieldBond(pc, rg):null; if(_bd){ playerPow+=_bd.bonus; abilLog.push('🤝 '+_bd.name+' Bond — '+pc.name+' + '+rg.name+': +'+_bd.bonus+' ('+_bd.count+' fought together in Ascension)'); }
       if(typeof dmSupportBonusThisDuel!=='undefined' && dmSupportBonusThisDuel){ playerPow+=dmSupportBonusThisDuel; abilLog.push('★ Collector\u2019s Due — '+rg.name+' as support: +'+dmSupportBonusThisDuel); }
       if(rg.name==='Kravyn the Collector'){ var _hrc=(typeof handReturnCount!=='undefined'&&handReturnCount[pc.name])||0; if(_hrc){ playerPow+=2*_hrc; abilLog.push('📣 Kravyn — '+pc.name+' returned to hand '+_hrc+'x this match: +'+(2*_hrc)); } }
     });
+    if(deckMasterCard && pc && deckMasterCard!==pc.name){ var _dbd=(typeof fieldBond==='function')?fieldBond(pc, deckMasterCard):null; if(_dbd){ playerPow+=_dbd.bonus; abilLog.push('🤝 '+_dbd.name+' Bond — '+pc.name+' + your Deck Master '+deckMasterCard+': +'+_dbd.bonus+' ('+_dbd.count+' fought together in Ascension)'); } }
     var _orc={match_commits:matchCommits, last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':'tie')), hand_len:0, opp_deaths:pc.deaths||0, opp_kills:pc.kills||0, wins:playerScore[1], losses:playerScore[0], wc_len:0, chaos:(cond.tag==='chaos')};
     pendingOppRears.forEach(function(og){ if(!og) return;
       RS._inRules=true; var _or3=applyCalled(og, _orc, oppPow, playerPow, abilLog, true, RS); oppPow=_or3[0]; playerPow=_or3[1]; RS._inRules=false; RS._resync();
@@ -6682,7 +6697,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     }
     /* Bloodthirsty no longer snowballs power — it draws a card on a win instead (see win branch) */
     if(typeof matchPlayed!=='undefined') matchPlayed.add(recKey(pc));
-    const _bf=bestFormation(pc); if(_bf){ abilLog.push('🤝 '+_bf.tierName+' with '+_bf.partner+' — a proven bond (flavor, no combat power)'); }
+    const _bf=bestFormation(pc); if(_bf){ var _bfHere=(typeof rearGuards!=='undefined'&&rearGuards.some(function(r){return r&&r.name===_bf.partner;}))||(typeof deckMasterCard!=='undefined'&&deckMasterCard===_bf.partner); if(!_bfHere){ abilLog.push('🤝 '+_bf.tierName+' with '+_bf.partner+' — your strongest bond, but '+_bf.partner+' isn’t fielded this duel'); } }
     { const _lks=activeLinks(pc, hand); let _lp=0; _lks.forEach(function(l){ if(_lp>=LINK_POW_CAP) return; const add=Math.min(l.pow, LINK_POW_CAP-_lp); if(add>0){ playerPow+=add; _lp+=add; abilLog.push('🔗 '+l.name+' (with '+l.partner+'): +'+add); } }); } }
   // opponent's ONE conditional living trait — evaluated from ITS match perspective
   { const _or={k:oc.kills||0,d:oc.deaths||0,ok:0,od:0}; var _octx={wins:playerScore[1], losses:playerScore[0], lastLose:(lastResult==='win'), oppDeaths:pc.deaths||0, oppKills:pc.kills||0, myKills:oc.kills||0}; const _r=activeTraitFor(oc,_or,0,_octx);
