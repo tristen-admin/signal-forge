@@ -9653,8 +9653,10 @@ function openCardDetail(id, fresh, tab){
     ${foilSectionHTML(c)}
     ${frameSectionHTML(c)}
     <div class="dr-section">
-      <div class="dr-sec-title">🎖 Living Traits</div>
-      ${traitChipsHTML(c)}
+      <details class="dr-dropdown">
+        <summary><span>🎖 Living Traits</span><span class="ddv">${cardTraits(c).length} / ${TRAITS.length} unlocked</span></summary>
+        <div class="ddbody">${traitChipsHTML(c)}</div>
+      </details>
     </div>
     ${linkChipsHTML(c)}
     <div class="dr-section">
