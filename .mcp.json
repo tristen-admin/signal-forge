@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "signalforge-local-agent": {
+      "command": "/Users/kotei/signal-forge/mcp-local-agent/.venv/bin/python3",
+      "args": ["/Users/kotei/signal-forge/mcp-local-agent/server.py"]
+    }
+  }
+}
