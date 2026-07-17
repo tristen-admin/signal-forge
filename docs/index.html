@@ -3287,7 +3287,7 @@ const CONDITIONS = [
   {id:'reinforce',mech:'Reinforcements',icon:'🃏',name:'The Muster Yard',rule:'The banners call fresh blood to the line — both players draw 1 card when this ground is revealed.',strat:'Pure card advantage. Great when your hand runs thin.',tag:'boost',prob:'6%'},
   {id:'dredge',mech:'Dredge',icon:'🌊',name:'The Drowned Vault',rule:'The tide gives and takes — both players draw 2 cards, then discard 2 to the banish pile.',strat:'Digs deep and fuels banish-recur engines.',tag:'chaos',prob:'5%'},
   {id:'wildpit',mech:'Wild Pit',icon:'🎲',name:'The Feral Menagerie',rule:'Beasts are loosed at random — both players draw 1 card, then after commit each conjured fighter is chosen at random from the hand.',strat:'Draw fuels the chaos. Commit knowing the pit decides.',tag:'chaos',prob:'5%'},
-  {id:'bloodlinesclash',mech:'Bloodlines Clash',icon:'🔱',name:'Thricefold Vale',rule:'Every bloodline answers to another — Wardbound (order) overwhelms Nightbound (predators), Nightbound overwhelms Wildbound (the untamed), and Wildbound overwhelms Wardbound in turn. Whoever\'s camp beats the other\'s gets +6 power. Same camp on both sides means no swing.',strat:'Check a card\'s Camp in its detail view before you commit — the wheel decides this one, not the printed power.',tag:'boost',prob:'4%'},
+  {id:'bloodlinesclash',mech:'Bloodlines Clash',icon:'🔱',name:'Thricefold Vale',rule:'Every bloodline answers to another — Amageras\'s Blessing overwhelms Omitsuki\'s Path, Omitsuki\'s Path overwhelms Kitanoo\'s Hunt, and Kitanoo\'s Hunt overwhelms Amageras\'s Blessing in turn. Whoever\'s camp beats the other\'s gets +6 power. Same camp on both sides means no swing.',strat:'Check a card\'s Camp in its detail view before you commit — the wheel decides this one, not the printed power.',tag:'boost',prob:'4%'},
 ];
 const COND_EFF = {
   lowest:"Lowest base power wins — power-adding abilities backfire.",
@@ -3323,7 +3323,7 @@ const COND_EFF = {
   woundedbeast:"Cards with 3+ deaths gain +5.",
   survivorsground:"The card with fewer deaths gains +3.",
   purereflection:"Each card's power becomes the opponent's career kills.",
-  bloodlinesclash:"Camp beats camp (Wardbound>Nightbound>Wildbound>Wardbound) for +6; same camp = no swing."
+  bloodlinesclash:"Camp beats camp (Amageras>Omitsuki>Kitanoo>Amageras) for +6; same camp = no swing."
 };
 
 const HAND_CARDS = [
@@ -4643,28 +4643,34 @@ function dispName(nm){ return (NAME_OVERRIDE && NAME_OVERRIDE[nm]) || nm; }
 function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Human'; }
 function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.race=r; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83e\uddec Race set: '+name+' \u2192 '+r, true); }
 
-/* Race Camps (7/13/26) \u2014 a 3-way affinity wheel bucketing the 16 races for the new "Bloodlines
-   Clash" Condition: Wardbound (order/wards) beats Nightbound (predators/undeath) beats Wildbound
-   (primal/untamed) beats Wardbound (the wild reclaims civilization). Placeholder first-pass assignment
-   for races with no established card-lore yet (Kaldrei/Vashiri/Nimkatta/Kaidrun/Marrowen) \u2014 rename/
-   reassign freely, this just stands the mechanic up with real, working data. */
+/* Race Camps (7/13/26, renamed 7/17/26) -- a 3-way affinity wheel bucketing the 16 races for the
+   "Bloodlines Clash" Condition: Amageras (order/blessing) beats Omitsuki (severance/chaos) beats
+   Kitanoo (the hunt/wild) beats Amageras (the wild reclaims civilization) -- named after Tosa's own
+   pantheon (Amaterasu/Tsukuyomi/Susanoo), reframed as original in-world titles rather than the real
+   kami names. Short forms are the canonical identity used everywhere; CAMP_TITLE holds the fuller
+   flavor titles for the one spot (the condition's own rule text) that wants them.
+   Placeholder first-pass assignment for races with no established card-lore yet (Kaldrei/Vashiri/
+   Nimkatta/Kaidrun/Marrowen) -- rename/reassign freely, this just stands the mechanic up with real,
+   working data. */
 const RACE_CAMP = {
-  Human:'Wardbound', Kaldrei:'Wardbound', Kaidrun:'Wardbound', Celestial:'Wardbound', Construct:'Wardbound',
-  Marrowen:'Nightbound', Lycan:'Nightbound', Vampire:'Nightbound', Revenant:'Nightbound',
-  Vashiri:'Wildbound', Nimkatta:'Wildbound', Uroth:'Wildbound', Dragonkin:'Wildbound', Beast:'Wildbound', Spirit:'Wildbound', Fae:'Wildbound'
+  Human:'Amageras', Kaldrei:'Amageras', Kaidrun:'Amageras', Celestial:'Amageras', Construct:'Amageras',
+  Marrowen:'Omitsuki', Lycan:'Omitsuki', Vampire:'Omitsuki', Revenant:'Omitsuki',
+  Vashiri:'Kitanoo', Nimkatta:'Kitanoo', Uroth:'Kitanoo', Dragonkin:'Kitanoo', Beast:'Kitanoo', Spirit:'Kitanoo', Fae:'Kitanoo'
 };
-const CAMP_BEATS = {Wardbound:'Nightbound', Nightbound:'Wildbound', Wildbound:'Wardbound'};
-const CAMP_ICON = {Wardbound:'\ud83d\udee1\ufe0f', Nightbound:'\ud83c\udf19', Wildbound:'\ud83c\udf3f'};
+const CAMP_BEATS = {Amageras:'Omitsuki', Omitsuki:'Kitanoo', Kitanoo:'Amageras'};
+const CAMP_ICON = {Amageras:'\u2600\ufe0f', Omitsuki:'\ud83c\udf19', Kitanoo:'\ud83c\udf0a'};
+const CAMP_TITLE = {Amageras:"Amageras's Blessing", Omitsuki:"Omitsuki's Path", Kitanoo:"Kitanoo's Hunt"};
+const CAMP_COLOR = {Amageras:'#E8873A', Omitsuki:'#5B2C8F', Kitanoo:'#2D6A4F'};
 let campOverride = {};   // design-time per-card camp edits (persisted); wins over RACE_CAMP
 function campOf(nameOrCard){
   var name=(nameOrCard && typeof nameOrCard==='object')?nameOrCard.name:nameOrCard;
   if(name && campOverride[name]) return campOverride[name];
   // Only trust RACE_CAMP when the card actually has explicit race lore (CARD_RACE entry or a
   // player-set raceOverride) — otherwise raceOf() silently falls through to 'Human' for ~90% of
-  // the collection, which would make every unassigned card Wardbound and Bloodlines Clash a near
+  // the collection, which would make every unassigned card Amageras and Bloodlines Clash a near
   // no-op. Cards with no race lore yet get a deterministic hash-spread across the 3 camps instead.
-  if(name && (raceOverride[name] || CARD_RACE[name])) return RACE_CAMP[raceOf(name)] || 'Wardbound';
-  var _camps=['Wardbound','Nightbound','Wildbound'];
+  if(name && (raceOverride[name] || CARD_RACE[name])) return RACE_CAMP[raceOf(name)] || 'Amageras';
+  var _camps=['Amageras','Omitsuki','Kitanoo'];
   return _camps[_nameHash(name)%3];
 }
 // Deck Master identity inheritance (7/15/26): when a Deck Master is set, every card the owner
@@ -6895,7 +6901,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   else if(cond.id==="survivorsground"){ if((pc.deaths||0)<(oc.deaths||0)){playerPow+=3;} else if((oc.deaths||0)<(pc.deaths||0)){oppPow+=3;} abilLog.push("⚰️ Survivor's Ground: fewer deaths +3"); }
   else if(cond.id==="purereflection"){ playerPow=(oc.kills||0); oppPow=(pc.kills||0); abilLog.push("🪞 Pure Reflection: power becomes the opponent's career kills"); }
   else if(cond.id==="bloodlinesclash"){
-    var _campP=(typeof effectiveCampOf==='function')?effectiveCampOf(pc,deckMasterCard):'Wardbound', _campO=(typeof effectiveCampOf==='function')?effectiveCampOf(oc,(typeof activeBot!=='undefined'&&activeBot)?activeBot.dmCard:null):'Wardbound';
+    var _campP=(typeof effectiveCampOf==='function')?effectiveCampOf(pc,deckMasterCard):'Amageras', _campO=(typeof effectiveCampOf==='function')?effectiveCampOf(oc,(typeof activeBot!=='undefined'&&activeBot)?activeBot.dmCard:null):'Amageras';
     if(_campP!==_campO && campBeats(_campP,_campO)){ playerPow+=6; abilLog.push("🔱 Bloodlines Clash: "+_campP+" overwhelms "+_campO+" — +6"); }
     else if(_campP!==_campO && campBeats(_campO,_campP)){ oppPow+=6; abilLog.push("🔱 Bloodlines Clash: "+_campO+" overwhelms "+_campP+" — +6"); }
     else { abilLog.push("🔱 Bloodlines Clash: same camp ("+_campP+") — no swing"); }
@@ -9962,7 +9968,7 @@ function openCardDetail(id, fresh, tab){
       <div class="dr-rarity">${rlab(c.rarity)}${pristine?' · ◈ Pristine':''}${fresh?' · ✦ Fresh Mint':''}</div>
       <div class="dr-name">${dispName(c.name)}</div>
       <div class="dr-race-row">🧬 <span class="dr-race-lbl">Race</span> <select class="dr-race-sel" data-cardname="${(c.name||'').replace(/"/g,'&quot;')}" onchange="setRace(this.dataset.cardname, this.value)">${RACES.map(function(r){return '<option'+(raceOf(c.name)===r?' selected':'')+'>'+r+'</option>';}).join('')}</select></div>
-      <div class="dr-race-row">${CAMP_ICON[c.camp||campOf(c.name)]||'🏕'} <span class="dr-race-lbl">${c.camp||campOf(c.name)}</span> <span class="dr-disc-stats">⚔ ${c.might||0} Might &middot; 🧠 ${c.cunning||0} Cunning &middot; 🪨 ${c.grit||0} Grit</span></div>
+      <div class="dr-race-row">${CAMP_ICON[c.camp||campOf(c.name)]||'🏕'} <span class="dr-race-lbl" style="color:${CAMP_COLOR[c.camp||campOf(c.name)]||'inherit'}">${CAMP_TITLE[c.camp||campOf(c.name)]||c.camp||campOf(c.name)}</span> <span class="dr-disc-stats">⚔ ${c.might||0} Might &middot; 🧠 ${c.cunning||0} Cunning &middot; 🪨 ${c.grit||0} Grit</span></div>
       <div class="dr-powline"><span class="dr-pow">${c.pow}</span><span class="dr-pow-label">Base Power</span><span class="dr-pow" style="color:var(--electric);margin-left:16px">⚡${conjureCost(c)}</span><span class="dr-pow-label">Conjure</span></div>
     </div>
     <div class="dr-tabs">
@@ -10144,7 +10150,7 @@ function bigCardHTML(c, opts){
   return `<div class="bigcard tframe${miniCls} ${c.rarity||''} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})" data-cn="${(c.name||'').replace(/"/g,'&quot;')}">
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
-    <div class="tf-camp" title="${c.camp||(typeof campOf==='function'?campOf(c):'')}">${(typeof CAMP_ICON!=='undefined'&&CAMP_ICON[c.camp||(typeof campOf==='function'?campOf(c):'')])||''}</div>
+    <div class="tf-camp" style="${(typeof CAMP_COLOR!=='undefined'&&CAMP_COLOR[c.camp||(typeof campOf==='function'?campOf(c):'')])?('color:'+CAMP_COLOR[c.camp||(typeof campOf==='function'?campOf(c):'')]):''}" title="${(typeof CAMP_TITLE!=='undefined'&&CAMP_TITLE[c.camp||(typeof campOf==='function'?campOf(c):'')])||c.camp||(typeof campOf==='function'?campOf(c):'')}">${(typeof CAMP_ICON!=='undefined'&&CAMP_ICON[c.camp||(typeof campOf==='function'?campOf(c):'')])||''}</div>
     <div class="tf-name">${dispName(c.name)}</div>
     <div class="tf-pow"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${c.chaosPow?'?':((c.pow||0)+(c._bo||0))}</div>
     <div class="tf-kd"><span class="k">${_kd.k}K</span>/<span class="d">${_kd.d}D</span>${isPristine(c)?' ◈':''}</div>
