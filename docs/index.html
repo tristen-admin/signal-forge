@@ -5616,8 +5616,8 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
           var _wc=won==='win'?['#fff6d8','#f5c24d','#ffb347','#ff7a3c']:won==='lose'?['#ffd9d9','#ef5a5a','#b82828','#ff7676']:['#e6edf6','#9fb3c8','#6d7f96'];
           FX.flash(_epic?0.95:0.68, won==='lose'?'#ffe0e0':'#fff'); FX.ring(ctr.x,ctr.y,{c:_wc[1],vr:11,w:6,life:40}); FX.ring(ctr.x,ctr.y,{c:'rgba(255,255,255,.85)',vr:17,w:3,life:26}); FX.burst(ctr.x,ctr.y,{n:Math.round(72*_m),colors:_wc,speed:9*_m,size:3.6,life:48,sparkRate:0.5,up:1.4}); }
         if(typeof SFX!=='undefined') SFX.play('impact');
-      }, 480);
-      setTimeout(finish, 1250);
+      }, Math.round(480*RC_SPEED));
+      setTimeout(finish, Math.round(1250*RC_SPEED));
     }
     function finish(){
       beat();
@@ -5632,9 +5632,10 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     }
     var ps=(steps||[]).filter(function(s){ return s.dp||s.dop; });
     if(reduce){ finish(); return; }
-    var HOLD=1600; // let the flip land + a long tension beat before effects tic (relish it)
-    if(ps.length===0){ setTimeout(clash, HOLD+300); return; }
-    var i=0, per = ps.length>8?1500:(ps.length>5?1850:2200);
+    var RC_SPEED=0.92; // 7/16/26: card-effect resolution sped up 8% -- multiplies every pacing delay from here through clash()
+    var HOLD=Math.round(1600*RC_SPEED); // let the flip land + a long tension beat before effects tic (relish it) -- was 1600
+    if(ps.length===0){ setTimeout(clash, HOLD+Math.round(300*RC_SPEED)); return; }
+    var i=0, per = Math.round((ps.length>8?1500:(ps.length>5?1850:2200))*RC_SPEED);
     setTimeout(function(){ (function step(){
       beat();
       if(i>=ps.length){ clash(); return; }
