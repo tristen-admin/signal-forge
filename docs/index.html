@@ -3288,7 +3288,6 @@ const CONDITIONS = [
   {id:'dredge',mech:'Dredge',icon:'🌊',name:'The Drowned Vault',rule:'The tide gives and takes — both players draw 2 cards, then discard 2 to the banish pile.',strat:'Digs deep and fuels banish-recur engines.',tag:'chaos',prob:'5%'},
   {id:'wildpit',mech:'Wild Pit',icon:'🎲',name:'The Feral Menagerie',rule:'Beasts are loosed at random — both players draw 1 card, then after commit each conjured fighter is chosen at random from the hand.',strat:'Draw fuels the chaos. Commit knowing the pit decides.',tag:'chaos',prob:'5%'},
   {id:'bloodlinesclash',mech:'Bloodlines Clash',icon:'🔱',name:'Thricefold Vale',rule:'Every bloodline answers to another — Wardbound (order) overwhelms Nightbound (predators), Nightbound overwhelms Wildbound (the untamed), and Wildbound overwhelms Wardbound in turn. Whoever\'s camp beats the other\'s gets +6 power. Same camp on both sides means no swing.',strat:'Check a card\'s Camp in its detail view before you commit — the wheel decides this one, not the printed power.',tag:'boost',prob:'4%'},
-  {id:'disciplinetrial',mech:'Discipline Trial',icon:'🎯',name:'Kaeloth\'s Gauntlet',rule:'The Gauntlet tests one trait and nothing else — Might, Cunning, or Grit is chosen at random, and whoever\'s committed card is higher in that one discipline gets +6 power. A tie swings nothing.',strat:'A high-power card with a weak discipline spread can still lose this one. Check the full spread, not just the headline number.',tag:'chaos',prob:'4%'}
 ];
 const COND_EFF = {
   lowest:"Lowest base power wins — power-adding abilities backfire.",
@@ -3324,8 +3323,7 @@ const COND_EFF = {
   woundedbeast:"Cards with 3+ deaths gain +5.",
   survivorsground:"The card with fewer deaths gains +3.",
   purereflection:"Each card's power becomes the opponent's career kills.",
-  bloodlinesclash:"Camp beats camp (Wardbound>Nightbound>Wildbound>Wardbound) for +6; same camp = no swing.",
-  disciplinetrial:"One of Might/Cunning/Grit is chosen at random; the higher card in it gains +6."
+  bloodlinesclash:"Camp beats camp (Wardbound>Nightbound>Wildbound>Wardbound) for +6; same camp = no swing."
 };
 
 const HAND_CARDS = [
@@ -4677,7 +4675,6 @@ function campOf(nameOrCard){
 // when no Deck Master is set -- unchanged behavior in every other mode/context.
 function effectiveRaceOf(card, dmName){ return dmName ? raceOf(dmName) : raceOf(card && card.name); }
 function effectiveCampOf(card, dmName){ return dmName ? campOf(dmName) : campOf(card); }
-function effectiveDisciplineOf(card, dmName){ if(dmName){ var _dc=(typeof COLLECTION!=='undefined')&&COLLECTION.find(function(x){return x.name===dmName && !x.uid;}); if(_dc) return (typeof deriveDisciplines==='function')?deriveDisciplines(_dc):{might:_dc.might||8,cunning:_dc.cunning||8,grit:_dc.grit||8}; } return (typeof deriveDisciplines==='function')?deriveDisciplines(card):{might:(card&&card.might)||8,cunning:(card&&card.cunning)||8,grit:(card&&card.grit)||8}; }
 function campBeats(a,b){ return CAMP_BEATS[a]===b; }
 function setCamp(name, camp){ if(!name) return; campOverride[name]=camp; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.camp=camp; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83c\udfd5 Camp set: '+name+' \u2192 '+camp, true); }
 
@@ -4689,22 +4686,29 @@ function setCamp(name, camp){ if(!name) return; campOverride[name]=camp; try{ []
 let DISC_OVERRIDE = {   // design-time per-card {might,cunning,grit} edits (persisted); wins over the derivation
   // 7/16/26: hand-tuned starters + archetype centerpieces, replacing the hash-derived placeholder for
   // these specific cards -- deliberate spreads grounded in each card's own printed ability, not a formula.
-  'Bannerlord Cassian':{might:14,cunning:16,grit:11},           // Muster rally-commander -- cunning-led tactics, solid might, average endurance
-  'Broodmother':{might:9,cunning:17,grit:15},                   // swarm manipulator -- high cunning, tanky matriarch, weak direct might
-  'Kiana':{might:12,cunning:13,grit:18},                        // disciplined self-sacrifice ("Order Initiate") -- grit-dominant
-  'Kravyn the Collector':{might:17,cunning:16,grit:9},          // relentless kill-collector -- high might+cunning, low patience
-  'Black Wings, Ossian Drell':{might:11,cunning:18,grit:14}     // strategic Wing Commander -- cunning-dominant, decent endurance
+  // Rescaled 7/17/26 to the new 25-75 per-instance roll range (same relative shape, different scale) --
+  // see feedback_signalforge_discipline_pokemon_iv_ev.md for the exact conversion used.
+  'Bannerlord Cassian':{might:56,cunning:63,grit:47},           // Muster rally-commander -- cunning-led tactics, solid might, average endurance
+  'Broodmother':{might:41,cunning:66,grit:59},                  // swarm manipulator -- high cunning, tanky matriarch, weak direct might
+  'Kiana':{might:50,cunning:53,grit:69},                        // disciplined self-sacrifice ("Order Initiate") -- grit-dominant
+  'Kravyn the Collector':{might:66,cunning:63,grit:41},         // relentless kill-collector -- high might+cunning, low patience
+  'Black Wings, Ossian Drell':{might:47,cunning:69,grit:56}     // strategic Wing Commander -- cunning-dominant, decent endurance
 };
 function _nameHash(s){ var h=0; s=String(s||''); for(var i=0;i<s.length;i++){ h=((h<<5)-h+s.charCodeAt(i))|0; } return Math.abs(h); }
+// Per-instance random Discipline rolls (7/17/26) -- Pokemon-IV-like: each individual owned copy
+// (keyed by uid, or plain name for the single un-minted base copy) gets its own independent
+// Might/Cunning/Grit roll in [25,75], generated once on first access and cached here permanently.
+// Two DIFFERENT copies of the same card can roll completely differently -- pulling duplicates now
+// has a reason to matter. DISC_OVERRIDE (above) still wins for the 5 hand-tuned names: every copy
+// of those specific cards shares the same deliberate spread, no per-copy variance.
+let DISC_ROLLS = {};
+function _rollDiscipline(){ return {might:25+Math.floor(Math.random()*51), cunning:25+Math.floor(Math.random()*51), grit:25+Math.floor(Math.random()*51)}; }
 function deriveDisciplines(c){
-  if(!c) return {might:8,cunning:8,grit:8};
+  if(!c) return {might:25,cunning:25,grit:25};
   if(DISC_OVERRIDE[c.name]) return DISC_OVERRIDE[c.name];
-  var h=_nameHash(c.name), base=Math.max(4,Math.min(20,Math.round((c.pow||10)*0.7))), spread=8, half=Math.floor(spread/2);
-  return {
-    might:  Math.max(1, base + (h%spread) - half),
-    cunning:Math.max(1, base + (Math.floor(h/7)%spread) - half),
-    grit:   Math.max(1, base + (Math.floor(h/49)%spread) - half)
-  };
+  var key = c.uid||c.name;
+  if(!DISC_ROLLS[key]) DISC_ROLLS[key] = _rollDiscipline();
+  return DISC_ROLLS[key];
 }
 function setDisciplines(name, might, cunning, grit){ if(!name) return; DISC_OVERRIDE[name]={might:might,cunning:cunning,grit:grit}; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name){ c.might=might; c.cunning=cunning; c.grit=grit; } }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\u2694\ufe0f Disciplines set: '+name+' \u2192 M'+might+'/C'+cunning+'/G'+grit, true); }
 function conjureCost(c){ if(!c) return 1; if(c.cost!=null) return c.cost; if(COST_OVERRIDE[c.name]!=null) return COST_OVERRIDE[c.name]; var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; }
@@ -6896,15 +6900,6 @@ function resolve(pc, oc, cond, playerCommittedPow){
     else if(_campP!==_campO && campBeats(_campO,_campP)){ oppPow+=6; abilLog.push("🔱 Bloodlines Clash: "+_campO+" overwhelms "+_campP+" — +6"); }
     else { abilLog.push("🔱 Bloodlines Clash: same camp ("+_campP+") — no swing"); }
   }
-  else if(cond.id==="disciplinetrial"){
-    var _dks=['might','cunning','grit'], _dk=_dks[Math.floor(Math.random()*3)], _dLbl={might:'Might',cunning:'Cunning',grit:'Grit'}[_dk];
-    var _pdisc=(typeof effectiveDisciplineOf==='function')?effectiveDisciplineOf(pc,deckMasterCard):pc;
-    var _odisc=(typeof effectiveDisciplineOf==='function')?effectiveDisciplineOf(oc,(typeof activeBot!=='undefined'&&activeBot)?activeBot.dmCard:null):oc;
-    var _pv=_pdisc[_dk]||0, _ov=_odisc[_dk]||0;
-    if(_pv>_ov){ playerPow+=6; abilLog.push("🎯 Discipline Trial ("+_dLbl+"): "+_pv+" vs "+_ov+" — +6"); }
-    else if(_ov>_pv){ oppPow+=6; abilLog.push("🎯 Discipline Trial ("+_dLbl+"): "+_ov+" vs "+_pv+" — +6"); }
-    else { abilLog.push("🎯 Discipline Trial ("+_dLbl+"): tied at "+_pv+" — no swing"); }
-  }
   else if(cond.id === 'lowest'){
     playerPow = -playerPow; oppPow = -oppPow;
   } else if(cond.id === 'surge'){
@@ -7591,7 +7586,7 @@ function rlab(r){ return RARITY_LABEL[r]||cap(r||''); }
 function rlab1(r){ var l=RARITY_LABEL[r]||cap(r||''); return l.length<=2?l:l.charAt(0); }
 const SAVE_KEY = 'signalforge_save_v2';
 function saveState(){
-  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
 }
 function loadState(){
   try{
@@ -7628,6 +7623,8 @@ function loadState(){
       if(s.raceOverride && typeof s.raceOverride==='object'){ raceOverride=s.raceOverride; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c) c.race=raceOf(c.name); }); }catch(e){} }
       if(s.campOverride && typeof s.campOverride==='object'){ campOverride=s.campOverride; }
       if(s.DISC_OVERRIDE && typeof s.DISC_OVERRIDE==='object'){ DISC_OVERRIDE=Object.assign({}, DISC_OVERRIDE, s.DISC_OVERRIDE); }   // 7/16/26: merge, not replace -- a save file's own overrides must not wipe out the hand-tuned source defaults for cards it never touched
+      if(s.DISC_ROLLS && typeof s.DISC_ROLLS==='object') DISC_ROLLS=s.DISC_ROLLS;   // no in-code seed data here, plain replace is safe
+      if(s.ASC_DISC_BONUS && typeof s.ASC_DISC_BONUS==='object') ASC_DISC_BONUS=s.ASC_DISC_BONUS;
       try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(!c) return; c.camp=campOf(c.name); var _d=deriveDisciplines(c); c.might=_d.might; c.cunning=_d.cunning; c.grit=_d.grit; }); }catch(e){}
       if(s.cardFoilMax && typeof s.cardFoilMax==='object') cardFoilMax=s.cardFoilMax;
       if(s.cardFrames && typeof s.cardFrames==='object') cardFrames=s.cardFrames;
@@ -10724,9 +10721,9 @@ const ASC_STORY=[
    beat:"Skarrow Hold tests restraint, not strength. Two generations ago it followed a warlord who lost himself mid-campaign and turned on his own warriors. Chieftain Reyva Vosh will not make that mistake twice — win without losing control, or do not win at all."},
   {loc:'Noctreach', title:'Where Legends Died', champ:'Arch-Grim Korrin', art:'Arch-Grim Korrin', type:'elite',
    beat:"Noctreach is a wound in the world — the shattered land where, an age ago, the first Ahdor-Khaan and Valcarion destroyed one another. What crawls its ruins now is Arch-Grim Korrin, and the Undying Flame answers to his ruined hands."},
-  {loc:'The Black Citadel', title:"The Mad King's Web", champ:'Darwin', art:'Darwin', type:'boss', requires:{stat:'grit',min:15},
+  {loc:'The Black Citadel', title:"The Mad King's Web", champ:'Darwin', art:'Darwin', type:'boss', requires:{stat:'grit',min:50},
    beat:"The Black Citadel floats on a slab of Noctreach torn loose and raised into the sky — Darwin's throne, older than Darwin by far. The Mad King rules through fear, at the word of a deeper master who may not have his best interests at heart. He has been waiting for you to climb this high."},
-  {loc:'The Gray', title:'The Undying Flame', champ:'Sister Mire', art:'Sister Mire', type:'boss', requires:{stat:'grit',min:15},
+  {loc:'The Gray', title:'The Undying Flame', champ:'Sister Mire', art:'Sister Mire', type:'boss', requires:{stat:'grit',min:50},
    beat:"Past the Rift's last edge lies the Gray, where the banished are kept and identity itself falls away. A hooded courier cradles an ember of the Undying Flame — proof the war does not end with a king. Sister Mire turns to face you: 'Ash returns to root. Roots drink deep. Death... rebirthed.'"}
 ];
 const ASC_STORY_CH2=[
@@ -10738,9 +10735,9 @@ const ASC_STORY_CH2=[
    beat:"Noctreach keeps its dead close. Something old wears the name Anorith Keeling here, stitched together from an age that ended in fire, and it remembers being a legend before the land broke it. It would like company in the ruin."},
   {loc:'Yozai-no-Sato', title:'The Sleeping Pact', champ:'Kiba', art:'Kiba', type:'elite',
    beat:"The illusion village remembers you, and this time it does not bother to hide. A dragon-pact stirs in Kiba, gold beneath the skin, and the great eye that judged you once now weighs whether you have grown enough to be worth waking for."},
-  {loc:'The Black Citadel', title:"The Court's Last Stand", champ:'La "La" Ballora, the Broodqueen', art:'La "La" Ballora, the Broodqueen', type:'boss', requires:{stat:'grit',min:15},
+  {loc:'The Black Citadel', title:"The Court's Last Stand", champ:'La "La" Ballora, the Broodqueen', art:'La "La" Ballora, the Broodqueen', type:'boss', requires:[{stat:'grit',min:50},{stat:'cunning',min:50}],
    beat:"Darwin fell, but his Court did not scatter, and the throne room is not empty theatre. Ella Ballora sheds the shape you would recognize; what unfolds in the dark is what the Court always was underneath, and it has been waiting for you to climb this high a second time."},
-  {loc:'The Gray', title:'The Deeper Master', champ:'Valcarion', art:'Valcarion', type:'boss', requires:{stat:'grit',min:15},
+  {loc:'The Gray', title:'The Deeper Master', champ:'Valcarion', art:'Valcarion', type:'boss', requires:{stat:'cunning',min:50,count:2},
    beat:"Past the Rift's last edge, the voice that whispered a Mad King into ruin steps into the light at last. Valcarion was old when Ahdor-Khaan was young, and he has been patient far longer than you have been alive. The Undying Flame does not end with a king. It only asks who carries it next."}
 ];
 const ASC_CHAPTERS=[
@@ -10771,7 +10768,7 @@ function ascStoryStart(){
 function ascStoryBeat(node){
   ascHideAll(); var a=document.getElementById('asc-arena'); if(!a) return; a.style.display=''; ascSetVistaLoc(node.loc);
   var _reqOk=ascMeetsRequirement(node.requires);
-  var _reqHtml=node.requires?('<div class="asb-req'+(_reqOk?' ok':'')+'">'+(_reqOk?'✓ ':'🔒 ')+'Requires a fielded companion with '+node.requires.min+'+ '+node.requires.stat.charAt(0).toUpperCase()+node.requires.stat.slice(1)+'</div>'):'';
+  var _reqHtml=node.requires?('<div class="asb-req'+(_reqOk?' ok':'')+'">'+(_reqOk?'✓ ':'🔒 ')+'Requires '+ascDescribeRequirement(node.requires)+'</div>'):'';
   a.innerHTML='<div class="asc-storybeat"><div class="asb-loc">'+(node.loc||'')+'</div><h1 class="asb-title">'+(node.title||'')+'</h1><div class="asb-beat">'+(node.beat||'')+'</div><div class="asb-foe">'+(node.type==='boss'?'☠ BOSS':node.type==='elite'?'👑 ELITE':'⚔')+' · '+node.champName+'</div>'+_reqHtml+'<button class="enter-btn" onclick="ascEnterEncounter(ascRun.map['+node.tier+'][0])"'+(_reqOk?'':' disabled')+'>⚔ Face '+node.champName.split(',')[0]+' →</button></div>';
 }
 function ascLocationFor(tier){ return ASC_JOURNEY[Math.min(Math.max(0,tier||0), ASC_JOURNEY.length-1)]; }
@@ -10792,21 +10789,34 @@ let ascUnitProg={};     // {unitId:{level,xp}} — separate Ascension progressio
 function ascUnitLevel(key){ return (ascUnitProg[key]&&ascUnitProg[key].level)||1; }
 function ascUnitStats(u){ var lv=ascUnitLevel(u.name); return {hp:Math.round(u.hp*(1+(lv-1)*0.12)), atk:Math.round(u.atk*(1+(lv-1)*0.10)), lv:lv}; }
 function ascUnitCard(name){ return (typeof COLLECTION!=='undefined') && COLLECTION.find(function(x){return x.name===name && !x.variant && !x.ascendant;}); }
-function ascUnitDiscipline(name){ var c=ascUnitCard(name); if(!c) return {might:8,cunning:8,grit:8}; return (typeof deriveDisciplines==='function')?deriveDisciplines(c):{might:c.might||8,cunning:c.cunning||8,grit:c.grit||8}; }
+// 7/17/26: rebuilt on top of the per-instance random rolls. IV-like part (the roll) lives on each
+// owned copy via deriveDisciplines/DISC_ROLLS; this is the EV-like part -- a permanent, earned,
+// per-NAME bonus stacked on top, independent of which specific copy you're currently fielding.
+// ASC_DISC_BONUS[name] = {might,cunning,grit}, incremented +2 at a time by ascSpecChoice below.
+let ASC_DISC_BONUS = {};
+function ascUnitDiscipline(name){
+  var copies = (typeof COLLECTION!=='undefined') ? COLLECTION.filter(function(x){ return x.name===name && (ownedCopies[x.uid||x.name]||0)>0; }) : [];
+  if(!copies.length){ var base=ascUnitCard(name); if(base) copies=[base]; }
+  var best={might:0,cunning:0,grit:0};
+  copies.forEach(function(c){ var d=(typeof deriveDisciplines==='function')?deriveDisciplines(c):{might:c.might||25,cunning:c.cunning||25,grit:c.grit||25};
+    best.might=Math.max(best.might,d.might); best.cunning=Math.max(best.cunning,d.cunning); best.grit=Math.max(best.grit,d.grit); });
+  if(!copies.length){ best={might:25,cunning:25,grit:25}; }
+  var bonus=ASC_DISC_BONUS[name]||{might:0,cunning:0,grit:0};
+  return {might:best.might+(bonus.might||0), cunning:best.cunning+(bonus.cunning||0), grit:best.grit+(bonus.grit||0)};
+}
 // 7/16/26: single level-up path for all 3 XP-grant sites -- every 5th level banks a pendingSpec
 // point (manual Might/Cunning/Grit choice, see ascSpecChoice) instead of auto-buffing combat stats.
 function ascGrantXP(u, amount){ var P=ascUnitProg[u.name]=ascUnitProg[u.name]||{level:1,xp:0,rites:0,bosses:0}; P.xp+=amount; var need=P.level*60, leveled=false;
   while(P.xp>=need){ P.xp-=need; P.level++; need=P.level*60; leveled=true; if(P.level%5===0) P.pendingSpec=(P.pendingSpec||0)+1; }
   return leveled; }
-// Spends one pendingSpec point, writing +2 to the chosen Discipline stat via the existing
-// setDisciplines() -- this is a real, permanent change to the player's actual card (DISC_OVERRIDE),
-// not a separate Ascension-only shadow stat. Mechanical effect stays scoped to Ascension gates.
+// Spends one pendingSpec point: +2 to the chosen stat, banked permanently in ASC_DISC_BONUS[name] --
+// earned growth for this Ascension character's identity, stacking on top of whichever owned copy's
+// random roll is currently best, not overwriting it (that's the whole point of keeping IV and EV separate).
 function ascSpecChoice(unitId, stat){ var u=ASC_UNITS.find(function(x){return x.id===unitId;}); if(!u) return;
   var P=ascUnitProg[u.name]; if(!P || !(P.pendingSpec>0)) return;
-  var c=ascUnitCard(u.name); if(!c) return;
-  var d=ascUnitDiscipline(u.name), m=d.might, cu=d.cunning, g=d.grit;
-  if(stat==='might') m+=2; else if(stat==='cunning') cu+=2; else if(stat==='grit') g+=2; else return;
-  if(typeof setDisciplines==='function') setDisciplines(c.name, m, cu, g);
+  if(stat!=='might' && stat!=='cunning' && stat!=='grit') return;
+  var b=ASC_DISC_BONUS[u.name]=ASC_DISC_BONUS[u.name]||{might:0,cunning:0,grit:0};
+  b[stat]+=2;
   P.pendingSpec--; saveState(); ascChampionDetail(unitId); }
 let ascSetupStep='intro'; let ascIntroTimer=null; let _ascMovesReturn=false;
 // ══ ASCENSION HUB — the lobby you land in (champions · team · arena · shop) ══
@@ -11145,8 +11155,27 @@ function ascPickNode(ti,ni){
 }
 let ascDuel=null;   // active best-of-3 encounter within the Rite (real cards, real abilities, rolled condition)
 // Lean Rite resolver — reuses the real ability engine (applyCardRules) + conditions, but NO DOM / NO global mutation / NO record writes.
-function ascMeetsRequirement(req){ if(!req) return true; return ascParty.some(function(u){ if(u.avatar||u.hp<=0) return false; var d=ascUnitDiscipline(u.name); return (d[req.stat]||0)>=req.min; }); }
-function ascEnterEncounter(node){ if(node && node.requires && !ascMeetsRequirement(node.requires)){ var req=node.requires; if(typeof toast==='function') toast('Locked — field a companion with '+req.min+'+ '+req.stat.charAt(0).toUpperCase()+req.stat.slice(1)+' to attempt this.', false); return; } ascBattleStart(node); }
+// requires can be a single {stat,min,count} or an array of them (ALL must independently be met).
+// count (default 1) is how many DIFFERENT fielded party members need to individually clear that
+// stat's threshold -- 1 = "any specialist," 2+ = "need real depth," matching the escalating gates
+// across harder Ascension tiers (single-stat -> two-different-stats -> two-of-the-same-stat).
+function ascMeetsRequirement(req){
+  if(!req) return true;
+  var reqs = Array.isArray(req) ? req : [req];
+  return reqs.every(function(r){
+    var need = r.count||1;
+    var qualifying = ascParty.filter(function(u){ if(u.avatar||u.hp<=0) return false; var d=ascUnitDiscipline(u.name); return (d[r.stat]||0)>=r.min; }).length;
+    return qualifying >= need;
+  });
+}
+function ascDescribeRequirement(req){
+  var reqs = Array.isArray(req) ? req : [req];
+  return reqs.map(function(r){
+    var lbl = r.stat.charAt(0).toUpperCase()+r.stat.slice(1), need = r.count||1;
+    return (need>1 ? (need+' companions') : 'a companion')+' with '+r.min+'+ '+lbl;
+  }).join(' AND ');
+}
+function ascEnterEncounter(node){ if(node && node.requires && !ascMeetsRequirement(node.requires)){ if(typeof toast==='function') toast('Locked — field '+ascDescribeRequirement(node.requires)+' to attempt this.', false); return; } ascBattleStart(node); }
 let ascBattle=null;   // active JRPG battle state
 // ── RPG consumables (Signal sink; bought at Merchant nodes, used in battle) ──
 const ASC_ITEMS=[
@@ -11680,6 +11709,16 @@ if(typeof hubBgReveal==='function'){
   if(document.readyState==='complete') _fireHubReveal(); else window.addEventListener('load', _fireHubReveal, {once:true});
 }
 try{ if(localStorage.getItem('sf_deckfill16')!=='1'){ localStorage.setItem('sf_deckfill16','1'); if(typeof fillDeckToCap==='function' && fillDeckToCap()>0 && typeof saveState==='function') saveState(); } }catch(e){}  /* one-time: top up saved decks to the 16 cap (additive — only adds owned cards you already have) */
+/* 7/17/26: one-time rescale of the 5 hand-tuned DISC_OVERRIDE names from the old ~1-20 scale to the new
+   25-75 per-instance-roll scale. Needed because loadState()'s merge (correctly) lets a save's own
+   DISC_OVERRIDE win for names it already touched -- without this, any existing save keeps those 5
+   cards stuck on the old scale forever, permanently worse than every freshly-rolled 25-75 card. */
+try{ if(localStorage.getItem('sf_discrescale_0717')!=='1'){
+  localStorage.setItem('sf_discrescale_0717','1');
+  var _RESCALED_DISC={'Bannerlord Cassian':{might:56,cunning:63,grit:47},'Broodmother':{might:41,cunning:66,grit:59},'Kiana':{might:50,cunning:53,grit:69},'Kravyn the Collector':{might:66,cunning:63,grit:41},'Black Wings, Ossian Drell':{might:47,cunning:69,grit:56}};
+  Object.keys(_RESCALED_DISC).forEach(function(nm){ DISC_OVERRIDE[nm]=_RESCALED_DISC[nm]; });
+  if(typeof saveState==='function') saveState();
+}}catch(e){}
 /* ── 2026-07-07 deck migration: rename renamed cards + drop cut cards across owned/records/cosmetics/decks, and re-seed the 5 archetype presets ── */
 try{ if(localStorage.getItem('sf_deckmigrate_0707c')!=='1'){
   var _REN={'Voidmaw the Unmaker':'Young Darwin, Predetermined Dictator','Sunforged Colossus':'Courtroom Colossus','Veyra Stormcaller':'Fifth Frequency Stormcaller','Ossian Drell':'Black Wings, Ossian Drell',"Keawe, A Legend Reborn":"Legend Reborn, Keawe Kel'rua",'Kleydson':'Conduit of Chaos, Kleydson','Ossuary Titan':'Summoned Skull Soldiers','Ella Ballora':'Envoy of Tyrants, Ella Ballora','Ghorruk Skullbrand':'Ghorruk "Gnarly" Judarr'};
