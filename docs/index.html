@@ -7438,7 +7438,7 @@ function materializeWon(){ wonInstances.forEach(w=>{ if(!COLLECTION.find(c=>(c.u
 // Mints via the same pattern as mintWon() -- a real Vault entry with its own uid and ownership
 // chain, just tagged with a story-specific variant label instead of "Won in duel."
 const SIDE_STORIES = [
-  {id:'story1', title:'[Chapter title — coming soon]', teaser:'Story content goes here — an isekai-flavored slice-of-life chapter. Placeholder until the real text is written.', rewardCard:'Kotei', variantLabel:'Side Story I'}
+  {id:'story1', title:'Side Story I', teaser:'The first side story is being written — check back soon.', rewardCard:'Kotei', variantLabel:'Side Story I', comingSoon:true}
 ];
 let sideStoriesRead = {};
 function mintStoryVariant(cardName, storyId, variantLabel){
@@ -7452,7 +7452,7 @@ function mintStoryVariant(cardName, storyId, variantLabel){
   return uid;
 }
 function completeSideStory(id){
-  const s = SIDE_STORIES.find(x=>x.id===id); if(!s || sideStoriesRead[id]) return;
+  const s = SIDE_STORIES.find(x=>x.id===id); if(!s || sideStoriesRead[id] || s.comingSoon) return;
   sideStoriesRead[id] = true;
   mintStoryVariant(s.rewardCard, s.id, s.variantLabel);
   if(typeof saveState==='function') saveState();
@@ -7470,6 +7470,8 @@ function buildSideStories(){
       +'<div style="font-size:12.5px;color:var(--text2);margin:4px 0 10px">'+s.teaser+'</div>'
       +(done
         ? '<span style="font-size:12px;color:var(--gold);font-weight:700">✓ Complete — '+s.rewardCard+' ('+s.variantLabel+') in your Vault</span>'
+        : s.comingSoon
+        ? '<span style="font-size:12px;color:var(--text3);font-weight:700">🔒 Coming soon</span>'
         : '<button class="pc-pick" style="display:inline-block;width:auto;padding:8px 18px;margin:0" onclick="completeSideStory(\''+s.id+'\')">Read chapter — reward: '+s.rewardCard+' variant</button>')
       +'</div></div>';
   }).join('');
