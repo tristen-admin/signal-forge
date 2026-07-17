@@ -8559,6 +8559,7 @@ const CARD_ART_FULL = {
   'Kiba':'assets/img/b7b09c4e8ed7.jpg'
 };
 
+const WORLD_MAP_IMG = 'assets/img/da6104578a0a.jpg';
 const LOCATION_ART = {
   'Noctreach':'assets/img/fc65d1956078.jpg',
   'Yozai-no-Sato':'assets/img/8cd158829779.jpg',
@@ -9443,14 +9444,13 @@ function grantDailyBonusIfDue(){
   if(typeof saveState==='function') saveState();
 }
 // ══ EXPEDITIONS — card-acquisition idle-claim (7/17/26) ══
-// World-map reference art is the owner's own asset, dropped in at assets/world-map.jpg -- x/y below
-// are percentage placements matched to that reference; adjust if the final art crops differently.
+// World-map art is the owner's real reference image (Corrected_Final_Map.png), embedded below as
+// WORLD_MAP_IMG -- x/y are percentage placements matched to that image at 1200x800.
 // Location names/positions are flavor-only right now (no per-location odds) -- every site rolls the
 // same table. A few names (North Kasac, Sekihar) are shared with Ascension's own map on purpose --
 // same world, not the same mode; nothing here reads or writes Ascension state.
-// x/y re-derived 7/17/26 directly against the reference image a second time (still a chat
-// attachment, not a saved file -- see the note above assets/world-map.jpg below) -- placed on each
-// landmass itself, not its text label, since labels in the source art sit beside/above the island.
+// x/y placed on each landmass itself, not its text label, since labels in the source art sit
+// beside/above the island -- re-verify against the real art now that it's embedded.
 const WORLD_LOCATIONS = [
   {id:'apex',     name:'Apex Islands', x:16.5, y:13, blurb:'A cold northern reach, first to catch the dawn.'},
   {id:'namurak',  name:'Namurak',      x:28,   y:21, blurb:'Pinewood slopes over a quiet harbor.'},
@@ -9528,7 +9528,7 @@ function buildExpeditions(){
     + '</div>';
   el.innerHTML = '<p class="exp-intro">Send a charge to a marked location for a chance at a card or Signal. Charges refill over time — check back every few hours.</p>'
     + chargeRow
-    + '<div class="exp-map"><img class="exp-map-img" src="assets/world-map.jpg" alt="" onerror="this.style.display=\'none\'"><div class="exp-map-fallback"></div>' + pins + '</div>';
+    + '<div class="exp-map"><img class="exp-map-img" src="'+WORLD_MAP_IMG+'" alt=""><div class="exp-map-fallback"></div>' + pins + '</div>';
 }
 // Daily Quests (7/15/26) -- 3 simple, engine-tracked quests, todayISO()-keyed reset mirroring the
 // Daily Bonus pattern above. The Marketplace quest IS the "reason to check Marketplace daily" ask --
