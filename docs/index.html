@@ -9448,22 +9448,25 @@ function grantDailyBonusIfDue(){
 // Location names/positions are flavor-only right now (no per-location odds) -- every site rolls the
 // same table. A few names (North Kasac, Sekihar) are shared with Ascension's own map on purpose --
 // same world, not the same mode; nothing here reads or writes Ascension state.
+// x/y re-derived 7/17/26 directly against the reference image a second time (still a chat
+// attachment, not a saved file -- see the note above assets/world-map.jpg below) -- placed on each
+// landmass itself, not its text label, since labels in the source art sit beside/above the island.
 const WORLD_LOCATIONS = [
-  {id:'apex',     name:'Apex Islands', x:14, y:17, blurb:'A cold northern reach, first to catch the dawn.'},
-  {id:'namurak',  name:'Namurak',      x:29, y:20, blurb:'Pinewood slopes over a quiet harbor.'},
-  {id:'azraketh', name:'Azraketh',     x:34, y:37, blurb:'A scatter of islets, half-drowned at high tide.'},
-  {id:'kelvaara', name:'Kelvaara',     x:47, y:26, blurb:'Mountain spine cutting the northern seas in two.'},
-  {id:'gnulfor',  name:'Gnulför',      x:63, y:15, blurb:'A lone spire of pine and old stone.'},
-  {id:'sekihar',  name:'Sekihar',      x:70, y:28, blurb:'Terraced hills, smoke rising from a hidden village.'},
-  {id:'belqar',   name:'Belqar',       x:83, y:19, blurb:'Broad eastern coastline, mountains inland.'},
-  {id:'saranek',  name:'Saranek',      x:9,  y:38, blurb:'A cluster of forested rocks, storm-battered.'},
-  {id:'tchandro', name:'Tchandro',     x:37, y:52, blurb:'A long central landmass, farms giving way to peaks.'},
-  {id:'manatok',  name:'Manatok',      x:15, y:62, blurb:'Wooded lowlands south of the strait.'},
-  {id:'omin',     name:'Omin Isle',    x:30, y:73, blurb:'A small, isolated holdfast.'},
-  {id:'nkasac',   name:'North Kasac',  x:72, y:53, blurb:'Rugged coast, rumored to hide old ruins.'},
-  {id:'skasac',   name:'South Kasac',  x:68, y:71, blurb:'Quieter, drier country below the north reach.'},
-  {id:'kahuroa',  name:'Kahuroa',      x:88, y:73, blurb:'A warm eastern isle, terraced and mountainous.'},
-  {id:'flor',     name:'Flor',         x:48, y:92, blurb:'The southern mainland, coastline unmapped past here.'},
+  {id:'apex',     name:'Apex Islands', x:16.5, y:13, blurb:'A cold northern reach, first to catch the dawn.'},
+  {id:'namurak',  name:'Namurak',      x:28,   y:21, blurb:'Pinewood slopes over a quiet harbor.'},
+  {id:'azraketh', name:'Azraketh',     x:30.5, y:35, blurb:'A scatter of islets, half-drowned at high tide.'},
+  {id:'kelvaara', name:'Kelvaara',     x:45.5, y:24, blurb:'Mountain spine cutting the northern seas in two.'},
+  {id:'gnulfor',  name:'Gnulför',      x:60.5, y:13, blurb:'A lone spire of pine and old stone.'},
+  {id:'sekihar',  name:'Sekihar',      x:67.5, y:31, blurb:'Terraced hills, smoke rising from a hidden village.'},
+  {id:'belqar',   name:'Belqar',       x:78,   y:21.5, blurb:'Broad eastern coastline, mountains inland.'},
+  {id:'saranek',  name:'Saranek',      x:10,   y:35.5, blurb:'A cluster of forested rocks, storm-battered.'},
+  {id:'tchandro', name:'Tchandro',     x:34,   y:51, blurb:'A long central landmass, farms giving way to peaks.'},
+  {id:'manatok',  name:'Manatok',      x:15.5, y:62.5, blurb:'Wooded lowlands south of the strait.'},
+  {id:'omin',     name:'Omin Isle',    x:30,   y:73, blurb:'A small, isolated holdfast.'},
+  {id:'nkasac',   name:'North Kasac',  x:73.5, y:55, blurb:'Rugged coast, rumored to hide old ruins.'},
+  {id:'skasac',   name:'South Kasac',  x:67,   y:68.5, blurb:'Quieter, drier country below the north reach.'},
+  {id:'kahuroa',  name:'Kahuroa',      x:88,   y:76, blurb:'A warm eastern isle, terraced and mountainous.'},
+  {id:'flor',     name:'Flor',         x:45.5, y:96.5, blurb:'The southern mainland, coastline unmapped past here.'},
 ];
 function expeditionRegen(){
   var now = Date.now();
