@@ -11061,7 +11061,7 @@ function ascUltimate(){
     if(ult.kind==='heal'){ ascParty.forEach(function(u){ if(!u.avatar&&u.hp>0) ascHealAmt(u,pw); }); ascLog('✦ '+ult.name+' mends the party (+'+pw+' HP each)'); }
     else if(ult.kind==='aoe'){ ascBattle.foes.forEach(function(f){ if(f.hp>0) ascApplyDamage(f,pw); }); ascLog('✦ '+ult.name+' devastates every foe for ~'+pw+'!'); }
     else { var alv=ascBattle.foes.filter(function(f){return f.hp>0;}); if(alv.length){ var tgt=alv.sort(function(x,y){return y.hp-x.hp;})[0]; var d=ascApplyDamage(tgt,pw); ascLog('✦ '+ult.name+' strikes '+tgt.name+' for '+d+'!'); } }
-    saveState(); ascRenderBattle(); if(typeof ascPlayFx==='function')ascPlayFx();
+    saveState(); ascRenderBattle(); if(typeof ascPlayFx==='function')ascPlayFx({skipSpotlight:true});
     setTimeout(function(){ ascBusy=false; ascBattleNext(); }, 900);
   }, 1200);
 }
@@ -11959,7 +11959,23 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
 .asc-victory{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:60;pointer-events:none}
 .asc-victory .vb{font-family:'Trajan Pro','Cinzel',Palatino,serif;font-size:clamp(34px,9vw,52px);font-weight:800;color:#F5C24D;letter-spacing:.06em;text-shadow:0 0 26px rgba(245,194,77,.65),0 4px 10px rgba(0,0,0,.75);animation:ascVic 1.9s cubic-bezier(.2,.8,.2,1) forwards}
 @keyframes ascVic{0%{opacity:0;transform:scale(.55) translateY(12px)}28%{opacity:1;transform:scale(1.08)}72%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.03)}}
-@media(prefers-reduced-motion:reduce){.asc-lunge-f,.asc-lunge-p,.asc-hit,.asc-impact>.asc-foe-art,.asc-impact .asc-pc-art,.asc-float,.asc-burst,.asc-dying,.asc-battle.asc-quake,.asc-victory .vb,.asc-fxflash{animation-duration:.01ms!important}}
+/* spotlight: pulls the attacker + the single target of a clean (non-AOE) hit into a centered
+   close-up over a dark scrim, echoing the main card duel's resolution-cinematic clash framing.
+   Lives entirely inside .asc-battle (same append point as .asc-victory below) and self-removes
+   well inside the ~900-960ms window before the next ascRenderBattle() wholesale re-render. */
+.asc-spot-scrim{position:absolute;inset:0;z-index:50;background:rgba(5,6,10,.76);opacity:0;pointer-events:none;animation:ascSpotFade .8s ease forwards}
+@keyframes ascSpotFade{0%{opacity:0}18%{opacity:1}78%{opacity:1}100%{opacity:0}}
+.asc-spot-wrap{position:absolute;inset:0;z-index:51;display:flex;align-items:center;justify-content:center;gap:30px;pointer-events:none}
+.asc-spot-card{width:104px;display:flex;flex-direction:column;align-items:center;gap:5px;opacity:0;animation:ascSpotCard .8s cubic-bezier(.22,.75,.3,1) forwards}
+.asc-spot-art{width:92px;height:92px;border-radius:13px;background-size:cover;background-position:center top;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 14px 32px rgba(0,0,0,.65)}
+.asc-spot-card.atk .asc-spot-art{box-shadow:0 0 0 3px var(--gold),0 14px 32px rgba(0,0,0,.65)}
+.asc-spot-card.def .asc-spot-art{box-shadow:0 0 0 3px var(--lose),0 14px 32px rgba(0,0,0,.65)}
+.asc-spot-name{font-size:12.5px;font-weight:800;color:#fff;text-shadow:0 1px 4px #000;text-align:center;max-width:104px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.asc-spot-card .asc-hpbar{width:92px}
+@keyframes ascSpotCard{0%{opacity:0;transform:scale(.5)}20%{opacity:1;transform:scale(1.08)}30%{transform:scale(1)}75%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.86)}}
+.asc-spot-vs{position:absolute;left:50%;top:50%;z-index:52;font-family:'Trajan Pro','Cinzel',Palatino,serif;font-weight:800;font-size:16px;letter-spacing:.08em;color:var(--gold);text-shadow:0 0 16px rgba(245,194,77,.75),0 2px 6px rgba(0,0,0,.8);opacity:0;animation:ascSpotVsA .8s ease forwards}
+@keyframes ascSpotVsA{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}22%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}32%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.9)}}
+@media(prefers-reduced-motion:reduce){.asc-lunge-f,.asc-lunge-p,.asc-hit,.asc-impact>.asc-foe-art,.asc-impact .asc-pc-art,.asc-float,.asc-burst,.asc-dying,.asc-battle.asc-quake,.asc-victory .vb,.asc-fxflash,.asc-spot-scrim,.asc-spot-card,.asc-spot-vs{animation-duration:.01ms!important}}
 </style>
 <script>
 (function(){
@@ -11969,21 +11985,44 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
   function flash(el,cls){ var fl=document.createElement('div'); fl.className='asc-fxflash '+cls; el.appendChild(fl); setTimeout(function(){ if(fl.parentNode)fl.parentNode.removeChild(fl); },470); }
   function burst(el,cls){ var b=document.createElement('div'); b.className='asc-burst '+cls; el.appendChild(b); setTimeout(function(){ if(b.parentNode)b.parentNode.removeChild(b); },440); }
   function floatNum(el,txt,cls){ var f=document.createElement('span'); f.className='asc-float '+cls; f.textContent=txt; el.appendChild(f); setTimeout(function(){ if(f.parentNode)f.parentNode.removeChild(f); },1100); }
-  window.ascPlayFx=function(){
+  function spotCardHTML(ent,side,cls){
+    var noArt=!(typeof CARD_ART!=='undefined'&&CARD_ART[ent.art]);
+    var art=(typeof artFillStyle==='function'?artFillStyle(ent.art):'')+(side==='party'&&typeof ascSkinStyle==='function'?ascSkinStyle(ent.name):'');
+    var pct=Math.max(0,Math.round((ent.hp||0)/(ent.maxhp||1)*100));
+    return '<div class="asc-spot-card '+cls+'"><div class="asc-spot-art" style="'+art+'">'+(noArt&&typeof sigilFor==='function'?sigilFor(ent.art):'')+'</div>'
+      +'<div class="asc-spot-name">'+(ent.name||'').split(',')[0]+'</div>'
+      +'<div class="asc-hpbar"><div class="asc-hpfill'+(side==='foe'?' foe':'')+(pct<30?' low':'')+'" style="width:'+pct+'%"></div></div>'
+      +'<div class="asc-hptxt">'+Math.max(0,ent.hp||0)+' / '+(ent.maxhp||0)+'</div></div>';
+  }
+  function ascSpotlight(atkTurn,tgtEnt,tgtSide){
+    try{
+      var bt=document.querySelector('.asc-battle'); if(!bt||!atkTurn||!tgtEnt) return;
+      var atkEnt=atkTurn.side==='party'?ascParty[atkTurn.i]:ascBattle.foes[atkTurn.i]; if(!atkEnt) return;
+      var wrap=document.createElement('div'); wrap.className='asc-spot-scrim';
+      wrap.innerHTML='<div class="asc-spot-wrap">'+spotCardHTML(atkEnt,atkTurn.side,'atk')+'<div class="asc-spot-vs">VS</div>'+spotCardHTML(tgtEnt,tgtSide,'def')+'</div>';
+      bt.appendChild(wrap);
+      setTimeout(function(){ if(wrap.parentNode) wrap.parentNode.removeChild(wrap); }, 820);
+    }catch(e){}
+  }
+  window.ascPlayFx=function(opts){
+    opts=opts||{};
     if(typeof ascBattle==='undefined'||!ascBattle)return; if(!document.querySelector('.asc-battle'))return;
     try{ var act=ascBattle.actor; if(act){ var ael=elFor(act.side,act.i); if(ael){ var lc=act.side==='party'?'asc-lunge-f':'asc-lunge-p'; ael.classList.remove('asc-lunge-f','asc-lunge-p'); void ael.offsetWidth; ael.classList.add(lc); (function(e,c){setTimeout(function(){e.classList.remove(c);},540);})(ael,lc); } } }catch(e){}
-    var maxHit=0, hits=0;
-    function handle(ent,el){ if(!el||!SNAP.has(ent))return; var delta=(ent.hp||0)-SNAP.get(ent);
-      if(delta<0){ var mag=Math.abs(delta), crit=mag>=25; hits++; if(mag>maxHit)maxHit=mag;
+    var maxHit=0, hits=0, hitEnt=null, hitSide=null;
+    function handle(ent,el,side){ if(!el||!SNAP.has(ent))return; var delta=(ent.hp||0)-SNAP.get(ent);
+      if(delta<0){ var mag=Math.abs(delta), crit=mag>=25; hits++; if(mag>maxHit)maxHit=mag; hitEnt=ent; hitSide=side;
         el.classList.remove('asc-hit','asc-impact'); void el.offsetWidth; el.classList.add('asc-hit','asc-impact');
         (function(x){setTimeout(function(){x.classList.remove('asc-hit','asc-impact');},540);})(el);
         flash(el, crit?'crit':'dmg'); burst(el, crit?'crit':'dmg'); floatNum(el, ''+delta, crit?'crit':'dmg');
         if((ent.hp||0)<=0) el.classList.add('asc-dying');
       } else if(delta>0){ el.classList.add('asc-healed'); (function(x){setTimeout(function(){x.classList.remove('asc-healed');},600);})(el); flash(el,'heal'); burst(el,'heal'); floatNum(el,'+'+delta,'heal'); } }
-    try{ ascParty.forEach(function(u,i){ handle(u, elFor('party',i)); }); ascBattle.foes.forEach(function(f,i){ handle(f, elFor('foe',i)); }); }catch(e){}
+    try{ ascParty.forEach(function(u,i){ handle(u, elFor('party',i), 'party'); }); ascBattle.foes.forEach(function(f,i){ handle(f, elFor('foe',i), 'foe'); }); }catch(e){}
     // screen shake on heavy / boss / multi-target hits
     try{ var boss=false, a=ascBattle.actor; if(a&&a.side==='foe'){ var f=ascBattle.foes[a.i]; boss=!!(f&&(f.rank==='boss'||f.rank==='elite')); }
       if(boss || maxHit>=35 || hits>=3){ var bt=document.querySelector('.asc-battle'); if(bt){ var big=boss||maxHit>=55; bt.classList.remove('asc-quake','big'); void bt.offsetWidth; bt.classList.add('asc-quake'); if(big)bt.classList.add('big'); setTimeout(function(){bt.classList.remove('asc-quake','big');},540); } } }catch(e){}
+    // spotlight: a clean single-target hit (not AOE, not heal/buff/guard) pulls attacker+target into
+    // a centered close-up. Ultimate has its own dedicated cinematic (ascSummonVFX) and opts out.
+    if(!opts.skipSpotlight && hits===1 && hitEnt && ascBattle.actor) ascSpotlight(ascBattle.actor, hitEnt, hitSide);
   };
   window.ascVictoryFx=function(){ try{ var bt=document.querySelector('.asc-battle'); if(!bt||bt.querySelector('.asc-victory'))return; var v=document.createElement('div'); v.className='asc-victory'; v.innerHTML='<div class="vb">VICTORY</div>'; bt.appendChild(v); setTimeout(function(){ if(v.parentNode)v.parentNode.removeChild(v); },2000); }catch(e){} };
 })();
