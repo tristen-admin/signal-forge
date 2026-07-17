@@ -2153,6 +2153,17 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .bps-row b{color:#4FB980}
 .bps-claim{padding:6px 12px !important;font-size:12px !important;background:#173a2b !important;border-color:rgba(79,185,139,0.5) !important;color:#7fe0b0 !important}
 .bps-done{color:#4FB980;font-weight:700}
+.bond-overlay{position:fixed;inset:0;z-index:130;display:none;align-items:center;justify-content:center;background:rgba(5,7,12,0.82);backdrop-filter:blur(3px);padding:20px}
+.bond-overlay.show{display:flex}
+.bond-panel{background:linear-gradient(180deg,var(--panel),var(--void));border:1px solid var(--gold);border-radius:14px;padding:26px 28px;max-width:440px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.6),0 0 40px rgba(245,194,77,0.15)}
+.bnd-tier{font-size:12px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.bnd-portraits{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:12px}
+.bnd-port{width:64px;height:64px;border-radius:50%;background:var(--surface) center top/cover;border:2px solid var(--gold);box-shadow:0 0 16px rgba(245,194,77,0.3)}
+.bnd-link{font-size:18px;color:var(--gold)}
+.bnd-names{font-size:16px;font-weight:800;color:var(--text);margin-bottom:10px}
+.bnd-quote{font-size:13.5px;font-style:italic;color:var(--text2);line-height:1.5;margin-bottom:14px}
+.bnd-bonus{font-size:12.5px;font-weight:700;color:#4FB980;background:rgba(79,185,139,0.1);border:1px solid rgba(79,185,139,0.3);border-radius:8px;padding:7px 10px;margin-bottom:16px}
+.bnd-btn{font-family:inherit;font-size:13px;font-weight:700;padding:10px 22px;border-radius:9px;cursor:pointer;border:1px solid var(--gold);background:var(--gold);color:#1a1206}
 .legend-head{display:flex;align-items:center;gap:16px;margin:8px 0 12px}
 .lg-score{font-size:40px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1}
 .lg-scwrap{display:flex;flex-direction:column;gap:5px}
@@ -4372,7 +4383,7 @@ function retreat(who){
 // Best-of-7 conclusion — win/loss screen with Signal payout.
 function showMatchComplete(mode, amt){ if(typeof SFX!=='undefined')SFX.stopCrowd();
   clearTurnTimers();
-  if(typeof matchPlayed!=='undefined' && matchPlayed.size>=2){ recordFormationBonds([...matchPlayed]); matchPlayed=new Set(); }
+  if(typeof matchPlayed!=='undefined' && matchPlayed.size>=2){ var _bondCrossed=recordFormationBonds([...matchPlayed]); matchPlayed=new Set(); if(_bondCrossed && _bondCrossed.length) setTimeout(function(){ showBondBeat(_bondCrossed[0]); }, 900); }
   wagerDone=true; if(wagerTimer){ clearInterval(wagerTimer); wagerTimer=null; } { const _wo=document.getElementById('wager-overlay'); if(_wo) _wo.classList.remove('show'); }
   const _seasonWon = pvpMode ? (pvpForced ? (pvpForced==='win') : (playerScore[0]>playerScore[1])) : (mode==='retreat-bot' ? true : mode==='retreat-player' ? false : (playerScore[0]>playerScore[1]));
   if(_seasonWon) seasonWins++; else seasonLosses++;
@@ -4384,7 +4395,7 @@ function showMatchComplete(mode, amt){ if(typeof SFX!=='undefined')SFX.stopCrowd
     if(mode){ swing=(won?'+':'−')+fmtPts(amt)+' RP'; }
     else { const dRP=matchWager*stakeMult; rankRP=Math.max(0, rankRP+(won?dRP:-dRP)); swing=(won?'+':'−')+fmtPts(dRP)+' RP'; }
   }
-  if(won && rankedMode){ const rpGained = mode ? amt : (matchWager*stakeMult); sigGain=Math.round(rpGained/100*3000); if(sigGain>0){ signalPoints+=sigGain; updateBalance(); } }  // Ranked only: 3000 Signal per 100 RP collected (7/15/26: 25->3000, sized so 25 base-stake wins = one premier summon (15,000 Signal / 5 pulls); RP/rank-tier/Bounty untouched, they read matchWager*stakeMult before this conversion) (not Play-vs-Bot)
+  if(rankedMode){ const rpAtStake = mode ? amt : (matchWager*stakeMult); sigGain=Math.round(rpAtStake/100*3000*(won?1:0.3)); if(sigGain>0){ signalPoints+=sigGain; updateBalance(); } }  // Ranked: win pays 3000 Signal per 100 RP at stake (7/15/26: 25->3000, sized so 25 base-stake wins = one premier summon). 7/17/26: losses now pay a 30% consolation instead of 0 -- a losing/early-game win rate was making ranked feel unrewarding to grind, especially now the summon pool is just 2 packs. RP/rank-tier/Bounty untouched, they read matchWager*stakeMult before this conversion. (not Play-vs-Bot)
   if(won && rankedMode){ const _rpB = mode ? amt : (matchWager*stakeMult); const _mult=bountyRankMult(rankRP); const _bg=Math.max(1,Math.round(_rpB/100*5*_mult)); bountyBalance+=_bg; if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('\u2b25 +'+fmtPts(_bg)+' Bounty \u2014 '+rankTier(rankRP)+' win (\u00d7'+_mult+')', true); }  // Bounty: EARN-ONLY via ranked skill, rank-scaled
   if(!rankedMode && !pvpMode){ signalPoints += (won ? 180 : 30); }
   if(typeof updateBalance==='function') updateBalance();
@@ -5952,7 +5963,43 @@ function currentDeckKeys(){ return (activeDeck.size>=MIN_DECK) ? [...activeDeck]
 function cardNameOf(key){ const c=COLLECTION.find(function(x){ return (x.uid||x.name)===key; }); return c?c.name:key; }
 function bestFormation(c){ if(!c) return null; const key=c.uid||c.name, deck=currentDeckKeys(); let best=null; deck.forEach(function(pk){ if(pk===key) return; const t=formationTier(pairBondCount(key,pk)); if(t && (!best || t.bonus>best.bonus)) best={bonus:t.bonus, tierName:t.name, partner:cardNameOf(pk)}; }); return best; }
 function cardBondList(c){ if(!c) return []; const key=c.uid||c.name, out=[]; Object.keys(pairBonds).forEach(function(pk){ const p=pk.split('|'); if(p[0]===key||p[1]===key){ const o=p[0]===key?p[1]:p[0]; out.push({partner:cardNameOf(o), count:pairBonds[pk], tier:formationTier(pairBonds[pk]), next:nextFormationTier(pairBonds[pk])}); } }); out.sort(function(a,b){ return b.count-a.count; }); return out; }
-function recordFormationBonds(keys){ for(let i=0;i<keys.length;i++){ for(let j=i+1;j<keys.length;j++){ const pk=pairKey(keys[i],keys[j]); pairBonds[pk]=(pairBonds[pk]||0)+1; } } }
+// Returns any pairs that JUST crossed into a new tier this call, so callers can fire a one-time
+// narrative beat (Ascension Bonds Phase 1, 7/17/26) instead of silently incrementing.
+function recordFormationBonds(keys){
+  var crossed=[];
+  for(let i=0;i<keys.length;i++){ for(let j=i+1;j<keys.length;j++){
+    const pk=pairKey(keys[i],keys[j]); const before=pairBonds[pk]||0, after=before+1; pairBonds[pk]=after;
+    const bt=formationTier(before), at=formationTier(after);
+    if(at && (!bt || at.n>bt.n)) crossed.push({a:keys[i], b:keys[j], tier:at});
+  } }
+  return crossed;
+}
+const BOND_QUOTES=[
+  '"I have your back, {b}."',
+  '"We move as one now, {b}."',
+  '"Whatever comes, we face it together, {b}."',
+  '"You’ve earned my trust, {b}."',
+  '"Not alone anymore — not with you beside me, {b}."'
+];
+function bondQuote(speaker,ally){ var t=BOND_QUOTES[Math.floor(Math.random()*BOND_QUOTES.length)]; return t.replace(/\{b\}/g,ally)+' — '+speaker; }
+function showBondBeat(pair){
+  var cA=COLLECTION.find(function(x){return (x.uid||x.name)===pair.a;}), cB=COLLECTION.find(function(x){return (x.uid||x.name)===pair.b;});
+  var nameA=cA?cA.name:pair.a, nameB=cB?cB.name:pair.b;
+  var artA=cA?(CARD_ART[cA.artKey||cA.name]||''):'', artB=cB?(CARD_ART[cB.artKey||cB.name]||''):'';
+  var swap=Math.random()<0.5, speaker=swap?nameB:nameA, ally=swap?nameA:nameB;
+  var ov=document.getElementById('bond-overlay');
+  if(!ov){ ov=document.createElement('div'); ov.id='bond-overlay'; ov.className='bond-overlay'; ov.onclick=function(e){ if(e.target===ov) closeBondBeat(); }; document.body.appendChild(ov); }
+  ov.innerHTML='<div class="bond-panel">'
+    +'<div class="bnd-tier">🤝 '+pair.tier.name+'</div>'
+    +'<div class="bnd-portraits"><div class="bnd-port"'+(artA?' style="background-image:url('+artA+')"':'')+'></div><div class="bnd-link">⚔</div><div class="bnd-port"'+(artB?' style="background-image:url('+artB+')"':'')+'></div></div>'
+    +'<div class="bnd-names">'+nameA+' &amp; '+nameB+'</div>'
+    +'<div class="bnd-quote">'+bondQuote(speaker,ally)+'</div>'
+    +'<div class="bnd-bonus">+'+pair.tier.bonus+' Power whenever fielded together</div>'
+    +'<button class="bnd-btn" onclick="closeBondBeat()">Continue</button>'
+    +'</div>';
+  ov.classList.add('show');
+}
+function closeBondBeat(){ var ov=document.getElementById('bond-overlay'); if(ov) ov.classList.remove('show'); }
 function bondsSectionHTML(c){ const list=cardBondList(c); if(!list.length) return '<div class="dr-row"><span class="dr-key">Bonds</span><span class="dr-val" style="color:var(--text3)">None yet — deck cards together to forge bonds</span></div>'; return '<div class="bond-list">'+list.slice(0,6).map(function(b){ const tl=b.tier?b.tier.name+' +'+b.tier.bonus:'Forming'; const pr=b.next?b.count+'/'+b.next.n+' → '+b.next.name:'max tier'; return '<div class="bond-row"><span class="bond-partner">'+b.partner+'</span><span class="bond-tier '+(b.tier?'on':'')+'">'+tl+'</span><span class="bond-prog">'+pr+'</span></div>'; }).join('')+'</div>'; }
 function renderDeckFormations(){ const el=document.getElementById('deck-formations'); if(!el) return; const keys=[...activeDeck], pairs=[]; for(let i=0;i<keys.length;i++){ for(let j=i+1;j<keys.length;j++){ const cnt=pairBondCount(keys[i],keys[j]), t=formationTier(cnt); if(t) pairs.push({a:cardNameOf(keys[i]),b:cardNameOf(keys[j]),t:t,cnt:cnt}); } } pairs.sort(function(x,y){ return y.t.bonus-x.t.bonus || y.cnt-x.cnt; }); if(!pairs.length){ el.innerHTML='<div class="df-empty">No active formations yet — cards that fight together forge bonds (+power when both are decked).</div>'; return; } el.innerHTML='<div class="df-title">⚔ Active Formations</div>'+pairs.map(function(p){ return '<div class="df-row"><span class="df-pair">'+p.a+' + '+p.b+'</span><span class="df-tier">'+p.t.name+' <b>+'+p.t.bonus+'</b></span></div>'; }).join(''); }
 // ══ LEGEND ECONOMY — biography appraised as value, priced in Forge (❖ premium in-game currency) ══
@@ -7679,10 +7726,13 @@ function startNewPlayer(){
   if(typeof window.showHowTo==='function'){ setTimeout(function(){ window.showHowTo(); }, 300); }
 }
 const SEASON = { chapter:'Chapter 1', name:'Rebirth', pack:'Legends Reborn' };
+// Summon pool cut to the 2 cheapest options 7/17/26 -- Apex Vault (genesis pack) removed to keep the
+// Signal ladder tight (500/1500) instead of spread across 3 rungs. Apex-rarity cards are still
+// reachable -- both remaining packs already carry a small genesis% in their own odds table below,
+// and the Pity system (PITY_APEX) still triggers off those same odds, untouched.
 const PACKS = [
   {id:'std', name:'Legends Reborn Booster', icon:'📦', price:500, blurb:'Common through Rare — a whisper of higher.', odds:{common:63.9, uncommon:25, rare:8, ultra:2.3, genesis:0.8}},
   {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & an Apex shot — no commons.', odds:{rare:78, ultra:20, genesis:2}},
-  {id:'genesis', name:'Legends Reborn Apex Vault', icon:'💠', price:3000, blurb:'Ultra-dense — a 40% Ultra pull with a 5% Apex shot.', odds:{rare:55, ultra:40, genesis:5}},
 ];
 const PREMIUM_PACKS = [
   {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{uncommon:14, rare:60, ultra:23, genesis:3}},
@@ -8811,7 +8861,7 @@ let decisionTimer = null;       // 15s decision clock handle
 const STARTING_HAND = 5;
 const DRAW_PER_TURN = 1;   // cards drawn per turn — 1/turn, symmetric w/ bot (owner flagged the draw-2 surplus). Draw-heavy decks use their own draw cards.
 const DECK_SIZE = 20;
-const MIN_DECK = 15;   // decks are 15–20 (min 15 to play, max 20) — 7/12/26 resize, same 0.75 ratio as the prior 12/16
+const MIN_DECK = 16;   // decks are 16-20 by design -- no deckout stalling risk in this game, so a range is fine, not a bug (confirmed 7/17/26)
 // Curated fallback starter deck (used when no full custom deck is built) — NOT resized to the new
 // 15/20 format (still 12 cards); a content decision left for the owner, not silently expanded here.
 const DEFAULT_DECK = ['Kotei','Lagertha Waltz','Kiana','Zerith Var','Arch-Grim Korrin','Darwin','Ruffius Rufeldro','King Joris','Ahdorah Khaan, Determined Soul','Cletus Gwyndull','Bram the Bulwark','Old Garrick'];
@@ -11268,7 +11318,7 @@ function ascBattleWin(){
   if(node.type==='trial'){ var _av=ASC_GEAR.filter(function(g){return (ascRun.gear||[]).indexOf(g.id)<0;}); if(_av.length){ var _gg=_av[Math.floor(Math.random()*_av.length)]; ascRun.gear=ascRun.gear||[]; ascRun.gear.push(_gg.id); ascLog('⚡ Trial cleared — gained '+_gg.name+'!'); } ascBountyProgress('trial'); }
   if(node.type==='boss') ascBountyProgress('boss');
   ascBountyProgress('clear');
-  { var _bk=ascParty.filter(function(u){return !u.avatar && (ownedCopies[u.name]||0)>0;}).map(function(u){ var _c=COLLECTION.find(function(x){return x.name===u.name && !x.variant && !x.ascendant;}); return _c?(_c.uid||_c.name):u.name; }); if(_bk.length>1 && typeof recordFormationBonds==='function') recordFormationBonds(_bk); }
+  { var _bk=ascParty.filter(function(u){return !u.avatar && (ownedCopies[u.name]||0)>0;}).map(function(u){ var _c=COLLECTION.find(function(x){return x.name===u.name && !x.variant && !x.ascendant;}); return _c?(_c.uid||_c.name):u.name; }); if(_bk.length>1 && typeof recordFormationBonds==='function'){ var _bondCrossed2=recordFormationBonds(_bk); if(_bondCrossed2 && _bondCrossed2.length) setTimeout(function(){ showBondBeat(_bondCrossed2[0]); }, 2000); } }
   if((ascRun.links||[]).length>=2) ascBountyProgress('links');
   if(ascParty.every(function(u){ return u.avatar || u.hp>0; })) ascBountyProgress('flawless');
   ascLog('Victory! Each survivor +'+xp+' XP · +'+sig+' ◈');
