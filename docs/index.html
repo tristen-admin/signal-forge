@@ -912,7 +912,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .hub-action.ha-wide{grid-column:1/-1}
 .hub-codex{margin-top:20px}
 /* ══ HUB — Elden Ring / Elder Scrolls selection-screen treatment ══ */
-#v-hub{position:relative;overflow-y:auto;background:linear-gradient(180deg,rgba(6,7,11,0.70),rgba(6,7,11,0.5) 45%,rgba(6,7,11,0.80)),var(--vista) center/cover no-repeat,#050506}
+#v-hub{position:relative;overflow-y:auto;background:linear-gradient(180deg,rgba(6,7,11,0.70),rgba(6,7,11,0.5) 45%,rgba(6,7,11,0.80)),#050506}
 .hub-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity 1.1s ease}
 .hub-bg-video.on{opacity:1}
 .hub{position:relative;z-index:1}
@@ -8627,7 +8627,7 @@ const CARD_ART_FULL = {
   'Kiba':'assets/img/b7b09c4e8ed7.jpg'
 };
 
-const HUB_BG_VIDEO = 'assets/video/06352a0e0a15.mp4';
+const HUB_BG_VIDEO = 'assets/video/d18f51f19c42.mp4';
 const WORLD_MAP_IMG = 'assets/img/da6104578a0a.jpg';
 const LOCATION_ART = {
   'Noctreach':'assets/img/fc65d1956078.jpg',
@@ -11662,7 +11662,13 @@ window._sfReturningSession = _hadSave;   // captured before loadState()/startNew
 loadState();
 applyAscendantFrame();
 if(!_hadSave && typeof startNewPlayer==='function') startNewPlayer();
-if(typeof hubBgReveal==='function') hubBgReveal();   // Hub is the default view in static markup, show() never runs for it at boot
+// Hub is the default view in static markup, show() never runs for it at boot. Deferred past window.load
+// + a double-rAF (7/17/26): this file is 25MB+ of embedded base64 media -- firing the reveal synchronously
+// mid-script risked the whole fade completing before the browser had even painted once on a slow load.
+if(typeof hubBgReveal==='function'){
+  var _fireHubReveal=function(){ setTimeout(hubBgReveal, 60); };   // plain timeout, not rAF -- rAF is suspended in backgrounded/inactive tabs and never fires there
+  if(document.readyState==='complete') _fireHubReveal(); else window.addEventListener('load', _fireHubReveal, {once:true});
+}
 try{ if(localStorage.getItem('sf_deckfill16')!=='1'){ localStorage.setItem('sf_deckfill16','1'); if(typeof fillDeckToCap==='function' && fillDeckToCap()>0 && typeof saveState==='function') saveState(); } }catch(e){}  /* one-time: top up saved decks to the 16 cap (additive — only adds owned cards you already have) */
 /* ── 2026-07-07 deck migration: rename renamed cards + drop cut cards across owned/records/cosmetics/decks, and re-seed the 5 archetype presets ── */
 try{ if(localStorage.getItem('sf_deckmigrate_0707c')!=='1'){
