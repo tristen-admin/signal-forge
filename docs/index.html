@@ -2630,13 +2630,13 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <div class="lobby-head">
           <div class="lh-eyebrow" style="color:var(--violet)">Ascension · The Rite</div>
           <h1>Assemble your party</h1>
-          <p>You don't march into the Rift — you <b>pilot</b> it. Choose an <b>Avatar</b>: the card you'd follow into anything. You never field it directly — its presence <b>empowers the units that serve you</b>, and at the crest of battle you unleash its <b>Ultimate</b>. Rally <b>2–3 companions</b>, descend through the Rite, and every victory is written into your Avatar's legend.</p><div class="asc-lore">“You do not enter the Rift alone — you enter it as <i>someone</i>. Choose the card you would follow into the dark, and it becomes your Avatar: your banner, your voice, your name. Your units fight for that name. Every Rift you survive, you survive together.”</div>
+          <p>You don't march into the Rift — you <b>pilot</b> it. Choose a <b>Champion</b>: the card you'd follow into anything. You never field it directly — its presence <b>empowers the units that serve you</b>, and at the crest of battle you unleash its <b>Ultimate</b>. Rally <b>2–3 companions</b>, descend through the Rite, and every victory is written into your Champion's legend.</p><div class="asc-lore">“You do not enter the Rift alone — you enter it as <i>someone</i>. Choose the card you would follow into the dark, and it becomes your Champion: your banner, your voice, your name. Your units fight for that name. Every Rift you survive, you survive together.”</div>
         </div>
         <div class="asc-chosen" id="asc-chosen"></div>
         <div class="pvp-section-label">Your Ascension roster</div>
         <div class="asc-avatar-grid" id="asc-avatar-grid"></div>
         <div class="lobby-launch">
-          <div class="ll-info"><h3 id="asc-ll-title">No champion chosen</h3><p id="asc-ll-sub" class="ll-none">Pick a card to anoint as your avatar.</p></div>
+          <div class="ll-info"><h3 id="asc-ll-title">No Champion chosen</h3><p id="asc-ll-sub" class="ll-none">Pick a card to anoint as your champion.</p></div>
           <button class="enter-btn" id="asc-begin-btn" onclick="ascBegin()" disabled>⚜ Begin the Rite</button>
         </div>
 
@@ -3040,7 +3040,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 <div class="view" id="v-mastery" style="flex-direction:column">
   <div class="view-head">
     <strong>Mastery, Traits &amp; Bonds</strong>
-    Every character grows three ways: a <b>Mastery</b> track (win as its avatar in Ascension · The Rite → cosmetic tiers), <b>Living Traits</b> (permanent stat buffs earned just by fighting with the card — each shows how far it is from unlocking), and <b>Bonds</b> (formed when you deck cards together). Track every character's progress here.
+    Every character grows three ways: a <b>Mastery</b> track (win as its champion in Ascension · The Rite → cosmetic tiers), <b>Living Traits</b> (permanent stat buffs earned just by fighting with the card — each shows how far it is from unlocking), and <b>Bonds</b> (formed when you deck cards together). Track every character's progress here.
   </div>
   <div style="overflow-y:auto;flex:1;padding:14px"><div id="mastery-hub" class="mastery-hub"></div></div>
 </div>
@@ -3835,7 +3835,7 @@ function buildGrowthCodex(){
   if(cur) cur.innerHTML=[
     ['🩸','Career record (K / D)','Every win and loss the card has ever taken — grows +1 each duel it fights, forever.','Kept when traded — the card carries its whole history to a new owner.'],
     ['🤝','Owner record','Wins you personally earn while you hold it.','Resets to 0 when the card changes hands.'],
-    ['⭐','Mastery','Bond level from playing it as your avatar in Ascension / the Rite (max 25).','Tied to the current holder.']
+    ['⭐','Mastery','Bond level from playing it as your champion in Ascension / the Rite (max 25).','Tied to the current holder.']
   ].map(function(r){ return '<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border2);border-radius:10px;background:var(--panel);margin-bottom:8px"><div style="font-size:22px;flex-shrink:0">'+r[0]+'</div><div><div style="font-weight:700;color:var(--text)">'+r[1]+'</div><div style="font-size:12px;color:var(--text2);margin:2px 0">'+r[2]+'</div><div style="font-size:11px;color:var(--text3)">'+r[3]+'</div></div></div>'; }).join('');
   var CUR={scarred:'Career',veteran:'Career',feared:'Career',bloodthirsty:'Career',untouchable:'Career',loyal:'Owner',honed:'Mastery',ascendant:'Mastery'};
   var el=document.getElementById('growth-traits');
@@ -4587,7 +4587,7 @@ const CARD_RACE = {
   // Beast
   'Bixie Bee':'Beast','Anorith Keeling':'Beast','Little Pox':'Beast','Broodmother':'Beast','Mip':'Beast',
   // Spirit
-  'Wisp':'Spirit','Veil of Echoes':'Spirit','Echo Ward':'Spirit','Signal Diviner':'Spirit','Avatar':'Spirit'
+  'Wisp':'Spirit','Veil of Echoes':'Spirit','Echo Ward':'Spirit','Signal Diviner':'Spirit','Champion':'Spirit'
   // everything else defaults to 'Human' (see raceOf)
 };
 let raceOverride = {};   // design-time per-card race edits (persisted); wins over CARD_RACE
@@ -7191,7 +7191,7 @@ const COSMETICS = {
     {id:'undefeated',name:'The Undefeated',price:1500},
     {id:'apex',name:'Apex Duelist',price:2500},
   ]},
-  summon:{label:'Summon Rites',icon:'✨',desc:"The Avatar's descent when summoned in the Rite (Ascension mode).",items:[
+  summon:{label:'Summon Rites',icon:'✨',desc:"The Champion's descent when summoned in the Rite (Ascension mode).",items:[
     {id:'golden',name:'Golden Descent',price:0,color:'#F5C24D'},
     {id:'void',name:'Void Rift',price:1800,color:'#B15CF0'},
     {id:'crimson',name:'Crimson Omen',price:1800,color:'#E0503C'},
@@ -10506,14 +10506,14 @@ function ascHub(){
   hub.innerHTML='<div class="asc-hub-wrap"><div class="asc-hub-hero">'
     +'<div class="ahh-portrait" style="'+artFillStyle(avUnit.art)+'">'+(CARD_ART[avUnit.art]?'':sigilFor(avUnit.art))+'</div>'
     +'<div class="ahh-copy"><div class="lh-eyebrow" style="color:var(--violet)">Ascension · The Rite</div><h1>The Rift Awaits</h1>'
-    +'<p>Enter the Rift as an Avatar, rally a party of champions, and descend. Every victory is written into their legend.</p>'
+    +'<p>Enter the Rift as a Champion, rally a party of Allies, and descend. Every victory is written into their legend.</p>'
     +'<div class="ahh-standing">'
       +'<div class="ahs"><span class="ahs-k">Rite Rank</span><span class="ahs-v">'+rank.name+'</span><span class="ahs-s">'+(rank.next?'score '+rank.score+' · next '+rank.next.name:'◆ max rank')+'</span></div>'
       +'<div class="ahs"><span class="ahs-k">Arena</span><span class="ahs-v">'+ascArenaRank()+'</span><span class="ahs-s">'+ascArenaRP+' RP · '+ascArenaW+'W '+ascArenaL+'L</span></div>'
-      +'<div class="ahs"><span class="ahs-k">Champions</span><span class="ahs-v">'+lvlCount+'</span><span class="ahs-s">levelled up</span></div>'
+      +'<div class="ahs"><span class="ahs-k">Allies</span><span class="ahs-v">'+lvlCount+'</span><span class="ahs-s">levelled up</span></div>'
     +'</div>'+resume+'</div></div>'
     +'<div class="asc-hub-grid">'
-      +ascHubCard('👥','Champions','Progression, abilities & cosmetics for every unit','ascChampions()')
+      +ascHubCard('👥','Allies','Progression, abilities & cosmetics for every unit','ascChampions()')
       +ascHubCard('✦','Team Builder','Assemble your party · moves, skins & link auras','ascEnterTeam()')
       +ascHubCard('⚔️','The Arena','Rank your party against rivals · PvP','ascArenaHub()')
       +ascHubCard('🏪','Shop','Cosmetics, summon rites & bundles','ascGoShop()')
@@ -10527,12 +10527,12 @@ function ascHowTo(){
   function sec(t,rows){ return '<div class="acd-sec"><div class="acd-sec-t">'+t+'</div>'+rows+'</div>'; }
   function row(ic,nm,ds){ return '<div class="acd-link"><span class="acd-link-n">'+ic+' '+nm+'</span><span class="acd-link-fx">'+ds+'</span></div>'; }
   a.innerHTML='<div class="asc-panel"><div class="asc-panel-head"><button class="asc-back" onclick="ascHomeAsc()">← Ascension</button><div><div class="asc-res-eyebrow">Ascension · Field Manual</div><h2 class="asc-panel-title">How the Rite Works</h2></div></div>'
-   +'<p class="asc-panel-sub">You descend a six-tier gauntlet as an Avatar and a party of champions. A party wipe ends the run, and HP carries between battles — so pace yourself and heal when you can.</p>'
-   +sec('Your Party', row('★','Avatar (Patron)','Never fights. It grants your party a passive and charges an Ultimate you unleash at the crest of battle.')+row('⚔','Companions','Your fighters. Each learns a new move at Lv 3, 6 and 10.'))
+   +'<p class="asc-panel-sub">You descend a six-tier gauntlet as a Champion and a party of Allies. A party wipe ends the run, and HP carries between battles — so pace yourself and heal when you can.</p>'
+   +sec('Your Party', row('★','Champion (Patron)','Never fights. It grants your party a passive and charges an Ultimate you unleash at the crest of battle.')+row('⚔','Companions','Your fighters. Each learns a new move at Lv 3, 6 and 10.'))
    +sec('Move Kinds', row('⚔','Damage / 💥 AoE','Strike one foe, or all of them.')+row('❤️','Heal','Restore an ally.')+row('🛡','Guard','The party takes less damage for a few turns — soak a big hit.')+row('⤴','Buff','An ally strikes harder for a few turns — set up a nuke.')+row('🎯','Vulnerable','A foe takes extra damage — soften the tank.')+row('🩸','Bleed / Burn','Damage every turn, no roll needed.')+row('☠','Execute','Bonus damage against low-HP foes — close it out.'))
    +sec('Link Auras', row('🔗','Lore Links','Field 2+ units from the same lore group (Dragon-Pact, Waltz Twins, Darwin’s Court…) to activate a run-long team buff. Fighting together deepens the bond and strengthens the aura.'))
    +sec('The Map', row('⚔','Duel / 👑 Elite','Battles — the backbone of the run.')+row('⚡','Trial','Optional harder fight with a modifier — bigger rewards and guaranteed gear.')+row('🔀','Crossroads','Choose one of three rewards.')+row('🛒','Merchant','Spend Signal on gear and consumables.')+row('❤️','Sanctum','Rest and heal the party.')+row('☠️','Boss','Tier six — the run’s final test.'))
-   +sec('Your Legend', row('🎖','Bounties','Three optional run goals — complete them for bonus card value and Signal.')+row('🤝','Bonds','Champions who fight together forge bonds that raise their card value and strengthen shared links.')+row('👑','Card Value','Levels, Rites and bosses felled all raise a champion card’s market value — your Rite legend is a real asset.'))
+   +sec('Your Legend', row('🎖','Bounties','Three optional run goals — complete them for bonus card value and Signal.')+row('🤝','Bonds','Allies who fight together forge bonds that raise their card value and strengthen shared links.')+row('👑','Card Value','Levels, Rites and bosses felled all raise an ally card’s market value — your Rite legend is a real asset.'))
    +'<button class="enter-btn" style="margin-top:18px" onclick="ascHomeAsc()">Got it — back to Ascension</button></div>';
 }
 function ascEditMoves(id){ _ascMovesReturn=true; ascChampionDetail(id); }
@@ -10546,10 +10546,10 @@ function ascChampions(){
     var moves=ascUnitMoveList(u), unlocked=moves.filter(function(m){return lv>=(m.unlock||1);}).length;
     return '<button class="asc-champ-cell'+(u.avatar?' av':'')+(owned||loaner?'':' locked')+'" onclick="ascChampionDetail('+qk(u.id)+')">'
       +'<div class="acc-art" style="'+artFillStyle(u.art)+ascSkinStyle(u.name)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'<span class="acc-lv">Lv '+lv+'</span>'+(u.avatar?'<span class="acc-av">★</span>':'')+(owned||loaner?'':'<span class="acc-lock">🔒</span>')+'</div>'
-      +'<div class="acc-name">'+u.name.split(',')[0]+'</div><div class="acc-role">'+(u.avatar?'Avatar · '+u.role:u.role)+'</div>'
+      +'<div class="acc-name">'+u.name.split(',')[0]+'</div><div class="acc-role">'+(u.avatar?'Champion · '+u.role:u.role)+'</div>'
       +'<div class="acc-meta">'+unlocked+'/'+moves.length+' moves · '+(P.rites||0)+' rites</div></button>';
   }).join('');
-  a.innerHTML='<div class="asc-panel"><div class="asc-panel-head"><button class="asc-back" onclick="ascHomeAsc()">← Ascension</button><div><div class="asc-res-eyebrow">Ascension · Champions</div><h2 class="asc-panel-title">Your Champions</h2></div></div><p class="asc-panel-sub">Every unit carries its own legend — level, abilities and standing. Tap a champion for detail.</p><div class="asc-champ-grid">'+cells+'</div></div>';
+  a.innerHTML='<div class="asc-panel"><div class="asc-panel-head"><button class="asc-back" onclick="ascHomeAsc()">← Ascension</button><div><div class="asc-res-eyebrow">Ascension · Allies</div><h2 class="asc-panel-title">Your Allies</h2></div></div><p class="asc-panel-sub">Every unit carries its own legend — level, abilities and standing. Tap an ally for detail.</p><div class="asc-champ-grid">'+cells+'</div></div>';
 }
 function ascChampionDetail(id){
   var u=ASC_UNITS.find(function(x){return x.id===id;}); if(!u) return; var a=ascShowPane('asc-arena'); if(!a) return; ascSetVista(0);
@@ -10559,24 +10559,24 @@ function ascChampionDetail(id){
   var moves=ascUnitMoveList(u).map(function(m,mi){ var ok=lv>=(m.unlock||1); var eqd=_load.indexOf(mi)>=0; var btn=u.avatar?'':(ok?'<button class="acd-eq'+(eqd?' on':'')+'" onclick="ascToggleMove('+qk(u.id)+','+mi+')">'+(eqd?'✓ Equipped':'Equip')+'</button>':'<span class="acd-mv-lock">Lv '+m.unlock+'</span>'); return '<div class="acd-move'+(ok?'':' locked')+(eqd?' eqd':'')+' k-'+m.kind+'"><span class="acd-mv-ico">'+(ASC_KIND_ICON[m.kind]||'✦')+'</span><span class="acd-mv-body"><span class="acd-mv-name">'+m.name+(ok?'':' <span class="acd-mv-lock">unlocks Lv '+m.unlock+'</span>')+'</span><span class="acd-mv-desc">'+(m.desc||'')+'</span></span><span class="acd-mv-tag">'+ascMoveTag(m)+'</span>'+btn+'</div>'; }).join('');
   var pas=u.avatar?ASC_PASSIVES[u.id]:null;
   var groups=cardLinkGroups(u.name).filter(function(g){return ASC_LINK_FX[g.id];});
-  var linkHtml=groups.length?groups.map(function(g){ return '<div class="acd-link"><span class="acd-link-n">'+(ASC_LINK_FX[g.id].icon||g.icon)+' '+g.name+'</span><span class="acd-link-fx">'+ASC_LINK_FX[g.id].desc+'</span></div>'; }).join(''):'<div class="acd-none">No lore links — this champion fights alone.</div>'; var _bc=COLLECTION.find(function(x){return x.name===u.name && !x.variant && !x.ascendant;}); var bonds=(_bc&&typeof cardBondList==='function')?cardBondList(_bc):[]; var bondHtml=bonds.length?bonds.slice(0,6).map(function(b){ var _tl=b.tier?b.tier.name+' +'+b.tier.bonus:'Forming'; var _pr=b.next?b.count+'/'+b.next.n:'max tier'; return '<div class="acd-link"><span class="acd-link-n">🤝 '+b.partner+'</span><span class="acd-link-fx">'+_tl+' \u00b7 '+_pr+'</span></div>'; }).join(''):'<div class="acd-none">No bonds yet &mdash; field this champion alongside others in the Rite.</div>';
-  var skinRow=!ascSkinEligible(u.name)?'<div class="acd-cos-label">Regalia</div><div class="acd-cos-note">Portrait regalia is reserved for <b class="gold">Ultra</b>-rarity champions and rarer — a flex for your best cards. Unlock it on any card of that character.</div>':('<div class="acd-cos-label">Regalia &mdash; a portrait aura (any '+u.name.split(',')[0]+' card)</div><div class="acd-skins">'+ASC_SKINS.map(function(sk){ var own=ascSkinOwned(sk.id), eq=ascSkinOf(u.name)===sk.id; return '<button class="acd-skin'+(eq?' on':'')+(own?'':' locked')+'" onclick="ascBuySkin('+qk(sk.id)+','+qk(u.id)+')"><span class="acd-skin-dot" style="background:'+(sk.glow||'#5a5a6a')+'"></span>'+sk.name+(eq?' ✓':(own?'':' ❖'+sk.price))+'</button>'; }).join('')+'</div>');
+  var linkHtml=groups.length?groups.map(function(g){ return '<div class="acd-link"><span class="acd-link-n">'+(ASC_LINK_FX[g.id].icon||g.icon)+' '+g.name+'</span><span class="acd-link-fx">'+ASC_LINK_FX[g.id].desc+'</span></div>'; }).join(''):'<div class="acd-none">No lore links — this ally fights alone.</div>'; var _bc=COLLECTION.find(function(x){return x.name===u.name && !x.variant && !x.ascendant;}); var bonds=(_bc&&typeof cardBondList==='function')?cardBondList(_bc):[]; var bondHtml=bonds.length?bonds.slice(0,6).map(function(b){ var _tl=b.tier?b.tier.name+' +'+b.tier.bonus:'Forming'; var _pr=b.next?b.count+'/'+b.next.n:'max tier'; return '<div class="acd-link"><span class="acd-link-n">🤝 '+b.partner+'</span><span class="acd-link-fx">'+_tl+' \u00b7 '+_pr+'</span></div>'; }).join(''):'<div class="acd-none">No bonds yet &mdash; field this ally alongside others in the Rite.</div>';
+  var skinRow=!ascSkinEligible(u.name)?'<div class="acd-cos-label">Regalia</div><div class="acd-cos-note">Portrait regalia is reserved for <b class="gold">Ultra</b>-rarity allies and rarer — a flex for your best cards. Unlock it on any card of that character.</div>':('<div class="acd-cos-label">Regalia &mdash; a portrait aura (any '+u.name.split(',')[0]+' card)</div><div class="acd-skins">'+ASC_SKINS.map(function(sk){ var own=ascSkinOwned(sk.id), eq=ascSkinOf(u.name)===sk.id; return '<button class="acd-skin'+(eq?' on':'')+(own?'':' locked')+'" onclick="ascBuySkin('+qk(sk.id)+','+qk(u.id)+')"><span class="acd-skin-dot" style="background:'+(sk.glow||'#5a5a6a')+'"></span>'+sk.name+(eq?' ✓':(own?'':' ❖'+sk.price))+'</button>'; }).join('')+'</div>');
   var cos;
   if(u.avatar){
-    cos=skinRow+'<div class="acd-cos-label" style="margin-top:12px">Summon Rite</div><div class="acd-skins">'+COSMETICS.summon.items.map(function(it){ var own=ownedCosmetics.has('summon:'+it.id), eq=equipped.summon===it.id; return '<button class="acd-skin'+(eq?' on':'')+(own?'':' locked')+'" onclick="'+(own?'ascEquipSummon('+qk(it.id)+','+qk(u.id)+')':'ascGoShop()')+'"><span class="acd-skin-dot" style="background:'+(it.color||'#F5C24D')+'"></span>'+it.name+(eq?' ✓':(own?'':' 🔒'))+'</button>'; }).join('')+'</div><div class="acd-cos-note">Summon Rite — your Avatar’s descent when you unleash its Ultimate. More in the <a onclick="ascGoShop()">Shop</a>.</div>';
+    cos=skinRow+'<div class="acd-cos-label" style="margin-top:12px">Summon Rite</div><div class="acd-skins">'+COSMETICS.summon.items.map(function(it){ var own=ownedCosmetics.has('summon:'+it.id), eq=equipped.summon===it.id; return '<button class="acd-skin'+(eq?' on':'')+(own?'':' locked')+'" onclick="'+(own?'ascEquipSummon('+qk(it.id)+','+qk(u.id)+')':'ascGoShop()')+'"><span class="acd-skin-dot" style="background:'+(it.color||'#F5C24D')+'"></span>'+it.name+(eq?' ✓':(own?'':' 🔒'))+'</button>'; }).join('')+'</div><div class="acd-cos-note">Summon Rite — your Champion’s descent when you unleash its Ultimate. More in the <a onclick="ascGoShop()">Shop</a>.</div>';
   } else {
-    cos=skinRow+'<div class="acd-cos-note">This champion’s look is set by its card. Unlock auras, sleeves and summon rites in the <a onclick="ascGoShop()">Shop</a>.</div>';
+    cos=skinRow+'<div class="acd-cos-note">This ally’s look is set by its card. Unlock auras, sleeves and summon rites in the <a onclick="ascGoShop()">Shop</a>.</div>';
   }
-  var standing=owned?'✦ Owned — Rite progress banks to this card’s market value':(loaner?'✧ Loaner — free this month · progress does not bank':'🔒 Own the card to field this champion');
+  var standing=owned?'✦ Owned — Rite progress banks to this card’s market value':(loaner?'✧ Loaner — free this month · progress does not bank':'🔒 Own the card to field this ally');
   var _disc=u.avatar?null:ascUnitDiscipline(u.name);
   var discHtml=_disc?('<div class="acd-disc-row">⚔ '+_disc.might+' Might &middot; 🧠 '+_disc.cunning+' Cunning &middot; 🪨 '+_disc.grit+' Grit</div>'+((P.pendingSpec>0)?('<div class="acd-spec"><div class="acd-mv-desc">✦ '+P.pendingSpec+' spec point'+(P.pendingSpec>1?'s':'')+' available — permanently changes '+u.name.split(',')[0]+'\'s real card</div><div class="acd-spec-btns">'+['might','cunning','grit'].map(function(s){return '<button class="acd-eq" onclick="ascSpecChoice('+qk(u.id)+','+qk(s)+')">+2 '+s.charAt(0).toUpperCase()+s.slice(1)+'</button>';}).join('')+'</div></div>'):'')):'';
-  a.innerHTML='<div class="asc-panel"><div class="asc-panel-head">'+(_ascMovesReturn?'<button class="asc-back" onclick="ascMovesBackToTeam()">← Back to team</button>':'<button class="asc-back" onclick="ascChampions()">← Champions</button>')+'</div>'
+  a.innerHTML='<div class="asc-panel"><div class="asc-panel-head">'+(_ascMovesReturn?'<button class="asc-back" onclick="ascMovesBackToTeam()">← Back to team</button>':'<button class="asc-back" onclick="ascChampions()">← Allies</button>')+'</div>'
     +'<div class="acd-hero"><div class="acd-portrait" style="'+artFillStyle(u.art)+ascSkinStyle(u.name)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'</div>'
-    +'<div class="acd-id"><div class="asc-res-eyebrow">'+(u.avatar?'Avatar · '+u.role:u.role)+'</div><h2 class="asc-panel-title">'+u.name+'</h2>'
+    +'<div class="acd-id"><div class="asc-res-eyebrow">'+(u.avatar?'Champion · '+u.role:u.role)+'</div><h2 class="asc-panel-title">'+u.name+'</h2>'
     +'<div class="acd-standing">'+standing+'</div>'
     +'<div class="acd-stats"><span>Lv '+lv+'</span><span>'+st.hp+' HP</span><span>'+st.atk+' ATK</span><span>'+u.spd+' SPD</span></div>'
     +'<div class="acd-xp"><div class="acd-xpbar"><div class="acd-xpfill" style="width:'+Math.min(100,Math.round((P.xp||0)/need*100))+'%"></div></div><span class="acd-xptxt">'+(P.xp||0)+' / '+need+' XP · '+(P.rites||0)+' rites · '+(P.bosses||0)+' bosses felled</span></div></div></div>'
-    +(pas?'<div class="acd-sec"><div class="acd-sec-t">Avatar Passive & Ultimate</div><div class="acd-pas"><b>'+pas.name+'</b> — '+pas.desc+'</div><div class="acd-pas ult">Ultimate: <b>'+u.ability.name+'</b> — '+(u.ability.desc||'')+'</div></div>':'')
+    +(pas?'<div class="acd-sec"><div class="acd-sec-t">Champion Passive & Ultimate</div><div class="acd-pas"><b>'+pas.name+'</b> — '+pas.desc+'</div><div class="acd-pas ult">Ultimate: <b>'+u.ability.name+'</b> — '+(u.ability.desc||'')+'</div></div>':'')
     +(u.avatar?'':'<div class="acd-sec"><div class="acd-sec-t">Abilities &mdash; loadout '+_load.length+'/4 · equip up to 4 for battle</div>'+moves+'</div>')
     +(u.avatar?'':'<div class="acd-sec"><div class="acd-sec-t">Discipline — grows with Rite levels, changes this exact card</div>'+discHtml+'</div>')
     +'<div class="acd-sec"><div class="acd-sec-t">Lore Links — active when a linked ally shares the party</div>'+linkHtml+'</div>'
@@ -10627,9 +10627,9 @@ function ascRenderIntro(){
   var setup=document.getElementById('asc-setup'); if(!setup) return;
   setup.innerHTML='<div class="asc-intro"><div class="ai-eyebrow">Ascension · The Rite</div><h1 class="ai-title">Enter the Rift</h1><div class="ai-lore">'+
     '<p>Reality wears thin where the old wars scarred it. Where it tears, a <b>Rift</b> opens — a corridor of collapsing arenas across the shattered world. Nothing that walks in as <i>one thing</i> walks out the same.</p>'+
-    '<p>You do not enter as a soldier. You enter as an <b>Avatar</b> — a will, not a blade. Choose the card you would follow into the dark; it becomes your banner, your name inside the tear. Your units fight in that name; the Avatar empowers them; and when the battle crests, it answers with a single world-ending act.</p>'+
-    '<p>Every Rift you survive is written into the legend of your <b>Avatar</b>, forever. You do not simply play the card — you enter the Rift <i>as</i> it, and return as someone.</p>'+
-    '</div><button class="enter-btn ai-continue" onclick="ascIntroContinue()">Choose your Avatar →</button><div class="ai-skip">The Rite opens in a moment…</div></div>';
+    '<p>You do not enter as a soldier. You enter as a <b>Champion</b> — a will, not a blade. Choose the card you would follow into the dark; it becomes your banner, your name inside the tear. Your units fight in that name; the Champion empowers them; and when the battle crests, it answers with a single world-ending act.</p>'+
+    '<p>Every Rift you survive is written into the legend of your <b>Champion</b>, forever. You do not simply play the card — you enter the Rift <i>as</i> it, and return as someone.</p>'+
+    '</div><button class="enter-btn ai-continue" onclick="ascIntroContinue()">Choose your Champion →</button><div class="ai-skip">The Rite opens in a moment…</div></div>';
   if(ascIntroTimer) clearTimeout(ascIntroTimer);
   ascIntroTimer=setTimeout(function(){ if(ascSetupStep==='intro') ascIntroContinue(); }, 8000);
 }
@@ -10666,10 +10666,10 @@ function ascArenaEnd(won){
   }, 1300);
 }
 function ascUnitCell(u){ var owned=(ownedCopies[u.name]||0)>0, loaner=!owned&&ascIsLoaner(u.id), field=owned||loaner; var st=ascUnitStats(u), sel=(ascPartySel.avatarId===u.id||ascPartySel.companionIds.indexOf(u.id)>=0); var _spec=(ascUnitProg[u.name]&&ascUnitProg[u.name].pendingSpec)||0;
-  return '<div class="asc-unit'+(sel?' sel':'')+(u.avatar?' av':'')+(field?'':' locked')+(loaner?' loaner':'')+'"'+(field?' onclick="ascSelectUnit('+qk(u.id)+')"':'')+'><div class="asc-unit-art" style="'+artFillStyle(u.art)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'<span class="asc-unit-lv">Lv '+st.lv+'</span>'+(sel?'<span class="asc-unit-check">✓</span>':'')+(field?'':'<span class="asc-unit-lock">🔒</span>')+(loaner?'<span class="asc-unit-loan">LOANER</span>':'')+(_spec>0?'<span class="asc-unit-loan" style="background:var(--gold);color:#241a05">✦ SPEC</span>':'')+'</div><div class="asc-unit-name">'+u.name.split(',')[0]+'</div><div class="asc-unit-role">'+(owned?(u.avatar?'★ Avatar':u.role):(loaner?'✧ Loaner · free this month':'Own the card to field'))+'</div><div class="asc-unit-stat">'+st.hp+' HP · '+st.atk+' ATK</div><div class="asc-unit-abil">'+u.ability.name+'</div></div>'; }
+  return '<div class="asc-unit'+(sel?' sel':'')+(u.avatar?' av':'')+(field?'':' locked')+(loaner?' loaner':'')+'"'+(field?' onclick="ascSelectUnit('+qk(u.id)+')"':'')+'><div class="asc-unit-art" style="'+artFillStyle(u.art)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'<span class="asc-unit-lv">Lv '+st.lv+'</span>'+(sel?'<span class="asc-unit-check">✓</span>':'')+(field?'':'<span class="asc-unit-lock">🔒</span>')+(loaner?'<span class="asc-unit-loan">LOANER</span>':'')+(_spec>0?'<span class="asc-unit-loan" style="background:var(--gold);color:#241a05">✦ SPEC</span>':'')+'</div><div class="asc-unit-name">'+u.name.split(',')[0]+'</div><div class="asc-unit-role">'+(owned?(u.avatar?'★ Champion':u.role):(loaner?'✧ Loaner · free this month':'Own the card to field'))+'</div><div class="asc-unit-stat">'+st.hp+' HP · '+st.atk+' ATK</div><div class="asc-unit-abil">'+u.ability.name+'</div></div>'; }
 function ascSetupToAvatar(){ ascSetupGo('avatar'); }
 function ascSetupToCompanions(){ ascSetupGo('companions'); }
-function ascSetupGo(step){ if(step==='companions' && !ascPartySel.avatarId){ toast('Choose an Avatar first.', false); return; } ascSetupStep=step; buildAscension(); }
+function ascSetupGo(step){ if(step==='companions' && !ascPartySel.avatarId){ toast('Choose a Champion first.', false); return; } ascSetupStep=step; buildAscension(); }
 function ascRenderSetup(){
   var setup=document.getElementById('asc-setup'); if(!setup) return;
   var av=ASC_UNITS.find(function(u){return u.id===ascPartySel.avatarId;});
@@ -10680,14 +10680,14 @@ function ascRenderSetup(){
   var h;
   if(ascSetupStep==='avatar'){
     var pas=av?ASC_PASSIVES[av.id]:null;
-    h='<div class="lobby-head"><div class="lh-eyebrow" style="color:var(--violet)">The Rite · Step 1 of 2 · Choose your Avatar</div><h1>Summon your Avatar</h1><p>The card you pilot the Rift as. It empowers the units that serve you and charges your Ultimate — it never fights directly.</p></div>'+rankBar+
+    h='<div class="lobby-head"><div class="lh-eyebrow" style="color:var(--violet)">The Rite · Step 1 of 2 · Choose your Champion</div><h1>Summon your Champion</h1><p>The card you pilot the Rift as. It empowers the units that serve you and charges your Ultimate — it never fights directly.</p></div>'+rankBar+
       '<div class="asc-roster">'+ASC_UNITS.filter(function(u){return u.avatar;}).map(ascUnitCell).join('')+'</div>'+
-      '<div class="lobby-launch"><button class="asc-edit-team" onclick="ascHomeAsc()">⌂ Hub</button><div class="ll-info"><h3>'+(av?av.name.split(',')[0]+' — your Avatar':'No Avatar chosen')+'</h3><p class="'+(av?'':'ll-none')+'">'+(av&&pas?pas.name+': '+pas.desc+' · Ultimate: '+av.ability.name:'Tap an Avatar to see its aura and Ultimate.')+'</p></div><button class="enter-btn" onclick="ascSetupToCompanions()"'+(av?'':' disabled')+'>Rally your units →</button></div>';
+      '<div class="lobby-launch"><button class="asc-edit-team" onclick="ascHomeAsc()">⌂ Hub</button><div class="ll-info"><h3>'+(av?av.name.split(',')[0]+' — your Champion':'No Champion chosen')+'</h3><p class="'+(av?'':'ll-none')+'">'+(av&&pas?pas.name+': '+pas.desc+' · Ultimate: '+av.ability.name:'Tap a Champion to see its aura and Ultimate.')+'</p></div><button class="enter-btn" onclick="ascSetupToCompanions()"'+(av?'':' disabled')+'>Rally your units →</button></div>';
   } else {
-    h='<div class="lobby-head"><div class="lh-eyebrow" style="color:var(--violet)">The Rite · Step 2 of 2 · Rally your units</div><h1>Choose your companions</h1><p>The units that fight for '+(av?av.name.split(',')[0]:'your Avatar')+'. Choose 2 to 3.</p></div>'+
+    h='<div class="lobby-head"><div class="lh-eyebrow" style="color:var(--violet)">The Rite · Step 2 of 2 · Rally your units</div><h1>Choose your companions</h1><p>The units that fight for '+(av?av.name.split(',')[0]:'your Champion')+'. Choose 2 to 3.</p></div>'+
       '<div class="asc-party-preview">'+[av].concat(comps).filter(Boolean).map(function(u){ return '<div class="app-unit'+(u.avatar?' av':'')+'"><div class="app-art" style="'+artFillStyle(u.art)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'</div><div class="app-name">'+u.name.split(',')[0]+(u.avatar?' ★':'')+'</div>'+(u.avatar?'<span class="app-ult">★ Ultimate</span>':'<button class="app-moves" onclick="ascEditMoves('+qk(u.id)+')">✎ Moves</button>')+'</div>'; }).join('')+'</div>'+
       _lp+'<div class="asc-roster">'+ASC_UNITS.filter(function(u){return !u.avatar;}).map(ascUnitCell).join('')+'</div>'+
-      ascChapterPicker()+'<div class="lobby-launch"><button class="asc-edit-team" onclick="ascHomeAsc()">⌂ Hub</button><button class="asc-edit-team" onclick="ascSetupToAvatar()">← Avatar</button><div class="ll-info"><h3>'+(comps.length>=2?'Party ready':'Choose '+(2-comps.length)+' more')+'</h3><p>'+comps.length+' / 3 companions</p></div><button class="enter-btn"'+((av&&comps.length>=2)?'':' disabled')+' onclick="'+(ascEditing?'ascApplyTeamEdit()':'ascStoryStart()')+'">'+(ascEditing?'✓ Save team':'▶ Begin '+(ASC_CHAPTERS[ascChapterIdx]?ASC_CHAPTERS[ascChapterIdx].title:'Chapter 1: Rebirth'))+'</button></div>'+((!ascEditing)?'<div class="asc-altmodes"><span class="aam-label">Other modes</span><button class="asc-alt"'+((av&&comps.length>=2)?'':' disabled')+' onclick="ascBegin()">⚜ Endless Rite</button><button class="asc-alt"'+((av&&comps.length>=2)?'':' disabled')+' onclick="ascArenaStart()">⚔ The Arena · PvP</button></div>':'');
+      ascChapterPicker()+'<div class="lobby-launch"><button class="asc-edit-team" onclick="ascHomeAsc()">⌂ Hub</button><button class="asc-edit-team" onclick="ascSetupToAvatar()">← Champion</button><div class="ll-info"><h3>'+(comps.length>=2?'Party ready':'Choose '+(2-comps.length)+' more')+'</h3><p>'+comps.length+' / 3 companions</p></div><button class="enter-btn"'+((av&&comps.length>=2)?'':' disabled')+' onclick="'+(ascEditing?'ascApplyTeamEdit()':'ascStoryStart()')+'">'+(ascEditing?'✓ Save team':'▶ Begin '+(ASC_CHAPTERS[ascChapterIdx]?ASC_CHAPTERS[ascChapterIdx].title:'Chapter 1: Rebirth'))+'</button></div>'+((!ascEditing)?'<div class="asc-altmodes"><span class="aam-label">Other modes</span><button class="asc-alt"'+((av&&comps.length>=2)?'':' disabled')+' onclick="ascBegin()">⚜ Endless Rite</button><button class="asc-alt"'+((av&&comps.length>=2)?'':' disabled')+' onclick="ascArenaStart()">⚔ The Arena · PvP</button></div>':'');
   }
   setup.innerHTML=h;
 }
@@ -10775,7 +10775,7 @@ function ascEditTeam(){
 function ascApplyTeamEdit(){
   var av=ASC_UNITS.find(function(u){return u.id===ascPartySel.avatarId;});
   var comps=ascPartySel.companionIds.map(function(id){return ASC_UNITS.find(function(u){return u.id===id;});}).filter(Boolean);
-  if(!av || comps.length<2){ toast('Keep an Avatar and at least 2 companions.', false); return; }
+  if(!av || comps.length<2){ toast('Keep a Champion and at least 2 companions.', false); return; }
   var prev={}; ascParty.forEach(function(u){ prev[u.name]=u; });
   var mk=function(u){ var was=prev[u.name], st=ascUnitStats(u), g=ascGearDef(ascGearOn(u.name))||{}, ps=u.avatar?{}:ascPassive(); return {id:u.id, name:u.name, art:u.art, role:u.role, avatar:!!u.avatar, maxhp:st.hp+(g.hp||0)+(ps.hp||0), hp:was?Math.min(was.hp,st.hp+(g.hp||0)+(ps.hp||0)):st.hp+(g.hp||0)+(ps.hp||0), atk:st.atk+(g.atk||0)+(ps.atk||0), spd:u.spd+(g.spd||0), ability:Object.assign({}, u.ability), abilLeft:was?was.abilLeft:u.ability.uses}; };
   ascParty=[mk(av)].concat(comps.map(mk));
@@ -10784,7 +10784,7 @@ function ascApplyTeamEdit(){
 function ascBegin(){
   var av=ASC_UNITS.find(function(u){return u.id===ascPartySel.avatarId;});
   var comps=ascPartySel.companionIds.map(function(id){return ASC_UNITS.find(function(u){return u.id===id;});}).filter(Boolean);
-  if(!av || comps.length<2){ toast('Choose an Avatar and at least 2 companions.', false); return; }
+  if(!av || comps.length<2){ toast('Choose a Champion and at least 2 companions.', false); return; }
   var pas=ASC_PASSIVES[av.id]||{};
   var mkA=function(u){ var st=ascUnitStats(u); return {id:u.id, name:u.name, art:u.art, role:u.role, avatar:true, maxhp:st.hp, hp:st.hp, atk:st.atk, spd:u.spd, ability:Object.assign({}, u.ability), abilLeft:99}; };
   var mkC=function(u){ var st=ascUnitStats(u); return {id:u.id, name:u.name, art:u.art, role:u.role, avatar:false, maxhp:st.hp+(pas.hp||0), hp:st.hp+(pas.hp||0), atk:st.atk+(pas.atk||0), spd:u.spd, ability:Object.assign({}, u.ability), abilLeft:u.ability.uses}; };
@@ -10796,7 +10796,7 @@ function ascShowMap(){
   if(!ascRun){ buildAscension(); return; }
   ascSetVistaLoc(ascTierLoc(ascRun.tier));
   ascHideAll(); const el=document.getElementById('asc-map'); if(!el) return; el.style.display='';
-  const av={name:ascRun.avatarName||'Avatar',artKey:ascRun.avatarArt||'Kotei'};
+  const av={name:ascRun.avatarName||'Champion',artKey:ascRun.avatarArt||'Kotei'};
   let html='<div class="asc-run-bar"><div class="arb-portrait" style="'+artFillStyle(av.artKey||av.name)+'"></div>'+
     '<div class="arb-info"><div class="arb-name">'+av.name+'</div><div class="arb-sub">Ascension Lv <b>'+ascRun.level+'</b> · '+ascRankInfo().name+' · Tier '+(ascRun.tier+1)+'/'+ascRun.map.length+' · '+ascTierLoc(ascRun.tier)+'</div><div class="arb-party">'+ascPartyHpBar()+'</div></div>'+((ascRun.links&&ascRun.links.length)?'<div class="arb-links">'+ascRun.links.map(function(l){return '<span class="arb-link" title="'+l.name+' — '+l.desc+'">'+l.icon+'</span>';}).join('')+'</div>':'')+
     '<button class="asc-edit-team" onclick="ascBag()">🎒 Bag</button><button class="asc-edit-team" onclick="ascEditTeam()">\u2726 Edit Team</button><button class="asc-forfeit" onclick="ascConfirmAbandon()">Abandon</button></div>';
@@ -10817,7 +10817,7 @@ function ascShowMap(){
   html+='</div>';
   el.innerHTML=html;
 }
-function ascConfirmAbandon(){ if(confirm('Abandon the Rite? This run is lost — your Avatar keeps the legend it has earned so far.')){ ascSetupStep='intro'; ascEndRun(false); } }
+function ascConfirmAbandon(){ if(confirm('Abandon the Rite? This run is lost — your Champion keeps the legend it has earned so far.')){ ascSetupStep='intro'; ascEndRun(false); } }
 function ascPickNode(ti,ni){
   if(!ascRun || ti!==ascRun.tier) return;
   const node=ascRun.map[ti][ni]; ascRun.chosen[ti]=node.id;
@@ -10866,7 +10866,7 @@ const ASC_GEAR=[
   {id:'plate',  name:'Warplate',        icon:'🛡', atk:0,  hp:35, spd:0, price:220, desc:'Heavy protection for a front-liner.'},
   {id:'boots',  name:'Swift Boots',     icon:'🥾', atk:0,  hp:0,  spd:5, price:160, desc:'Act sooner in the turn order.'},
   {id:'amulet', name:'Vigor Amulet',    icon:'📿', atk:3,  hp:20, spd:0, price:300, desc:'A balanced boost to power and vitality.'},
-  {id:'crown',  name:'Ascendant Crown', icon:'👑', atk:8,  hp:30, spd:3, price:600, desc:'A relic of champions — power, vitality, speed.'}
+  {id:'crown',  name:'Ascendant Crown', icon:'👑', atk:8,  hp:30, spd:3, price:600, desc:'A relic of allies — power, vitality, speed.'}
 ];
 function ascGearDef(id){ return ASC_GEAR.find(function(x){return x.id===id;}); }
 function ascGearOn(name){ return (ascRun&&ascRun.equip&&ascRun.equip[name])||null; }
@@ -10883,7 +10883,7 @@ function ascRenderBag(){
       var b=[(it.atk?'+'+it.atk+' ATK':''),(it.hp?'+'+it.hp+' HP':''),(it.spd?'+'+it.spd+' SPD':'')].filter(Boolean).join(' · ');
       var btns=champs.map(function(cn){ var here=onWho===cn; return '<button class="bag-eq'+(here?' on':'')+'" onclick="ascEquipGear('+qk(id)+','+qk(cn)+')">'+(here?'✓ ':'')+cn.split(',')[0]+'</button>'; }).join('')+(onWho?'<button class="bag-eq off" onclick="ascUnequipGear('+qk(onWho)+')">Unequip</button>':'');
       return '<div class="bag-gear"><div class="bag-gi">'+it.icon+'</div><div class="bag-gbody"><div class="bag-gn">'+it.name+' <span class="bag-gb">'+b+'</span></div><div class="bag-eqrow">'+btns+'</div></div></div>'; }).join('') : '<div class="bag-empty">No gear yet — buy some at a Merchant node.</div>';
-  a.innerHTML='<div class="asc-merchant"><div class="asc-res-eyebrow">The Bag</div><h2 style="font-family:\'Trajan Pro\',Cinzel,Palatino,serif;margin:6px 0 12px;font-size:26px">Inventory</h2><div class="asc-shop-label">Consumables</div><div class="bag-cons-row">'+cons+'</div><div class="asc-shop-label" style="margin-top:16px">Gear — tap a Champion to equip</div>'+gearHtml+'<button class="enter-btn" style="margin-top:18px" onclick="ascShowMap()">← Back to the map</button></div>';
+  a.innerHTML='<div class="asc-merchant"><div class="asc-res-eyebrow">The Bag</div><h2 style="font-family:\'Trajan Pro\',Cinzel,Palatino,serif;margin:6px 0 12px;font-size:26px">Inventory</h2><div class="asc-shop-label">Consumables</div><div class="bag-cons-row">'+cons+'</div><div class="asc-shop-label" style="margin-top:16px">Gear — tap an Ally to equip</div>'+gearHtml+'<button class="enter-btn" style="margin-top:18px" onclick="ascShowMap()">← Back to the map</button></div>';
 }
 function ascFoeStats(node){
   var count = node.type==='boss'?1 : node.type==='elite'?3 : 2;
@@ -11059,7 +11059,7 @@ function ascBattleWin(){
 function ascBattleLose(reason){
   if(ascRun&&ascRun.pvp){ return ascArenaEnd(false); }
   ascBattle.phase='over'; ascBusy=true;
-  ascLog(reason==='avatar'?'Your Avatar has fallen — the Rite collapses.':'The party is wiped out.');
+  ascLog(reason==='avatar'?'Your Champion has fallen — the Rite collapses.':'The party is wiped out.');
   ascRenderBattle();
   setTimeout(function(){ ascBattleRunEnd(false); }, 1400);
 }
@@ -11110,8 +11110,8 @@ function ascRenderBattle(){
   var partyHtml=onfield.map(function(x){ var u=x.u,i=x.i; var pct=Math.round(Math.max(0,u.hp)/u.maxhp*100); var active=actor&&b.actor.i===i; var tgt=(b.phase==='target'&&((b.targetSide==='ally'&&u.hp>0)||(b.targetSide==='downed'&&u.hp<=0)));
     return '<div class="asc-pcard'+(u.hp<=0?' down':'')+(active?' active':'')+(u.avatar?' av':'')+(tgt?' targetable':'')+'" data-pi="'+i+'"'+(tgt?' onclick="ascTarget('+i+')"':'')+'><div class="asc-pc-art" style="'+artFillStyle(u.art)+ascSkinStyle(u.name)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'</div><div class="asc-pc-info"><div class="asc-pc-name">'+u.name.split(',')[0]+(u.avatar?' ★':'')+'</div><div class="asc-hpbar"><div class="asc-hpfill'+(pct<30?' low':'')+'" style="width:'+pct+'%"></div></div><div class="asc-hptxt">'+Math.max(0,u.hp)+' / '+u.maxhp+'</div></div>'+ascStatusBadges(u)+'</div>'; }).join('');
   var dock='';
-  { var av=ascParty.find(function(u){return u.avatar;})||{name:'Avatar',art:'Kotei'}; var gpct=Math.round(b.gauge/b.gaugeMax*100), ready=b.gauge>=b.gaugeMax; var pas=ascPassive(), ult=(ascPatron()&&ascPatron().ability)||{};
-    dock='<div class="asc-summon-dock'+(ready?' ready':'')+'"><div class="asd-art" style="'+artFillStyle(av.art)+'">'+(CARD_ART[av.art]?'':sigilFor(av.art))+'</div><div class="asd-info"><div class="asd-name">'+av.name.split(',')[0]+' <span>· your Avatar</span></div>'+(pas.name?'<div class="asd-passive">'+pas.name+' — '+pas.desc+'</div>':'')+'<div class="asd-gaugebar"><div class="asd-gaugefill" style="width:'+gpct+'%"></div></div><div class="asd-gtxt">'+(ready?'✦ ULTIMATE READY — '+(ult.name||''):'Ultimate '+gpct+'% · '+(ult.name||''))+'</div></div></div>'; }
+  { var av=ascParty.find(function(u){return u.avatar;})||{name:'Champion',art:'Kotei'}; var gpct=Math.round(b.gauge/b.gaugeMax*100), ready=b.gauge>=b.gaugeMax; var pas=ascPassive(), ult=(ascPatron()&&ascPatron().ability)||{};
+    dock='<div class="asc-summon-dock'+(ready?' ready':'')+'"><div class="asd-art" style="'+artFillStyle(av.art)+'">'+(CARD_ART[av.art]?'':sigilFor(av.art))+'</div><div class="asd-info"><div class="asd-name">'+av.name.split(',')[0]+' <span>· your Champion</span></div>'+(pas.name?'<div class="asd-passive">'+pas.name+' — '+pas.desc+'</div>':'')+'<div class="asd-gaugebar"><div class="asd-gaugefill" style="width:'+gpct+'%"></div></div><div class="asd-gtxt">'+(ready?'✦ ULTIMATE READY — '+(ult.name||''):'Ultimate '+gpct+'% · '+(ult.name||''))+'</div></div></div>'; }
   var menu='';
   if(b.phase==='choose'&&actor){ var canUlt=b.gauge>=b.gaugeMax, ultName=((ascPatron()&&ascPatron().ability&&ascPatron().ability.name))||'Ultimate';
     menu='<div class="asc-cmd"><div class="asc-cmd-who">'+actor.name.split(',')[0]+' — choose an action</div>'+
@@ -11134,11 +11134,11 @@ function ascSanctum(node){
 function ascPartyHpBar(){
   if(!ascParty||!ascParty.length) return '';
   return ascParty.map(function(u){ var pct=Math.round(Math.max(0,u.hp)/u.maxhp*100);
-    return '<span class="arb-hp'+(u.hp<=0?' down':'')+'" title="'+u.name.split(',')[0]+' '+Math.max(0,u.hp)+'/'+u.maxhp+(u.avatar?' (Avatar)':'')+'"><span class="arb-hpname">'+(u.avatar?'★':'')+u.name.split(',')[0].slice(0,5)+'</span><span class="arb-hpbar2"><span style="width:'+pct+'%"></span></span></span>'; }).join('');
+    return '<span class="arb-hp'+(u.hp<=0?' down':'')+'" title="'+u.name.split(',')[0]+' '+Math.max(0,u.hp)+'/'+u.maxhp+(u.avatar?' (Champion)':'')+'"><span class="arb-hpname">'+(u.avatar?'★':'')+u.name.split(',')[0].slice(0,5)+'</span><span class="arb-hpbar2"><span style="width:'+pct+'%"></span></span></span>'; }).join('');
 }
 function ascEndRun(won){
   if(!ascRun) return;
-  const av=COLLECTION.find(function(x){ return (x.uid||x.name)===ascRun.avatarKey; })||{name:'Your champion',rarity:'common'};
+  const av=COLLECTION.find(function(x){ return (x.uid||x.name)===ascRun.avatarKey; })||{name:'Your Champion',rarity:'common'};
   const key=ascRun.avatarKey, lvl=ascRun.level, flawless=ascRun.flawless, cleared=ascRun.cleared, tier=ascRun.tier;
   if(!avatarBond[key]) avatarBond[key]={wins:0,runs:0,bestLevel:1};
   const b=avatarBond[key]; const preW=b.wins; b.runs++;
@@ -11852,7 +11852,7 @@ function buildTourney(){
   var enterLabel = wknd ? (left>0 ? '⚔ Enter Tournament' : 'No entries left — back Saturday') : 'Opens this weekend';
   body.innerHTML = status
     + '<div class="tourney-card"><h4>Format</h4><p>A <b>'+TOURNEY_FIELD+'-rival round robin</b>, played to completion in one sitting — face every opponent once, and the highest score takes the crown. No mid-run saves; you win it in a single session.</p></div>'
-    + '<div class="tourney-card"><h4>Champion&rsquo;s Reward</h4><div class="tourney-reward"><span class="tr-icon">🎟️</span><p>Win the tournament and claim a <b>Tournament Pack</b> — it awards a random <b style="color:var(--gold)">Apex Rare variant</b>, the rarest pull in the game. Champions only.</p></div></div>'
+    + '<div class="tourney-card"><h4>Victor&rsquo;s Reward</h4><div class="tourney-reward"><span class="tr-icon">🎟️</span><p>Win the tournament and claim a <b>Tournament Pack</b> — it awards a random <b style="color:var(--gold)">Apex Rare variant</b>, the rarest pull in the game. Victors only.</p></div></div>'
     + '<div class="tourney-card"><h4>Entries</h4><p><span class="tourney-entries">'+left+' of '+TOURNEY_MAX+'</span> attempts left this weekend — resets every Saturday.</p></div>'
     + '<button class="tourney-enter" '+(canEnter?'':'disabled')+' onclick="enterTournament()">'+enterLabel+'</button>';
 }
@@ -11899,23 +11899,23 @@ function tourneyFinish(){
   var ov=document.getElementById('tourney-overlay'), panel=ov.querySelector('.to-panel');
   var rows=table.map(function(r,i){ return '<div class="to-row'+(r.me?' me':'')+'"><span>'+(i+1)+'. '+r.name+'</span><span>'+r.w+'W</span></div>'; }).join('');
   if(champion){
-    panel.innerHTML='<h2>🏆 CHAMPION</h2><p style="color:var(--gold);font-size:13px">You took the weekend tournament ('+tourneyWins+'–'+tourneyLosses+'). Claim your Tournament Pack.</p><div class="to-standings">'+rows+'</div><button class="to-btn" onclick="tourneyClaim()">🎟️ Open Tournament Pack</button>';
+    panel.innerHTML='<h2>🏆 VICTOR</h2><p style="color:var(--gold);font-size:13px">You took the weekend tournament ('+tourneyWins+'–'+tourneyLosses+'). Claim your Tournament Pack.</p><div class="to-standings">'+rows+'</div><button class="to-btn" onclick="tourneyClaim()">🎟️ Open Tournament Pack</button>';
   } else {
-    panel.innerHTML='<h2 style="color:var(--text)">Tournament Over</h2><p style="color:var(--text2);font-size:13px">You finished '+place+((place%10==1&&place!=11)?'st':(place%10==2&&place!=12)?'nd':(place%10==3&&place!=13)?'rd':'th')+' ('+tourneyWins+'–'+tourneyLosses+'). The crown pays only the champion — no pack this run.</p><div class="to-standings">'+rows+'</div><button class="to-btn" onclick="tourneyExit()">Back to Tournament</button>';
+    panel.innerHTML='<h2 style="color:var(--text)">Tournament Over</h2><p style="color:var(--text2);font-size:13px">You finished '+place+((place%10==1&&place!=11)?'st':(place%10==2&&place!=12)?'nd':(place%10==3&&place!=13)?'rd':'th')+' ('+tourneyWins+'–'+tourneyLosses+'). The crown pays only the victor — no pack this run.</p><div class="to-standings">'+rows+'</div><button class="to-btn" onclick="tourneyExit()">Back to Tournament</button>';
   }
   ov.classList.add('show');
 }
 function tourneyClaim(){
   var gens = (typeof VARIANT_DEFS!=='undefined') ? VARIANT_DEFS.filter(function(v){return v.tier==='genesis';}) : [];
   var res=null;
-  if(gens.length && typeof mintVariant==='function'){ var def=gens[Math.floor(Math.random()*gens.length)]; res=mintVariant(def, 'Tournament Champion'); }
+  if(gens.length && typeof mintVariant==='function'){ var def=gens[Math.floor(Math.random()*gens.length)]; res=mintVariant(def, 'Tournament Victor'); }
   var ov=document.getElementById('tourney-overlay'), panel=ov.querySelector('.to-panel');
   if(res){
     if(typeof saveState==='function') saveState();
     if(typeof updateBalance==='function') updateBalance();
     if(typeof buildVault==='function') buildVault();
     panel.innerHTML='<h2>✦ '+res.def.label+' '+res.def.unit+'</h2><p style="color:var(--gold);font-size:13px">Apex Rare variant — minted to your Vault, yours forever.</p><button class="to-btn" onclick="tourneyExit()">Claim →</button>';
-    if(typeof openLightbox==='function'){ try{ openLightbox(res.base.name, '🏆 Tournament Champion — '+res.def.label+' '+res.def.unit); }catch(e){} }
+    if(typeof openLightbox==='function'){ try{ openLightbox(res.base.name, '🏆 Tournament Victor — '+res.def.label+' '+res.def.unit); }catch(e){} }
   } else { tourneyExit(); }
 }
 function tourneyExit(){
@@ -11941,7 +11941,7 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
     }
     var scr=document.querySelector('.screens');
     if(scr && !document.getElementById('v-tourney')){
-      scr.insertAdjacentHTML('beforeend','<div class="view" id="v-tourney"><div class="tourney-wrap"><div style="margin:2px 0 4px"><div style="color:var(--gold);font-size:11px;letter-spacing:.17em;font-weight:700">WEEKEND EVENT</div><h1 style="font-size:26px;margin:2px 0 0">The Signal Tournament</h1><p style="color:var(--text2);font-size:12.5px;margin:5px 0 0">One weekend. One session. One champion.</p></div><div id="tourney-body"></div></div></div>');
+      scr.insertAdjacentHTML('beforeend','<div class="view" id="v-tourney"><div class="tourney-wrap"><div style="margin:2px 0 4px"><div style="color:var(--gold);font-size:11px;letter-spacing:.17em;font-weight:700">WEEKEND EVENT</div><h1 style="font-size:26px;margin:2px 0 0">The Signal Tournament</h1><p style="color:var(--text2);font-size:12.5px;margin:5px 0 0">One weekend. One session. One victor.</p></div><div id="tourney-body"></div></div></div>');
     }
     if(!document.getElementById('tourney-overlay')){
       document.body.insertAdjacentHTML('beforeend','<div id="tourney-overlay" class="tourney-overlay"><div class="to-panel"></div></div>');
