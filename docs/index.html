@@ -876,7 +876,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .screens{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
 
 /* ══ HUB ══ */
-:root{--vista:url(assets/img/c921eb5f72d9.jpg)}
+:root{--vista:url(assets/img/c921eb5f72d9.jpg);--hub-still:url(assets/img/e3c031231fde.jpg);}
 #v-lobby,#v-ranked,#v-pvp,#v-asc,#v-vault,#v-deck,#v-shop,#v-market,#v-profile{background:linear-gradient(180deg,rgba(6,7,11,0.74),rgba(6,7,11,0.58) 45%,rgba(6,7,11,0.82)),var(--vista) center/cover no-repeat,#050506}
 #v-conds,#v-abil,#v-match,#v-dna,#v-replay{flex-direction:column;background:linear-gradient(180deg,rgba(6,7,11,0.88),rgba(6,7,11,0.82) 45%,rgba(6,7,11,0.92)),var(--vista) center/cover no-repeat,#060608}
 #v-hub{flex-direction:column;overflow-y:auto}
@@ -912,11 +912,12 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .hub-action.ha-wide{grid-column:1/-1}
 .hub-codex{margin-top:20px}
 /* ══ HUB — Elden Ring / Elder Scrolls selection-screen treatment ══ */
-#v-hub{position:relative;overflow-y:auto;background:linear-gradient(180deg,rgba(6,7,11,0.70),rgba(6,7,11,0.5) 45%,rgba(6,7,11,0.80)),#050506}
+#v-hub{position:relative;overflow-y:auto;background:linear-gradient(180deg,rgba(6,7,11,0.70),rgba(6,7,11,0.5) 45%,rgba(6,7,11,0.80)),var(--hub-still) center/cover no-repeat,#050506}
 .hub-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity 1.1s ease}
 .hub-bg-video.on{opacity:1}
 .hub{position:relative;z-index:1}
-.hub.reveal-in{opacity:0;transform:translateY(10px);animation:hubReveal 1s ease 0.35s forwards}
+.hub.pending-reveal{opacity:0}
+.hub.reveal-in{opacity:0;transform:translateY(10px);animation:hubReveal 1s ease forwards}
 @keyframes hubReveal{to{opacity:1;transform:translateY(0)}}
 #v-hub::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;background:radial-gradient(62% 46% at 50% 6%,rgba(245,194,77,0.12),transparent 70%);box-shadow:inset 0 0 240px 46px rgba(0,0,0,0.78)}
 #v-hub::after{content:'';position:absolute;left:0;right:0;bottom:0;height:70%;pointer-events:none;z-index:0;opacity:0.6;background:radial-gradient(2px 2px at 14% 92%,rgba(245,214,130,0.9),transparent),radial-gradient(1.5px 1.5px at 33% 82%,rgba(245,214,130,0.7),transparent),radial-gradient(2px 2px at 58% 96%,rgba(245,214,130,0.8),transparent),radial-gradient(1.5px 1.5px at 78% 86%,rgba(245,214,130,0.6),transparent),radial-gradient(2px 2px at 90% 93%,rgba(245,214,130,0.7),transparent),radial-gradient(1.5px 1.5px at 46% 89%,rgba(245,214,130,0.6),transparent);background-repeat:no-repeat;animation:sfEmber 13s linear infinite}
@@ -2417,7 +2418,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 
   <!-- ── HUB VIEW ── -->
   <div class="view on" id="v-hub">
-    <video class="hub-bg-video" id="hub-bg-video" autoplay muted loop playsinline onerror="this.style.display='none'"></video>
+    <video class="hub-bg-video" id="hub-bg-video" muted playsinline onerror="this.style.display='none'"></video>
     <div class="hub">
       <div class="hub-hero">
         <div class="hero-left">
@@ -8627,7 +8628,7 @@ const CARD_ART_FULL = {
   'Kiba':'assets/img/b7b09c4e8ed7.jpg'
 };
 
-const HUB_BG_VIDEO = 'assets/video/d18f51f19c42.mp4';
+const HUB_BG_VIDEO = 'assets/video/692eeea2a812.mp4';
 const WORLD_MAP_IMG = 'assets/img/da6104578a0a.jpg';
 const LOCATION_ART = {
   'Noctreach':'assets/img/fc65d1956078.jpg',
@@ -9682,25 +9683,32 @@ function renderDailyQuests(){
   }).join('');
 }
 let _sfHubRevealDone = false;
-// Hub background video (7/17/26): loops permanently once shown. The reveal-in animation on .hub
-// (video fades in, then the UI settles in over it) fires exactly once per page load, and only for
-// a session that already had a save when the page loaded -- a brand-new player is still mid-onboarding
-// the first time they ever reach Hub, so they just get the video already playing, no extra flourish.
+// Hub background (7/17/26, reworked): permanent background is the static --hub-still image (the
+// video's own final frame) -- no loop, no ongoing camera motion. On a session that already had a save
+// when the page loaded (not a brand-new player, who's still mid-onboarding the first time they ever
+// reach Hub), the ORIGINAL full clip plays once on top as a "cinematic boot up," then fades out into
+// that same static frame underneath while the Hub UI, hidden until now, fades in. Runs exactly once
+// per page load; every later Hub visit this session just shows the static image immediately.
 function hubBgReveal(){
-  var vid = document.getElementById('hub-bg-video');
-  if(vid){
-    if(typeof HUB_BG_VIDEO!=='undefined' && vid.getAttribute('src')!==HUB_BG_VIDEO) vid.src = HUB_BG_VIDEO;
-    vid.classList.add('on');
-    var _tryPlay=function(){ if(vid.paused){ var _p=vid.play(); if(_p&&_p.catch) _p.catch(function(){}); } };
-    _tryPlay();
-    vid.addEventListener('canplay', _tryPlay, {once:true});   // covers the case where the very first play() attempt lands before boot has painted anything
-  }
   if(_sfHubRevealDone || !window._sfReturningSession) return;
   _sfHubRevealDone = true;
+  var vid = document.getElementById('hub-bg-video');
   var hubEl = document.querySelector('#v-hub .hub');
-  if(!hubEl) return;
-  hubEl.classList.add('reveal-in');
-  setTimeout(function(){ hubEl.classList.remove('reveal-in'); }, 1400);
+  if(!vid || typeof HUB_BG_VIDEO==='undefined'){ return; }   // no clip available -- Hub just shows normally over the static image
+  if(hubEl) hubEl.classList.add('pending-reveal');
+  vid.src = HUB_BG_VIDEO;
+  vid.classList.add('on');
+  var settled = false;
+  var settle=function(){
+    if(settled) return; settled = true;
+    vid.classList.remove('on');
+    if(hubEl){ hubEl.classList.remove('pending-reveal'); hubEl.classList.add('reveal-in'); setTimeout(function(){ hubEl.classList.remove('reveal-in'); }, 1100); }
+  };
+  vid.addEventListener('ended', settle, {once:true});
+  setTimeout(settle, 11000);   // safety net -- autoplay blocked, or 'ended' never fires for any reason
+  var _tryPlay=function(){ if(vid.paused){ var _p=vid.play(); if(_p&&_p.catch) _p.catch(function(){}); } };
+  _tryPlay();
+  vid.addEventListener('canplay', _tryPlay, {once:true});   // covers the case where the very first play() attempt lands before boot has painted anything
 }
 // Some browsers block even muted autoplay() called from boot script before any real user gesture --
 // retry once on the first click/key/touch anywhere, which reliably unblocks it. Harmless no-op once already playing.
