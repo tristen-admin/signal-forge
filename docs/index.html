@@ -452,7 +452,14 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .exp-pin-label{font-size:9.5px;font-weight:700;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.9);white-space:nowrap;pointer-events:none}
 .exp-pin:disabled{cursor:default}
 .exp-pin:disabled .exp-pin-dot{background:var(--text3);box-shadow:0 0 0 3px rgba(255,255,255,0.06)}
-.exp-pin:disabled:hover .exp-pin-dot{transform:none}.sf-pip{position:absolute;top:5px;right:6px;z-index:6;font-size:13px;line-height:1;padding:2px 3px;border-radius:9px;background:rgba(7,9,15,.6);filter:drop-shadow(0 1px 3px rgba(0,0,0,.85))}.rcard.sf-blooded{box-shadow:inset 0 0 0 1px rgba(212,168,67,.4)}.rcard.sf-elite{box-shadow:inset 0 0 0 1px var(--gold)}.rcard.sf-mastered{box-shadow:inset 0 0 0 1px var(--gold),0 0 18px rgba(245,194,77,.25)}.vault-card.sf-blooded{box-shadow:0 0 0 1px rgba(212,168,67,.6),0 0 14px rgba(212,168,67,.3)}.vault-card.sf-elite{box-shadow:0 0 0 1.5px var(--gold),0 0 20px rgba(245,194,77,.42)}.vault-card.sf-pristine{box-shadow:0 0 0 1px rgba(190,225,255,.5),inset 0 0 18px rgba(190,225,255,.14)}.vault-card.sf-marked .vc-art{filter:saturate(.78) brightness(.92)}.vault-card.sf-worn .vc-art{filter:saturate(.5) brightness(.8) sepia(.18)}.vault-card.sf-mastered{animation:sfMast 3.2s ease-in-out infinite}.vault-card.locked-card{opacity:.46;filter:grayscale(.78)}.vault-card.locked-card:hover{opacity:.8;filter:grayscale(.4)}.vault-card .vc-locked{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;font-size:10px;font-weight:800;letter-spacing:.03em;color:#fff;background:rgba(7,9,15,.82);border:1px solid var(--border2);border-radius:8px;padding:4px 9px;white-space:nowrap;pointer-events:none}.vault-card .vc-serial{position:absolute;bottom:6px;left:6px;z-index:5;font-size:9px;font-weight:800;letter-spacing:.03em;color:var(--gold);background:rgba(7,9,15,.85);border:1px solid var(--gold);border-radius:7px;padding:2px 7px;white-space:nowrap;pointer-events:none}.vault-card .vc-ingest{position:absolute;bottom:6px;right:6px;z-index:6;font-size:9px;font-weight:800;color:var(--gold);background:rgba(7,9,15,.85);border:1px solid var(--gold);border-radius:7px;padding:3px 8px;cursor:pointer;opacity:0;transition:opacity .12s}.vault-card:hover .vc-ingest{opacity:1}.vault-card .vc-ingest:hover{background:var(--gold);color:#0a0a0c}.vault-card.sf-blooded::before,.vault-card.sf-elite::before,.vault-card.sf-marked::before,.vault-card.sf-worn::before,.vault-card.sf-pristine::before,.vault-card.sf-mastered::before{content:'';position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;z-index:4;box-shadow:0 1px 3px rgba(0,0,0,.7)}.vault-card.sf-marked::before,.vault-card.sf-worn::before{background:var(--lose)}.vault-card.sf-blooded::before,.vault-card.sf-elite::before,.vault-card.sf-pristine::before,.vault-card.sf-mastered::before{background:var(--gold)}
+.exp-pin:disabled:hover .exp-pin-dot{transform:none}
+.exp-pin-active .exp-pin-dot{background:var(--text3);box-shadow:0 0 0 3px rgba(255,255,255,0.08)}
+.exp-pin-active .exp-pin-label{opacity:0.75}
+.exp-pin-ready .exp-pin-dot{background:var(--gold);animation:expReadyPulse 1.4s ease-in-out infinite}
+.exp-pin-ready .exp-pin-label{color:var(--gold);text-shadow:0 1px 3px rgba(0,0,0,0.9),0 0 8px rgba(245,194,77,0.6)}
+@keyframes expReadyPulse{0%,100%{box-shadow:0 0 0 3px rgba(245,194,77,0.3),0 2px 6px rgba(0,0,0,0.6)}50%{box-shadow:0 0 0 8px rgba(245,194,77,0.12),0 2px 10px rgba(0,0,0,0.6)}}
+.exp-claim-banner{color:var(--gold);font-weight:800}
+.sf-pip{position:absolute;top:5px;right:6px;z-index:6;font-size:13px;line-height:1;padding:2px 3px;border-radius:9px;background:rgba(7,9,15,.6);filter:drop-shadow(0 1px 3px rgba(0,0,0,.85))}.rcard.sf-blooded{box-shadow:inset 0 0 0 1px rgba(212,168,67,.4)}.rcard.sf-elite{box-shadow:inset 0 0 0 1px var(--gold)}.rcard.sf-mastered{box-shadow:inset 0 0 0 1px var(--gold),0 0 18px rgba(245,194,77,.25)}.vault-card.sf-blooded{box-shadow:0 0 0 1px rgba(212,168,67,.6),0 0 14px rgba(212,168,67,.3)}.vault-card.sf-elite{box-shadow:0 0 0 1.5px var(--gold),0 0 20px rgba(245,194,77,.42)}.vault-card.sf-pristine{box-shadow:0 0 0 1px rgba(190,225,255,.5),inset 0 0 18px rgba(190,225,255,.14)}.vault-card.sf-marked .vc-art{filter:saturate(.78) brightness(.92)}.vault-card.sf-worn .vc-art{filter:saturate(.5) brightness(.8) sepia(.18)}.vault-card.sf-mastered{animation:sfMast 3.2s ease-in-out infinite}.vault-card.locked-card{opacity:.46;filter:grayscale(.78)}.vault-card.locked-card:hover{opacity:.8;filter:grayscale(.4)}.vault-card .vc-locked{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:5;font-size:10px;font-weight:800;letter-spacing:.03em;color:#fff;background:rgba(7,9,15,.82);border:1px solid var(--border2);border-radius:8px;padding:4px 9px;white-space:nowrap;pointer-events:none}.vault-card .vc-serial{position:absolute;bottom:6px;left:6px;z-index:5;font-size:9px;font-weight:800;letter-spacing:.03em;color:var(--gold);background:rgba(7,9,15,.85);border:1px solid var(--gold);border-radius:7px;padding:2px 7px;white-space:nowrap;pointer-events:none}.vault-card .vc-ingest{position:absolute;bottom:6px;right:6px;z-index:6;font-size:9px;font-weight:800;color:var(--gold);background:rgba(7,9,15,.85);border:1px solid var(--gold);border-radius:7px;padding:3px 8px;cursor:pointer;opacity:0;transition:opacity .12s}.vault-card:hover .vc-ingest{opacity:1}.vault-card .vc-ingest:hover{background:var(--gold);color:#0a0a0c}.vault-card.sf-blooded::before,.vault-card.sf-elite::before,.vault-card.sf-marked::before,.vault-card.sf-worn::before,.vault-card.sf-pristine::before,.vault-card.sf-mastered::before{content:'';position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;z-index:4;box-shadow:0 1px 3px rgba(0,0,0,.7)}.vault-card.sf-marked::before,.vault-card.sf-worn::before{background:var(--lose)}.vault-card.sf-blooded::before,.vault-card.sf-elite::before,.vault-card.sf-pristine::before,.vault-card.sf-mastered::before{background:var(--gold)}
 
 /* ── MATCH-END (WIN / LOSS) SCREEN ── */
 .match-end{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,rgba(7,9,15,0.86),rgba(7,9,15,0.97));backdrop-filter:blur(3px)}
@@ -7136,7 +7143,8 @@ function show(id, btn){
   document.getElementById('tb-crumb').textContent = '';
   if(id==='vault') buildVault();
   if(id==='stories') buildSideStories();
-  if(id==='expeditions'){ expeditionRegen(); buildExpeditions(); }
+  if(_expTickTimer && id!=='expeditions'){ clearInterval(_expTickTimer); _expTickTimer=null; }
+  if(id==='expeditions'){ expeditionRegen(); buildExpeditions(); if(!_expTickTimer) _expTickTimer=setInterval(buildExpeditions, 30000); }
   if(id==='hub'){ buildHub(); grantDailyBonusIfDue(); expeditionRegen(); }
   if(id==='lobby') buildLobby();
   if(id==='pvp') buildPvP();
@@ -7162,6 +7170,9 @@ let lastDailyBonusDate = '';   // daily-return bonus (7/15/26): todayISO()-forma
 // the loop -- distinct from the once-daily Hub bonus above.
 let expeditionCharges = 2, expeditionMaxCharges = 2, expeditionLastRegen = 0;
 const EXPEDITION_FILL_MS = 3*60*60*1000;   // 3 hours per charge
+let expeditionsActive = {};   // locId -> {start, dur, reward} -- in-flight/ready-to-claim expeditions
+const EXPEDITION_MIN_DUR = 30*60*1000, EXPEDITION_MAX_DUR = 120*60*1000;   // duration rolled per launch, 30min-2hr
+let _expTickTimer = null;   // 30s refresh while the Expeditions screen is open, so countdowns/claim state update live
 function fmtPts(n){ return n.toLocaleString('en-US'); }
 function updateBalance(){
   const s = fmtPts(signalPoints);
@@ -7526,7 +7537,7 @@ function rlab(r){ return RARITY_LABEL[r]||cap(r||''); }
 function rlab1(r){ var l=RARITY_LABEL[r]||cap(r||''); return l.length<=2?l:l.charAt(0); }
 const SAVE_KEY = 'signalforge_save_v2';
 function saveState(){
-  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, expeditionCharges, expeditionLastRegen, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
+  try{ localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]})); }catch(e){}
 }
 function loadState(){
   try{
@@ -7536,6 +7547,7 @@ function loadState(){
     if(typeof s.lastDailyBonusDate==='string') lastDailyBonusDate=s.lastDailyBonusDate;
     if(typeof s.expeditionCharges==='number') expeditionCharges=s.expeditionCharges;
     if(typeof s.expeditionLastRegen==='number') expeditionLastRegen=s.expeditionLastRegen;
+    if(s.expeditionsActive && typeof s.expeditionsActive==='object') expeditionsActive=s.expeditionsActive;
     if(typeof s.questDate==='string') questDate=s.questDate;
     if(s.questProgress && typeof s.questProgress==='object') questProgress=s.questProgress;
     if(s.questAwarded && typeof s.questAwarded==='object') questAwarded=s.questAwarded;
@@ -9443,14 +9455,17 @@ function grantDailyBonusIfDue(){
   if(typeof toast==='function') toast('◈ Daily Bonus — +600 Signal, welcome back!', true);
   if(typeof saveState==='function') saveState();
 }
-// ══ EXPEDITIONS — card-acquisition idle-claim (7/17/26) ══
+// ══ EXPEDITIONS — card-acquisition idle-claim (7/17/26; rarity+duration 7/17/26) ══
 // World-map art is the owner's real reference image (Corrected_Final_Map.png), embedded below as
 // WORLD_MAP_IMG -- x/y are percentage placements matched to that image at 1200x800.
 // Location names/positions are flavor-only right now (no per-location odds) -- every site rolls the
 // same table. A few names (North Kasac, Sekihar) are shared with Ascension's own map on purpose --
 // same world, not the same mode; nothing here reads or writes Ascension state.
 // x/y placed on each landmass itself, not its text label, since labels in the source art sit
-// beside/above the island -- re-verify against the real art now that it's embedded.
+// beside/above the island.
+// Sending a charge now starts a timed expedition (30min-2hr, rolled at launch) instead of resolving
+// instantly -- longer expeditions skew the reward odds toward higher rarity. Reward is pre-rolled at
+// launch and revealed on claim; only one expedition can be in flight per location at a time.
 const WORLD_LOCATIONS = [
   {id:'apex',     name:'Apex Islands', x:16.5, y:13, blurb:'A cold northern reach, first to catch the dawn.'},
   {id:'namurak',  name:'Namurak',      x:28,   y:21, blurb:'Pinewood slopes over a quiet harbor.'},
@@ -9492,41 +9507,85 @@ function expeditionTimeLabel(ms){
   var mins = Math.ceil(ms/60000), h = Math.floor(mins/60), m = mins%60;
   return h>0 ? (h+'h '+m+'m') : (m+'m');
 }
+// Reward odds scale with rolled duration: t=0 at the 30min floor, t=1 at the 2hr ceiling.
+// Ultra ramps 0%->1%, Rare ramps 5%->10%; the remainder splits between a Common/Uncommon card and
+// flat Signal exactly like the original 50/50, just shrunk to make room for the two new tiers.
+function expeditionOdds(durMs){
+  var span = EXPEDITION_MAX_DUR - EXPEDITION_MIN_DUR;
+  var t = span>0 ? (durMs-EXPEDITION_MIN_DUR)/span : 0;
+  t = Math.max(0, Math.min(1, t));
+  var ultra = 1*t, rare = 5+5*t, rem = 100-ultra-rare;
+  return {ultra:ultra, rare:rare, card:rem/2, signal:rem/2};
+}
+function expeditionRollCard(rarities){
+  var pool = COLLECTION.filter(function(c){ return !c.uid && rarities.indexOf(c.rarity)>=0; });
+  return pool.length ? pool[Math.floor(Math.random()*pool.length)] : null;
+}
+function expeditionRollSignal(){ return 100 + Math.floor(Math.random()*101); }
+function expeditionRoll(durMs){
+  var o = expeditionOdds(durMs), roll = Math.random()*100, c;
+  if(roll < o.ultra){ c = expeditionRollCard(['ultra']); if(c) return {type:'card', name:c.name, rarity:c.rarity}; }
+  else if(roll < o.ultra+o.rare){ c = expeditionRollCard(['rare']); if(c) return {type:'card', name:c.name, rarity:c.rarity}; }
+  else if(roll < o.ultra+o.rare+o.card){ c = expeditionRollCard(['common','uncommon']); if(c) return {type:'card', name:c.name, rarity:c.rarity}; }
+  return {type:'signal', amt:expeditionRollSignal()};
+}
+function expeditionReady(exp){ return !!exp && Date.now() >= exp.start+exp.dur; }
 function runExpedition(locId){
+  var loc = WORLD_LOCATIONS.find(function(l){ return l.id===locId; }); if(!loc) return;
+  var exp = expeditionsActive[locId];
+  if(exp){
+    if(!expeditionReady(exp)){ if(typeof toast==='function') toast('🗺 '+loc.name+' — still adventuring, '+expeditionTimeLabel(exp.start+exp.dur-Date.now())+' left.', false); return; }
+    var msg;
+    if(exp.reward.type==='card'){
+      var res = typeof mintPulled==='function' ? mintPulled(exp.reward.name, 'Expedition: '+loc.name, 'expedition') : null;
+      if(res){ msg = '🗺 '+loc.name+' — found '+exp.reward.name+' ('+rlab(exp.reward.rarity)+')! (#'+res.idx+' / '+res.cap+')'; }
+      else { var fb=expeditionRollSignal(); signalPoints+=fb; msg='🗺 '+loc.name+' — nothing to find, +'+fb+' Signal instead.'; }
+    } else {
+      signalPoints += exp.reward.amt;
+      msg = '🗺 '+loc.name+' — +'+exp.reward.amt+' Signal';
+    }
+    delete expeditionsActive[locId];
+    if(typeof updateBalance==='function') updateBalance();
+    if(typeof toast==='function') toast(msg, true);
+    if(typeof saveState==='function') saveState();
+    if(typeof buildVault==='function') buildVault();
+    buildExpeditions();
+    return;
+  }
   expeditionRegen();
   if(expeditionCharges <= 0){ if(typeof toast==='function') toast('No expeditions ready — next one in '+expeditionTimeLabel(expeditionNextChargeMs())+'.', false); return; }
-  var loc = WORLD_LOCATIONS.find(function(l){ return l.id===locId; }); if(!loc) return;
   expeditionCharges--;
-  var msg;
-  if(Math.random() < 0.5){
-    var pool = COLLECTION.filter(function(c){ return !c.uid && (c.rarity==='common' || c.rarity==='uncommon'); });
-    var pick = pool.length ? pool[Math.floor(Math.random()*pool.length)] : null;
-    var res = pick && typeof mintPulled==='function' ? mintPulled(pick.name, 'Expedition: '+loc.name, 'expedition') : null;
-    if(res){ msg = '🗺 '+loc.name+' — found '+pick.name+'! (#'+res.idx+' / '+res.cap+')'; }
-    else { var fallback=80+Math.floor(Math.random()*81); signalPoints+=fallback; msg='🗺 '+loc.name+' — nothing to find, +'+fallback+' Signal instead.'; }
-  } else {
-    var amt = 100 + Math.floor(Math.random()*101);
-    signalPoints += amt;
-    msg = '🗺 '+loc.name+' — +'+amt+' Signal';
-  }
-  if(typeof updateBalance==='function') updateBalance();
-  if(typeof toast==='function') toast(msg, true);
+  var dur = EXPEDITION_MIN_DUR + Math.floor(Math.random()*(EXPEDITION_MAX_DUR-EXPEDITION_MIN_DUR+1));
+  expeditionsActive[locId] = {start: Date.now(), dur: dur, reward: expeditionRoll(dur)};
+  if(typeof toast==='function') toast('🗺 '+loc.name+' — expedition underway, back in '+expeditionTimeLabel(dur)+'.', true);
   if(typeof saveState==='function') saveState();
-  if(typeof buildVault==='function') buildVault();
   buildExpeditions();
 }
 function buildExpeditions(){
   var el = document.getElementById('expeditions-body'); if(!el) return;
   expeditionRegen();
+  var readyCount = 0;
   var pins = WORLD_LOCATIONS.map(function(l){
+    var exp = expeditionsActive[l.id];
+    if(exp && expeditionReady(exp)){
+      readyCount++;
+      return '<button class="exp-pin exp-pin-ready" style="left:'+l.x+'%;top:'+l.y+'%" title="'+l.name+' — ready to claim!" onclick="runExpedition(\''+l.id+'\')">'
+        + '<span class="exp-pin-dot"></span><span class="exp-pin-label">🎁 '+l.name+'</span></button>';
+    }
+    if(exp){
+      var left = expeditionTimeLabel(exp.start+exp.dur-Date.now());
+      return '<button class="exp-pin exp-pin-active" style="left:'+l.x+'%;top:'+l.y+'%" title="'+l.name+' — adventuring, '+left+' left" disabled>'
+        + '<span class="exp-pin-dot"></span><span class="exp-pin-label">'+l.name+' · '+left+'</span></button>';
+    }
     return '<button class="exp-pin" style="left:'+l.x+'%;top:'+l.y+'%" title="'+l.name+' — '+l.blurb+'" onclick="runExpedition(\''+l.id+'\')"'+(expeditionCharges<=0?' disabled':'')+'>'
       + '<span class="exp-pin-dot"></span><span class="exp-pin-label">'+l.name+'</span></button>';
   }).join('');
   var chargeRow = '<div class="exp-charges">'
     + '<span class="exp-charge-count">⚡ '+expeditionCharges+' / '+expeditionMaxCharges+' expeditions ready</span>'
     + (expeditionCharges<expeditionMaxCharges ? '<span class="exp-charge-next">next in '+expeditionTimeLabel(expeditionNextChargeMs())+'</span>' : '')
+    + (readyCount>0 ? '<span class="exp-claim-banner">🎁 '+readyCount+' expedition'+(readyCount>1?'s':'')+' ready to claim!</span>' : '')
     + '</div>';
-  el.innerHTML = '<p class="exp-intro">Send a charge to a marked location for a chance at a card or Signal. Charges refill over time — check back every few hours.</p>'
+  el.innerHTML = '<p class="exp-intro">Send a charge to a marked location — the longer the expedition, the better the odds of a rare find. Charges refill over time — check back every few hours.</p>'
     + chargeRow
     + '<div class="exp-map"><img class="exp-map-img" src="'+WORLD_MAP_IMG+'" alt=""><div class="exp-map-fallback"></div>' + pins + '</div>';
 }
