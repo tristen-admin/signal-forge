@@ -324,7 +324,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
    no name/K-D/keyword clutter competing for a 128px frame. Full detail stays one hover/tap away
    via readableCardHTML() (see wireFieldCardPreview()) -- nothing is lost, just off the board. */
 .bigcard.mini .tf-name,.bigcard.mini .tf-text,.bigcard.mini .tf-kd{display:none}
-.bigcard.mini .tf-pow{left:3.4%;width:58%;top:74%;height:22%;font-size:30px}
+.bigcard.mini .tf-pow{left:3.4%;width:58%;top:64%;height:32%;font-size:30px}
 .tframe .tf-abil{font-size:9px;line-height:1.35;color:#eef2f8;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;text-shadow:0 1px 2px rgba(0,0,0,0.98),0 0 6px rgba(0,0,0,0.85)}
 .tf-lbl{font-weight:800;margin-right:2px;opacity:.85}.tf-lbl.gold{color:#ffcf5a}
 .tf-called{font-size:8.5px;line-height:1.3;color:#ffe0a3;overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;flex-shrink:0;margin-top:1px;padding-top:3px;border-top:1px dashed rgba(245,194,77,0.45);text-shadow:0 1px 2px rgba(0,0,0,0.98),0 0 6px rgba(0,0,0,0.8)}
@@ -5442,8 +5442,8 @@ function _injectResolveCSS(){
   +'.rc-pow{font-size:46px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;color:var(--gold);margin-top:6px}'
   +'.rc-card.opp .rc-pow{color:var(--lose)}'
   +'.rc-base{font-size:9px;color:var(--text3);letter-spacing:.05em}'
-  +'.rc-pow.tick{animation:rc-pop .32s cubic-bezier(.2,1.6,.4,1)}'
-  +'@keyframes rc-pop{0%{transform:scale(1)}40%{transform:scale(1.45)}100%{transform:scale(1)}}'
+  +'.rc-pow.tick{animation:rc-pow-pop .32s cubic-bezier(.2,1.6,.4,1)}'
+  +'@keyframes rc-pow-pop{0%{transform:scale(1)}40%{transform:scale(1.15)}100%{transform:scale(1)}}'
   +'@keyframes rc-flip{0%{transform:rotateY(85deg);opacity:0}100%{transform:rotateY(0);opacity:1}}'
   +'.rc-fx{position:absolute;left:0;right:0;top:40%;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:3px}'
   +'.rc-chip{font-size:14px;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.55);animation:rc-rise 1.15s ease-out forwards}'
@@ -5460,6 +5460,7 @@ function _injectResolveCSS(){
   +'.rc-card.rc-tie{border-color:var(--text3)}'
   +'.rc-slot{position:relative;display:flex;align-items:center;justify-content:center}'
   +'.rc-slot .bigcard.tframe{width:128px}'
+  +'.rc-slot .tf-pow.rc-pow{margin-top:0}'
   +'.rc-slot .bigcard{animation:rc-flip .55s cubic-bezier(.2,.75,.3,1) both;transform-origin:center;backface-visibility:hidden}'
   +'.rc-slot.me .bigcard{animation-delay:.30s}'
   +'.rc-slot.opp .bigcard{animation-delay:.42s}'
@@ -5467,7 +5468,7 @@ function _injectResolveCSS(){
   +'.rc-slot.pu .bigcard{animation:rc-gu .42s ease}.rc-slot.pd .bigcard{animation:rc-gd .42s ease}'
   +'.rc-slot.rc-victor .bigcard{filter:drop-shadow(0 0 26px rgba(212,168,67,.7));animation:rc-vic .5s ease}'
   +'.rc-slot.rc-fallen{opacity:.42;filter:grayscale(.55)}'
-  +'.rc-slot .tf-pow.rc-pow.tick{animation:rc-pop .32s cubic-bezier(.2,1.6,.4,1)}'
+  +'.rc-slot .tf-pow.rc-pow.tick{animation:rc-pow-pop .32s cubic-bezier(.2,1.6,.4,1)}'
   +'.rc-slot.rc-clash{z-index:20}'
   +'.rc-slot.rc-clash .bigcard{animation:rc-cclash .62s cubic-bezier(.34,1.5,.5,1) forwards}'
   // Real bug (7/13/26): 1.74x peak / 1.6x settled scale-up on a .bigcard inside a .rc-slot wrapper
