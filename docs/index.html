@@ -2160,8 +2160,14 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 @media(prefers-reduced-motion:reduce){.companion-pet{animation:none}}
 .cos-comp{font-size:22px}
 /* ══ MOBILE DUEL REDESIGN (2026-07-04) — fit to viewport, field-first, nav out of combat ══ */
+/* 7/16/26: widened 860->1024 to close a dead zone against the desktop V-formation grid's
+   own min-width:1025px floor -- 861-1024px had neither rule set, so .field fell back to a bare
+   2-col CSS grid with no placement for any of the 6 formation slots, and auto-placement (once the
+   opponent's hidden rear slots left the flow) landed the player's OWN rear-guard under the
+   OPPONENT's fighter column. This flex-based layout doesn't rely on grid auto-placement, so
+   extending its range to exactly meet the desktop floor removes the gap instead of shrinking it. */
 @media (max-width:1024px){ body:has(#v-turn.on) .sidebar{display:none!important} }
-@media (max-width:860px), (orientation:landscape) and (max-height:620px){
+@media (max-width:1024px), (orientation:landscape) and (max-height:620px){
   .main{height:100%}
   #v-turn.on{height:100%;display:flex;flex-direction:column;overflow:hidden}
   .duel-strip{display:flex!important;flex-direction:column;flex:1;min-height:0;overflow:hidden!important}
@@ -2273,7 +2279,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
    setPhase() -- no JS change needed here). Unlike desktop's CSS grid, mobile's .field is a plain
    flex box, so the opponent's slots can just leave the flow via display:none -- the remaining
    flex children (yours) redistribute the freed space automatically. */
-@media (max-width:860px), (orientation:landscape) and (max-height:620px){
+@media (max-width:1024px), (orientation:landscape) and (max-height:620px){
   .field.cam-solo #opp-field,.field.cam-solo #opp-rear,.field.cam-solo #opp-rear2{display:none}
 }
 @media (max-width:860px){
@@ -5491,7 +5497,7 @@ function _injectResolveCSS(){
   // mobile: the 1.6x victor scale-up (centered transform-origin) has room to spare on the wide desktop
   // triangle grid, but on a narrow/short viewport it visually overlaps the result text + buttons below it.
   var _rcMobile = document.createElement('style');
-  _rcMobile.textContent = '@media (max-width:860px), (orientation:landscape) and (max-height:620px){'
+  _rcMobile.textContent = '@media (max-width:1024px), (orientation:landscape) and (max-height:620px){'
     + '@keyframes rc-cclash{0%{transform:scale(1)}52%{transform:scale(1.22)}74%{transform:scale(1.08)}100%{transform:scale(1.15)}}'
     + '.field{gap:30px!important}'
     + '}';
