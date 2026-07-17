@@ -4630,6 +4630,7 @@ function campOf(nameOrCard){
 // when no Deck Master is set -- unchanged behavior in every other mode/context.
 function effectiveRaceOf(card, dmName){ return dmName ? raceOf(dmName) : raceOf(card && card.name); }
 function effectiveCampOf(card, dmName){ return dmName ? campOf(dmName) : campOf(card); }
+function effectiveDisciplineOf(card, dmName){ if(dmName){ var _dc=(typeof COLLECTION!=='undefined')&&COLLECTION.find(function(x){return x.name===dmName && !x.uid;}); if(_dc) return (typeof deriveDisciplines==='function')?deriveDisciplines(_dc):{might:_dc.might||8,cunning:_dc.cunning||8,grit:_dc.grit||8}; } return (typeof deriveDisciplines==='function')?deriveDisciplines(card):{might:(card&&card.might)||8,cunning:(card&&card.cunning)||8,grit:(card&&card.grit)||8}; }
 function campBeats(a,b){ return CAMP_BEATS[a]===b; }
 function setCamp(name, camp){ if(!name) return; campOverride[name]=camp; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.camp=camp; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83c\udfd5 Camp set: '+name+' \u2192 '+camp, true); }
 
@@ -4638,7 +4639,15 @@ function setCamp(name, camp){ if(!name) return; campOverride[name]=camp; try{ []
    authored) so every existing card gets real, stable, working numbers immediately \u2014 this is placeholder
    content to stand the mechanic up; DISC_OVERRIDE lets the owner hand-tune specific cards later without
    re-deriving the rest. */
-let DISC_OVERRIDE = {};   // design-time per-card {might,cunning,grit} edits (persisted); wins over the derivation
+let DISC_OVERRIDE = {   // design-time per-card {might,cunning,grit} edits (persisted); wins over the derivation
+  // 7/16/26: hand-tuned starters + archetype centerpieces, replacing the hash-derived placeholder for
+  // these specific cards -- deliberate spreads grounded in each card's own printed ability, not a formula.
+  'Bannerlord Cassian':{might:14,cunning:16,grit:11},           // Muster rally-commander -- cunning-led tactics, solid might, average endurance
+  'Broodmother':{might:9,cunning:17,grit:15},                   // swarm manipulator -- high cunning, tanky matriarch, weak direct might
+  'Kiana':{might:12,cunning:13,grit:18},                        // disciplined self-sacrifice ("Order Initiate") -- grit-dominant
+  'Kravyn the Collector':{might:17,cunning:16,grit:9},          // relentless kill-collector -- high might+cunning, low patience
+  'Black Wings, Ossian Drell':{might:11,cunning:18,grit:14}     // strategic Wing Commander -- cunning-dominant, decent endurance
+};
 function _nameHash(s){ var h=0; s=String(s||''); for(var i=0;i<s.length;i++){ h=((h<<5)-h+s.charCodeAt(i))|0; } return Math.abs(h); }
 function deriveDisciplines(c){
   if(!c) return {might:8,cunning:8,grit:8};
@@ -6787,7 +6796,9 @@ function resolve(pc, oc, cond, playerCommittedPow){
   }
   else if(cond.id==="disciplinetrial"){
     var _dks=['might','cunning','grit'], _dk=_dks[Math.floor(Math.random()*3)], _dLbl={might:'Might',cunning:'Cunning',grit:'Grit'}[_dk];
-    var _pv=pc[_dk]||0, _ov=oc[_dk]||0;
+    var _pdisc=(typeof effectiveDisciplineOf==='function')?effectiveDisciplineOf(pc,deckMasterCard):pc;
+    var _odisc=(typeof effectiveDisciplineOf==='function')?effectiveDisciplineOf(oc,(typeof activeBot!=='undefined'&&activeBot)?activeBot.dmCard:null):oc;
+    var _pv=_pdisc[_dk]||0, _ov=_odisc[_dk]||0;
     if(_pv>_ov){ playerPow+=6; abilLog.push("🎯 Discipline Trial ("+_dLbl+"): "+_pv+" vs "+_ov+" — +6"); }
     else if(_ov>_pv){ oppPow+=6; abilLog.push("🎯 Discipline Trial ("+_dLbl+"): "+_ov+" vs "+_pv+" — +6"); }
     else { abilLog.push("🎯 Discipline Trial ("+_dLbl+"): tied at "+_pv+" — no swing"); }
@@ -7498,7 +7509,7 @@ function loadState(){
       if(s.essenceCosmetics && typeof s.essenceCosmetics==='object') essenceCosmetics=s.essenceCosmetics;
       if(s.raceOverride && typeof s.raceOverride==='object'){ raceOverride=s.raceOverride; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c) c.race=raceOf(c.name); }); }catch(e){} }
       if(s.campOverride && typeof s.campOverride==='object'){ campOverride=s.campOverride; }
-      if(s.DISC_OVERRIDE && typeof s.DISC_OVERRIDE==='object'){ DISC_OVERRIDE=s.DISC_OVERRIDE; }
+      if(s.DISC_OVERRIDE && typeof s.DISC_OVERRIDE==='object'){ DISC_OVERRIDE=Object.assign({}, DISC_OVERRIDE, s.DISC_OVERRIDE); }   // 7/16/26: merge, not replace -- a save file's own overrides must not wipe out the hand-tuned source defaults for cards it never touched
       try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(!c) return; c.camp=campOf(c.name); var _d=deriveDisciplines(c); c.might=_d.might; c.cunning=_d.cunning; c.grit=_d.grit; }); }catch(e){}
       if(s.cardFoilMax && typeof s.cardFoilMax==='object') cardFoilMax=s.cardFoilMax;
       if(s.cardFrames && typeof s.cardFrames==='object') cardFrames=s.cardFrames;
