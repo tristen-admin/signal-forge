@@ -319,6 +319,8 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .tframe .tf-text{position:absolute;left:19.5%;right:17.5%;top:57%;bottom:12.8%;z-index:2;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:2px}
 .tframe .tf-kd{position:absolute;left:56%;width:29%;top:85.8%;height:6.6%;z-index:4;display:flex;align-items:center;justify-content:center;gap:1px;font-size:8px;font-weight:800;font-variant-numeric:tabular-nums;color:#2c1904;text-shadow:0 1px 0 rgba(255,238,200,0.4)}
 .tf-cost{position:absolute;left:5%;width:17.2%;top:4%;height:12.7%;z-index:4;display:flex;align-items:center;justify-content:center;color:#3a2103;font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 rgba(255,240,205,0.6)}
+.tframe .tf-camp{position:absolute;right:5%;width:17.2%;top:4%;height:12.7%;z-index:4;display:flex;align-items:center;justify-content:center;font-size:15px;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+.bigcard.mini .tf-camp{display:none}
 .tframe .tf-kd .k{color:var(--win);font-weight:700}.tframe .tf-kd .d{color:var(--lose);font-weight:700}
 /* Marvel-Snap-style battlefield mode (7/13/26): live-play cards read at a glance -- power only,
    no name/K-D/keyword clutter competing for a 128px frame. Full detail stays one hover/tap away
@@ -9831,6 +9833,7 @@ function bigCardHTML(c, opts){
   return `<div class="bigcard tframe${miniCls} ${c.rarity||''} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})" data-cn="${(c.name||'').replace(/"/g,'&quot;')}">
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
+    <div class="tf-camp" title="${c.camp||(typeof campOf==='function'?campOf(c):'')}">${(typeof CAMP_ICON!=='undefined'&&CAMP_ICON[c.camp||(typeof campOf==='function'?campOf(c):'')])||''}</div>
     <div class="tf-name">${dispName(c.name)}</div>
     <div class="tf-pow"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${c.chaosPow?'?':((c.pow||0)+(c._bo||0))}</div>
     <div class="tf-kd"><span class="k">${_kd.k}K</span>/<span class="d">${_kd.d}D</span>${isPristine(c)?' ◈':''}</div>
