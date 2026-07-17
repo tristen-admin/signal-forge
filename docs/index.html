@@ -775,13 +775,20 @@ body{flex-direction:row!important}
 .nav-toggle:hover{background:rgba(245,194,77,0.22);transform:scale(1.15)}
 body.nav-collapsed .sidebar{width:48px!important;min-width:48px!important;overflow:hidden}
 body.nav-collapsed .sidebar > *{display:none!important}
+/* 7/16/26: .brand is the actual toggle button (onclick="toggleSidebar()") but is a sibling of
+   .nav, not a child of it -- the blanket rule above hid it with nothing re-showing it, so once
+   collapsed there was nothing left to click to reopen the menu. Re-show it the same way #nav-hub
+   already gets re-shown below, icon-only. */
+body.nav-collapsed .sidebar > .brand{display:flex!important;justify-content:center;padding:10px 0}
+body.nav-collapsed .brand .brand-text{display:none!important}
+body.nav-collapsed .brand .brand-mark{font-size:22px;color:var(--gold);filter:drop-shadow(0 0 7px var(--gold-glow));animation:navpulse 2.4s ease-in-out infinite}
 body.nav-collapsed .sidebar > .nav{display:flex!important;align-items:center;padding:10px 0 0}
 body.nav-collapsed .nav > *{display:none!important}
 body.nav-collapsed .nav > #nav-hub{display:flex!important;justify-content:center;width:100%;background:transparent!important;padding:6px 0}
 body.nav-collapsed #nav-hub .brand-text{display:none!important}
-body.nav-collapsed #nav-hub .ni-icon{font-size:22px;margin:0;color:var(--gold);filter:drop-shadow(0 0 7px var(--gold-glow));animation:navpulse 2.4s ease-in-out infinite}
+body.nav-collapsed #nav-hub .ni-icon{font-size:22px;margin:0;color:var(--gold);filter:drop-shadow(0 0 7px var(--gold-glow))}
 @keyframes navpulse{0%,100%{filter:drop-shadow(0 0 5px var(--gold-glow))}50%{filter:drop-shadow(0 0 11px var(--gold-glow))}}
-body.rm body.nav-collapsed #nav-hub .ni-icon,body.rm.nav-collapsed #nav-hub .ni-icon{animation:none}
+body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .brand-mark{animation:none}
 .brand{
   display:flex;align-items:center;gap:8px;padding:16px 16px 14px;
   font-size:14px;font-weight:800;letter-spacing:0.08em;color:var(--gold);
