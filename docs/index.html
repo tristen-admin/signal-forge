@@ -913,8 +913,8 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .hub-codex{margin-top:20px}
 /* ══ HUB — Elden Ring / Elder Scrolls selection-screen treatment ══ */
 #v-hub{position:relative;overflow-y:auto;background:linear-gradient(180deg,rgba(6,7,11,0.70),rgba(6,7,11,0.5) 45%,rgba(6,7,11,0.80)),var(--hub-still) center/cover no-repeat,#050506}
-.hub-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;transition:opacity 1.1s ease}
-.hub-bg-video.on{opacity:1}
+.hub-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:0;pointer-events:none;transition:opacity 1.1s ease;cursor:pointer}
+.hub-bg-video.on{opacity:1;pointer-events:auto}
 .hub{position:relative;z-index:1}
 .hub.pending-reveal{opacity:0}
 .hub.reveal-in{opacity:0;transform:translateY(10px);animation:hubReveal 1s ease forwards}
@@ -9705,6 +9705,8 @@ function hubBgReveal(){
     if(hubEl){ hubEl.classList.remove('pending-reveal'); hubEl.classList.add('reveal-in'); setTimeout(function(){ hubEl.classList.remove('reveal-in'); }, 1100); }
   };
   vid.addEventListener('ended', settle, {once:true});
+  vid.addEventListener('click', settle);
+  vid.addEventListener('touchstart', settle, {passive:true});   // tap anywhere on the intro skips straight to Hub
   setTimeout(settle, 11000);   // safety net -- autoplay blocked, or 'ended' never fires for any reason
   var _tryPlay=function(){ if(vid.paused){ var _p=vid.play(); if(_p&&_p.catch) _p.catch(function(){}); } };
   _tryPlay();
