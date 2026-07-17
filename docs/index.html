@@ -4615,14 +4615,14 @@ const ENERGY_SPELLS = [
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
 const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdorah Khaan, Determined Soul":2, "Tange Sazen":2, "Kotei":3, "Darwin":3, "Lagertha Waltz":2, "The Bronzed Beast, Hanse Waltz":3, "Hanse Waltz":1};   // ability-strength nudges above the power band (balance dial)
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
-const RACES = ['Human','Kaldrei','Vashiri','Nimkatta','Uroth','Kaidrun','Marrowen','Dragonkin','Lycan','Vampire','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
+const RACES = ['Human','Kaldrei','Vashiri','Nimkatta','Uroth','Kaidrun','Marrowen','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
 const CARD_RACE = {
   // Dragonkin
   'Ourevos, the Golden Dragon':'Dragonkin','Dragan Korr':'Dragonkin','Heir of Kaiga':'Dragonkin','Dragon':'Dragonkin','Scale Guard':'Dragonkin','Dragonfire':'Dragonkin','Wing Buffet':'Dragonkin','Ragefire':'Dragonkin',
-  // Lycan
-  'Hanse Waltz \u2014 Werewolf Form':'Lycan','Lagertha Waltz \u2014 Werewolf Form':'Lycan','Wolfsblood Guard':'Lycan','Werewolf Fury':'Lycan','Feral Lunge':'Lycan',
-  // Vampire
-  'Valcarion':'Vampire','Mordezh, Blood Prophet':'Vampire','Kravyn the Collector':'Vampire','Blood Moon':'Vampire','Bloodline Surge':'Vampire','Bloodline Momentum':'Vampire','Crosscut Bleed':'Vampire','Soul Reave':'Vampire',
+  // Nightclaw
+  'Hanse Waltz \u2014 Werewolf Form':'Nightclaw','Lagertha Waltz \u2014 Werewolf Form':'Nightclaw','Wolfsblood Guard':'Nightclaw','Werewolf Fury':'Nightclaw','Feral Lunge':'Nightclaw',
+  // Undying
+  'Valcarion':'Undying','Mordezh, Blood Prophet':'Undying','Kravyn the Collector':'Undying','Blood Moon':'Undying','Bloodline Surge':'Undying','Bloodline Momentum':'Undying','Crosscut Bleed':'Undying','Soul Reave':'Undying',
   // Revenant (undead)
   'Revenant':'Revenant','Revenant Mercy':'Revenant','The Regenerating Horror':'Revenant','Hollow Ravager':'Revenant','Twisted Specimen':'Revenant','Nyx, Devourer of Legends':'Revenant','Sythe Marrow':'Revenant','Soul Harvest':'Revenant','Grave Chill':'Revenant','Death Remnant':'Revenant','Phantom Cut':'Revenant','The Hollow King':'Revenant',
   // Ork
@@ -4654,7 +4654,7 @@ function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].conca
    working data. */
 const RACE_CAMP = {
   Human:'Amageras', Kaldrei:'Amageras', Kaidrun:'Amageras', Celestial:'Amageras', Construct:'Amageras',
-  Marrowen:'Omitsuki', Lycan:'Omitsuki', Vampire:'Omitsuki', Revenant:'Omitsuki',
+  Marrowen:'Omitsuki', Nightclaw:'Omitsuki', Undying:'Omitsuki', Revenant:'Omitsuki',
   Vashiri:'Kitanoo', Nimkatta:'Kitanoo', Uroth:'Kitanoo', Dragonkin:'Kitanoo', Beast:'Kitanoo', Spirit:'Kitanoo', Fae:'Kitanoo'
 };
 const CAMP_BEATS = {Amageras:'Omitsuki', Omitsuki:'Kitanoo', Kitanoo:'Amageras'};
