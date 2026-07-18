@@ -4620,7 +4620,7 @@ const ENERGY_SPELLS = [
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
 const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdorah Khaan, Determined Soul":2, "Tange Sazen":2, "Kotei":3, "Darwin":3, "Lagertha Waltz":2, "The Bronzed Beast, Hanse Waltz":3, "Hanse Waltz":1};   // ability-strength nudges above the power band (balance dial)
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
-const RACES = ['Human','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Marrowen','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
+const RACES = ['Human','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Marrowen','Dreikan','Dractyl','Thennlar','Xylotes','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
 const CARD_RACE = {
   // Dragonkin
   'Ourevos, the Golden Dragon':'Dragonkin','Dragan Korr':'Dragonkin','Heir of Kaiga':'Dragonkin','Dragon':'Dragonkin','Scale Guard':'Dragonkin','Dragonfire':'Dragonkin','Wing Buffet':'Dragonkin','Ragefire':'Dragonkin',
@@ -4655,12 +4655,12 @@ function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].conca
    kami names. Short forms are the canonical identity used everywhere; CAMP_TITLE holds the fuller
    flavor titles for the one spot (the condition's own rule text) that wants them.
    Placeholder first-pass assignment for races with no established card-lore yet (Kaldrei/Vysh'ra/
-   N'imkatta/Kaidrun/Marrowen) -- rename/reassign freely, this just stands the mechanic up with real,
+   N'imkatta/Kaidrun/Marrowen/Dreikan/Dractyl/Thennlar/Xylotes) -- rename/reassign freely, this just stands the mechanic up with real,
    working data. */
 const RACE_CAMP = {
-  Human:'Amageras', Kaldrei:'Amageras', Kaidrun:'Amageras', Celestial:'Amageras', Construct:'Amageras',
+  Human:'Amageras', Kaldrei:'Amageras', Kaidrun:'Amageras', Celestial:'Amageras', Construct:'Amageras', Dreikan:'Amageras',
   Marrowen:'Omitsuki', Nightclaw:'Omitsuki', Undying:'Omitsuki', Revenant:'Omitsuki',
-  'Vysh\'ra':'Kitanoo', 'N\'imkatta':'Kitanoo', Wrothlan:'Kitanoo', Dragonkin:'Kitanoo', Beast:'Kitanoo', Spirit:'Kitanoo', Fae:'Kitanoo'
+  'Vysh\'ra':'Kitanoo', 'N\'imkatta':'Kitanoo', Wrothlan:'Kitanoo', Dragonkin:'Kitanoo', Beast:'Kitanoo', Spirit:'Kitanoo', Fae:'Kitanoo', Dractyl:'Kitanoo', Thennlar:'Kitanoo', Xylotes:'Kitanoo'
 };
 const CAMP_BEATS = {Amageras:'Omitsuki', Omitsuki:'Kitanoo', Kitanoo:'Amageras'};
 const CAMP_ICON = {Amageras:'\u2600\ufe0f', Omitsuki:'\ud83c\udf19', Kitanoo:'\ud83c\udf0a'};
