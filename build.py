@@ -62,9 +62,10 @@ MANIFEST = {
 }
 
 EXT = {'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png', 'image/webp': 'webp',
-       'image/gif': 'gif', 'image/svg+xml': 'svg', 'video/mp4': 'mp4'}
+       'image/gif': 'gif', 'image/svg+xml': 'svg', 'video/mp4': 'mp4', 'audio/mp4': 'm4a',
+       'audio/mpeg': 'mp3'}
 DATA_URI = re.compile(
-    r'data:(image/(?:jpeg|jpg|png|webp|gif|svg\+xml)|video/mp4);base64,([A-Za-z0-9+/]+={0,2})')
+    r'data:(image/(?:jpeg|jpg|png|webp|gif|svg\+xml)|video/mp4|audio/(?:mp4|mpeg));base64,([A-Za-z0-9+/]+={0,2})')
 
 
 def main():
@@ -82,9 +83,10 @@ def main():
         shutil.rmtree(OUT)
     os.makedirs(os.path.join(OUT, "assets", "img"))
     os.makedirs(os.path.join(OUT, "assets", "video"))
+    os.makedirs(os.path.join(OUT, "assets", "audio"))
 
     seen = {}
-    stats = {'img': 0, 'video': 0, 'bytes': 0, 'dedup': 0, 'fail': 0}
+    stats = {'img': 0, 'video': 0, 'audio': 0, 'bytes': 0, 'dedup': 0, 'fail': 0}
 
     def repl(mm):
         mime, b64 = mm.group(1), mm.group(2)
@@ -97,7 +99,7 @@ def main():
         if h in seen:
             stats['dedup'] += 1
             return seen[h]
-        sub = 'video' if mime.startswith('video') else 'img'
+        sub = 'video' if mime.startswith('video') else 'audio' if mime.startswith('audio') else 'img'
         fn = f"{h}.{EXT.get(mime, 'bin')}"
         with open(os.path.join(OUT, "assets", sub, fn), 'wb') as f:
             f.write(raw)
@@ -126,10 +128,10 @@ def main():
     if apple and os.path.isfile(os.path.join(OUT, apple)):
         shutil.copyfile(os.path.join(OUT, apple), os.path.join(OUT, "apple-touch-icon.jpg"))
 
-    leftover = len(re.findall(r'data:(?:image|video)/[^;]+;base64,', out_html))
+    leftover = len(re.findall(r'data:(?:image|video|audio)/[^;]+;base64,', out_html))
     print(f"source          : {SRC}  ({len(html)//1024//1024} MB)")
     print(f"dist/index.html : {len(out_html)//1024} KB")
-    print(f"images extracted: {stats['img']}   videos: {stats['video']}   "
+    print(f"images extracted: {stats['img']}   videos: {stats['video']}   audio: {stats['audio']}   "
           f"deduped: {stats['dedup']}   failed: {stats['fail']}")
     print(f"assets on disk  : {stats['bytes']//1024//1024} MB")
     print(f"leftover data-URIs: {leftover}")

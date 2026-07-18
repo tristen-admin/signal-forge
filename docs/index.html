@@ -5845,12 +5845,40 @@ const SFX = (function(){
   if(typeof document!=='undefined'){ if(document.body) init(); else document.addEventListener('DOMContentLoaded', init); }
   return { play:play, setMuted:setMuted, startCrowd:startCrowd, stopCrowd:stopCrowd, ac:ac, get muted(){ return muted; } };
 })();
-// ══ MUSIC — procedural background score (Web Audio, zero assets). Combat = tense martial minor; Ascension = expansive mystical. Respects Sound + a separate Music toggle. ══
+// Real recorded tracks (7/18/26): lobby/deck-builder loop + the battle loop, both licensed-source
+// clips the user supplied and trimmed to exact timestamps. Decoded once via decodeAudioData and
+// looped with AudioBufferSourceNode (not a plain <audio loop> element) specifically for sample-
+// accurate, gapless looping -- confirmed live that decodeAudioData correctly strips this AAC
+// source's encoder priming/padding (a raw ffmpeg PCM dump of the same cut showed zeroed head/tail
+// samples that decodeAudioData's own output does not have).
+const REAL_TRACKS = { lobby:'assets/audio/87ad98640b43.m4a', battle:'assets/audio/3092c3e7219f.m4a' };
+const REAL_VOL = { lobby:0.30, battle:0.40 };
+// ══ MUSIC — procedural background score (Web Audio, zero assets) + the 2 real tracks above.
+// Combat/battle screen and Lobby/Deck-builder both now play real audio; Ascension stays procedural
+// (expansive mystical). Respects Sound + a separate Music toggle. ══
 const MUSIC = (function(){
   var ctx=null, master=null, timer=null, cur=null, wanted=null, step=0, nextT=0;
+  var realBuf={}, realSrc={}, realGain={}, realLoading={};   // per real-track-theme: decoded AudioBuffer (cached), live BufferSourceNode, own GainNode (bypasses `master` entirely -- see startReal), in-flight decode flag
   function mtof(m){ return 440*Math.pow(2,(m-69)/12); }
   function want(){ var s=true,m=true; try{ s=localStorage.getItem('sf_muted')!=='1'; }catch(e){} try{ m=localStorage.getItem('sf_music')!=='0'; }catch(e){} return s&&m; }
   function ac(){ if(!ctx){ try{ ctx=(typeof SFX!=='undefined'&&SFX.ac)?SFX.ac():new (window.AudioContext||window.webkitAudioContext)(); master=ctx.createGain(); master.gain.value=0.0001; master.connect(ctx.destination); }catch(e){ ctx=null; } } return ctx; }
+  function b64ToArrayBuffer(dataUri){ var b64=dataUri.slice(dataUri.indexOf(',')+1); var bin=atob(b64); var bytes=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i); return bytes.buffer; }
+  function realGainNode(theme){ if(realGain[theme]) return realGain[theme]; var c=ac(); if(!c) return null; var g=c.createGain(); g.gain.value=0.0001; g.connect(c.destination); realGain[theme]=g; return g; }   // straight to destination, NOT through `master` -- master's own gain is the procedural bus's volume control and must not multiply against these
+  function stopReal(theme){ var s=realSrc[theme]; if(!s) return; try{ s.stop(); }catch(e){} realSrc[theme]=null; }
+  function fadeRealOut(theme,ms){ var g=realGain[theme]; if(!g||!ctx) return; var t=ctx.currentTime, cv=Math.max(0.0001,g.gain.value||0.0001); g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(cv,t); g.gain.linearRampToValueAtTime(0.0001,t+(ms||700)/1000); setTimeout(function(){ stopReal(theme); },(ms||700)+50); }
+  function startReal(theme){
+    var c=ac(); if(!c) return; var g=realGainNode(theme); if(!g) return;
+    function go(buf){ if(cur!==theme) return;   // theme changed while this decode was in flight -- stale, drop it
+      stopReal(theme);
+      var s=c.createBufferSource(); s.buffer=buf; s.loop=true; s.connect(g); s.start(c.currentTime); realSrc[theme]=s;
+      var t=c.currentTime, cv=Math.max(0.0001,g.gain.value||0.0001);
+      g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(cv,t); g.gain.linearRampToValueAtTime(REAL_VOL[theme]||0.4, t+0.9);
+    }
+    if(realBuf[theme]){ go(realBuf[theme]); return; }
+    if(realLoading[theme]) return;
+    realLoading[theme]=true;
+    try{ c.decodeAudioData(b64ToArrayBuffer(REAL_TRACKS[theme]), function(buf){ realLoading[theme]=false; realBuf[theme]=buf; go(buf); }, function(){ realLoading[theme]=false; }); }catch(e){ realLoading[theme]=false; }
+  }
   function voice(t,freq,dur,type,peak,atk){ try{ var o=ctx.createOscillator(),g=ctx.createGain(); o.type=type; o.frequency.setValueAtTime(freq,t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+(atk||0.01)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g).connect(master); o.start(t); o.stop(t+dur+0.05); }catch(e){} }
   function chord(t,root,dur,type,peak,qual){ var iv=qual==='M'?[0,4,7]:qual==='sus'?[0,5,7]:[0,3,7]; for(var i=0;i<iv.length;i++) voice(t, mtof(root+iv[i]), dur, type, peak, 0.08); }
   function kick(t,peak){ try{ var o=ctx.createOscillator(),g=ctx.createGain(); o.type='sine'; o.frequency.setValueAtTime(150,t); o.frequency.exponentialRampToValueAtTime(48,t+0.11); g.gain.setValueAtTime(peak,t); g.gain.exponentialRampToValueAtTime(0.0001,t+0.16); o.connect(g).connect(master); o.start(t); o.stop(t+0.2); }catch(e){} }
@@ -5877,10 +5905,19 @@ const MUSIC = (function(){
   }
   function scheduler(){ var c=ac(); if(!c||!cur){ return; } while(nextT < c.currentTime+0.28){ schedStep(nextT); nextT+=PROG[cur].sd; step++; } }
   function fade(v,ms){ if(!master||!ctx) return; var t=ctx.currentTime, cv=Math.max(0.0001, master.gain.value||0.0001); master.gain.cancelScheduledValues(t); master.gain.setValueAtTime(cv,t); master.gain.linearRampToValueAtTime(Math.max(0.0001,v), t+(ms||900)/1000); }
-  function play(theme){ wanted=theme; if(!PROG[theme]) return; if(!want()) return; var c=ac(); if(!c) return; if(c.state==='suspended'){ try{ c.resume(); }catch(e){} } if(cur===theme && timer){ fade(PROG[theme].vol); return; } cur=theme; step=0; nextT=c.currentTime+0.1; if(!timer) timer=setInterval(scheduler,70); fade(PROG[theme].vol); }
-  function stop(){ wanted=null; cur=null; fade(0,700); if(timer){ clearInterval(timer); timer=null; } }
-  function refresh(){ if(wanted && want()){ var w=wanted; cur=null; play(w); } else { cur=null; fade(0,300); if(timer){ clearInterval(timer); timer=null; } } }
-  return { play:play, stop:stop, refresh:refresh, _dbg:function(){ return {state:ctx?ctx.state:'none', gain:master?+master.gain.value.toFixed(3):0, playing:!!timer, cur:cur, shared:(typeof SFX!=='undefined'&&SFX.ac&&ctx===SFX.ac())}; }, get current(){ return cur; }, get wanted(){ return wanted; } };
+  function play(theme){
+    wanted=theme; if(!REAL_TRACKS[theme] && !PROG[theme]) return; if(!want()) return;
+    var c=ac(); if(!c) return; if(c.state==='suspended'){ try{ c.resume(); }catch(e){} }
+    if(cur===theme && (REAL_TRACKS[theme] ? realSrc[theme] : timer)){ if(REAL_TRACKS[theme]){ var g=realGainNode(theme); if(g) g.gain.linearRampToValueAtTime(REAL_VOL[theme]||0.4, c.currentTime+0.4); } else fade(PROG[theme].vol); return; }
+    Object.keys(realGain).forEach(function(k){ if(k!==theme) fadeRealOut(k,500); });   // only one real track audible at a time
+    if(timer){ clearInterval(timer); timer=null; }
+    cur=theme;
+    if(REAL_TRACKS[theme]){ startReal(theme); return; }
+    step=0; nextT=c.currentTime+0.1; if(!timer) timer=setInterval(scheduler,70); fade(PROG[theme].vol);
+  }
+  function stop(){ wanted=null; cur=null; Object.keys(realGain).forEach(function(k){ fadeRealOut(k,700); }); fade(0,700); if(timer){ clearInterval(timer); timer=null; } }
+  function refresh(){ if(wanted && want()){ var w=wanted; cur=null; play(w); } else { cur=null; Object.keys(realGain).forEach(function(k){ fadeRealOut(k,300); }); fade(0,300); if(timer){ clearInterval(timer); timer=null; } } }
+  return { play:play, stop:stop, refresh:refresh, _dbg:function(){ return {state:ctx?ctx.state:'none', gain:master?+master.gain.value.toFixed(3):0, playing:!!timer, real:cur&&REAL_TRACKS[cur]?{theme:cur, gain:realGain[cur]?+realGain[cur].gain.value.toFixed(3):0, hasSrc:!!realSrc[cur]}:null, cur:cur, shared:(typeof SFX!=='undefined'&&SFX.ac&&ctx===SFX.ac())}; }, get current(){ return cur; }, get wanted(){ return wanted; } };
 })();
 // resume the shared audio context on the first user gesture (autoplay policy blocks sound until then)
 (function(){ function _unlock(){ try{ if(typeof SFX!=='undefined'&&SFX.ac){ var c=SFX.ac(); if(c&&c.state==='suspended') c.resume(); } }catch(e){} } ['pointerdown','keydown','touchstart','click'].forEach(function(ev){ document.addEventListener(ev,_unlock,{passive:true}); }); })();
@@ -7241,7 +7278,7 @@ function show(id, btn){
   if(id==='market'){ buildMarket(); if(typeof bumpQuestProgress==='function') bumpQuestProgress('visitMarket'); }
   if(id==='legend') buildLegendBoard();
   if(id==='profile') buildProfile();
-  if(typeof MUSIC!=='undefined'){ if(id==='turn') MUSIC.play('combat'); else if(id==='asc') MUSIC.play('ascension'); else MUSIC.stop(); }
+  if(typeof MUSIC!=='undefined'){ if(id==='turn') MUSIC.play('battle'); else if(id==='asc') MUSIC.play('ascension'); else if(id==='lobby'||id==='deck') MUSIC.play('lobby'); else MUSIC.stop(); }
   if(typeof showGuideTipIfDue==='function') showGuideTipIfDue(id);
 }
 
