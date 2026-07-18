@@ -8101,6 +8101,43 @@ function ingestVariant(uid){
   if(tierAfter>tierBefore) msg+=' \u00b7 \u2605 Ascended to '+ASC_NAME[tierAfter]+'!';
   if(typeof toast==='function') toast(msg, true);
 }
+// Integrate (7/17/26) -- the general "burn a duplicate into its own copy" sink for ordinary
+// (non-variant) cards, generalizing ingestVariant's shape to the base game. Reward is scoped to
+// cosmetics only (a free foil tier), never Signal/power, matching this game's power-transparency
+// doctrine -- same hard line the original variant-ingestion design drew. Consumes a MINTED
+// duplicate (its own uid) when one exists; otherwise decrements the shared base-copy count --
+// covers both ways a regular card can be owned more than once. Always keeps at least one copy.
+function ingestCard(name){
+  if(!name) return;
+  var mintedDupes = COLLECTION.filter(function(c){ return c.name===name && c.uid && !c.gachaVariant && (ownedCopies[c.uid]||0)>0; });
+  var baseCount = ownedCopies[name]||0;
+  var total = baseCount + mintedDupes.length;
+  if(total<=1){ if(typeof toast==='function') toast('That is your only '+name+' — keep at least one. Ingest only duplicates.', false); return; }
+  if(typeof confirm==='function' && !confirm('Ingest a duplicate '+name+'? It is consumed forever — your remaining copy gains a free foil tier, recorded in its ledger.')) return;
+  var recipientKey;
+  if(mintedDupes.length>0){
+    var victim=mintedDupes[0];
+    delete ownedCopies[victim.uid]; delete cardRecords[victim.uid]; delete cardFoils[victim.uid];
+    var ci=COLLECTION.findIndex(function(c){ return c.uid===victim.uid; }); if(ci>=0) COLLECTION.splice(ci,1);
+    var wi=wonInstances.findIndex(function(w){ return w.uid===victim.uid; }); if(wi>=0) wonInstances.splice(wi,1);
+    activeDeck.delete(victim.uid);
+    // recipient must be a copy that actually survives the ingest: prefer the fungible base-copy
+    // pool (key = name) when any base copies remain, else the next minted duplicate in line --
+    // cardFoilMax/cardRecords are both keyed by uid||name (recKey), so crediting a uid that just
+    // got deleted (or one nobody still owns) would silently strand the reward.
+    recipientKey = baseCount>0 ? name : mintedDupes[1].uid;
+  } else {
+    ownedCopies[name]=Math.max(0,baseCount-1);
+    if(freshCopies[name]) freshCopies[name]=Math.min(freshCopies[name], ownedCopies[name]);
+    recipientKey = name;
+  }
+  cardFoilMax[recipientKey]=(cardFoilMax[recipientKey]||0)+1;
+  if(cardRecords[recipientKey]){ cardRecords[recipientKey].chain=cardRecords[recipientKey].chain||[]; cardRecords[recipientKey].chain.push({owner:ME_ADDR, date:todayISO(), via:'Absorbed a duplicate copy'}); }
+  if(typeof updateBalance==='function') updateBalance();
+  if(typeof saveState==='function') saveState();
+  if(typeof buildVault==='function') buildVault();
+  if(typeof toast==='function') toast('✦ Ingested a duplicate '+name+' — your remaining copy gains a free foil tier.', true);
+}
 function pullVariant(bannerId){
   const b=GACHA_BANNERS.find(function(x){return x.id===bannerId;}); if(!b) return;
   const bi=GACHA_BANNERS.indexOf(b);
@@ -9909,7 +9946,7 @@ function buildVault(){
         ${e.count>1?`<span class="vc-copies">×${e.count}</span>`:''}
         ${e.locked?`<span class="vc-locked">\ud83d\udd12 Not owned</span>`:''}
         ${c.serial?`<span class="vc-serial">\u2726 #${c.serial}${c.firstPrint?' \u00b7 1st':''}</span>`:''}
-        ${c.gachaVariant?`<button class="vc-ingest" onclick="event.stopPropagation();ingestVariant('${c.uid}')" title="Feed this duplicate: +Essence, cosmetic ascension, and it leaves circulation">\u2726 Ingest</button>`:''}
+        ${c.gachaVariant?`<button class="vc-ingest" onclick="event.stopPropagation();ingestVariant('${c.uid}')" title="Feed this duplicate: +Essence, cosmetic ascension, and it leaves circulation">\u2726 Ingest</button>`:(e.count>1?`<button class="vc-ingest" onclick="event.stopPropagation();ingestCard('${c.name.replace(/'/g,"\\'")}')" title="Feed a duplicate copy: free foil tier, recorded in this card's ledger">\u2726 Ingest</button>`:'')}
         ${e.fresh?'<span class="vc-fresh">✦ Fresh Mint</span>':(c.ascendant?'<span class="vc-ascendant">⭐ Ascendant</span>':(c.variant?'<span style="position:absolute;top:6px;left:6px;font-size:13px;filter:drop-shadow(0 1px 2px #000)">🏆</span>':''))}
       </div>
       <div class="vc-info">
