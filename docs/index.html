@@ -5877,7 +5877,16 @@ const MUSIC = (function(){
     if(realBuf[theme]){ go(realBuf[theme]); return; }
     if(realLoading[theme]) return;
     realLoading[theme]=true;
-    try{ c.decodeAudioData(b64ToArrayBuffer(REAL_TRACKS[theme]), function(buf){ realLoading[theme]=false; realBuf[theme]=buf; go(buf); }, function(){ realLoading[theme]=false; }); }catch(e){ realLoading[theme]=false; }
+    var done=function(buf){ realLoading[theme]=false; realBuf[theme]=buf; go(buf); };
+    var fail=function(){ realLoading[theme]=false; };
+    var src=REAL_TRACKS[theme];
+    // build.py's de-embed pass rewrites the source's data: URI into a plain relative path
+    // (assets/audio/<hash>.m4a) in the deployed dist/docs build, same as it already does for
+    // every image/video reference -- only the raw pre-build source still has the literal data
+    // URI. decodeAudioData needs real bytes either way, so branch on which form we were handed:
+    // decode the base64 payload directly, or fetch the real file first.
+    if(src.indexOf('data:')===0){ try{ c.decodeAudioData(b64ToArrayBuffer(src), done, fail); }catch(e){ fail(); } }
+    else { fetch(src).then(function(r){ return r.arrayBuffer(); }).then(function(arrBuf){ try{ c.decodeAudioData(arrBuf, done, fail); }catch(e){ fail(); } }).catch(fail); }
   }
   function voice(t,freq,dur,type,peak,atk){ try{ var o=ctx.createOscillator(),g=ctx.createGain(); o.type=type; o.frequency.setValueAtTime(freq,t); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+(atk||0.01)); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g).connect(master); o.start(t); o.stop(t+dur+0.05); }catch(e){} }
   function chord(t,root,dur,type,peak,qual){ var iv=qual==='M'?[0,4,7]:qual==='sus'?[0,5,7]:[0,3,7]; for(var i=0;i<iv.length;i++) voice(t, mtof(root+iv[i]), dur, type, peak, 0.08); }
