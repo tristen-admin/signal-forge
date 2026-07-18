@@ -4103,6 +4103,7 @@ function playMatchIntro(){
   if(_miCd){ clearInterval(_miCd); _miCd=null; } if(_miSafe){ clearTimeout(_miSafe); _miSafe=null; }
   function fallback(){ if(done) return; done=true; if(_miCd){clearInterval(_miCd);_miCd=null;} if(ov){ ov.classList.remove('on','fade'); } if(typeof startRoundCountdown==='function') startRoundCountdown(); }
   if(_skipMatchIntro){ _skipMatchIntro=false; fallback(); return; }
+  if(typeof tutorialMode!=='undefined' && tutorialMode){ fallback(); return; }   // 7/18/26: the coached tutorial's practice duel shouldn't eat several seconds on the same cinematic a real match gets -- straight to the (already tutorial-safe) round countdown instead
   var reduce = (document.body.classList.contains('rm')) || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   if(reduce || !ov || !v || typeof MATCH_INTRO_VID==='undefined' || !MATCH_INTRO_VID){ fallback(); return; }
   cnt.textContent=''; cnt.classList.remove('pop');
