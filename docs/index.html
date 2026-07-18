@@ -2468,6 +2468,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <div class="vh-group vh-sort">
           <span class="vh-label">Sort</span>
           <button class="filter-chip on" onclick="setSort('rarity',this)">Rarity</button>
+          <button class="filter-chip" onclick="setSort('newest',this)">Newest</button>
           <button class="filter-chip" onclick="setSort('kills',this)">Most Kills</button>
           <button class="filter-chip" onclick="setSort('deaths',this)">Fewest Deaths</button>
         </div>
@@ -3563,9 +3564,12 @@ let banishPile = [];
 let banishSurge = 0;
 // Deck Master activated ability (7/15/26): a new, player-*activated* identity ability, separate
 // from the passive Tier-1/2/3 DM_EXCLUSIVE system -- usable any pre-commit phase (not gated to
-// the Instant Window), once per duel. dmNextConjureBonus is a deferred bonus consumed at the next
-// power computation, same shape as banishSurge, just earned by activating rather than banishing a card.
-let dmAbilityUsedThisDuel = false, dmNextConjureBonus = 0;
+// the Instant Window), once per MATCH (7/18/26: was wrongly resetting every duel -- only
+// resetMatchState() may clear this now, never commitCard()). dmNextConjureBonus is a deferred
+// bonus consumed at the next power computation, same shape as banishSurge, just earned by
+// activating rather than banishing a card -- that part IS still per-duel, since it's only
+// meant to buff the very next thing you conjure.
+let dmAbilityUsedThisMatch = false, dmNextConjureBonus = 0;
 const DM_ACTIVATED_ABILITY = {
   'Bannerlord Cassian': {draw:1, nextConjureBonus:5, log:'Rally the Line'},
   'Broodmother':        {draw:1, nextConjureBonus:5, log:"The Brood Answers"},
@@ -3583,10 +3587,10 @@ const DM_ACTIVATED_ABILITY = {
   }}
 };
 function activateDeckMasterAbility(){
-  if(!deckMasterCard || dmAbilityUsedThisDuel) return;
+  if(!deckMasterCard || dmAbilityUsedThisMatch) return;
   var ab = DM_ACTIVATED_ABILITY[deckMasterCard]; if(!ab) return;
   if(phase==='committed' || phase==='resolved') return;   // any MAIN phase, not after you've locked in
-  dmAbilityUsedThisDuel = true;
+  dmAbilityUsedThisMatch = true;
   if(ab.run){ ab.run(); }
   else { if(ab.draw && typeof drawToHand==='function') drawToHand(ab.draw); dmNextConjureBonus = ab.nextConjureBonus || 0; }
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
@@ -3598,7 +3602,7 @@ function renderDeckMasterAbilityStrip(){
   var opts=document.getElementById('dm-ability-options');
   var ab = deckMasterCard ? DM_ACTIVATED_ABILITY[deckMasterCard] : null;
   var eligiblePhase = (typeof phase!=='undefined') && phase!=='committed' && phase!=='resolved';
-  if(!ab || dmAbilityUsedThisDuel || !eligiblePhase){ strip.style.display='none'; if(opts) opts.innerHTML=''; return; }
+  if(!ab || dmAbilityUsedThisMatch || !eligiblePhase){ strip.style.display='none'; if(opts) opts.innerHTML=''; return; }
   strip.style.display='flex';
   if(opts) opts.innerHTML = '<button class="instant-card-btn" style="border-color:rgba(212,168,67,0.6);color:var(--gold)" onclick="activateDeckMasterAbility()">★ '+deckMasterCard+' — '+ab.log+' ('+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus))+')</button>';
 }
@@ -5128,6 +5132,30 @@ function selectCard(i, el){
   if(phase === 'selecting' && preSelectedCard !== null && i !== preSelectedCard){ callSupportIdx(i); return; }
   stageFighter(i);
 }
+// Deck Master conjure flourish (7/18/26): cosmetic-only celebration for conjuring your OWN chosen
+// Deck Master specifically (not just any fighter) -- deliberately no power change. This game already
+// has two power layers tied to a Deck Master (the passive DM_EXCLUSIVE tier bonus, and the once-per-
+// match activated ability); stacking a third automatic bonus here would be power creep with no clear
+// gap it fills, so this stays purely visual, matching the ask's own "not a power up unless it truly
+// makes sense" framing.
+function _dmConjureCSS(){ if(document.getElementById('dm-conjure-style')) return; var st=document.createElement('style'); st.id='dm-conjure-style'; st.textContent=`
+.dm-conjure-ring{position:fixed;z-index:250;pointer-events:none;border-radius:14px;border:2px solid var(--gold);animation:dmConjureRing 1.7s ease forwards}
+.dm-conjure-banner{position:fixed;z-index:250;pointer-events:none;left:50%;top:13%;transform:translateX(-50%);font-size:20px;font-weight:800;color:var(--gold);letter-spacing:.04em;text-shadow:0 2px 10px rgba(0,0,0,.7);white-space:nowrap;opacity:0;animation:dmConjureBanner 1.7s ease forwards}
+@keyframes dmConjureRing{0%{box-shadow:0 0 0 0 rgba(245,194,77,.75)}55%{box-shadow:0 0 0 20px rgba(245,194,77,0)}100%{box-shadow:0 0 0 20px rgba(245,194,77,0);opacity:0}}
+@keyframes dmConjureBanner{0%{opacity:0;transform:translateX(-50%) translateY(8px)}18%{opacity:1;transform:translateX(-50%) translateY(0)}78%{opacity:1}100%{opacity:0;transform:translateX(-50%) translateY(-6px)}}
+`; document.head.appendChild(st); }
+function _dmConjureFx(name){
+  _dmConjureCSS();
+  var pf=document.getElementById('player-field'); if(!pf) return;
+  var r=pf.getBoundingClientRect(), pad=10;
+  var ring=document.createElement('div'); ring.className='dm-conjure-ring';
+  ring.style.left=(r.left-pad)+'px'; ring.style.top=(r.top-pad)+'px'; ring.style.width=(r.width+pad*2)+'px'; ring.style.height=(r.height+pad*2)+'px';
+  document.body.appendChild(ring);
+  var banner=document.createElement('div'); banner.className='dm-conjure-banner'; banner.textContent='★ '+name+' takes the field';
+  document.body.appendChild(banner);
+  if(typeof SFX!=='undefined') SFX.play('ability');
+  setTimeout(function(){ if(ring.parentNode) ring.remove(); if(banner.parentNode) banner.remove(); }, 1700);
+}
 function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview(); if(typeof tutorialAdvance==='function')setTimeout(function(){tutorialAdvance('stage');},90);
   var c=hand[i]; if(!c || c.timing==='instant') return;
   if(phase!=='revealed' && phase!=='selecting') return;
@@ -5144,6 +5172,7 @@ function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview
   preSelectedCard = i; rearGuardIdxs = [];
   if(!pendingOppCard){ pendingOppCard = pickOppCard(); pendingOppRears = pickOppRears(pendingOppCard); }
   document.getElementById('player-field').innerHTML = bigCardHTML(c, {mini:true});  // face-up so you confirm what you're conjuring
+  if(c.name===deckMasterCard && typeof _dmConjureFx==='function') _dmConjureFx(c.name);
   if(typeof attachFighterDrag==='function') attachFighterDrag();
   if(typeof updateLivePow==='function') updateLivePow();
   document.getElementById('opp-field').innerHTML = '<div class="card field-card facedown enemy"><div class="fd-mark">▪▪▪</div></div>';
@@ -5418,7 +5447,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   if(typeof bumpQuestProgress==='function') bumpQuestProgress('conjure3');
   const committedPow = (pc.name==='Anorith Keeling' ? Math.max(1,(playerScore[0]+playerScore[1])*Math.max(0,hand.length-1)) : (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow)) + banishSurge + dmNextConjureBonus + remnantPowSum();
   banishSurge = 0;
-  dmNextConjureBonus = 0; dmAbilityUsedThisDuel = false;   // resets every duel -- usable again next round
+  dmNextConjureBonus = 0;   // per-duel deferred bonus only -- dmAbilityUsedThisMatch stays set until resetMatchState(), the ability is once per match now, not once per duel
 
   // close record reveal — opponent identity now revealed on field
   document.getElementById('record-reveal').style.display = 'none';
@@ -8922,8 +8951,12 @@ function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.rand
 // Custom deck used only if the player built one with at least STARTING_HAND+1 cards.
 let sandboxNext=false;   // one-shot: next deal uses a random ALL-CARD deck (Public Server sandbox)
 let draftDeckNext=null;   // one-shot: next deal uses the drafted deck (onboarding)
-function dealNewDeck(){
+function dealNewDeck(){ if(typeof tutorialAdvance==='function')setTimeout(function(){tutorialAdvance('draw');},90);
   // Public Server sandbox = a random all-card deck (zero consequence); else the player's 10 (or starter).
+  // 7/18/26: the opening hand of a match is dealt HERE directly (hand=deckCards.slice(...) below),
+  // never through drawCard() -- so the tutorial's draw-gated step needs its own tutorialAdvance('draw')
+  // hook right on this function, or the coached tutorial's first real gate never fires and softlocks
+  // (found via live playtest right after removing the old, wrongly-always-clickable "Next" button).
   let names;
   let _sandboxDealt=false;
   if(draftDeckNext){ names=draftDeckNext.slice(0,DECK_SIZE); draftDeckNext=null; }
@@ -9153,7 +9186,7 @@ function _pathDeck(key){ return (typeof STARTER_DECKS!=='undefined'&&STARTER_DEC
 function grantStarterDeck(names){ ownedCopies={}; freshCopies={}; cardRecords={}; if(typeof activeDeck!=='undefined') activeDeck=new Set(); (names||[]).forEach(function(nm){ var c=COLLECTION.find(function(x){return x.name===nm && !x.uid;}); if(!c) return; var k=c.uid||c.name; ownedCopies[k]=1; cardRecords[k]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Starter deck'}]}; if(activeDeck&&activeDeck.add) activeDeck.add(k); }); }
 var STARTER_DECKMASTER={ironsworn:'Bannerlord Cassian',broodswarm:'Broodmother',blackwings:'Kiana'};   // each starter path is issued its own Deck Master on pick (7/15/26)
 function chooseStarterPath(key){ var p=STARTER_PATHS.find(function(x){return x.key===key;}); if(!p) return; grantStarterDeck(_pathDeck(key)); if(STARTER_DECKMASTER[key]){ deckMasterCard=STARTER_DECKMASTER[key]; lsSet('sf_deckmaster', deckMasterCard); } featuredCards=[p.rep]; featuredShuffle=false; featuredRotIdx=0; try{ localStorage.setItem('sf_starter_chosen', key); }catch(e){} window._needStarterChoice=false; if(typeof saveState==='function') saveState(); var ov=document.getElementById('path-chooser'); if(ov) ov.classList.remove('on'); if(typeof applyCosmetics==='function') applyCosmetics(); if(typeof buildVault==='function') buildVault(); if(typeof buildHub==='function') buildHub(); if(typeof buildDeckBuilder==='function') buildDeckBuilder(); if(typeof updateDeckCount==='function') updateDeckCount(); if(typeof renderFeatured==='function') renderFeatured(); if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('🃏 '+p.name+' — starter deck forged: '+_pathDeck(key).length+' cards, all yours.', true); if(typeof showGuideDialogue==='function') setTimeout(function(){ showGuideDialogue('That deck is yours to keep — every card in it, permanently. To get you started, here\'s <b>20,000 Signal</b>. Spend it, save it, it\'s yours now.', {okLabel:'Let\'s go'}); }, 550); if(typeof startTutorial==='function'){ var _td=true; try{ _td=!localStorage.getItem('sf_tutorial_done'); }catch(e){} if(_td) setTimeout(startTutorial, 550); } }
-function _pathChooserCSS(){ if(document.getElementById('pc-style')) return; var st=document.createElement('style'); st.id='pc-style'; st.textContent=`.path-chooser{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center}.path-chooser.on{display:flex}.path-chooser .pc-scrim{position:absolute;inset:0;background:rgba(4,6,11,.87)}.path-chooser .pc-panel{position:relative;z-index:1;max-width:min(96vw,940px);max-height:92vh;overflow-y:auto;padding:26px 22px 30px;text-align:center}.path-chooser .pc-eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px}.path-chooser .pc-title{font-size:34px;font-weight:800;color:#fff;margin-bottom:6px}.path-chooser .pc-sub{font-size:13px;color:var(--text2);max-width:520px;margin:0 auto 22px;line-height:1.5}.path-chooser .pc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.path-chooser .pc-card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--border2);border-radius:14px;padding-bottom:16px;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,border-color .15s,box-shadow .15s}.path-chooser .pc-card:hover{transform:translateY(-4px);border-color:var(--acc);box-shadow:0 16px 40px rgba(0,0,0,.55)}.path-chooser .pc-art{height:148px;background-size:cover;background-position:center top;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border2)}.path-chooser .pc-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(10,12,18,.82))}.path-chooser .pc-icon{position:relative;z-index:1;font-size:38px;filter:drop-shadow(0 3px 8px rgba(0,0,0,.75))}.path-chooser .pc-body{padding:13px 15px 10px;flex:1;text-align:left}.path-chooser .pc-name{font-size:18px;font-weight:800;color:#fff}.path-chooser .pc-tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);margin:2px 0 9px}.path-chooser .pc-blurb{font-size:12px;color:var(--text2);line-height:1.5}.path-chooser .pc-pick{margin:0 15px;padding:10px 0;border-radius:9px;border:1px solid var(--acc);background:rgba(255,255,255,.06);color:#fff;font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:background .15s,color .15s}.path-chooser .pc-card:hover .pc-pick{background:var(--acc);color:#0a0d14}@media(max-width:720px){.path-chooser .pc-grid{grid-template-columns:1fr}.path-chooser .pc-panel{padding:18px 14px}.path-chooser .pc-title{font-size:26px}.path-chooser .pc-art{height:118px}}`; document.head.appendChild(st); }
+function _pathChooserCSS(){ if(document.getElementById('pc-style')) return; var st=document.createElement('style'); st.id='pc-style'; st.textContent=`.path-chooser{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center}.path-chooser.on{display:flex}.path-chooser .pc-scrim{position:absolute;inset:0;background:rgba(4,6,11,.87)}.path-chooser .pc-panel{position:relative;z-index:1;max-width:min(96vw,940px);max-height:92vh;overflow-y:auto;padding:26px 22px 30px;text-align:center}.path-chooser .pc-eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px}.path-chooser .pc-title{font-size:34px;font-weight:800;color:#fff;margin-bottom:6px}.path-chooser .pc-sub{font-size:13px;color:var(--text2);max-width:520px;margin:0 auto 22px;line-height:1.5}.path-chooser .pc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.path-chooser .pc-card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--border2);border-radius:14px;padding-bottom:16px;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,border-color .15s,box-shadow .15s}.path-chooser .pc-card:hover{transform:translateY(-4px);border-color:var(--acc);box-shadow:0 16px 40px rgba(0,0,0,.55)}.path-chooser .pc-art{height:148px;background-size:cover;background-position:center top;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border2)}.path-chooser .pc-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(10,12,18,.82))}.path-chooser .pc-body{padding:13px 15px 10px;flex:1;text-align:left}.path-chooser .pc-name{font-size:18px;font-weight:800;color:#fff}.path-chooser .pc-tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);margin:2px 0 9px}.path-chooser .pc-blurb{font-size:12px;color:var(--text2);line-height:1.5}.path-chooser .pc-pick{margin:0 15px;padding:10px 0;border-radius:9px;border:1px solid var(--acc);background:rgba(255,255,255,.06);color:#fff;font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:background .15s,color .15s}.path-chooser .pc-card:hover .pc-pick{background:var(--acc);color:#0a0d14}@media(max-width:720px){.path-chooser .pc-grid{grid-template-columns:1fr}.path-chooser .pc-panel{padding:18px 14px}.path-chooser .pc-title{font-size:26px}.path-chooser .pc-art{height:118px}}`; document.head.appendChild(st); }
 // Guide character (7/15/26): a portrait-above-textbox dialogue, classic VN/JRPG style -- the
 // character PNG is a placeholder slot (assets/guide-character.png) the user supplies later, same
 // pattern as the intro video. Two uses: (1) per-screen orientation tips, shown once ever per
@@ -9217,11 +9250,12 @@ function showIntroVideo(){
   if(!ov){ ov=document.createElement('div'); ov.id='intro-video-ov'; ov.className='intro-video-ov'; document.body.appendChild(ov); }
   ov.innerHTML='<video id="intro-video-el" autoplay playsinline src="'+INTRO_VIDEO_SRC+'"></video><button class="iv-skip" onclick="_introVideoDone()">Skip →</button>';
   ov.classList.add('on');
+  ov.onclick=_introVideoDone;   // tap anywhere on screen skips, not just the Skip button/Escape
   var v=document.getElementById('intro-video-el');
   if(v){ v.onended=_introVideoDone; v.onerror=_introVideoDone; }
   document.addEventListener('keydown', function _ivEsc(e){ if(e.key==='Escape'){ document.removeEventListener('keydown', _ivEsc); _introVideoDone(); } });
 }
-function showStarterChooser(){ _pathChooserCSS(); var ov=document.getElementById('path-chooser'); if(!ov){ ov=document.createElement('div'); ov.id='path-chooser'; ov.className='path-chooser'; document.body.appendChild(ov); } ov.innerHTML='<div class="pc-scrim"></div><div class="pc-panel"><div class="pc-eyebrow">New Commander</div><div class="pc-title">Choose Your Path</div><div class="pc-sub">Pick a starter deck — real cards you own and can build on. You can collect the others later.</div><div class="pc-grid">'+STARTER_PATHS.map(function(p){ var repC=COLLECTION.find(function(x){return x.name===p.rep && !x.uid;}); var art=(repC && typeof artFillStyle==='function')?artFillStyle(repC.artKey||repC.name):''; return '<div class="pc-card" style="--acc:'+p.accent+'" onclick="chooseStarterPath(\''+p.key+'\')"><div class="pc-art" style="'+art+'"><span class="pc-icon">'+p.icon+'</span></div><div class="pc-body"><div class="pc-name">'+p.name+'</div><div class="pc-tag">'+p.tag+'</div><div class="pc-blurb">'+p.blurb+'</div></div><button class="pc-pick">Choose '+p.name.replace('The ','')+'</button></div>'; }).join('')+'</div></div>'; ov.classList.add('on'); }
+function showStarterChooser(){ _pathChooserCSS(); var ov=document.getElementById('path-chooser'); if(!ov){ ov=document.createElement('div'); ov.id='path-chooser'; ov.className='path-chooser'; document.body.appendChild(ov); } ov.innerHTML='<div class="pc-scrim"></div><div class="pc-panel"><div class="pc-eyebrow">New Commander</div><div class="pc-title">Choose Your Path</div><div class="pc-sub">Pick a starter deck — real cards you own and can build on. You can collect the others later.</div><div class="pc-grid">'+STARTER_PATHS.map(function(p){ var repC=COLLECTION.find(function(x){return x.name===p.rep && !x.uid;}); var art=(repC && typeof artFillStyle==='function')?artFillStyle(repC.artKey||repC.name):''; return '<div class="pc-card" style="--acc:'+p.accent+'" onclick="chooseStarterPath(\''+p.key+'\')"><div class="pc-art" style="'+art+'"></div><div class="pc-body"><div class="pc-name">'+p.name+'</div><div class="pc-tag">'+p.tag+'</div><div class="pc-blurb">'+p.blurb+'</div></div><button class="pc-pick">Choose '+p.name.replace('The ','')+'</button></div>'; }).join('')+'</div></div>'; ov.classList.add('on'); }
 window.showStarterChooser=showStarterChooser; window.chooseStarterPath=chooseStarterPath;
 ;/* ── BALANCE PASS 2026-07-07 (owner spec): reworked CARD_RULES + remnant values ── */
 CARD_RULES['Kravyn the Collector']=[{"if":{"v":"pc_kills","op":">=","n":10},"add":3,"log":"⚔️ Kravyn: +3 (10+ kills)"},{"if":{"v":"pc_kills","op":">=","n":20},"add":5,"log":"⚔️ Kravyn: +5 Kill Escalation (20+)"}];
@@ -9262,6 +9296,8 @@ function _coachCSS(){ if(document.getElementById('coach-style'))return; var st=d
 .coach-box .cb-skip:hover{color:var(--text2)}
 .coach-box .cb-next{background:var(--gold);color:#0a0d14;border:none;border-radius:8px;padding:8px 20px;font-weight:800;font-size:13px;cursor:pointer}
 .coach-box .cb-next:hover{filter:brightness(1.08)}
+.coach-box .cb-wait{color:var(--gold);font-size:12px;font-weight:700;opacity:.85;animation:coachWaitPulse 1.6s ease-in-out infinite}
+@keyframes coachWaitPulse{0%,100%{opacity:.55}50%{opacity:1}}
 @media(max-width:640px){.coach-box{bottom:2%;padding:12px 13px}.coach-box .cb-say{font-size:12.5px}}
 `; document.head.appendChild(st); }
 function _coachSpot(sel){
@@ -9275,7 +9311,10 @@ function showCoachStep(){
   _coachCSS(); var step=TUTORIAL_SCRIPT[tutorialStep]; if(!step){ endTutorial(); return; }
   _coachSpot(step.spot);
   var box=document.getElementById('coach-box'); if(!box){ box=document.createElement('div'); box.id='coach-box'; box.className='coach-box'; document.body.appendChild(box); }
-  box.innerHTML='<div class="cb-mentor">🃏</div><div class="cb-body"><div class="cb-step">Tutorial · Step '+(tutorialStep+1)+' / '+TUTORIAL_SCRIPT.length+'</div><div class="cb-say">'+step.say+'</div><div class="cb-row"><button class="cb-skip" onclick="endTutorial()">Skip tutorial</button><button class="cb-next" onclick="'+(step.act||'nextCoachStep')+'()">'+(step.btn||'Next')+' →</button></div></div>';
+  var advanceCtl = step.on
+    ? '<span class="cb-wait">👉 Do it to continue</span>'
+    : '<button class="cb-next" onclick="'+(step.act||'nextCoachStep')+'()">'+(step.btn||'Next')+' →</button>';
+  box.innerHTML='<div class="cb-mentor">🃏</div><div class="cb-body"><div class="cb-step">Tutorial · Step '+(tutorialStep+1)+' / '+TUTORIAL_SCRIPT.length+'</div><div class="cb-say">'+step.say+'</div><div class="cb-row"><button class="cb-skip" onclick="endTutorial()">Skip tutorial</button>'+advanceCtl+'</div></div>';
 }
 function nextCoachStep(){ tutorialStep++; if(tutorialStep>=TUTORIAL_SCRIPT.length){ endTutorial(); return; } showCoachStep(); }
 function tutorialAdvance(trigger){ if(!tutorialMode) return; var step=TUTORIAL_SCRIPT[tutorialStep]; if(step && step.on===trigger) nextCoachStep(); }
@@ -9910,6 +9949,7 @@ function vaultTrackerHTML(){
     +'<span class="vt-count">'+O+'/'+T+' <span class="vt-pct">'+pct+'%</span></span></div>'
     +'<div class="vt-chips">'+chips+'</div>';
 }
+function _acquiredDate(c){ var r=cardRecords[c.uid||c.name]; var ch=r&&r.chain; return (ch&&ch.length)?(ch[ch.length-1].date||''):''; }   // last chain entry = most recent thing that happened to this copy (acquired, won, or fed via Ingest)
 function buildVault(){
   const grid=document.getElementById('vault-grid');
   const base=COLLECTION.filter(c=>{
@@ -9930,8 +9970,9 @@ function buildVault(){
   });
   if(vaultSort==='kills') entries.sort((a,b)=> b.k-a.k || (RARITY_ORDER[a.c.rarity]-RARITY_ORDER[b.c.rarity]));
   else if(vaultSort==='deaths') entries.sort((a,b)=> a.d-b.d || b.k-a.k);
+  else if(vaultSort==='newest') entries.sort((a,b)=> _acquiredDate(b.c).localeCompare(_acquiredDate(a.c)) || (RARITY_ORDER[a.c.rarity]-RARITY_ORDER[b.c.rarity]));
   else entries.sort((a,b)=> (RARITY_ORDER[a.c.rarity]-RARITY_ORDER[b.c.rarity]) || ((a.locked?1:0)-(b.locked?1:0)) || (b.c.pow-a.c.pow) || ((a.fresh?1:0)-(b.fresh?1:0)));
-  const sortLabel = vaultSort==='kills' ? ' · most kills' : vaultSort==='deaths' ? ' · fewest deaths' : '';
+  const sortLabel = vaultSort==='kills' ? ' · most kills' : vaultSort==='deaths' ? ' · fewest deaths' : vaultSort==='newest' ? ' · newest' : '';
   const totalCards=entries.reduce((s,e)=>s+(e.locked?0:e.count),0);
   document.getElementById('vault-count').textContent=`${totalCards} cards${vaultKeyword?' · '+vaultKeyword:''}${sortLabel}`;
   { var _vt=document.getElementById('vault-tracker'); if(_vt) _vt.innerHTML=vaultTrackerHTML(); }
@@ -11696,7 +11737,7 @@ function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopC
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[];
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
-  banishSurge=0; dmNextConjureBonus=0; dmAbilityUsedThisDuel=false; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
+  banishSurge=0; dmNextConjureBonus=0; dmAbilityUsedThisMatch=false; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
   charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
