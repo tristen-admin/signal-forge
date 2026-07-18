@@ -428,7 +428,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .dfb-own .own-chip.owned.on{background:rgba(87,196,106,0.20);border-color:#57c46a;color:#93e7a4}
 .filter-chip.kw-chip{border-style:dashed}
 .filter-chip.kw-chip.on{border-style:solid}
-.vh-kw.collapsed,.dfb-kw.collapsed{display:none}
+.vh-kw.collapsed,.dfb-kw.collapsed,.vh-arch.collapsed{display:none}
 .kw-toggle{border-style:dashed;white-space:nowrap}
 .kw-toggle.active{background:var(--gold-glow);border-color:var(--gold);color:var(--gold);border-style:solid}
 
@@ -2473,6 +2473,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <button class="filter-chip" onclick="setSort('deaths',this)">Fewest Deaths</button>
         </div>
         <button class="filter-chip kw-toggle" id="kw-toggle" onclick="toggleVaultKw()">Keywords ▾</button><div class="vh-group vh-kw collapsed" id="vh-kw"></div>
+        <button class="filter-chip kw-toggle" id="arch-toggle" onclick="toggleVaultArch()">Archetype ▾</button><div class="vh-group vh-arch collapsed" id="vh-arch"></div>
       </div>
     </div>
     <div class="vault-body">
@@ -8970,6 +8971,7 @@ let activeDeckPool = null;       // built from activeDeck when >0
 let vaultFilter = 'all';
 let vaultSort = 'rarity';
 let vaultKeyword = null;
+let vaultArchetype = null;
 let vaultShowUnowned = false;
 let drawerCard = null;
 let drawPile = [];               // shuffled draw stack for the active match (drawn top-down, no repeats)
@@ -9207,6 +9209,20 @@ const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned
 const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Zerith Var'];   // The Warpath — early champ + WC recycle + kill escalation
 const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte','Skittering Drone','Hatchling Tide',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Signal Diviner','Faye Quicksilver'];   // The Broodswarm — hand-size draw + power
 const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Shieldwall Recruit','Standard-Bearer Halden','Rank-Sworn Levy','Heir of Kaiga','Conduit Adept','Signal Diviner','Chieftain Reyva Vosh','Faye Quicksilver','Zerith Var'];   // The Ironsworn — go wide with 1-cost bodies, Cassian scales biggest (Muster: +power per 1-cost ally)
+// Archetype dev-view (7/18/26): the 5 named meta archetypes' full membership, for the Vault's
+// Archetype filter -- reuses these *_PRESET arrays directly (the actual full-deck lists) rather
+// than ARCHETYPE_MEMBERS (a narrower, Deck-Master-tier-eligibility-only list that excludes proven
+// cross-deck generic staples and doesn't cover Black Wings at all) or LINK_GROUPS (lore-relationship
+// synergy, a different axis). A card can legitimately appear in more than one archetype here --
+// Zerith Var/Signal Diviner/Heir of Kaiga/Faye Quicksilver are each proven staples in 2-3 decks.
+const ARCHETYPE_PRESETS = [
+  {id:'blackwing', name:'Black Wings', members:BLACKWING_PRESET},
+  {id:'deathless', name:'Deathless', members:DEATHLESS_PRESET},
+  {id:'warpath', name:'Warpath', members:WARPATH_PRESET},
+  {id:'broodswarm', name:'Broodswarm', members:BROODSWARM_PRESET},
+  {id:'ironsworn', name:'Ironsworn', members:IRONSWORN_PRESET}
+];
+function cardArchetypes(name){ return ARCHETYPE_PRESETS.filter(function(a){ return a.members.indexOf(name)>=0; }); }
 let deckPresets = lsGet('sf_presets', {});
 (function(){ var _seed={blackwing:BLACKWING_PRESET, deathless:DEATHLESS_PRESET, warpath:WARPATH_PRESET, broodswarm:BROODSWARM_PRESET, ironsworn:IRONSWORN_PRESET}; var _ch=false; Object.keys(_seed).forEach(function(k){ if(!deckPresets[k] && !lsGet('sf_seed_'+k,0)){ deckPresets[k]=_seed[k].slice(); lsSet('sf_seed_'+k,1); _ch=true; } }); if(!lsGet('sf_bw_seeded',0)) lsSet('sf_bw_seeded',1); if(!lsGet('sf_seed_deathless_v2',0)){ deckPresets.deathless = DEATHLESS_PRESET.slice(); lsSet('sf_seed_deathless_v2',1); _ch=true; } if(_ch) lsSet('sf_presets', deckPresets); })();
 ;/* PICK YOUR PATH - starter archetype chooser (onboarding) */
@@ -9996,7 +10012,8 @@ function buildVault(){
   const base=COLLECTION.filter(c=>{
     const rOk = vaultFilter==='all' ? true : vaultFilter==='deck' ? activeDeck.has(c.uid||c.name) : vaultFilter==='variant' ? !!c.variant : c.rarity===vaultFilter;
     const kOk = !vaultKeyword || cardHasKeyword(c, vaultKeyword);
-    return rOk && kOk;
+    const aOk = !vaultArchetype || cardArchetypes(c.name).some(a=>a.id===vaultArchetype);
+    return rOk && kOk && aOk;
   });
   let entries=[];
   base.forEach(c=>{
@@ -10015,9 +10032,10 @@ function buildVault(){
   else entries.sort((a,b)=> (RARITY_ORDER[a.c.rarity]-RARITY_ORDER[b.c.rarity]) || ((a.locked?1:0)-(b.locked?1:0)) || (b.c.pow-a.c.pow) || ((a.fresh?1:0)-(b.fresh?1:0)));
   const sortLabel = vaultSort==='kills' ? ' · most kills' : vaultSort==='deaths' ? ' · fewest deaths' : vaultSort==='newest' ? ' · newest' : '';
   const totalCards=entries.reduce((s,e)=>s+(e.locked?0:e.count),0);
-  document.getElementById('vault-count').textContent=`${totalCards} cards${vaultKeyword?' · '+vaultKeyword:''}${sortLabel}`;
+  const archLabel = vaultArchetype ? ' · '+(ARCHETYPE_PRESETS.find(a=>a.id===vaultArchetype)||{}).name : '';
+  document.getElementById('vault-count').textContent=`${totalCards} cards${vaultKeyword?' · '+vaultKeyword:''}${archLabel}${sortLabel}`;
   { var _vt=document.getElementById('vault-tracker'); if(_vt) _vt.innerHTML=vaultTrackerHTML(); }
-  if(!entries.length){ var _emsg = vaultFilter==='variant' ? 'No variant cards yet — variants come from Forge summons (paid, play-only copies).' : (vaultKeyword||vaultFilter!=='all') ? 'No cards match this filter — try clearing it.' : 'Your vault is empty — open a pack in the Shop or win a duel.'; grid.innerHTML='<div class="vault-empty">'+_emsg+'</div>'; return; }
+  if(!entries.length){ var _emsg = vaultFilter==='variant' ? 'No variant cards yet — variants come from Forge summons (paid, play-only copies).' : (vaultKeyword||vaultArchetype||vaultFilter!=='all') ? 'No cards match this filter — try clearing it.' : 'Your vault is empty — open a pack in the Shop or win a duel.'; grid.innerHTML='<div class="vault-empty">'+_emsg+'</div>'; return; }
   grid.innerHTML=entries.map(e=>{
     const c=e.c;
     const pristine=isPristine(c)?`<span class="vc-pristine">◈ Pristine</span>`:'';
@@ -10069,6 +10087,24 @@ function buildKeywordChips(){
   el.innerHTML='<span class="vh-label">Keyword</span>'+
     `<button class="filter-chip on" onclick="setKeyword(null,this)">Any</button>`+
     present.map(kw=>`<button class="filter-chip kw-chip" data-kw="${kw}" title="${(KEYWORDS[kw]||'').replace(/"/g,'&quot;')}" onclick="setKeyword('${kw.replace(/'/g,"\\'")}',this)">${kw}</button>`).join('');
+}
+// Archetype filter (7/18/26) -- same shape as the Keyword filter above, dev-facing: browse every
+// card tagged to a given meta archetype (via ARCHETYPE_PRESETS) to check synergy coverage and
+// balance (compare the filtered vault-count across archetypes -- should land in the same ballpark).
+function updateArchToggle(){ var t=document.getElementById('arch-toggle'), g=document.getElementById('vh-arch'); if(!t||!g) return; var caret=g.classList.contains('collapsed')?' ▾':' ▴'; var arch=vaultArchetype?ARCHETYPE_PRESETS.find(function(a){return a.id===vaultArchetype;}):null; if(arch){ t.classList.add('active'); t.textContent='Archetype: '+arch.name+caret; } else { t.classList.remove('active'); t.textContent='Archetype'+caret; } }
+function toggleVaultArch(){ var g=document.getElementById('vh-arch'); if(g) g.classList.toggle('collapsed'); updateArchToggle(); }
+function setArchetype(id,btn){
+  vaultArchetype=id;
+  document.querySelectorAll('.vh-arch .filter-chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  buildVault();
+  if(typeof updateArchToggle==='function') updateArchToggle();
+}
+function buildArchetypeChips(){
+  const el=document.getElementById('vh-arch');
+  el.innerHTML='<span class="vh-label">Archetype</span>'+
+    `<button class="filter-chip on" onclick="setArchetype(null,this)">Any</button>`+
+    ARCHETYPE_PRESETS.map(a=>`<button class="filter-chip" data-arch="${a.id}" title="${a.members.length} cards" onclick="setArchetype('${a.id}',this)">${a.name}</button>`).join('');
 }
 
 function openCardDetail(id, fresh, tab){
@@ -11874,6 +11910,7 @@ try{ localStorage.setItem('sf_grantcards_v1','1'); }catch(e){}  /* playtest: no 
 buildHub();
 updateDeckCount();
 buildKeywordChips();
+buildArchetypeChips();
 document.addEventListener('keydown', function(e){
   if(e.key!=='Escape' && e.key!=='Esc') return;
   var lb=document.getElementById('lightbox'); if(lb && lb.classList.contains('open')){ if(typeof closeLightbox==='function') closeLightbox(); else lb.classList.remove('open'); return; }
