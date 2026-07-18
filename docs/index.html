@@ -27,7 +27,7 @@
   --r-uncommon:#46B060;
   --r-rare:#4C74EE;
   --r-ultra:#A24CE8;
-  --r-genesis:#F5C24D;
+  --r-apex:#F5C24D;
   font-family:system-ui,-apple-system,sans-serif;
   font-size:15px;
 }
@@ -291,7 +291,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .bigcard.uncommon{border-color:var(--r-uncommon);background:linear-gradient(160deg,#162218,#0C1510)}
 .bigcard.rare{border-color:var(--r-rare);background:linear-gradient(160deg,#142040,#0C1428)}
 .bigcard.ultra{border-color:var(--r-ultra);background:linear-gradient(160deg,#200A38,#130622)}
-.bigcard.genesis{border-color:var(--r-genesis);background:linear-gradient(160deg,#2A1E06,#180E00)}
+.bigcard.apex{border-color:var(--r-apex);background:linear-gradient(160deg,#2A1E06,#180E00)}
 .bigcard .bc-art{height:158px;background-size:cover;background-position:center top;position:relative;display:flex;align-items:center;justify-content:center}
 .bigcard .bc-art .bc-sigil{font-size:54px;opacity:0.9;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.6))}
 .bigcard .bc-art::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 52%,rgba(7,9,15,0.94))}
@@ -309,7 +309,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .bigcard.tframe.common::before,.bigcard.tframe.uncommon::before{filter:saturate(0.15) brightness(0.97) contrast(1.05)}   /* gunmetal iron */
 .bigcard.tframe.rare::before{filter:hue-rotate(168deg) saturate(1.15) brightness(0.98)}                                 /* steel + sapphire */
 .bigcard.tframe.ultra::before{filter:hue-rotate(224deg) saturate(1.25)}                                                 /* obsidian + amethyst */
-/* genesis = untouched molten gold (base) */
+/* apex = untouched molten gold (base) */
 .tframe .tf-art{position:absolute;left:16.2%;right:15.6%;top:16.2%;height:37%;background-size:cover;background-position:center 22%;background-repeat:no-repeat;z-index:1;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .tframe .tf-art::after{content:'';position:absolute;left:0;right:0;bottom:0;height:52%;background:linear-gradient(180deg,transparent,rgba(5,6,11,0.72));pointer-events:none;z-index:2}
 .tframe .tf-art .bc-sigil{font-size:44px;opacity:0.92;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.7))}
@@ -513,7 +513,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .card.uncommon{border-color:var(--r-uncommon);background:linear-gradient(160deg,#162218 0%,#0C1510 100%)}
 .card.rare{border-color:var(--r-rare);background:linear-gradient(160deg,#142040 0%,#0C1428 100%)}
 .card.ultra{border-color:var(--r-ultra);background:linear-gradient(160deg,#200A38 0%,#130622 100%)}
-.card.genesis{border-color:var(--r-genesis);background:linear-gradient(160deg,#2A1E06 0%,#180E00 100%)}
+.card.apex{border-color:var(--r-apex);background:linear-gradient(160deg,#2A1E06 0%,#180E00 100%)}
 
 /* hand card */
 .hand-card{width:120px;padding:0;background:transparent!important;overflow:visible;position:relative;border:none!important}
@@ -526,7 +526,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .hc-called{position:absolute;top:2px;right:3px;font-size:11px;z-index:6;filter:drop-shadow(0 1px 2px #000);pointer-events:none}
 .hc-darwin{position:absolute;bottom:2px;left:2px;font-size:7px;color:#e2c3ff;background:rgba(120,48,184,0.55);border-radius:3px;padding:1px 3px;z-index:6;cursor:pointer;pointer-events:auto}
 .rcard{width:268px;background:linear-gradient(162deg,#17110a,#0b0805);border:1px solid #8a6a2f;border-radius:12px;padding:13px 15px;box-shadow:0 18px 50px rgba(0,0,0,.72);color:var(--text)}
-.rcard.rare{border-color:var(--r-rare)}.rcard.ultra{border-color:var(--r-ultra)}.rcard.genesis{border-color:var(--r-genesis)}.rcard.uncommon{border-color:var(--r-uncommon)}
+.rcard.rare{border-color:var(--r-rare)}.rcard.ultra{border-color:var(--r-ultra)}.rcard.apex{border-color:var(--r-apex)}.rcard.uncommon{border-color:var(--r-uncommon)}
 .rc-top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
 .rc-cost{background:var(--electric);color:#04141c;font-weight:800;font-size:13px;border-radius:7px;padding:2px 8px;flex-shrink:0}
 .rc-name{flex:1;font-size:15px;font-weight:800;color:#fff;line-height:1.12}
@@ -554,7 +554,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .card.uncommon .c-rarity{color:var(--r-uncommon)}
 .card.rare .c-rarity{color:var(--r-rare)}
 .card.ultra .c-rarity{color:var(--r-ultra)}
-.card.genesis .c-rarity{color:var(--r-genesis)}
+.card.apex .c-rarity{color:var(--r-apex)}
 
 /* field card */
 .field-card{width:88px;padding:7px 6px 6px}
@@ -666,11 +666,11 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 #v-dna{flex-direction:column;overflow-y:auto;padding:16px}
 .dna-layout{display:grid;grid-template-columns:160px 1fr;gap:16px;max-width:640px;margin:0 auto;width:100%}
 .dna-card-full{
-  border-radius:5px;border:2px solid var(--r-genesis);
+  border-radius:5px;border:2px solid var(--r-apex);
   background:linear-gradient(160deg,#2A1E06 0%,#180E00 100%);
   padding:12px 10px;display:flex;flex-direction:column;gap:0;
 }
-.dcf-rarity{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--r-genesis);margin-bottom:6px}
+.dcf-rarity{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--r-apex);margin-bottom:6px}
 .dcf-name{font-size:14px;font-weight:800;color:var(--text);line-height:1.2;margin-bottom:8px}
 .dcf-art{
   height:80px;background:rgba(212,168,67,0.04);border:1px solid rgba(212,168,67,0.12);
@@ -1292,7 +1292,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 }
 .qp-btn:hover{transform:translateY(-2px);box-shadow:0 6px 22px rgba(212,168,67,0.4)}
 .featured-card{
-  border-radius:12px;border:2px solid var(--r-genesis);overflow:hidden;position:relative;
+  border-radius:12px;border:2px solid var(--r-apex);overflow:hidden;position:relative;
   background:linear-gradient(160deg,#2A1E06,#0C0A04);display:flex;flex-direction:column;
   box-shadow:0 0 30px rgba(212,168,67,0.15);min-height:340px;
 }
@@ -1330,7 +1330,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .filter-chip:hover{border-color:var(--border2);color:var(--text)}
 .filter-chip.on{background:var(--gold-glow);border-color:var(--gold);color:var(--gold);box-shadow:inset 0 0 12px rgba(245,194,77,0.12),0 0 10px var(--gold-glow)}
 .vault-body{flex:1;overflow-y:auto;padding:16px 18px}
-.vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px}.vault-tracker{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:11px 15px;margin:0 0 14px;background:var(--panel);border:1px solid var(--border);border-radius:11px}.vt-bar-wrap{display:flex;align-items:center;gap:11px;flex:1;min-width:230px}.vt-lbl{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);white-space:nowrap}.vt-bar{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;min-width:70px}.vt-bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:4px;transition:width .4s ease}.vt-count{font-size:13px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}.vt-count .vt-pct{font-size:11px;color:var(--gold);margin-left:3px}.vt-chips{display:flex;flex-wrap:wrap;gap:6px}.vt-chip{font-size:10px;font-weight:700;padding:2px 9px;border-radius:12px;border:1px solid var(--border2);color:var(--text2);background:var(--surface);white-space:nowrap;font-variant-numeric:tabular-nums}.vt-chip.done{color:var(--gold);border-color:var(--gold);background:var(--gold-glow)}.vt-chip.r-genesis{border-left:3px solid var(--r-genesis)}.vt-chip.r-ultra{border-left:3px solid var(--r-ultra)}.vt-chip.r-rare{border-left:3px solid var(--r-rare)}.vt-chip.r-common{border-left:3px solid var(--r-common)}
+.vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px}.vault-tracker{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:11px 15px;margin:0 0 14px;background:var(--panel);border:1px solid var(--border);border-radius:11px}.vt-bar-wrap{display:flex;align-items:center;gap:11px;flex:1;min-width:230px}.vt-lbl{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);white-space:nowrap}.vt-bar{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;min-width:70px}.vt-bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:4px;transition:width .4s ease}.vt-count{font-size:13px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}.vt-count .vt-pct{font-size:11px;color:var(--gold);margin-left:3px}.vt-chips{display:flex;flex-wrap:wrap;gap:6px}.vt-chip{font-size:10px;font-weight:700;padding:2px 9px;border-radius:12px;border:1px solid var(--border2);color:var(--text2);background:var(--surface);white-space:nowrap;font-variant-numeric:tabular-nums}.vt-chip.done{color:var(--gold);border-color:var(--gold);background:var(--gold-glow)}.vt-chip.r-apex{border-left:3px solid var(--r-apex)}.vt-chip.r-ultra{border-left:3px solid var(--r-ultra)}.vt-chip.r-rare{border-left:3px solid var(--r-rare)}.vt-chip.r-common{border-left:3px solid var(--r-common)}
 .vault-empty{grid-column:1/-1;padding:48px 20px;text-align:center;color:var(--text3);font-style:italic;font-size:13px}
 .vault-card{
   border-radius:10px;border:1px solid;overflow:hidden;cursor:pointer;position:relative;
@@ -1342,12 +1342,12 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .vault-card.uncommon{border-color:var(--r-uncommon)}
 .vault-card.rare{border-color:var(--r-rare)}
 .vault-card.ultra{border-color:var(--r-ultra)}
-.vault-card.genesis{border-color:var(--r-genesis)}
+.vault-card.apex{border-color:var(--r-apex)}
 .vault-card.common:hover{box-shadow:0 10px 26px rgba(74,92,112,0.3)}
 .vault-card.uncommon:hover{box-shadow:0 10px 26px rgba(58,120,72,0.3)}
 .vault-card.rare:hover{box-shadow:0 10px 26px rgba(56,88,184,0.35)}
 .vault-card.ultra:hover{box-shadow:0 10px 26px rgba(120,48,184,0.4)}
-.vault-card.genesis:hover{box-shadow:0 10px 30px rgba(212,168,67,0.4)}
+.vault-card.apex:hover{box-shadow:0 10px 30px rgba(212,168,67,0.4)}
 .vc-art{
   flex:1;background-size:cover;background-position:center top;position:relative;
   display:flex;align-items:center;justify-content:center;min-height:0;
@@ -1359,7 +1359,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .vault-card.uncommon .vc-rarity-ribbon{background:var(--r-uncommon);color:#fff}
 .vault-card.rare .vc-rarity-ribbon{background:var(--r-rare);color:#fff}
 .vault-card.ultra .vc-rarity-ribbon{background:var(--r-ultra);color:#fff}
-.vault-card.genesis .vc-rarity-ribbon{background:var(--r-genesis);color:#150E00}
+.vault-card.apex .vc-rarity-ribbon{background:var(--r-apex);color:#150E00}
 .vc-pow{position:absolute;top:6px;right:8px;z-index:2;font-size:19px;font-weight:800;color:#fff;text-shadow:0 2px 6px #000;font-variant-numeric:tabular-nums}
 .vc-pristine{position:absolute;top:30px;right:8px;z-index:2;font-size:8px;font-weight:700;color:var(--gold);text-shadow:0 1px 3px #000}
 .vc-info{padding:0 9px 9px;position:relative;z-index:2;margin-top:-30px}
@@ -1401,7 +1401,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .dr-rarity{font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px}
 .dr-header.common .dr-rarity{color:var(--r-common)} .dr-header.uncommon .dr-rarity{color:#5FB878}
 .dr-header.rare .dr-rarity{color:#6C8CF0} .dr-header.ultra .dr-rarity{color:#C080E0}
-.dr-header.genesis .dr-rarity{color:var(--gold)}
+.dr-header.apex .dr-rarity{color:var(--gold)}
 .dr-race-row{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11px;color:var(--text3)}.dr-race-lbl{letter-spacing:.04em;text-transform:uppercase;font-weight:700}.dr-race-sel{background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer}.dr-race-sel:hover{border-color:var(--gold)}.dr-disc-stats{font-variant-numeric:tabular-nums;color:var(--text2);letter-spacing:0}
 .dr-name{font-size:22px;font-weight:800;color:#fff;line-height:1.05;margin-bottom:6px;text-shadow:0 2px 8px #000;text-wrap:balance}
 .dr-powline{display:flex;align-items:baseline;gap:8px}
@@ -1545,7 +1545,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .deck-slot.filled.uncommon{border-left-color:var(--r-uncommon)}
 .deck-slot.filled.rare{border-left-color:var(--r-rare)}
 .deck-slot.filled.ultra{border-left-color:var(--r-ultra)}
-.deck-slot.filled.genesis{border-left-color:var(--r-genesis)}
+.deck-slot.filled.apex{border-left-color:var(--r-apex)}
 .ds-num{font-size:11px;font-weight:800;color:var(--text3);width:16px;text-align:center;flex-shrink:0;font-variant-numeric:tabular-nums}
 .ds-sigil{font-size:16px;flex-shrink:0;width:20px;text-align:center}
 .ds-body{flex:1;min-width:0}
@@ -1630,7 +1630,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .listing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:12px}
 .listing{border-radius:10px;border:1px solid;overflow:hidden;display:flex;flex-direction:column;background:var(--panel);transition:transform 0.14s}
 .listing:hover{transform:translateY(-3px)}
-.listing.common{border-color:var(--r-common)}.listing.uncommon{border-color:var(--r-uncommon)}.listing.rare{border-color:var(--r-rare)}.listing.ultra{border-color:var(--r-ultra)}.listing.genesis{border-color:var(--r-genesis)}
+.listing.common{border-color:var(--r-common)}.listing.uncommon{border-color:var(--r-uncommon)}.listing.rare{border-color:var(--r-rare)}.listing.ultra{border-color:var(--r-ultra)}.listing.apex{border-color:var(--r-apex)}
 .listing.sold{opacity:0.5}
 .listing.legend{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold-dim),0 8px 30px rgba(212,168,67,0.28)}
 .listing.legend .lst-art::after{background:linear-gradient(180deg,transparent 42%,rgba(30,20,4,0.94))}
@@ -1697,7 +1697,7 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .sc-rar{font-size:9px;font-weight:800;letter-spacing:.04em;margin-left:5px}
 .sc-bar{height:4px;border-radius:3px;background:rgba(255,255,255,0.09);margin:5px 0 3px;overflow:hidden}
 .sc-fill{display:block;height:100%;border-radius:3px;background:var(--gold)}
-.sc-fill.rar-genesis{background:var(--r-genesis)}.sc-fill.rar-ultra{background:var(--r-ultra)}.sc-fill.rar-rare{background:var(--r-rare)}.sc-fill.rar-common{background:var(--r-common)}
+.sc-fill.rar-apex{background:var(--r-apex)}.sc-fill.rar-ultra{background:var(--r-ultra)}.sc-fill.rar-rare{background:var(--r-rare)}.sc-fill.rar-common{background:var(--r-common)}
 .sc-left{font-size:10px;color:var(--text3);font-variant-numeric:tabular-nums}.sc-mint{opacity:0.7}
 .sc-buy{flex:0 0 auto;font-size:11px;font-weight:800;padding:7px 12px;border-radius:8px;border:1px solid var(--gold);background:transparent;color:var(--gold);cursor:pointer;white-space:nowrap}
 .sc-buy.dim{opacity:0.5}
@@ -1755,8 +1755,8 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .ps-fill{height:100%;border-radius:3px}
 .ps-left{color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
 .pack-supply-note{font-size:9px;color:var(--text3);line-height:1.4;margin-bottom:11px;font-style:italic}
-.rar-genesis{color:var(--r-genesis)}.rar-ultra{color:#C080E0}.rar-rare{color:#6C8CF0}.rar-uncommon{color:#5FB878}.rar-common{color:#9DB0C8}
-.ps-fill.rar-genesis{background:var(--r-genesis)}.ps-fill.rar-ultra{background:var(--r-ultra)}.ps-fill.rar-rare{background:var(--r-rare)}.ps-fill.rar-uncommon{background:var(--r-uncommon)}.ps-fill.rar-common{background:var(--r-common)}
+.rar-apex{color:var(--r-apex)}.rar-ultra{color:#C080E0}.rar-rare{color:#6C8CF0}.rar-uncommon{color:#5FB878}.rar-common{color:#9DB0C8}
+.ps-fill.rar-apex{background:var(--r-apex)}.ps-fill.rar-ultra{background:var(--r-ultra)}.ps-fill.rar-rare{background:var(--r-rare)}.ps-fill.rar-uncommon{background:var(--r-uncommon)}.ps-fill.rar-common{background:var(--r-common)}
 .pack-card.wide .pack-buy{margin-top:auto}
 .mint-ledger{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px}
 .ml-head{font-size:11px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold);margin-bottom:9px;display:flex;align-items:center;gap:8px}
@@ -2454,7 +2454,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <div class="vh-group vh-rarity" style="margin-left:auto">
           <span class="vh-label">Rarity</span>
           <button class="filter-chip on" onclick="filterVault('all',this)">All</button>
-          <button class="filter-chip" onclick="filterVault('genesis',this)">AR</button>
+          <button class="filter-chip" onclick="filterVault('apex',this)">AR</button>
           <button class="filter-chip" onclick="filterVault('ultra',this)">UR</button>
           <button class="filter-chip" onclick="filterVault('rare',this)">Rare</button>
           
@@ -2531,7 +2531,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
             </div>
             <div class="vh-group dfb-rarity"><span class="vh-label">Rarity</span>
               <button class="filter-chip on" onclick="filterDeck('all',this)">All</button>
-              <button class="filter-chip" onclick="filterDeck('genesis',this)">AR</button>
+              <button class="filter-chip" onclick="filterDeck('apex',this)">AR</button>
               <button class="filter-chip" onclick="filterDeck('ultra',this)">UR</button>
               <button class="filter-chip" onclick="filterDeck('rare',this)">Rare</button>
               
@@ -2893,7 +2893,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <span class="clock-label" id="clock-label">to decide</span>
     </div>
 
-    <style>.rear-slot{min-height:32px;margin:3px auto;max-width:min(94%,560px);border:1px dashed var(--border2);border-radius:9px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;color:var(--text3);padding:4px 9px;background:rgba(255,255,255,0.02);flex-wrap:wrap}.rear-slot.filled{border-style:solid;border-color:var(--gold);color:var(--text);background:rgba(245,194,77,0.06);flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;text-align:left;flex-wrap:nowrap}.rear-slot .rg-thumb{width:34px;height:44px;border-radius:5px;flex-shrink:0;background-size:cover;background-position:center top;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:var(--surface2)}.rear-slot.enemy .rg-thumb{border-color:var(--lose)}.rear-slot .rg-thumb .rg-sig{font-size:20px;opacity:.65}.rear-slot .rg-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}.rear-slot .rg-line1{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0}.rear-slot .rg-lead{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}.rear-slot .rg-name{font-weight:700;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.rear-slot .rg-called{color:var(--electric);font-size:10px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.rear-slot .rg-hint{opacity:.75}.hand-card.called{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 10px rgba(245,194,77,0.3)}.hand-card .c-cost{position:absolute;top:3px;left:3px;font-size:9px;font-weight:800;color:#0a1a24;background:var(--electric);border-radius:8px;padding:1px 5px;z-index:3;box-shadow:0 1px 3px rgba(0,0,0,.6)}.hand-card .c-abil .ca-fighter{display:block}.hand-card .c-abil .ca-called{display:block;margin-top:3px;padding-top:3px;border-top:1px dashed rgba(245,194,77,.3);color:var(--gold);font-weight:600}.pile-view{position:fixed;inset:0;z-index:130;display:none;align-items:center;justify-content:center}.pile-view.on{display:flex}.pv-scrim{position:absolute;inset:0;background:rgba(4,6,11,0.7)}.pv-panel{position:relative;z-index:1;background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:16px 18px;max-width:min(92vw,640px);max-height:82vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.6)}.pv-head{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}.pv-count{font-size:12px;font-weight:700;color:var(--text3);background:var(--surface2);border-radius:10px;padding:1px 9px}.pv-close{margin-left:auto;background:none;border:1px solid var(--border2);color:var(--text2);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:13px}.pv-sub{font-size:11px;color:var(--text3);margin-bottom:14px}.pv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}.pv-card{aspect-ratio:3/4;border-radius:8px;border:1px solid var(--border2);background-size:cover;background-position:center top;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:6px;overflow:hidden}.pv-card.rare{border-color:var(--r-rare)}.pv-card.ultra{border-color:var(--r-ultra)}.pv-card.genesis{border-color:var(--r-genesis)}.pv-card.uncommon{border-color:var(--r-uncommon)}.pv-card .pvc-sig{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;opacity:.5}.pv-card .pvc-pow{position:absolute;top:5px;right:6px;font-size:15px;font-weight:800;color:var(--gold);text-shadow:0 1px 3px #000}.pv-card .pvc-name{position:relative;font-size:9px;font-weight:700;color:#fff;line-height:1.15;text-shadow:0 1px 3px #000;background:linear-gradient(transparent,rgba(7,9,15,.9));margin:0 -6px -6px;padding:8px 6px 6px}.hand-card .c-called-dot{font-size:8px}.hand-card .c-info{position:absolute;bottom:2px;right:4px;font-size:10px;color:var(--text3);z-index:3;cursor:pointer;line-height:1;padding:1px}.hand-card .c-info:hover{color:var(--electric)}#preview-scrim{position:fixed;inset:0;z-index:89;background:rgba(4,6,11,0.55)}#card-preview.pinned{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%) scale(1)!important;z-index:91}.rr-proj{display:none;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:8px;font-size:11px;color:var(--text2);background:rgba(245,194,77,0.06);border:1px solid rgba(245,194,77,0.2);border-radius:6px;padding:6px 10px;margin:2px auto 8px;max-width:480px}.rr-proj .rp-you b{color:var(--gold);font-size:15px}.rr-proj .rp-opp b{color:var(--lose);font-size:15px}.rr-proj .rp-vs{color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:.1em}.rr-proj .rp-parts{color:var(--text3);font-size:9px}.rr-proj .rp-parts i,.rr-proj .rp-opp i{font-style:normal;color:var(--electric)}.rear-slot.linked{border-color:var(--electric);box-shadow:0 0 12px var(--elec-glow)}.rear-slot .rg-link{color:var(--electric);font-weight:700;font-size:10px}.charge-meter.spent{animation:chSpent .55s ease-out}@keyframes chSpent{0%{color:var(--lose);transform:scale(1.18)}100%{transform:scale(1)}}.dr-dropdown{border:1px solid var(--border);border-radius:8px;background:var(--panel);margin:8px 0;overflow:hidden}.dr-dropdown>summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text2);user-select:none}.dr-dropdown>summary::-webkit-details-marker{display:none}.dr-dropdown>summary::after{content:"\25be";color:var(--text3);transition:transform .18s;margin-left:4px}.dr-dropdown[open]>summary::after{transform:rotate(180deg)}.dr-dropdown>summary:hover{color:var(--text)}.dr-dropdown .ddv{margin-left:auto;font-weight:700;color:var(--text)}.dr-dropdown .ddbody{padding:6px 12px 12px;border-top:1px solid var(--border)}.foil-opts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.foil-opt{font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border2);color:var(--text);position:relative;overflow:hidden}.foil-opt.sel{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}.foil-next{font-size:10px;color:var(--text3);display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}.foil-next .fn-lbl{color:var(--text2);font-weight:700}.drag-ghost{position:fixed;pointer-events:none;z-index:200;transform:translate(-50%,-50%);padding:6px 9px;min-width:56px;max-width:88px;background:var(--panel);border:2px solid var(--gold);border-radius:9px;font-size:10px;font-weight:800;color:var(--gold);text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.65);background-size:cover;background-position:center top;opacity:.94}.drop-hot{outline:2px dashed var(--gold)!important;outline-offset:2px;background:rgba(245,194,77,0.14)!important;box-shadow:0 0 16px rgba(245,194,77,0.35)!important}body.sf-dragging{cursor:grabbing;user-select:none}.hand-card{touch-action:none}.mastery-hub{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;max-width:1120px}.mast-char{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--r-common);border-radius:12px;padding:14px}.mast-char.uncommon{border-left-color:var(--r-uncommon)}.mast-char.rare{border-left-color:var(--r-rare)}.mast-char.ultra{border-left-color:var(--r-ultra)}.mast-char.genesis{border-left-color:var(--r-genesis)}.mc-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}.mc-art{width:52px;height:52px;border-radius:8px;background-size:cover;background-position:center top;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid var(--border2)}.mc-name{font-size:15px;font-weight:800;color:var(--text)}.mc-lvl{font-size:11px;color:var(--text2);margin-top:2px}.mc-lvl b{color:var(--gold)}.mc-nomast{color:var(--text3)}.mt-track{position:relative;height:6px;background:var(--surface2);border-radius:3px;margin:20px 8px 28px}.mt-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:3px}.mt-node{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center}.mt-node .mt-icon{font-size:15px;filter:grayscale(1);opacity:.45}.mt-node.on .mt-icon{filter:none;opacity:1}.mt-node .mt-lv{position:absolute;top:15px;font-size:8px;color:var(--text3);white-space:nowrap}.mt-node.on .mt-lv{color:var(--gold);font-weight:700}.mc-how{font-size:11px;color:var(--text2);background:rgba(111,211,255,0.06);border:1px solid rgba(111,211,255,0.16);border-radius:6px;padding:6px 9px;margin-bottom:10px}.mc-how b{color:var(--electric)}.mc-rewards{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}.mr-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);padding:2px 0}.mr-item.on{color:var(--text)}.mr-item .mr-ic{width:20px;text-align:center;font-size:14px}.mr-item .mr-nm{flex:1}.mr-item .mr-lv{font-size:9px;font-weight:700;color:var(--text3)}.mr-item.on .mr-lv{color:var(--win)}.mc-bonds{font-size:11px;color:var(--text2);border-top:1px solid var(--border);padding-top:9px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.mc-bonds .mb-lbl{font-weight:700}.mb-chip{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:2px 9px;font-size:10px;color:var(--text)}.mb-none{color:var(--text3);font-style:italic;font-size:10px}.mc-traits{border-top:1px solid var(--border);padding-top:9px;margin-bottom:10px}.trait-ladder{display:flex;flex-direction:column;gap:3px;margin-top:5px}.tl-row{display:flex;align-items:center;gap:7px;font-size:10.5px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.025)}.tl-row.earned{background:rgba(245,194,77,.08)}.tl-row.eq{box-shadow:inset 0 0 0 1px var(--gold)}.tl-ic{font-size:13px;width:16px;text-align:center;flex-shrink:0}.tl-ic.locked{filter:grayscale(1);opacity:.55}.tl-nm{font-weight:700;color:var(--text2);flex-shrink:0;min-width:80px}.tl-row.earned .tl-nm{color:var(--gold)}.tl-buff{font-size:9px;font-weight:800;color:var(--gold);flex-shrink:0}.tl-buff.dim{color:var(--text3);opacity:.85}.tl-badge{margin-left:auto;font-size:8.5px;font-weight:800;color:var(--gold);letter-spacing:.04em;flex-shrink:0}.tl-bar{flex:1;height:4px;background:rgba(255,255,255,.09);border-radius:2px;overflow:hidden;min-width:24px;margin-left:4px}.tl-bar>span{display:block;height:100%;background:var(--electric)}.tl-prog{font-size:9px;color:var(--text3);flex-shrink:0;font-variant-numeric:tabular-nums;min-width:66px;text-align:right}.mc-sec-lbl{font-size:11px;font-weight:800;color:var(--text2)}.mc-sec-sub{font-weight:500;color:var(--text3);font-size:10px}.trade-tabs{display:flex;gap:8px;margin-bottom:10px}.tt-btn{font-size:12px;font-weight:700;padding:8px 16px;border-radius:8px;border:1px solid var(--border2);background:var(--panel);color:var(--text2);cursor:pointer}.tt-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-glow)}.trade-note{font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:14px;max-width:720px}.trade-note b{color:var(--text2)}.trade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-width:1000px}.trade-offer{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}.to-partner{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:700}.to-swap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.to-give,.to-want{flex:1;min-width:96px;font-size:12px;font-weight:700;padding:7px 9px;border-radius:7px;border:1px solid var(--border2);color:var(--text);display:flex;flex-direction:column;gap:2px}.to-give{border-color:var(--win)}.to-want{border-color:var(--lose);color:var(--text2)}.to-give i,.to-want i{font-style:normal;font-size:9px;color:var(--text3);font-weight:500}.to-give.genesis{box-shadow:inset 0 0 0 1px var(--r-genesis)}.to-give.ultra{box-shadow:inset 0 0 0 1px var(--r-ultra)}.to-give.rare{box-shadow:inset 0 0 0 1px var(--r-rare)}.to-arrow{font-size:16px;color:var(--gold);flex-shrink:0}.to-accept{background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:7px 0;border-radius:6px;cursor:pointer}.to-accept:hover{background:rgba(212,168,67,0.25)}.trade-refresh{margin-top:14px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:11px;font-weight:700;padding:8px 16px;border-radius:8px;cursor:pointer}</style>
+    <style>.rear-slot{min-height:32px;margin:3px auto;max-width:min(94%,560px);border:1px dashed var(--border2);border-radius:9px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;color:var(--text3);padding:4px 9px;background:rgba(255,255,255,0.02);flex-wrap:wrap}.rear-slot.filled{border-style:solid;border-color:var(--gold);color:var(--text);background:rgba(245,194,77,0.06);flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;text-align:left;flex-wrap:nowrap}.rear-slot .rg-thumb{width:34px;height:44px;border-radius:5px;flex-shrink:0;background-size:cover;background-position:center top;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:var(--surface2)}.rear-slot.enemy .rg-thumb{border-color:var(--lose)}.rear-slot .rg-thumb .rg-sig{font-size:20px;opacity:.65}.rear-slot .rg-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}.rear-slot .rg-line1{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0}.rear-slot .rg-lead{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}.rear-slot .rg-name{font-weight:700;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.rear-slot .rg-called{color:var(--electric);font-size:10px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.rear-slot .rg-hint{opacity:.75}.hand-card.called{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 10px rgba(245,194,77,0.3)}.hand-card .c-cost{position:absolute;top:3px;left:3px;font-size:9px;font-weight:800;color:#0a1a24;background:var(--electric);border-radius:8px;padding:1px 5px;z-index:3;box-shadow:0 1px 3px rgba(0,0,0,.6)}.hand-card .c-abil .ca-fighter{display:block}.hand-card .c-abil .ca-called{display:block;margin-top:3px;padding-top:3px;border-top:1px dashed rgba(245,194,77,.3);color:var(--gold);font-weight:600}.pile-view{position:fixed;inset:0;z-index:130;display:none;align-items:center;justify-content:center}.pile-view.on{display:flex}.pv-scrim{position:absolute;inset:0;background:rgba(4,6,11,0.7)}.pv-panel{position:relative;z-index:1;background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:16px 18px;max-width:min(92vw,640px);max-height:82vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.6)}.pv-head{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}.pv-count{font-size:12px;font-weight:700;color:var(--text3);background:var(--surface2);border-radius:10px;padding:1px 9px}.pv-close{margin-left:auto;background:none;border:1px solid var(--border2);color:var(--text2);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:13px}.pv-sub{font-size:11px;color:var(--text3);margin-bottom:14px}.pv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}.pv-card{aspect-ratio:3/4;border-radius:8px;border:1px solid var(--border2);background-size:cover;background-position:center top;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:6px;overflow:hidden}.pv-card.rare{border-color:var(--r-rare)}.pv-card.ultra{border-color:var(--r-ultra)}.pv-card.apex{border-color:var(--r-apex)}.pv-card.uncommon{border-color:var(--r-uncommon)}.pv-card .pvc-sig{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;opacity:.5}.pv-card .pvc-pow{position:absolute;top:5px;right:6px;font-size:15px;font-weight:800;color:var(--gold);text-shadow:0 1px 3px #000}.pv-card .pvc-name{position:relative;font-size:9px;font-weight:700;color:#fff;line-height:1.15;text-shadow:0 1px 3px #000;background:linear-gradient(transparent,rgba(7,9,15,.9));margin:0 -6px -6px;padding:8px 6px 6px}.hand-card .c-called-dot{font-size:8px}.hand-card .c-info{position:absolute;bottom:2px;right:4px;font-size:10px;color:var(--text3);z-index:3;cursor:pointer;line-height:1;padding:1px}.hand-card .c-info:hover{color:var(--electric)}#preview-scrim{position:fixed;inset:0;z-index:89;background:rgba(4,6,11,0.55)}#card-preview.pinned{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%) scale(1)!important;z-index:91}.rr-proj{display:none;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:8px;font-size:11px;color:var(--text2);background:rgba(245,194,77,0.06);border:1px solid rgba(245,194,77,0.2);border-radius:6px;padding:6px 10px;margin:2px auto 8px;max-width:480px}.rr-proj .rp-you b{color:var(--gold);font-size:15px}.rr-proj .rp-opp b{color:var(--lose);font-size:15px}.rr-proj .rp-vs{color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:.1em}.rr-proj .rp-parts{color:var(--text3);font-size:9px}.rr-proj .rp-parts i,.rr-proj .rp-opp i{font-style:normal;color:var(--electric)}.rear-slot.linked{border-color:var(--electric);box-shadow:0 0 12px var(--elec-glow)}.rear-slot .rg-link{color:var(--electric);font-weight:700;font-size:10px}.charge-meter.spent{animation:chSpent .55s ease-out}@keyframes chSpent{0%{color:var(--lose);transform:scale(1.18)}100%{transform:scale(1)}}.dr-dropdown{border:1px solid var(--border);border-radius:8px;background:var(--panel);margin:8px 0;overflow:hidden}.dr-dropdown>summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text2);user-select:none}.dr-dropdown>summary::-webkit-details-marker{display:none}.dr-dropdown>summary::after{content:"\25be";color:var(--text3);transition:transform .18s;margin-left:4px}.dr-dropdown[open]>summary::after{transform:rotate(180deg)}.dr-dropdown>summary:hover{color:var(--text)}.dr-dropdown .ddv{margin-left:auto;font-weight:700;color:var(--text)}.dr-dropdown .ddbody{padding:6px 12px 12px;border-top:1px solid var(--border)}.foil-opts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.foil-opt{font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border2);color:var(--text);position:relative;overflow:hidden}.foil-opt.sel{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}.foil-next{font-size:10px;color:var(--text3);display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}.foil-next .fn-lbl{color:var(--text2);font-weight:700}.drag-ghost{position:fixed;pointer-events:none;z-index:200;transform:translate(-50%,-50%);padding:6px 9px;min-width:56px;max-width:88px;background:var(--panel);border:2px solid var(--gold);border-radius:9px;font-size:10px;font-weight:800;color:var(--gold);text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.65);background-size:cover;background-position:center top;opacity:.94}.drop-hot{outline:2px dashed var(--gold)!important;outline-offset:2px;background:rgba(245,194,77,0.14)!important;box-shadow:0 0 16px rgba(245,194,77,0.35)!important}body.sf-dragging{cursor:grabbing;user-select:none}.hand-card{touch-action:none}.mastery-hub{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;max-width:1120px}.mast-char{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--r-common);border-radius:12px;padding:14px}.mast-char.uncommon{border-left-color:var(--r-uncommon)}.mast-char.rare{border-left-color:var(--r-rare)}.mast-char.ultra{border-left-color:var(--r-ultra)}.mast-char.apex{border-left-color:var(--r-apex)}.mc-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}.mc-art{width:52px;height:52px;border-radius:8px;background-size:cover;background-position:center top;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid var(--border2)}.mc-name{font-size:15px;font-weight:800;color:var(--text)}.mc-lvl{font-size:11px;color:var(--text2);margin-top:2px}.mc-lvl b{color:var(--gold)}.mc-nomast{color:var(--text3)}.mt-track{position:relative;height:6px;background:var(--surface2);border-radius:3px;margin:20px 8px 28px}.mt-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:3px}.mt-node{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center}.mt-node .mt-icon{font-size:15px;filter:grayscale(1);opacity:.45}.mt-node.on .mt-icon{filter:none;opacity:1}.mt-node .mt-lv{position:absolute;top:15px;font-size:8px;color:var(--text3);white-space:nowrap}.mt-node.on .mt-lv{color:var(--gold);font-weight:700}.mc-how{font-size:11px;color:var(--text2);background:rgba(111,211,255,0.06);border:1px solid rgba(111,211,255,0.16);border-radius:6px;padding:6px 9px;margin-bottom:10px}.mc-how b{color:var(--electric)}.mc-rewards{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}.mr-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);padding:2px 0}.mr-item.on{color:var(--text)}.mr-item .mr-ic{width:20px;text-align:center;font-size:14px}.mr-item .mr-nm{flex:1}.mr-item .mr-lv{font-size:9px;font-weight:700;color:var(--text3)}.mr-item.on .mr-lv{color:var(--win)}.mc-bonds{font-size:11px;color:var(--text2);border-top:1px solid var(--border);padding-top:9px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.mc-bonds .mb-lbl{font-weight:700}.mb-chip{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:2px 9px;font-size:10px;color:var(--text)}.mb-none{color:var(--text3);font-style:italic;font-size:10px}.mc-traits{border-top:1px solid var(--border);padding-top:9px;margin-bottom:10px}.trait-ladder{display:flex;flex-direction:column;gap:3px;margin-top:5px}.tl-row{display:flex;align-items:center;gap:7px;font-size:10.5px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.025)}.tl-row.earned{background:rgba(245,194,77,.08)}.tl-row.eq{box-shadow:inset 0 0 0 1px var(--gold)}.tl-ic{font-size:13px;width:16px;text-align:center;flex-shrink:0}.tl-ic.locked{filter:grayscale(1);opacity:.55}.tl-nm{font-weight:700;color:var(--text2);flex-shrink:0;min-width:80px}.tl-row.earned .tl-nm{color:var(--gold)}.tl-buff{font-size:9px;font-weight:800;color:var(--gold);flex-shrink:0}.tl-buff.dim{color:var(--text3);opacity:.85}.tl-badge{margin-left:auto;font-size:8.5px;font-weight:800;color:var(--gold);letter-spacing:.04em;flex-shrink:0}.tl-bar{flex:1;height:4px;background:rgba(255,255,255,.09);border-radius:2px;overflow:hidden;min-width:24px;margin-left:4px}.tl-bar>span{display:block;height:100%;background:var(--electric)}.tl-prog{font-size:9px;color:var(--text3);flex-shrink:0;font-variant-numeric:tabular-nums;min-width:66px;text-align:right}.mc-sec-lbl{font-size:11px;font-weight:800;color:var(--text2)}.mc-sec-sub{font-weight:500;color:var(--text3);font-size:10px}.trade-tabs{display:flex;gap:8px;margin-bottom:10px}.tt-btn{font-size:12px;font-weight:700;padding:8px 16px;border-radius:8px;border:1px solid var(--border2);background:var(--panel);color:var(--text2);cursor:pointer}.tt-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-glow)}.trade-note{font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:14px;max-width:720px}.trade-note b{color:var(--text2)}.trade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-width:1000px}.trade-offer{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}.to-partner{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:700}.to-swap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.to-give,.to-want{flex:1;min-width:96px;font-size:12px;font-weight:700;padding:7px 9px;border-radius:7px;border:1px solid var(--border2);color:var(--text);display:flex;flex-direction:column;gap:2px}.to-give{border-color:var(--win)}.to-want{border-color:var(--lose);color:var(--text2)}.to-give i,.to-want i{font-style:normal;font-size:9px;color:var(--text3);font-weight:500}.to-give.apex{box-shadow:inset 0 0 0 1px var(--r-apex)}.to-give.ultra{box-shadow:inset 0 0 0 1px var(--r-ultra)}.to-give.rare{box-shadow:inset 0 0 0 1px var(--r-rare)}.to-arrow{font-size:16px;color:var(--gold);flex-shrink:0}.to-accept{background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:7px 0;border-radius:6px;cursor:pointer}.to-accept:hover{background:rgba(212,168,67,0.25)}.trade-refresh{margin-top:14px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:11px;font-weight:700;padding:8px 16px;border-radius:8px;cursor:pointer}</style>
     <!-- FIELD -->
     <div class="field">
       <div class="rear-slot enemy" id="opp-rear" style="display:none"></div>
@@ -3327,7 +3327,7 @@ const COND_EFF = {
 };
 
 const HAND_CARDS = [
-  {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
+  {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
   {name:'Uso Oso',pow:16,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant: when Uso dies he stays on field. Your cards here gain +10 power until an opponent\'s card is killed, then Remnant is removed. When this card is conjured, call a "Oso\'s skeletal summons" from outside of your deck to an open support circle.'},
   {name:'Tannis',pow:10,kills:0,deaths:0,rarity:'uncommon',timing:'instant',abil:'⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.'},
   {name:'Bixie Bee',pow:18,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Relentless Swarm: on commit, +1 power for each card in your banish zone — she feeds on the discarded.'},
@@ -3394,15 +3394,15 @@ const DECK_POOL = [
   {name:'Voltcaller',pow:8,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: your next Interrupt costs 2 less.'},
   {name:'Signal Diviner',pow:12,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Foresight: on commit, draw a card. On win: next turn gain 2 max Charge.'},
   // Commons
-  {name:'Ahdorah Khaan, Determined Soul',pow:17,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. When Ahdor returns to your hand from the effect of "Record Guard", two random hand cards gain +3.'},
+  {name:'Ahdorah Khaan, Determined Soul',pow:17,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. When Ahdor returns to your hand from the effect of "Record Guard", two random hand cards gain +3.'},
   // Uncommons
-  {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: if 3rd+ commit this match, +5 power. Returns from Winners Circle: banish from hand to curse opponent\'s next committed card −10 power.'},
+  {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: if 3rd+ commit this match, +5 power. Returns from Winners Circle: banish from hand to curse opponent\'s next committed card −10 power.'},
   {name:'Hanse Waltz',pow:13,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.'},
   // Rares
   {name:'Arch-Grim Korrin',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: +4 per Death Remnant on the field, and draw 1 for each Remnant you hold. Death Remnant: when he falls, +8 to your cards until an enemy dies — the Unburied commands the dead."},
   {name:'Cletus Gwyndull',pow:15,kills:0,deaths:0,rarity:'rare',timing:'pre',abil:'Pre-commit: lock the active condition this turn — opponent cannot shift it.'},
   {name:'Val Kreigh',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if this is the 1st duel of the match, +6 power.'},
-  {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'genesis',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
+  {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'apex',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
   // Warpath combo pieces (7/12/26) — makes the empty-Winners-Circle Deck Master mechanic (Tange/Kravyn)
   // a sustainable loop instead of a one-time front-loaded bonus. Not in WARPATH_PRESET by default —
   // available in the Vault/deck builder for anyone building around the combo.
@@ -3426,7 +3426,7 @@ const DECK_POOL = [
   {name:'Lagertha Waltz, Wrathful Transformation',pow:18,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Alpha\'s Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack\'s fury peaks in mourning.'},
   {name:'The Bronzed Beast, Hanse Waltz',pow:20,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 while behind — if you were behind when you kill an opponent fighter, this returns to your hand at its original power.'},
   {name:'La "La" Ballora, the Broodqueen',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw 2 cards — her brood is her hand.'},
-  {name:'Ourevos, the Golden Dragon',pow:24,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
+  {name:'Ourevos, the Golden Dragon',pow:24,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.'},
   {name:'Legend Reborn, Keawe Kel\'rua',pow:8,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 15 or higher from your deck to your hand. Called (support): snipe the opposing support in the mirrored slot — it is removed before it can fire.'},
   {name:'Rhaess Korvain',pow:13,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish the top card of your deck, then +2 power for every card in your banish zone.'},
@@ -3459,7 +3459,7 @@ const DECK_POOL = [
   {name:'Grave-Warden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Death Remnant: when it falls, +3 to your cards until an enemy dies.'},
   {name:'Bone-Stitcher',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), your Fighter +3; if a Remnant is on the field, draw a card.'},
   
-  {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
+  {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
   // ── art-swapped in from Set 2 storage ──
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you are down 2 or more duels this match, double this card\'s power.'},
   {name:'Kiba',pow:2,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: when Kiba dies it stays on field. Your cards here gain +2 power until an opponent\'s card is killed, then Remnant is removed.'},
@@ -3467,7 +3467,7 @@ const DECK_POOL = [
   {name:'Moro',pow:14,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: if opponent\'s card has 6+ career kills, gain +3 power.'},
   {name:'Zerith Var',pow:19,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you are losing this duel (opponent\'s base power is higher), +4 power.'},
   
-  {name:'Anorith Keeling',pow:0,cost:3,chaosPow:true,kills:0,deaths:0,rarity:'genesis',timing:'on',abil:'Chaos Deity — base power is a ? (unknown). On commit its power becomes the duels completed this match × the cards left in your hand, and every spell in your deck warps into the Chaos Trinity: Draw Surge (2⚡ draw 3, banish 1), Godhand (1⚡ your card +10), and Sorn-Vallis Shift (3⚡ warp the location to Sorn-Vallis — lowest power wins).'},
+  {name:'Anorith Keeling',pow:0,cost:3,chaosPow:true,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Chaos Deity — base power is a ? (unknown). On commit its power becomes the duels completed this match × the cards left in your hand, and every spell in your deck warps into the Chaos Trinity: Draw Surge (2⚡ draw 3, banish 1), Godhand (1⚡ your card +10), and Sorn-Vallis Shift (3⚡ warp the location to Sorn-Vallis — lowest power wins).'},
   {name:'Heir of Kaiga',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast.'},
   {name:'Josef',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Master Tailor: on commit, +4 power once he has taken the measure of the fight (any commit after your first).'},
   {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, +6 to your committed cards until an opponent\'s card is killed.'},
@@ -3508,10 +3508,10 @@ const DECK_POOL = [
 
 // ── SET 2 — held for post-launch release (NOT loaded into COLLECTION) ──
 const SET2_POOL = [
-  {name:"Vharos, the Iron Crown",pow:20,kills:0,deaths:0,rarity:"genesis",timing:"on",abil:"Record Guard. On commit: +5 against a Pristine opponent (0 deaths, 1+ kill)."},
-  {name:"Nyx, Devourer of Legends",pow:18,kills:0,deaths:0,rarity:"genesis",timing:"on",abil:"On commit: +4; +4 more if you lost your last duel."},
-  {name:"Aurelion Prime",pow:21,kills:0,deaths:0,rarity:"genesis",timing:"on",abil:"Kill Escalation: +6 at 30+ career kills, +3 at 15+."},
-  {name:"The Hollow King",pow:16,kills:0,deaths:0,rarity:"genesis",timing:"on",abil:"Bloodrage: +7 while you are behind in the match."},
+  {name:"Vharos, the Iron Crown",pow:20,kills:0,deaths:0,rarity:"apex",timing:"on",abil:"Record Guard. On commit: +5 against a Pristine opponent (0 deaths, 1+ kill)."},
+  {name:"Nyx, Devourer of Legends",pow:18,kills:0,deaths:0,rarity:"apex",timing:"on",abil:"On commit: +4; +4 more if you lost your last duel."},
+  {name:"Aurelion Prime",pow:21,kills:0,deaths:0,rarity:"apex",timing:"on",abil:"Kill Escalation: +6 at 30+ career kills, +3 at 15+."},
+  {name:"The Hollow King",pow:16,kills:0,deaths:0,rarity:"apex",timing:"on",abil:"Bloodrage: +7 while you are behind in the match."},
   {name:"Sirefax the Warden",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Record Guard. On commit: +3 vs a Pristine opponent."},
   {name:"Mordezh, Blood Prophet",pow:15,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Bloodrage: +5 while behind; +2 if you lost last."},
   {name:"Sable the Unseen",pow:14,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: a Pristine opponent is drained — opponent −4."},
@@ -3645,10 +3645,10 @@ let stakeMult = 1;
 let rankRP = 1000;   // competitive ladder rating — what the snap wagers (NOT Signal)
 
 const OPP_CARDS = [
-  {name:"Vharos, the Iron Crown",pow:20,kills:0,deaths:0,rarity:"genesis",abil:"Record Guard. On commit: +5 against a Pristine opponent (0 deaths, 1+ kill)."},
-  {name:"Nyx, Devourer of Legends",pow:18,kills:0,deaths:0,rarity:"genesis",abil:"On commit: +4; +4 more if you lost your last duel."},
-  {name:"Aurelion Prime",pow:21,kills:0,deaths:0,rarity:"genesis",abil:"Kill Escalation: +6 at 30+ career kills, +3 at 15+."},
-  {name:"The Hollow King",pow:16,kills:0,deaths:0,rarity:"genesis",abil:"Bloodrage: +7 while you are behind in the match."},
+  {name:"Vharos, the Iron Crown",pow:20,kills:0,deaths:0,rarity:"apex",abil:"Record Guard. On commit: +5 against a Pristine opponent (0 deaths, 1+ kill)."},
+  {name:"Nyx, Devourer of Legends",pow:18,kills:0,deaths:0,rarity:"apex",abil:"On commit: +4; +4 more if you lost your last duel."},
+  {name:"Aurelion Prime",pow:21,kills:0,deaths:0,rarity:"apex",abil:"Kill Escalation: +6 at 30+ career kills, +3 at 15+."},
+  {name:"The Hollow King",pow:16,kills:0,deaths:0,rarity:"apex",abil:"Bloodrage: +7 while you are behind in the match."},
   {name:"Sirefax the Warden",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Record Guard. On commit: +3 vs a Pristine opponent."},
   {name:"Mordezh, Blood Prophet",pow:15,kills:0,deaths:0,rarity:"ultra",abil:"Bloodrage: +5 while behind; +2 if you lost last."},
   {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:"ultra",abil:"Purity: +5 while this card is Pristine (0 deaths, 1+ kill)."},
@@ -3686,13 +3686,13 @@ const OPP_CARDS = [
   {name:'Lagertha Waltz',pow:14,kills:0,deaths:0,rarity:'rare',abil:'On commit: +2 if lost last, -2 if won last.'},
   {name:'Conduit of Chaos, Kleydson',pow:4,kills:0,deaths:0,rarity:'common',abil:'No ability.'},
   {name:'Arch-Grim Korrin',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'On commit: +4 per Death Remnant on the field, and draw 1 for each Remnant you hold. Death Remnant: when he falls, +8 to your cards until an enemy dies.'},
-  {name:'Anorith Keeling',pow:13,kills:0,deaths:0,rarity:'genesis',abil:'Chaos Deity — chaos incarnate.'},
-  {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'genesis',abil:'On commit: +3 if 0-death OR lost last; repeats if won a duel.'},
-  {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'genesis',abil:'On commit: if 3rd+ commit, +3 power.'},
+  {name:'Anorith Keeling',pow:13,kills:0,deaths:0,rarity:'apex',abil:'Chaos Deity — chaos incarnate.'},
+  {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',abil:'On commit: +3 if 0-death OR lost last; repeats if won a duel.'},
+  {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'apex',abil:'On commit: if 3rd+ commit, +3 power.'},
   {name:'Kiba',pow:2,kills:0,deaths:0,rarity:'common',abil:'Death Remnant: +2 power to next cards until opp kill.'},
   {name:'Zerith Var',pow:19,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"On commit: if you are losing this duel (opponent's base power is higher), +4 power."},
   {name:'Malia',pow:10,kills:0,deaths:0,rarity:'common',abil:'On commit: mirror opponent power.'},
-  {name:'Ahdorah Khaan, Determined Soul',pow:17,kills:0,deaths:0,rarity:'genesis',abil:'On commit: underdog hand bonus.'},
+  {name:'Ahdorah Khaan, Determined Soul',pow:17,kills:0,deaths:0,rarity:'apex',abil:'On commit: underdog hand bonus.'},
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',abil:'On commit: comeback double.'},
   {name:'Valcarion',pow:15,kills:0,deaths:0,rarity:'rare',abil:'On commit: reclaim a banished card to hand or support.'},
   {name:'Envoy of Tyrants, Ella Ballora',pow:14,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Bloodrage: on commit +3 with 3+ cards in hand, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
@@ -3738,7 +3738,7 @@ const OPP_CARDS = [
   {name:'Silkbound Sentinel',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Support: draw a card; your Fighter +2.'},
   {name:"Widow's Patience",pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +5 power if your hand is full (6 cards).'},
   {name:"Web-Weaver's Return",pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: shuffle your banish pile back into your deck, then draw a card — the web is rewoven.'},
-  {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'genesis',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
+  {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'apex',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
   {name:'Trophy-Hunter Kessa',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every card in BOTH players Winners Circle.'},
   {name:'Skullchain Reaver',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power per kill earned this match; when it wins, it returns to your hand instead of the Winners Circle.'},
   {name:'Warpath Vanguard',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power on the 1st or 2nd duel of the match.'},
@@ -6021,7 +6021,7 @@ function bondsSectionHTML(c){ const list=cardBondList(c); if(!list.length) retur
 function renderDeckFormations(){ const el=document.getElementById('deck-formations'); if(!el) return; const keys=[...activeDeck], pairs=[]; for(let i=0;i<keys.length;i++){ for(let j=i+1;j<keys.length;j++){ const cnt=pairBondCount(keys[i],keys[j]), t=formationTier(cnt); if(t) pairs.push({a:cardNameOf(keys[i]),b:cardNameOf(keys[j]),t:t,cnt:cnt}); } } pairs.sort(function(x,y){ return y.t.bonus-x.t.bonus || y.cnt-x.cnt; }); if(!pairs.length){ el.innerHTML='<div class="df-empty">No active formations yet — cards that fight together forge bonds (+power when both are decked).</div>'; return; } el.innerHTML='<div class="df-title">⚔ Active Formations</div>'+pairs.map(function(p){ return '<div class="df-row"><span class="df-pair">'+p.a+' + '+p.b+'</span><span class="df-tier">'+p.t.name+' <b>+'+p.t.bonus+'</b></span></div>'; }).join(''); }
 // ══ LEGEND ECONOMY — biography appraised as value, priced in Forge (❖ premium in-game currency) ══
 const LEGEND_TIERS=[{min:550,name:'Mythic',cls:'mythic'},{min:320,name:'Legendary',cls:'legendary'},{min:180,name:'Renowned',cls:'renowned'},{min:80,name:'Notable',cls:'notable'},{min:0,name:'Unproven',cls:'unproven'}];
-const LEGEND_RARITY_BASE={genesis:100,ultra:60,rare:30,uncommon:12,common:4};
+const LEGEND_RARITY_BASE={apex:100,ultra:60,rare:30,uncommon:12,common:4};
 function bestBondTierOf(c){ const key=c.uid||c.name; let best=0; Object.keys(pairBonds).forEach(function(pk){ const p=pk.split('|'); if(p[0]===key||p[1]===key){ const t=formationTier(pairBonds[pk]); if(t && t.bonus>best) best=t.bonus; } }); return best; }
 function legendBreakdown(c){
   if(!c) return [];
@@ -6896,7 +6896,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   else if(cond.id==="momentumtide"){ if(playerScore[0]<playerScore[1]){playerPow+=6;abilLog.push("🌊 Momentum's Tide: you are behind — +6");} else if(playerScore[1]<playerScore[0]){oppPow+=6;abilLog.push("🌊 Momentum's Tide: opponent behind — +6");} else {abilLog.push("🌊 Momentum's Tide: even match — no swing");} }
   else if(cond.id==="eldersreach"){ playerPow+=Math.floor(((pc.kills||0)+(pc.deaths||0))/4); oppPow+=Math.floor(((oc.kills||0)+(oc.deaths||0))/4); abilLog.push("📜 Elder's Reach: +1 power per 4 duels fought"); }
   else if(cond.id==="doubleedged"){ playerPow=Math.max(1,playerPow+((pc.kills||0)-(pc.deaths||0))); oppPow=Math.max(1,oppPow+((oc.kills||0)-(oc.deaths||0))); abilLog.push("⚔️ Double-Edged: net record (kills − deaths) swings power"); }
-  else if(cond.id==="legendsclash"){ playerPow=Math.max(1,playerPow+(pc.rarity==="genesis"?4:-2)); oppPow=Math.max(1,oppPow+(oc.rarity==="genesis"?4:-2)); abilLog.push("👑 Legends' Clash: Apex +4, all others −2"); }
+  else if(cond.id==="legendsclash"){ playerPow=Math.max(1,playerPow+(pc.rarity==="apex"?4:-2)); oppPow=Math.max(1,oppPow+(oc.rarity==="apex"?4:-2)); abilLog.push("👑 Legends' Clash: Apex +4, all others −2"); }
   else if(cond.id==="woundedbeast"){ if((pc.deaths||0)>=3){playerPow+=5;} if((oc.deaths||0)>=3){oppPow+=5;} abilLog.push("🐺 Wounded Beast: 3+ deaths veterans +5"); }
   else if(cond.id==="survivorsground"){ if((pc.deaths||0)<(oc.deaths||0)){playerPow+=3;} else if((oc.deaths||0)<(pc.deaths||0)){oppPow+=3;} abilLog.push("⚰️ Survivor's Ground: fewer deaths +3"); }
   else if(cond.id==="purereflection"){ playerPow=(oc.kills||0); oppPow=(pc.kills||0); abilLog.push("🪞 Pure Reflection: power becomes the opponent's career kills"); }
@@ -7308,7 +7308,7 @@ const COSMETICS = {
     {id:'damned',name:'The Damned',price:900,glyph:'🩸'},
     {id:'anorith',name:'Anorith',price:800,glyph:'🦂'},
     {id:'sovereign',name:'Sovereign',price:1200,glyph:'👑'},
-    {id:'genesisbolt',name:'Genesis Bolt',price:1500,glyph:'⚡'},
+    {id:'apexbolt',name:'Genesis Bolt',price:1500,glyph:'⚡'},
   ]},
   title:{label:'Duelist Titles',icon:'✦',desc:'A rank shown beneath your handle.',items:[
     {id:'integrator',name:'Integrator',price:0},
@@ -7370,7 +7370,7 @@ function cosPreview(cat,it){
 const COIN = 'Signal';
 function marketPrice(c, kOv, dOv){
   // Value = SCARCITY x HISTORY x UTILITY (compounded, not additive)
-  const scarcity = {genesis:9000,ultra:4200,rare:1900,uncommon:850,common:350}[c.rarity] || 1000;
+  const scarcity = {apex:9000,ultra:4200,rare:1900,uncommon:850,common:350}[c.rarity] || 1000;
   const k = (kOv!=null?kOv:(c.kills||0)), d = (dOv!=null?dOv:(c.deaths||0));
   const tot=k+d, wr=tot>0?k/tot:0.5;
   const history = 1 + k*0.010 + ((d===0&&k>0)?0.6:0) + wr*0.4;                       // record: wins, pristine premium, win-rate
@@ -7404,7 +7404,7 @@ function seedMarket(){
     const seller = '0x' + ((h*2654435761)>>>0).toString(16).slice(0,4) + '…' + (h>>>16).toString(16).padStart(4,'0').slice(0,4);
     return {name, price:marketPrice(c), seller, mine:false, sold:false};
   }).filter(Boolean);
-  // Legendary UNDEFEATED Pristine GENESIS instances listed by whale vaults
+  // Legendary UNDEFEATED Pristine APEX instances listed by whale vaults
   const whales = [
     {name:'Ourevos, the Golden Dragon', k:512, d:0, price:8400000, seller:'@ApexCollector', legend:true},
     {name:'Kotei',                      k:447, d:0, price:6900000, seller:'@GenesisVault', legend:true},
@@ -7512,8 +7512,8 @@ function buyMarket(idx){
   buildMarket();
 }
 // ══ CARD PACKS · GLOBAL MINT LEDGER (finite, shared, persisted) ══
-const COPIES_PER = {genesis:100, ultra:1000, rare:2500, uncommon:4000, common:5000}; // copies minted per individual card of each rarity — AR 100 : UR 1000 (1:10), matches RARITY_SUPPLY, ladder stays rarer=fewer
-const SUPPLY_FRAC = {genesis:0.10, ultra:0.17, rare:0.38, uncommon:0.52, common:0.60}; // fraction of the mint still unclaimed in packs (rest already in circulation)
+const COPIES_PER = {apex:100, ultra:1000, rare:2500, uncommon:4000, common:5000}; // copies minted per individual card of each rarity — AR 100 : UR 1000 (1:10), matches RARITY_SUPPLY, ladder stays rarer=fewer
+const SUPPLY_FRAC = {apex:0.10, ultra:0.17, rare:0.38, uncommon:0.52, common:0.60}; // fraction of the mint still unclaimed in packs (rest already in circulation)
 function rarityTypeCounts(){ const c={}; COLLECTION.forEach(x=>{ c[x.rarity]=(c[x.rarity]||0)+1; }); return c; }
 function defaultSupply(){ const t=rarityTypeCounts(); const s={}; for(const r in COPIES_PER){ const mint=(t[r]||0)*COPIES_PER[r]; s[r]={mint, left:Math.round(mint*SUPPLY_FRAC[r])}; } return s; }
 let supply = null; // built from the live roster at init (COLLECTION is declared later)
@@ -7587,7 +7587,7 @@ function mintPulled(name, via, prov){
   return {uid, idx, cap};
 }
 function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-const RARITY_LABEL={genesis:'AR',ultra:'UR',rare:'R',uncommon:'UC',common:'C'};
+const RARITY_LABEL={apex:'AR',ultra:'UR',rare:'R',uncommon:'UC',common:'C'};
 function rlab(r){ return RARITY_LABEL[r]||cap(r||''); }
 function rlab1(r){ var l=RARITY_LABEL[r]||cap(r||''); return l.length<=2?l:l.charAt(0); }
 const SAVE_KEY = 'signalforge_save_v2';
@@ -7635,6 +7635,7 @@ function loadState(){
       if(s.cardFoilMax && typeof s.cardFoilMax==='object') cardFoilMax=s.cardFoilMax;
       if(s.cardFrames && typeof s.cardFrames==='object') cardFrames=s.cardFrames;
       if(Array.isArray(s.ownedFrames)) ownedFrames=new Set(s.ownedFrames);
+    if(s.supply && s.supply.genesis && !s.supply.apex){ s.supply.apex=s.supply.genesis; delete s.supply.genesis; }   // 7/18/26: rarity key 'genesis' renamed to 'apex' -- carry an old save's remaining-supply count to the new key so it isn't silently reset to full
     if(s.supply){ for(const r in supply){ if(s.supply[r] && typeof s.supply[r].left==='number') supply[r].left=Math.max(0,Math.min(s.supply[r].left, supply[r].mint)); } }
     if(s.cardSupply){ for(const n in cardSupply){ if(s.cardSupply[n] && typeof s.cardSupply[n].left==='number') cardSupply[n].left=Math.max(0,Math.min(s.cardSupply[n].left, cardSupply[n].mint)); } }
     if(s.v===2){
@@ -7668,7 +7669,7 @@ function startFreshSession(){ if(!confirm('Start a fresh session? This clears ev
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']);
   COLLECTION.forEach(c=>{ const k=c.uid||c.name; ownedCopies[k]=1;
-    cardRecords[k]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:c.variant?'Tournament variant':(c.rarity==='genesis'?'Apex mint':'Fresh vault mint')}]}; });
+    cardRecords[k]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:c.variant?'Tournament variant':(c.rarity==='apex'?'Apex mint':'Fresh vault mint')}]}; });
   if(typeof activeDeck!=='undefined' && activeDeck.clear) activeDeck.clear();
   featuredCards=['Kotei']; featuredShuffle=false; featuredRotIdx=0;
   equipped={aura:'gold',back:'sealed',emblem:'crest',title:'integrator',sleeves:'standard',summon:'golden'};
@@ -7736,26 +7737,26 @@ function startNewPlayer(){
   if(typeof window.showHowTo==='function'){ setTimeout(function(){ window.showHowTo(); }, 300); }
 }
 const SEASON = { chapter:'Chapter 1', name:'Rebirth', pack:'Legends Reborn' };
-// Summon pool cut to the 2 cheapest options 7/17/26 -- Apex Vault (genesis pack) removed to keep the
+// Summon pool cut to the 2 cheapest options 7/17/26 -- Apex Vault (apex pack) removed to keep the
 // Signal ladder tight (500/1500) instead of spread across 3 rungs. Apex-rarity cards are still
-// reachable -- both remaining packs already carry a small genesis% in their own odds table below,
+// reachable -- both remaining packs already carry a small apex% in their own odds table below,
 // and the Pity system (PITY_APEX) still triggers off those same odds, untouched.
 const PACKS = [
-  {id:'std', name:'Legends Reborn Booster', icon:'📦', price:500, blurb:'Common through Rare — a whisper of higher.', odds:{common:63.9, uncommon:25, rare:8, ultra:2.3, genesis:0.8}},
-  {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & an Apex shot — no commons.', odds:{rare:78, ultra:20, genesis:2}},
+  {id:'std', name:'Legends Reborn Booster', icon:'📦', price:500, blurb:'Common through Rare — a whisper of higher.', odds:{common:63.9, uncommon:25, rare:8, ultra:2.3, apex:0.8}},
+  {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & an Apex shot — no commons.', odds:{rare:78, ultra:20, apex:2}},
 ];
 const PREMIUM_PACKS = [
-  {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{uncommon:14, rare:60, ultra:23, genesis:3}},
-  {id:'fforge', name:'Forgemaster Vault', icon:'❖', price:5000, blurb:'Ultra-dense with a real Apex shot.', odds:{rare:44, ultra:48, genesis:8}},
-  {id:'fmythic', name:'Mythic Rite', icon:'👑', price:12000, blurb:'The whale summon — highest Apex rate in the game.', odds:{ultra:78, genesis:22}},
+  {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{uncommon:14, rare:60, ultra:23, apex:3}},
+  {id:'fforge', name:'Forgemaster Vault', icon:'❖', price:5000, blurb:'Ultra-dense with a real Apex shot.', odds:{rare:44, ultra:48, apex:8}},
+  {id:'fmythic', name:'Mythic Rite', icon:'👑', price:12000, blurb:'The whale summon — highest Apex rate in the game.', odds:{ultra:78, apex:22}},
 ];
 function mintLedgerHTML(){
   const t=rarityTypeCounts();
-  const rows=['genesis','ultra','rare','common'].map(r=>{
+  const rows=['apex','ultra','rare','common'].map(r=>{
     const s=supply[r]; const pct=(s.mint<=0||s.left<=0)?0:Math.max(1,Math.round(s.left/s.mint*100)); const circ=s.mint-s.left;
     return `<div class="ml-row"><span class="ml-rar rar-${r}">${rlab(r)}</span><span class="ml-types">${t[r]||0} cards</span><span class="ml-bar"><span class="ml-fill rar-${r}" style="width:${pct}%"></span></span><span class="ml-num">${fmtPts(s.left)}<span class="ml-mint"> / ${fmtPts(s.mint)}</span></span><span class="ml-circ">${fmtPts(circ)} in circulation</span></div>`;
   }).join('');
-  return `<div class="mint-ledger"><div class="ml-head">◈ Global Mint Ledger <span class="ml-sub">${COLLECTION.length} card types · ${COPIES_PER.genesis}–${fmtPts(COPIES_PER.common)} copies each by rarity · shared across every pack</span><button class="ml-reset" onclick="startFreshSession()">🌱 New Session (dev)</button><button class="ml-reset" onclick="resetProgress()">↺ Reset (dev)</button></div>${rows}</div>`;
+  return `<div class="mint-ledger"><div class="ml-head">◈ Global Mint Ledger <span class="ml-sub">${COLLECTION.length} card types · ${COPIES_PER.apex}–${fmtPts(COPIES_PER.common)} copies each by rarity · shared across every pack</span><button class="ml-reset" onclick="startFreshSession()">🌱 New Session (dev)</button><button class="ml-reset" onclick="resetProgress()">↺ Reset (dev)</button></div>${rows}</div>`;
 }
 function packCardHTML(p){
   const rars=Object.keys(p.odds).sort((a,b)=>RARITY_ORDER[a]-RARITY_ORDER[b]);
@@ -7768,17 +7769,17 @@ function packCardHTML(p){
   </div>`;
 }
 function packsSectionHTML(){
-  return `<div class="season-banner"><div class="sb-chapter">${SEASON.chapter} · ${SEASON.name}</div><div class="sb-name">${SEASON.pack}</div><div class="sb-tag">The inaugural set — every legend re-minted for the first chapter, drawn from the finite shared mint. Once a rarity is gone, it is gone for everyone.</div></div>`+mintLedgerHTML()+`<div class="odds-note">🎲 <b>Published pull odds.</b> Each pack lists its exact rarity chances below — outcomes are random. Every card is obtainable with <b>earned Signal</b> (win it in play) — no purchase is ever required to progress, and nothing here cashes out.</div>`+`<div style="font-size:11.5px;color:var(--text2);background:rgba(245,194,77,0.06);border:1px solid rgba(245,194,77,0.22);border-radius:8px;padding:9px 13px;margin:10px 0;line-height:1.55">◇ <b>Pity</b> — a guaranteed <b class="rar-ultra">Ultra</b> lands within <b>${PITY_ULTRA}</b> pulls (now <b>${packPityUltra}/${PITY_ULTRA}</b>); an <b class="rar-genesis">Apex</b> is guaranteed by <b>${PITY_APEX}</b> pulls (<b>${packPityApex}/${PITY_APEX}</b>) — the true chase. Any Ultra+ resets the Ultra counter; an Apex resets both.</div><div class="banner-head">◈ Basic Summon · Signal <span class="banner-sub">Earned currency — pulls are <b>Forged</b> (tradeable + wagerable). Generous odds to build your repertoire.</span></div>`+`<div class="pack-grid">`+PACKS.map(packCardHTML).join('')+`</div>`;
+  return `<div class="season-banner"><div class="sb-chapter">${SEASON.chapter} · ${SEASON.name}</div><div class="sb-name">${SEASON.pack}</div><div class="sb-tag">The inaugural set — every legend re-minted for the first chapter, drawn from the finite shared mint. Once a rarity is gone, it is gone for everyone.</div></div>`+mintLedgerHTML()+`<div class="odds-note">🎲 <b>Published pull odds.</b> Each pack lists its exact rarity chances below — outcomes are random. Every card is obtainable with <b>earned Signal</b> (win it in play) — no purchase is ever required to progress, and nothing here cashes out.</div>`+`<div style="font-size:11.5px;color:var(--text2);background:rgba(245,194,77,0.06);border:1px solid rgba(245,194,77,0.22);border-radius:8px;padding:9px 13px;margin:10px 0;line-height:1.55">◇ <b>Pity</b> — a guaranteed <b class="rar-ultra">Ultra</b> lands within <b>${PITY_ULTRA}</b> pulls (now <b>${packPityUltra}/${PITY_ULTRA}</b>); an <b class="rar-apex">Apex</b> is guaranteed by <b>${PITY_APEX}</b> pulls (<b>${packPityApex}/${PITY_APEX}</b>) — the true chase. Any Ultra+ resets the Ultra counter; an Apex resets both.</div><div class="banner-head">◈ Basic Summon · Signal <span class="banner-sub">Earned currency — pulls are <b>Forged</b> (tradeable + wagerable). Generous odds to build your repertoire.</span></div>`+`<div class="pack-grid">`+PACKS.map(packCardHTML).join('')+`</div>`;
 }
 const PITY_ULTRA = 20, PITY_APEX = 80;   // card-pack pity: guaranteed Ultra (featured) within 20 pulls; guaranteed Apex (the chase) within 80
 let packPityUltra = 0, packPityApex = 0;
 function rollPackRarity(p, avail){
   packPityUltra++; packPityApex++;
-  var hasG = avail.indexOf('genesis')>=0, hasU = avail.indexOf('ultra')>=0, rar;
-  if(hasG && packPityApex >= PITY_APEX){ rar='genesis'; }
-  else if((hasU||hasG) && packPityUltra >= PITY_ULTRA){ rar = (hasG && Math.random()<0.08) ? 'genesis' : (hasU ? 'ultra' : 'genesis'); }
+  var hasG = avail.indexOf('apex')>=0, hasU = avail.indexOf('ultra')>=0, rar;
+  if(hasG && packPityApex >= PITY_APEX){ rar='apex'; }
+  else if((hasU||hasG) && packPityUltra >= PITY_ULTRA){ rar = (hasG && Math.random()<0.08) ? 'apex' : (hasU ? 'ultra' : 'apex'); }
   else { var total=avail.reduce(function(a,r){return a+p.odds[r];},0), roll=Math.random()*total; rar=avail[avail.length-1]; for(var i=0;i<avail.length;i++){ roll-=p.odds[avail[i]]; if(roll<=0){ rar=avail[i]; break; } } }
-  if(rar==='genesis'){ packPityApex=0; packPityUltra=0; } else if(rar==='ultra'){ packPityUltra=0; }
+  if(rar==='apex'){ packPityApex=0; packPityUltra=0; } else if(rar==='ultra'){ packPityUltra=0; }
   return rar;
 }
 function _pullFrom(p){
@@ -7839,9 +7840,9 @@ let _summonDone=null, _summonReveal=null;
 function playSummon(card, rar, mint, packName, onDone){
   const ov=document.getElementById('summon-overlay');
   if(!ov || typeof card!=='object'){ if(onDone) onDone(); return; }
-  const colors={common:'#6B6B78',uncommon:'#46B060',rare:'#4C74EE',ultra:'#A24CE8',genesis:'#F5C24D'};
-  const order=['common','uncommon','rare','ultra','genesis'];
-  const tier=({common:1,uncommon:2,rare:3,ultra:4,genesis:5})[rar]||1;
+  const colors={common:'#6B6B78',uncommon:'#46B060',rare:'#4C74EE',ultra:'#A24CE8',apex:'#F5C24D'};
+  const order=['common','uncommon','rare','ultra','apex'];
+  const tier=({common:1,uncommon:2,rare:3,ultra:4,apex:5})[rar]||1;
   const finalColor=colors[rar]||'#F5C24D';
   let reduce=false; try{ reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches; }catch(e){}
   const ak=card.artKey||card.name;
@@ -7876,7 +7877,7 @@ function playSummon(card, rar, mint, packName, onDone){
   };
   _summonReveal=reveal;
   if(reduce){ reveal(); return; }
-  const rollDur=1100 + tier*440;   // common ~1.5s … genesis ~3.3s (rarer = longer, tenser build)
+  const rollDur=1100 + tier*440;   // common ~1.5s … apex ~3.3s (rarer = longer, tenser build)
   const t0=performance.now(); let i=0;
   const tick=function(){
     const el=performance.now()-t0, frac=Math.min(1, el/rollDur);
@@ -7967,7 +7968,7 @@ function framesShopHTML(){
   return '<div class="shop-section-title">▣ Card Frames <span class="ssc-count">Per-card borders · buy with Forge, or master the unit</span></div><div class="cosmetic-grid">'+rows+'</div>';
 }
 // ── SINGLES · per-card finite ledger + Direct-Mint card shop (buy the exact card with earned Signal) ──
-const CARD_PRICE = {genesis:6000, ultra:2200, rare:900, uncommon:350, common:120};
+const CARD_PRICE = {apex:6000, ultra:2200, rare:900, uncommon:350, common:120};
 function singleCap(c){ return (RARITY_SUPPLY[c.rarity]||1000); }
 function cardBuyPrice(c){ return CARD_PRICE[c.rarity]||1000; }
 function isSingleCard(c){ return c && !c.uid && !c.variant && !isStarter(c); }
@@ -8008,16 +8009,16 @@ function singlesSectionHTML(){
   return '<div class="banner-head singles">◈ Singles · Direct Mint <span class="banner-sub">Buy the <b>exact</b> card you want with earned Signal — each is finite. When a holder <b>integrates</b> a copy for a foil boost, it returns to this pool, so a card is never gone for good.</span></div><div class="single-grid">'+cards+'</div>';
 }
 // ── VARIANT GACHA: Forge-summoned play-only skins — full in-game parity, minus scarcity/trade/wager ──
-const GACHA_ODDS = {genesis:5, ultra:15, rare:80}; // per-pull rarity odds — Apex(AR) capped at 5%, the risk that funds the whole thing
+const GACHA_ODDS = {apex:5, ultra:15, rare:80}; // per-pull rarity odds — Apex(AR) capped at 5%, the risk that funds the whole thing
 let variantEditions = {};   // {defId:{minted,circulating,sealed}} — Panini-Instant emergent editions (minted freezes at banner close; circulating burns on ingestion)
 let variantEssence = 0;   // cosmetic-only currency from ingesting dupe variants (NEVER buys cards/power/Signal)
 let variantFed = {};   // {defId:#dupes fed} -> drives cosmetic ascension tier
 const VARIANT_DEFS = [
-  {id:'v-akatosh-eclipse', unit:'Ourevos, the Golden Dragon', label:'Eclipse', tier:'genesis', foil:'ethereal'},
-  {id:'v-kotei-ascend', unit:'Kotei', label:'Ascendant', tier:'genesis', foil:'ethereal'},
-  {id:'v-darwin-primal', unit:'Darwin', label:'Primal', tier:'genesis', foil:'ethereal'},
-  {id:'v-tange-shogun', unit:'Tange Sazen', label:'Shogun', tier:'genesis', foil:'gold'},
-  {id:'v-ahdor-warden', unit:'Ahdorah Khaan, Determined Soul', label:'Eternal Warden', tier:'genesis', foil:'gold'},
+  {id:'v-akatosh-eclipse', unit:'Ourevos, the Golden Dragon', label:'Eclipse', tier:'apex', foil:'ethereal'},
+  {id:'v-kotei-ascend', unit:'Kotei', label:'Ascendant', tier:'apex', foil:'ethereal'},
+  {id:'v-darwin-primal', unit:'Darwin', label:'Primal', tier:'apex', foil:'ethereal'},
+  {id:'v-tange-shogun', unit:'Tange Sazen', label:'Shogun', tier:'apex', foil:'gold'},
+  {id:'v-ahdor-warden', unit:'Ahdorah Khaan, Determined Soul', label:'Eternal Warden', tier:'apex', foil:'gold'},
   {id:'v-ella-crimson', unit:'Envoy of Tyrants, Ella Ballora', label:'Crimson', tier:'ultra', foil:'prism'},
   {id:'v-ella-radiant', unit:'La "La" Ballora, the Broodqueen', label:'Radiant', tier:'ultra', foil:'prism'},
   {id:'v-hanse-bloodmoon', unit:'The Bronzed Beast, Hanse Waltz', label:'Bloodmoon', tier:'ultra', foil:'prism'},
@@ -8031,8 +8032,8 @@ const VARIANT_DEFS = [
 ];
 function variantDef(id){ return VARIANT_DEFS.find(function(v){return v.id===id;}); }
 const GACHA_BANNERS = [
-  {id:'b-genesis', name:'Apex Legends', blurb:'Apex-focused summon. Rate-up on three genesis Apexes. Ultra & rare skins round out a tight pool.', cost:900, featured:'v-akatosh-eclipse', rateUp:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal'], pool:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal','v-ella-crimson','v-hanse-bloodmoon','v-forgemask-molten','v-valcarion-astral','v-voltcaller-surge']},
-  {id:'b-vanguard', name:'Vanguard Rites', blurb:'Rate-up on three genesis Apexes. A curated pool of apex, ultra & rare champions.', cost:600, featured:'v-tange-shogun', rateUp:['v-tange-shogun','v-ahdor-warden','v-darwin-primal'], pool:['v-darwin-primal','v-tange-shogun','v-ahdor-warden','v-ella-radiant','v-lagertha-frost','v-alucard-nightfall','v-korrin-warlord','v-lagertha-storm']},
+  {id:'b-apex', name:'Apex Legends', blurb:'Apex-focused summon. Rate-up on three Apex-tier champions. Ultra & rare skins round out a tight pool.', cost:900, featured:'v-akatosh-eclipse', rateUp:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal'], pool:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal','v-ella-crimson','v-hanse-bloodmoon','v-forgemask-molten','v-valcarion-astral','v-voltcaller-surge']},
+  {id:'b-vanguard', name:'Vanguard Rites', blurb:'Rate-up on three Apex-tier champions. A curated pool of apex, ultra & rare champions.', cost:600, featured:'v-tange-shogun', rateUp:['v-tange-shogun','v-ahdor-warden','v-darwin-primal'], pool:['v-darwin-primal','v-tange-shogun','v-ahdor-warden','v-ella-radiant','v-lagertha-frost','v-alucard-nightfall','v-korrin-warlord','v-lagertha-storm']},
 ];
 function bannerByIdx(i){ return GACHA_BANNERS[i]; }
 let gachaPity = {};            // {bannerId: pulls since last Apex}
@@ -8081,7 +8082,7 @@ function mintVariant(def, viaLabel){
 const ASC_FED = [3,8,20];   // cumulative dupes fed for Gilded / Radiant / Mythforged
 const ASC_NAME = ['Base','Gilded','Radiant','Mythforged'];
 function variantAscTier(defId){ var f=variantFed[defId]||0, t=0; for(var i=0;i<ASC_FED.length;i++){ if(f>=ASC_FED[i]) t=i+1; } return t; }
-function essenceForTier(tier){ return tier==='genesis'?25 : tier==='ultra'?12 : 6; }
+function essenceForTier(tier){ return tier==='apex'?25 : tier==='ultra'?12 : 6; }
 function ownedVariantCopiesOfDef(defId){ return COLLECTION.filter(function(c){ return c.gachaVariant && c.editionId===defId && (ownedCopies[c.uid]||0)>0; }); }
 function ingestVariant(uid){
   var inst=COLLECTION.find(function(c){ return c.uid===uid && c.gachaVariant; }); if(!inst) return;
@@ -8144,15 +8145,15 @@ function pullVariant(bannerId){
   if(!bannerIsOpen(bi)){ if(typeof toast==='function') toast(b.name+' is sealed this rotation \u2014 summon on the live banner.', false); return; }
   if(forgeBalance < b.cost){ if(typeof toast==='function') toast('Need ❖ '+fmtPts(b.cost)+' Forge to summon on '+b.name+'.', false); return; }
   forgeBalance-=b.cost;
-  const tiers=['genesis','ultra','rare'].filter(function(t){ return b.pool.some(function(id){ var v=variantDef(id); return v&&v.tier===t; }); });
+  const tiers=['apex','ultra','rare'].filter(function(t){ return b.pool.some(function(id){ var v=variantDef(id); return v&&v.tier===t; }); });
   var _tot=tiers.reduce(function(s,t){return s+(GACHA_ODDS[t]||0);},0), _roll=Math.random()*_tot, _tier=tiers[tiers.length-1];
   for(var _i=0;_i<tiers.length;_i++){ _roll-=(GACHA_ODDS[tiers[_i]]||0); if(_roll<=0){ _tier=tiers[_i]; break; } }
   var _pity=(gachaPity[bannerId]||0)+1, _forced=false;
-  if(_tier!=='genesis' && _pity>=GACHA_PITY_CAP && tiers.indexOf('genesis')>=0){ _tier='genesis'; _forced=true; }
+  if(_tier!=='apex' && _pity>=GACHA_PITY_CAP && tiers.indexOf('apex')>=0){ _tier='apex'; _forced=true; }
   var cands=b.pool.filter(function(id){ var v=variantDef(id); return v&&v.tier===_tier; });
   var _ru=(b.rateUp||[]).filter(function(id){ return cands.indexOf(id)>=0; });
-  let pickId = (_tier==='genesis' && _ru.length && (_forced || Math.random()<0.7)) ? _ru[Math.floor(Math.random()*_ru.length)] : cands[Math.floor(Math.random()*cands.length)];
-  if(_tier==='genesis'){ gachaPity[bannerId]=0; } else { gachaPity[bannerId]=_pity; }
+  let pickId = (_tier==='apex' && _ru.length && (_forced || Math.random()<0.7)) ? _ru[Math.floor(Math.random()*_ru.length)] : cands[Math.floor(Math.random()*cands.length)];
+  if(_tier==='apex'){ gachaPity[bannerId]=0; } else { gachaPity[bannerId]=_pity; }
   const def=variantDef(pickId)||variantDef(b.featured);
   const res=mintVariant(def, 'Variant Summon · '+b.name);
   if(typeof updateBalance==='function') updateBalance();
@@ -8193,7 +8194,7 @@ function bannerHTML(b, i, featured){
   const mintedTot=b.pool.reduce(function(s,id){ return s+((variantEditions[id]&&variantEditions[id].minted)||0); },0);
   const ruNames=(b.rateUp||[]).map(function(id){ var v=variantDef(id); return v?(v.label+' '+v.unit):''; }).filter(Boolean);
   const cards=b.pool.map(variantCardHTML).join('');
-  const _tiers=['genesis','ultra','rare'].filter(function(t){ return b.pool.some(function(id){ var v=variantDef(id); return v&&v.tier===t; }); });
+  const _tiers=['apex','ultra','rare'].filter(function(t){ return b.pool.some(function(id){ var v=variantDef(id); return v&&v.tier===t; }); });
   const oddsStr=_tiers.map(function(t){ return '<b>'+rlab(t)+' '+(GACHA_ODDS[t]||0)+'%</b>'; }).join(' · ');
   const afford=forgeBalance>=b.cost;
   return '<div class="gacha-banner'+(featured?' feat':'')+(isOpen?' live':' sealed')+'">'
@@ -8294,28 +8295,28 @@ const REPLAY_STEPS = [
 
   {id:2,label:'Duel 1 · Turn 1',sublabel:'Player A Commits Darwin',stake:'1×',series:[0,0],
    condition:{icon:'⚔️',name:'Standard',rule:'Highest base power wins.'},condActive:true,
-   playerCard:{name:'Darwin',pow:15,displayPow:15,kills:41,deaths:3,rarity:'genesis',status:'active',note:'Momentum dormant · 1st commit'},
+   playerCard:{name:'Darwin',pow:15,displayPow:15,kills:41,deaths:3,rarity:'apex',status:'active',note:'Momentum dormant · 1st commit'},
    oppCard:null,events:['Darwin enters field','Momentum ability dormant — needs 3rd commit','Darwin holds at base 15'],result:null,
    annotation:'Darwin commits at base 15 — his Momentum ability stays dormant this early (it only fires on his 3rd commit of the match). A one-point edge over Stormcaller, nothing more. Player B can see the whole board. The question is whether they can steal this duel before Darwin scales.',kdAfter:{}},
 
   {id:3,label:'Duel 1 · Turn 1',sublabel:'Stormcaller Commits — Disruptor Fires',stake:'1×',series:[0,0],
    condition:{icon:'⚡',name:'Energy Surge',rule:'+6 power added to a randomly selected committed card. Rolling now…'},condActive:true,
-   playerCard:{name:'Darwin',pow:15,displayPow:15,kills:41,deaths:3,rarity:'genesis',status:'active',note:'base 15 · awaiting roll'},
-   oppCard:{name:'Stormcaller Prime',pow:14,displayPow:14,kills:23,deaths:0,rarity:'genesis',status:'pristine',note:'Disruptor fired'},
+   playerCard:{name:'Darwin',pow:15,displayPow:15,kills:41,deaths:3,rarity:'apex',status:'active',note:'base 15 · awaiting roll'},
+   oppCard:{name:'Stormcaller Prime',pow:14,displayPow:14,kills:23,deaths:0,rarity:'apex',status:'pristine',note:'Disruptor fired'},
    events:['Stormcaller Prime enters field','Disruptor activates: condition shifts','Standard → Energy Surge','Energy Surge roll in progress…'],result:null,
    annotation:'Stormcaller commits and Disruptor fires — condition flips from Standard to Energy Surge. Now a random card gets +6. This is Player B\'s whole plan: surge on Stormcaller means 20 vs 15 — Stormcaller wins and keeps Pristine. Surge on Darwin means 21 vs 14 — a blowout the other way. Player B needs the surge to land on their own card.',kdAfter:{}},
 
   {id:4,label:'Duel 1 · Turn 1',sublabel:'Surge Lands on Darwin',stake:'1×',series:[0,0],
    condition:{icon:'⚡',name:'Energy Surge',rule:'+6 landed on Darwin.'},condActive:true,
-   playerCard:{name:'Darwin',pow:15,displayPow:21,kills:41,deaths:3,rarity:'genesis',status:'active',note:'+6 surge → 21'},
-   oppCard:{name:'Stormcaller Prime',pow:14,displayPow:14,kills:23,deaths:0,rarity:'genesis',status:'pristine',note:'Disruptor spent'},
+   playerCard:{name:'Darwin',pow:15,displayPow:21,kills:41,deaths:3,rarity:'apex',status:'active',note:'+6 surge → 21'},
+   oppCard:{name:'Stormcaller Prime',pow:14,displayPow:14,kills:23,deaths:0,rarity:'apex',status:'pristine',note:'Disruptor spent'},
    events:['Energy Surge → Darwin','Darwin: 15 → 21','Stormcaller holds at 14'],result:null,
    annotation:'The roll betrays Player B. The surge lands on Darwin, not Stormcaller — 21 vs 14. The Disruptor gamble backfired: Player B shifted the condition away from raw power and instead handed the aggressor +6. Nearly the right read. Nearly is the whole game.',kdAfter:{}},
 
   {id:5,label:'Duel 1 · Turn 1',sublabel:'Resolution — Player A Wins',stake:'1×',series:[1,0],
    condition:{icon:'⚡',name:'Energy Surge — Resolved',rule:'Darwin 21 vs Stormcaller 14. Player A wins.'},condActive:false,
-   playerCard:{name:'Darwin',pow:15,displayPow:21,kills:42,deaths:3,rarity:'genesis',status:'active',note:'42-3 ↑'},
-   oppCard:{name:'Stormcaller Prime',pow:14,displayPow:14,kills:23,deaths:1,rarity:'genesis',status:'lost-pristine',note:'23-0 → 23-1'},
+   playerCard:{name:'Darwin',pow:15,displayPow:21,kills:42,deaths:3,rarity:'apex',status:'active',note:'42-3 ↑'},
+   oppCard:{name:'Stormcaller Prime',pow:14,displayPow:14,kills:23,deaths:1,rarity:'apex',status:'lost-pristine',note:'23-0 → 23-1'},
    events:['Darwin wins — 21 vs 14','Darwin: 41-3 → 42-3','Stormcaller takes death: 23-0 → 23-1','❌ Pristine status gone — recorded to its record forever'],
    result:'player-wins',
    annotation:'Darwin takes it 21-14. Stormcaller Prime — 23 consecutive wins, Pristine since mint — just took its first death because its own Disruptor roll fed the aggressor. Block #5,112,904. The card Player B built their deck around protecting lost its most valuable attribute on turn 1, duel 1.',
@@ -8356,14 +8357,14 @@ const REPLAY_STEPS = [
 
   {id:11,label:'Duel 2 · Turn 1',sublabel:'Open Book — Cards Visible Before Commit',stake:'2×',series:[1,1],
    condition:{icon:'📖',name:'Open Book',rule:'Both players reveal committed cards before the opponent locks in their choice.'},condActive:true,
-   playerCard:{name:'Darwin',pow:15,displayPow:18,kills:42,deaths:3,rarity:'genesis',status:'active',note:'Momentum +3 · 3rd commit → 18'},
+   playerCard:{name:'Darwin',pow:15,displayPow:18,kills:42,deaths:3,rarity:'apex',status:'active',note:'Momentum +3 · 3rd commit → 18'},
    oppCard:{name:'Anorith Keeling',pow:10,displayPow:10,kills:6,deaths:1,rarity:'rare',status:'guarded',note:'Record Guard active'},
    events:['Open Book: reveals happen before commit confirms','Player A reveals Darwin (18 — Momentum online, 3rd commit)','Player B reveals Anorith Keeling (10) — Record Guard visible to both'],result:null,
    annotation:'Open Book means both players see each other\'s card before confirming. Darwin\'s Momentum is now online — his 3rd commit of the match, +3 to 18. Player B chose Anorith Keeling (10) knowing it loses. This is intentional — Anorith Keeling has Record Guard active, a one-use ability that blocks the next death from being written to its record. Player B is conceding the duel to protect the card.',kdAfter:{}},
 
   {id:12,label:'Duel 2 · Turn 1',sublabel:'Resolution — Record Guard Fires',stake:'2×',series:[2,1],
    condition:{icon:'📖',name:'Open Book — Resolved',rule:'Darwin 18 vs Anorith Keeling 10.'},condActive:false,
-   playerCard:{name:'Darwin',pow:15,displayPow:18,kills:43,deaths:3,rarity:'genesis',status:'active',note:'43-3 ↑'},
+   playerCard:{name:'Darwin',pow:15,displayPow:18,kills:43,deaths:3,rarity:'apex',status:'active',note:'43-3 ↑'},
    oppCard:{name:'Anorith Keeling',pow:10,displayPow:10,kills:6,deaths:1,rarity:'rare',status:'guarded',note:'Death blocked — Record Guard consumed'},
    events:['Darwin wins — 18 vs 10','Darwin: 42-3 → 43-3','Record Guard fires — Anorith Keeling death NOT written to record','Anorith Keeling stays at 6-1','Record Guard consumed — one-time use gone'],
    result:'player-wins',
@@ -8699,9 +8700,9 @@ const TIMING_LABEL = {on:'On-Commit',instant:'Instant',pre:'Pre-Commit',resoluti
 
 // Full owned collection = starting hand cards + deck pool
 const COLLECTION = [...HAND_CARDS, ...DECK_POOL];
-const RARITY_ORDER = {genesis:0,ultra:1,rare:2,uncommon:3,common:4};
+const RARITY_ORDER = {apex:0,ultra:1,rare:2,uncommon:3,common:4};
 // Series 1 edition sizes — mint supply per card, by rarity
-const RARITY_SUPPLY = {genesis:100, ultra:1000, rare:2500, uncommon:4000, common:5000};
+const RARITY_SUPPLY = {apex:100, ultra:1000, rare:2500, uncommon:4000, common:5000};
 COLLECTION.sort((a,b)=>(RARITY_ORDER[a.rarity]-RARITY_ORDER[b.rarity])||(b.pow-a.pow));
 
 // deterministic provenance from card name (stable, no RNG)
@@ -8713,7 +8714,7 @@ function provenance(c){
   const winRate=total>0?Math.round(_pk.k/total*100):0;
   const supply=c.variant?(c.tourneyOpened||12):(RARITY_SUPPLY[c.rarity]||1000);
   const idx=c.mintIndex?c.mintIndex:(h%supply)+1;
-  const transfers=c.rarity==='genesis'?0:(h%5);
+  const transfers=c.rarity==='apex'?0:(h%5);
   const block=4820000+(h%600000);
   return {winRate,supply,idx,transfers,block,seasons:'Chapter 1 · Rebirth',
     owner:'0x'+((h*2654435761)>>>0).toString(16).padStart(8,'0').slice(0,4)+'…'+(h>>>16).toString(16).padStart(4,'0').slice(0,4)};
@@ -8729,7 +8730,7 @@ function getRec(c){
   const key = recKey(c);
   if(!cardRecords[key]){
     cardRecords[key] = { k: c.kills||0, d: c.deaths||0, ok: 0, od: 0,
-      chain: [{ owner: ME_ADDR, date: todayISO(), via: c.variant ? 'Tournament variant' : (c.rarity==='genesis' ? 'Apex mint' : 'Held in vault') }] };
+      chain: [{ owner: ME_ADDR, date: todayISO(), via: c.variant ? 'Tournament variant' : (c.rarity==='apex' ? 'Apex mint' : 'Held in vault') }] };
   }
   return cardRecords[key];
 }
@@ -9460,7 +9461,7 @@ const BOT_OPPONENTS = [
   {id:'anorith',name:'Anorith Prime',avatar:'🦂',color:'var(--r-ultra)',arch:'The Broodswarm — hand-size',diff:3,
    desc:'Hoards cards and turns a full hand into raw power. La "La" Ballora, the Broodqueen commands the swarm — the longer you let her sit, the more the brood answers her call.',
    sig:'La "La" Ballora, the Broodqueen (16)', dmCard:'La "La" Ballora, the Broodqueen', pool:pick(BROODSWARM_PRESET),bias:2},
-  {id:'keawe',name:'Mirror Kotei',avatar:'⚡',color:'var(--r-genesis)',arch:'The Warpath — kill escalation',diff:4,
+  {id:'keawe',name:'Mirror Kotei',avatar:'⚡',color:'var(--r-apex)',arch:'The Warpath — kill escalation',diff:4,
    desc:'The hardest opponent — early-champion aggression backed by Tange Sazen\'s kill escalation. Bank a win against him and his Winners Circle bonus goes quiet; keep him scoreless and he only gets more dangerous.',
    sig:'Tange Sazen (17)', dmCard:'Tange Sazen', pool:pick(WARPATH_PRESET),bias:3},
   {id:'ascendant',name:'The Ascendant',avatar:'👑',color:'var(--gold)',arch:'Trait Trial — maxed veterans',diff:4,
@@ -9885,7 +9886,7 @@ function mergeFoil(){
   if(got<need){ if(typeof toast==='function') toast('Not enough duplicates to merge.', false); return; }
   cardFoils[key]=nx.id; cardFoilMax[key]=Math.max(cardFoilMax[key]||0, idx+1);
   // Merge reward — fair Signal for engaging with foil progression (rarity base 10-25, +3 per extra duplicate)
-  const MERGE_SIGNAL={genesis:25,ultra:20,rare:15,uncommon:12,common:10};
+  const MERGE_SIGNAL={apex:25,ultra:20,rare:15,uncommon:12,common:10};
   const mergeReward=(MERGE_SIGNAL[c.rarity]||12)+Math.max(0,got-1)*3;
   signalPoints+=mergeReward;
   if(typeof updateBalance==='function') updateBalance(); if(typeof saveState==='function') saveState(); if(typeof buildShop==='function') buildShop(); if(typeof buildVault==='function') buildVault();
@@ -9899,7 +9900,7 @@ function isTypeOwned(name){
 }
 function vaultTrackerHTML(){
   var types=COLLECTION.filter(function(c){ return !c.uid && !c.variant; });
-  var order=['genesis','ultra','rare','common'], tot={}, own={}, T=0, O=0;
+  var order=['apex','ultra','rare','common'], tot={}, own={}, T=0, O=0;
   order.forEach(function(r){ tot[r]=0; own[r]=0; });
   types.forEach(function(c){ var r=c.rarity; if(tot[r]==null){tot[r]=0;own[r]=0;} tot[r]++; T++; if(isTypeOwned(c.name)){ own[r]++; O++; } });
   var pct=T?Math.round(O/T*100):0;
@@ -10373,19 +10374,19 @@ function toggleDeckFromDrawer(){
 let pvpMode=false, pvpRival=null, pvpStakeMine=null, pvpStakeTheirs=null;
 let pvpFloor='any', pvpApproveYou=false, pvpApproveThem=false;
 let pvpPotMine=[], pvpPotTheirs=[], pvpForced=null;  // multi-card pot for PvP raises
-const RIVAL_TIER={1:'uncommon',2:'rare',3:'ultra',4:'genesis'};
+const RIVAL_TIER={1:'uncommon',2:'rare',3:'ultra',4:'apex'};
 function rivalStakeFor(b){
   const tier=RIVAL_TIER[b.diff]||'rare';
   const pool=COLLECTION.filter(c=>c.rarity===tier && !c.variant);
   return pool.length ? pool[hashStr(b.id)%pool.length].name : 'Ahdorah Khaan, Determined Soul';
 }
 function buildPvP(){
-  const FLOORS=[{k:'any',l:'Any'},{k:'rare',l:'Rare+'},{k:'ultra',l:'Ultra+'},{k:'genesis',l:'Apex'}];
+  const FLOORS=[{k:'any',l:'Any'},{k:'rare',l:'Rare+'},{k:'ultra',l:'Ultra+'},{k:'apex',l:'Apex'}];
   const fl=document.getElementById('pvp-floor'); if(fl) fl.innerHTML=FLOORS.map(x=>'<button class="pvp-floor-btn '+(pvpFloor===x.k?'sel':'')+'" onclick="setPvpFloor(\''+x.k+'\')">'+x.l+'</button>').join('');
   const rivals=BOT_OPPONENTS.filter(b=> pvpFloor==='any' || RARITY_ORDER[RIVAL_TIER[b.diff]] <= RARITY_ORDER[pvpFloor]).slice(0,3);
   document.getElementById('pvp-rival-grid').innerHTML = rivals.map(b=>{
     const pips=[1,2,3,4].map(i=>`<div class="pip ${i<=b.diff?'on':''}"></div>`).join('');
-    const tierName={uncommon:'Uncommon',rare:'Rare',ultra:'Ultra',genesis:'Apex'}[RIVAL_TIER[b.diff]||'rare'];
+    const tierName={uncommon:'Uncommon',rare:'Rare',ultra:'Ultra',apex:'Apex'}[RIVAL_TIER[b.diff]||'rare'];
     return `<div class="bot-card ${pvpRival===b.id?'sel':''}" onclick="selectPvpRival('${b.id}')">
       <div class="bot-top"><div class="bot-avatar" style="background:linear-gradient(135deg,${b.color},var(--surface2))">${b.avatar}</div>
       <div><div class="bot-name">${b.name}</div><div class="bot-arch">${b.arch}</div><div class="bot-diff">${pips}</div></div></div>
@@ -10522,7 +10523,7 @@ function rankedFindMatch(){
 // ══ MASTERY — per-card progression to Lv 25, rarity-gated reward ladder, fueled by Ascension bond ══
 const MASTERY_MAX=25;
 const MASTERY_REWARDS={
-  genesis:[{lvl:3,type:'emote',icon:'😤'},{lvl:6,type:'header',icon:'🎴'},{lvl:10,type:'sleeve',icon:'🂠'},{lvl:15,type:'title',icon:'👑'},{lvl:20,type:'frame',icon:'🖼'},{lvl:25,type:'variant',icon:'⭐'}],
+  apex:[{lvl:3,type:'emote',icon:'😤'},{lvl:6,type:'header',icon:'🎴'},{lvl:10,type:'sleeve',icon:'🂠'},{lvl:15,type:'title',icon:'👑'},{lvl:20,type:'frame',icon:'🖼'},{lvl:25,type:'variant',icon:'⭐'}],
   ultra:[{lvl:3,type:'emote',icon:'😤'},{lvl:6,type:'header',icon:'🎴'},{lvl:10,type:'sleeve',icon:'🂠'},{lvl:25,type:'variant',icon:'⭐'}],
   rare:[{lvl:3,type:'emote',icon:'😤'},{lvl:6,type:'header',icon:'🎴'},{lvl:25,type:'variant',icon:'⭐'}],
   uncommon:[{lvl:3,type:'emote',icon:'😤'},{lvl:25,type:'variant',icon:'⭐'}],
@@ -10562,7 +10563,7 @@ function claimMasteryVariant(key){
   if(document.querySelector('.drawer')) closeDrawer();
   if(document.getElementById('v-asc')&&document.getElementById('v-asc').classList.contains('on')) buildAscension();
 }
-function hasAscendantFrame(){ return COLLECTION.some(function(c){ return c.rarity==='genesis' && masteryLevelOf(c)>=20; }); }
+function hasAscendantFrame(){ return COLLECTION.some(function(c){ return c.rarity==='apex' && masteryLevelOf(c)>=20; }); }
 function applyAscendantFrame(){ if(document.body) document.body.classList.toggle('frame-ascendant', equipped.frame==='ascendant' && hasAscendantFrame()); }
 function toggleAscendantFrame(){
   if(!hasAscendantFrame()){ toast('Master a Apex card to Lv 20 to unlock the Ascendant Frame.'); return; }
@@ -10966,7 +10967,7 @@ function ascSkinDef(id){ return ASC_SKINS.find(function(x){return x.id===id;})||
 function ascSkinOf(name){ var P=ascUnitProg[name]; return (P&&P.skin)||'none'; }
 function ascSkinStyle(name){ var d=ascSkinDef(ascSkinOf(name)); var css=''; if(d.glow) css+=';box-shadow:0 0 0 2px '+d.glow+',0 0 16px '+d.glow; if(d.filter) css+=';filter:'+d.filter; return css; }
 function ascSkinOwned(id){ return id==='none' || (typeof ownedCosmetics!=='undefined' && ownedCosmetics.has('ascskin:'+id)); }
-function ascSkinEligible(name){ var c=(typeof COLLECTION!=='undefined')&&COLLECTION.find(function(x){return x.name===name && !x.variant && !x.ascendant;}); var r=c&&c.rarity; return r==='ultra'||r==='genesis'; }
+function ascSkinEligible(name){ var c=(typeof COLLECTION!=='undefined')&&COLLECTION.find(function(x){return x.name===name && !x.variant && !x.ascendant;}); var r=c&&c.rarity; return r==='ultra'||r==='apex'; }
 function ascEquipSkin(id, unitId){ var u=ASC_UNITS.find(function(x){return x.id===unitId;}); if(!u) return; if(id!=='none' && !ascSkinEligible(u.name)) return; var P=ascUnitProg[u.name]=ascUnitProg[u.name]||{level:1,xp:0,rites:0,bosses:0}; P.skin=id; saveState(); ascChampionDetail(unitId); }
 function ascBuySkin(id, unitId){ var d=ascSkinDef(id); if(!d) return; if(ascSkinOwned(id)){ ascEquipSkin(id, unitId); return; } if(typeof forgeBalance==='undefined'||forgeBalance<d.price){ if(typeof toast==='function') toast('Not enough Forge — '+d.name+' costs ❖ '+d.price, false); return; } forgeBalance-=d.price; if(typeof ownedCosmetics!=='undefined') ownedCosmetics.add('ascskin:'+id); if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('Unlocked '+d.name+' regalia', true); ascEquipSkin(id, unitId); }
 function ascArenaHub(){
@@ -11656,7 +11657,7 @@ function startDraft(){
   if(typeof toast==='function') toast('Draft entered \u2014 '+fmtPts(DRAFT_ENTRY)+' \u25c8. Keep every card you draft.', true);
 }
 function dealDraftRow(){
-  const W={common:50,uncommon:30,rare:14,ultra:5,genesis:1}; const taken=new Set(draftPool); const row=[]; let guard=0;
+  const W={common:50,uncommon:30,rare:14,ultra:5,apex:1}; const taken=new Set(draftPool); const row=[]; let guard=0;
   while(row.length<DRAFT_ROW && guard++<300){
     let tot=0; for(const r in W) tot+=W[r]; let roll=Math.random()*tot, rar='common';
     for(const r in W){ roll-=W[r]; if(roll<=0){ rar=r; break; } }
@@ -12050,7 +12051,7 @@ body::before{background:
   <div class="dev-hd">
     <span class="dev-ti">🛠 Developer — Balance</span>
     <input id="dev-q" class="dev-q" placeholder="search cards…">
-    <span id="dev-rar" class="dev-rarf"><button class="dev-rc on" data-rar="">All</button><button class="dev-rc" data-rar="genesis">AR</button><button class="dev-rc" data-rar="ultra">UR</button><button class="dev-rc" data-rar="rare">Rare</button><button class="dev-rc" data-rar="common">Common</button></span>
+    <span id="dev-rar" class="dev-rarf"><button class="dev-rc on" data-rar="">All</button><button class="dev-rc" data-rar="apex">AR</button><button class="dev-rc" data-rar="ultra">UR</button><button class="dev-rc" data-rar="rare">Rare</button><button class="dev-rc" data-rar="common">Common</button></span>
     <span class="dev-chg" id="dev-chg">0 edits</span>
     <button class="dev-b" id="dev-exp">Export</button>
     <button class="dev-b" id="dev-req" title="Copy all your plain-word Called requests to hand off to Claude">📣 Requests</button>
@@ -12074,8 +12075,8 @@ body::before{background:
     if(typeof COLLECTION==='undefined'||typeof DECK_POOL==='undefined'){return setTimeout(boot,250);}
     var OVL=document.getElementById('dev-ov'); if(!OVL)return;
     var FAB=document.getElementById('dev-fab'), BODY=document.getElementById('dev-body'), Q=document.getElementById('dev-q'), RARF=document.getElementById('dev-rar'), EXP=document.getElementById('dev-expbox');
-    var KEY='sf_dev_overrides_v1', ORDER=['genesis','ultra','rare','common'], SCALE=30;
-    var RAR={genesis:{c:'#F5C24D',n:'Apex'},ultra:{c:'#B36AF0',n:'Ultra'},rare:{c:'#5B86F5',n:'Rare'},common:{c:'#8b98ad',n:'Common'}};
+    var KEY='sf_dev_overrides_v1', ORDER=['apex','ultra','rare','common'], SCALE=30;
+    var RAR={apex:{c:'#F5C24D',n:'Apex'},ultra:{c:'#B36AF0',n:'Ultra'},rare:{c:'#5B86F5',n:'Rare'},common:{c:'#8b98ad',n:'Common'}};
     var HAND=(typeof HAND_CARDS!=='undefined')?HAND_CARDS:[];
     function baseList(){var s={},l=[];HAND.concat(DECK_POOL).forEach(function(c){if(!s[c.name]){s[c.name]=1;l.push(c);}});return l;}
     var ORIG={}; baseList().forEach(function(c){ORIG[c.name]={p:c.pow,r:c.rarity,t:c.timing||'—',a:c.abil||'',cost:(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[c.name]!=null)?COST_OVERRIDE[c.name]:((typeof conjureCost==='function')?conjureCost(c):null),might:c.might,cunning:c.cunning,grit:c.grit,camp:c.camp,called:(typeof CALLED!=='undefined'&&CALLED[c.name])?JSON.stringify(CALLED[c.name]):null,rules:(typeof CARD_RULES!=='undefined'&&CARD_RULES[c.name])?JSON.stringify(CARD_RULES[c.name]):null};});
@@ -12145,7 +12146,7 @@ body::before{background:
         var cc=(typeof CALLED!=='undefined'&&CALLED[n])?CALLED[n]:{};
         var note=(OV[n]&&OV[n].note)?OV[n].note:'';
         var rules=(typeof CARD_RULES!=='undefined'&&CARD_RULES[n])?JSON.stringify(CARD_RULES[n]):'';
-        h+='<div class="dfx-card" data-n="'+esc(n)+'"><div class="dfx-h"><input class="dfx-name" data-fx="rename" value="'+esc(NAME_OVERRIDE[n]||n)+'" title="Display name (card face). Export hands the canonical rename to Claude."><span class="dfx-cost">⚡ <input type="number" data-fx="cost" value="'+cost+'" min="0" max="6"></span></div>'+'<div class="dfx-pr"><span class="dfx-q"><i>Power</i><input type="number" data-fx="pow" class="dfx-qin" value="'+(c.pow||0)+'" min="0" max="40"></span><span class="dfx-q"><i>Rarity</i><select data-fx="rar" class="dfx-qin">'+['genesis','ultra','rare','common'].map(function(r){return '<option'+(c.rarity===r?' selected':'')+'>'+r+'</option>';}).join('')+'</select></span></div>'
+        h+='<div class="dfx-card" data-n="'+esc(n)+'"><div class="dfx-h"><input class="dfx-name" data-fx="rename" value="'+esc(NAME_OVERRIDE[n]||n)+'" title="Display name (card face). Export hands the canonical rename to Claude."><span class="dfx-cost">⚡ <input type="number" data-fx="cost" value="'+cost+'" min="0" max="6"></span></div>'+'<div class="dfx-pr"><span class="dfx-q"><i>Power</i><input type="number" data-fx="pow" class="dfx-qin" value="'+(c.pow||0)+'" min="0" max="40"></span><span class="dfx-q"><i>Rarity</i><select data-fx="rar" class="dfx-qin">'+['apex','ultra','rare','common'].map(function(r){return '<option'+(c.rarity===r?' selected':'')+'>'+r+'</option>';}).join('')+'</select></span></div>'
           +'<div class="dfx-pr dfx-disc"><span class="dfx-q"><i>Might</i><input type="number" data-fx="might" class="dfx-qin" value="'+(c.might||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Cunning</i><input type="number" data-fx="cunning" class="dfx-qin" value="'+(c.cunning||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Grit</i><input type="number" data-fx="grit" class="dfx-qin" value="'+(c.grit||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Camp</i><select data-fx="camp" class="dfx-qin">'+Object.keys(CAMP_BEATS).map(function(cm){return '<option'+((c.camp||campOf(n))===cm?' selected':'')+'>'+cm+'</option>';}).join('')+'</select></span></div>'
           +'<label class="dfx-l">Conjured ability — display text</label><textarea data-fx="abil" class="dfx-ta">'+esc(c.abil||'')+'</textarea>'
           +'<label class="dfx-l">📣 Called — quick build (flat effect)</label>'
@@ -12314,7 +12315,7 @@ function tourneyFinish(){
   ov.classList.add('show');
 }
 function tourneyClaim(){
-  var gens = (typeof VARIANT_DEFS!=='undefined') ? VARIANT_DEFS.filter(function(v){return v.tier==='genesis';}) : [];
+  var gens = (typeof VARIANT_DEFS!=='undefined') ? VARIANT_DEFS.filter(function(v){return v.tier==='apex';}) : [];
   var res=null;
   if(gens.length && typeof mintVariant==='function'){ var def=gens[Math.floor(Math.random()*gens.length)]; res=mintVariant(def, 'Tournament Victor'); }
   var ov=document.getElementById('tourney-overlay'), panel=ov.querySelector('.to-panel');
