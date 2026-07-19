@@ -12240,6 +12240,7 @@ body::before{background:
     <span class="dev-ti">🛠 Developer — Balance</span>
     <input id="dev-q" class="dev-q" placeholder="search cards…">
     <span id="dev-rar" class="dev-rarf"><button class="dev-rc on" data-rar="">All</button><button class="dev-rc" data-rar="apex">AR</button><button class="dev-rc" data-rar="ultra">UR</button><button class="dev-rc" data-rar="rare">Rare</button><button class="dev-rc" data-rar="common">Common</button></span>
+    <span id="dev-arch" class="dev-rarf"><button class="dev-rc on" data-arch="">All archetypes</button><button class="dev-rc" data-arch="blackwing">Black Wings</button><button class="dev-rc" data-arch="deathless">Deathless</button><button class="dev-rc" data-arch="warpath">Warpath</button><button class="dev-rc" data-arch="broodswarm">Broodswarm</button><button class="dev-rc" data-arch="ironsworn">Ironsworn</button></span>
     <span class="dev-chg" id="dev-chg">0 edits</span>
     <button class="dev-b" id="dev-exp">Export</button>
     <button class="dev-b" id="dev-req" title="Copy all your plain-word Called requests to hand off to Claude">📣 Requests</button>
@@ -12262,7 +12263,7 @@ body::before{background:
   function boot(){
     if(typeof COLLECTION==='undefined'||typeof DECK_POOL==='undefined'){return setTimeout(boot,250);}
     var OVL=document.getElementById('dev-ov'); if(!OVL)return;
-    var FAB=document.getElementById('dev-fab'), BODY=document.getElementById('dev-body'), Q=document.getElementById('dev-q'), RARF=document.getElementById('dev-rar'), EXP=document.getElementById('dev-expbox');
+    var FAB=document.getElementById('dev-fab'), BODY=document.getElementById('dev-body'), Q=document.getElementById('dev-q'), RARF=document.getElementById('dev-rar'), ARCHF=document.getElementById('dev-arch'), EXP=document.getElementById('dev-expbox');
     var KEY='sf_dev_overrides_v1', ORDER=['apex','ultra','rare','common'], SCALE=30;
     var RAR={apex:{c:'#F5C24D',n:'Apex'},ultra:{c:'#B36AF0',n:'Ultra'},rare:{c:'#5B86F5',n:'Rare'},common:{c:'#8b98ad',n:'Common'}};
     var HAND=(typeof HAND_CARDS!=='undefined')?HAND_CARDS:[];
@@ -12288,8 +12289,8 @@ body::before{background:
     function esc(s){return (''+s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
     function chg(){document.getElementById('dev-chg').textContent=Object.keys(OV).length+' edits';}
     function record(n,f,v){var map={p:'pow',r:'rarity',t:'timing',a:'abil'};setProp(n,map[f],v);var o=ORIG[n];if(!OV[n])OV[n]={};var og=o?o[f]:undefined;if((''+v)===(''+og))delete OV[n][f];else OV[n][f]=v;if(OV[n]&&!Object.keys(OV[n]).length)delete OV[n];saveOV();chg();schedVault();}
-    var cur='table', sortK='ceil', sortD=-1, devRar='';
-    function renderTable(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=devRar;var d=model().filter(function(c){return (!q||c.n.toLowerCase().indexOf(q)>=0)&&(!rf||c.r===rf);});
+    var cur='table', sortK='ceil', sortD=-1, devRar='', devArch='';
+    function renderTable(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=devRar;var af=devArch;var d=model().filter(function(c){return (!q||c.n.toLowerCase().indexOf(q)>=0)&&(!rf||c.r===rf)&&(!af||(typeof cardArchetypes==='function'&&cardArchetypes(c.n).some(function(a){return a.id===af;})));});
       d.sort(function(a,b){var x=sortK==='ceil'?ceil(a):a[sortK],y=sortK==='ceil'?ceil(b):b[sortK];return (x<y?-1:x>y?1:0)*sortD;});
       var h='<table class="dev-tbl"><thead><tr><th>Card</th><th>Rarity</th><th class="num" data-k="cost">Cost'+(sortK==='cost'?(sortD<0?' ▼':' ▲'):'')+'</th><th class="num" data-k="p">Power'+(sortK==='p'?(sortD<0?' ▼':' ▲'):'')+'</th><th class="num" data-k="ceil">Ceil'+(sortK==='ceil'?(sortD<0?' ▼':' ▲'):'')+'</th><th>Ability (click to edit)</th></tr></thead><tbody>';
       d.forEach(function(c){var o=ORIG[c.n];h+='<tr data-n="'+esc(c.n)+'"><td class="nm" style="border-left:3px solid '+rarOf(c.r).c+'">'+esc(c.n)+(stacks(c.a)?' <span title="scales further" style="color:#d0a24a">∞</span>':'')+'</td>'+
@@ -12393,6 +12394,7 @@ body::before{background:
     document.getElementById('dev-tabs').addEventListener('click',function(e){var b=e.target.closest('.dev-t');if(!b)return;document.querySelectorAll('.dev-t').forEach(function(t){t.classList.remove('on');});b.classList.add('on');cur=b.getAttribute('data-v');render();});
     Q.addEventListener('input',function(){if(cur==='table')renderTable();else if(cur==='effects')renderEffects();});
     if(RARF)RARF.addEventListener('click',function(e){var b=e.target.closest('.dev-rc');if(!b)return;devRar=b.getAttribute('data-rar')||'';RARF.querySelectorAll('.dev-rc').forEach(function(x){x.classList.toggle('on',x===b);});render();});
+    if(ARCHF)ARCHF.addEventListener('click',function(e){var b=e.target.closest('.dev-rc');if(!b)return;devArch=b.getAttribute('data-arch')||'';ARCHF.querySelectorAll('.dev-rc').forEach(function(x){x.classList.toggle('on',x===b);});render();});
     document.getElementById('dev-exp').onclick=function(){var lines=Object.keys(OV).map(function(n){var o=OV[n],g=ORIG[n]||{},c=[];if(o.p!=null&&(''+o.p)!==(''+g.p))c.push('pow '+(g.p==null?'?':g.p)+'→'+o.p);if(o.r!=null&&o.r!==g.r)c.push('rarity '+(g.r||'?')+'→'+o.r);if(o.t!=null&&o.t!==g.t)c.push('timing '+(g.t||'?')+'→'+o.t);if(o.a!=null&&o.a!==g.a)c.push('ability → "'+o.a+'"');if(o.cost!=null&&(''+o.cost)!==(''+g.cost))c.push('cost →'+o.cost);if(o.rename!=null)c.push('RENAME → "'+o.rename+'" (canonical rename — Claude to apply)');if(o.links!=null)c.push('links → ['+o.links.join(', ')+']');if(o.called!=null&&o.called!==g.called)c.push('CALLED →'+o.called);if(o.rules!=null&&o.rules!==g.rules)c.push('CARD_RULES →'+o.rules);if(o.note!=null)c.push('note: "'+o.note+'"');return c.length?(n+': '+c.join(', ')):null;}).filter(Boolean);EXP.hidden=false;EXP.innerHTML='<textarea readonly>'+esc(lines.length?lines.join('\n'):'No changes yet.')+'</textarea>';try{EXP.querySelector('textarea').select();}catch(_){}};
     var _rq=document.getElementById('dev-req'); if(_rq) _rq.onclick=function(){ var lines=Object.keys(OV).filter(function(n){return OV[n]&&OV[n].note;}).map(function(n){ var cur=(typeof CALLED!=='undefined'&&CALLED[n])?JSON.stringify(CALLED[n]):'(none yet)'; var cst=(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[n]!=null)?(' [⚡'+COST_OVERRIDE[n]+']'):''; return n+cst+': '+OV[n].note+'   (current: '+cur+')'; }); EXP.hidden=false; EXP.innerHTML='<textarea readonly>'+esc(lines.length?('CALLED-EFFECT REQUESTS — paste to Claude:\n\n'+lines.join('\n\n')):'No descriptions yet — open ⚡ Abilities and describe a card in the plain-words box.')+'</textarea>'; try{EXP.querySelector('textarea').select();}catch(_){} };
     document.getElementById('dev-rst').onclick=function(){if(!confirm('Reset ALL dev edits back to original values?'))return;Object.keys(OV).forEach(function(n){var o=ORIG[n];if(o){setProp(n,'pow',o.p);setProp(n,'rarity',o.r);setProp(n,'timing',o.t);setProp(n,'abil',o.a);}});OV={};saveOV();chg();try{if(typeof buildVault==='function')buildVault();}catch(e){}render();};
