@@ -4512,6 +4512,7 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   document.getElementById('commit-btn').style.display = 'none';
   document.getElementById('select-hint').textContent = 'Click a card to enter the Select phase';
   buildHand();
+  if(typeof cheapestFighterCost==='function' && charge < cheapestFighterCost()){ energyForfeit(); return; }   // can't afford ANY fighter in hand — hard forfeit, checked before the Deck Master fallback since it's the more fundamental blocker
   if(typeof dmShouldOfferFallback==='function' && dmShouldOfferFallback()){
     var _dmov=document.getElementById('dm-fallback-overlay'); if(_dmov) _dmov.classList.add('show');
     return;   // no conjure-eligible card — Auto-Ride/Forfeit only, no normal decision clock
@@ -5163,11 +5164,13 @@ function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview
   if(phase!=='revealed' && phase!=='selecting') return;
   { var _cc=conjureCost(c);
     if(_cc > charge){
-      var _fcosts=hand.filter(function(h){return h && h.timing!=='instant';}).map(conjureCost);
-      var _minC=_fcosts.length?Math.min.apply(null,_fcosts):0;
+      var _minC=(typeof cheapestFighterCost==='function')?cheapestFighterCost():0;
       if(charge >= _minC){ if(typeof toast==='function') toast('Not enough energy — '+c.name+' costs ⚡'+_cc+'. Conjure a cheaper card (⚡'+charge+' available).', false); return; }
-      if(_cc > _minC){ if(typeof toast==='function') toast('Energy-starved — only your cheapest fighter (⚡'+_minC+') conjures free. Pick it.', false); return; }
-      if(typeof toast==='function') toast('⚡ Energy-starved — '+c.name+' conjured free. You can always field a fighter.', true);
+      // charge < even the cheapest fighter in hand -- can't legally conjure anything. This should
+      // already have been caught by revealCondition()'s own check before the decision clock ever
+      // started; reaching it here means charge dropped (an energy-cost spell cast, most likely)
+      // sometime during the pre-commit window. Same hard forfeit either way, no free conjure.
+      energyForfeit(); return;
     }
   }
   if(typeof SFX!=='undefined')SFX.play('deploy');
@@ -6360,6 +6363,39 @@ function dmForfeit(){
   document.getElementById('abil-log').innerHTML = '<div class="abil-log-entry">🏳 Deck Master: no conjure-eligible card — round forfeited</div>';
   if(typeof updateScore==='function') updateScore();
   var _nb=document.querySelector('#result-overlay .next-btn'); if(_nb) _nb.textContent=(playerScore[0]>=matchWinThreshold()||playerScore[1]>=matchWinThreshold())?'View Match Result →':'Continue →';
+  if(typeof updateStake==='function') updateStake();
+  document.getElementById('result-overlay').classList.add('show');
+  setPhase('resolved');
+  if(typeof updatePiles==='function') updatePiles();
+}
+// Energy-lockout forfeit (7/18/26, direct request): if even the cheapest non-instant card in hand
+// costs more than current charge, you cannot legally conjure anything -- replaces the old "cheapest
+// fighter conjures free" safety net (stageFighter() used to guarantee "you can always field a
+// fighter") with a hard forfeit instead. No compensation draw, unlike dmForfeit() -- not asked for.
+// Checked twice: at reveal (revealCondition(), before the normal decision clock would start -- the
+// common case) and again inside stageFighter() as a defense-in-depth catch for the rarer case where
+// an energy-cost spell gets cast mid-window and drops charge below the floor after reveal already
+// passed. Same surrender presentation as dmForfeit()/onDecisionTimeout().
+function cheapestFighterCost(){
+  var costs = (typeof hand!=='undefined'?hand:[]).filter(function(h){ return h && h.timing!=='instant'; }).map(conjureCost);
+  return costs.length ? Math.min.apply(null, costs) : Infinity;
+}
+function energyForfeit(){
+  clearTurnTimers();
+  document.getElementById('record-reveal').style.display = 'none';
+  document.getElementById('instant-strip').style.display = 'none';
+  document.getElementById('confirm-btn').style.display = 'none';
+  document.getElementById('commit-btn').style.display = 'none';
+  document.getElementById('player-field').innerHTML = '<span class="placeholder">⚡ forfeited</span>';
+  document.getElementById('opp-field').innerHTML = '<span class="placeholder">no contest</span>';
+  playerScore[1]++;
+  lastResult = 'lose';
+  document.getElementById('result-label').textContent = '⚡ ROUND FORFEITED';
+  document.getElementById('result-label').className = 'result-label lose';
+  document.getElementById('result-sub').textContent = 'Not enough energy to conjure any card in hand — the round is forfeited.';
+  document.getElementById('abil-log').innerHTML = '<div class="abil-log-entry">⚡ Energy-starved — no affordable fighter, round forfeited</div>';
+  if(typeof updateScore==='function') updateScore();
+  var _nb2=document.querySelector('#result-overlay .next-btn'); if(_nb2) _nb2.textContent=(playerScore[0]>=matchWinThreshold()||playerScore[1]>=matchWinThreshold())?'View Match Result →':'Continue →';
   if(typeof updateStake==='function') updateStake();
   document.getElementById('result-overlay').classList.add('show');
   setPhase('resolved');
