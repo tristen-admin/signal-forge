@@ -4396,7 +4396,7 @@ function retreat(who){
   showMatchComplete(who==='player'?'retreat-player':'retreat-bot', half);
 }
 // Best-of-7 conclusion — win/loss screen with Signal payout.
-function showMatchComplete(mode, amt){ if(typeof SFX!=='undefined')SFX.stopCrowd();
+function showMatchComplete(mode, amt){
   clearTurnTimers();
   if(typeof matchPlayed!=='undefined' && matchPlayed.size>=2){ var _bondCrossed=recordFormationBonds([...matchPlayed]); matchPlayed=new Set(); if(_bondCrossed && _bondCrossed.length) setTimeout(function(){ showBondBeat(_bondCrossed[0]); }, 900); }
   wagerDone=true; if(wagerTimer){ clearInterval(wagerTimer); wagerTimer=null; } { const _wo=document.getElementById('wager-overlay'); if(_wo) _wo.classList.remove('show'); }
@@ -5819,7 +5819,7 @@ setInterval(function(){ try{ var _drw=document.getElementById('card-drawer'); va
 // Ability-activation cinematic — plays a card's signature clip once, centered, then fades.
 // ── SFX: procedural Web Audio card sounds (no assets, CSP-safe) ──
 const SFX = (function(){
-  let ctx=null, muted=false, lastHover=0, crowd=null;
+  let ctx=null, muted=false, lastHover=0;
   try{ muted = (localStorage.getItem('sf_muted')==='1'); }catch(e){}
   function ac(){ if(!ctx){ try{ ctx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ ctx=null; } } return ctx; }
   function tone(c,t,f,dur,type,peak,glide){ try{ const o=c.createOscillator(),g=c.createGain(); o.type=type||'sine'; o.frequency.setValueAtTime(f,t); if(glide) o.frequency.exponentialRampToValueAtTime(Math.max(1,glide),t+dur); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+0.012); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.connect(g).connect(c.destination); o.start(t); o.stop(t+dur+0.03); }catch(e){} }
@@ -5835,24 +5835,10 @@ const SFX = (function(){
     else if(kind==='defeat'){ tone(c,t,300,0.5,'sine',0.18,90); tone(c,t+0.09,224,0.5,'sine',0.15,70); tone(c,t+0.18,150,0.6,'sine',0.12,48); noise(c,t,0.28,0.05,260); }
     else if(kind==='hover'){ const now=Date.now(); if(now-lastHover<110) return; lastHover=now; tone(c,t,880,0.06,'sine',0.04,1250); }
   }
-  function ambBuf(c){ const n=Math.floor(c.sampleRate*4); const b=c.createBuffer(1,n,c.sampleRate); const d=b.getChannelData(0); for(let i=0;i<n;i++) d[i]=Math.random()*2-1; return b; }
-  function startCrowd(){ if(muted) return; const c=ac(); if(!c) return; if(c.state==='suspended'){ try{c.resume();}catch(e){} } if(crowd) return; try{ const t=c.currentTime;
-    const src=c.createBufferSource(); src.buffer=ambBuf(c); src.loop=true;
-    const bp=c.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=640; bp.Q.value=0.55;
-    const lp=c.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=1900;
-    const swell=c.createGain(); swell.gain.value=0.9;
-    const master=c.createGain(); master.gain.setValueAtTime(0.0001,t); master.gain.exponentialRampToValueAtTime(0.085,t+2.6);
-    const lfo=c.createOscillator(); lfo.type='sine'; lfo.frequency.value=0.11; const lfoG=c.createGain(); lfoG.gain.value=0.34; lfo.connect(lfoG); lfoG.connect(swell.gain);
-    const rsrc=c.createBufferSource(); rsrc.buffer=ambBuf(c); rsrc.loop=true; const rlp=c.createBiquadFilter(); rlp.type='lowpass'; rlp.frequency.value=115; const rg=c.createGain(); rg.gain.value=0.07;
-    src.connect(bp); bp.connect(lp); lp.connect(swell); swell.connect(master);
-    rsrc.connect(rlp); rlp.connect(rg); rg.connect(master);
-    master.connect(c.destination); src.start(t); rsrc.start(t); lfo.start(t);
-    crowd={src:src,rsrc:rsrc,lfo:lfo,master:master}; }catch(e){} }
-  function stopCrowd(){ if(!crowd||!ctx){ crowd=null; return; } try{ const c=ctx,t=c.currentTime,cr=crowd; cr.master.gain.cancelScheduledValues(t); cr.master.gain.setValueAtTime(Math.max(0.0001,cr.master.gain.value||0.05),t); cr.master.gain.exponentialRampToValueAtTime(0.0001,t+0.7); setTimeout(function(){ try{cr.src.stop();cr.rsrc.stop();cr.lfo.stop();}catch(e){} },800); }catch(e){} crowd=null; }
-  function setMuted(m){ muted=m; if(m) stopCrowd(); try{ localStorage.setItem('sf_muted', m?'1':'0'); }catch(e){} const b=document.getElementById('sfx-toggle'); if(b) b.textContent=m?'🔇':'🔊'; if(typeof MUSIC!=='undefined')MUSIC.refresh(); }
+  function setMuted(m){ muted=m; try{ localStorage.setItem('sf_muted', m?'1':'0'); }catch(e){} const b=document.getElementById('sfx-toggle'); if(b) b.textContent=m?'🔇':'🔊'; if(typeof MUSIC!=='undefined')MUSIC.refresh(); }
   function init(){ if(document.getElementById('sfx-toggle')) return; const b=document.createElement('button'); b.id='sfx-toggle'; b.title='Toggle sound'; b.textContent=muted?'🔇':'🔊'; b.style.cssText='position:fixed;right:16px;bottom:16px;z-index:200;width:38px;height:38px;border-radius:50%;border:1px solid var(--border2);background:var(--panel);color:var(--text);font-size:16px;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.45);opacity:0.7;transition:opacity .15s,transform .12s'; b.onmouseenter=function(){b.style.opacity='1';b.style.transform='scale(1.08)';}; b.onmouseleave=function(){b.style.opacity='0.7';b.style.transform='none';}; b.onclick=function(){ setMuted(!muted); if(!muted) play('hover'); }; document.body.appendChild(b); }
   if(typeof document!=='undefined'){ if(document.body) init(); else document.addEventListener('DOMContentLoaded', init); }
-  return { play:play, setMuted:setMuted, startCrowd:startCrowd, stopCrowd:stopCrowd, ac:ac, get muted(){ return muted; } };
+  return { play:play, setMuted:setMuted, ac:ac, get muted(){ return muted; } };
 })();
 // Real hub/lobby track (7/18/26): plays across every non-play screen (Hub, Shop, Vault, Deck
 // Builder, Market, Lobby, PvP/Ranked/Tourney entry screens, Profile, Codex, etc.) -- explicitly
@@ -11806,7 +11792,6 @@ function startMatch(mode){
   show('turn', null);
   document.getElementById('nav-lobby').classList.add('on');
   document.getElementById('tb-title').textContent='Match — vs '+b.name;
-  if(typeof SFX!=='undefined')SFX.startCrowd();
 }
 // Deck Master (Phase C, 7/11/26) — same shared-function-then-flag idiom as Ranked Ladder
 // (rankedFindMatch calls startMatch() then sets rankedMode=true right after). Player-only:
@@ -11883,13 +11868,13 @@ function buildDraft(){
   if(!_draftRow) dealDraftRow();
   s.innerHTML='<div class="draft-prog">Pick '+(draftPool.length+1)+' of '+DRAFT_PICKS+'</div><div class="draft-row">'+_draftRow.map(function(c,i){ return '<div class="draft-card '+c.rarity+'" onclick="draftInspect('+i+')" onmouseenter="draftHover('+i+',this)" onmouseleave="hideCardPreview()"><div class="dc-pow">'+c.pow+'</div><div class="dc-name">'+(typeof dispName==="function"?dispName(c.name):c.name)+'</div><div class="dc-rar">'+c.rarity+'</div><div class="dc-hint" style="font-size:9px;color:var(--text3);margin-top:5px;letter-spacing:.03em">👁 view / draft</div></div>'; }).join('')+'</div>'+(draftPool.length?'<div class="draft-picked">Drafted: '+draftPool.join(' \u00b7 ')+'</div>':'');
 }
-function exitMatch(){ if(typeof SFX!=='undefined')SFX.stopCrowd();
+function exitMatch(){
   clearTurnTimers();
   show('lobby', document.getElementById('nav-lobby'));
 }
 
 // reset the duel engine for a fresh match
-function resetMatchState(){ if(typeof SFX!=='undefined'&&SFX.stopCrowd)SFX.stopCrowd();
+function resetMatchState(){
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[];
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
