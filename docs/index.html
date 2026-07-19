@@ -2473,6 +2473,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <button class="filter-chip" onclick="setSort('newest',this)">Newest</button>
           <button class="filter-chip" onclick="setSort('kills',this)">Most Kills</button>
           <button class="filter-chip" onclick="setSort('deaths',this)">Fewest Deaths</button>
+          <button class="filter-chip" onclick="setSort('cost',this)">Highest Cost</button>
         </div>
         <button class="filter-chip kw-toggle" id="kw-toggle" onclick="toggleVaultKw()">Keywords ▾</button><div class="vh-group vh-kw collapsed" id="vh-kw"></div>
         <button class="filter-chip kw-toggle" id="arch-toggle" onclick="toggleVaultArch()">Archetype ▾</button><div class="vh-group vh-arch collapsed" id="vh-arch"></div>
@@ -10105,8 +10106,9 @@ function buildVault(){
   if(vaultSort==='kills') entries.sort((a,b)=> b.k-a.k || (RARITY_ORDER[a.c.rarity]-RARITY_ORDER[b.c.rarity]));
   else if(vaultSort==='deaths') entries.sort((a,b)=> a.d-b.d || b.k-a.k);
   else if(vaultSort==='newest') entries.sort((a,b)=> _acquiredDate(b.c).localeCompare(_acquiredDate(a.c)) || (RARITY_ORDER[a.c.rarity]-RARITY_ORDER[b.c.rarity]));
+  else if(vaultSort==='cost') entries.sort((a,b)=> (conjureCost(b.c)-conjureCost(a.c)) || (RARITY_ORDER[a.c.rarity]-RARITY_ORDER[b.c.rarity]));
   else entries.sort((a,b)=> (RARITY_ORDER[a.c.rarity]-RARITY_ORDER[b.c.rarity]) || ((a.locked?1:0)-(b.locked?1:0)) || (b.c.pow-a.c.pow) || ((a.fresh?1:0)-(b.fresh?1:0)));
-  const sortLabel = vaultSort==='kills' ? ' · most kills' : vaultSort==='deaths' ? ' · fewest deaths' : vaultSort==='newest' ? ' · newest' : '';
+  const sortLabel = vaultSort==='kills' ? ' · most kills' : vaultSort==='deaths' ? ' · fewest deaths' : vaultSort==='newest' ? ' · newest' : vaultSort==='cost' ? ' · highest cost' : '';
   const totalCards=entries.reduce((s,e)=>s+(e.locked?0:e.count),0);
   const archLabel = vaultArchetype ? ' · '+(ARCHETYPE_PRESETS.find(a=>a.id===vaultArchetype)||{}).name : '';
   document.getElementById('vault-count').textContent=`${totalCards} cards${vaultKeyword?' · '+vaultKeyword:''}${archLabel}${sortLabel}`;
