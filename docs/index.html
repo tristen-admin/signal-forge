@@ -9633,6 +9633,13 @@ const BOT_OPPONENTS = [
    desc:'A Living-Traits test dummy: every card it fields is a maxed legend — its record equips its single strongest trait (Scarred, +2) plus a peak stat boost. One trait, not a stack. Bring an average build and see if base power can still hang.',
    sig:'maxed legends', pool:pick(['Kotei','Valcarion','Arch-Grim Korrin','Darwin','Lagertha Waltz','Envoy of Tyrants, Ella Ballora']),bias:3,maxed:true},
 ];
+// each archetype bot's pool above is a one-time snapshot taken at script load, before any dev-tool
+// archetype edit (or its restore-on-boot) has run -- refreshBotPool() recomputes it fresh from the
+// live preset array right as a real match starts, so an archetype-tag change actually reaches the
+// bot's deck instead of only ever affecting Vault/dev-tool display. 'ascendant' has no entry here on
+// purpose -- its pool is a fixed hand-picked legends list, not archetype-driven.
+var BOT_ARCH_PRESET = {kleydson:IRONSWORN_PRESET, korrin:DEATHLESS_PRESET, anorith:BROODSWARM_PRESET, keawe:WARPATH_PRESET};
+function refreshBotPool(b){ if(b && BOT_ARCH_PRESET[b.id]) b.pool = pick(BOT_ARCH_PRESET[b.id]); }
 let selectedBot = null;
 let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward gate)
 // 7/12/26: no longer gates the Deck Master mechanic itself — deckMasterCard alone does that now,
@@ -10605,6 +10612,7 @@ function updatePvpLaunch(){
 function startPvpMatch(){
   if(!pvpRival||!pvpStakeMine) return;
   const b=BOT_OPPONENTS.find(x=>x.id===pvpRival); if(!b) return;
+  refreshBotPool(b);
   pvpMode=true; activeBot=b; pvpStakeTheirs=rivalStakeFor(b); deckMasterMode=false;
   pvpPotMine=[pvpStakeMine]; pvpPotTheirs=[pvpStakeTheirs]; pvpForced=null;
   resetMatchState();
@@ -10649,6 +10657,7 @@ function enterAgreedDuel(){ const o=document.getElementById('approve-overlay'); 
 function autoSimPvp(){
   const o=document.getElementById('approve-overlay'); if(o) o.classList.remove('show');
   const b=BOT_OPPONENTS.find(x=>x.id===pvpRival); if(!b) return;
+  refreshBotPool(b);
   pvpMode=true; activeBot=b; pvpStakeTheirs=rivalStakeFor(b); deckMasterMode=false;
   pvpPotMine=[pvpStakeMine]; pvpPotTheirs=[pvpStakeTheirs]; pvpForced=null;
   resetMatchState();
@@ -11779,6 +11788,7 @@ function startMatch(mode){
   try{ var _fld0=document.querySelector('.field'); if(_fld0) _fld0.classList.toggle('ess-aura', typeof essenceCosmeticOwned==='function' && essenceCosmeticOwned('ec-aura')); }catch(e){}
   const b=BOT_OPPONENTS.find(x=>x.id===selectedBot);
   if(!b) return;
+  refreshBotPool(b);
   activeBot=b;
   pvpMode=false;
   // Flags MUST be set to their final value before resetMatchState()/dealNewDeck() run below —
@@ -12475,6 +12485,7 @@ function enterTournament(){
 function tourneyStartRound(){
   var b=tourneyQueue[tourneyIdx]; if(!b){ tourneyFinish(); return; }
   var ov=document.getElementById('tourney-overlay'); if(ov) ov.classList.remove('show');
+  refreshBotPool(b);
   activeBot=b; pvpMode=false; rankedMode=false; deckMasterMode=false;
   if(typeof resetMatchState==='function') resetMatchState();
   var bn=document.getElementById('match-bot-name'); if(bn) bn.textContent=b.name;
