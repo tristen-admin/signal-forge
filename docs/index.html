@@ -583,6 +583,8 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 }
 .commit-btn:hover:not(:disabled){background:rgba(212,168,67,0.25)}
 .commit-btn:disabled{opacity:0.3;cursor:default}
+.forfeit-round-btn{flex:0 0 auto;background:transparent;border:1px solid var(--border2);color:var(--text3);font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;padding:7px 10px;cursor:pointer;border-radius:3px;transition:border-color 0.15s,color 0.15s}
+.forfeit-round-btn:hover{border-color:var(--lose);color:var(--lose)}
 .hint{font-size:10px;color:var(--text3);flex:2;line-height:1.4}
 
 /* result overlay */
@@ -2992,6 +2994,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <button class="draw-btn" id="draw-btn" onclick="drawCard()" style="display:none">Draw Card ▶</button>
         <button class="confirm-btn" id="confirm-btn" onclick="confirmSelection()" style="display:none">Confirm Selection ▶</button>
         <button class="commit-btn" id="commit-btn" disabled onclick="commitCard()" style="display:none">Commit Card</button>
+        <button class="forfeit-round-btn" id="forfeit-round-btn" onclick="voluntaryForfeit()" style="display:none" title="Concede this round without conjuring — keeps your energy for next round">🏳 Forfeit Round</button>
         <div class="hint" id="commit-hint">Draw a card to begin the turn.</div>
       </div>
     </div>
@@ -3844,6 +3847,7 @@ function openPileView(kind){
 }
 function closePileView(){ var ov=document.getElementById('pile-view'); if(ov) ov.classList.remove('on'); }
 function buildHand(){
+  { var _frb=document.getElementById('forfeit-round-btn'); if(_frb) _frb.style.display=(phase==='revealed'||phase==='selecting')?'flex':'none'; }
   const row = document.getElementById('hand-row');
   row.innerHTML = '';
   hand.forEach((c,i) => {
@@ -6380,26 +6384,44 @@ function cheapestFighterCost(){
   var costs = (typeof hand!=='undefined'?hand:[]).filter(function(h){ return h && h.timing!=='instant'; }).map(conjureCost);
   return costs.length ? Math.min.apply(null, costs) : Infinity;
 }
-function energyForfeit(){
+// Shared surrender presentation (7/18/26 extraction): energyForfeit()/voluntaryForfeit() both
+// concede the round the same way dmForfeit()/onDecisionTimeout() already do -- pulled the common
+// body out once here instead of copy-pasting a 5th near-identical block.
+function surrenderRound(placeholderTxt, resultLabel, resultSub, logTxt){
   clearTurnTimers();
   document.getElementById('record-reveal').style.display = 'none';
   document.getElementById('instant-strip').style.display = 'none';
   document.getElementById('confirm-btn').style.display = 'none';
   document.getElementById('commit-btn').style.display = 'none';
-  document.getElementById('player-field').innerHTML = '<span class="placeholder">⚡ forfeited</span>';
+  var _frb=document.getElementById('forfeit-round-btn'); if(_frb) _frb.style.display='none';
+  document.getElementById('player-field').innerHTML = '<span class="placeholder">'+placeholderTxt+'</span>';
   document.getElementById('opp-field').innerHTML = '<span class="placeholder">no contest</span>';
   playerScore[1]++;
   lastResult = 'lose';
-  document.getElementById('result-label').textContent = '⚡ ROUND FORFEITED';
+  document.getElementById('result-label').textContent = resultLabel;
   document.getElementById('result-label').className = 'result-label lose';
-  document.getElementById('result-sub').textContent = 'Not enough energy to conjure any card in hand — the round is forfeited.';
-  document.getElementById('abil-log').innerHTML = '<div class="abil-log-entry">⚡ Energy-starved — no affordable fighter, round forfeited</div>';
+  document.getElementById('result-sub').textContent = resultSub;
+  document.getElementById('abil-log').innerHTML = '<div class="abil-log-entry">'+logTxt+'</div>';
   if(typeof updateScore==='function') updateScore();
   var _nb2=document.querySelector('#result-overlay .next-btn'); if(_nb2) _nb2.textContent=(playerScore[0]>=matchWinThreshold()||playerScore[1]>=matchWinThreshold())?'View Match Result →':'Continue →';
   if(typeof updateStake==='function') updateStake();
   document.getElementById('result-overlay').classList.add('show');
   setPhase('resolved');
   if(typeof updatePiles==='function') updatePiles();
+}
+function energyForfeit(){
+  surrenderRound('⚡ forfeited', '⚡ ROUND FORFEITED', 'Not enough energy to conjure any card in hand — the round is forfeited.', '⚡ Energy-starved — no affordable fighter, round forfeited');
+}
+// Voluntary forfeit (direct request): a player may always give up a round on purpose -- to bank
+// energy for a bigger play later, or just skip a round they don't want to spend charge contesting.
+// No compensation draw, matching energyForfeit()'s own precedent (only dmForfeit() grants one, tied
+// specifically to the Deck Master no-eligible-card case). Available any time staging/committing a
+// card would be (phase 'revealed' or 'selecting'); visibility kept in sync inside buildHand() rather
+// than threaded through every existing show/hide call site for the other action buttons.
+function voluntaryForfeit(){
+  if(phase!=='revealed' && phase!=='selecting'){ if(typeof toast==='function') toast('Nothing to forfeit right now.', false); return; }
+  if(typeof confirm==='function' && !confirm('Forfeit this round? It counts as a loss, but your energy carries over untouched.')) return;
+  surrenderRound('🏳 forfeited', '🏳 ROUND FORFEITED', 'You chose to forfeit this round to conserve energy.', '🏳 Player forfeited the round voluntarily');
 }
 // ── DATA-DRIVEN ABILITY SPEC — shared with server/rules.json (one source of truth). ──
 // Regenerate this const from server/rules.json when the spec changes; the server is canonical.
