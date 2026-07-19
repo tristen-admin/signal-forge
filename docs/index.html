@@ -3334,10 +3334,10 @@ const COND_EFF = {
 
 const HAND_CARDS = [
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, and +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
-  {name:'Uso Oso',pow:15,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant +6; When this card is conjured, call a "Oso\'s skeletal summons" from outside of your deck to an open support circle.'},
+  {name:'Uso Oso',pow:14,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant +6; When this card is conjured, call a "Oso\'s skeletal summons" from outside of your deck to an open support circle.'},
   {name:'Tannis',pow:10,kills:0,deaths:0,rarity:'uncommon',timing:'instant',abil:'⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.'},
-  {name:'Bixie Bee',pow:15,kills:0,deaths:0,rarity:'common',timing:'on',abil:''},
-  {name:'Veronica',pow:14,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: copy opponent\'s card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability.'},
+  {name:'Bixie Bee',pow:13,kills:0,deaths:0,rarity:'common',timing:'on',abil:''},
+  {name:'Veronica',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: copy opponent\'s card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability.'},
 ];
 
 const ABILITIES = {
@@ -3403,7 +3403,7 @@ const DECK_POOL = [
   {name:'Ahdorah Khaan, Determined Soul',pow:17,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. When Ahdor returns to your hand from the effect of "Record Guard", two random hand cards gain +3.'},
   // Uncommons
   {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: if 3rd+ commit this match, +5 power. Returns from Winners Circle: banish from hand to curse opponent\'s next committed card −10 power.'},
-  {name:'Hanse Waltz',pow:13,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.'},
+  {name:'Hanse Waltz',pow:15,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.'},
   // Rares
   {name:'Arch-Grim Korrin',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: if opponent's card has fewer career kills than this card, +6 power."},
   {name:'Cletus Gwyndull',pow:15,kills:0,deaths:0,rarity:'rare',timing:'pre',abil:'Pre-commit: lock the active condition this turn — opponent cannot shift it.'},
@@ -3415,7 +3415,7 @@ const DECK_POOL = [
   {name:'Unbanked Victory',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +3 power if your Winners Circle is empty — an unclaimed victory is worth more than a banked one.'},
   {name:'Reclaim the Colors',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your Winners Circle.'},
   // Ultras
-  {name:'Lagertha Waltz',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +4 if you lost your last duel. -2 if you won your last duel.'},
+  {name:'Lagertha Waltz',pow:8,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +6 if you lost your last duel. -2 if you won your last duel.'},
   {name:'Valcarion',pow:17,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if there is a card in your banish zone, add it to your hand — or call it to an open support circle.'},
   {name:'Envoy of Tyrants, Ella Ballora',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Bloodrage: on commit +3 with 3+ cards in hand, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
   {name:'Kiana',pow:15,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Elemental Flurry: on commit +3 power, and +4 more if you have 4 or more cards in your hand'},
@@ -3433,8 +3433,8 @@ const DECK_POOL = [
   {name:'The Bronzed Beast, Hanse Waltz',pow:20,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 while behind — if you were behind when you kill an opponent fighter, this returns to your hand at its original power.'},
   {name:'La "La" Ballora, the Broodqueen',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw 2 cards — her brood is her hand.'},
   {name:'Ourevos, the Golden Dragon',pow:28,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
-  {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.'},
-  {name:'Legend Reborn, Keawe Kel\'rua',pow:8,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 15 or higher from your deck to your hand. Called (support): snipe the opposing support in the mirrored slot — it is removed before it can fire.'},
+  {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel. Repeat this effect if you have 1 or fewer support units this battle.'},
+  {name:'Legend Reborn, Keawe Kel\'rua',pow:8,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 15 or higher from your deck to your hand, and reduce its cost by 1.'},
   {name:'Rhaess Korvain',pow:13,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish the top card of your deck, then +2 power for every card in your banish zone.'},
   {name:'Black Wings, Ossian Drell',pow:13,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone.'},
   {name:'Corvus',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Raven's Feast: on commit, banish the top 2 cards of your deck, then +2 power for every card in your banish zone."},
@@ -3692,7 +3692,7 @@ const OPP_CARDS = [
   {name:"Wisp",pow:1,kills:0,deaths:0,rarity:"common",abil:"No ability. A whisper of power — thrives under Lowest Wins."},
   {name:"Calla Thorn",pow:7,kills:0,deaths:0,rarity:"common",abil:"Last Stand — a narrow loss becomes a tie."},
   {name:"Grum the Steady",pow:11,kills:0,deaths:0,rarity:"common",abil:"Giant-Killer: +4 if the opponent has more career kills."},
-  {name:'Lagertha Waltz',pow:14,kills:0,deaths:0,rarity:'rare',abil:'On commit: +4 if lost last, -2 if won last.'},
+  {name:'Lagertha Waltz',pow:8,kills:0,deaths:0,rarity:'rare',abil:'On commit: +6 if lost last, -2 if won last.'},
   {name:'Conduit of Chaos, Kleydson',pow:4,kills:0,deaths:0,rarity:'common',abil:'No ability.'},
   {name:'Arch-Grim Korrin',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: if opponent's card has fewer career kills than this card, +6 power."},
   {name:'Anorith Keeling',pow:1,kills:0,deaths:0,rarity:'apex',abil:'Chaos Deity — power scales with duels completed × hand size; warps your deck into the Chaos Trinity.'},
@@ -3710,7 +3710,7 @@ const OPP_CARDS = [
   // resolve a genuine 16-card themed deck instead of silently padding with unrelated random cards. ──
   // (Ghorruk "Gnarly" Judarr already existed above at pow:16/ultra — not duplicated here.)
   {name:'Summoned Skull Soldiers',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +7 to your cards until an enemy dies. On commit: +3 power for each Remnant you hold.'},
-  {name:'Uso Oso',pow:15,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:"Death Remnant +6; When this card is conjured, call a \"Oso's skeletal summons\" from outside of your deck to an open support circle."},
+  {name:'Uso Oso',pow:14,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:"Death Remnant +6; When this card is conjured, call a \"Oso's skeletal summons\" from outside of your deck to an open support circle."},
   {name:"Uso Oso's Skeletal Summons",pow:5,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:"Death Remnant: these bones don't stay down — when the summons falls it lingers on the field, +5 to your committed cards until an opponent's card is killed."},
   {name:'Bone Choirmaster',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +5 to your cards until an enemy dies. On a win, draw a card.'},
   {name:'Marrow Priest',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Support: your Fighter +3; if a Remnant is on the field, draw a card.'},
@@ -4625,7 +4625,7 @@ const ENERGY_SPELLS = [
 ];
 // ══ REAR-GUARD / CALLED SYSTEM (v1) ══
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
-const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdorah Khaan, Determined Soul":2, "Tange Sazen":2, "Kotei":3, "Darwin":2, "Lagertha Waltz":2, "The Bronzed Beast, Hanse Waltz":3, "Hanse Waltz":1, "Uso Oso":2, "Zerith Var":3, "Lagertha Waltz, Wrathful Transformation":3, "Bixie Bee":1};   // ability-strength nudges above the power band (balance dial)
+const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdorah Khaan, Determined Soul":2, "Tange Sazen":2, "Kotei":3, "Darwin":2, "Lagertha Waltz":1, "The Bronzed Beast, Hanse Waltz":3, "Hanse Waltz":2, "Uso Oso":2, "Zerith Var":3, "Lagertha Waltz, Wrathful Transformation":3, "Bixie Bee":1, "Keawe Kel'rua":2, "Veronica":1};   // ability-strength nudges above the power band (balance dial)
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
 const RACES = ['Human','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Marrowen','Dreikan','Dractyl','Thennlar','Xylotes','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
 const CARD_RACE = {
@@ -4743,7 +4743,7 @@ function energyRegenPerTurn(){ var d=(typeof matchCommits!=='undefined')?((match
 // CALLED - universal rear-guard keyword; fires ALWAYS when a support is called (no group gate).
 // Inverse-scaling: fighter cards -> simple static (+N / opp -N); low-power/support -> rich combos.
 const CALLED = {
-  "Legend Reborn, Keawe Kel'rua":        {text:"snipe the opposing support in the mirrored slot", snipeSupport:true},
+  "Legend Reborn, Keawe Kel'rua":        {text:"destroy and nullify the opposing support in the mirrored slot, if there is no card to destroy, give your fighter +3 instead.", snipeSupport:true},
   // Support buff scales INVERSE to conjure cost: ⚡1=+5, ⚡2=+4, ⚡3=+3, ⚡4=+2 (cheap body = better support). Utility/recur/draw Calleds unchanged.
   "Kaelthar the Ascendant":        {text:"your Fighter +2", add:2},
   "Young Darwin, Predetermined Dictator":           {text:"your Fighter +3", add:3},
@@ -4751,8 +4751,8 @@ const CALLED = {
   "Kessuae, Tide of Ruin":         {text:"your Fighter +3", add:3},
   "Kotei":                         {text:"your Fighter +2; if your fighter wins the battle with this unit supporting, gain +2 charge and instead of going to the winners circle the card returns to the player's hand.", add:2},
   "Conduit of Chaos, Kleydson":                      {text:"your Fighter +3 · gain 1 charge", add:3, chargeGain:1},
-  "Lagertha Waltz":                {text:"your Fighter +3", add:3, twinBuff:5},
-  "Hanse Waltz":                   {text:"your Fighter +5", add:5, twinBuff:5},
+  "Lagertha Waltz":                {text:"your Fighter +3, add an additional +2 if that unit is a Nightclaw", add:3, twinBuff:5},
+  "Hanse Waltz":                   {text:"your Fighter +3, add an additional +2 if that unit is a Nightclaw", add:5, twinBuff:5},
   "Kiana":                         {text:"banish a card from your hand; your Fighter +4", banishOwn:1, add:4},
   "Heir of Kaiga":                 {text:"your Fighter +5 · draw 1", add:5, draw:1},
   "Melanie":                       {text:"your Fighter +5 · draw 1", add:5, draw:1},
@@ -4776,7 +4776,7 @@ const CALLED = {
   "Anorith Keeling":               {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
   // ── Engines — generic utility kept (the neutral engine every deck can splash) ──
   "Conduit Adept":                 {text:"gain 2 Charge + draw 1", chargeGain:2, draw:1},
-  "Signal Diviner":                {text:"gain 3 Charge", chargeGain:3},
+  "Signal Diviner":                {text:"gain 1 Charge, or scry 1", chargeGain:3},
   "Voltcaller":                    {text:"your next Interrupt costs 2 less", spellDiscountGain:2},
   "Uso Oso's Skeletal Summons":    {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
   "Sister Mire":                   {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
@@ -4786,7 +4786,7 @@ const CALLED = {
   "Ilma the Patient":              {text:"your Fighter +4", add:4},
   "Broodmother":                   {text:"your Fighter +3, then draw 1", add:3, draw:1},
   "Old Garrick":                   {text:"your Fighter +4", add:4},
-  "Keawe Kel'rua":                 {text:"your Fighter +3", add:3},
+  "Keawe Kel'rua":                 {text:"your Fighter +3, if there have been at least 2 duels this match then draw 1", add:3},
   "Rhaess Korvain":                {text:"return 1 banished card to hand", recurPlain:1},
   "Black Wings, Ossian Drell":                  {text:"your Fighter +1 for every card in your banish zone", addPerBanish:1},
   "Corvus":                        {text:"your Fighter +4", add:4},
@@ -4839,8 +4839,9 @@ const CALLED = {
   "Fifth Frequency Stormcaller":             {text:"your Fighter +3", add:3},
   "Ghorruk \"Gnarly\" Judarr":            {text:"return 1 banished card to hand, +2 power", recurBuff:1},
   "Elowen Dawnspear":              {text:"your Fighter +3", add:3},
-  "Bixie Bee":                     {text:"your Fighter +3", add:3},
+  "Bixie Bee":                     {text:"your Fighter +3, add an additional +2 if that unit is a Wrothlan", add:3},
   "Uso Oso":                       {text:"your Fighter +2; the lowest power card in your hand is automatically played as a death remnant.", add:3},
+  "Veronica":                      {text:"your fighter gains +2, then scry 1."},
   // Warpath combo pieces (7/12/26) — genuinely new effect kinds, not reusable from the existing
   // vocabulary above: nothing here lets a Called support redirect where a FUTURE win banks to, or
   // pull a card back OUT of the Winners Circle once it's there.
@@ -5479,7 +5480,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   if(pc.name==='Wren' && banishPile.length){ hand.push(banishPile.pop()); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='La "La" Ballora, the Broodqueen' && typeof drawToHand==='function'){ drawToHand(2); }
   if(pc.name==="Web-Weaver's Return"){ if(banishPile.length){ var _rb=banishPile.splice(0,banishPile.length); drawPile=drawPile.concat(_rb); if(typeof shuffle==='function') shuffle(drawPile); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof toast==='function') toast('🕸 Web-Weaver\'s Return \u2014 '+_rb.length+' banished cards rewoven into your deck.', true); } if(typeof drawToHand==='function') drawToHand(1); if(typeof updatePiles==='function') updatePiles(); }
-  if(pc.name==='Legend Reborn, Keawe Kel\'rua'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=15;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+') to your hand.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 18+ left in your deck to tutor.', false); } }
+  if(pc.name==='Legend Reborn, Keawe Kel\'rua'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=15;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+') to your hand.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 15+ left in your deck to tutor.', false); } }
   if(pc.name==='Anorith Keeling'){ energyLoadoutOverride=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your future spell draws into the Chaos Trinity — lose a round to draw one.', true); }
   if(pc.name==='Sister Mire, Wailing Nightmare'){ drawToHand(2); if(hand.length){ var _smci=Math.floor(Math.random()*hand.length); drawPile.unshift(hand.splice(_smci,1)[0]); if(typeof deckSize!=='undefined') deckSize=drawPile.length; } if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); if(typeof toast==='function') toast('🌫 Sister Mire wails — draw 2, one card sinks back into the deck.', true); }
   if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
@@ -6413,9 +6414,6 @@ function voluntaryForfeit(){
 // ── DATA-DRIVEN ABILITY SPEC — shared with server/rules.json (one source of truth). ──
 // Regenerate this const from server/rules.json when the spec changes; the server is canonical.
 const CARD_RULES = {
- "Lagertha Waltz": [{"if":{"v":"last_result","op":"==","s":"lose"},"add":2,"log":"🔥 Lagertha: +2 (lost last)"},{"if":{"v":"last_result","op":"==","s":"win"},"add":-2,"log":"🔥 Lagertha: −2 (won last)"}],
- "Lagertha Waltz, Wrathful Transformation": [{"add":3,"log":"🌕 Alpha's Grief: +3"},{"if":{"v":"player_losses","op":">","n":0},"add":4,"log":"🌕 Mourning: +4"}],
- "The Bronzed Beast, Hanse Waltz": [{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":5,"log":"🐺 Blood Moon: +5"}],
  "Silk-Spinner Drone": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"🕷 Swarm: +1×hand"}],
  "Web-Tender Matron": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"🕸 Swarm: +1×hand"}],
  "Brood-Tender": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"\ud83d\udd77 Swarm: +1\u00d7hand"}],
@@ -6521,8 +6519,8 @@ const CARD_RULES = {
     "op": "==",
     "s": "lose"
    },
-   "add": 4,
-   "log": "🔥 Lagertha: +4 (lost last)"
+   "add": 6,
+   "log": "🔥 Lagertha: +6 (lost last)"
   },
   {
    "if": {
@@ -9265,15 +9263,15 @@ function deckTab(t){
 // ══ DECK PRESETS (saved decks) ══
 const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Valcarion'];   // Black Wings — banish/discard. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Bixie Bee moved out 7/19/26 -- narrowed to Warpath/Keawe's Circle only.
 const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned Skull Soldiers','Uso Oso',"Uso Oso's Skeletal Summons",'Bone Choirmaster','Marrow Priest','Widow of the Vigil','Gravecaller Voss','Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','The Regenerating Horror','Signal Diviner'];   // The Deathless — Death-Remnant stack + draw. Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
-const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Bixie Bee'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
-const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte','Skittering Drone','Hatchling Tide',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Signal Diviner','Faye Quicksilver'];   // The Broodswarm — hand-size draw + power
+const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Bixie Bee'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Ruffius Rufeldro moved out 7/19/26 -- narrowed to Radiance + Ahdor's Pride only.
+const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte','Skittering Drone','Hatchling Tide',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Signal Diviner','Faye Quicksilver','Veronica'];   // The Broodswarm — hand-size draw + power
 const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Shieldwall Recruit','Standard-Bearer Halden','Rank-Sworn Levy','Heir of Kaiga','Conduit Adept','Signal Diviner','Chieftain Reyva Vosh','Faye Quicksilver'];   // The Ironsworn — go wide with 1-cost bodies, Cassian scales biggest (Muster: +power per 1-cost ally). Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
 // 4 more added 7/19/26 -- lore-driven rather than mechanically uniform like the 5 above. Black
 // Council and Radiance got an explicit playstyle brief; Keawe's Circle and Ahdor's Pride are
 // closer to the existing LINK_GROUPS lore-clusters (Darwin's Court/Exiled Royalty/Squad 19/
 // Keawe's Circle itself) promoted to full archetype status, not a single shared mechanic.
-const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Veronica','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Ruffius Rufeldro','Cletus Gwyndull','Kessuae, Tide of Ruin'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members.
-const RADIANCE_PRESET = ['Moro','Malia','King Joris','Ruffius Rufeldro','Elowen Dawnspear','Bram the Bulwark','Hanse Waltz','The Regenerating Horror','Kaelthar the Ascendant'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match.
+const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members. Veronica + Ruffius Rufeldro moved out 7/19/26.
+const RADIANCE_PRESET = ['Moro','Malia','King Joris','Ruffius Rufeldro','Elowen Dawnspear','Bram the Bulwark','The Regenerating Horror','Kaelthar the Ascendant'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match.
 const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua"];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms)
 const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro'];   // Ahdor's Pride — Ahdorah Khaan + Squad 19. Thin roster on purpose: no card named Kynaht exists yet, and no card is tagged Vysh'ra race (Ahdor's people, per the KOTEI bible) to pull in as "his crew" -- both are real content gaps, not an oversight here.
 // Archetype dev-view (7/18/26, expanded 7/19/26): the meta archetypes' full membership, for the
@@ -12040,6 +12038,7 @@ table.dev-tbl tr:hover td{background:#121722}
 .dev-sel{background:#0c0f16;border:1px solid #303a47;color:#e6e9f0;border-radius:5px;padding:2px 4px;font:inherit;font-size:11px}
 .dev-tbl .ab{color:#aeb7c6;font-size:11.5px;max-width:360px;cursor:text;border-radius:4px}
 .dev-tbl .ab.locked{color:#5a6478;cursor:not-allowed;font-style:italic}
+.dev-tbl .ab.note{color:#d0a24a;font-style:italic}
 .dev-ta{width:100%;min-height:52px;box-sizing:border-box;background:#05070b;color:#dfe4ee;border:1px solid #5a6675;border-radius:5px;padding:5px;font:inherit;font-size:11.5px}
 .dev-rows{display:flex;flex-direction:column;gap:3px}
 .dev-row{display:grid;grid-template-columns:24px 172px 1fr 34px;align-items:center;gap:8px}
@@ -12271,7 +12270,7 @@ body::before{background:
   </div>
   <div class="dev-body" id="dev-body"></div>
   <div class="dev-exp" id="dev-expbox" hidden></div>
-  <div class="dev-note">Power edits take effect in your <b>next match</b> and across the app. <b>Cost</b> edits are live instantly, from either tab. The <b>⚡ Abilities</b> tab additionally edits Called and CARD_RULES behavior — also instantly. (The Edit-table's ability field is display text only.) <b>DM Exclusive</b>/<b>DM Activated</b> only apply when this card is set as your Deck Master — a greyed-out DM Activated cell means that card's ability runs custom code and isn't editable here, source only.</div>
+  <div class="dev-note">Power edits take effect in your <b>next match</b> and across the app. <b>Cost</b> edits are live instantly, from either tab. The <b>⚡ Abilities</b> tab additionally edits Called and CARD_RULES behavior — also instantly. (The Edit-table's ability field is display text only.) <b>DM Exclusive</b>/<b>DM Activated</b> only apply when this card is set as your Deck Master, and accept either real JSON (applies live) or plain English (gold text — saved as a note for Claude to build, nothing breaks if it's not valid JSON). A greyed-out DM Activated cell means that card's ability runs custom code and isn't editable here, source only.</div>
 </div>
 <script>
 (function(){
@@ -12300,7 +12299,7 @@ body::before{background:
     function applyAll(){loadUserGroups();Object.keys(OV).forEach(function(n){var o=OV[n];if(o.p!=null)setProp(n,'pow',o.p);if(o.r!=null)setProp(n,'rarity',o.r);if(o.t!=null)setProp(n,'timing',o.t);if(o.a!=null)setProp(n,'abil',o.a);if(o.cost!=null&&typeof COST_OVERRIDE!=='undefined')COST_OVERRIDE[n]=o.cost;if((o.might!=null||o.cunning!=null||o.grit!=null)&&typeof setDisciplines==='function'){var _b=baseList().find(function(x){return x.name===n;})||{};setDisciplines(n,o.might!=null?o.might:_b.might,o.cunning!=null?o.cunning:_b.cunning,o.grit!=null?o.grit:_b.grit);}if(o.camp!=null&&typeof setCamp==='function')setCamp(n,o.camp);if(o.rename&&typeof NAME_OVERRIDE!=='undefined')NAME_OVERRIDE[n]=o.rename;if(o.links)applyLinksFor(n);if(o.arch)applyArchFor(n);if(o.called!=null&&typeof CALLED!=='undefined'){try{CALLED[n]=JSON.parse(o.called);}catch(e){}}if(o.rules!=null&&typeof CARD_RULES!=='undefined'){try{CARD_RULES[n]=JSON.parse(o.rules);}catch(e){}}if(o.dmx!=null&&typeof DM_EXCLUSIVE!=='undefined'){try{DM_EXCLUSIVE[n]=JSON.parse(o.dmx);}catch(e){}}if(o.dma!=null&&typeof DM_ACTIVATED_ABILITY!=='undefined'){try{DM_ACTIVATED_ABILITY[n]=JSON.parse(o.dma);}catch(e){}}});}
     applyAll(); try{if(typeof buildVault==='function')buildVault();}catch(e){}
     var vt; function schedVault(){clearTimeout(vt);vt=setTimeout(function(){try{if(typeof buildVault==='function')buildVault();}catch(e){}},400);}
-    function model(){return baseList().map(function(c){var dmxr=(typeof DM_EXCLUSIVE!=='undefined'&&DM_EXCLUSIVE[c.name])||null;var dmar=(typeof DM_ACTIVATED_ABILITY!=='undefined'&&DM_ACTIVATED_ABILITY[c.name])||null;return {n:c.name,r:c.rarity,p:c.pow,t:c.timing||'—',a:c.abil||'',cost:(typeof conjureCost==='function')?conjureCost(c):1,race:(typeof raceOf==='function')?raceOf(c.name):'Human',sup:(typeof CALLED!=='undefined'&&CALLED[c.name]&&CALLED[c.name].text)||'',dmx:dmxr?dmxr.map(function(r){return r.log||'';}).join(' / '):'',dma:dmar?((dmar.run?'🔒 ':'')+(dmar.log||'')):'',dmaLocked:!!(dmar&&dmar.run)};});}
+    function model(){return baseList().map(function(c){var dmxr=(typeof DM_EXCLUSIVE!=='undefined'&&DM_EXCLUSIVE[c.name])||null;var dmar=(typeof DM_ACTIVATED_ABILITY!=='undefined'&&DM_ACTIVATED_ABILITY[c.name])||null;var dmxNote=(OV[c.name]&&OV[c.name].dmxNote)||'';var dmaNote=(OV[c.name]&&OV[c.name].dmaNote)||'';return {n:c.name,r:c.rarity,p:c.pow,t:c.timing||'—',a:c.abil||'',cost:(typeof conjureCost==='function')?conjureCost(c):1,race:(typeof raceOf==='function')?raceOf(c.name):'Human',sup:(typeof CALLED!=='undefined'&&CALLED[c.name]&&CALLED[c.name].text)||'',dmx:dmxr?dmxr.map(function(r){return r.log||'';}).join(' / '):dmxNote,dmxIsNote:!dmxr&&!!dmxNote,dma:dmar?((dmar.run?'🔒 ':'')+(dmar.log||'')):dmaNote,dmaIsNote:!dmar&&!!dmaNote,dmaLocked:!!(dmar&&dmar.run)};});}
     function swing(a){var m=(a.match(/\+(\d+)/g)||[]).map(function(s){return +s.slice(1);});return m.length?Math.max.apply(null,m):0;}
     function stacks(a){return /\b(per |each |every )\b/i.test(a)||/for every/i.test(a);}
     function ceil(c){return c.p+swing(c.a);}
@@ -12320,8 +12319,8 @@ body::before{background:
         '<td class="num"><input data-f="p" type="number" class="dev-in'+(o&&c.p!=o.p?' ed':'')+'" value="'+c.p+'" min="0" max="40"></td>'+
         '<td class="ab'+(o&&c.a!=o.a?' ed':'')+'" data-ab>'+esc(c.a.length>92?c.a.slice(0,90)+'…':c.a)+'</td>'+
         '<td class="ab'+(o&&curCalled!==o.called?' ed':'')+'" data-sup title="Text shown when this card is Called as a rear-guard support">'+esc(c.sup.length>92?c.sup.slice(0,90)+'…':c.sup)+'</td>'+
-        '<td class="ab'+(o&&curDmx!==o.dmx?' ed':'')+'" data-dmx title="Deck Master Tier-1/2/3 exclusive rules (raw JSON array) — only applies when this card is set as Deck Master">'+esc(c.dmx.length>92?c.dmx.slice(0,90)+'…':c.dmx)+'</td>'+
-        '<td class="ab'+(c.dmaLocked?' locked':(o&&curDma!==o.dma?' ed':''))+'" data-dma'+(c.dmaLocked?' title="Uses a custom JS function (run) — not editable here, source only"':' title="Once-per-match activated Deck Master ability (raw JSON) — draw/nextConjureBonus/log fields"')+'>'+esc(c.dma.length>92?c.dma.slice(0,90)+'…':c.dma)+'</td></tr>';});
+        '<td class="ab'+(c.dmxIsNote?' note':'')+(o&&curDmx!==o.dmx?' ed':'')+'" data-dmx title="Deck Master Tier-1/2/3 exclusive rules — valid JSON applies live, plain English is saved as a note for Claude to build">'+esc(c.dmx.length>92?c.dmx.slice(0,90)+'…':c.dmx)+'</td>'+
+        '<td class="ab'+(c.dmaLocked?' locked':(c.dmaIsNote?' note':'')+(o&&curDma!==o.dma?' ed':''))+'" data-dma'+(c.dmaLocked?' title="Uses a custom JS function (run) — not editable here, source only"':' title="Once-per-match activated Deck Master ability — valid JSON applies live, plain English is saved as a note for Claude to build"')+'>'+esc(c.dma.length>92?c.dma.slice(0,90)+'…':c.dma)+'</td></tr>';});
       BODY.innerHTML=h+'</tbody></table>';
       BODY.querySelectorAll('th[data-k]').forEach(function(th){th.onclick=function(){var k=th.getAttribute('data-k');if(sortK===k)sortD=-sortD;else{sortK=k;sortD=-1;}renderTable();};});
       function syncArch(n){var ids=(typeof ARCHETYPE_PRESETS!=='undefined'?ARCHETYPE_PRESETS:[]).filter(function(a){return a.members.indexOf(n)>=0;}).map(function(a){return a.id;});recordFx(n,'arch',ids.length?ids:null);}
@@ -12336,11 +12335,21 @@ body::before{background:
           ta.addEventListener('blur',function(){record(n,'a',ta.value);var nv=ta.value;ab.textContent=nv.length>92?nv.slice(0,90)+'…':nv;ab.classList.toggle('ed',ORIG[n]&&nv!=ORIG[n].a);});});
         sup.addEventListener('click',function(){if(sup.querySelector('textarea'))return;var cur=(typeof CALLED!=='undefined'&&CALLED[n]&&CALLED[n].text)||'';var ta=document.createElement('textarea');ta.className='dev-ta';ta.value=cur;ta.placeholder='Fighter-only — click to give this card a Called (support) ability';sup.textContent='';sup.appendChild(ta);ta.focus();
           ta.addEventListener('blur',function(){var v=ta.value;var obj=Object.assign({},(typeof CALLED!=='undefined'&&CALLED[n])||{});if(v)obj.text=v;else delete obj.text;var hasAny=Object.keys(obj).length>0;if(typeof CALLED!=='undefined'){if(hasAny)CALLED[n]=obj;else delete CALLED[n];}var newStr=hasAny?JSON.stringify(obj):null;recordFx(n,'called',newStr);sup.textContent=v.length>92?v.slice(0,90)+'…':v;sup.classList.toggle('ed',ORIG[n]&&newStr!==ORIG[n].called);schedVault();});});
-        dmx.addEventListener('click',function(){if(dmx.querySelector('textarea'))return;var cur=(typeof DM_EXCLUSIVE!=='undefined'&&DM_EXCLUSIVE[n])?JSON.stringify(DM_EXCLUSIVE[n]):'';var ta=document.createElement('textarea');ta.className='dev-ta mono';ta.value=cur;ta.placeholder='[] — JSON array of Deck Master exclusive rules, e.g. [{"addvar":"wc_len","x":1,"log":"..."}]';dmx.textContent='';dmx.appendChild(ta);ta.focus();
-          ta.addEventListener('blur',function(){var v=ta.value.trim();var parsed;try{parsed=v?JSON.parse(v):null;}catch(e){if(typeof toast==='function')toast('⚠ DM Exclusive: invalid JSON, not saved',false);var prev=(typeof DM_EXCLUSIVE!=='undefined'&&DM_EXCLUSIVE[n])?JSON.stringify(DM_EXCLUSIVE[n]):'';dmx.textContent=prev.length>92?prev.slice(0,90)+'…':prev;return;}if(typeof DM_EXCLUSIVE!=='undefined'){if(parsed&&parsed.length)DM_EXCLUSIVE[n]=parsed;else delete DM_EXCLUSIVE[n];}var newStr=(parsed&&parsed.length)?JSON.stringify(parsed):null;recordFx(n,'dmx',newStr);var disp=newStr||'';dmx.textContent=disp.length>92?disp.slice(0,90)+'…':disp;dmx.classList.toggle('ed',ORIG[n]&&newStr!==ORIG[n].dmx);schedVault();});});
+        dmx.addEventListener('click',function(){if(dmx.querySelector('textarea'))return;var cur=(typeof DM_EXCLUSIVE!=='undefined'&&DM_EXCLUSIVE[n])?JSON.stringify(DM_EXCLUSIVE[n]):((OV[n]&&OV[n].dmxNote)||'');var ta=document.createElement('textarea');ta.className='dev-ta mono';ta.value=cur;ta.placeholder='JSON array of rules, e.g. [{"addvar":"wc_len","x":1,"log":"..."}] — or just describe it in plain English and it\'ll be saved as a note for Claude to build';dmx.textContent='';dmx.appendChild(ta);ta.focus();
+          ta.addEventListener('blur',function(){var v=ta.value.trim();
+            if(!v){if(typeof DM_EXCLUSIVE!=='undefined')delete DM_EXCLUSIVE[n];recordFx(n,'dmx',null);recordFx(n,'dmxNote',null);dmx.textContent='';dmx.classList.remove('ed','note');schedVault();return;}
+            var parsed=null;try{var maybe=JSON.parse(v);if(Array.isArray(maybe))parsed=maybe;}catch(e){}
+            if(parsed){if(typeof DM_EXCLUSIVE!=='undefined'){if(parsed.length)DM_EXCLUSIVE[n]=parsed;else delete DM_EXCLUSIVE[n];}var newStr=parsed.length?JSON.stringify(parsed):null;recordFx(n,'dmx',newStr);recordFx(n,'dmxNote',null);var disp=newStr||'';dmx.textContent=disp.length>92?disp.slice(0,90)+'…':disp;dmx.classList.remove('note');dmx.classList.toggle('ed',ORIG[n]&&newStr!==ORIG[n].dmx);}
+            else{recordFx(n,'dmxNote',v);dmx.textContent=v.length>92?v.slice(0,90)+'…':v;dmx.classList.add('note');dmx.classList.remove('ed');}
+            schedVault();});});
         if(dma.classList.contains('locked')){ dma.addEventListener('click',function(){ if(typeof toast==='function') toast('🔒 This card\'s Deck Master ability runs custom code (run: function) — edit it directly in source, not here.', false); }); }
-        else { dma.addEventListener('click',function(){if(dma.querySelector('textarea'))return;var curAb=(typeof DM_ACTIVATED_ABILITY!=='undefined'&&DM_ACTIVATED_ABILITY[n]&&!DM_ACTIVATED_ABILITY[n].run)?DM_ACTIVATED_ABILITY[n]:null;var cur=curAb?JSON.stringify(curAb):'';var ta=document.createElement('textarea');ta.className='dev-ta mono';ta.value=cur;ta.placeholder='{} — e.g. {"draw":1,"nextConjureBonus":5,"log":"Rally the Line"}';dma.textContent='';dma.appendChild(ta);ta.focus();
-          ta.addEventListener('blur',function(){var v=ta.value.trim();var parsed;try{parsed=v?JSON.parse(v):null;}catch(e){if(typeof toast==='function')toast('⚠ DM Activated: invalid JSON, not saved',false);var prevAb=(typeof DM_ACTIVATED_ABILITY!=='undefined'&&DM_ACTIVATED_ABILITY[n]&&!DM_ACTIVATED_ABILITY[n].run)?DM_ACTIVATED_ABILITY[n]:null;var prev=prevAb?JSON.stringify(prevAb):'';dma.textContent=prev.length>92?prev.slice(0,90)+'…':prev;return;}if(typeof DM_ACTIVATED_ABILITY!=='undefined'){if(parsed&&Object.keys(parsed).length)DM_ACTIVATED_ABILITY[n]=parsed;else delete DM_ACTIVATED_ABILITY[n];}var newStr=(parsed&&Object.keys(parsed).length)?JSON.stringify(parsed):null;recordFx(n,'dma',newStr);var disp=newStr||'';dma.textContent=disp.length>92?disp.slice(0,90)+'…':disp;dma.classList.toggle('ed',ORIG[n]&&newStr!==ORIG[n].dma);schedVault();});}); }
+        else { dma.addEventListener('click',function(){if(dma.querySelector('textarea'))return;var curAb=(typeof DM_ACTIVATED_ABILITY!=='undefined'&&DM_ACTIVATED_ABILITY[n]&&!DM_ACTIVATED_ABILITY[n].run)?DM_ACTIVATED_ABILITY[n]:null;var cur=curAb?JSON.stringify(curAb):((OV[n]&&OV[n].dmaNote)||'');var ta=document.createElement('textarea');ta.className='dev-ta mono';ta.value=cur;ta.placeholder='{} JSON, e.g. {"draw":1,"nextConjureBonus":5,"log":"Rally the Line"} — or just describe it in plain English and it\'ll be saved as a note for Claude to build';dma.textContent='';dma.appendChild(ta);ta.focus();
+          ta.addEventListener('blur',function(){var v=ta.value.trim();
+            if(!v){if(typeof DM_ACTIVATED_ABILITY!=='undefined')delete DM_ACTIVATED_ABILITY[n];recordFx(n,'dma',null);recordFx(n,'dmaNote',null);dma.textContent='';dma.classList.remove('ed','note');schedVault();return;}
+            var parsed=null;try{var maybe=JSON.parse(v);if(maybe&&typeof maybe==='object'&&!Array.isArray(maybe))parsed=maybe;}catch(e){}
+            if(parsed){if(typeof DM_ACTIVATED_ABILITY!=='undefined'){if(Object.keys(parsed).length)DM_ACTIVATED_ABILITY[n]=parsed;else delete DM_ACTIVATED_ABILITY[n];}var newStr=Object.keys(parsed).length?JSON.stringify(parsed):null;recordFx(n,'dma',newStr);recordFx(n,'dmaNote',null);var disp=newStr||'';dma.textContent=disp.length>92?disp.slice(0,90)+'…':disp;dma.classList.remove('note');dma.classList.toggle('ed',ORIG[n]&&newStr!==ORIG[n].dma);}
+            else{recordFx(n,'dmaNote',v);dma.textContent=v.length>92?v.slice(0,90)+'…':v;dma.classList.add('note');dma.classList.remove('ed');}
+            schedVault();});}); }
       });
     }
     function curveRow(c,i){var bp=Math.min(100,c.p/SCALE*100),sp=Math.min(100-bp,swing(c.a)/SCALE*100);
@@ -12429,7 +12438,7 @@ body::before{background:
     Q.addEventListener('input',function(){if(cur==='table')renderTable();else if(cur==='effects')renderEffects();});
     if(RARF)RARF.addEventListener('click',function(e){var b=e.target.closest('.dev-rc');if(!b)return;devRar=b.getAttribute('data-rar')||'';RARF.querySelectorAll('.dev-rc').forEach(function(x){x.classList.toggle('on',x===b);});render();});
     if(ARCHF)ARCHF.addEventListener('click',function(e){var b=e.target.closest('.dev-rc');if(!b)return;devArch=b.getAttribute('data-arch')||'';ARCHF.querySelectorAll('.dev-rc').forEach(function(x){x.classList.toggle('on',x===b);});render();});
-    document.getElementById('dev-exp').onclick=function(){var lines=Object.keys(OV).map(function(n){var o=OV[n],g=ORIG[n]||{},c=[];if(o.p!=null&&(''+o.p)!==(''+g.p))c.push('pow '+(g.p==null?'?':g.p)+'→'+o.p);if(o.r!=null&&o.r!==g.r)c.push('rarity '+(g.r||'?')+'→'+o.r);if(o.t!=null&&o.t!==g.t)c.push('timing '+(g.t||'?')+'→'+o.t);if(o.a!=null&&o.a!==g.a)c.push('ability → "'+o.a+'"');if(o.cost!=null&&(''+o.cost)!==(''+g.cost))c.push('cost →'+o.cost);if(o.rename!=null)c.push('RENAME → "'+o.rename+'" (canonical rename — Claude to apply)');if(o.links!=null&&!_sameSet(o.links,g.links))c.push('links → ['+o.links.join(', ')+']');if(o.arch!=null&&!_sameSet(o.arch,g.arch))c.push('archetypes → ['+o.arch.join(', ')+']');if(o.called!=null&&o.called!==g.called)c.push('CALLED →'+o.called);if(o.rules!=null&&o.rules!==g.rules)c.push('CARD_RULES →'+o.rules);if(o.dmx!=null&&o.dmx!==g.dmx)c.push('DM_EXCLUSIVE →'+o.dmx);if(o.dma!=null&&o.dma!==g.dma)c.push('DM_ACTIVATED_ABILITY →'+o.dma);if(o.note!=null)c.push('note: "'+o.note+'"');return c.length?(n+': '+c.join(', ')):null;}).filter(Boolean);EXP.hidden=false;EXP.innerHTML='<textarea readonly>'+esc(lines.length?lines.join('\n'):'No changes yet.')+'</textarea>';try{EXP.querySelector('textarea').select();}catch(_){}};
+    document.getElementById('dev-exp').onclick=function(){var lines=Object.keys(OV).map(function(n){var o=OV[n],g=ORIG[n]||{},c=[];if(o.p!=null&&(''+o.p)!==(''+g.p))c.push('pow '+(g.p==null?'?':g.p)+'→'+o.p);if(o.r!=null&&o.r!==g.r)c.push('rarity '+(g.r||'?')+'→'+o.r);if(o.t!=null&&o.t!==g.t)c.push('timing '+(g.t||'?')+'→'+o.t);if(o.a!=null&&o.a!==g.a)c.push('ability → "'+o.a+'"');if(o.cost!=null&&(''+o.cost)!==(''+g.cost))c.push('cost →'+o.cost);if(o.rename!=null)c.push('RENAME → "'+o.rename+'" (canonical rename — Claude to apply)');if(o.links!=null&&!_sameSet(o.links,g.links))c.push('links → ['+o.links.join(', ')+']');if(o.arch!=null&&!_sameSet(o.arch,g.arch))c.push('archetypes → ['+o.arch.join(', ')+']');if(o.called!=null&&o.called!==g.called)c.push('CALLED →'+o.called);if(o.rules!=null&&o.rules!==g.rules)c.push('CARD_RULES →'+o.rules);if(o.dmx!=null&&o.dmx!==g.dmx)c.push('DM_EXCLUSIVE →'+o.dmx);if(o.dma!=null&&o.dma!==g.dma)c.push('DM_ACTIVATED_ABILITY →'+o.dma);if(o.dmxNote!=null)c.push('DM Exclusive (plain-language, needs building) → "'+o.dmxNote+'"');if(o.dmaNote!=null)c.push('DM Activated (plain-language, needs building) → "'+o.dmaNote+'"');if(o.note!=null)c.push('note: "'+o.note+'"');return c.length?(n+': '+c.join(', ')):null;}).filter(Boolean);EXP.hidden=false;EXP.innerHTML='<textarea readonly>'+esc(lines.length?lines.join('\n'):'No changes yet.')+'</textarea>';try{EXP.querySelector('textarea').select();}catch(_){}};
     var _rq=document.getElementById('dev-req'); if(_rq) _rq.onclick=function(){ var lines=Object.keys(OV).filter(function(n){return OV[n]&&OV[n].note;}).map(function(n){ var cur=(typeof CALLED!=='undefined'&&CALLED[n])?JSON.stringify(CALLED[n]):'(none yet)'; var cst=(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[n]!=null)?(' [⚡'+COST_OVERRIDE[n]+']'):''; return n+cst+': '+OV[n].note+'   (current: '+cur+')'; }); EXP.hidden=false; EXP.innerHTML='<textarea readonly>'+esc(lines.length?('CALLED-EFFECT REQUESTS — paste to Claude:\n\n'+lines.join('\n\n')):'No descriptions yet — open ⚡ Abilities and describe a card in the plain-words box.')+'</textarea>'; try{EXP.querySelector('textarea').select();}catch(_){} };
     document.getElementById('dev-rst').onclick=function(){if(!confirm('Reset ALL dev edits back to original values?'))return;Object.keys(OV).forEach(function(n){var o=ORIG[n];if(!o)return;
       setProp(n,'pow',o.p);setProp(n,'rarity',o.r);setProp(n,'timing',o.t);setProp(n,'abil',o.a);
