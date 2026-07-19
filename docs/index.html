@@ -12255,7 +12255,7 @@ body::before{background:
   </div>
   <div class="dev-body" id="dev-body"></div>
   <div class="dev-exp" id="dev-expbox" hidden></div>
-  <div class="dev-note">Power edits take effect in your <b>next match</b> and across the app. The <b>⚡ Abilities</b> tab edits the live effects — conjure cost, Called, and CARD_RULES behavior — instantly. (The Edit-table's ability field is display text only.) Ceiling = power + biggest <b>+N</b> the ability grants.</div>
+  <div class="dev-note">Power edits take effect in your <b>next match</b> and across the app. <b>Cost</b> edits are live instantly, from either tab. The <b>⚡ Abilities</b> tab additionally edits Called and CARD_RULES behavior — also instantly. (The Edit-table's ability field is display text only.) Ceiling = power + biggest <b>+N</b> the ability grants.</div>
 </div>
 <script>
 (function(){
@@ -12280,7 +12280,7 @@ body::before{background:
     function applyAll(){loadUserGroups();Object.keys(OV).forEach(function(n){var o=OV[n];if(o.p!=null)setProp(n,'pow',o.p);if(o.r!=null)setProp(n,'rarity',o.r);if(o.t!=null)setProp(n,'timing',o.t);if(o.a!=null)setProp(n,'abil',o.a);if(o.cost!=null&&typeof COST_OVERRIDE!=='undefined')COST_OVERRIDE[n]=o.cost;if((o.might!=null||o.cunning!=null||o.grit!=null)&&typeof setDisciplines==='function'){var _b=baseList().find(function(x){return x.name===n;})||{};setDisciplines(n,o.might!=null?o.might:_b.might,o.cunning!=null?o.cunning:_b.cunning,o.grit!=null?o.grit:_b.grit);}if(o.camp!=null&&typeof setCamp==='function')setCamp(n,o.camp);if(o.rename&&typeof NAME_OVERRIDE!=='undefined')NAME_OVERRIDE[n]=o.rename;if(o.links)applyLinksFor(n);if(o.called!=null&&typeof CALLED!=='undefined'){try{CALLED[n]=JSON.parse(o.called);}catch(e){}}if(o.rules!=null&&typeof CARD_RULES!=='undefined'){try{CARD_RULES[n]=JSON.parse(o.rules);}catch(e){}}});}
     applyAll(); try{if(typeof buildVault==='function')buildVault();}catch(e){}
     var vt; function schedVault(){clearTimeout(vt);vt=setTimeout(function(){try{if(typeof buildVault==='function')buildVault();}catch(e){}},400);}
-    function model(){return baseList().map(function(c){return {n:c.name,r:c.rarity,p:c.pow,t:c.timing||'—',a:c.abil||''};});}
+    function model(){return baseList().map(function(c){return {n:c.name,r:c.rarity,p:c.pow,t:c.timing||'—',a:c.abil||'',cost:(typeof conjureCost==='function')?conjureCost(c):1};});}
     function swing(a){var m=(a.match(/\+(\d+)/g)||[]).map(function(s){return +s.slice(1);});return m.length?Math.max.apply(null,m):0;}
     function stacks(a){return /\b(per |each |every )\b/i.test(a)||/for every/i.test(a);}
     function ceil(c){return c.p+swing(c.a);}
@@ -12291,16 +12291,18 @@ body::before{background:
     var cur='table', sortK='ceil', sortD=-1, devRar='';
     function renderTable(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=devRar;var d=model().filter(function(c){return (!q||c.n.toLowerCase().indexOf(q)>=0)&&(!rf||c.r===rf);});
       d.sort(function(a,b){var x=sortK==='ceil'?ceil(a):a[sortK],y=sortK==='ceil'?ceil(b):b[sortK];return (x<y?-1:x>y?1:0)*sortD;});
-      var h='<table class="dev-tbl"><thead><tr><th>Card</th><th>Rarity</th><th class="num" data-k="p">Power'+(sortK==='p'?(sortD<0?' ▼':' ▲'):'')+'</th><th class="num" data-k="ceil">Ceil'+(sortK==='ceil'?(sortD<0?' ▼':' ▲'):'')+'</th><th>Ability (click to edit)</th></tr></thead><tbody>';
+      var h='<table class="dev-tbl"><thead><tr><th>Card</th><th>Rarity</th><th class="num" data-k="cost">Cost'+(sortK==='cost'?(sortD<0?' ▼':' ▲'):'')+'</th><th class="num" data-k="p">Power'+(sortK==='p'?(sortD<0?' ▼':' ▲'):'')+'</th><th class="num" data-k="ceil">Ceil'+(sortK==='ceil'?(sortD<0?' ▼':' ▲'):'')+'</th><th>Ability (click to edit)</th></tr></thead><tbody>';
       d.forEach(function(c){var o=ORIG[c.n];h+='<tr data-n="'+esc(c.n)+'"><td class="nm" style="border-left:3px solid '+rarOf(c.r).c+'">'+esc(c.n)+(stacks(c.a)?' <span title="scales further" style="color:#d0a24a">∞</span>':'')+'</td>'+
         '<td><select data-f="r" class="dev-sel">'+ORDER.map(function(r){return '<option value="'+r+'"'+(r===c.r?' selected':'')+'>'+RAR[r].n+'</option>';}).join('')+'</select></td>'+
+        '<td class="num"><input data-f="cost" type="number" class="dev-in'+(o&&c.cost!=o.cost?' ed':'')+'" value="'+c.cost+'" min="0" max="6" title="Energy cost"></td>'+
         '<td class="num"><input data-f="p" type="number" class="dev-in'+(o&&c.p!=o.p?' ed':'')+'" value="'+c.p+'" min="0" max="40"></td>'+
         '<td class="num ceil" data-ceil>'+ceil(c)+'</td>'+
         '<td class="ab'+(o&&c.a!=o.a?' ed':'')+'" data-ab>'+esc(c.a.length>92?c.a.slice(0,90)+'…':c.a)+'</td></tr>';});
       BODY.innerHTML=h+'</tbody></table>';
       BODY.querySelectorAll('th[data-k]').forEach(function(th){th.onclick=function(){var k=th.getAttribute('data-k');if(sortK===k)sortD=-sortD;else{sortK=k;sortD=-1;}renderTable();};});
       BODY.querySelectorAll('tr[data-n]').forEach(function(tr){var n=tr.getAttribute('data-n');
-        var pin=tr.querySelector('[data-f=p]'),rs=tr.querySelector('[data-f=r]'),cc=tr.querySelector('[data-ceil]'),ab=tr.querySelector('[data-ab]');
+        var cin=tr.querySelector('[data-f=cost]'),pin=tr.querySelector('[data-f=p]'),rs=tr.querySelector('[data-f=r]'),cc=tr.querySelector('[data-ceil]'),ab=tr.querySelector('[data-ab]');
+        cin.addEventListener('input',function(){var v=parseInt(cin.value,10);if(isNaN(v))return;v=Math.max(0,Math.min(6,v));if(typeof COST_OVERRIDE!=='undefined')COST_OVERRIDE[n]=v;recordFx(n,'cost',v);cin.classList.toggle('ed',ORIG[n]&&v!=ORIG[n].cost);schedVault();});
         pin.addEventListener('input',function(){var v=parseInt(pin.value,10);if(isNaN(v))return;v=Math.max(0,v);record(n,'p',v);var c=model().find(function(z){return z.n===n;});cc.textContent=ceil(c);pin.classList.toggle('ed',ORIG[n]&&v!=ORIG[n].p);});
         rs.addEventListener('change',function(){record(n,'r',rs.value);tr.querySelector('.nm').style.borderLeftColor=RAR[rs.value].c;});
         ab.addEventListener('click',function(){if(ab.querySelector('textarea'))return;var full=(model().find(function(z){return z.n===n;})||{}).a||'';var ta=document.createElement('textarea');ta.className='dev-ta';ta.value=full;ab.textContent='';ab.appendChild(ta);ta.focus();
