@@ -9264,18 +9264,32 @@ const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned
 const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Zerith Var'];   // The Warpath — early champ + WC recycle + kill escalation
 const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte','Skittering Drone','Hatchling Tide',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Signal Diviner','Faye Quicksilver'];   // The Broodswarm — hand-size draw + power
 const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Shieldwall Recruit','Standard-Bearer Halden','Rank-Sworn Levy','Heir of Kaiga','Conduit Adept','Signal Diviner','Chieftain Reyva Vosh','Faye Quicksilver','Zerith Var'];   // The Ironsworn — go wide with 1-cost bodies, Cassian scales biggest (Muster: +power per 1-cost ally)
-// Archetype dev-view (7/18/26): the 5 named meta archetypes' full membership, for the Vault's
-// Archetype filter -- reuses these *_PRESET arrays directly (the actual full-deck lists) rather
-// than ARCHETYPE_MEMBERS (a narrower, Deck-Master-tier-eligibility-only list that excludes proven
-// cross-deck generic staples and doesn't cover Black Wings at all) or LINK_GROUPS (lore-relationship
-// synergy, a different axis). A card can legitimately appear in more than one archetype here --
-// Zerith Var/Signal Diviner/Heir of Kaiga/Faye Quicksilver are each proven staples in 2-3 decks.
+// 4 more added 7/19/26 -- lore-driven rather than mechanically uniform like the 5 above. Black
+// Council and Radiance got an explicit playstyle brief; Keawe's Circle and Ahdor's Pride are
+// closer to the existing LINK_GROUPS lore-clusters (Darwin's Court/Exiled Royalty/Squad 19/
+// Keawe's Circle itself) promoted to full archetype status, not a single shared mechanic.
+const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Veronica','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Ruffius Rufeldro','Cletus Gwyndull','Kessuae, Tide of Ruin'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members.
+const RADIANCE_PRESET = ['Moro','Malia','King Joris','Ruffius Rufeldro','Elowen Dawnspear','Bram the Bulwark','Hanse Waltz','The Regenerating Horror'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match.
+const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua"];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms)
+const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro'];   // Ahdor's Pride — Ahdorah Khaan + Squad 19. Thin roster on purpose: no card named Kynaht exists yet, and no card is tagged Vysh'ra race (Ahdor's people, per the KOTEI bible) to pull in as "his crew" -- both are real content gaps, not an oversight here.
+// Archetype dev-view (7/18/26, expanded 7/19/26): the meta archetypes' full membership, for the
+// Vault's Archetype filter -- reuses these *_PRESET arrays directly (the actual full-deck lists)
+// rather than ARCHETYPE_MEMBERS (a narrower, Deck-Master-tier-eligibility-only list that excludes
+// proven cross-deck generic staples and doesn't cover Black Wings at all) or LINK_GROUPS
+// (lore-relationship synergy, a different axis, still authoritative for the small hand-pairing
+// bonus -- these archetypes exist in parallel, not as a replacement). A card can legitimately
+// appear in more than one archetype here -- Zerith Var/Signal Diviner/Heir of Kaiga/Faye
+// Quicksilver/Ruffius Rufeldro are each proven staples in 2+ decks.
 const ARCHETYPE_PRESETS = [
   {id:'blackwing', name:'Black Wings', members:BLACKWING_PRESET},
   {id:'deathless', name:'Deathless', members:DEATHLESS_PRESET},
   {id:'warpath', name:'Warpath', members:WARPATH_PRESET},
   {id:'broodswarm', name:'Broodswarm', members:BROODSWARM_PRESET},
-  {id:'ironsworn', name:'Ironsworn', members:IRONSWORN_PRESET}
+  {id:'ironsworn', name:'Ironsworn', members:IRONSWORN_PRESET},
+  {id:'blackcouncil', name:'Black Council', members:BLACK_COUNCIL_PRESET},
+  {id:'radiance', name:'Radiance', members:RADIANCE_PRESET},
+  {id:'keawescircle', name:"Keawe's Circle", members:KEAWES_CIRCLE_PRESET},
+  {id:'ahdorspride', name:"Ahdor's Pride", members:AHDORS_PRIDE_PRESET}
 ];
 function cardArchetypes(name){ return ARCHETYPE_PRESETS.filter(function(a){ return a.members.indexOf(name)>=0; }); }
 let deckPresets = lsGet('sf_presets', {});
@@ -12235,7 +12249,7 @@ body::before{background:
     <span class="dev-ti">🛠 Developer — Balance</span>
     <input id="dev-q" class="dev-q" placeholder="search cards…">
     <span id="dev-rar" class="dev-rarf"><button class="dev-rc on" data-rar="">All</button><button class="dev-rc" data-rar="apex">AR</button><button class="dev-rc" data-rar="ultra">UR</button><button class="dev-rc" data-rar="rare">Rare</button><button class="dev-rc" data-rar="common">Common</button></span>
-    <span id="dev-arch" class="dev-rarf"><button class="dev-rc on" data-arch="">All archetypes</button><button class="dev-rc" data-arch="blackwing">Black Wings</button><button class="dev-rc" data-arch="deathless">Deathless</button><button class="dev-rc" data-arch="warpath">Warpath</button><button class="dev-rc" data-arch="broodswarm">Broodswarm</button><button class="dev-rc" data-arch="ironsworn">Ironsworn</button></span>
+    <span id="dev-arch" class="dev-rarf"></span>
     <span class="dev-chg" id="dev-chg">0 edits</span>
     <button class="dev-b" id="dev-exp">Export</button>
     <button class="dev-b" id="dev-req" title="Copy all your plain-word Called requests to hand off to Claude">📣 Requests</button>
@@ -12259,6 +12273,7 @@ body::before{background:
     if(typeof COLLECTION==='undefined'||typeof DECK_POOL==='undefined'){return setTimeout(boot,250);}
     var OVL=document.getElementById('dev-ov'); if(!OVL)return;
     var FAB=document.getElementById('dev-fab'), BODY=document.getElementById('dev-body'), Q=document.getElementById('dev-q'), RARF=document.getElementById('dev-rar'), ARCHF=document.getElementById('dev-arch'), EXP=document.getElementById('dev-expbox');
+    if(ARCHF) ARCHF.innerHTML='<button class="dev-rc on" data-arch="">All archetypes</button>'+(typeof ARCHETYPE_PRESETS!=='undefined'?ARCHETYPE_PRESETS:[]).map(function(a){return '<button class="dev-rc" data-arch="'+a.id+'">'+a.name+'</button>';}).join('');
     var KEY='sf_dev_overrides_v1', ORDER=['apex','ultra','rare','common'], SCALE=30;
     var RAR={apex:{c:'#F5C24D',n:'Apex'},ultra:{c:'#B36AF0',n:'Ultra'},rare:{c:'#5B86F5',n:'Rare'},common:{c:'#8b98ad',n:'Common'}};
     var ARCH_SHORT={blackwing:'BW',deathless:'DL',warpath:'WP',broodswarm:'BS',ironsworn:'IS'};
