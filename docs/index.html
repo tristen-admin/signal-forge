@@ -12269,8 +12269,9 @@ body::before{background:
     function baseList(){var s={},l=[];HAND.concat(DECK_POOL).forEach(function(c){if(!s[c.name]){s[c.name]=1;l.push(c);}});return l;}
     var ORIG={}; baseList().forEach(function(c){ORIG[c.name]={p:c.pow,r:c.rarity,t:c.timing||'—',a:c.abil||'',cost:(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[c.name]!=null)?COST_OVERRIDE[c.name]:((typeof conjureCost==='function')?conjureCost(c):null),might:c.might,cunning:c.cunning,grit:c.grit,camp:c.camp,called:(typeof CALLED!=='undefined'&&CALLED[c.name])?JSON.stringify(CALLED[c.name]):null,rules:(typeof CARD_RULES!=='undefined'&&CARD_RULES[c.name])?JSON.stringify(CARD_RULES[c.name]):null};});
     function setProp(n,k,v){DECK_POOL.forEach(function(c){if(c.name===n)c[k]=v;});COLLECTION.forEach(function(c){if(c.name===n)c[k]=v;});}
-    function loadOV(){try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return {};}}
+    function loadOV(){try{var o=JSON.parse(localStorage.getItem(KEY)||'{}');var dirty=false;Object.keys(o).forEach(function(n){if(o[n]&&o[n].r==='genesis'){o[n].r='apex';dirty=true;}});if(dirty)try{localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}return o;}catch(e){return {};}}
     var OV=loadOV();
+    function rarOf(r){return RAR[r]||RAR.common;}
     function saveOV(){try{localStorage.setItem(KEY,JSON.stringify(OV));}catch(e){}}
     var GRP_KEY='sf_dev_groups_v1';
     function loadUserGroups(){ try{var a=JSON.parse(localStorage.getItem(GRP_KEY)||'[]'); if(typeof LINK_GROUPS!=='undefined'){a.forEach(function(g){ if(!LINK_GROUPS.some(function(x){return x.id===g.id;})) LINK_GROUPS.push(g); });} }catch(e){} }
@@ -12291,7 +12292,7 @@ body::before{background:
     function renderTable(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=devRar;var d=model().filter(function(c){return (!q||c.n.toLowerCase().indexOf(q)>=0)&&(!rf||c.r===rf);});
       d.sort(function(a,b){var x=sortK==='ceil'?ceil(a):a[sortK],y=sortK==='ceil'?ceil(b):b[sortK];return (x<y?-1:x>y?1:0)*sortD;});
       var h='<table class="dev-tbl"><thead><tr><th>Card</th><th>Rarity</th><th class="num" data-k="p">Power'+(sortK==='p'?(sortD<0?' ▼':' ▲'):'')+'</th><th class="num" data-k="ceil">Ceil'+(sortK==='ceil'?(sortD<0?' ▼':' ▲'):'')+'</th><th>Ability (click to edit)</th></tr></thead><tbody>';
-      d.forEach(function(c){var o=ORIG[c.n];h+='<tr data-n="'+esc(c.n)+'"><td class="nm" style="border-left:3px solid '+RAR[c.r].c+'">'+esc(c.n)+(stacks(c.a)?' <span title="scales further" style="color:#d0a24a">∞</span>':'')+'</td>'+
+      d.forEach(function(c){var o=ORIG[c.n];h+='<tr data-n="'+esc(c.n)+'"><td class="nm" style="border-left:3px solid '+rarOf(c.r).c+'">'+esc(c.n)+(stacks(c.a)?' <span title="scales further" style="color:#d0a24a">∞</span>':'')+'</td>'+
         '<td><select data-f="r" class="dev-sel">'+ORDER.map(function(r){return '<option value="'+r+'"'+(r===c.r?' selected':'')+'>'+RAR[r].n+'</option>';}).join('')+'</select></td>'+
         '<td class="num"><input data-f="p" type="number" class="dev-in'+(o&&c.p!=o.p?' ed':'')+'" value="'+c.p+'" min="0" max="40"></td>'+
         '<td class="num ceil" data-ceil>'+ceil(c)+'</td>'+
@@ -12306,7 +12307,7 @@ body::before{background:
           ta.addEventListener('blur',function(){record(n,'a',ta.value);var nv=ta.value;ab.textContent=nv.length>92?nv.slice(0,90)+'…':nv;ab.classList.toggle('ed',ORIG[n]&&nv!=ORIG[n].a);});});});
     }
     function curveRow(c,i){var bp=Math.min(100,c.p/SCALE*100),sp=Math.min(100-bp,swing(c.a)/SCALE*100);
-      return '<div class="dev-row" data-n="'+esc(c.n)+'"><span class="rk">'+(i+1)+'</span><span class="lb" title="'+esc(c.n)+'">'+esc(c.n)+'</span><div class="trk" data-trk><div class="br sw" style="width:'+(bp+sp)+'%;background:'+RAR[c.r].c+'"></div><div class="br bs" style="width:'+bp+'%;background:'+RAR[c.r].c+'"></div><div class="gp" style="left:calc('+bp+'% - 2px)"></div></div><span class="cv" data-cv>'+ceil(c)+'</span></div>';}
+      return '<div class="dev-row" data-n="'+esc(c.n)+'"><span class="rk">'+(i+1)+'</span><span class="lb" title="'+esc(c.n)+'">'+esc(c.n)+'</span><div class="trk" data-trk><div class="br sw" style="width:'+(bp+sp)+'%;background:'+rarOf(c.r).c+'"></div><div class="br bs" style="width:'+bp+'%;background:'+rarOf(c.r).c+'"></div><div class="gp" style="left:calc('+bp+'% - 2px)"></div></div><span class="cv" data-cv>'+ceil(c)+'</span></div>';}
     function renderCurve(){EXP.hidden=true;var d=model().sort(function(a,b){return ceil(b)-ceil(a);});
       BODY.innerHTML='<div class="dev-rows">'+d.map(curveRow).join('')+'</div>';
       BODY.querySelectorAll('.dev-row').forEach(function(row){var n=row.getAttribute('data-n'),trk=row.querySelector('[data-trk]'),mv=false;
@@ -12315,7 +12316,7 @@ body::before{background:
         trk.addEventListener('pointermove',function(e){if(mv)live(e.clientX);});
         trk.addEventListener('pointerup',function(e){if(!mv)return;mv=false;var v=live(e.clientX);record(n,'p',v);renderCurve();});});
     }
-    function tag(c){return '<span class="dev-tag"><i style="background:'+RAR[c.r].c+'"></i>'+esc(c.n)+' <b>'+ceil(c)+'</b></span>';}
+    function tag(c){return '<span class="dev-tag"><i style="background:'+rarOf(c.r).c+'"></i>'+esc(c.n)+' <b>'+ceil(c)+'</b></span>';}
     function renderFlags(){EXP.hidden=true;var m=model();var mr={};ORDER.forEach(function(r){var v=m.filter(function(c){return c.r===r;}).map(ceil);mr[r]=v.length?med(v):0;});
       var creep=m.filter(function(c){var i=ORDER.indexOf(c.r);return i>0&&ceil(c)>=mr[ORDER[i-1]];}).sort(function(a,b){return ceil(b)-ceil(a);});
       var under=m.filter(function(c){var i=ORDER.indexOf(c.r);return i<ORDER.length-1&&ceil(c)<=mr[ORDER[i+1]];}).sort(function(a,b){return ceil(a)-ceil(b);});
