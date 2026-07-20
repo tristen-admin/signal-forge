@@ -3386,11 +3386,11 @@ const DECK_POOL = [
   {name:"Kaelthar the Ascendant",pow:23,cost:3,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Ascendant: on commit, −20 while you hold the match lead, +20 while you are behind. Your Support effects do not fire when he is conjured."},
   {name:"Young Darwin, Predetermined Dictator",pow:14,cost:2,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"On commit: +4, and the opponent takes −3 if their card is Pristine (0 deaths)."},
   {name:"Courtroom Colossus",pow:15,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Colossus: +3, and +5 more from the 3rd commit onward — a late-game bomb."},
-  {name:"Kessuae, Tide of Ruin",pow:17,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: while you are behind, this destroys the active location (nullifies it). +5 if both support slots are full."},
+  {name:"Kessuae, Tide of Ruin",pow:15,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: while you are behind, this destroys the active location (nullifies it). +5 if both support slots are full."},
   {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:'rare',timing:"on",abil:"Purity: +5 while this card is Pristine (0 deaths, 1+ kill)."},
-  {name:"Kravyn the Collector",pow:17,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +3 at 10+ career kills. Kill Escalation: +5 at 20+ career kills."},
+  {name:"Kravyn the Collector",pow:18,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +3. At 10+ career kills this unit gains Kill Escalation: +5. At 25+ career kills this unit gains Kill Escalation +7 instead. When this unit kills its enemy unit, you may choose to return this unit to the hand instead of placing it in the winners circle."},
   {name:"Fifth Frequency Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Elemental Flurry: +3, +4 more with 5+ cards in hand, +7 more with 4+ cards in your banish zone."},
-  {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +1 power for every card remaining in your deck. Death Remnant: when he falls he holds the field, +8 to your committed cards until an enemy is killed."},
+  {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +1 power for every 2 cards remaining in your deck. Death Remnant +8"},
   {name:"Ilma the Patient",pow:13,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Late Bloomer: +5 from the 3rd commit onward."},
   {name:"Old Garrick",pow:12,kills:0,deaths:0,rarity:"common",timing:"on",abil:"Grizzled Veteran: +5 at 20+ kills; +5 more at 8+ deaths."},
   {name:"Faye Quicksilver",pow:14,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Snowball: +2 for every round you have already won this match."},
@@ -3405,7 +3405,7 @@ const DECK_POOL = [
   {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: if 3rd+ commit this match, +5 power. Returns from Winners Circle: banish from hand to curse opponent\'s next committed card −10 power.'},
   {name:'Hanse Waltz',pow:15,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.'},
   // Rares
-  {name:'Arch-Grim Korrin',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: if opponent's card has fewer career kills than this card, +6 power."},
+  {name:'Arch-Grim Korrin',pow:17,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: look at the top 2 cards of your deck, place 1 in the support zone and 1 as a death remnant. If opponent's card has fewer career kills than this card, +6 power."},
   {name:'Cletus Gwyndull',pow:15,kills:0,deaths:0,rarity:'rare',timing:'pre',abil:'Pre-commit: lock the active condition this turn — opponent cannot shift it.'},
   {name:'Val Kreigh',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if this is the 1st duel of the match, +6 power.'},
   {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'apex',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
@@ -3434,10 +3434,10 @@ const DECK_POOL = [
   {name:'La "La" Ballora, the Broodqueen',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw 2 cards — her brood is her hand.'},
   {name:'Ourevos, the Golden Dragon',pow:28,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel. Repeat this effect if you have 1 or fewer support units this battle.'},
-  {name:'Legend Reborn, Keawe Kel\'rua',pow:8,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 15 or higher from your deck to your hand, and reduce its cost by 1.'},
+  {name:'Legend Reborn, Keawe Kel\'rua',pow:13,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 15 or higher from your deck to your hand, and reduce its cost by 1.'},
   {name:'Rhaess Korvain',pow:13,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish the top card of your deck, then +2 power for every card in your banish zone.'},
-  {name:'Black Wings, Ossian Drell',pow:13,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone.'},
-  {name:'Corvus',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Raven's Feast: on commit, banish the top 2 cards of your deck, then +2 power for every card in your banish zone."},
+  {name:'Black Wings, Ossian Drell',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone.'},
+  {name:'Corvus',pow:17,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Raven's Feast: on commit, banish the top 2 cards of your deck, then +2 power for every card in your banish zone."},
   {name:'Wren',pow:9,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wingmate: on commit, return a banished card to your hand, then +4 power — Wren never leaves one behind.'},
   {name:'Rook',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Scout: on commit, banish the top card of your deck, then +1 power for every card in your banish zone.'},
   {name:'Falk',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Dive: on commit, +2 power for every card in your banish zone.'},
@@ -3478,7 +3478,7 @@ const DECK_POOL = [
   {name:'Josef',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Master Tailor: on commit, +4 power once he has taken the measure of the fight (any commit after your first).'},
   {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, +6 to your committed cards until an opponent\'s card is killed.'},
   {name:'Sister Mire, Wailing Nightmare',pow:12,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'On commit: draw 2, return 1 to the bottom of your deck, then +2 power per card in your hand (+3 per card at 20+ career kills). Support: draw 2, banish 1 from hand, your Fighter +1 per card in your hand.'},
-  {name:'Conduit of Chaos, Kleydson',pow:11,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Lesser Chaos (once per match): warp every spell in your deck into Draw Surge (2⚡ draw 3, banish 1) and Godhand (1⚡ your card +10) — a splashable echo of Anorith."},
+  {name:'Conduit of Chaos, Kleydson',pow:11,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Lesser Chaos (once per match): warp every spell in your deck into Draw Surge (2⚡ draw 3, banish 1) and Godhand (1⚡ your card +10)."},
   // ── THE BLACK WINGS (banish to fuel, reclaim & recur) ──
   {name:'Grave-Tithe Acolyte',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: banish the top card of your deck, then +5 power.'},
   {name:'Ashen Reclaimer',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: return a banished card to your hand with +3 power.'},
@@ -3661,9 +3661,9 @@ const OPP_CARDS = [
   {name:"Sirefax the Warden",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Record Guard. On commit: +3 vs a Pristine opponent."},
   {name:"Mordezh, Blood Prophet",pow:15,kills:0,deaths:0,rarity:"ultra",abil:"Bloodrage: +5 while behind; +2 if you lost last."},
   {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:"ultra",abil:"Purity: +5 while this card is Pristine (0 deaths, 1+ kill)."},
-  {name:"Kravyn the Collector",pow:17,kills:0,deaths:0,rarity:"ultra",abil:"On commit: +3 at 10+ career kills. Kill Escalation: +5 at 20+ career kills."},
+  {name:"Kravyn the Collector",pow:18,kills:0,deaths:0,rarity:"ultra",abil:"On commit: +3, more at 10+ and 25+ career kills. May return to hand on kill instead of Winners Circle."},
   {name:"Fifth Frequency Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Elemental Flurry: +3, +4 more with 5+ cards in hand, +7 more with 4+ cards in your banish zone."},
-  {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"On commit: +1 power for every card remaining in your deck. Death Remnant: when he falls he holds the field, +8 to your committed cards until an enemy is killed."},
+  {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"On commit: +1 power for every 2 cards remaining in your deck. Death Remnant +8"},
   {name:"Sable the Unseen",pow:14,kills:0,deaths:0,rarity:"ultra",abil:"On commit: a Pristine opponent is drained — opponent −4."},
   {name:"Torvald Ninefingers",pow:15,kills:0,deaths:0,rarity:"ultra",abil:"Last Stand. On commit: +3 with 2 or fewer cards in hand."},
   {name:"Kessa Brightblade",pow:13,kills:0,deaths:0,rarity:"rare",abil:"On commit: +4 vs a Pristine opponent."},
@@ -3694,7 +3694,7 @@ const OPP_CARDS = [
   {name:"Grum the Steady",pow:11,kills:0,deaths:0,rarity:"common",abil:"Giant-Killer: +4 if the opponent has more career kills."},
   {name:'Lagertha Waltz',pow:8,kills:0,deaths:0,rarity:'rare',abil:'On commit: +6 if lost last, -2 if won last.'},
   {name:'Conduit of Chaos, Kleydson',pow:4,kills:0,deaths:0,rarity:'common',abil:'No ability.'},
-  {name:'Arch-Grim Korrin',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: if opponent's card has fewer career kills than this card, +6 power."},
+  {name:'Arch-Grim Korrin',pow:17,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: look at the top 2 cards of your deck, place 1 in the support zone and 1 as a death remnant. If opponent's card has fewer career kills than this card, +6 power."},
   {name:'Anorith Keeling',pow:1,kills:0,deaths:0,rarity:'apex',abil:'Chaos Deity — power scales with duels completed × hand size; warps your deck into the Chaos Trinity.'},
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',abil:'On commit: +3 if 0-death and lost last; repeats if won a duel.'},
   {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'apex',abil:'On commit: if 3rd+ commit, +3 power.'},
@@ -4625,7 +4625,7 @@ const ENERGY_SPELLS = [
 ];
 // ══ REAR-GUARD / CALLED SYSTEM (v1) ══
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
-const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdorah Khaan, Determined Soul":2, "Tange Sazen":2, "Kotei":3, "Darwin":2, "Lagertha Waltz":1, "The Bronzed Beast, Hanse Waltz":3, "Hanse Waltz":2, "Uso Oso":2, "Zerith Var":3, "Lagertha Waltz, Wrathful Transformation":3, "Bixie Bee":1, "Keawe Kel'rua":2, "Veronica":1};   // ability-strength nudges above the power band (balance dial)
+const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdorah Khaan, Determined Soul":2, "Tange Sazen":2, "Kotei":3, "Darwin":2, "Lagertha Waltz":1, "The Bronzed Beast, Hanse Waltz":3, "Hanse Waltz":2, "Uso Oso":2, "Zerith Var":3, "Lagertha Waltz, Wrathful Transformation":3, "Bixie Bee":1, "Keawe Kel'rua":2, "Veronica":1, "Sister Mire, Wailing Nightmare":1};   // ability-strength nudges above the power band (balance dial)
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
 const RACES = ['Human','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Marrowen','Dreikan','Dractyl','Thennlar','Xylotes','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
 const CARD_RACE = {
@@ -4748,9 +4748,9 @@ const CALLED = {
   "Kaelthar the Ascendant":        {text:"your Fighter +2", add:2},
   "Young Darwin, Predetermined Dictator":           {text:"your Fighter +3", add:3},
   "Courtroom Colossus":            {text:"your Fighter +3", add:3},
-  "Kessuae, Tide of Ruin":         {text:"your Fighter +3", add:3},
+  "Kessuae, Tide of Ruin":         {text:"your Fighter +3, draw 1 then discard 1", add:3},
   "Kotei":                         {text:"your Fighter +2; if your fighter wins the battle with this unit supporting, gain +2 charge and instead of going to the winners circle the card returns to the player's hand.", add:2},
-  "Conduit of Chaos, Kleydson":                      {text:"your Fighter +3 · gain 1 charge", add:3, chargeGain:1},
+  "Conduit of Chaos, Kleydson":                      {text:"your Fighter +3 · gain 1 max charge for every round you have already won", add:3, chargeGain:1},
   "Lagertha Waltz":                {text:"your Fighter +3, add an additional +2 if that unit is a Nightclaw", add:3, twinBuff:5},
   "Hanse Waltz":                   {text:"your Fighter +3, add an additional +2 if that unit is a Nightclaw", add:5, twinBuff:5},
   "Kiana":                         {text:"banish a card from your hand; your Fighter +4", banishOwn:1, add:4},
@@ -4789,7 +4789,7 @@ const CALLED = {
   "Keawe Kel'rua":                 {text:"your Fighter +3, if there have been at least 2 duels this match then draw 1", add:3},
   "Rhaess Korvain":                {text:"return 1 banished card to hand", recurPlain:1},
   "Black Wings, Ossian Drell":                  {text:"your Fighter +1 for every card in your banish zone", addPerBanish:1},
-  "Corvus":                        {text:"your Fighter +4", add:4},
+  "Corvus":                        {text:"your Fighter +3, scry 1", add:4},
   "Wren":                          {text:"return a banished card to your hand, your Fighter +3", recurPlain:1, add:3},
   "Rook":                          {text:"your Fighter +2", add:2},
   "Falk":                          {text:"your Fighter +3", add:3},
@@ -4837,7 +4837,7 @@ const CALLED = {
   "Sister Mire, Wailing Nightmare": {text:"draw 2, banish 1 from hand; your Fighter +1 per card in your hand", draw:2, banishOwn:1, addPerHand:1},
   "Forgemask":                     {text:"your Fighter +3", add:3},
   "Fifth Frequency Stormcaller":             {text:"your Fighter +3", add:3},
-  "Ghorruk \"Gnarly\" Judarr":            {text:"return 1 banished card to hand, +2 power", recurBuff:1},
+  "Ghorruk \"Gnarly\" Judarr":            {text:"return 1 banished card to the bottom of the deck, scry 1, then +2 power", recurBuff:1},
   "Elowen Dawnspear":              {text:"your Fighter +3", add:3},
   "Bixie Bee":                     {text:"your Fighter +3, add an additional +2 if that unit is a Wrothlan", add:3},
   "Uso Oso":                       {text:"your Fighter +2; the lowest power card in your hand is automatically played as a death remnant.", add:3},
@@ -6442,7 +6442,6 @@ const CARD_RULES = {
  "Sirefax the Warden": [{"if": {"and":[{"v": "opp_deaths", "op": "==", "n": 0},{"v":"opp_kills","op":">=","n":1}]}, "add": 3, "log": "🛡 Sirefax: +3 vs Pristine"}],
  "Mordezh, Blood Prophet": [{"if": {"v": "player_losses", "op": ">", "v2": "player_wins"}, "add": 5, "log": "🩸 Mordezh: +5 (behind)"}, {"if": {"v": "last_result", "op": "==", "s": "lose"}, "add": 2, "log": "🩸 Mordezh: +2 (lost last)"}],
  "Elowen Dawnspear": [{"if": {"and":[{"v": "pc_deaths", "op": "==", "n": 0},{"v":"pc_kills","op":">=","n":1}]}, "add": 5, "log": "✨ Elowen: +5 (Pristine)"}],
- "Kravyn the Collector": [{"if": {"v": "pc_kills", "op": ">=", "n": 20}, "add": 5, "log": "⚔️ Kravyn: +5 (20+ kills)"}],
  "Fifth Frequency Stormcaller": [{"add": 3, "log": "🌪️ Veyra: +3"}, {"if": {"chaos": true}, "add": 4, "log": "🌪️ Veyra: +4 (chaos)"}],
  "Sable the Unseen": [{"if": {"v": "opp_deaths", "op": "==", "n": 0}, "oppadd": -4, "log": "🕷️ Sable: opponent −4 (purity drained)"}],
  "Torvald Ninefingers": [{"if": {"v": "hand_len", "op": "<=", "n": 2}, "add": 3, "log": "🪓 Torvald: +3 (low hand)"}],
@@ -9263,17 +9262,17 @@ function deckTab(t){
 // ══ DECK PRESETS (saved decks) ══
 const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Valcarion'];   // Black Wings — banish/discard. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Bixie Bee moved out 7/19/26 -- narrowed to Warpath/Keawe's Circle only.
 const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned Skull Soldiers','Uso Oso',"Uso Oso's Skeletal Summons",'Bone Choirmaster','Marrow Priest','Widow of the Vigil','Gravecaller Voss','Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','The Regenerating Horror','Signal Diviner'];   // The Deathless — Death-Remnant stack + draw. Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
-const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Bixie Bee'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Ruffius Rufeldro moved out 7/19/26 -- narrowed to Radiance + Ahdor's Pride only.
+const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Bixie Bee','The Bronzed Beast, Hanse Waltz',"Legend Reborn, Keawe Kel'rua"];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Ruffius Rufeldro moved out 7/19/26 -- narrowed to Radiance + Ahdor's Pride only.
 const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte','Skittering Drone','Hatchling Tide',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Signal Diviner','Faye Quicksilver','Veronica'];   // The Broodswarm — hand-size draw + power
 const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Shieldwall Recruit','Standard-Bearer Halden','Rank-Sworn Levy','Heir of Kaiga','Conduit Adept','Signal Diviner','Chieftain Reyva Vosh','Faye Quicksilver'];   // The Ironsworn — go wide with 1-cost bodies, Cassian scales biggest (Muster: +power per 1-cost ally). Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
 // 4 more added 7/19/26 -- lore-driven rather than mechanically uniform like the 5 above. Black
 // Council and Radiance got an explicit playstyle brief; Keawe's Circle and Ahdor's Pride are
 // closer to the existing LINK_GROUPS lore-clusters (Darwin's Court/Exiled Royalty/Squad 19/
 // Keawe's Circle itself) promoted to full archetype status, not a single shared mechanic.
-const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members. Veronica + Ruffius Rufeldro moved out 7/19/26.
+const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin','Kravyn the Collector'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members. Veronica + Ruffius Rufeldro moved out 7/19/26.
 const RADIANCE_PRESET = ['Moro','Malia','King Joris','Ruffius Rufeldro','Elowen Dawnspear','Bram the Bulwark','The Regenerating Horror','Kaelthar the Ascendant'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match.
-const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua"];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms)
-const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro'];   // Ahdor's Pride — Ahdorah Khaan + Squad 19. Thin roster on purpose: no card named Kynaht exists yet, and no card is tagged Vysh'ra race (Ahdor's people, per the KOTEI bible) to pull in as "his crew" -- both are real content gaps, not an oversight here.
+const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz'];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms)
+const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua"];   // Ahdor's Pride — Ahdorah Khaan + Squad 19. Thin roster on purpose: no card named Kynaht exists yet, and no card is tagged Vysh'ra race (Ahdor's people, per the KOTEI bible) to pull in as "his crew" -- both are real content gaps, not an oversight here.
 // Archetype dev-view (7/18/26, expanded 7/19/26): the meta archetypes' full membership, for the
 // Vault's Archetype filter -- reuses these *_PRESET arrays directly (the actual full-deck lists)
 // rather than ARCHETYPE_MEMBERS (a narrower, Deck-Master-tier-eligibility-only list that excludes
@@ -9386,14 +9385,14 @@ function showIntroVideo(){
 function showStarterChooser(){ _pathChooserCSS(); var ov=document.getElementById('path-chooser'); if(!ov){ ov=document.createElement('div'); ov.id='path-chooser'; ov.className='path-chooser'; document.body.appendChild(ov); } ov.innerHTML='<div class="pc-scrim"></div><div class="pc-panel"><div class="pc-eyebrow">New Commander</div><div class="pc-title">Choose Your Path</div><div class="pc-sub">Pick a starter deck — real cards you own and can build on. You can collect the others later.</div><div class="pc-grid">'+STARTER_PATHS.map(function(p){ var repC=COLLECTION.find(function(x){return x.name===p.rep && !x.uid;}); var art=(repC && typeof artFillStyle==='function')?artFillStyle(repC.artKey||repC.name):''; return '<div class="pc-card" style="--acc:'+p.accent+'" onclick="chooseStarterPath(\''+p.key+'\')"><div class="pc-art" style="'+art+'"></div><div class="pc-body"><div class="pc-name">'+p.name+'</div><div class="pc-tag">'+p.tag+'</div><div class="pc-blurb">'+p.blurb+'</div></div><button class="pc-pick">Choose '+p.name.replace('The ','')+'</button></div>'; }).join('')+'</div></div>'; ov.classList.add('on'); }
 window.showStarterChooser=showStarterChooser; window.chooseStarterPath=chooseStarterPath;
 ;/* ── BALANCE PASS 2026-07-07 (owner spec): reworked CARD_RULES + remnant values ── */
-CARD_RULES['Kravyn the Collector']=[{"if":{"v":"pc_kills","op":">=","n":10},"add":3,"log":"⚔️ Kravyn: +3 (10+ kills)"},{"if":{"v":"pc_kills","op":">=","n":20},"add":5,"log":"⚔️ Kravyn: +5 Kill Escalation (20+)"}];
+CARD_RULES['Kravyn the Collector']=[{"add":3,"log":"⚔️ Kravyn: +3"},{"if":{"v":"pc_kills","op":">=","n":10},"add":5,"log":"⚔️ Kravyn: +5 (Kill Escalation, 10+ kills)"},{"if":{"v":"pc_kills","op":">=","n":25},"add":2,"log":"⚔️ Kravyn: +2 more (Kill Escalation, 25+ kills — total +7)"}];
 CARD_RULES['Fifth Frequency Stormcaller']=[{"add":3,"log":"🌪️ Flurry: +3"},{"if":{"v":"hand_len","op":">=","n":5},"add":4,"log":"🌪️ Flurry: +4 (5+ hand)"},{"if":{"v":"banish_len","op":">=","n":4},"add":7,"log":"🌪️ Flurry: +7 (4+ banish)"}];
 CARD_RULES['Envoy of Tyrants, Ella Ballora']=[{"if":{"v":"hand_len","op":">=","n":3},"add":3,"log":"⚔️ Bloodrage: +3 (3+ hand)"},{"if":{"v":"player_losses","op":">","n":0},"add":3,"log":"⚔️ Bloodrage: +3 (wounded)"}];
 CARD_RULES['Arch-Grim Korrin']=[{"addvar":"remnant_count","x":4,"log":"👻 Unburied: +4 per Remnant"}];
 CARD_RULES['Kessuae, Tide of Ruin']=[{"if":{"v":"rear_count","op":">=","n":2},"add":5,"log":"🌊 Kessuae: +5 (both supports)"}];
 CARD_RULES['Kaelthar the Ascendant']=[{"if":{"v":"player_wins","op":">","v2":"player_losses"},"add":-20,"log":"🐉 Ascendant: −20 (winning)"},{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":20,"log":"🐉 Ascendant: +20 (losing)"}];
 CARD_RULES['Trophy-Hunter Kessa']=[{"addvar":"both_wc","x":2,"log":"🏆 Kessa: +2 per trophy (both Circles)"}];
-CARD_RULES['Ghorruk "Gnarly" Judarr']=[{"if":{"v":"deck_len","op":">","n":0},"addvar":"deck_len","x":1,"log":"💀 Ghorruk: +1 per card left in deck"}];
+CARD_RULES['Ghorruk "Gnarly" Judarr']=[{"if":{"v":"deck_len","op":">","n":0},"addvar":"deck_len","x":0.5,"log":"💀 Ghorruk: +1 per 2 cards left in deck"}];
 CARD_RULES['The Bronzed Beast, Hanse Waltz']=[{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":5,"log":"🌑 Blood Moon: +5 (behind)"}];
 if(typeof REMNANT_POW!=='undefined'){ REMNANT_POW['Ghorruk "Gnarly" Judarr']=8; REMNANT_POW['Arch-Grim Korrin']=8; }
 
