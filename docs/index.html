@@ -3333,7 +3333,7 @@ const COND_EFF = {
 };
 
 const HAND_CARDS = [
-  {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, and +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
+  {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, and +3 if you lost your last duel. The whole effect repeats for every round this match has completed.'},
   {name:'Uso Oso',pow:14,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant +6; When this card is conjured, call a "Oso\'s skeletal summons" from outside of your deck to an open support circle.'},
   {name:'Tannis',pow:10,kills:0,deaths:0,rarity:'uncommon',timing:'instant',abil:'⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.'},
   {name:'Bixie Bee',pow:13,kills:0,deaths:0,rarity:'common',timing:'on',abil:''},
@@ -3383,7 +3383,7 @@ const MATCH_STEPS = [
 const DECK_POOL = [
   {name:'Pit Thrall',pow:12,kills:0,deaths:0,rarity:'common',timing:null,abil:'No ability — a nameless conscript of the Sorn-Vallis pits. (Placeholder, will be redesigned.)'},
   {name:'Mirror Shade',pow:6,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"On commit: your power becomes the opponent's committed power +1."},
-  {name:"Kaelthar the Ascendant",pow:23,cost:3,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Ascendant: on commit, −20 while you hold the match lead, +20 while you are behind. Your Support effects do not fire when he is conjured."},
+  {name:"Kaelthar the Ascendant",pow:23,cost:4,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Ascendant: on commit, −20 while you hold the match lead, +20 while you are behind. Your Support effects do not fire when he is conjured."},
   {name:"Young Darwin, Predetermined Dictator",pow:14,cost:2,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"On commit: +4, and the opponent takes −3 if their card is Pristine (0 deaths)."},
   {name:"Courtroom Colossus",pow:15,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Colossus: +3, and +5 more from the 3rd commit onward — a late-game bomb."},
   {name:"Kessuae, Tide of Ruin",pow:15,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: while you are behind, this destroys the active location (nullifies it). +5 if both support slots are full."},
@@ -3400,7 +3400,7 @@ const DECK_POOL = [
   {name:'Voltcaller',pow:8,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: your next Interrupt costs 2 less.'},
   {name:'Signal Diviner',pow:12,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On win: next turn gain 2 max Charge.'},
   // Commons
-  {name:'Ahdorah Khaan, Determined Soul',pow:17,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. When Ahdor returns to your hand from the effect of "Record Guard", two random hand cards gain +3.'},
+  {name:'Ahdorah Khaan, Determined Soul',pow:15,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. When Ahdor returns to your hand from the effect of "Record Guard", two random hand cards gain +3.'},
   // Uncommons
   {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: if 3rd+ commit this match, +5 power. Returns from Winners Circle: banish from hand to curse opponent\'s next committed card −10 power.'},
   {name:'Hanse Waltz',pow:15,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.'},
@@ -3432,7 +3432,7 @@ const DECK_POOL = [
   {name:'Lagertha Waltz, Wrathful Transformation',pow:18,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Alpha\'s Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack\'s fury peaks in mourning.'},
   {name:'The Bronzed Beast, Hanse Waltz',pow:20,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 while behind — if you were behind when you kill an opponent fighter, this returns to your hand at its original power.'},
   {name:'La "La" Ballora, the Broodqueen',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw 2 cards — her brood is her hand.'},
-  {name:'Ourevos, the Golden Dragon',pow:28,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
+  {name:'Ourevos, the Golden Dragon',pow:30,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel. Repeat this effect if you have 1 or fewer support units this battle.'},
   {name:'Legend Reborn, Keawe Kel\'rua',pow:13,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 15 or higher from your deck to your hand, and reduce its cost by 1.'},
   {name:'Rhaess Korvain',pow:13,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish the top card of your deck, then +2 power for every card in your banish zone.'},
@@ -3465,7 +3465,7 @@ const DECK_POOL = [
   {name:'Grave-Warden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Death Remnant: when it falls, +3 to your cards until an enemy dies.'},
   {name:'Bone-Stitcher',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), your Fighter +3; if a Remnant is on the field, draw a card.'},
   
-  {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, and +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.'},
+  {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, and +3 if you lost your last duel. The whole effect repeats for every round this match has completed.'},
   // ── art-swapped in from Set 2 storage ──
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you are down 2 or more duels this match, double this card\'s power.'},
   {name:'Kiba',pow:2,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: when Kiba dies it stays on field. Your cards here gain +2 power until an opponent\'s card is killed, then Remnant is removed.'},
@@ -3473,7 +3473,7 @@ const DECK_POOL = [
   {name:'Moro',pow:14,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: if opponent\'s card has 6+ career kills, gain +3 power.'},
   {name:'Zerith Var',pow:19,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2; if your opponent\'s base power is higher, +4 power.'},
   
-  {name:'Anorith Keeling',pow:1,cost:3,chaosPow:true,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Chaos Deity — its base power is a question mark, determined by the number of duels completed prior to Anorith being conjured multiplied by the number of cards in hand. On commit, warp every spell in your deck into the Chaos Trinity: Draw Surge (2⚡ draw 3, banish 1), Godhand (1⚡ your card +10), and Sorn-Vallis Shift (3⚡ warp the location to Sorn-Vallis — lowest power wins).'},
+  {name:'Anorith Keeling',pow:1,cost:4,chaosPow:true,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Chaos Deity — its base power is a question mark, determined by the number of duels completed prior to Anorith being conjured multiplied by the number of cards in hand. On commit, warp every spell in your deck into the Chaos Trinity: Draw Surge (2⚡ draw 3, banish 1), Godhand (1⚡ your card +10), and Sorn-Vallis Shift (3⚡ warp the location to Sorn-Vallis — lowest power wins).'},
   {name:'Heir of Kaiga',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast.'},
   {name:'Josef',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Master Tailor: on commit, +4 power once he has taken the measure of the fight (any commit after your first).'},
   {name:'Sister Mire',pow:8,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, +6 to your committed cards until an opponent\'s card is killed.'},
@@ -3696,7 +3696,7 @@ const OPP_CARDS = [
   {name:'Conduit of Chaos, Kleydson',pow:4,kills:0,deaths:0,rarity:'common',abil:'No ability.'},
   {name:'Arch-Grim Korrin',pow:17,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: look at the top 2 cards of your deck, place 1 in the support zone and 1 as a death remnant. If opponent's card has fewer career kills than this card, +6 power."},
   {name:'Anorith Keeling',pow:1,kills:0,deaths:0,rarity:'apex',abil:'Chaos Deity — power scales with duels completed × hand size; warps your deck into the Chaos Trinity.'},
-  {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',abil:'On commit: +3 if 0-death and lost last; repeats if won a duel.'},
+  {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',abil:'On commit: +3 if 0-death and lost last; repeats per round completed.'},
   {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'apex',abil:'On commit: if 3rd+ commit, +3 power.'},
   {name:'Kiba',pow:2,kills:0,deaths:0,rarity:'common',abil:'Death Remnant: +2 power to next cards until opp kill.'},
   {name:'Zerith Var',pow:19,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"On commit: +2; if your opponent's base power is higher, +4 power."},
@@ -4756,24 +4756,24 @@ const CALLED = {
   "Kiana":                         {text:"banish a card from your hand; your Fighter +4", banishOwn:1, add:4},
   "Heir of Kaiga":                 {text:"your Fighter +5 · draw 1", add:5, draw:1},
   "Melanie":                       {text:"your Fighter +5 · draw 1", add:5, draw:1},
-  "Darwin":                        {text:"your Fighter +2", add:2},
+  "Darwin":                        {text:"your Fighter +2, and play the top card of your deck into your open support circle", add:2},
   "La \"La\" Ballora, the Broodqueen":      {text:"your Fighter +3", add:3},
   "Envoy of Tyrants, Ella Ballora":                  {text:"your Fighter +3", add:3},
   "Arch-Grim Korrin":              {text:"your Fighter +3", add:3},
   "Valcarion":            {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
   "Zerith Var":                    {text:"your Fighter +2, draw 2 cards and banish 1", add:2, draw:2, banishOwn:1},
   "Ruffius Rufeldro":              {text:"your Fighter +3", add:3},
-  "Ahdorah Khaan, Determined Soul":                         {text:"your Fighter +3", add:3},
+  "Ahdorah Khaan, Determined Soul":                         {text:"your Fighter +2, nullify a random supporting unit from the opponent's field", add:3},
   "Val Kreigh":                    {text:"your Fighter +3", add:3},
   "King Joris":                    {text:"your Fighter +4 · draw 1", add:4, draw:1},
   "Malia":                         {text:"your Fighter +4", add:4},
   "Moro":                          {text:"return 1 banished card to hand", recurPlain:1},
-  "Ourevos, the Golden Dragon":    {text:"your Fighter +2", add:2},
-  "Tange Sazen":                   {text:"your Fighter +3", add:3},
+  "Ourevos, the Golden Dragon":    {text:"your Fighter +5, fill the other support slot with a copy of this card, then draw a card", add:2},
+  "Tange Sazen":                   {text:"your Fighter +3, and your conjured unit returns to your hand instead of going to the winners circle", add:3},
   "Kiba":                          {text:"your Fighter +5", add:5},
   "The Bronzed Beast, Hanse Waltz":   {text:"your Fighter +3", add:3, twinBuff:5},
   "Lagertha Waltz, Wrathful Transformation":{text:"your Fighter +3", add:3, twinBuff:5},
-  "Anorith Keeling":               {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
+  "Anorith Keeling":               {text:"return this unit from the support circle to your deck, banish 1 card from your hand, draw 2 and gain 1 charge", banishOwn:1},
   // ── Engines — generic utility kept (the neutral engine every deck can splash) ──
   "Conduit Adept":                 {text:"gain 2 Charge + draw 1", chargeGain:2, draw:1},
   "Signal Diviner":                {text:"gain 1 Charge, or scry 1", chargeGain:3},
@@ -6485,30 +6485,22 @@ const CARD_RULES = {
   },
   {
    "if": {
-    "and": [
+    "or": [
      {
-      "or": [
-       {
-        "v": "opp_deaths",
-        "op": "==",
-        "n": 0
-       },
-       {
-        "v": "last_result",
-        "op": "==",
-        "s": "lose"
-       }
-      ]
+      "v": "opp_deaths",
+      "op": "==",
+      "n": 0
      },
      {
-      "v": "ragwing",
-      "op": ">",
-      "n": 0
+      "v": "last_result",
+      "op": "==",
+      "s": "lose"
      }
     ]
    },
-   "add": 3,
-   "log": "🔥 Kotei: repeat +3"
+   "addvar": "match_commits",
+   "x": 3,
+   "log": "🔥 Kotei: +3 per round completed (repeat)"
   }
  ],
  "Lagertha Waltz": [

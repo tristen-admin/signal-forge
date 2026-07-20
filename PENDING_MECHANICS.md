@@ -124,5 +124,11 @@ Standing practice: add an entry here any time a CALLED/CARD_RULES/ability text e
 **Text says:** "Banish the top 2 cards of your deck, draw 1 then scry 1."
 **Missing:** deck-banish-from-top (distinct from hand-banish), plus `scry`.
 
+### Darwin — Called: "play the top card of your deck into your open support circle" — no auto-conjure-from-deck-to-support field exists.
+### Ourevos, the Golden Dragon — Called: "fill the other support slot with a copy of this card" — no card-duplication-into-a-zone field exists. Text also says +5 while `add` stays 2 (mismatch, flagged not resolved).
+### Ahdorah Khaan, Determined Soul — Called: "nullify a random supporting unit from the opponent's field" — no field targets/removes an opposing support. Text says +2 while `add` stays 3 (mismatch, flagged not resolved).
+### Tange Sazen — Called: "returns to hand instead of winners circle" — same missing hand-redirect primitive as Kravyn's on-kill ask above. His DM Exclusive ask's first sentence ("+8 while your Winners Circle is empty") already matches his real, working `DM_EXCLUSIVE` entry almost exactly — only the second sentence (opponent-2-rounds-conditional draw + forced bottom-of-deck) is actually new/unbuilt.
+### Anorith Keeling — Called: "return this unit from the support circle to your deck," plus the described draw/charge, have no field/aren't in the given JSON (`banishOwn:1` is the only real field kept). Also confirmed with user: his `pow` field is inert (hardcoded per-name formula + always-"?" display) — not touched, working as intended.
+
 ## Resolved
 _(move entries here once real code backs the described behavior, with the commit that did it)_
