@@ -287,11 +287,9 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 #card-preview{position:fixed;z-index:90;width:auto;pointer-events:none;opacity:0;transform:translateX(-50%) scale(0.9);transform-origin:bottom center;transition:opacity 0.13s ease,transform 0.13s ease}
 #card-preview.show{opacity:1;transform:translateX(-50%) scale(1)}
 .bigcard{border-radius:12px;border:2px solid;overflow:hidden;position:relative;box-shadow:0 18px 50px rgba(0,0,0,0.75)}
-.bigcard.common{border-color:var(--r-common);background:linear-gradient(160deg,#1A2232,#0F1620)}
-.bigcard.uncommon{border-color:var(--r-uncommon);background:linear-gradient(160deg,#162218,#0C1510)}
-.bigcard.rare{border-color:var(--r-rare);background:linear-gradient(160deg,#142040,#0C1428)}
-.bigcard.ultra{border-color:var(--r-ultra);background:linear-gradient(160deg,#200A38,#130622)}
-.bigcard.apex{border-color:var(--r-apex);background:linear-gradient(160deg,#2A1E06,#180E00)}
+.bigcard.camp-amageras{border-color:#E8873A;background:linear-gradient(160deg,#3A2408,#1C1002)}
+.bigcard.camp-omitsuki{border-color:#5B2C8F;background:linear-gradient(160deg,#1E1030,#0D0718)}
+.bigcard.camp-kitanoo{border-color:#2D6A4F;background:linear-gradient(160deg,#0D2418,#05140C)}
 .bigcard .bc-art{height:158px;background-size:cover;background-position:center top;position:relative;display:flex;align-items:center;justify-content:center}
 .bigcard .bc-art .bc-sigil{font-size:54px;opacity:0.9;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.6))}
 .bigcard .bc-art::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 52%,rgba(7,9,15,0.94))}
@@ -509,11 +507,9 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
   transform:translateY(-6px);
   box-shadow:0 0 0 2px var(--gold),0 8px 24px rgba(212,168,67,0.25);
 }
-.card.common{border-color:var(--r-common);background:linear-gradient(160deg,#1A2232 0%,#0F1620 100%)}
-.card.uncommon{border-color:var(--r-uncommon);background:linear-gradient(160deg,#162218 0%,#0C1510 100%)}
-.card.rare{border-color:var(--r-rare);background:linear-gradient(160deg,#142040 0%,#0C1428 100%)}
-.card.ultra{border-color:var(--r-ultra);background:linear-gradient(160deg,#200A38 0%,#130622 100%)}
-.card.apex{border-color:var(--r-apex);background:linear-gradient(160deg,#2A1E06 0%,#180E00 100%)}
+.card.camp-amageras{border-color:#E8873A;background:linear-gradient(160deg,#3A2408 0%,#1C1002 100%)}
+.card.camp-omitsuki{border-color:#5B2C8F;background:linear-gradient(160deg,#1E1030 0%,#0D0718 100%)}
+.card.camp-kitanoo{border-color:#2D6A4F;background:linear-gradient(160deg,#0D2418 0%,#05140C 100%)}
 
 /* hand card */
 .hand-card{width:120px;padding:0;background:transparent!important;overflow:visible;position:relative;border:none!important}
@@ -526,7 +522,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .hc-called{position:absolute;top:2px;right:3px;font-size:11px;z-index:6;filter:drop-shadow(0 1px 2px #000);pointer-events:none}
 .hc-darwin{position:absolute;bottom:2px;left:2px;font-size:7px;color:#e2c3ff;background:rgba(120,48,184,0.55);border-radius:3px;padding:1px 3px;z-index:6;cursor:pointer;pointer-events:auto}
 .rcard{width:268px;background:linear-gradient(162deg,#17110a,#0b0805);border:1px solid #8a6a2f;border-radius:12px;padding:13px 15px;box-shadow:0 18px 50px rgba(0,0,0,.72);color:var(--text)}
-.rcard.rare{border-color:var(--r-rare)}.rcard.ultra{border-color:var(--r-ultra)}.rcard.apex{border-color:var(--r-apex)}.rcard.uncommon{border-color:var(--r-uncommon)}
+.rcard.camp-amageras{border-color:#E8873A}.rcard.camp-omitsuki{border-color:#5B2C8F}.rcard.camp-kitanoo{border-color:#2D6A4F}
 .rc-top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
 .rc-cost{background:var(--electric);color:#04141c;font-weight:800;font-size:13px;border-radius:7px;padding:2px 8px;flex-shrink:0}
 .rc-name{flex:1;font-size:15px;font-weight:800;color:#fff;line-height:1.12}
@@ -550,11 +546,9 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
   position:absolute;top:3px;right:4px;
   font-size:7px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
 }
-.card.common .c-rarity{color:var(--r-common)}
-.card.uncommon .c-rarity{color:var(--r-uncommon)}
-.card.rare .c-rarity{color:var(--r-rare)}
-.card.ultra .c-rarity{color:var(--r-ultra)}
-.card.apex .c-rarity{color:var(--r-apex)}
+.card.camp-amageras .c-rarity{color:#E8873A}
+.card.camp-omitsuki .c-rarity{color:#5B2C8F}
+.card.camp-kitanoo .c-rarity{color:#2D6A4F}
 
 /* field card */
 .field-card{width:88px;padding:7px 6px 6px}
@@ -1340,16 +1334,12 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
   aspect-ratio:3/4.15;
 }
 .vault-card:hover{transform:translateY(-4px)}
-.vault-card.common{border-color:var(--r-common)}
-.vault-card.uncommon{border-color:var(--r-uncommon)}
-.vault-card.rare{border-color:var(--r-rare)}
-.vault-card.ultra{border-color:var(--r-ultra)}
-.vault-card.apex{border-color:var(--r-apex)}
-.vault-card.common:hover{box-shadow:0 10px 26px rgba(74,92,112,0.3)}
-.vault-card.uncommon:hover{box-shadow:0 10px 26px rgba(58,120,72,0.3)}
-.vault-card.rare:hover{box-shadow:0 10px 26px rgba(56,88,184,0.35)}
-.vault-card.ultra:hover{box-shadow:0 10px 26px rgba(120,48,184,0.4)}
-.vault-card.apex:hover{box-shadow:0 10px 30px rgba(212,168,67,0.4)}
+.vault-card.camp-amageras{border-color:#E8873A}
+.vault-card.camp-omitsuki{border-color:#5B2C8F}
+.vault-card.camp-kitanoo{border-color:#2D6A4F}
+.vault-card.camp-amageras:hover{box-shadow:0 10px 26px rgba(232,135,58,0.35)}
+.vault-card.camp-omitsuki:hover{box-shadow:0 10px 26px rgba(91,44,143,0.4)}
+.vault-card.camp-kitanoo:hover{box-shadow:0 10px 26px rgba(45,106,79,0.4)}
 .vc-art{
   flex:1;background-size:cover;background-position:center top;position:relative;
   display:flex;align-items:center;justify-content:center;min-height:0;
@@ -1357,11 +1347,9 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .vc-art .vc-sigil{font-size:44px;opacity:0.9;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.6))}
 .vc-art::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(7,9,15,0.92))}
 .vc-rarity-ribbon{position:absolute;top:7px;left:7px;z-index:2;font-size:7px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;padding:2px 6px;border-radius:3px}
-.vault-card.common .vc-rarity-ribbon{background:var(--r-common);color:#fff}
-.vault-card.uncommon .vc-rarity-ribbon{background:var(--r-uncommon);color:#fff}
-.vault-card.rare .vc-rarity-ribbon{background:var(--r-rare);color:#fff}
-.vault-card.ultra .vc-rarity-ribbon{background:var(--r-ultra);color:#fff}
-.vault-card.apex .vc-rarity-ribbon{background:var(--r-apex);color:#150E00}
+.vault-card.camp-amageras .vc-rarity-ribbon{background:#E8873A;color:#150E00}
+.vault-card.camp-omitsuki .vc-rarity-ribbon{background:#5B2C8F;color:#fff}
+.vault-card.camp-kitanoo .vc-rarity-ribbon{background:#2D6A4F;color:#fff}
 .vc-pow{position:absolute;top:6px;right:8px;z-index:2;font-size:19px;font-weight:800;color:#fff;text-shadow:0 2px 6px #000;font-variant-numeric:tabular-nums}
 .vc-pristine{position:absolute;top:30px;right:8px;z-index:2;font-size:8px;font-weight:700;color:var(--gold);text-shadow:0 1px 3px #000}
 .vc-info{padding:0 9px 9px;position:relative;z-index:2;margin-top:-30px}
@@ -1401,9 +1389,9 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .dr-art::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,var(--panel))}
 .dr-header{padding:0 16px 14px;margin-top:-56px;position:relative;z-index:2}
 .dr-rarity{font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px}
-.dr-header.common .dr-rarity{color:var(--r-common)} .dr-header.uncommon .dr-rarity{color:#5FB878}
-.dr-header.rare .dr-rarity{color:#6C8CF0} .dr-header.ultra .dr-rarity{color:#C080E0}
-.dr-header.apex .dr-rarity{color:var(--gold)}
+.dr-header.camp-amageras .dr-rarity{color:#E8873A}
+.dr-header.camp-omitsuki .dr-rarity{color:#5B2C8F}
+.dr-header.camp-kitanoo .dr-rarity{color:#2D6A4F}
 .dr-race-row{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11px;color:var(--text3)}.dr-race-lbl{letter-spacing:.04em;text-transform:uppercase;font-weight:700}.dr-race-sel{background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer}.dr-race-sel:hover{border-color:var(--gold)}.dr-disc-stats{font-variant-numeric:tabular-nums;color:var(--text2);letter-spacing:0}
 .dr-name{font-size:22px;font-weight:800;color:#fff;line-height:1.05;margin-bottom:6px;text-shadow:0 2px 8px #000;text-wrap:balance}
 .dr-powline{display:flex;align-items:baseline;gap:8px}
@@ -1543,11 +1531,9 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .deck-slot{display:flex;align-items:center;gap:9px;border-radius:7px;padding:8px 10px;min-height:48px}
 .deck-slot.empty{border:1px dashed var(--border2);background:rgba(255,255,255,0.01)}
 .deck-slot.filled{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--border2)}
-.deck-slot.filled.common{border-left-color:var(--r-common)}
-.deck-slot.filled.uncommon{border-left-color:var(--r-uncommon)}
-.deck-slot.filled.rare{border-left-color:var(--r-rare)}
-.deck-slot.filled.ultra{border-left-color:var(--r-ultra)}
-.deck-slot.filled.apex{border-left-color:var(--r-apex)}
+.deck-slot.filled.camp-amageras{border-left-color:#E8873A}
+.deck-slot.filled.camp-omitsuki{border-left-color:#5B2C8F}
+.deck-slot.filled.camp-kitanoo{border-left-color:#2D6A4F}
 .ds-num{font-size:11px;font-weight:800;color:var(--text3);width:16px;text-align:center;flex-shrink:0;font-variant-numeric:tabular-nums}
 .ds-sigil{font-size:16px;flex-shrink:0;width:20px;text-align:center}
 .ds-body{flex:1;min-width:0}
@@ -1632,7 +1618,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .listing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:12px}
 .listing{border-radius:10px;border:1px solid;overflow:hidden;display:flex;flex-direction:column;background:var(--panel);transition:transform 0.14s}
 .listing:hover{transform:translateY(-3px)}
-.listing.common{border-color:var(--r-common)}.listing.uncommon{border-color:var(--r-uncommon)}.listing.rare{border-color:var(--r-rare)}.listing.ultra{border-color:var(--r-ultra)}.listing.apex{border-color:var(--r-apex)}
+.listing.camp-amageras{border-color:#E8873A}.listing.camp-omitsuki{border-color:#5B2C8F}.listing.camp-kitanoo{border-color:#2D6A4F}
 .listing.sold{opacity:0.5}
 .listing.legend{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold-dim),0 8px 30px rgba(212,168,67,0.28)}
 .listing.legend .lst-art::after{background:linear-gradient(180deg,transparent 42%,rgba(30,20,4,0.94))}
@@ -2898,7 +2884,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <span class="clock-label" id="clock-label">to decide</span>
     </div>
 
-    <style>.rear-slot{min-height:32px;margin:3px auto;max-width:min(94%,560px);border:1px dashed var(--border2);border-radius:9px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;color:var(--text3);padding:4px 9px;background:rgba(255,255,255,0.02);flex-wrap:wrap}.rear-slot.filled{border-style:solid;border-color:var(--gold);color:var(--text);background:rgba(245,194,77,0.06);flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;text-align:left;flex-wrap:nowrap}.rear-slot .rg-thumb{width:34px;height:44px;border-radius:5px;flex-shrink:0;background-size:cover;background-position:center top;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:var(--surface2)}.rear-slot.enemy .rg-thumb{border-color:var(--lose)}.rear-slot .rg-thumb .rg-sig{font-size:20px;opacity:.65}.rear-slot .rg-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}.rear-slot .rg-line1{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0}.rear-slot .rg-lead{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}.rear-slot .rg-name{font-weight:700;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.rear-slot .rg-called{color:var(--electric);font-size:10px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.rear-slot .rg-hint{opacity:.75}.hand-card.called{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 10px rgba(245,194,77,0.3)}.hand-card .c-cost{position:absolute;top:3px;left:3px;font-size:9px;font-weight:800;color:#0a1a24;background:var(--electric);border-radius:8px;padding:1px 5px;z-index:3;box-shadow:0 1px 3px rgba(0,0,0,.6)}.hand-card .c-abil .ca-fighter{display:block}.hand-card .c-abil .ca-called{display:block;margin-top:3px;padding-top:3px;border-top:1px dashed rgba(245,194,77,.3);color:var(--gold);font-weight:600}.pile-view{position:fixed;inset:0;z-index:130;display:none;align-items:center;justify-content:center}.pile-view.on{display:flex}.pv-scrim{position:absolute;inset:0;background:rgba(4,6,11,0.7)}.pv-panel{position:relative;z-index:1;background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:16px 18px;max-width:min(92vw,640px);max-height:82vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.6)}.pv-head{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}.pv-count{font-size:12px;font-weight:700;color:var(--text3);background:var(--surface2);border-radius:10px;padding:1px 9px}.pv-close{margin-left:auto;background:none;border:1px solid var(--border2);color:var(--text2);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:13px}.pv-sub{font-size:11px;color:var(--text3);margin-bottom:14px}.pv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}.pv-card{aspect-ratio:3/4;border-radius:8px;border:1px solid var(--border2);background-size:cover;background-position:center top;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:6px;overflow:hidden}.pv-card.rare{border-color:var(--r-rare)}.pv-card.ultra{border-color:var(--r-ultra)}.pv-card.apex{border-color:var(--r-apex)}.pv-card.uncommon{border-color:var(--r-uncommon)}.pv-card .pvc-sig{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;opacity:.5}.pv-card .pvc-pow{position:absolute;top:5px;right:6px;font-size:15px;font-weight:800;color:var(--gold);text-shadow:0 1px 3px #000}.pv-card .pvc-name{position:relative;font-size:9px;font-weight:700;color:#fff;line-height:1.15;text-shadow:0 1px 3px #000;background:linear-gradient(transparent,rgba(7,9,15,.9));margin:0 -6px -6px;padding:8px 6px 6px}.hand-card .c-called-dot{font-size:8px}.hand-card .c-info{position:absolute;bottom:2px;right:4px;font-size:10px;color:var(--text3);z-index:3;cursor:pointer;line-height:1;padding:1px}.hand-card .c-info:hover{color:var(--electric)}#preview-scrim{position:fixed;inset:0;z-index:89;background:rgba(4,6,11,0.55)}#card-preview.pinned{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%) scale(1)!important;z-index:91}.rr-proj{display:none;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:8px;font-size:11px;color:var(--text2);background:rgba(245,194,77,0.06);border:1px solid rgba(245,194,77,0.2);border-radius:6px;padding:6px 10px;margin:2px auto 8px;max-width:480px}.rr-proj .rp-you b{color:var(--gold);font-size:15px}.rr-proj .rp-opp b{color:var(--lose);font-size:15px}.rr-proj .rp-vs{color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:.1em}.rr-proj .rp-parts{color:var(--text3);font-size:9px}.rr-proj .rp-parts i,.rr-proj .rp-opp i{font-style:normal;color:var(--electric)}.rear-slot.linked{border-color:var(--electric);box-shadow:0 0 12px var(--elec-glow)}.rear-slot .rg-link{color:var(--electric);font-weight:700;font-size:10px}.charge-meter.spent{animation:chSpent .55s ease-out}@keyframes chSpent{0%{color:var(--lose);transform:scale(1.18)}100%{transform:scale(1)}}.dr-dropdown{border:1px solid var(--border);border-radius:8px;background:var(--panel);margin:8px 0;overflow:hidden}.dr-dropdown>summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text2);user-select:none}.dr-dropdown>summary::-webkit-details-marker{display:none}.dr-dropdown>summary::after{content:"\25be";color:var(--text3);transition:transform .18s;margin-left:4px}.dr-dropdown[open]>summary::after{transform:rotate(180deg)}.dr-dropdown>summary:hover{color:var(--text)}.dr-dropdown .ddv{margin-left:auto;font-weight:700;color:var(--text)}.dr-dropdown .ddbody{padding:6px 12px 12px;border-top:1px solid var(--border)}.foil-opts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.foil-opt{font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border2);color:var(--text);position:relative;overflow:hidden}.foil-opt.sel{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}.foil-next{font-size:10px;color:var(--text3);display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}.foil-next .fn-lbl{color:var(--text2);font-weight:700}.drag-ghost{position:fixed;pointer-events:none;z-index:200;transform:translate(-50%,-50%);padding:6px 9px;min-width:56px;max-width:88px;background:var(--panel);border:2px solid var(--gold);border-radius:9px;font-size:10px;font-weight:800;color:var(--gold);text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.65);background-size:cover;background-position:center top;opacity:.94}.drop-hot{outline:2px dashed var(--gold)!important;outline-offset:2px;background:rgba(245,194,77,0.14)!important;box-shadow:0 0 16px rgba(245,194,77,0.35)!important}body.sf-dragging{cursor:grabbing;user-select:none}.hand-card{touch-action:none}.mastery-hub{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;max-width:1120px}.mast-char{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--r-common);border-radius:12px;padding:14px}.mast-char.uncommon{border-left-color:var(--r-uncommon)}.mast-char.rare{border-left-color:var(--r-rare)}.mast-char.ultra{border-left-color:var(--r-ultra)}.mast-char.apex{border-left-color:var(--r-apex)}.mc-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}.mc-art{width:52px;height:52px;border-radius:8px;background-size:cover;background-position:center top;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid var(--border2)}.mc-name{font-size:15px;font-weight:800;color:var(--text)}.mc-lvl{font-size:11px;color:var(--text2);margin-top:2px}.mc-lvl b{color:var(--gold)}.mc-nomast{color:var(--text3)}.mt-track{position:relative;height:6px;background:var(--surface2);border-radius:3px;margin:20px 8px 28px}.mt-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:3px}.mt-node{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center}.mt-node .mt-icon{font-size:15px;filter:grayscale(1);opacity:.45}.mt-node.on .mt-icon{filter:none;opacity:1}.mt-node .mt-lv{position:absolute;top:15px;font-size:8px;color:var(--text3);white-space:nowrap}.mt-node.on .mt-lv{color:var(--gold);font-weight:700}.mc-how{font-size:11px;color:var(--text2);background:rgba(111,211,255,0.06);border:1px solid rgba(111,211,255,0.16);border-radius:6px;padding:6px 9px;margin-bottom:10px}.mc-how b{color:var(--electric)}.mc-rewards{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}.mr-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);padding:2px 0}.mr-item.on{color:var(--text)}.mr-item .mr-ic{width:20px;text-align:center;font-size:14px}.mr-item .mr-nm{flex:1}.mr-item .mr-lv{font-size:9px;font-weight:700;color:var(--text3)}.mr-item.on .mr-lv{color:var(--win)}.mc-bonds{font-size:11px;color:var(--text2);border-top:1px solid var(--border);padding-top:9px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.mc-bonds .mb-lbl{font-weight:700}.mb-chip{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:2px 9px;font-size:10px;color:var(--text)}.mb-none{color:var(--text3);font-style:italic;font-size:10px}.mc-traits{border-top:1px solid var(--border);padding-top:9px;margin-bottom:10px}.trait-ladder{display:flex;flex-direction:column;gap:3px;margin-top:5px}.tl-row{display:flex;align-items:center;gap:7px;font-size:10.5px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.025)}.tl-row.earned{background:rgba(245,194,77,.08)}.tl-row.eq{box-shadow:inset 0 0 0 1px var(--gold)}.tl-ic{font-size:13px;width:16px;text-align:center;flex-shrink:0}.tl-ic.locked{filter:grayscale(1);opacity:.55}.tl-nm{font-weight:700;color:var(--text2);flex-shrink:0;min-width:80px}.tl-row.earned .tl-nm{color:var(--gold)}.tl-buff{font-size:9px;font-weight:800;color:var(--gold);flex-shrink:0}.tl-buff.dim{color:var(--text3);opacity:.85}.tl-badge{margin-left:auto;font-size:8.5px;font-weight:800;color:var(--gold);letter-spacing:.04em;flex-shrink:0}.tl-bar{flex:1;height:4px;background:rgba(255,255,255,.09);border-radius:2px;overflow:hidden;min-width:24px;margin-left:4px}.tl-bar>span{display:block;height:100%;background:var(--electric)}.tl-prog{font-size:9px;color:var(--text3);flex-shrink:0;font-variant-numeric:tabular-nums;min-width:66px;text-align:right}.mc-sec-lbl{font-size:11px;font-weight:800;color:var(--text2)}.mc-sec-sub{font-weight:500;color:var(--text3);font-size:10px}.trade-tabs{display:flex;gap:8px;margin-bottom:10px}.tt-btn{font-size:12px;font-weight:700;padding:8px 16px;border-radius:8px;border:1px solid var(--border2);background:var(--panel);color:var(--text2);cursor:pointer}.tt-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-glow)}.trade-note{font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:14px;max-width:720px}.trade-note b{color:var(--text2)}.trade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-width:1000px}.trade-offer{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}.to-partner{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:700}.to-swap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.to-give,.to-want{flex:1;min-width:96px;font-size:12px;font-weight:700;padding:7px 9px;border-radius:7px;border:1px solid var(--border2);color:var(--text);display:flex;flex-direction:column;gap:2px}.to-give{border-color:var(--win)}.to-want{border-color:var(--lose);color:var(--text2)}.to-give i,.to-want i{font-style:normal;font-size:9px;color:var(--text3);font-weight:500}.to-give.apex{box-shadow:inset 0 0 0 1px var(--r-apex)}.to-give.ultra{box-shadow:inset 0 0 0 1px var(--r-ultra)}.to-give.rare{box-shadow:inset 0 0 0 1px var(--r-rare)}.to-arrow{font-size:16px;color:var(--gold);flex-shrink:0}.to-accept{background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:7px 0;border-radius:6px;cursor:pointer}.to-accept:hover{background:rgba(212,168,67,0.25)}.trade-refresh{margin-top:14px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:11px;font-weight:700;padding:8px 16px;border-radius:8px;cursor:pointer}</style>
+    <style>.rear-slot{min-height:32px;margin:3px auto;max-width:min(94%,560px);border:1px dashed var(--border2);border-radius:9px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;color:var(--text3);padding:4px 9px;background:rgba(255,255,255,0.02);flex-wrap:wrap}.rear-slot.filled{border-style:solid;border-color:var(--gold);color:var(--text);background:rgba(245,194,77,0.06);flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;text-align:left;flex-wrap:nowrap}.rear-slot .rg-thumb{width:34px;height:44px;border-radius:5px;flex-shrink:0;background-size:cover;background-position:center top;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:var(--surface2)}.rear-slot.enemy .rg-thumb{border-color:var(--lose)}.rear-slot .rg-thumb .rg-sig{font-size:20px;opacity:.65}.rear-slot .rg-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}.rear-slot .rg-line1{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0}.rear-slot .rg-lead{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}.rear-slot .rg-name{font-weight:700;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.rear-slot .rg-called{color:var(--electric);font-size:10px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.rear-slot .rg-hint{opacity:.75}.hand-card.called{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 10px rgba(245,194,77,0.3)}.hand-card .c-cost{position:absolute;top:3px;left:3px;font-size:9px;font-weight:800;color:#0a1a24;background:var(--electric);border-radius:8px;padding:1px 5px;z-index:3;box-shadow:0 1px 3px rgba(0,0,0,.6)}.hand-card .c-abil .ca-fighter{display:block}.hand-card .c-abil .ca-called{display:block;margin-top:3px;padding-top:3px;border-top:1px dashed rgba(245,194,77,.3);color:var(--gold);font-weight:600}.pile-view{position:fixed;inset:0;z-index:130;display:none;align-items:center;justify-content:center}.pile-view.on{display:flex}.pv-scrim{position:absolute;inset:0;background:rgba(4,6,11,0.7)}.pv-panel{position:relative;z-index:1;background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:16px 18px;max-width:min(92vw,640px);max-height:82vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.6)}.pv-head{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}.pv-count{font-size:12px;font-weight:700;color:var(--text3);background:var(--surface2);border-radius:10px;padding:1px 9px}.pv-close{margin-left:auto;background:none;border:1px solid var(--border2);color:var(--text2);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:13px}.pv-sub{font-size:11px;color:var(--text3);margin-bottom:14px}.pv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}.pv-card{aspect-ratio:3/4;border-radius:8px;border:1px solid var(--border2);background-size:cover;background-position:center top;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:6px;overflow:hidden}.pv-card.camp-amageras{border-color:#E8873A}.pv-card.camp-omitsuki{border-color:#5B2C8F}.pv-card.camp-kitanoo{border-color:#2D6A4F}.pv-card .pvc-sig{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;opacity:.5}.pv-card .pvc-pow{position:absolute;top:5px;right:6px;font-size:15px;font-weight:800;color:var(--gold);text-shadow:0 1px 3px #000}.pv-card .pvc-name{position:relative;font-size:9px;font-weight:700;color:#fff;line-height:1.15;text-shadow:0 1px 3px #000;background:linear-gradient(transparent,rgba(7,9,15,.9));margin:0 -6px -6px;padding:8px 6px 6px}.hand-card .c-called-dot{font-size:8px}.hand-card .c-info{position:absolute;bottom:2px;right:4px;font-size:10px;color:var(--text3);z-index:3;cursor:pointer;line-height:1;padding:1px}.hand-card .c-info:hover{color:var(--electric)}#preview-scrim{position:fixed;inset:0;z-index:89;background:rgba(4,6,11,0.55)}#card-preview.pinned{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%) scale(1)!important;z-index:91}.rr-proj{display:none;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:8px;font-size:11px;color:var(--text2);background:rgba(245,194,77,0.06);border:1px solid rgba(245,194,77,0.2);border-radius:6px;padding:6px 10px;margin:2px auto 8px;max-width:480px}.rr-proj .rp-you b{color:var(--gold);font-size:15px}.rr-proj .rp-opp b{color:var(--lose);font-size:15px}.rr-proj .rp-vs{color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:.1em}.rr-proj .rp-parts{color:var(--text3);font-size:9px}.rr-proj .rp-parts i,.rr-proj .rp-opp i{font-style:normal;color:var(--electric)}.rear-slot.linked{border-color:var(--electric);box-shadow:0 0 12px var(--elec-glow)}.rear-slot .rg-link{color:var(--electric);font-weight:700;font-size:10px}.charge-meter.spent{animation:chSpent .55s ease-out}@keyframes chSpent{0%{color:var(--lose);transform:scale(1.18)}100%{transform:scale(1)}}.dr-dropdown{border:1px solid var(--border);border-radius:8px;background:var(--panel);margin:8px 0;overflow:hidden}.dr-dropdown>summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text2);user-select:none}.dr-dropdown>summary::-webkit-details-marker{display:none}.dr-dropdown>summary::after{content:"\25be";color:var(--text3);transition:transform .18s;margin-left:4px}.dr-dropdown[open]>summary::after{transform:rotate(180deg)}.dr-dropdown>summary:hover{color:var(--text)}.dr-dropdown .ddv{margin-left:auto;font-weight:700;color:var(--text)}.dr-dropdown .ddbody{padding:6px 12px 12px;border-top:1px solid var(--border)}.foil-opts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.foil-opt{font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border2);color:var(--text);position:relative;overflow:hidden}.foil-opt.sel{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}.foil-next{font-size:10px;color:var(--text3);display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}.foil-next .fn-lbl{color:var(--text2);font-weight:700}.drag-ghost{position:fixed;pointer-events:none;z-index:200;transform:translate(-50%,-50%);padding:6px 9px;min-width:56px;max-width:88px;background:var(--panel);border:2px solid var(--gold);border-radius:9px;font-size:10px;font-weight:800;color:var(--gold);text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.65);background-size:cover;background-position:center top;opacity:.94}.drop-hot{outline:2px dashed var(--gold)!important;outline-offset:2px;background:rgba(245,194,77,0.14)!important;box-shadow:0 0 16px rgba(245,194,77,0.35)!important}body.sf-dragging{cursor:grabbing;user-select:none}.hand-card{touch-action:none}.mastery-hub{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;max-width:1120px}.mast-char{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--r-common);border-radius:12px;padding:14px}.mast-char.uncommon{border-left-color:var(--r-uncommon)}.mast-char.rare{border-left-color:var(--r-rare)}.mast-char.ultra{border-left-color:var(--r-ultra)}.mast-char.apex{border-left-color:var(--r-apex)}.mc-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}.mc-art{width:52px;height:52px;border-radius:8px;background-size:cover;background-position:center top;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid var(--border2)}.mc-name{font-size:15px;font-weight:800;color:var(--text)}.mc-lvl{font-size:11px;color:var(--text2);margin-top:2px}.mc-lvl b{color:var(--gold)}.mc-nomast{color:var(--text3)}.mt-track{position:relative;height:6px;background:var(--surface2);border-radius:3px;margin:20px 8px 28px}.mt-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:3px}.mt-node{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center}.mt-node .mt-icon{font-size:15px;filter:grayscale(1);opacity:.45}.mt-node.on .mt-icon{filter:none;opacity:1}.mt-node .mt-lv{position:absolute;top:15px;font-size:8px;color:var(--text3);white-space:nowrap}.mt-node.on .mt-lv{color:var(--gold);font-weight:700}.mc-how{font-size:11px;color:var(--text2);background:rgba(111,211,255,0.06);border:1px solid rgba(111,211,255,0.16);border-radius:6px;padding:6px 9px;margin-bottom:10px}.mc-how b{color:var(--electric)}.mc-rewards{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}.mr-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);padding:2px 0}.mr-item.on{color:var(--text)}.mr-item .mr-ic{width:20px;text-align:center;font-size:14px}.mr-item .mr-nm{flex:1}.mr-item .mr-lv{font-size:9px;font-weight:700;color:var(--text3)}.mr-item.on .mr-lv{color:var(--win)}.mc-bonds{font-size:11px;color:var(--text2);border-top:1px solid var(--border);padding-top:9px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.mc-bonds .mb-lbl{font-weight:700}.mb-chip{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:2px 9px;font-size:10px;color:var(--text)}.mb-none{color:var(--text3);font-style:italic;font-size:10px}.mc-traits{border-top:1px solid var(--border);padding-top:9px;margin-bottom:10px}.trait-ladder{display:flex;flex-direction:column;gap:3px;margin-top:5px}.tl-row{display:flex;align-items:center;gap:7px;font-size:10.5px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.025)}.tl-row.earned{background:rgba(245,194,77,.08)}.tl-row.eq{box-shadow:inset 0 0 0 1px var(--gold)}.tl-ic{font-size:13px;width:16px;text-align:center;flex-shrink:0}.tl-ic.locked{filter:grayscale(1);opacity:.55}.tl-nm{font-weight:700;color:var(--text2);flex-shrink:0;min-width:80px}.tl-row.earned .tl-nm{color:var(--gold)}.tl-buff{font-size:9px;font-weight:800;color:var(--gold);flex-shrink:0}.tl-buff.dim{color:var(--text3);opacity:.85}.tl-badge{margin-left:auto;font-size:8.5px;font-weight:800;color:var(--gold);letter-spacing:.04em;flex-shrink:0}.tl-bar{flex:1;height:4px;background:rgba(255,255,255,.09);border-radius:2px;overflow:hidden;min-width:24px;margin-left:4px}.tl-bar>span{display:block;height:100%;background:var(--electric)}.tl-prog{font-size:9px;color:var(--text3);flex-shrink:0;font-variant-numeric:tabular-nums;min-width:66px;text-align:right}.mc-sec-lbl{font-size:11px;font-weight:800;color:var(--text2)}.mc-sec-sub{font-weight:500;color:var(--text3);font-size:10px}.trade-tabs{display:flex;gap:8px;margin-bottom:10px}.tt-btn{font-size:12px;font-weight:700;padding:8px 16px;border-radius:8px;border:1px solid var(--border2);background:var(--panel);color:var(--text2);cursor:pointer}.tt-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-glow)}.trade-note{font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:14px;max-width:720px}.trade-note b{color:var(--text2)}.trade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-width:1000px}.trade-offer{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}.to-partner{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:700}.to-swap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.to-give,.to-want{flex:1;min-width:96px;font-size:12px;font-weight:700;padding:7px 9px;border-radius:7px;border:1px solid var(--border2);color:var(--text);display:flex;flex-direction:column;gap:2px}.to-give{border-color:var(--win)}.to-want{border-color:var(--lose);color:var(--text2)}.to-give i,.to-want i{font-style:normal;font-size:9px;color:var(--text3);font-weight:500}.to-give.apex{box-shadow:inset 0 0 0 1px var(--r-apex)}.to-give.ultra{box-shadow:inset 0 0 0 1px var(--r-ultra)}.to-give.rare{box-shadow:inset 0 0 0 1px var(--r-rare)}.to-arrow{font-size:16px;color:var(--gold);flex-shrink:0}.to-accept{background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:7px 0;border-radius:6px;cursor:pointer}.to-accept:hover{background:rgba(212,168,67,0.25)}.trade-refresh{margin-top:14px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:11px;font-weight:700;padding:8px 16px;border-radius:8px;cursor:pointer}</style>
     <!-- FIELD -->
     <div class="field">
       <div class="rear-slot enemy" id="opp-rear" style="display:none"></div>
@@ -3841,7 +3827,7 @@ function openPileView(kind){
   var list = kind==='wc'?winnersCircle:banishPile; list=list||[];
   var title = kind==='wc'?'🏆 Winners Circle':'💀 Banish';
   var sub = kind==='wc'?'Cards you have won this match — recover one when you lose a duel.':'Cards removed from the game this match.';
-  var cards = list.length ? list.map(function(c){ return '<div class="pv-card '+(c.rarity||'common')+'" style="'+artFillStyle(c.artKey||c.name)+'">'+(CARD_ART[c.artKey||c.name]?'':'<span class="pvc-sig">'+sigilFor(c.artKey||c.name)+'</span>')+'<span class="pvc-pow">'+(c.pow!=null?c.pow:'')+'</span><span class="pvc-name">'+c.name+'</span></div>'; }).join('') : '<div class="df-empty">Empty — nothing here yet.</div>';
+  var cards = list.length ? list.map(function(c){ return '<div class="pv-card '+(c.rarity||'common')+' camp-'+(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()+'" style="'+artFillStyle(c.artKey||c.name)+'">'+(CARD_ART[c.artKey||c.name]?'':'<span class="pvc-sig">'+sigilFor(c.artKey||c.name)+'</span>')+'<span class="pvc-pow">'+(c.pow!=null?c.pow:'')+'</span><span class="pvc-name">'+c.name+'</span></div>'; }).join('') : '<div class="df-empty">Empty — nothing here yet.</div>';
   var ov=document.getElementById('pile-view'); if(!ov){ ov=document.createElement('div'); ov.id='pile-view'; ov.className='pile-view'; document.body.appendChild(ov); }
   ov.innerHTML='<div class="pv-scrim" onclick="closePileView()"></div><div class="pv-panel"><div class="pv-head"><span>'+title+'</span><span class="pv-count">'+list.length+'</span><button class="pv-close" onclick="closePileView()">✕</button></div><div class="pv-sub">'+sub+'</div><div class="pv-grid">'+cards+'</div></div>';
   ov.classList.add('on');
@@ -3853,7 +3839,7 @@ function buildHand(){
   row.innerHTML = '';
   hand.forEach((c,i) => {
     const el = document.createElement('div');
-    el.className = `card hand-card ${c.rarity}${i===preSelectedCard?' selected':''}${rearGuardIdxs.indexOf(i)>=0?' called':''}`;
+    el.className = `card hand-card ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()}${i===preSelectedCard?' selected':''}${rearGuardIdxs.indexOf(i)>=0?' called':''}`;
     el.id = `hcard-${i}`;
     const isInstant = c.timing === 'instant' || !!INSTANT_EFFECTS[c.name];
     el.innerHTML = bigCardHTML(c)
@@ -5335,7 +5321,7 @@ function confirmSelection(){
 
   // enemy card — a sealed, stylized cover (or the exposed face under Open Book)
   document.getElementById('opp-field').innerHTML = openBook
-    ? `<div class="card field-card ${oc.rarity} enemy" ${CARD_ART[oc.artKey||oc.name] ? `style="background-image:linear-gradient(180deg,rgba(7,9,15,0.4),rgba(7,9,15,0.93)),url(${CARD_ART[oc.artKey||oc.name]});background-size:cover;background-position:center top"` : ''} data-cn="${(oc.name||'').replace(/"/g,'&quot;')}">
+    ? `<div class="card field-card ${oc.rarity} camp-${(oc.camp||(typeof campOf==='function'?campOf(oc):'Amageras')).toLowerCase()} enemy" ${CARD_ART[oc.artKey||oc.name] ? `style="background-image:linear-gradient(180deg,rgba(7,9,15,0.4),rgba(7,9,15,0.93)),url(${CARD_ART[oc.artKey||oc.name]});background-size:cover;background-position:center top"` : ''} data-cn="${(oc.name||'').replace(/"/g,'&quot;')}">
         <div class="c-rarity">${rlab1(oc.rarity)}</div>
         <div class="c-name">${oc.name}</div>
         <div class="c-pow" style="color:var(--lose)">${oc.pow}</div>
@@ -5494,7 +5480,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   const _pk = pc.artKey||pc.name;
   const _pv = VIDEO_PREVIEW[_pk];
   const pcArt = (!_pv && CARD_ART[_pk]) ? `style="background-image:linear-gradient(180deg,rgba(7,9,15,0.4),rgba(7,9,15,0.93)),url(${CARD_ART[_pk]});background-size:cover;background-position:center top"` : '';
-  pf.innerHTML = `<div class="card field-card ${pc.rarity} locked ${_pv?'video-card':''}" ${pcArt} data-cn="${(pc.name||'').replace(/"/g,'&quot;')}">
+  pf.innerHTML = `<div class="card field-card ${pc.rarity} camp-${(pc.camp||(typeof campOf==='function'?campOf(pc):'Amageras')).toLowerCase()} locked ${_pv?'video-card':''}" ${pcArt} data-cn="${(pc.name||'').replace(/"/g,'&quot;')}">
     ${_pv?`<video class="field-vid" src="${_pv}" autoplay muted loop playsinline></video><div class="fv-scrim"></div>`:''}
     <div class="c-rarity">${rlab1(pc.rarity)}</div>
     <div class="c-name">${pc.name}</div>
@@ -5524,7 +5510,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
     // show opp card on field
     const of2 = document.getElementById('opp-field');
     const ocArt = CARD_ART[oc.artKey||oc.name] ? `style="background-image:linear-gradient(180deg,rgba(7,9,15,0.4),rgba(7,9,15,0.93)),url(${CARD_ART[oc.artKey||oc.name]});background-size:cover;background-position:center top"` : '';
-    of2.innerHTML = `<div class="card field-card ${oc.rarity} locked enemy" ${ocArt}>
+    of2.innerHTML = `<div class="card field-card ${oc.rarity} camp-${(oc.camp||(typeof campOf==='function'?campOf(oc):'Amageras')).toLowerCase()} locked enemy" ${ocArt}>
       <div class="c-rarity">${rlab1(oc.rarity)}</div>
       <div class="c-name">${oc.name}</div>
       <div class="c-pow" style="color:var(--lose)">${oc.pow}</div>
@@ -6029,8 +6015,9 @@ function showLinkGroup(id){
     var art=(typeof CARD_ART!=='undefined')&&CARD_ART[ak];
     var sig=((typeof CARD_SIGIL!=='undefined')&&CARD_SIGIL[ak])||'◈';
     var rar=(c&&c.rarity)||'common';
+    var camp='camp-'+((c&&c.camp)||(typeof campOf==='function'?campOf(nm):'Amageras')).toLowerCase();
     var st=art?(' style="background-image:linear-gradient(180deg,rgba(7,9,15,.2),rgba(7,9,15,.92)),url('+art+')"'):'';
-    return '<div class="pv-card '+rar+'"'+st+'>'+(art?'':'<span class="pvc-sig">'+sig+'</span>')+'<span class="pvc-name">'+nm+'</span></div>';
+    return '<div class="pv-card '+rar+' '+camp+'"'+st+'>'+(art?'':'<span class="pvc-sig">'+sig+'</span>')+'<span class="pvc-name">'+nm+'</span></div>';
   }).join('');
   ov.innerHTML='<div class="pv-scrim" onclick="closeLinkGroup()"></div><div class="pv-panel"><div class="pv-head">'+g.icon+' '+g.name+'<span class="pv-count">'+g.members.length+' units</span><button class="pv-close" onclick="closeLinkGroup()">\u2715</button></div><div class="pv-sub">Commit any one of these as your fighter with another still in your hand \u2014 the +'+g.pow+' Link bonus fires.</div><div class="pv-grid">'+cards+'</div></div>';
   ov.classList.add('on');
@@ -7161,7 +7148,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
       dmRemnantPowOverride=null;
       deathRemnants.push({name:pc.name,pow:_rp});
       sub.textContent = `${oc.name} (${Math.round(oppPow)}) defeated ${pc.name} (${Math.round(playerPow)}) — Death Remnant active (+${_rp}, ${deathRemnants.length} on field)`;
-      _deferField = function(){ document.getElementById('player-field').innerHTML = `<div class="card field-card ${pc.rarity}" style="opacity:0.55;border-color:rgba(184,58,58,0.55)">
+      _deferField = function(){ document.getElementById('player-field').innerHTML = `<div class="card field-card ${pc.rarity} camp-${(pc.camp||(typeof campOf==='function'?campOf(pc):'Amageras')).toLowerCase()}" style="opacity:0.55;border-color:rgba(184,58,58,0.55)">
         <div class="c-rarity">☠</div>
         <div class="c-name">${pc.name}</div>
         <div class="c-pow" style="color:var(--lose)">+${_rp}↑</div>
@@ -7553,7 +7540,7 @@ function buildMarket(){
     const lk = l.k!=null?l.k:c.kills, ld = l.d!=null?l.d:c.deaths;
     const crown = l.legend ? '<span class="lst-crown">👑 Undefeated</span>' : '';
     const pristine = (ld === 0 && lk >= 1) ? '<span class="lst-pristine">◈</span>' : '';
-    return `<div class="listing ${c.rarity} ${l.legend?'legend':''} ${l.sold?'sold':''}" onclick="openListingDetail(${idx})" style="cursor:pointer">
+    return `<div class="listing ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()} ${l.legend?'legend':''} ${l.sold?'sold':''}" onclick="openListingDetail(${idx})" style="cursor:pointer">
       <div class="lst-art" style="${artFillStyle(l.name)}">${sigilFor(l.name)}<span class="lst-rar">${rlab(c.rarity)}</span><span class="lst-pow">${c.pow}</span>${pristine}${crown}</div>
       <div class="lst-body">
         <div class="lst-name">${l.name} ${legendMiniHTML(c)}</div>
@@ -8498,7 +8485,7 @@ function rpCardHTML(c, side) {
     : c.status === 'guarded' ? '<div class="rp-badge rp-badge-guard">🛡 Record Guard</div>'
     : c.status === 'trapped' ? '<div class="rp-badge rp-badge-alert">⚠ Trapped</div>'
     : '';
-  return `<div class="card rp-card ${c.rarity}">
+  return `<div class="card rp-card ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()}">
     <div class="c-rarity">${rlab1(c.rarity)}</div>
     <div style="font-size:9.5px;font-weight:700;color:var(--text);margin-bottom:5px;line-height:1.2">${c.name}</div>
     <div style="font-size:26px;font-weight:800;color:${powCol};font-variant-numeric:tabular-nums;line-height:1;margin-bottom:2px">${c.displayPow}</div>
@@ -9113,7 +9100,7 @@ function buildDeckSlots(){
       const dmKey=(c.uid||c.name);
       const isDM = (typeof deckMasterCard!=='undefined') && deckMasterCard===dmKey;
       const dmBtn = c.rarity!=='common' ? `<button class="ds-dm${isDM?' on':''}" title="${isDM?'Your Deck Master':'Name as Deck Master'}" onclick="event.stopPropagation();setDeckMaster('${dmKey.replace(/'/g,"\\'")}')">★</button>` : '';
-      slots.push(`<div class="deck-slot filled ${c.rarity}${isDM?' dm-master':''}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}')" style="cursor:pointer">
+      slots.push(`<div class="deck-slot filled ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()}${isDM?' dm-master':''}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}')" style="cursor:pointer">
         <span class="ds-num">${i+1}</span>
         <span class="ds-sigil">${glyph}</span>
         <div class="ds-body">
@@ -10108,7 +10095,7 @@ function buildVault(){
     const c=e.c;
     const pristine=isPristine(c)?`<span class="vc-pristine">◈ Pristine</span>`:'';
     const inDeck=activeDeck.has(c.uid||c.name)?'in-deck':'';
-    return `<div class="vault-card ${c.rarity} ${inDeck} ${e.fresh?'is-fresh':''} ${c.won?'is-won':''} ${foilClass(c)} ${frameClass(c)} ${e.locked?'locked-card':(typeof cardStateClasses==='function'?cardStateClasses(c):'')}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}',${e.fresh?'true':'false'})">
+    return `<div class="vault-card ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()} ${inDeck} ${e.fresh?'is-fresh':''} ${c.won?'is-won':''} ${foilClass(c)} ${frameClass(c)} ${e.locked?'locked-card':(typeof cardStateClasses==='function'?cardStateClasses(c):'')}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}',${e.fresh?'true':'false'})">
       <div class="vc-art vc-frame">
         ${bigCardHTML(c)}
         ${pristine}
@@ -10188,7 +10175,7 @@ function openCardDetail(id, fresh, tab){
   const body=document.getElementById('drawer-body');
   body.innerHTML=`
     <div class="dr-art ${CARD_ART_FULL[c.artKey||c.name]?'zoomable':''} ${foilClass(c)} ${frameClass(c)}" ${CARD_ART_FULL[c.artKey||c.name]?`onclick="openLightbox('${(c.artKey||c.name).replace(/'/g,"\\'")}')"`:''} style="${artFillStyle(c.artKey||c.name)}">${VIDEO_PREVIEW[c.artKey||c.name]?`<video class="fc-vid"${vidStyle(c.artKey||c.name)} src="${VIDEO_PREVIEW[c.artKey||c.name]}" autoplay muted loop playsinline></video>`:''}${CARD_ART[c.artKey||c.name]?'':`<span class="dr-sigil">${CARD_SIGIL[c.artKey||c.name]||'◈'}</span>`}${CARD_ART_FULL[c.artKey||c.name]?'<span class="dr-zoom-hint">⤢ Tap for full art</span>':''}</div>
-    <div class="dr-header ${c.rarity}">
+    <div class="dr-header ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()}">
       <div class="dr-rarity">${rlab(c.rarity)}${pristine?' · ◈ Pristine':''}${fresh?' · ✦ Fresh Mint':''}</div>
       <div class="dr-name">${dispName(c.name)}</div>
       <div class="dr-race-row">🧬 <span class="dr-race-lbl">Race</span> <select class="dr-race-sel" data-cardname="${(c.name||'').replace(/"/g,'&quot;')}" onchange="setRace(this.dataset.cardname, this.value)">${RACES.map(function(r){return '<option'+(raceOf(c.name)===r?' selected':'')+'>'+r+'</option>';}).join('')}</select></div>
@@ -10283,7 +10270,7 @@ function openListingDetail(idx){
     : '<button class="dr-deck-btn" style="width:100%;margin-top:9px" onclick="buyMarket('+idx+');closeDrawer()">'+(l.mine?'✕ Cancel your listing':'Buy · ◈ '+fmtPts(l.price)+' '+COIN)+'</button>';
   document.getElementById('drawer-body').innerHTML=`
     <div class="dr-art ${full?'zoomable':''}" ${full?`onclick="openLightbox('${(c.artKey||c.name).replace(/'/g,"\\'")}')"`:''} style="${artFillStyle(c.artKey||c.name)}">${CARD_ART[c.artKey||c.name]?'':`<span class="dr-sigil">${CARD_SIGIL[c.artKey||c.name]||'◈'}</span>`}${full?'<span class="dr-zoom-hint">⤢ Tap for full art</span>':''}</div>
-    <div class="dr-header ${c.rarity}">
+    <div class="dr-header ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()}">
       <div class="dr-rarity">${rlab(c.rarity)}${l.legend?' · 👑 Undefeated':(pristine?' · ◈ Pristine':'')}</div>
       <div class="dr-name">${dispName(c.name)}</div>
       <div class="dr-powline"><span class="dr-pow">${c.pow}</span><span class="dr-pow-label">Base Power</span></div>
@@ -10371,7 +10358,8 @@ function bigCardHTML(c, opts){
   // just off the board. Modifier class only -- same markup/classes every other hook (tagPow(),
   // the rear-guard flip-in animation, cardStateClasses()) already depends on.
   const miniCls = (opts && opts.mini) ? ' mini' : '';
-  return `<div class="bigcard tframe${miniCls} ${c.rarity||''} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})" data-cn="${(c.name||'').replace(/"/g,'&quot;')}">
+  const campCls = 'camp-'+(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase();
+  return `<div class="bigcard tframe${miniCls} ${c.rarity||''} ${campCls} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})" data-cn="${(c.name||'').replace(/"/g,'&quot;')}">
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
     <div class="tf-camp" style="${(typeof CAMP_COLOR!=='undefined'&&CAMP_COLOR[c.camp||(typeof campOf==='function'?campOf(c):'')])?('color:'+CAMP_COLOR[c.camp||(typeof campOf==='function'?campOf(c):'')]):''}" title="${(typeof CAMP_TITLE!=='undefined'&&CAMP_TITLE[c.camp||(typeof campOf==='function'?campOf(c):'')])||c.camp||(typeof campOf==='function'?campOf(c):'')}">${(typeof CAMP_ICON!=='undefined'&&CAMP_ICON[c.camp||(typeof campOf==='function'?campOf(c):'')])||''}</div>
@@ -10391,7 +10379,7 @@ function readableCardHTML(c){
   var art=(typeof artFillStyle==='function')?artFillStyle(c.name):'';
   var hasArt=(typeof CARD_ART!=='undefined')&&CARD_ART[c.name];
   var sig=hasArt?'':('<span class="rc-sig">'+(((typeof CARD_SIGIL!=='undefined')&&CARD_SIGIL[c.name])||'◈')+'</span>');
-  return '<div class="rcard '+c.rarity+' '+(typeof cardStateClasses==='function'?cardStateClasses(c):'')+'">'
+  return '<div class="rcard '+c.rarity+' camp-'+(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()+' '+(typeof cardStateClasses==='function'?cardStateClasses(c):'')+'">'
     + '<div class="rc-art"'+(art?' style="'+art+'"':'')+'>'+sig+'</div>'
     + '<div class="rc-top"><span class="rc-cost">⚡'+cost+'</span><span class="rc-name">'+dispName(c.name)+'</span><span class="rc-pow">'+(c.chaosPow?'?':((c.pow||0)+(c._bo||0)))+'</span></div>'
     + '<div class="rc-meta">'+String(c.rarity).toUpperCase()+' · <span class="k">'+kd.k+'K</span> / <span class="d">'+kd.d+'D</span>'+pristine+'</div>'
