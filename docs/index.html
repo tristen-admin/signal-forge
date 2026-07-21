@@ -10118,6 +10118,21 @@ function ownedCountByName(name){ let t=0; for(const k in ownedCopies){ const car
 function foilDupsAvail(c){ return c ? Math.max(0, ownedCountByName(c.name)-1) : 0; }
 function foilUnlockedIdx(c){ if(!c) return 0; var key=c.uid||c.name; return Math.max(foilIdx(c), (cardFoilMax&&cardFoilMax[key])||0); }
 function selectFoil(id){ var c=(typeof drawerCard!=='undefined')?drawerCard:null; if(!c) return; var i=FOILS.findIndex(function(f){return f.id===id;}); if(i<0||i>foilUnlockedIdx(c)){ if(typeof toast==='function') toast("That finish is not unlocked for this copy yet.", false); return; } cardFoils[c.uid||c.name]=id; if(typeof saveState==='function') saveState(); if(typeof buildVault==='function') buildVault(); if(typeof openCardDetail==='function') openCardDetail(c.uid||c.name); }
+function dmAbilitySectionHTML(c){
+  var dmx = (typeof DM_EXCLUSIVE!=='undefined') ? DM_EXCLUSIVE[c.name] : null;
+  var dma = (typeof DM_ACTIVATED_ABILITY!=='undefined') ? DM_ACTIVATED_ABILITY[c.name] : null;
+  if(!dmx && !dma) return '<div class="dr-abil" style="color:var(--text3)">No Deck Master ability — this card has no special effect when set as your Deck Master.</div>';
+  var out = '';
+  if(dmx && dmx.length){
+    var dmxText = dmx.map(function(r){ return r.log||''; }).filter(Boolean).join(' / ');
+    out += '<div class="dr-abil" style="color:var(--gold)">'+dmxText+'</div><div class="dr-note">Passive — always active whenever this card is your Deck Master.</div>';
+  }
+  if(dma){
+    if(out) out += '<div style="height:8px"></div>';
+    out += '<div class="dr-abil" style="color:var(--electric)">'+(dma.log||'')+(dma.desc?': '+dma.desc:'')+'</div><div class="dr-note">Activated — once per match, use it any time before you commit a Fighter.</div>';
+  }
+  return out;
+}
 function foilSectionHTML(c){
   var cur=foilOf(c), maxIdx=foilUnlockedIdx(c);
   var opts=FOILS.map(function(f,i){ if(i>maxIdx) return ''; var on=f.id===cur; return '<span class="foil-opt foil-'+f.id+(on?' sel':'')+'" onclick="selectFoil(\''+f.id+'\')">'+f.name+(on?' ✓':'')+'</span>'; }).filter(Boolean).join('');
@@ -10330,6 +10345,10 @@ function openCardDetail(id, fresh, tab){
     <div class="dr-section">
       <div class="dr-sec-title">📣 Called — support effect</div>
       ${CALLED[c.name] ? `<div class="dr-abil" style="color:var(--gold)">${CALLED[c.name].text}</div><div class="dr-note">Fires whenever this card is Called as a rear-guard support, in any deck. A same-group support also triggers its 🔗 Link bonus on top.</div>` : `<div class="dr-abil" style="color:var(--text3)">No Called effect — this card is fighter-only (conjure only, cannot be Called as support).</div>`}
+    </div>
+    <div class="dr-section">
+      <div class="dr-sec-title">👑 Deck Master ability</div>
+      ${dmAbilitySectionHTML(c)}
     </div>
     ${foilSectionHTML(c)}
     ${frameSectionHTML(c)}
