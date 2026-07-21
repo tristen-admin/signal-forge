@@ -3545,6 +3545,11 @@ let spellHand=[];                               // Stage 2: spells you've drawn 
 let spellOppPow=0, spellSelfPow=0, spellJam=false, spellNullOpp=false, spellShield=false, spellHalveField=false, condNeutralized=false, condNeutralizedBy='', spellDiscount=0;  // per-duel armed effects
 let energyLoadoutOverride = null;   // set when a card (Kleydson/Anorith) warps the spell pool for the rest of the match; checked before the real energyLoadout so the player's deck-builder pick is never overwritten
 let dmSupportBonusThisDuel = 0;   // Kravyn DM skill: +N power per card called as support this duel
+let dmUnitsReturnToHandThisDuel = false;   // Kravyn DM skill v2: your winning committed card returns to hand instead of the Winners Circle
+let dmSupportAddPowThisDuel = false;       // Kotei DM skill: called supports add their own power to your Fighter's total
+let dmSupportDoubleCostThisDuel = false;   // Darwin DM skill: called supports add DOUBLE their conjure cost to your Fighter
+let dmNullifyOppSupportsThisDuel = false;  // Ahdorah Khaan DM skill: opponent's called supports contribute nothing this duel
+let dmZeroCostThisDuel = false;            // Anorith Keeling DM skill: every card in hand costs 0 to conjure this duel
 let handBanishedThisTurn = false, oppHandBanishedThisTurn = false;   // Ossian Drell on-conjure condition -- was a card banished FROM HAND (not deck) this turn
 let handReturnCount = {};   // cardName -> times that exact card has returned to hand due to a card effect instead of its normal fate -- per MATCH, not per duel
 let spellsUsedRound=[];  // each spell castable only ONCE per round  // Rebirth season — cumulative match W/L across ranked + staked
@@ -3561,20 +3566,114 @@ let banishSurge = 0;
 // activating rather than banishing a card -- that part IS still per-duel, since it's only
 // meant to buff the very next thing you conjure.
 let dmAbilityUsedThisMatch = false, dmNextConjureBonus = 0;
+let dmNextConjureDouble = false;   // Ourevos DM skill: your next conjure's power is doubled
+let dmAhdorahBonusPending = false;   // Ahdorah Khaan DM skill: draw 2 if the opponent calls 0 supports this duel — checked post-resolve since supports aren't known at activation time
 const DM_ACTIVATED_ABILITY = {
   'Bannerlord Cassian': {draw:1, nextConjureBonus:5, log:'Rally the Line'},
   'Broodmother':        {draw:1, nextConjureBonus:5, log:"The Brood Answers"},
   'Kiana':              {draw:1, nextConjureBonus:5, log:'Wings in the Dark'},
-  'Kravyn the Collector': {log:'Collector\u2019s Due', desc:'cards called as support this duel +5 power', run:function(){ dmSupportBonusThisDuel = 5; }},
-  'Sister Mire, Wailing Nightmare': {log:'Wailing Draw', desc:'draw 2, return 1 to deck bottom', run:function(){
-    drawToHand(2);
-    if(hand.length){ var _smi=Math.floor(Math.random()*hand.length); drawPile.unshift(hand.splice(_smi,1)[0]); if(typeof deckSize!=='undefined') deckSize=drawPile.length; }
+  'Kravyn the Collector': {log:'Collector\u2019s Due', desc:'shuffle your banish zone into your deck, your next conjure +2, units you win a duel with this turn return to hand instead of the Winners Circle', run:function(){
+    while(banishPile.length){ drawPile.push(banishPile.pop()); }
+    for(var _ki=drawPile.length-1;_ki>0;_ki--){ var _kj=Math.floor(Math.random()*(_ki+1)); var _kt=drawPile[_ki]; drawPile[_ki]=drawPile[_kj]; drawPile[_kj]=_kt; }
+    if(typeof deckSize!=='undefined') deckSize=drawPile.length;
+    dmNextConjureBonus = (dmNextConjureBonus||0) + 2;
+    dmUnitsReturnToHandThisDuel = true;
     if(typeof updatePiles==='function') updatePiles();
   }},
-  'Black Wings, Ossian Drell': {log:"Wing Commander's Cull", desc:'banish the top 2 of your deck', run:function(){
-    for(var _od=0;_od<2;_od++){ if(drawPile.length) banishPile.push(drawPile.pop()); }
-    if(typeof deckSize!=='undefined') deckSize=drawPile.length;
+  "Keawe Kel'rua": {log:'Rising Talent \u2014 Foresight', desc:'draw 1, scry 1 \u2014 if the scried card costs 2 or more, it costs 1 less the next time you conjure it', run:function(){
+    drawToHand(1);
+    scryOne(function(card){
+      if(card && (typeof conjureCost==='function'?conjureCost(card):(card.cost||0)) >= 2){
+        card._dmScryDiscount = 1;
+        if(typeof toast==='function') toast('\ud83d\udde1 Keawe \u2014 '+card.name+' costs 1 less next time you conjure it', true);
+      }
+    });
+  }},
+  'Kotei': {log:'A Legend Reborn \u2014 Rally', desc:'draw 2, return your highest-power hand card to the bottom of your deck, called supports add their own power to your Fighter this duel', run:function(){
+    drawToHand(2);
+    if(hand.length){
+      var _hi=0; for(var _hk=1;_hk<hand.length;_hk++){ if((hand[_hk].pow||0) > (hand[_hi].pow||0)) _hi=_hk; }
+      drawPile.unshift(hand.splice(_hi,1)[0]);
+      if(typeof deckSize!=='undefined') deckSize=drawPile.length;
+    }
+    dmSupportAddPowThisDuel = true;
+    if(typeof buildHand==='function') buildHand();
     if(typeof updatePiles==='function') updatePiles();
+  }},
+  'The Bronzed Beast, Hanse Waltz': {log:'Blood Moon Rising', desc:'if your hand has 3 or fewer cards, draw 2 and gain 2 Charge', run:function(){
+    if(hand.length<=3){
+      drawToHand(2);
+      charge += 2;
+      if(typeof renderCharge==='function') renderCharge();
+      if(typeof toast==='function') toast('\ud83c\udf11 Blood Moon Rising \u2014 hand was 3 or fewer, drew 2 and gained 2 Charge', true);
+    } else if(typeof toast==='function') toast('\ud83c\udf11 Blood Moon Rising \u2014 hand has more than 3 cards, no effect', false);
+  }},
+  'Arch-Grim Korrin': {log:'The Unburied Throne \u2014 Reap', desc:'raise a Death Remnant equal to your lowest-power supporting unit, then scry 1 at the end of your turn', run:function(){
+    var _agLowest = null;
+    rearGuardIdxs.forEach(function(ix){ var s=hand[ix]; if(s && (_agLowest===null || (s.pow||0)<_agLowest)) _agLowest=(s.pow||0); });
+    deathRemnants.push({name:'Arch-Grim Korrin', pow:_agLowest||0});
+    if(typeof toast==='function') toast('\ud83d\udc7b Arch-Grim Korrin \u2014 raised a Death Remnant at '+(_agLowest||0)+' power', true);
+    scryOne();
+  }},
+  'Ghorruk "Gnarly" Judarr': {log:'Boneyard Rising', desc:"raise a Death Remnant equal to your hand size plus your banish zone size", run:function(){
+    var _gp = hand.length + banishPile.length;
+    deathRemnants.push({name:'Ghorruk "Gnarly" Judarr', pow:_gp});
+    if(typeof toast==='function') toast('\ud83d\udc80 Ghorruk \u2014 raised a Death Remnant at '+_gp+' power', true);
+  }},
+  'La "La" Ballora, the Broodqueen': {log:"The Broodqueen's Reckoning", desc:'your next conjure gains +2 power per card in both Winners Circles, then draw 1 and bank a hand card to your Winners Circle', run:function(){
+    var _lbTotal = winnersCircle.length + (typeof oppWC!=='undefined'?oppWC:0);
+    dmNextConjureBonus = (dmNextConjureBonus||0) + 2*_lbTotal;
+    drawToHand(1);
+    if(hand.length){ var _lbi=Math.floor(Math.random()*hand.length); winnersCircle.push(hand.splice(_lbi,1)[0]); if(typeof buildHand==='function') buildHand(); }
+  }},
+  'Conduit of Chaos, Kleydson': {log:'Greater Chaos', desc:'permanently upgrade to the full Chaos Trinity (Draw Surge, Godhand, Sorn-Vallis Shift) for the rest of the match, gain 2 Charge', run:function(){
+    energyLoadoutOverride = ['drawsurge','godhand','sornshift'];
+    charge += 2;
+    if(typeof buildSpellTray==='function') buildSpellTray();
+    if(typeof renderCharge==='function') renderCharge();
+    if(typeof toast==='function') toast('\ud83c\udf00 Kleydson \u2014 Greater Chaos: full Chaos Trinity unlocked for the rest of the match', true);
+  }},
+  'Sister Mire, Wailing Nightmare': {log:'Wailing Reclamation', desc:'return your hand to the bottom of your deck, reclaim your Winners Circle to hand, draw 3, your next conjure +5', run:function(){
+    while(hand.length){ drawPile.unshift(hand.pop()); }
+    while(winnersCircle.length){ hand.push(winnersCircle.pop()); }
+    drawToHand(3);
+    dmNextConjureBonus = (dmNextConjureBonus||0) + 5;
+    if(typeof deckSize!=='undefined') deckSize=drawPile.length;
+    if(typeof buildHand==='function') buildHand();
+    if(typeof updatePiles==='function') updatePiles();
+  }},
+  'Black Wings, Ossian Drell': {log:"Wing Commander's Purge", desc:'banish your entire hand, draw 5, your next conjure +2 per card in your banish zone', run:function(){
+    while(hand.length){ banishPile.push(hand.pop()); }
+    drawToHand(5);
+    dmNextConjureBonus = (dmNextConjureBonus||0) + 2*banishPile.length;
+    if(typeof buildHand==='function') buildHand();
+    if(typeof updatePiles==='function') updatePiles();
+  }},
+  'Corvus': {log:"Raven's Reckoning", desc:'banish the top 2 of your deck, draw 1, then scry 1', run:function(){
+    for(var _cb=0;_cb<2;_cb++){ if(drawPile.length) banishPile.push(drawPile.pop()); }
+    if(typeof deckSize!=='undefined') deckSize=drawPile.length;
+    drawToHand(1);
+    scryOne();
+    if(typeof updatePiles==='function') updatePiles();
+  }},
+  'Darwin': {log:'Bloodline Ascendant', desc:'called supports add DOUBLE their conjure cost to your Fighter this duel', run:function(){
+    dmSupportDoubleCostThisDuel = true;
+  }},
+  'Ourevos, the Golden Dragon': {log:"Shattered Chronoplain", desc:'your next conjure\u2019s power is doubled', run:function(){
+    dmNextConjureDouble = true;
+  }},
+  'Anorith Keeling': {log:'Chaos Unbound', desc:'every card in your hand costs 0 to conjure this duel', run:function(){
+    dmZeroCostThisDuel = true;
+  }},
+  'Ahdorah Khaan, Determined Soul': {log:'Record Guard \u2014 Denial', desc:"nullify the opponent's called supports this duel; if they called none at all, draw 2", run:function(){
+    dmNullifyOppSupportsThisDuel = true;
+    dmAhdorahBonusPending = true;
+  }},
+  'Tange Sazen': {log:'Warpath Ascendant — Vengeance', desc:'if your opponent has 2 or more round wins, draw 1', run:function(){
+    if((playerScore[1]||0) >= 2){
+      var _tsd = drawToHand(1);
+      if(typeof toast==='function') toast('⚔ Tange Sazen — opponent has 2+ round wins, drew '+_tsd, true);
+    } else if(typeof toast==='function') toast('⚔ Tange Sazen — opponent has fewer than 2 round wins, no effect', false);
   }}
 };
 function activateDeckMasterAbility(){
@@ -4016,7 +4115,7 @@ function openTurn(){
   // only energyRegenPerTurn() replenishes each turn, so leftover/spent charge carries across turns
   // and players have to play smaller conjures to bank enough for bigger plays or spells later.
   // oppCharge mirrors charge exactly (bots get the same regen/cap rule as the player).
-  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; dmZeroCostThisDuel=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -4715,7 +4814,12 @@ function deriveDisciplines(c){
   return DISC_ROLLS[key];
 }
 function setDisciplines(name, might, cunning, grit){ if(!name) return; DISC_OVERRIDE[name]={might:might,cunning:cunning,grit:grit}; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name){ c.might=might; c.cunning=cunning; c.grit=grit; } }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\u2694\ufe0f Disciplines set: '+name+' \u2192 M'+might+'/C'+cunning+'/G'+grit, true); }
-function conjureCost(c){ if(!c) return 1; if(c.cost!=null) return c.cost; if(COST_OVERRIDE[c.name]!=null) return COST_OVERRIDE[c.name]; var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; }
+function conjureCost(c){
+  if(!c) return 1;
+  if(typeof dmZeroCostThisDuel!=='undefined' && dmZeroCostThisDuel) return 0;
+  var base = (c.cost!=null) ? c.cost : ((COST_OVERRIDE[c.name]!=null) ? COST_OVERRIDE[c.name] : (function(){ var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; })());
+  return c._dmScryDiscount ? Math.max(0, base-c._dmScryDiscount) : base;
+}
 // Energy rework (7/12/26, direct spec): both players start at 2 max energy, gaining +1 max per duel
 // through duel 4, then +2 max per duel from duel 5 onward — no fixed ceiling (Hearthstone-style
 // mana-crystal model: max energy GROWS every turn, current energy fully refills to the new max in
@@ -4874,6 +4978,29 @@ function projectPlay(){
   return {base:base, called:called, link:link, spell:spell, rally:rally, total:base+called+link+spell+rally, oppDelta:oppDelta, oppShown:oppShown, linkName:linkName};
 }
 function drawToHand(n){ if(typeof drawPile==='undefined'||typeof hand==='undefined') return 0; var got=0; for(var i=0;i<(n||0);i++){ if(!drawPile.length) break; hand.push(drawPile.pop()); got++; } if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(got && typeof buildHand==='function') buildHand(); return got; }
+// SCRY: look at the top card of the deck, choose to keep it on top or move it to the bottom.
+// onDone(card) fires after the choice (or immediately with null if the deck is empty) so callers
+// can chain a conditional follow-up (e.g. Keawe Kel'rua's cost discount if the card costs 2+).
+function scryOne(onDone){
+  if(!drawPile.length){ if(onDone) onDone(null); return; }
+  var card = drawPile[drawPile.length-1];
+  var ov = document.getElementById('scry-modal');
+  if(!ov){ ov=document.createElement('div'); ov.id='scry-modal'; ov.className='bd-modal on'; document.body.appendChild(ov); }
+  else ov.classList.add('on');
+  ov.innerHTML = '<div class="bd-scrim"></div><div class="bd-panel" style="text-align:center;max-width:320px">'
+    + '<div class="bd-head">🔮 Scry</div>'
+    + '<div style="margin:14px 0;font-size:15px;font-weight:800;color:var(--gold)">'+card.name+' <span style="color:var(--text2);font-weight:600">('+(card.chaosPow?'?':(card.pow||0))+' pow, '+(typeof conjureCost==='function'?conjureCost(card):(card.cost||0))+'⚡)</span></div>'
+    + '<div style="display:flex;gap:10px;justify-content:center">'
+    +   '<button class="bd-close2" style="width:auto;padding:9px 16px" onclick="_scryResolve(true)">Keep on Top</button>'
+    +   '<button class="bd-close2" style="width:auto;padding:9px 16px" onclick="_scryResolve(false)">Move to Bottom</button>'
+    + '</div></div>';
+  window._scryResolve = function(keep){
+    if(!keep){ drawPile.pop(); drawPile.unshift(card); }
+    var el=document.getElementById('scry-modal'); if(el) el.classList.remove('on');
+    if(typeof toast==='function') toast('🔮 Scry — '+card.name+(keep?' stays on top':' moved to the bottom'), true);
+    if(onDone) onDone(card);
+  };
+}
 function banishFromHand(n){ for(var _bi=0;_bi<(n||0);_bi++){ if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); handBanishedThisTurn=true; } } if(typeof buildHand==='function') buildHand(); }
 function oppDrawN(n){ for(var _oi=0;_oi<(n||0);_oi++){ if(typeof oppDeckBot!=='undefined'&&oppDeckBot.length) oppHandBot.push(oppDeckBot.shift()); } }
 function oppBanishN(n){ for(var _oj=0;_oj<(n||0);_oj++){ if(typeof oppHandBot!=='undefined'&&oppHandBot.length>1){ oppBanishBot.push(oppHandBot.splice(Math.floor(Math.random()*oppHandBot.length),1)[0]); } } }   // never drain the bot's last card -- same floor as pickOppRears, or dredge strands it at 0 with no supports for the rest of the match
@@ -5440,9 +5567,12 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   charge=Math.max(0, charge-conjureCost(pc)); if(typeof renderCharge==='function') renderCharge();
   matchCommits++;
   if(typeof bumpQuestProgress==='function') bumpQuestProgress('conjure3');
-  const committedPow = (pc.name==='Anorith Keeling' ? Math.max(1,(playerScore[0]+playerScore[1])*Math.max(0,hand.length-1)) : (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow)) + banishSurge + dmNextConjureBonus + remnantPowSum();
+  let _cpBase = (pc.name==='Anorith Keeling' ? Math.max(1,(playerScore[0]+playerScore[1])*Math.max(0,hand.length-1)) : (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow)) + banishSurge + dmNextConjureBonus + remnantPowSum();
+  if(typeof dmNextConjureDouble!=='undefined' && dmNextConjureDouble){ _cpBase *= 2; if(typeof toast==='function') toast("🐉 Ourevos's Shattered Chronoplain — power doubled", true); }
+  const committedPow = _cpBase;
   banishSurge = 0;
   dmNextConjureBonus = 0;   // per-duel deferred bonus only -- dmAbilityUsedThisMatch stays set until resetMatchState(), the ability is once per match now, not once per duel
+  dmNextConjureDouble = false;
 
   // close record reveal — opponent identity now revealed on field
   document.getElementById('record-reveal').style.display = 'none';
@@ -6902,15 +7032,19 @@ function resolve(pc, oc, cond, playerCommittedPow){
       var _lk=fieldLink(pc, rg); if(_lk){ playerPow+=_lk.pow; abilLog.push('🔗 '+_lk.name+' Link — '+pc.name+' + '+rg.name+': +'+_lk.pow); var _tb=(typeof CALLED!=='undefined'&&CALLED[rg.name]&&CALLED[rg.name].twinBuff)||0; if(_tb){ playerPow+=_tb; abilLog.push('🐺 '+rg.name+' rallies the twins — '+pc.name+' +'+_tb); } }
       var _bd=(typeof fieldBond==='function')?fieldBond(pc, rg):null; if(_bd){ playerPow+=_bd.bonus; abilLog.push('🤝 '+_bd.name+' Bond — '+pc.name+' + '+rg.name+': +'+_bd.bonus+' ('+_bd.count+' fought together in Ascension)'); }
       if(typeof dmSupportBonusThisDuel!=='undefined' && dmSupportBonusThisDuel){ playerPow+=dmSupportBonusThisDuel; abilLog.push('★ Collector\u2019s Due — '+rg.name+' as support: +'+dmSupportBonusThisDuel); }
+      if(typeof dmSupportDoubleCostThisDuel!=='undefined' && dmSupportDoubleCostThisDuel){ var _ddc=(typeof conjureCost==='function')?conjureCost(rg):0; if(_ddc){ playerPow+=_ddc*2; abilLog.push('🧬 Darwin — '+rg.name+' as support: +'+(_ddc*2)+' (double cost)'); } }
+      if(typeof dmSupportAddPowThisDuel!=='undefined' && dmSupportAddPowThisDuel){ var _dap=(rg.chaosPow?0:(rg.pow||0)); if(_dap){ playerPow+=_dap; abilLog.push('🔥 Kotei — '+rg.name+' adds its own power: +'+_dap); } }
       if(rg.name==='Kravyn the Collector'){ var _hrc=(typeof handReturnCount!=='undefined'&&handReturnCount[pc.name])||0; if(_hrc){ playerPow+=2*_hrc; abilLog.push('📣 Kravyn — '+pc.name+' returned to hand '+_hrc+'x this match: +'+(2*_hrc)); } }
     });
     if(deckMasterCard && pc && deckMasterCard!==pc.name){ var _dbd=(typeof fieldBond==='function')?fieldBond(pc, deckMasterCard):null; if(_dbd){ playerPow+=_dbd.bonus; abilLog.push('🤝 '+_dbd.name+' Bond — '+pc.name+' + your Deck Master '+deckMasterCard+': +'+_dbd.bonus+' ('+_dbd.count+' fought together in Ascension)'); } }
     var _orc={match_commits:matchCommits, last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':'tie')), hand_len:0, opp_deaths:pc.deaths||0, opp_kills:pc.kills||0, wins:playerScore[1], losses:playerScore[0], wc_len:0, chaos:(cond.tag==='chaos')};
     pendingOppRears.forEach(function(og){ if(!og) return;
+      if(typeof dmNullifyOppSupportsThisDuel!=='undefined' && dmNullifyOppSupportsThisDuel){ abilLog.push('🛡 Ahdorah Khaan — Opp '+og.name+' nullified, no support effect applied'); return; }
       RS._inRules=true; var _or3=applyCalled(og, _orc, oppPow, playerPow, abilLog, true, RS); oppPow=_or3[0]; playerPow=_or3[1]; RS._inRules=false; RS._resync();
       var _ogc2=(typeof conjureCost==='function')?conjureCost(og):0; if(_ogc2){ oppPow+=_ogc2; abilLog.push('📣 Opp '+og.name+' called — +'+_ogc2+' (its own conjure cost)'); }
       var _lk2=fieldLink(oc, og); if(_lk2){ oppPow+=_lk2.pow; abilLog.push('🔗 Opp '+_lk2.name+' Link — '+oc.name+' + '+og.name+': +'+_lk2.pow); var _tb2=(typeof CALLED!=='undefined'&&CALLED[og.name]&&CALLED[og.name].twinBuff)||0; if(_tb2){ oppPow+=_tb2; } }
     });
+    if(typeof dmAhdorahBonusPending!=='undefined' && dmAhdorahBonusPending){ dmAhdorahBonusPending=false; if(!pendingOppRears.filter(Boolean).length){ var _dak=drawToHand(2); if(_dak) abilLog.push('🛡 Ahdorah Khaan — opponent called no supports, drew '+_dak); } }
   }
   // ── RALLY: comradery — bonus power per ally (supports this duel + Winners Circle) ──
   if(typeof RALLY!=='undefined'){
@@ -7125,6 +7259,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     if(pc.name==='Skullchain Reaver' || pc.name==='Kravyn the Collector' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1; if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':pc.name==='Kravyn the Collector'?'💰 Kravyn the Collector':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); }
     else if(unbankNextWin){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); unbankNextWin=false; abilLog.push('🏳 Unbanked Victory — '+pc.name+' returns to your hand instead of banking to the Winners Circle'); }
     else if(deckMasterCard && pc.name===deckMasterCard){ drawPile.unshift({...pc}); deckSize=drawPile.length; abilLog.push('★ '+pc.name+' — your Deck Master recycles to the deck instead of the Winners Circle, ready to be conjured again'); }
+    else if(typeof dmUnitsReturnToHandThisDuel!=='undefined' && dmUnitsReturnToHandThisDuel){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push('💰 Kravyn — '+pc.name+' returns to your hand instead of the Winners Circle (Deck Master ability)'); }
     else { winnersCircle.push({...pc}); }
     lastResult = 'win';
     recordDuel(pc,'win'); signalPoints += 20;   // playtest: every match tracks K/D + pays
@@ -11872,10 +12007,10 @@ function resetMatchState(){
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[];
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
-  banishSurge=0; dmNextConjureBonus=0; dmAbilityUsedThisMatch=false; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
+  banishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
-  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
+  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';

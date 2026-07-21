@@ -61,32 +61,24 @@ Standing practice: add an entry here any time a CALLED/CARD_RULES/ability text e
 **To build:** a choice prompt at kill-resolution time, plus a hand-instead-of-winners-circle redirect path (likely shares plumbing with whatever eventually builds Kotei's Called-effect hand-return, see below).
 **Note on Kill Escalation tiers:** the requested text ("+5 at 10+... +7 instead at 25+") was implemented as an *additive delta* — unconditional +3, +5 at 10+, +2 more at 25+ (netting +7 total at 25+) — because the engine's `if` schema has no true mutual-exclusion/range operator, and this delta pattern already matches how Lagertha Waltz, Wrathful Transformation's own CARD_RULES stack (unconditional base + conditional add-on). If "instead" was meant literally (25+ kills gets ONLY +7, not +3+5+2=+10 total), flag it back and the tiers will be restructured.
 
-### Kotei — DM Exclusive
-**Text says:** "2 cards and return your highest card in hand to the bottom of your deck. During the turn a player activated this ability, all support cards called add their power to the conjured fighter's total value."
-**Missing:** draw amount is ambiguous (not yet built either way), hand-card-to-bottom-of-deck movement (no field), and a temporary whole-turn combat-math change where support power adds to the fighter's total (no such aggregation hook exists — support power currently modifies the fighter directly via CALLED's own `add`, it doesn't get separately summed and re-applied).
-**To build:** needs a turn-scoped rule type in the DM_EXCLUSIVE/resolution engine, well beyond the current flat/addvar/draw primitives.
-
-### Keawe Kel'rua — DM Exclusive
-**Text says:** "Draw 1 card, and scry 1. If that card is a cost 2 or higher, you may play that card for -1 cost next turn."
-**Missing:** `scry` itself (tracked since Veronica/Signal Diviner — this is now a 4th card wanting it), plus a novel "conditional discount on a specific scried card, redeemable next turn" mechanic — a stateful, per-card-instance discount window that doesn't exist anywhere yet.
-
-### The Bronzed Beast, Hanse Waltz — DM Exclusive
-**Text says:** "When a player activates this ability, and their hand has 3 or less cards, draw 2 and gain 2 charge."
-**Partially close to buildable:** the conditional half (`hand_len <= 3`) uses the same `if` comparator already proven elsewhere, and `draw` is a real DM_EXCLUSIVE-adjacent primitive — but `chargeGain` has never been confirmed to resolve inside `DM_EXCLUSIVE` specifically (every existing DM_EXCLUSIVE entry only uses `add`/`addvar`/`raiseRemnant`/`deathLingerBuffOverride`/log). Held back rather than guessing the resolver reads it.
-**To build:** confirm (or add) `chargeGain` support in the DM_EXCLUSIVE resolver, then this one is a straightforward single-clause rule.
-
-### Kravyn the Collector — DM Exclusive
-**Text says:** "Shuffle your banished cards back into your deck and give your conjured unit +2. Units played on your field this turn return to your hand after the duel concludes."
-**Missing:** shuffle-banish-into-deck (no field), and a whole-turn "played units return to hand after duel" effect (no field). The flat +2 alone would be trivial but the rest isn't.
-
 ### Arch-Grim Korrin — ability (printed, on-commit)
 **Text says:** "Look at the top 2 cards of your deck, place 1 in the support zone and 1 as a death remnant." (now the opening clause of his rewritten ability — his existing "+6 if opponent has fewer career kills" clause is unchanged and still real/working).
 **Missing:** a deck-look-and-distribute-to-two-zones effect — no field for looking at multiple top cards and routing them to different zones (support vs. death-remnant) exists.
 
-### Arch-Grim Korrin — DM Exclusive (possible revision, not touched)
-**Text says:** "During combat this turn, raise a death remnant of equal power to your lowest strength supporting unit, at the end of your turn scry 1."
-**Note:** he already has a real, working `DM_EXCLUSIVE` entry (`raiseRemnant:"self_pow"` + `deathLingerBuffOverride:10`) — this new ask uses a *different* remnant-power source ("lowest strength supporting unit" instead of his own power) plus `scry`. Left his existing entry untouched since it's unclear whether this is meant to replace it or add to it — flag back which one.
-**Missing regardless:** `raiseRemnant` only supports `"self_pow"` as a source today, not "lowest supporting unit's power"; `scry` doesn't exist.
+### Darwin — DM Activated ability, second clause not built
+**Text says (second sentence):** "Whenever your hand is 2 or less cards after your draw phase, can draw 2 and banish 1."
+**What's built (7/20/26):** the first sentence — supports add double their conjure cost to the Fighter this duel (`dmSupportDoubleCostThisDuel`).
+**Missing:** this second clause is a *recurring* passive trigger ("whenever... after your draw phase"), not a one-time activation effect — architecturally different from the once-per-match `run:` function it was described alongside. Needs a hook into the draw-phase code itself, checked every turn, not just on DM-ability activation.
+
+### Anorith Keeling — DM Activated ability, spell costs not covered
+**Text says:** "During this turn, energy costs become zero for all spells and cards in your hand."
+**What's built (7/20/26):** `dmZeroCostThisDuel` zeroes `conjureCost()` for every Fighter/Support card — covers "cards in your hand."
+**Missing:** spell-cast costs (e.g. Draw Surge's "2⚡") aren't computed through `conjureCost()` — they're likely hardcoded per spell definition. Have not found the spell-cost deduction path yet to add the same override there.
+
+### Tange Sazen — DM Activated ability, opponent-deck disruption not covered
+**Text says (second half):** "...and make your opponent return 1 card to the bottom of the deck."
+**What's built (7/20/26):** the draw-1-if-opponent-has-2+-round-wins half.
+**Missing:** there is no real, populated "opponent's deck" array to manipulate — `oppDrawPileBot` is declared and reset but never actually populated or read anywhere in the engine (dead scaffolding from an unfinished feature). The bot's card selection isn't modeled as an orderable deck today, so "return a card to the bottom" has nothing to act on.
 
 ### Ghorruk "Gnarly" Judarr — ability (per-2-cards scaling) — FIXED, not actually pending
 **Correction:** this was almost logged as text-only by mistake — the real mechanism lives in a separate `CARD_RULES['Ghorruk "Gnarly" Judarr']=[...]` statement outside the main `const CARD_RULES` object (a standalone "BALANCE PASS 2026-07-07" patch block, ~line 9395, that reassigns several cards' rules *after* the main object is declared — grep for `^CARD_RULES\['` to find all of them). It previously computed `addvar:"deck_len",x:1` (+1 per card, no divisor); updated to `x:0.5` so the math now matches the new "+1 per 2 cards" text. Flagging this pattern generically: any CARD_RULES lookup on this file must check for a later reassignment in that patch block too, not just the main object literal — it silently overwrote this session's first attempt at Kravyn the Collector's CARD_RULES edit before this was caught.
@@ -95,41 +87,28 @@ Standing practice: add an entry here any time a CALLED/CARD_RULES/ability text e
 **Text says:** "return 1 banished card to the bottom of the deck, scry 1, then +2 power" (destination changed from "to hand," which is what `recurBuff` actually does everywhere else it's used — e.g. Moro, The Regenerating Horror).
 **Missing:** `recurBuff` has no "to bottom of deck" variant — every existing use returns to hand. Plus `scry`, same recurring gap.
 
-### La "La" Ballora, the Broodqueen — DM Exclusive (possible revision, not touched)
-**Text says:** "For this turn, your conjured unit gains +2 power for each card in both players' winners circles. Then draw 1 and put a card from hand to the winners circle."
-**Note:** she already has a real, working `DM_EXCLUSIVE` entry (`addvar:"wc_len",x:1` — her own Winners Circle only, +1 each). This new ask differs in scope (both players' WC, not just hers) and rate (+2, not +1) — left untouched pending which is intended.
-**Missing regardless:** no variable currently sums both players' Winners Circle length together (only the player's own `wc_len` exists); no field moves a card from hand directly to Winners Circle.
-
 ### Conduit of Chaos, Kleydson — Called (support) effect
 **Text says:** "gain 1 max charge for every round you have already won" (was a flat "gain 1 charge").
 **Missing:** `chargeGain` is currently a flat number; there's no per-round-win scaling variant (would need something like an `addvar`-style multiplier applied to `chargeGain` specifically).
 
-### Conduit of Chaos, Kleydson — DM Exclusive
-**Text says:** "For the rest of the game, you have access to all 3 spell cards you have chosen, then gain 2 max charge."
-**Missing:** a permanent, standing game-state change (not a per-conjure buff) — categorically different from every existing DM_EXCLUSIVE entry, which are all instantaneous or duration-scoped to a turn/match. The flat "+2 max charge" alone would be trivial in isolation.
-
-### Sister Mire, Wailing Nightmare — DM Exclusive
-**Text says:** "Return your hand to the bottom of your deck, then add your winners circle cards back to your hand, then draw 3 cards and your conjured fighter +5."
-**Missing:** hand-to-bottom-of-deck, Winners-Circle-to-hand — neither exists as a field. `draw:3` and `add:5` alone would be trivial but the surrounding sequence isn't buildable piecemeal without misrepresenting what actually happens.
-
-### Black Wings, Ossian Drell — DM Exclusive
-**Text says:** "Banish your entire hand, and draw 5 cards, then give your conjured fighter +2 for every card in your banish zone."
-**Partially close to buildable:** the "+2 per banish zone card" half maps directly to the existing `addvar:"banish_len"` pattern (see Web-Weaver's Return / Rhaess Korvain's real DM_EXCLUSIVE entries) — but "banish your entire hand" (a bulk hand-to-banish action) has no field, so the setup that feeds the banish count isn't buildable, only the scaling payoff is.
-
 ### Corvus — Called (support) effect
 **Text says:** "your Fighter +3, scry 1" (the field stays `add:4` — text says +3, another text/number mismatch in this same family as Uso Oso/Hanse Waltz, flagged not resolved).
-**Missing:** `scry`, same recurring gap.
-
-### Corvus — DM Exclusive
-**Text says:** "Banish the top 2 cards of your deck, draw 1 then scry 1."
-**Missing:** deck-banish-from-top (distinct from hand-banish), plus `scry`.
+**Missing:** `scry` is now a real, working mechanic (`scryOne()`, built 7/20/26 for the DM abilities) but CALLED's own resolution doesn't call it yet — needs a CALLED field (e.g. `scry:1`) wired to invoke `scryOne()`.
 
 ### Darwin — Called: "play the top card of your deck into your open support circle" — no auto-conjure-from-deck-to-support field exists.
 ### Ourevos, the Golden Dragon — Called: "fill the other support slot with a copy of this card" — no card-duplication-into-a-zone field exists. Text also says +5 while `add` stays 2 (mismatch, flagged not resolved).
 ### Ahdorah Khaan, Determined Soul — Called: "nullify a random supporting unit from the opponent's field" — no field targets/removes an opposing support. Text says +2 while `add` stays 3 (mismatch, flagged not resolved).
-### Tange Sazen — Called: "returns to hand instead of winners circle" — same missing hand-redirect primitive as Kravyn's on-kill ask above.
-### Tange Sazen — DM Exclusive, clarified wording: "When your winners circle is empty, gain +8 power" is his EXISTING real `DM_EXCLUSIVE` entry verbatim — nothing to build there. Only new part: "if activated during the 3rd+ duel: draw 1, and opponent banishes 1 random card from hand" — `draw:1` is real, but there's no field for forcing a random card out of the OPPONENT's hand (only `banishOwn` exists, self-targeted). Needs an `oppBanish`-style field.
+### Tange Sazen — Called: "returns to hand instead of winners circle" — same missing hand-redirect primitive as Kravyn's on-kill ask above (his own base ability already unconditionally returns HIM to hand on win — see `resolve()`'s win-branch — but that's name-hardcoded, not a generic CALLED-triggerable redirect for arbitrary Fighters).
 ### Anorith Keeling — Called: "return this unit from the support circle to your deck," plus the described draw/charge, have no field/aren't in the given JSON (`banishOwn:1` is the only real field kept). Also confirmed with user: his `pow` field is inert (hardcoded per-name formula + always-"?" display) — not touched, working as intended.
 
 ## Resolved
+
+### DM Activated Abilities — 11 cards built as real `run:function()` code, shipped 7/20/26
+Built real, working `DM_ACTIVATED_ABILITY` entries (not passive `DM_EXCLUSIVE` — every one of these plain-language asks described a one-time action sequence, matching the *activated*, once-per-match pattern already established for Kravyn/Sister Mire/Black Wings, not the always-on declarative `DM_EXCLUSIVE` pattern). New shared engine primitives added to support them:
+- **`scryOne(onDone)`** — a real interactive modal: look at the top card of the deck, choose Keep on Top or Move to Bottom. Used by Keawe Kel'rua, Arch-Grim Korrin, and Corvus's new abilities.
+- **Turn-scoped effect flags** (`dmUnitsReturnToHandThisDuel`, `dmSupportAddPowThisDuel`, `dmSupportDoubleCostThisDuel`, `dmNullifyOppSupportsThisDuel`, `dmZeroCostThisDuel`) — set on activation, read inside `resolve()`'s support loops / `conjureCost()`, cleared at the next duel-start reset (same pattern as the pre-existing `dmSupportBonusThisDuel`/`handBanishedThisTurn`).
+- **`dmNextConjureDouble`** and **`dmAhdorahBonusPending`** — single-shot deferred flags, consumed and cleared at the same point as the pre-existing `dmNextConjureBonus`.
+- **`card._dmScryDiscount`** — a per-card-instance cost discount, checked inside `conjureCost()`, set on a specific scried card object by reference (not a global override).
+
+Card-by-card: **Kravyn the Collector** (replaced — shuffle banish into deck, next conjure +2, wins return to hand this duel), **Keawe Kel'rua** (new — draw 1, scry 1, conditional -1 cost on the scried card), **Kotei** (new — draw 2, bottom your highest card, supports add their own power this duel), **The Bronzed Beast, Hanse Waltz** (new — hand≤3 conditional draw 2 + Charge), **Arch-Grim Korrin** (new, added alongside his existing passive `DM_EXCLUSIVE` rather than replacing it — raise a Remnant at his lowest support's power, then scry), **Ghorruk "Gnarly" Judarr** (new — raise a Remnant at hand+banish size), **La "La" Ballora** (new, added alongside her existing passive — next conjure scales by both Winners Circles, draw 1 + bank a random hand card to WC), **Conduit of Chaos, Kleydson** (replaced — permanently upgrades to the full 3-spell Chaos Trinity via the pre-existing `energyLoadoutOverride` mechanism, +2 Charge), **Sister Mire, Wailing Nightmare** (replaced — hand to deck bottom, Winners Circle back to hand, draw 3, next conjure +5), **Black Wings, Ossian Drell** (replaced — hand to banish, draw 5, next conjure scales by banish size), **Corvus** (new — banish top 2, draw 1, scry), **Darwin** (new, first clause only — see open entry above for the unbuilt recurring clause), **Ourevos, the Golden Dragon** (new — next conjure's power doubled), **Anorith Keeling** (new, hand/support costs only — see open entry above for spells), **Ahdorah Khaan** (new — nullify opponent's supports this duel, draw 2 if they called none), **Tange Sazen** (new, draw-1 half only — see open entry above for the opponent-deck half).
 _(move entries here once real code backs the described behavior, with the commit that did it)_
