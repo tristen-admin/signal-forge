@@ -303,11 +303,11 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .bigcard .bc-abil{font-size:11.5px;color:var(--text);line-height:1.5;border-top:1px solid rgba(255,255,255,0.08);padding-top:8px}
 .bigcard .bc-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .bigcard.tframe{width:284px;aspect-ratio:765 / 1024;border:none !important;border-radius:0;overflow:visible;background:transparent;box-shadow:0 20px 55px rgba(0,0,0,0.8);padding:0}
-.bigcard.tframe::before{content:'';position:absolute;inset:0;z-index:0;background:var(--frame) center/100% 100% no-repeat;pointer-events:none}
-.bigcard.tframe.common::before,.bigcard.tframe.uncommon::before{filter:saturate(0.15) brightness(0.97) contrast(1.05)}   /* gunmetal iron */
-.bigcard.tframe.rare::before{filter:hue-rotate(168deg) saturate(1.15) brightness(0.98)}                                 /* steel + sapphire */
-.bigcard.tframe.ultra::before{filter:hue-rotate(224deg) saturate(1.25)}                                                 /* obsidian + amethyst */
-/* apex = untouched molten gold (base) */
+.bigcard.tframe::before{content:'';position:absolute;inset:0;z-index:0;background-image:var(--frame);background-size:100% 100%;background-position:center;background-repeat:no-repeat;pointer-events:none}
+.bigcard.tframe.camp-amageras::before{background-image:linear-gradient(#E8873A,#E8873A),var(--frame);background-blend-mode:hue}
+.bigcard.tframe.camp-omitsuki::before{background-image:linear-gradient(#5B2C8F,#5B2C8F),var(--frame);background-blend-mode:hue}
+.bigcard.tframe.camp-kitanoo::before{background-image:linear-gradient(#2D6A4F,#2D6A4F),var(--frame);background-blend-mode:hue}
+/* rarity-based frame filters removed 7/20/26 — frame color now reflects Skyward Trinity camp, not rarity (see camp-amageras/omitsuki/kitanoo above) */
 .tframe .tf-art{position:absolute;left:16.2%;right:15.6%;top:16.2%;height:37%;background-size:cover;background-position:center 22%;background-repeat:no-repeat;z-index:1;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .tframe .tf-art::after{content:'';position:absolute;left:0;right:0;bottom:0;height:52%;background:linear-gradient(180deg,transparent,rgba(5,6,11,0.72));pointer-events:none;z-index:2}
 .tframe .tf-art .bc-sigil{font-size:44px;opacity:0.92;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.7))}
@@ -9264,11 +9264,12 @@ function buildDeckPool(){
   else if(deckSort==='deaths') cards.sort((a,b)=> a.deaths-b.deaths || b.kills-a.kills);
   else cards.sort((a,b)=> (RARITY_ORDER[a.rarity]-RARITY_ORDER[b.rarity]) || (b.pow-a.pow));
   document.getElementById('deck-pool-grid').innerHTML = cards.map(c => {
-    const nm = (c.uid||c.name).replace(/'/g,"\\'");
+    const nm = (c.uid||c.name).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"\\'");
+    const campCls = 'camp-'+(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase();
     const inDeck = activeDeck.has(c.uid||c.name);
     const owned = (ownedCopies[c.uid||c.name]||0) > 0;
     const pristine = ((typeof isPristine==='function')?isPristine(c):(c.deaths===0)) ? `<span class="vc-pristine">◈</span>` : '';
-    return `<div class="vault-card ${c.rarity} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="previewPoolCard('${nm}',this)" onmouseleave="hideCardPreview()">
+    return `<div class="vault-card ${c.rarity} ${campCls} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="previewPoolCard('${nm}',this)" onmouseleave="hideCardPreview()">
       <div class="vc-art" style="${artFillStyle(c.artKey||c.name)}">
         ${sigilFor(c.artKey||c.name)}
         <span class="vc-rarity-ribbon">${rlab(c.rarity)}</span>
