@@ -994,7 +994,21 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .asc-foe.targetable{cursor:pointer}
 .asc-foe.targetable:hover{transform:translateY(-4px)}
 .asc-foe.targetable .asc-foe-art{box-shadow:0 0 0 2px var(--lose),0 0 20px rgba(224,80,60,0.5)}
-.asc-foe-art{height:108px;border-radius:12px;background-size:cover;background-position:center;border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:38px;margin-bottom:6px}
+.asc-foe-art{position:relative;overflow:hidden;height:108px;border-radius:12px;background-size:cover;background-position:center;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:38px;margin-bottom:6px}
+/* frame-lite: camp-colored bezel + corner gem + rune-tint edge, same DNA/hexes as the TCG card
+   frame's camp-amageras/omitsuki/kitanoo rules — deliberately NOT the ornate TEMP_FRAME PNG here
+   (wrong art-key shape for filler foes, re-rendered every turn — see the Ascension plan). */
+.asc-foe-art::after{content:'';position:absolute;top:4px;left:4px;width:9px;height:9px;border-radius:50%;background:var(--border2);box-shadow:0 0 0 1px rgba(0,0,0,.6);z-index:1}
+.asc-foe-art::before{content:'';position:absolute;left:0;right:0;bottom:0;height:18%;mix-blend-mode:soft-light;opacity:.7;background-color:var(--border2)}
+.asc-foe-art.camp-amageras{border-color:#E8873A}
+.asc-foe-art.camp-omitsuki{border-color:#5B2C8F}
+.asc-foe-art.camp-kitanoo{border-color:#2D6A4F}
+.asc-foe-art.camp-amageras::after{background:#E8873A;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 5px #E8873A}
+.asc-foe-art.camp-omitsuki::after{background:#5B2C8F;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 5px #5B2C8F}
+.asc-foe-art.camp-kitanoo::after{background:#2D6A4F;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 5px #2D6A4F}
+.asc-foe-art.camp-amageras::before{background-color:#E8873A}
+.asc-foe-art.camp-omitsuki::before{background-color:#5B2C8F}
+.asc-foe-art.camp-kitanoo::before{background-color:#2D6A4F}
 .asc-foe-name{font-family:'Trajan Pro','Cinzel',Palatino,serif;font-size:13px;color:var(--text);margin-bottom:4px}
 .asc-blog{background:rgba(6,6,9,0.7);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12.5px;color:var(--text3);line-height:1.75;min-height:60px}
 .asc-blog .cur{color:var(--gold);font-weight:600}
@@ -1005,7 +1019,14 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .asc-pcard.down{opacity:0.4;filter:grayscale(0.8)}
 .asc-pcard.targetable{cursor:pointer}
 .asc-pcard.targetable:hover{transform:translateY(-3px);box-shadow:0 0 0 1px var(--win),0 0 20px rgba(107,203,119,0.4)}
-.asc-pc-art{width:52px;height:52px;border-radius:9px;background-size:cover;background-position:center;border:1px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+.asc-pc-art{position:relative;overflow:hidden;width:52px;height:52px;border-radius:9px;background-size:cover;background-position:center;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+.asc-pc-art::after{content:'';position:absolute;top:2px;left:2px;width:6px;height:6px;border-radius:50%;background:var(--border2);box-shadow:0 0 0 1px rgba(0,0,0,.6);z-index:1}
+.asc-pc-art.camp-amageras{border-color:#E8873A}
+.asc-pc-art.camp-omitsuki{border-color:#5B2C8F}
+.asc-pc-art.camp-kitanoo{border-color:#2D6A4F}
+.asc-pc-art.camp-amageras::after{background:#E8873A;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 4px #E8873A}
+.asc-pc-art.camp-omitsuki::after{background:#5B2C8F;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 4px #5B2C8F}
+.asc-pc-art.camp-kitanoo::after{background:#2D6A4F;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 4px #2D6A4F}
 .asc-pc-info{flex:1;min-width:0}
 .asc-pc-name{font-family:'Trajan Pro','Cinzel',Palatino,serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
 .asc-hpbar{height:8px;background:rgba(0,0,0,0.5);border-radius:5px;overflow:hidden;border:1px solid var(--border2)}
@@ -1223,6 +1244,10 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .asb-beat{font-family:Palatino,Georgia,serif;font-size:15px;line-height:1.8;color:var(--text2);text-align:left;margin-bottom:16px}
 .asb-foe{font-family:'Trajan Pro','Cinzel',Palatino,serif;color:var(--lose);font-size:14px;letter-spacing:0.06em;margin-bottom:16px}
 .asb-req{font-size:12px;font-weight:700;color:var(--lose);border:1px solid var(--lose);border-radius:8px;padding:6px 12px;display:inline-block;margin-bottom:14px}
+.asb-champ{margin:0 0 16px}
+.asb-champ .bigcard.tframe{width:200px;margin:0 auto}
+.asb-champ .asc-foe-art{width:190px;height:190px;margin:0 auto;font-size:64px}
+@media (max-height:700px){.asb-champ .bigcard.tframe{width:140px}.asb-champ .asc-foe-art{width:130px;height:130px}}
 .asb-req.ok{color:var(--win);border-color:var(--win)}
 .acd-disc-row{font-size:12.5px;color:var(--text2);margin-bottom:6px}
 .acd-spec{background:rgba(245,194,77,0.08);border:1px solid rgba(245,194,77,0.3);border-radius:8px;padding:8px 10px;margin-top:6px}
@@ -4780,6 +4805,11 @@ function campOf(nameOrCard){
   var _camps=['Amageras','Omitsuki','Kitanoo'];
   return _camps[_nameHash(name)%3];
 }
+// Ascension battle/story portraits key camp tint off the underlying ART identity, not the display
+// name — filler foes alias a real card's art under an invented name (see ASC_FOES), and campOf()
+// falls through to a stable deterministic hash for any name with no real race lore either way, so
+// this is safe to call on synthetic names (Fenrik Vench, The Writ-Captain, etc.) too.
+function ascCampCls(artKey){ return 'camp-'+(typeof campOf==='function'?campOf(artKey):'amageras').toLowerCase(); }
 // Deck Master identity inheritance (7/15/26): when a Deck Master is set, every card the owner
 // commits carries the Deck Master's own race/camp for faction-facing resolution (Bloodlines
 // Clash, etc.) instead of its own printed one -- "you and your Deck Master share one identity."
@@ -11109,19 +11139,29 @@ function ascMonthSeed(){ try{ var d=new Date(); return d.getFullYear()*12+d.getM
 function ascLoaners(){ var seed=ascMonthSeed(); var rot=function(arr,n){ var out=[],L=arr.length; for(var i=0;i<n&&i<L;i++) out.push(arr[(seed+i)%L].id); return out; };
   return rot(ASC_UNITS.filter(function(u){return u.avatar;}),2).concat(rot(ASC_UNITS.filter(function(u){return !u.avatar;}),3)); }
 function ascIsLoaner(id){ return ascLoaners().indexOf(id)>=0; }
+// Per-node themed filler pools (Chapter 1, Tosa) — the global ASC_FOES pool declared further
+// below is all monsters/undead, wrong tone for a cadet-corps yard. Must be declared BEFORE
+// ASC_STORY (unlike ASC_FOES itself, which is only ever read from inside a function body, these
+// are referenced directly inside ASC_STORY's own object literals, which evaluate immediately —
+// a forward reference here is a genuine TDZ crash, not just a style nit). art keys point to no
+// real CARD_ART entry on purpose; the existing sigilFor() fallback (used everywhere fo.art
+// misses) covers them.
+const ASC_FOES_CADETS=[
+  {name:'Corps Trainee', art:'Corps Trainee', hp:52, atk:11, spd:9}
+];
+const ASC_FOES_WRIT=[
+  {name:'Writ-Sergeant',  art:'Writ-Sergeant',  hp:70, atk:16, spd:8},
+  {name:'Writ-Officer',   art:'Writ-Officer',   hp:60, atk:14, spd:9}
+];
 const ASC_STORY=[
-  {loc:'Sorn-Vallis', title:"The God-King's City", champ:'Zerith Var', art:'Zerith Var', type:'duel',
-   beat:"The gates of Sorn-Vallis close behind you — a slaver city that flies the God-King's sigil over its pits. Darwin's enforcer, Zerith Var, has already read your record aloud to the crowd. He does not ask questions. He collects."},
-  {loc:'Yozai-no-Sato', title:'The Illusion Village', champ:'Tange Sazen', art:'Tange Sazen', type:'elite',
-   beat:"In Yozai-no-Sato nothing is itself. A masked warrior waits at its heart, a dragon's pact burning gold beneath his scars — and behind him, half-dreamed, the great eye of a sleeping god weighs whether you are worth the killing."},
-  {loc:'North Kasac', title:'Skarrow Hold', champ:'Chieftain Reyva Vosh', art:'Chieftain Reyva Vosh', type:'elite',
-   beat:"Skarrow Hold tests restraint, not strength. Two generations ago it followed a warlord who lost himself mid-campaign and turned on his own warriors. Chieftain Reyva Vosh will not make that mistake twice — win without losing control, or do not win at all."},
-  {loc:'Noctreach', title:'Where Legends Died', champ:'Arch-Grim Korrin', art:'Arch-Grim Korrin', type:'elite',
-   beat:"Noctreach is a wound in the world — the shattered land where, an age ago, the first Ahdor-Khaan and Valcarion destroyed one another. What crawls its ruins now is Arch-Grim Korrin, and the Undying Flame answers to his ruined hands."},
-  {loc:'The Black Citadel', title:"The Mad King's Web", champ:'Darwin', art:'Darwin', type:'boss', requires:{stat:'grit',min:50},
-   beat:"The Black Citadel floats on a slab of Noctreach torn loose and raised into the sky — Darwin's throne, older than Darwin by far. The Mad King rules through fear, at the word of a deeper master who may not have his best interests at heart. He has been waiting for you to climb this high."},
-  {loc:'The Gray', title:'The Undying Flame', champ:'Sister Mire', art:'Sister Mire', type:'boss', requires:{stat:'grit',min:50},
-   beat:"Past the Rift's last edge lies the Gray, where the banished are kept and identity itself falls away. A hooded courier cradles an ember of the Undying Flame — proof the war does not end with a king. Sister Mire turns to face you: 'Ash returns to root. Roots drink deep. Death... rebirthed.'"}
+  {loc:'Tosa', title:'Placement', champ:'Fenrik Vench', art:'Fenrik Vench', type:'duel', foes:ASC_FOES_CADETS,
+   beat:"The corps yard sorts you before you've thrown a punch — high-family boys on one side, levy sons like you on the other. Sergeant Ossian Drell has broken cadets in this yard for thirty years; his right hand ends at the wrist in a fitted iron cap, and he doesn't raise it to call the pairings. \"Kel'rua,\" he says. \"Vench.\" Fenrik Vench is a causeway-lord's son who has never once been paired against someone beneath him — and he intends to keep it that way."},
+  {loc:'Tosa', title:"The Instructor's Test", champ:'Ossian Drell', art:'Black Wings, Ossian Drell', type:'boss',
+   beat:"You lost the spar the whole yard saw. Drell watched a different fight — the one in your head, where you'd already won three moves before your body caught up. \"Being clever is a locked door with your name filed off,\" he told you after, quiet enough that only you heard it. Today he doesn't send another cadet. Thirty years breaking recruits in this yard, and Sergeant Ossian Drell steps onto the sand himself — to find out exactly how far that locked door goes."},
+  {loc:'Tosa', title:"What the Corps Won't Forgive", champ:'The Writ-Captain', art:'The Writ-Captain', type:'elite', foes:ASC_FOES_WRIT,
+   beat:"Word travels faster than any of you did. Something cracked loose in you during the Measure — a green pulse the whole city felt — and Darwin's Writ-officers don't need to understand what it was to know it's worth a body brought in alive. They find you at the gate, lacquered black and unhurried, the way men move when they've never once lost a chase. Whatever Tosa was to you, it isn't safe to be from here anymore."},
+  {loc:'Gnulför', title:'Animal Shelter', champ:'Uso Oso', art:'Uso Oso', type:'boss',
+   beat:"The fire is barely embers when he steps out of the dark like he was always standing there. Darwin sent him with two words and a name — bring me his head, or his hope — and Uso Oso has never once come back empty-handed. Steel finds him and doesn't seem to mind. \"Sharp,\" he says, almost gentle. \"But not deep.\" He isn't here to talk. He isn't sure, yet, that he wants to win."}
 ];
 const ASC_STORY_CH2=[
   {loc:'Sekihar', title:'The Smiling Man', champ:'Ruffius Rufeldro', art:'Ruffius Rufeldro', type:'elite',
@@ -11138,7 +11178,7 @@ const ASC_STORY_CH2=[
    beat:"Past the Rift's last edge, the voice that whispered a Mad King into ruin steps into the light at last. Valcarion was old when Ahdor-Khaan was young, and he has been patient far longer than you have been alive. The Undying Flame does not end with a king. It only asks who carries it next."}
 ];
 const ASC_CHAPTERS=[
-  {id:'ch1', title:'Chapter 1: Rebirth', sub:"Darwin's road — the slaver-city to the Gray.", beats:ASC_STORY},
+  {id:'ch1', title:'Chapter 1: The Ceiling', sub:'A cadet who cheated the coffin — from the corps yard to the ally waiting in ambush.', beats:ASC_STORY},
   {id:'ch2', title:'Chapter 2: Ash & Root', sub:'The war did not end with a king. Follow the Flame to its master.', beats:ASC_STORY_CH2}
 ];
 var ascChapterIdx=0;
@@ -11149,7 +11189,7 @@ function ascSetVistaLoc(loc){ try{ var img=LOCATION_ART[loc]; var v=document.get
 function ascTierLoc(ti){ var t=ascRun&&ascRun.map&&ascRun.map[ti]; var n=t&&t[0]; return (n&&n.loc)||ascLocationFor(ti); }
 function ascStoryMap(){
   var _ch=(ASC_CHAPTERS[ascChapterIdx]||ASC_CHAPTERS[0]).beats; return _ch.map(function(sn,i){ var boss=sn.type==='boss', el=sn.type==='elite';
-    return [{ id:'story'+i, type:sn.type, champName:sn.champ, champArt:sn.art, pow:8+i*3+(el?4:0)+(boss?9:0), vit:boss?4:el?3:2, tier:i, loc:sn.loc, beat:sn.beat, title:sn.title, requires:sn.requires }]; });
+    return [{ id:'story'+i, type:sn.type, champName:sn.champ, champArt:sn.art, pow:8+i*3+(el?4:0)+(boss?9:0), vit:boss?4:el?3:2, tier:i, loc:sn.loc, beat:sn.beat, title:sn.title, requires:sn.requires, foes:sn.foes }]; });
 }
 function ascStoryStart(){
   var av=ASC_UNITS.find(function(u){return u.id===ascPartySel.avatarId;});
@@ -11166,7 +11206,15 @@ function ascStoryBeat(node){
   ascHideAll(); var a=document.getElementById('asc-arena'); if(!a) return; a.style.display=''; ascSetVistaLoc(node.loc);
   var _reqOk=ascMeetsRequirement(node.requires);
   var _reqHtml=node.requires?('<div class="asb-req'+(_reqOk?' ok':'')+'">'+(_reqOk?'✓ ':'🔒 ')+'Requires '+ascDescribeRequirement(node.requires)+'</div>'):'';
-  a.innerHTML='<div class="asc-storybeat"><div class="asb-loc">'+(node.loc||'')+'</div><h1 class="asb-title">'+(node.title||'')+'</h1><div class="asb-beat">'+(node.beat||'')+'</div><div class="asb-foe">'+(node.type==='boss'?'☠ BOSS':node.type==='elite'?'👑 ELITE':'⚔')+' · '+node.champName+'</div>'+_reqHtml+'<button class="enter-btn" onclick="ascEnterEncounter(ascRun.map['+node.tier+'][0])"'+(_reqOk?'':' disabled')+'>⚔ Face '+node.champName.split(',')[0]+' →</button></div>';
+  // champArt is checked first: some nodes use a shorter champName for prose ("Ossian Drell")
+  // while art/champArt holds the real full COLLECTION card name ("Black Wings, Ossian Drell") —
+  // ascUnitCard() matches on the exact card .name, so champName alone silently misses those.
+  var _champCard=(typeof ascUnitCard==='function')?(ascUnitCard(node.champArt)||ascUnitCard(node.champName)):null;
+  var _champHtml = _champCard
+    ? '<div class="asb-champ">'+bigCardHTML(_champCard)+'</div>'
+    : '<div class="asb-champ"><div class="asc-foe-art '+ascCampCls(node.champArt)+'" style="'+artFillStyle(node.champArt)+'">'+(CARD_ART[node.champArt]?'':sigilFor(node.champArt))+'</div></div>';
+  var _rankBadge=node.type==='boss'?'<span class="foe-rank boss">☠ BOSS</span>':node.type==='elite'?'<span class="foe-rank elite">👑 ELITE</span>':'⚔';
+  a.innerHTML='<div class="asc-storybeat"><div class="asb-loc">'+(node.loc||'')+'</div><h1 class="asb-title">'+(node.title||'')+'</h1>'+_champHtml+'<div class="asb-beat">'+(node.beat||'')+'</div><div class="asb-foe">'+_rankBadge+' · '+node.champName+'</div>'+_reqHtml+'<button class="enter-btn" onclick="ascEnterEncounter(ascRun.map['+node.tier+'][0])"'+(_reqOk?'':' disabled')+'>⚔ Face '+node.champName.split(',')[0]+' →</button></div>';
 }
 function ascLocationFor(tier){ return ASC_JOURNEY[Math.min(Math.max(0,tier||0), ASC_JOURNEY.length-1)]; }
 function ascSetVista(tier){ try{ var img=LOCATION_ART[ascLocationFor(tier)]; var v=document.getElementById('v-asc'); if(v&&img) v.style.setProperty('--vista','url("'+img+'")'); }catch(e){} }
@@ -11633,11 +11681,12 @@ function ascFoeStats(node){
   var mult = 1 + node.tier*0.22;
   var tr = (node.type==='trial') ? (ASC_TRIALS.find(function(x){return x.id===node.mod;})||null) : null;
   var atkMod = (tr&&tr.foeAtk)||1;
+  var pool = (node.foes && node.foes.length) ? node.foes : ASC_FOES;   // per-node themed filler override (see ASC_FOES_CADETS/ASC_FOES_WRIT)
   var foes=[];
   for(var i=0;i<count;i++){
     var lead=(i===0);
     var tmpl = (node.type==='boss') ? {name:node.champName, art:node.champArt, hp:150, atk:26, spd:9}
-                                    : ASC_FOES[Math.floor(Math.random()*ASC_FOES.length)];
+                                    : pool[Math.floor(Math.random()*pool.length)];
     var hp=Math.round(tmpl.hp*mult*(node.type==='boss'?1.55:1));
     foes.push({ name:(lead?(node.champName||tmpl.name):tmpl.name), art:(lead?(node.champArt||tmpl.art):tmpl.art), maxhp:hp, hp:hp, atk:Math.round(tmpl.atk*mult*atkMod), spd:tmpl.spd, rank:(lead?(node.type==='boss'?'boss':(node.type==='elite'||node.type==='trial')?'elite':'normal'):'normal'), sig:((node.type==='boss'&&lead)?ASC_BOSS_SIGS[Math.floor(Math.random()*ASC_BOSS_SIGS.length)]:(tr&&tr.siege&&lead?'Siege Barrage':null)), siege:!!(tr&&tr.siege&&lead), t:0, st:{vuln:0,vulnT:0,dot:0,dotT:0,def:(tr&&tr.foeDef)||0,defT:(tr&&tr.foeDef)?99:0} });
   }
@@ -11848,10 +11897,10 @@ function ascRenderBattle(){
   if(!ascBattle) return; var a=document.getElementById('asc-arena'); if(!a) return; var b=ascBattle;
   var actor=(b.actor&&b.actor.side==='party'&&(b.phase==='choose'||b.phase==='target'||b.phase==='movesel'))?ascParty[b.actor.i]:null;
   var foesHtml=b.foes.map(function(fo,i){ var pct=Math.round(fo.hp/fo.maxhp*100); var tgt=(b.phase==='target'&&b.targetSide==='foe'&&fo.hp>0); var enr=(fo.rank==='boss'&&fo.hp>0&&fo.hp<=fo.maxhp*0.35); var badge=fo.rank==='boss'?'<span class="foe-rank boss">☠ BOSS</span>':fo.rank==='elite'?'<span class="foe-rank elite">👑 ELITE</span>':'';
-    return '<div class="asc-foe'+(fo.hp<=0?' dead':'')+(tgt?' targetable':'')+(fo.rank==='boss'?' boss':'')+(enr?' enraged':'')+'" data-fi="'+i+'"'+(tgt?' onclick="ascTarget('+i+')"':'')+'><div class="asc-foe-art" style="'+artFillStyle(fo.art)+'">'+(CARD_ART[fo.art]?'':sigilFor(fo.art))+'</div>'+badge+'<div class="asc-foe-name">'+fo.name+(enr?' <span class="enr-tag">ENRAGED</span>':'')+'</div><div class="asc-hpbar"><div class="asc-hpfill foe" style="width:'+pct+'%"></div></div><div class="asc-hptxt">'+fo.hp+' / '+fo.maxhp+'</div>'+ascStatusBadges(fo)+'</div>'; }).join('');
+    return '<div class="asc-foe'+(fo.hp<=0?' dead':'')+(tgt?' targetable':'')+(fo.rank==='boss'?' boss':'')+(enr?' enraged':'')+'" data-fi="'+i+'"'+(tgt?' onclick="ascTarget('+i+')"':'')+'><div class="asc-foe-art '+ascCampCls(fo.art)+'" style="'+artFillStyle(fo.art)+'">'+(CARD_ART[fo.art]?'':sigilFor(fo.art))+'</div>'+badge+'<div class="asc-foe-name">'+fo.name+(enr?' <span class="enr-tag">ENRAGED</span>':'')+'</div><div class="asc-hpbar"><div class="asc-hpfill foe" style="width:'+pct+'%"></div></div><div class="asc-hptxt">'+fo.hp+' / '+fo.maxhp+'</div>'+ascStatusBadges(fo)+'</div>'; }).join('');
   var onfield=ascParty.map(function(u,i){return {u:u,i:i};}).filter(function(x){ return !x.u.avatar || b.summoned; });
   var partyHtml=onfield.map(function(x){ var u=x.u,i=x.i; var pct=Math.round(Math.max(0,u.hp)/u.maxhp*100); var active=actor&&b.actor.i===i; var tgt=(b.phase==='target'&&((b.targetSide==='ally'&&u.hp>0)||(b.targetSide==='downed'&&u.hp<=0)));
-    return '<div class="asc-pcard'+(u.hp<=0?' down':'')+(active?' active':'')+(u.avatar?' av':'')+(tgt?' targetable':'')+'" data-pi="'+i+'"'+(tgt?' onclick="ascTarget('+i+')"':'')+'><div class="asc-pc-art" style="'+artFillStyle(u.art)+ascSkinStyle(u.name)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'</div><div class="asc-pc-info"><div class="asc-pc-name">'+u.name.split(',')[0]+(u.avatar?' ★':'')+'</div><div class="asc-hpbar"><div class="asc-hpfill'+(pct<30?' low':'')+'" style="width:'+pct+'%"></div></div><div class="asc-hptxt">'+Math.max(0,u.hp)+' / '+u.maxhp+'</div></div>'+ascStatusBadges(u)+'</div>'; }).join('');
+    return '<div class="asc-pcard'+(u.hp<=0?' down':'')+(active?' active':'')+(u.avatar?' av':'')+(tgt?' targetable':'')+'" data-pi="'+i+'"'+(tgt?' onclick="ascTarget('+i+')"':'')+'><div class="asc-pc-art '+ascCampCls(u.art)+'" style="'+artFillStyle(u.art)+ascSkinStyle(u.name)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'</div><div class="asc-pc-info"><div class="asc-pc-name">'+u.name.split(',')[0]+(u.avatar?' ★':'')+'</div><div class="asc-hpbar"><div class="asc-hpfill'+(pct<30?' low':'')+'" style="width:'+pct+'%"></div></div><div class="asc-hptxt">'+Math.max(0,u.hp)+' / '+u.maxhp+'</div></div>'+ascStatusBadges(u)+'</div>'; }).join('');
   var dock='';
   { var av=ascParty.find(function(u){return u.avatar;})||{name:'Champion',art:'Kotei'}; var gpct=Math.round(b.gauge/b.gaugeMax*100), ready=b.gauge>=b.gaugeMax; var pas=ascPassive(), ult=(ascPatron()&&ascPatron().ability)||{};
     dock='<div class="asc-summon-dock'+(ready?' ready':'')+'"><div class="asd-art" style="'+artFillStyle(av.art)+'">'+(CARD_ART[av.art]?'':sigilFor(av.art))+'</div><div class="asd-info"><div class="asd-name">'+av.name.split(',')[0]+' <span>· your Champion</span></div>'+(pas.name?'<div class="asd-passive">'+pas.name+' — '+pas.desc+'</div>':'')+'<div class="asd-gaugebar"><div class="asd-gaugefill" style="width:'+gpct+'%"></div></div><div class="asd-gtxt">'+(ready?'✦ ULTIMATE READY — '+(ult.name||''):'Ultimate '+gpct+'% · '+(ult.name||''))+'</div></div></div>'; }
@@ -12812,7 +12861,14 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
 @keyframes ascSpotFade{0%{opacity:0}18%{opacity:1}78%{opacity:1}100%{opacity:0}}
 .asc-spot-wrap{position:absolute;inset:0;z-index:51;display:flex;align-items:center;justify-content:center;gap:30px;pointer-events:none}
 .asc-spot-card{width:104px;display:flex;flex-direction:column;align-items:center;gap:5px;opacity:0;animation:ascSpotCard .8s cubic-bezier(.22,.75,.3,1) forwards}
-.asc-spot-art{width:92px;height:92px;border-radius:13px;background-size:cover;background-position:center top;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 14px 32px rgba(0,0,0,.65)}
+.asc-spot-art{position:relative;overflow:hidden;width:92px;height:92px;border-radius:13px;background-size:cover;background-position:center top;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 14px 32px rgba(0,0,0,.65)}
+.asc-spot-art::after{content:'';position:absolute;top:4px;left:4px;width:8px;height:8px;border-radius:50%;background:var(--border2);box-shadow:0 0 0 1px rgba(0,0,0,.6);z-index:1}
+.asc-spot-art.camp-amageras{border-color:#E8873A}
+.asc-spot-art.camp-omitsuki{border-color:#5B2C8F}
+.asc-spot-art.camp-kitanoo{border-color:#2D6A4F}
+.asc-spot-art.camp-amageras::after{background:#E8873A;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 5px #E8873A}
+.asc-spot-art.camp-omitsuki::after{background:#5B2C8F;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 5px #5B2C8F}
+.asc-spot-art.camp-kitanoo::after{background:#2D6A4F;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 5px #2D6A4F}
 .asc-spot-card.atk .asc-spot-art{box-shadow:0 0 0 3px var(--gold),0 14px 32px rgba(0,0,0,.65)}
 .asc-spot-card.def .asc-spot-art{box-shadow:0 0 0 3px var(--lose),0 14px 32px rgba(0,0,0,.65)}
 .asc-spot-name{font-size:12.5px;font-weight:800;color:#fff;text-shadow:0 1px 4px #000;text-align:center;max-width:104px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -12834,7 +12890,8 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
     var noArt=!(typeof CARD_ART!=='undefined'&&CARD_ART[ent.art]);
     var art=(typeof artFillStyle==='function'?artFillStyle(ent.art):'')+(side==='party'&&typeof ascSkinStyle==='function'?ascSkinStyle(ent.name):'');
     var pct=Math.max(0,Math.round((ent.hp||0)/(ent.maxhp||1)*100));
-    return '<div class="asc-spot-card '+cls+'"><div class="asc-spot-art" style="'+art+'">'+(noArt&&typeof sigilFor==='function'?sigilFor(ent.art):'')+'</div>'
+    var campCls=(typeof ascCampCls==='function')?ascCampCls(ent.art):'';
+    return '<div class="asc-spot-card '+cls+'"><div class="asc-spot-art '+campCls+'" style="'+art+'">'+(noArt&&typeof sigilFor==='function'?sigilFor(ent.art):'')+'</div>'
       +'<div class="asc-spot-name">'+(ent.name||'').split(',')[0]+'</div>'
       +'<div class="asc-hpbar"><div class="asc-hpfill'+(side==='foe'?' foe':'')+(pct<30?' low':'')+'" style="width:'+pct+'%"></div></div>'
       +'<div class="asc-hptxt">'+Math.max(0,ent.hp||0)+' / '+(ent.maxhp||0)+'</div></div>';
