@@ -11163,23 +11163,25 @@ const ASC_STORY=[
   {loc:'Gnulför', title:'Animal Shelter', champ:'Uso Oso', art:'Uso Oso', type:'boss',
    beat:"The fire is barely embers when he steps out of the dark like he was always standing there. Darwin sent him with two words and a name — bring me his head, or his hope — and Uso Oso has never once come back empty-handed. Steel finds him and doesn't seem to mind. \"Sharp,\" he says, almost gentle. \"But not deep.\" He isn't here to talk. He isn't sure, yet, that he wants to win."}
 ];
+// Themed filler pool for Chapter 2 (Sorn-Vallis) — same reasoning as ASC_FOES_CADETS/ASC_FOES_WRIT
+// in Chapter 1: the global ASC_FOES roster is all monsters/undead, wrong tone for a slaver city's
+// guards. Declared BEFORE ASC_STORY_CH2 for the same TDZ reason those two were (see the comment
+// above ASC_STORY) — these are referenced directly inside the story array's own object literals.
+const ASC_FOES_SORNVALLIS=[
+  {name:'City Guard',          art:'City Guard',          hp:60, atk:15, spd:8},
+  {name:"Slaver's Enforcer",   art:"Slaver's Enforcer",   hp:68, atk:17, spd:7}
+];
 const ASC_STORY_CH2=[
-  {loc:'Sekihar', title:'The Smiling Man', champ:'Ruffius Rufeldro', art:'Ruffius Rufeldro', type:'elite',
-   beat:"Sekihar welcomes you with open arms, and the warmest belong to Ruffius Rufeldro, who has never once been caught being what he is. He offers help you did not ask for, in a voice built to be trusted. Behind the smile he is already deciding how you will be useful."},
-  {loc:'North Kasac', title:'The Blackened Order', champ:'Conduit of Chaos, Kleydson', art:'Conduit of Chaos, Kleydson', type:'elite',
-   beat:"A rider crosses the frost with fire in one hand and killing cold in the other, raised by the Blackened Order to hunt exactly the kind of legend you are becoming. Kleydson does not hate you. That is what makes him dangerous."},
-  {loc:'Noctreach', title:'What The Wound Remembers', champ:'Anorith Keeling', art:'Anorith Keeling', type:'elite',
-   beat:"Noctreach keeps its dead close. Something old wears the name Anorith Keeling here, stitched together from an age that ended in fire, and it remembers being a legend before the land broke it. It would like company in the ruin."},
-  {loc:'Yozai-no-Sato', title:'The Sleeping Pact', champ:'Kiba', art:'Kiba', type:'elite',
-   beat:"The illusion village remembers you, and this time it does not bother to hide. A dragon-pact stirs in Kiba, gold beneath the skin, and the great eye that judged you once now weighs whether you have grown enough to be worth waking for."},
-  {loc:'The Black Citadel', title:"The Court's Last Stand", champ:'La "La" Ballora, the Broodqueen', art:'La "La" Ballora, the Broodqueen', type:'boss', requires:[{stat:'grit',min:50},{stat:'cunning',min:50}],
-   beat:"Darwin fell, but his Court did not scatter, and the throne room is not empty theatre. Ella Ballora sheds the shape you would recognize; what unfolds in the dark is what the Court always was underneath, and it has been waiting for you to climb this high a second time."},
-  {loc:'The Gray', title:'The Deeper Master', champ:'Valcarion', art:'Valcarion', type:'boss', requires:{stat:'cunning',min:50,count:2},
-   beat:"Past the Rift's last edge, the voice that whispered a Mad King into ruin steps into the light at last. Valcarion was old when Ahdor-Khaan was young, and he has been patient far longer than you have been alive. The Undying Flame does not end with a king. It only asks who carries it next."}
+  {loc:'Sorn-Vallis', title:'Sorn-Vallis', champ:'Veronica', art:'Veronica', type:'elite', foes:ASC_FOES_SORNVALLIS,
+   beat:"The gates close behind you before you understand you've walked through them. Sorn-Vallis flies no banner you'd recognize, but every corner of it answers to one woman. Veronica doesn't ask what you are — she takes one look and already knows exactly what's useful about you, the same way she takes everything else that crosses her city: quietly, completely, and as if it were always hers to begin with."},
+  {loc:'Sorn-Vallis', title:'Smokescreen', champ:'The Arena Master', art:'The Arena Master', type:'elite', foes:ASC_FOES_SORNVALLIS,
+   beat:"The festival crowd doesn't know it's watching a punishment. Somewhere below the stands they've dragged Uso Oso into the sand against a boy who can't be older than thirteen, and told him to make it a show. He won't. \"Don't let them carve you hollow,\" he tells the boy instead, low enough that only the boy hears it. \"Stay you. That's the fight they can't win.\" On the balcony above, something in a woman's smile stops being a woman's smile at all — and on the rooftop over all of it, Lagertha is already changing shape. You have to reach them before either finishes what it started."},
+  {loc:'Sorn-Vallis', title:'Queen Crimson', champ:'La "La" Ballora, the Broodqueen', art:'La "La" Ballora, the Broodqueen', type:'boss',
+   beat:"Whatever wore Ella Ballora's smile a moment ago doesn't bother wearing it now. What unfolds in the throne room beneath the arena is what she always was underneath — and it takes everything you have just to find the seam in her, a single ruby weak point Uso finally rips free with his bare hands. Dying, she offers you exactly what you came for: Darwin's stronghold, named aloud, yours for the taking if you let her live one minute longer. Lagertha, still wearing the wolf, doesn't wait for you to decide. The intel dies with her. Somewhere behind you, word is already reaching Keawe's sister — Kianna has just enlisted, fast-tracked into an elite unit they're calling the Black Wings."}
 ];
 const ASC_CHAPTERS=[
   {id:'ch1', title:'Chapter 1: The Ceiling', sub:'A cadet who cheated the coffin — from the corps yard to the ally waiting in ambush.', beats:ASC_STORY},
-  {id:'ch2', title:'Chapter 2: Ash & Root', sub:'The war did not end with a king. Follow the Flame to its master.', beats:ASC_STORY_CH2}
+  {id:'ch2', title:'Chapter 2: Queen Crimson', sub:"A slaver city's baroness, a mercy in the arena, and the Broodqueen's throne.", beats:ASC_STORY_CH2}
 ];
 var ascChapterIdx=0;
 function ascChapterUnlocked(i){ if(i<=0) return true; var t=0; for(var k in ascUnitProg){ var p=ascUnitProg[k]||{}; t+=(p.bosses||0)+(p.rites||0); } return t>0; }
