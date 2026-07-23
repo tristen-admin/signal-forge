@@ -806,16 +806,15 @@ body.nav-collapsed .sidebar{width:48px!important;min-width:48px!important;overfl
 body.nav-collapsed .sidebar > *{display:none!important}
 /* 7/16/26: .brand is the actual toggle button (onclick="toggleSidebar()") but is a sibling of
    .nav, not a child of it -- the blanket rule above hid it with nothing re-showing it, so once
-   collapsed there was nothing left to click to reopen the menu. Re-show it the same way #nav-hub
-   already gets re-shown below, icon-only. */
+   collapsed there was nothing left to click to reopen the menu. Re-show it, icon-only.
+   7/22/26: #nav-hub used to ALSO stay visible right below this for the same "something to click"
+   reason -- now removed. It read as a pointless duplicate (two near-identical glowing diamond
+   icons stacked with no label to tell them apart once text is hidden), and was never load-bearing
+   once .brand alone covers reopening the menu. .nav now stays fully hidden when collapsed, same as
+   every other nav item. */
 body.nav-collapsed .sidebar > .brand{display:flex!important;justify-content:center;padding:10px 0}
 body.nav-collapsed .brand .brand-text{display:none!important}
 body.nav-collapsed .brand .brand-mark{font-size:22px;color:var(--gold);filter:drop-shadow(0 0 7px var(--gold-glow));animation:navpulse 2.4s ease-in-out infinite}
-body.nav-collapsed .sidebar > .nav{display:flex!important;align-items:center;padding:10px 0 0}
-body.nav-collapsed .nav > *{display:none!important}
-body.nav-collapsed .nav > #nav-hub{display:flex!important;justify-content:center;width:100%;background:transparent!important;padding:6px 0}
-body.nav-collapsed #nav-hub .brand-text{display:none!important}
-body.nav-collapsed #nav-hub .ni-icon{font-size:22px;margin:0;color:var(--gold);filter:drop-shadow(0 0 7px var(--gold-glow))}
 @keyframes navpulse{0%,100%{filter:drop-shadow(0 0 5px var(--gold-glow))}50%{filter:drop-shadow(0 0 11px var(--gold-glow))}}
 body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .brand-mark{animation:none}
 .brand{
@@ -1399,7 +1398,11 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .vc-kd .k{color:var(--win);font-weight:700} .vc-kd .d{color:var(--lose);font-weight:700}
 .vc-deck-tag{position:absolute;bottom:7px;right:7px;z-index:3;font-size:8px;font-weight:800;color:var(--electric);background:rgba(91,192,235,0.15);border:1px solid var(--cond-border);border-radius:3px;padding:2px 5px;display:none}
 .vault-card.in-deck .vc-deck-tag{display:block}
-.vault-card.in-deck{box-shadow:inset 0 0 0 2px var(--electric)}
+/* 7/22/26: removed the inset cyan box-shadow ring that used to cover the whole card on top of
+   this -- it visually competed with the camp-color border (or rarity ribbon before that), making
+   it hard to tell a card's rarity/camp at a glance once it was in the active deck. The corner
+   .vc-deck-tag badge above is the sole "in deck" indicator now -- smaller, localized, doesn't fight
+   the card's own border color. */
 
 /* ══ CARD DRAWER ══ */
 .drawer-scrim{position:fixed;inset:0;background:rgba(7,9,15,0.6);z-index:20;opacity:0;pointer-events:none;transition:opacity 0.2s}
