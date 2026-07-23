@@ -3779,46 +3779,16 @@ let stakeMult = 1;
 let rankRP = 1000;   // competitive ladder rating — what the snap wagers (NOT Signal)
 
 const OPP_CARDS = [
-  {name:"Vharos, the Iron Crown",pow:20,kills:0,deaths:0,rarity:"apex",abil:"Record Guard. On commit: +5 against a Pristine opponent (0 deaths, 1+ kill)."},
-  {name:"Nyx, Devourer of Legends",pow:18,kills:0,deaths:0,rarity:"apex",abil:"On commit: +4; +4 more if you lost your last duel."},
-  {name:"Aurelion Prime",pow:21,kills:0,deaths:0,rarity:"apex",abil:"Kill Escalation: +6 at 30+ career kills, +3 at 15+."},
-  {name:"The Hollow King",pow:16,kills:0,deaths:0,rarity:"apex",abil:"Bloodrage: +7 while you are behind in the match."},
-  {name:"Sirefax the Warden",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Record Guard. On commit: +3 vs a Pristine opponent."},
-  {name:"Mordezh, Blood Prophet",pow:15,kills:0,deaths:0,rarity:"ultra",abil:"Bloodrage: +5 while behind; +2 if you lost last."},
-  {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:"ultra",abil:"Purity: +5 while this card is Pristine (0 deaths, 1+ kill)."},
+  {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:"rare",abil:"Purity: +5 while this card is Pristine (0 deaths, 1+ kill)."},
   {name:"Kravyn the Collector",pow:18,kills:0,deaths:0,rarity:"ultra",abil:"On commit: +3, more at 10+ and 25+ career kills. May return to hand on kill instead of Winners Circle."},
   {name:"Fifth Frequency Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"Elemental Flurry: +3, +4 more with 5+ cards in hand, +7 more with 4+ cards in your banish zone."},
   {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",abil:"On commit: +1 power for every 2 cards remaining in your deck. Death Remnant +8"},
-  {name:"Sable the Unseen",pow:14,kills:0,deaths:0,rarity:"ultra",abil:"On commit: a Pristine opponent is drained — opponent −4."},
-  {name:"Torvald Ninefingers",pow:15,kills:0,deaths:0,rarity:"ultra",abil:"Last Stand. On commit: +3 with 2 or fewer cards in hand."},
-  {name:"Kessa Brightblade",pow:13,kills:0,deaths:0,rarity:"rare",abil:"On commit: +4 vs a Pristine opponent."},
-  {name:"Ruven Ashwalker",pow:12,kills:0,deaths:0,rarity:"rare",abil:"Bloodrage: +5 while behind in the match."},
   {name:"Ilma the Patient",pow:13,kills:0,deaths:0,rarity:"rare",abil:"Late Bloomer: +5 from the 3rd commit onward."},
-  {name:"Dragan Korr",pow:14,kills:0,deaths:0,rarity:"rare",abil:"Kill Escalation: +4 at 18+ career kills."},
-  {name:"Sythe Marrow",pow:10,kills:0,deaths:0,rarity:"rare",abil:"Death Remnant: +5 to your cards until an enemy is killed."},
-  {name:"Wren of the Vigil",pow:12,kills:0,deaths:0,rarity:"rare",abil:"Record Guard — once per match a loss becomes a tie, no death recorded."},
-  {name:"Halbrecht the Sure",pow:13,kills:0,deaths:0,rarity:"rare",abil:"On commit: +3; +3 more if the opponent has fewer career kills."},
-  {name:"Nissa Emberfen",pow:11,kills:0,deaths:0,rarity:"rare",abil:"Elemental Flurry: +2, +4 under a chaos condition."},
   {name:"Old Garrick",pow:12,kills:0,deaths:0,rarity:"common",abil:"Grizzled Veteran: +5 at 20+ kills; +5 more at 8+ deaths."},
   {name:"Faye Quicksilver",pow:14,kills:0,deaths:0,rarity:"rare",abil:"Snowball: +2 for every round you have already won this match."},
   {name:"Bram the Bulwark",pow:15,kills:0,deaths:0,rarity:"rare",abil:"Last Stand — a loss by 3 power or less becomes a tie."},
-  {name:"Vessa Coil",pow:9,kills:0,deaths:0,rarity:"rare",abil:"Comeback: +6 if you lost your last duel."},
-  {name:"Tobin Reed",pow:8,kills:0,deaths:0,rarity:"common",abil:"On commit: +3 vs a Pristine opponent."},
-  {name:"Marn the Digger",pow:6,kills:0,deaths:0,rarity:"common",abil:"Bloodrage: +4 while behind."},
-  {name:"Little Pox",pow:4,kills:0,deaths:0,rarity:"common",abil:"Death Remnant: +4 to your cards until an enemy is killed."},
-  {name:"Gilda Fenn",pow:9,kills:0,deaths:0,rarity:"common",abil:"Purity: +3 while this card is Pristine."},
-  {name:"Rusk",pow:7,kills:0,deaths:0,rarity:"common",abil:"On commit: +3; +2 more from the 3rd commit onward."},
-  {name:"Two-Coin Tilly",pow:5,kills:0,deaths:0,rarity:"common",abil:"Elemental Flurry: +5 under a chaos condition."},
-  {name:"Bonnick",pow:10,kills:0,deaths:0,rarity:"common",abil:"Comeback: +4 if you lost your last duel."},
-  {name:"Sedge the Meek",pow:3,kills:0,deaths:0,rarity:"common",abil:"Underdog: +6 if the opponent's base power is higher."},
-  {name:"Harrow Vane",pow:8,kills:0,deaths:0,rarity:"common",abil:"Veteran: +3 at 6+ career kills."},
-  {name:"Mip",pow:2,kills:0,deaths:0,rarity:"common",abil:"No ability. Cheap fodder — a Lowest-Wins darling."},
-  {name:"Doru Blacktooth",pow:9,kills:0,deaths:0,rarity:"common",abil:"On commit: a Pristine opponent is unnerved — opponent −3."},
-  {name:"Wisp",pow:1,kills:0,deaths:0,rarity:"common",abil:"No ability. A whisper of power — thrives under Lowest Wins."},
-  {name:"Calla Thorn",pow:7,kills:0,deaths:0,rarity:"common",abil:"Last Stand — a narrow loss becomes a tie."},
-  {name:"Grum the Steady",pow:11,kills:0,deaths:0,rarity:"common",abil:"Giant-Killer: +4 if the opponent has more career kills."},
   {name:'Lagertha Waltz',pow:8,kills:0,deaths:0,rarity:'rare',abil:'On commit: +6 if lost last, -2 if won last.'},
-  {name:'Conduit of Chaos, Kleydson',pow:4,kills:0,deaths:0,rarity:'common',abil:'No ability.'},
+  {name:'Conduit of Chaos, Kleydson',pow:11,kills:0,deaths:0,rarity:'ultra',abil:'No ability.'},
   {name:'Arch-Grim Korrin',pow:17,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: look at the top 2 cards of your deck, place 1 in the support zone and 1 as a death remnant. If opponent's card has fewer career kills than this card, +6 power."},
   {name:'Anorith Keeling',pow:1,kills:0,deaths:0,rarity:'apex',abil:'Chaos Deity — power scales with duels completed × hand size; warps your deck into the Chaos Trinity.'},
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',abil:'On commit: +3 if 0-death and lost last; repeats per round completed.'},
@@ -3826,11 +3796,11 @@ const OPP_CARDS = [
   {name:'Kiba',pow:2,kills:0,deaths:0,rarity:'common',abil:'Death Remnant: +2 power to next cards until opp kill.'},
   {name:'Zerith Var',pow:19,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"On commit: +2; if your opponent's base power is higher, +4 power."},
   {name:'Malia',pow:10,kills:0,deaths:0,rarity:'common',abil:'On commit: mirror opponent power.'},
-  {name:'Ahdorah Khaan, Determined Soul',pow:17,kills:0,deaths:0,rarity:'apex',abil:'On commit: underdog hand bonus.'},
+  {name:'Ahdorah Khaan, Determined Soul',pow:15,kills:0,deaths:0,rarity:'apex',abil:'On commit: underdog hand bonus.'},
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',abil:'On commit: comeback double.'},
   {name:'Valcarion',pow:17,kills:0,deaths:0,rarity:'rare',abil:'On commit: reclaim a banished card to hand or support.'},
   {name:'Envoy of Tyrants, Ella Ballora',pow:14,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Bloodrage: on commit +3 with 3+ cards in hand, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
-  {name:'Kiana',pow:15,kills:0,deaths:0,rarity:'uncommon',abil:'Elemental Flurry: +3, +4 more with 4+ cards in hand.'},
+  {name:'Kiana',pow:15,kills:0,deaths:0,rarity:'rare',abil:'Elemental Flurry: +3, +4 more with 4+ cards in hand.'},
   // ── Bot identity backfill (7/12/26) — real COLLECTION stats/abil, not invented, so pick(PRESET) can
   // resolve a genuine 16-card themed deck instead of silently padding with unrelated random cards. ──
   // (Ghorruk "Gnarly" Judarr already existed above at pow:16/ultra — not duplicated here.)
@@ -5133,7 +5103,12 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
         var _oarr=Array.from(oppWonBot); var _opick=_oarr[_oarr.length-1]; oppWonBot.delete(_opick);
         if(typeof oppWC!=='undefined') oppWC=oppWonBot.size;
         var _opool=(typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]); var _ocard=_opool.find(function(x){return x.name===_opick;});
-        if(_ocard && typeof oppDeckBot!=='undefined') oppDeckBot.unshift(Object.assign({},_ocard));
+        // 7/22/26: was oppDeckBot.unshift(...) -- the bot's OWN draw functions all read via
+        // .shift() (front of array), so unshift() put this at the bot's very NEXT draw, the
+        // opposite of "bottom." push() (end of array) is the bot-side equivalent of the
+        // player-side drawPile.unshift() used two lines above -- same intent, opposite array
+        // convention. Mirrors the exact bug class just fixed in the Deck Master win-routing case.
+        if(_ocard && typeof oppDeckBot!=='undefined') oppDeckBot.push(Object.assign({},_ocard));
         abilLog.push("↩ Opp "+support.name+" — reclaimed "+_opick+" from their Winners Circle to the bottom of their deck");
       } else { abilLog.push("↩ Opp "+support.name+" — Winners Circle empty, nothing to reclaim"); }
     }
@@ -9880,23 +9855,11 @@ function oppEndDuelCycle(){
   for(var _bd=0;_bd<DRAW_PER_TURN;_bd++){ if(oppDeckBot.length) oppHandBot.push(oppDeckBot.shift()); }   // draw DRAW_PER_TURN per turn — same speed as player
 }
 function _oppStamp(card){ var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null; return Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{}); }
-// NOTE: this definition is superseded near the end of the file by a monkey-patch
-// (`if(typeof pickOppCard==='function'){ pickOppCard=function(){...}; }`, ability-aware bias via
-// oppEvalPow()) — that reassignment always runs at script load, so this body never actually
-// executes. The energy-cost gate (7/12/26) lives in THAT version, not here — caught only by
-// testing pickOppCard() directly and finding oppCharge wasn't being respected. Left unedited
-// (matches pre-rework behavior) to avoid dead, misleading duplicate logic sitting in two places.
-function pickOppCard(){
-  if(!oppHandBot.length) oppInitDeck();
-  if(!oppHandBot.length){ var pool=(activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool:OPP_CARDS; oppHandBot=[pool[Math.floor(Math.random()*pool.length)]]; }
-  const bias = activeBot ? activeBot.bias : 0;
-  var bi=Math.floor(Math.random()*oppHandBot.length);
-  for(var i=0;i<bias;i++){ var a=Math.floor(Math.random()*oppHandBot.length); if((oppHandBot[a].pow||0)>(oppHandBot[bi].pow||0)) bi=a; }   // difficulty bias: keep the higher-power draw
-  var card=oppHandBot.splice(bi,1)[0]; _oppInPlay=[card];   // COMMIT: leaves the bot's hand
-  var _out=_oppStamp(card);
-  if(activeBot && activeBot.maxed){ _out.kills=99; _out.deaths=5; _out.pow=(_out.pow||8)+6; }
-  return _out;
-}
+// 7/22/26: removed a dead, superseded pickOppCard() that used to sit here -- it was fully
+// overwritten at script load by the real, ability-aware definition further down (see oppEvalPow()
+// and the reassignment near the bot-side resolve() hook), so its body never executed. Kept as a
+// comment-only marker so a future edit doesn't recreate the same "two copies, only one live"
+// trap that bit this exact function once already.
 
 // ══ ART HELPERS ══
 function artFillStyle(name){
@@ -13010,10 +12973,24 @@ function oppEvalPow(card){
       deck_len:(typeof oppDeckBot!=='undefined')?oppDeckBot.length:0,
       chaos:(typeof cond!=='undefined'&&cond&&cond.tag==='chaos')
     };
-    return applyCardRules(card.name, ctx, card.pow||0, 0, [], null)[0];
+    var estimated = applyCardRules(card.name, ctx, card.pow||0, 0, [], null)[0];
+    // 7/22/26: also estimate the bot's own Deck-Master tier-1/2 bonus for this candidate --
+    // previously this function only ran the general CARD_RULES pass, so a bot could undervalue
+    // conjuring its own identity card here even though the bonus correctly applies once the
+    // duel actually resolves (applyBotDeckMasterResolveEffects, called for real from resolve()).
+    // Dry-run: throwaway abilLog, null stepSink -- same defensive pattern the CARD_RULES call
+    // above already uses, so nothing leaks into the visible log before a card is even committed.
+    if(typeof applyBotDeckMasterResolveEffects==='function' && typeof activeBot!=='undefined' && activeBot && activeBot.dmCard===card.name){
+      estimated = applyBotDeckMasterResolveEffects(card, 0, estimated, [], null)[1];
+    }
+    return estimated;
   }catch(e){ return card.pow||0; }
 }
-if(typeof pickOppCard==='function'){ pickOppCard=function(){
+// 7/22/26: this used to be a conditional reassignment (`if(typeof pickOppCard==='function'){
+// pickOppCard=function(){...}; }`) overwriting a dead duplicate declared earlier in the file.
+// That duplicate is gone now, so this is the plain, sole, unconditional definition -- the guard
+// would have made pickOppCard permanently undefined once its target disappeared.
+function pickOppCard(){
   if(!oppHandBot||!oppHandBot.length){ if(oppDeckBot && oppDeckBot.length){ oppHandBot.push(oppDeckBot.shift()); } }
   if(!oppHandBot.length){ if(typeof oppInitDeck==='function') oppInitDeck(); }
   if(!oppHandBot.length){ var _p=(typeof activeBot!=='undefined'&&activeBot&&activeBot.pool&&activeBot.pool.length)?activeBot.pool:OPP_CARDS; oppHandBot=[_p[Math.floor(Math.random()*_p.length)]]; }
@@ -13037,7 +13014,7 @@ if(typeof pickOppCard==='function'){ pickOppCard=function(){
   var _out=Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{});
   if(typeof activeBot!=='undefined'&&activeBot&&activeBot.maxed){ _out.kills=99;_out.deaths=5;_out.pow=(_out.pow||8)+6; }
   return _out;
-}; }
+}
 /* when the bot wins a duel, its card enters the opponent Winners Circle (never redrawn this match) */
 if(typeof resolve==='function'){ var _oppRes=resolve; resolve=function(pc,oc,cond,pcpow){
   var _b1 = (typeof playerScore!=='undefined') ? playerScore[1] : 0;
