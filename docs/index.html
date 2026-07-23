@@ -2818,6 +2818,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 .pile-label{font-size:9px;color:var(--text3);letter-spacing:0.05em;display:none}
 .surge-active{background:rgba(212,168,67,0.12);border-color:var(--gold)!important}
 .surge-pip{font-size:9px;color:var(--gold);font-weight:700;padding:2px 6px;background:rgba(212,168,67,0.15);border:1px solid rgba(212,168,67,0.3);border-radius:2px}
+.remnant-pip{font-size:9px;color:var(--lose);font-weight:700;padding:2px 6px;background:rgba(184,58,58,0.15);border:1px solid rgba(184,58,58,0.35);border-radius:2px;cursor:help}
 .instant-strip{display:flex;gap:6px;align-items:center;padding:5px 16px;background:rgba(91,192,235,0.06);border-top:1px solid rgba(91,192,235,0.15);border-bottom:1px solid rgba(91,192,235,0.15);flex-shrink:0}
 .instant-label{font-size:10px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--electric);flex-shrink:0}
 .instant-card-btn{background:var(--cond);border:1px solid var(--cond-border);color:var(--electric);font-size:9px;font-weight:600;padding:4px 8px;border-radius:3px;cursor:pointer;transition:background 0.12s;white-space:nowrap}
@@ -3012,6 +3013,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <div class="pile-chip winners" id="pile-wc-chip" title="Winners Circle — click to view" onclick="openPileView('wc')" style="cursor:pointer"><span class="pile-icon">🏆</span><span class="pile-count" id="wc-count">0</span><span class="pile-label">W.Circle</span></div>
           <div class="pile-chip banish" id="pile-banish-chip" title="Banished cards — click to view" onclick="openPileView('banish')" style="cursor:pointer"><span class="pile-icon">💀</span><span class="pile-count" id="banish-count">0</span><span class="pile-label">Banish</span></div>
           <span id="surge-indicator" style="display:none" class="surge-pip">+11 Surge Ready</span>
+          <span id="remnant-indicator" style="display:none" class="remnant-pip" title="Death Remnants — lingers until an enemy card is killed">☠ 0 Remnants (+0)</span>
         </div>
       </div>
       <div class="wager-overlay" id="wager-overlay">
@@ -3919,6 +3921,18 @@ function updatePiles(){
   const si = document.getElementById('surge-indicator');
   if(banishSurge > 0){ si.style.display='inline'; si.textContent=`+${banishSurge} Surge Ready`; }
   else { si.style.display='none'; }
+  // 7/24/26: proactively-raised Remnants (RAISE_REMNANT) only fired a toast that disappeared --
+  // no persistent board representation, unlike a death-triggered Remnant's field placeholder.
+  // This chip is the persistent fix: always reflects the true live deathRemnants state (however
+  // it got there -- proactive raise, death-trigger, or carried over into a new duel), since
+  // updatePiles() already runs on every one of those paths.
+  { var _ri=document.getElementById('remnant-indicator');
+    if(_ri){
+      if(typeof deathRemnants!=='undefined' && deathRemnants.length>0){
+        _ri.style.display='inline'; _ri.textContent=`☠ ${deathRemnants.length} Remnant${deathRemnants.length>1?'s':''} (+${remnantPowSum()})`;
+      } else { _ri.style.display='none'; }
+    }
+  }
   { var _dmb=document.getElementById('dm-badge');
     if(_dmb){
       if(deckMasterCard){   // 7/12/26: universal, no longer gated to deckMasterMode — see the note by its declaration
