@@ -5915,7 +5915,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     }
     var ps=(steps||[]).filter(function(s){ return s.dp||s.dop; });
     if(reduce){ finish(); return; }
-    var RC_SPEED=0.92; // 7/16/26: card-effect resolution sped up 8% -- multiplies every pacing delay from here through clash()
+    var RC_SPEED=0.71; // 7/23/26: resolution sped up another 30% on top of the prior 7/16/26 pass (0.92 / 1.3 = 0.71 -- speed up 30% means duration divides by 1.3, not multiplies) -- multiplies every pacing delay from here through clash()
     var HOLD=Math.round(1600*RC_SPEED); // let the flip land + a long tension beat before effects tic (relish it) -- was 1600
     if(ps.length===0){ setTimeout(clash, HOLD+Math.round(300*RC_SPEED)); return; }
     var i=0, per = Math.round((ps.length>8?1500:(ps.length>5?1850:2200))*RC_SPEED);
@@ -10557,7 +10557,6 @@ function bigCardHTML(c, opts){
     <div class="tf-stone pow"></div>
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
-    <div class="tf-camp" style="${(typeof CAMP_COLOR!=='undefined'&&CAMP_COLOR[c.camp||(typeof campOf==='function'?campOf(c):'')])?('color:'+CAMP_COLOR[c.camp||(typeof campOf==='function'?campOf(c):'')]):''}" title="${(typeof CAMP_TITLE!=='undefined'&&CAMP_TITLE[c.camp||(typeof campOf==='function'?campOf(c):'')])||c.camp||(typeof campOf==='function'?campOf(c):'')}">${(typeof CAMP_ICON!=='undefined'&&CAMP_ICON[c.camp||(typeof campOf==='function'?campOf(c):'')])||''}</div>
     <div class="tf-name">${dispName(c.name)}</div>
     <div class="tf-pow"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${c.chaosPow?'?':((c.pow||0)+(c._bo||0))}</div>
     <div class="tf-kd"><span class="k">${_kd.k}K</span>/<span class="d">${_kd.d}D</span>${isPristine(c)?' ◈':''}</div>
