@@ -3749,6 +3749,9 @@ function renderDeckMasterAbilityStrip(){
 let divinerBonusNext = 0;
 let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + lingering supports); each {name,pow}; persists until an enemy card is killed
 function remnantPowSum(){ return deathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
+let oppDeathRemnants = [];   // 7/24/26: bot-side mirror -- was missing entirely, Korrin's kit was inert bot-side (see note above applyBotDeckMasterResolveEffects)
+function oppRemnantPowSum(){ return oppDeathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
+let oppDmRemnantPowOverride = null;   // bot-side mirror of dmRemnantPowOverride
 const REMNANT_POW = {'Arch-Grim Korrin':8,'Summoned Skull Soldiers':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk "Gnarly" Judarr':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5,'Grave-Warden':3};
 const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5};   // PROACTIVE: raise a Death Remnant on commit — no death needed
 const RALLY = {'Bannerlord Cassian':5,'Ironsworn Vanguard':3,'Warden of the Wall':3,'Oathkeeper Sena':3,'Oathbound Shield':3,'Sworn Duelist':3,'Shieldwall Recruit':3};   // MUSTER: +N power per 1-COST ally (1-cost called supports this duel + 1-cost cards in Winners Circle)
@@ -6446,6 +6449,25 @@ function applyDeckMasterCommitEffects(pc){
     });
   }
 }
+// Bot-side mirror of applyDeckMasterCommitEffects -- built 7/24/26 to close the Korrin bot-AI gap
+// documented above applyBotDeckMasterResolveEffects. Called once from resolve(), right after
+// oppPow's baseline is set (so a remnant raised THIS commit doesn't retroactively inflate this
+// duel's own base power -- matches the player-side timing even though bot commit/resolve collapse
+// into one function call here). Tier-2 vanilla draw is deliberately not mirrored -- Korrin's own
+// kit (the actual scope of this fix) only uses the tier-1 raiseRemnant/deathLingerBuffOverride keys.
+function applyBotDeckMasterCommitEffects(oc){
+  if(!activeBot || !activeBot.dmCard || !oc) return;
+  var tier = conjureTierOf(oc, activeBot.dmCard);
+  if(tier===1){
+    (DM_EXCLUSIVE[oc.name]||[]).forEach(function(r){
+      if('raiseRemnant' in r && typeof oppDeathRemnants!=='undefined'){
+        var amt = (r.raiseRemnant==='self_pow') ? (oc.pow||0) : (r.raiseRemnant||0);
+        oppDeathRemnants.push({name:oc.name, pow:amt});
+      }
+      if('deathLingerBuffOverride' in r){ oppDmRemnantPowOverride = r.deathLingerBuffOverride; }
+    });
+  }
+}
 // Deck Master Phase D — RESOLVE-time pieces: pure power math (tier 1 Cassian, tier 2 Muster/Bryn,
 // tier 3 universal splash), same category as the existing RALLY / Conduit-Adept-style effects that
 // already live inside resolve() rather than commitCard(). Filters to power-math-only rule keys so a
@@ -7072,7 +7094,8 @@ function applyCardRules(name, ctx, playerPow, oppPow, abilLog, stepSink, isOpp){
 }
 function resolve(pc, oc, cond, playerCommittedPow){
   let playerPow = playerCommittedPow != null ? playerCommittedPow : ((pc.pow||0)+(pc._bo||0)+(pc.name==='Conduit of Chaos, Kleydson'?2*banishPile.length:0));
-  let oppPow = oc.pow;
+  let oppPow = oc.pow + (typeof oppRemnantPowSum==='function' ? oppRemnantPowSum() : 0);
+  if(typeof applyBotDeckMasterCommitEffects==='function') applyBotDeckMasterCommitEffects(oc);
 
   const abilLog = [];
   // ── resolution-cinematic capture: each power change becomes a structured step ──
@@ -7175,7 +7198,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     if(typeof applyDeckMasterResolveEffects==='function'){ RS._inRules=true; var _dmr=applyDeckMasterResolveEffects(pc,playerPow,oppPow,abilLog,RS); playerPow=_dmr[0]; oppPow=_dmr[1]; RS._inRules=false; RS._resync(); }
     /* BOT fighter fires its OWN on-commit ability — bot-centric ctx, pow args swapped so its +power lands on the bot */
     if(oc && oc.name && (typeof CARD_RULES!=='undefined') && CARD_RULES[oc.name] && CARD_RULES[oc.name].length){
-      var _octx={opp_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_pow:pc.pow,pc_pow:oc.pow,last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)),match_commits:matchCommits,player_wins:playerScore[1],player_losses:playerScore[0],hand_len:(typeof oppHandBot!=='undefined'?oppHandBot.length:0),wc_len:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0),skullchain:0,ragwing:0,chaos:(cond.tag==='chaos'),banish_len:(typeof oppBanishBot!=='undefined'?oppBanishBot.length:0),remnant_count:0,deck_len:(typeof oppDeckBot!=='undefined'?oppDeckBot.length:0),both_wc:(((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+winnersCircle.length),rear_count:((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0),wc_names:((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot):[]),hand_banished:oppHandBanishedThisTurn};
+      var _octx={opp_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_pow:pc.pow,pc_pow:oc.pow,last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)),match_commits:matchCommits,player_wins:playerScore[1],player_losses:playerScore[0],hand_len:(typeof oppHandBot!=='undefined'?oppHandBot.length:0),wc_len:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0),skullchain:0,ragwing:0,chaos:(cond.tag==='chaos'),banish_len:(typeof oppBanishBot!=='undefined'?oppBanishBot.length:0),remnant_count:(typeof oppDeathRemnants!=='undefined'?oppDeathRemnants.length:0),deck_len:(typeof oppDeckBot!=='undefined'?oppDeckBot.length:0),both_wc:(((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+winnersCircle.length),rear_count:((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0),wc_names:((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot):[]),hand_banished:oppHandBanishedThisTurn};
       RS._inRules=true; var _ov=applyCardRules(oc.name,_octx,oppPow,playerPow,abilLog,RS,true); oppPow=_ov[0]; playerPow=_ov[1]; RS._inRules=false; RS._resync();
     }
     if(typeof applyBotDeckMasterResolveEffects==='function'){ RS._inRules=true; var _bdm=applyBotDeckMasterResolveEffects(oc,playerPow,oppPow,abilLog,RS); playerPow=_bdm[0]; oppPow=_bdm[1]; RS._inRules=false; RS._resync(); }
@@ -7254,6 +7277,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
 
   // ── RESOLUTION EFFECTS ──
   const isDeathRemnant = pc.abil.includes('Death Remnant');
+  const isOppDeathRemnant = (oc.abil||'').includes('Death Remnant');
   const isShellward = /last stand/i.test(pc.abil||'');   // Bram, Torvald, Calla, Hanse Waltz — any Last Stand fighter
   const isAhdor = pc.name === 'Ahdorah Khaan, Determined Soul';
 
@@ -7328,6 +7352,12 @@ function resolve(pc, oc, cond, playerCommittedPow){
       deathRemnants = [];
       _deferField = function(){ document.getElementById('player-field').innerHTML = '<span class="placeholder">remnant cleared</span>'; };
     }
+    if(isOppDeathRemnant){
+      var _orp=(typeof oppDmRemnantPowOverride!=='undefined'&&oppDmRemnantPowOverride!=null)?oppDmRemnantPowOverride:((typeof REMNANT_POW!=='undefined'&&REMNANT_POW[oc.name]!=null)?REMNANT_POW[oc.name]:oc.pow);
+      oppDmRemnantPowOverride=null;
+      oppDeathRemnants.push({name:oc.name, pow:_orp});
+      abilLog.push('☠ Opp '+oc.name+' falls — bot Death Remnant active (+'+_orp+', '+oppDeathRemnants.length+' on field)');
+    }
     playerScore[0]++;
     // 7/22/26: decide the real destination FIRST, then build the headline off it. Previously
     // sub.textContent was hardcoded to "to Winners Circle" above, before any of the branches
@@ -7353,6 +7383,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   } else if(won === 'lose'){
     label.textContent = 'DUEL LOST';
     label.className = 'result-label lose';
+    if(typeof oppDeathRemnants!=='undefined' && oppDeathRemnants.length>0){ abilLog.push('☠ Opp Remnants disperse — your card was killed'); oppDeathRemnants=[]; }
     lastResult = 'lose';
     playerScore[1]++;
     charge=Math.min(duelEnergyCap(),charge+1); if(typeof renderCharge==='function') renderCharge();
@@ -12144,7 +12175,7 @@ function resetMatchState(){
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[];
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
-  banishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; divinerBonusNext=0; deathRemnants=[]; lastResult=null; matchCommits=0; skullchainKills=0;
+  banishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
   charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
@@ -13002,7 +13033,7 @@ function oppEvalPow(card){
       wc_len:(typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0,
       both_wc:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+((typeof winnersCircle!=='undefined')?winnersCircle.length:0),
       banish_len:(typeof oppBanishBot!=='undefined')?oppBanishBot.length:0,
-      remnant_count:0, rear_count:0, skullchain:0, ragwing:0,
+      remnant_count:(typeof oppDeathRemnants!=='undefined'?oppDeathRemnants.length:0), rear_count:0, skullchain:0, ragwing:0,
       deck_len:(typeof oppDeckBot!=='undefined')?oppDeckBot.length:0,
       chaos:(typeof cond!=='undefined'&&cond&&cond.tag==='chaos')
     };
