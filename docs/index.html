@@ -2408,13 +2408,22 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <button class="navitem" id="nav-market" onclick="show('market',this)"><span class="ni-icon">⚖</span><span class="brand-text">Marketplace</span></button>
       </div>
     </div>
-    <div class="nav-group" id="grp-codex">
-      <button class="nav-grp-head" onclick="toggleNavGroup('grp-codex')"><span class="ni-icon">📖</span><span class="brand-text">Codex</span><span class="grp-chev brand-text">▾</span></button>
+    <div class="nav-group" id="grp-reference">
+      <button class="nav-grp-head" onclick="toggleNavGroup('grp-reference')"><span class="ni-icon">📜</span><span class="brand-text">Reference</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
-        <button class="navitem" id="nav-legend" onclick="show('legend',this)"><span class="ni-icon">🏆</span><span class="brand-text">Legend Board</span></button>
         <button class="navitem" id="nav-conds" onclick="show('conds',this)"><span class="ni-icon">🎲</span><span class="brand-text">Conditions</span></button>
         <button class="navitem" id="nav-abil" onclick="show('abil',this)"><span class="ni-icon">✦</span><span class="brand-text">Abilities</span></button>
         <button class="navitem" id="nav-growth" onclick="show('growth',this)"><span class="ni-icon">🌱</span><span class="brand-text">Card Growth</span></button>
+      </div>
+    </div>
+    <!-- 7/22/26: split the old single "Codex" group (7 items -- rules reference mixed in with
+         personal stats/history) into these two, so each group is one coherent kind of thing
+         rather than a catch-all. Also fixes an icon collision: Codex and Side Stories both used
+         📖 before this. -->
+    <div class="nav-group" id="grp-records">
+      <button class="nav-grp-head" onclick="toggleNavGroup('grp-records')"><span class="ni-icon">📊</span><span class="brand-text">Records</span><span class="grp-chev brand-text">▾</span></button>
+      <div class="nav-sub">
+        <button class="navitem" id="nav-legend" onclick="show('legend',this)"><span class="ni-icon">🏆</span><span class="brand-text">Legend Board</span></button>
         <button class="navitem" id="nav-match" onclick="show('match',this)"><span class="ni-icon">◷</span><span class="brand-text">Match Arc</span></button>
         <button class="navitem" id="nav-dna" onclick="show('dna',this)"><span class="ni-icon">🧬</span><span class="brand-text">Card DNA</span></button>
         <button class="navitem" id="nav-replay" onclick="show('replay',this)"><span class="ni-icon">▶</span><span class="brand-text">Match Replay</span></button>
