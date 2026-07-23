@@ -3617,8 +3617,13 @@ let banishSurge = 0;
 let dmAbilityUsedThisMatch = false, dmNextConjureBonus = 0;
 let dmNextConjureDouble = false;   // Ourevos DM skill: your next conjure's power is doubled
 let dmAhdorahBonusPending = false;   // Ahdorah Khaan DM skill: draw 2 if the opponent calls 0 supports this duel — checked post-resolve since supports aren't known at activation time
+// 7/23/26: a Deck Master gets ONE bonus mechanism, not a passive (DM_EXCLUSIVE) AND an activated
+// ability stacked on top -- Bannerlord Cassian, Arch-Grim Korrin, and Tange Sazen all used to have
+// both, found while investigating a direct "Korrin has 2 deckmaster abilities, that's too strong"
+// report. The passive stays (it's the card's always-on identity); the activated duplicate is
+// removed here rather than left dead-but-present, so a future edit can't accidentally re-enable
+// it. See DM_EXCLUSIVE below for what each of these 3 cards' one real bonus is.
 const DM_ACTIVATED_ABILITY = {
-  'Bannerlord Cassian': {draw:1, nextConjureBonus:5, log:'Rally the Line'},
   'Broodmother':        {draw:1, nextConjureBonus:5, log:"The Brood Answers"},
   'Kiana':              {draw:1, nextConjureBonus:5, log:'Wings in the Dark'},
   'Kravyn the Collector': {log:'Collector\u2019s Due', desc:'shuffle your banish zone into your deck, your next conjure +2, units you win a duel with this turn return to hand instead of the Winners Circle', run:function(){
@@ -3657,23 +3662,10 @@ const DM_ACTIVATED_ABILITY = {
       if(typeof toast==='function') toast('\ud83c\udf11 Blood Moon Rising \u2014 hand was 3 or fewer, drew 2 and gained 2 Charge', true);
     } else if(typeof toast==='function') toast('\ud83c\udf11 Blood Moon Rising \u2014 hand has more than 3 cards, no effect', false);
   }},
-  'Arch-Grim Korrin': {log:'The Unburied Throne \u2014 Reap', desc:'raise a Death Remnant equal to your lowest-power supporting unit, then scry 1 at the end of your turn', run:function(){
-    var _agLowest = null;
-    rearGuardIdxs.forEach(function(ix){ var s=hand[ix]; if(s && (_agLowest===null || (s.pow||0)<_agLowest)) _agLowest=(s.pow||0); });
-    deathRemnants.push({name:'Arch-Grim Korrin', pow:_agLowest||0});
-    if(typeof toast==='function') toast('\ud83d\udc7b Arch-Grim Korrin \u2014 raised a Death Remnant at '+(_agLowest||0)+' power', true);
-    scryOne();
-  }},
   'Ghorruk "Gnarly" Judarr': {log:'Boneyard Rising', desc:"raise a Death Remnant equal to your hand size plus your banish zone size", run:function(){
     var _gp = hand.length + banishPile.length;
     deathRemnants.push({name:'Ghorruk "Gnarly" Judarr', pow:_gp});
     if(typeof toast==='function') toast('\ud83d\udc80 Ghorruk \u2014 raised a Death Remnant at '+_gp+' power', true);
-  }},
-  'La "La" Ballora, the Broodqueen': {log:"The Broodqueen's Reckoning", desc:'your next conjure gains +2 power per card in both Winners Circles, then draw 1 and bank a hand card to your Winners Circle', run:function(){
-    var _lbTotal = winnersCircle.length + (typeof oppWC!=='undefined'?oppWC:0);
-    dmNextConjureBonus = (dmNextConjureBonus||0) + 2*_lbTotal;
-    drawToHand(1);
-    if(hand.length){ var _lbi=Math.floor(Math.random()*hand.length); winnersCircle.push(hand.splice(_lbi,1)[0]); if(typeof buildHand==='function') buildHand(); }
   }},
   'Conduit of Chaos, Kleydson': {log:'Greater Chaos', desc:'permanently upgrade to the full Chaos Trinity (Draw Surge, Godhand, Sorn-Vallis Shift) for the rest of the match, gain 2 Charge', run:function(){
     energyLoadoutOverride = ['drawsurge','godhand','sornshift'];
@@ -3717,12 +3709,6 @@ const DM_ACTIVATED_ABILITY = {
   'Ahdorah Khaan, Determined Soul': {log:'Record Guard \u2014 Denial', desc:"nullify the opponent's called supports this duel; if they called none at all, draw 2", run:function(){
     dmNullifyOppSupportsThisDuel = true;
     dmAhdorahBonusPending = true;
-  }},
-  'Tange Sazen': {log:'Warpath Ascendant — Vengeance', desc:'if your opponent has 2 or more round wins, draw 1', run:function(){
-    if((playerScore[1]||0) >= 2){
-      var _tsd = drawToHand(1);
-      if(typeof toast==='function') toast('⚔ Tange Sazen — opponent has 2+ round wins, drew '+_tsd, true);
-    } else if(typeof toast==='function') toast('⚔ Tange Sazen — opponent has fewer than 2 round wins, no effect', false);
   }}
 };
 function activateDeckMasterAbility(){
