@@ -3371,7 +3371,7 @@ const COND_EFF = {
 
 const HAND_CARDS = [
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, and +3 if you lost your last duel. The whole effect repeats for every round this match has completed.'},
-  {name:'Uso Oso',pow:14,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant +6; When this card is conjured, call a "Oso\'s skeletal summons" from outside of your deck to an open support circle.'},
+  {name:'Uso Oso',pow:14,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant +6; When this card is conjured, call a "Oso\'s skeletal summons" from outside of your deck to an open support circle. On commit: raise a +2 Death Remnant, no death needed. The Bulwark of Bones: while you hold 3+ Remnants, a loss becomes a tie instead.'},
   {name:'Tannis',pow:10,kills:0,deaths:0,rarity:'uncommon',timing:'instant',abil:'⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.'},
   {name:'Bixie Bee',pow:13,kills:0,deaths:0,rarity:'common',timing:'on',abil:''},
   {name:'Veronica',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: copy opponent\'s card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability.'},
@@ -3762,7 +3762,7 @@ let oppDeathRemnants = [];   // 7/24/26: bot-side mirror -- was missing entirely
 function oppRemnantPowSum(){ return oppDeathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
 let oppDmRemnantPowOverride = null;   // bot-side mirror of dmRemnantPowOverride
 const REMNANT_POW = {'Arch-Grim Korrin':8,'Summoned Skull Soldiers':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk "Gnarly" Judarr':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5,'Grave-Warden':3};
-const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5};   // PROACTIVE: raise a Death Remnant on commit — no death needed
+const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5,'Uso Oso':2};   // PROACTIVE: raise a Death Remnant on commit — no death needed. Uso Oso added 7/24/26, Stage 1 of "The Bulwark of Bones"
 const RALLY = {'Bannerlord Cassian':5,'Ironsworn Vanguard':3,'Warden of the Wall':3,'Oathkeeper Sena':3,'Oathbound Shield':3,'Sworn Duelist':3,'Shieldwall Recruit':3};   // MUSTER: +N power per 1-COST ally (1-cost called supports this duel + 1-cost cards in Winners Circle)
 const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk "Gnarly" Judarr','Sister Mire','Kiba','Grave-Fed Ghoul','Bone Choirmaster','Gravecaller Voss',"Uso Oso's Skeletal Summons"];
 let lastResult = null;
@@ -3827,7 +3827,7 @@ const OPP_CARDS = [
   // resolve a genuine 16-card themed deck instead of silently padding with unrelated random cards. ──
   // (Ghorruk "Gnarly" Judarr already existed above at pow:16/ultra — not duplicated here.)
   {name:'Summoned Skull Soldiers',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +7 to your cards until an enemy dies. On commit: +3 power for each Remnant you hold.'},
-  {name:'Uso Oso',pow:14,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:"Death Remnant +6; When this card is conjured, call a \"Oso's skeletal summons\" from outside of your deck to an open support circle."},
+  {name:'Uso Oso',pow:14,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:"Death Remnant +6; When this card is conjured, call a \"Oso's skeletal summons\" from outside of your deck to an open support circle. On commit: raise a +2 Death Remnant, no death needed. The Bulwark of Bones: while you hold 3+ Remnants, a loss becomes a tie instead."},
   {name:"Uso Oso's Skeletal Summons",pow:5,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:"Death Remnant: these bones don't stay down — when the summons falls it lingers on the field, +5 to your committed cards until an opponent's card is killed."},
   {name:'Bone Choirmaster',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +5 to your cards until an enemy dies. On a win, draw a card.'},
   {name:'Marrow Priest',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Support: your Fighter +3; if a Remnant is on the field, draw a card.'},
@@ -7385,6 +7385,12 @@ function resolve(pc, oc, cond, playerCommittedPow){
   }
 
   if(won === 'lose' && spellShield){ glacialForcedTie = true; won = 'tie'; abilLog.push('\ud83d\udee1 Ledger Ward: death negated \u2014 no loss written'); }
+  // 7/24/26: Uso Oso's "Bulwark of Bones" -- Stage 2 of the Deathless wall mechanic. Deliberately a
+  // forced-tie check (same shape as Ahdor's Record Guard/Untouchable/Ledger Ward above), NOT a
+  // separate remnant-clear suppression -- forcing a tie here means resolve()'s win branch (which
+  // clears deathRemnants) and lose branch (which would push pc as a new remnant) both never run for
+  // this duel, so "Remnants persist" falls out for free from the existing branch structure.
+  if(won === 'lose' && pc.name === 'Uso Oso' && typeof deathRemnants!=='undefined' && deathRemnants.length>=3){ glacialForcedTie = true; won = 'tie'; abilLog.push('\ud83e\uddb4 The Bulwark of Bones: 3+ Remnants held \u2014 the loss is denied, duel ties instead'); }
   const overlay = document.getElementById('result-overlay');
   const label = document.getElementById('result-label');
   const sub = document.getElementById('result-sub');
