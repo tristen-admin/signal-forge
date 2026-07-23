@@ -3451,6 +3451,15 @@ const DECK_POOL = [
   {name:"Writ-Sergeant's Ledger",pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), gain 1 Charge. [Tosa Pact]'},
   {name:'Fenrik Vench',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"A causeway-lord's son, first to prove himself against you in the yard. On commit: +3 power if you have lost a duel this match — the rivalry sharpens him."},
   {name:'Yard Sparring Partner',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3.'},
+  // Charge economy pass, 7/24/26 -- one on-commit + one support card per starved archetype (Black Wings, Black Council, Radiance, Warpath)
+  {name:"Pyre-Keeper's Apprentice",pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), gain 1 Charge.'},
+  {name:'Court Cipher',pow:7,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), gain 1 Charge if the active condition is locked this turn.'},
+  {name:'Lumen Acolyte',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: gain 1 Charge.'},
+  {name:'Oathlit Attendant',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), gain 1 Charge.'},
+  {name:'Trophy Runner',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:"As a support (Called), gain 1 Charge if you've earned a kill this match."},
+  // Skyward Trilogy tech piece, 7/24/26 -- occasional deckbuilding option, not archetype-specific, not systemic
+  {name:'Trilogy Ward',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: +5 power if your card's camp beats the opponent's on the Skyward Trilogy wheel (Amageras>Omitsuki>Kitanoo>Amageras). Same camp on both sides: no bonus."},
+  {name:'Oathlit Vanguard',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power while you remain undefeated this match — gone the moment you take your first loss.'},
   // Uncommons
   {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: if 3rd+ commit this match, +5 power. Returns from Winners Circle: banish from hand to curse opponent\'s next committed card −10 power.'},
   {name:'Hanse Waltz',pow:15,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.'},
@@ -3486,7 +3495,7 @@ const DECK_POOL = [
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel. Repeat this effect if you have 1 or fewer support units this battle.'},
   {name:'Legend Reborn, Keawe Kel\'rua',pow:13,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 15 or higher from your deck to your hand, and reduce its cost by 1.'},
   {name:'Rhaess Korvain',pow:13,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish the top card of your deck, then +2 power for every card in your banish zone.'},
-  {name:'Black Wings, Ossian Drell',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone.'},
+  {name:'Black Wings, Ossian Drell',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone. If you banished a card from your hand this turn, also +2 power for every card in your hand.'},
   {name:'Corvus',pow:17,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Raven's Feast: on commit, banish the top 2 cards of your deck, then +2 power for every card in your banish zone."},
   {name:'Wren',pow:9,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wingmate: on commit, return a banished card to your hand, then +4 power — Wren never leaves one behind.'},
   {name:'Rook',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Scout: on commit, banish the top card of your deck, then +1 power for every card in your banish zone.'},
@@ -3520,7 +3529,7 @@ const DECK_POOL = [
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you are down 2 or more duels this match, double this card\'s power.'},
   {name:'Kiba',pow:2,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: when Kiba dies it stays on field. Your cards here gain +2 power until an opponent\'s card is killed, then Remnant is removed.'},
   {name:'Malia',pow:10,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: your power becomes the opponent\'s committed card power for this duel.'},
-  {name:'Moro',pow:14,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: if opponent\'s card has 6+ career kills, gain +3 power.'},
+  {name:'Moro',pow:19,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Royal Bearing: on commit, if your Deck Master\'s printed power is higher than Moro\'s current total, borrow it. Then +3 power — the crown\'s power is always present.'},
   {name:'Zerith Var',pow:19,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2; if your opponent\'s base power is higher, +4 power.'},
   
   {name:'Anorith Keeling',pow:1,cost:4,chaosPow:true,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Chaos Deity — its base power is a question mark, determined by the number of duels completed prior to Anorith being conjured multiplied by the number of cards in hand. On commit, warp every spell in your deck into the Chaos Trinity: Draw Surge (2⚡ draw 3, banish 1), Godhand (1⚡ your card +10), and Sorn-Vallis Shift (3⚡ warp the location to Sorn-Vallis — lowest power wins).'},
@@ -3533,7 +3542,7 @@ const DECK_POOL = [
   {name:'Grave-Tithe Acolyte',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: banish the top card of your deck, then +5 power.'},
   {name:'Ashen Reclaimer',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: return a banished card to your hand with +3 power.'},
   {name:'Cinder-Marked Hound',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your banish zone.'},
-  {name:'The Black Ledger',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish 2 cards from your hand, then draw 2.'},
+  {name:'The Black Ledger',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish 2 random cards from your hand, then draw 1.'},
   {name:'Pyre-Keeper Vayle',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power while 2 or more cards are banished.'},
   {name:'Hollow Mendicant',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Support: banish a card from your hand; your Fighter +4.'},
   // ── THE DEATHLESS (Death Remnants linger + draw to replenish) ──
@@ -4726,6 +4735,7 @@ function activatePre(i){
   if(c.timing !== 'pre') return;
   if(c.name === 'Cletus Gwyndull'){
     conditionLocked = true;
+    charge=Math.min(duelEnergyCap(),charge+1); if(typeof renderCharge==='function') renderCharge();   // 7/24/26: charge economy pass -- gain 1 Charge when you lock the condition
     hand.splice(i, 1);
     deckSize++; // goes to deck bottom
     const eyebrow = document.getElementById('cond-eyebrow');
@@ -4891,6 +4901,10 @@ const CALLED = {
   "Barracks Drill Sergeant":             {text:"your Fighter +2", add:2},
   "Writ-Sergeant's Ledger":              {text:"gain 1 Charge", chargeGain:1},
   "Yard Sparring Partner":               {text:"your Fighter +3", add:3},
+  "Pyre-Keeper's Apprentice":            {text:"gain 1 Charge", chargeGain:1},
+  "Court Cipher":                        {text:"gain 1 Charge if condition locked", chargeGainIfLocked:1},
+  "Oathlit Attendant":                   {text:"gain 1 Charge", chargeGain:1},
+  "Trophy Runner":                       {text:"gain 1 Charge if you've won a duel this match", chargeGainIfWon:1},
   "Legend Reborn, Keawe Kel'rua":        {text:"destroy and nullify the opposing support in the mirrored slot, if there is no card to destroy, give your fighter +3 instead.", snipeSupport:true},
   // Support buff scales INVERSE to conjure cost: ⚡1=+5, ⚡2=+4, ⚡3=+3, ⚡4=+2 (cheap body = better support). Utility/recur/draw Calleds unchanged.
   "Kaelthar the Ascendant":        {text:"your Fighter +2", add:2},
@@ -5087,6 +5101,9 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
   // chargeGain effect correctly benefits whichever side triggered it, instead of being skipped
   // bot-side as it was when bots had no energy resource at all.
   if(e.chargeGain){ if(isOpp){ oppCharge=Math.min(duelEnergyCap(),oppCharge+e.chargeGain); } else { charge=Math.min(duelEnergyCap(),charge+e.chargeGain); if(typeof renderCharge==="function") renderCharge(); } }
+  // 7/24/26: charge economy pass -- conditional variants, same naming convention as projectCalled's addIfWon/addIfLost.
+  if(e.chargeGainIfWon && (ctx.wins||0)>0){ if(isOpp){ oppCharge=Math.min(duelEnergyCap(),oppCharge+e.chargeGainIfWon); } else { charge=Math.min(duelEnergyCap(),charge+e.chargeGainIfWon); if(typeof renderCharge==="function") renderCharge(); } }
+  if(e.chargeGainIfLocked && typeof conditionLocked!=='undefined' && conditionLocked){ if(isOpp){ oppCharge=Math.min(duelEnergyCap(),oppCharge+e.chargeGainIfLocked); } else { charge=Math.min(duelEnergyCap(),charge+e.chargeGainIfLocked); if(typeof renderCharge==="function") renderCharge(); } }
   if(e.spellDiscountGain && !isOpp && typeof spellDiscount!=='undefined'){ spellDiscount+=e.spellDiscountGain; }   // bot never casts spells -- correctly player-only
   if(e.draw){
     if(!isOpp){ drawToHand(e.draw); }
@@ -5648,9 +5665,19 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   rearGuardIdxs=[];
   // ── conjure summons ──
   if(typeof RAISE_REMNANT!=='undefined' && RAISE_REMNANT[pc.name]!=null){ if(pc.name==='Gravecaller Voss' && typeof banishFromHand==='function') banishFromHand(1); if(typeof deathRemnants!=='undefined') deathRemnants.push({name:pc.name, pow:RAISE_REMNANT[pc.name]}); if(typeof updatePiles==='function') updatePiles(); if(typeof toast==='function') toast('☠ '+pc.name+' raises a +'+RAISE_REMNANT[pc.name]+' Death Remnant — no death needed.', true); }
-  { var _btmap={'Corvus':2,'Rook':1,'Grave-Tithe Acolyte':1,'Rhaess Korvain':1}; var _btn=_btmap[pc.name]; if(_btn){ for(var _bti=0;_bti<_btn && drawPile.length;_bti++) banishPile.push(drawPile.pop()); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof updatePiles==='function') updatePiles(); } }
+  { var _btmap={'Corvus':2,'Rook':1,'Grave-Tithe Acolyte':1,'Rhaess Korvain':1}; var _btn=_btmap[pc.name];
+    // 7/24/26: Black Wings consequence lever -- self-banish-from-deck generates its own scaling fuel
+    // for free today; Corvus/Rhaess Korvain/Grave-Tithe Acolyte now tax that with 1 Charge (Rook is
+    // NOT in this list -- not named in the balance pass, left as-is). No Charge = the banish simply
+    // doesn't happen this commit -- never a forced negative Charge.
+    var _btTaxed={'Corvus':1,'Grave-Tithe Acolyte':1,'Rhaess Korvain':1};
+    if(_btn && _btTaxed[pc.name]){
+      if(charge>=1){ charge-=1; if(typeof renderCharge==='function') renderCharge(); }
+      else { _btn=0; abilLog.push('⚡ '+pc.name+' — not enough Charge, self-banish fizzles'); }
+    }
+    if(_btn){ for(var _bti=0;_bti<_btn && drawPile.length;_bti++) banishPile.push(drawPile.pop()); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof updatePiles==='function') updatePiles(); } }
   if(pc.name==='Kiana' && typeof banishFromHand==='function'){ banishFromHand(1); }
-  if(pc.name==='The Black Ledger'){ if(typeof banishFromHand==='function') banishFromHand(2); if(typeof drawToHand==='function') drawToHand(2); }
+  if(pc.name==='The Black Ledger'){ if(typeof banishFromHand==='function') banishFromHand(2); if(typeof drawToHand==='function') drawToHand(1); }   // 7/24/26: draw nerfed 2->1, banish stays random (explicit exception to the player-choice default)
   if(pc.name==='Ashen Reclaimer' && banishPile.length){ var _ar=banishPile.pop(); _ar._bo=(_ar._bo||0)+3; hand.push(_ar); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==="Hoarder's Gambit" && typeof drawToHand==='function'){ drawToHand(2); }
   if(pc.name==='Arch-Grim Korrin' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(deathRemnants.length); }
@@ -6189,7 +6216,7 @@ const LINK_GROUPS = [
   {id:'dragon',  name:'Dragon-Pact',     icon:'🐉', pow:1, members:['Tange Sazen','Ourevos, the Golden Dragon','Kiba','Conduit of Chaos, Kleydson','Kaelthar the Ascendant']},
   {id:'waltz',   name:'Waltz Twins',     icon:'🐺', pow:1, members:['Lagertha Waltz','Hanse Waltz','Lagertha Waltz, Wrathful Transformation','The Bronzed Beast, Hanse Waltz','Kessuae, Tide of Ruin']},
   {id:'tosa',    name:'Tosa Pact',      icon:'🤝', pow:1, members:['Cletus Gwyndull']},
-  {id:'blackwings', name:'The Black Wings', icon:'🖤', pow:1, members:['Black Wings, Ossian Drell','Kiana','Corvus','Wren','Rook','Falk','Sable','Rhaess Korvain','The Black Ledger','Tannis','Wingblade Scout','Feather-Marked Skirmisher','Squad-Captain Vesk']},
+  {id:'blackwings', name:'The Black Wings', icon:'🖤', pow:1, members:['Black Wings, Ossian Drell','Kiana','Corvus','Wren','Rook','Falk','Sable','Rhaess Korvain','The Black Ledger','Tannis','Wingblade Scout','Feather-Marked Skirmisher','Squad-Captain Vesk',"Pyre-Keeper's Apprentice"]},
   {id:'ironsworn', name:'The Ironsworn', icon:'✊', pow:2, members:['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh']},
 {id:'legend',  name:'Split Legend',    icon:'✨', pow:1, members:['Kotei','Ahdorah Khaan, Determined Soul','Conduit of Chaos, Kleydson','Anorith Keeling','Anorith Prime','Courtroom Colossus']},
 ];
@@ -6331,7 +6358,10 @@ const ARCHETYPE_MEMBERS = {
   // corrected against real rarity data: Bloodwake Duelist/First-Blood Squire are Common (tier 4, not
   // tier 2); Ruffius Rufeldro/Bram the Bulwark are Rare and NOT proven cross-deck generic (only
   // appear in Warpath's own preset), so they belong here instead.
-  'Warpath': ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bram the Bulwark']
+  'Warpath': ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bram the Bulwark'],
+  // Added 7/24/26 for the Consecrated Reserve charge-economy pass -- non-Common only, excludes
+  // King Joris/Ruffius Rufeldro/Bram the Bulwark (cross-deck, already claimed by Warpath above).
+  'Radiance': ['Moro','Elowen Dawnspear','Kaelthar the Ascendant','Oathlit Vanguard']
 };
 function archetypeOf(cardName){
   for(var arch in ARCHETYPE_MEMBERS){ if(ARCHETYPE_MEMBERS[arch].indexOf(cardName)>=0) return arch; }
@@ -6391,7 +6421,11 @@ const ARCHETYPE_VANILLA = {
   // bonus, distinct from each member's own varied per-card-scaling ability.
   'Broodswarm': [{"if":{"v":"hand_len","op":">=","n":4},"add":2,"log":"🕷 Brood Instinct: +2 power with 4 or more cards in hand"}],
   // Kravyn gets the same empty-WC theme as Tange's exclusive, at a smaller vanilla-tier rate.
-  'Warpath': [{"if":{"v":"wc_len","op":"==","n":0},"add":4,"log":"⚔ Warpath's Momentum: your Winners Circle is empty — +4 power"}]
+  'Warpath': [{"if":{"v":"wc_len","op":"==","n":0},"add":4,"log":"⚔ Warpath's Momentum: your Winners Circle is empty — +4 power"}],
+  // Consecrated Reserve, 7/24/26 -- replaces the withdrawn Pristine-based "Radiant Bearing" spine
+  // (see BALANCE_PROPOSALS.md Rev.3). Charge-centric, not Pristine-centric; pairs with this same
+  // pass's Lumen Acolyte/Oathlit Attendant charge-generation pieces.
+  'Radiance': [{"addvar":"charge_capped","x":1,"log":"✨ Consecrated Reserve: +1 per Charge held (capped +4)"}]
 };
 const DM_VANILLA_OVERRIDE = {
   // her signature draw stays stronger than the archetype baseline (draws 2, not 1)
@@ -6478,6 +6512,7 @@ function applyDeckMasterResolveEffects(pc, playerPow, oppPow, abilLog, stepSink)
   var tier = conjureTierOf(pc, deckMasterCard);
   var ctx = {rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0), wc_len:(typeof winnersCircle!=='undefined'?winnersCircle.length:0), hand_len:(typeof hand!=='undefined'&&hand?hand.length:0)};
   ctx.dm_all_allies = ctx.rear_count + ctx.wc_len;
+  ctx.charge_capped = Math.min(4, typeof charge!=='undefined'?charge:0);   // 7/24/26: Consecrated Reserve (Radiance shared spine)
   if(tier===1){
     var r1 = applyRuleList((DM_EXCLUSIVE[pc.name]||[]).filter(_dmIsPowRule), ctx, playerPow, oppPow, abilLog, stepSink);
     playerPow=r1[0]; oppPow=r1[1];
@@ -6509,6 +6544,7 @@ function applyBotDeckMasterResolveEffects(oc, playerPow, oppPow, abilLog, stepSi
   var tier = conjureTierOf(oc, activeBot.dmCard);
   var ctx = {rear_count:(typeof pendingOppRears!=='undefined'&&pendingOppRears?pendingOppRears.filter(Boolean).length:0), wc_len:(typeof oppWonBot!=='undefined'&&oppWonBot?oppWonBot.size:0), hand_len:(typeof oppHandBot!=='undefined'&&oppHandBot?oppHandBot.length:0)};
   ctx.dm_all_allies = ctx.rear_count + ctx.wc_len;
+  ctx.charge_capped = Math.min(4, typeof oppCharge!=='undefined'?oppCharge:0);   // 7/24/26: Consecrated Reserve (Radiance shared spine), bot mirror
   if(tier===1){
     var r1 = applyRuleList((DM_EXCLUSIVE[oc.name]||[]).filter(_dmIsPowRule), ctx, oppPow, playerPow, abilLog, stepSink, true);
     oppPow=r1[0]; playerPow=r1[1];
@@ -6624,6 +6660,8 @@ const CARD_RULES = {
  "Ahdorah Khaan, Squad 19 Recruit": [{"if":{"v":"last_result","op":"==","s":"lose"},"add":3,"log":"🛡 Squad 19 Recruit: +3 (lost last)"}],
  "Cadet Corps Recruit": [{"if":{"or":[{"v":"match_commits","op":"==","n":1},{"v":"match_commits","op":"==","n":2}]},"add":3,"log":"⚔ Cadet Recruit: +3 (early duel)"}],
  "Fenrik Vench": [{"if":{"v":"player_losses","op":">","n":0},"add":3,"log":"⚔ Fenrik Vench: +3 (rivalry sharpens him)"}],
+ "Lumen Acolyte": [{"chargeGain":1,"log":"✨ Lumen Acolyte: gain 1 Charge"}],
+ "Oathlit Vanguard": [{"if":{"v":"player_losses","op":"==","n":0},"add":5,"log":"🛡 Oathlit Vanguard: +5 (undefeated this match)"}],
  "Silk-Spinner Drone": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"🕷 Swarm: +1×hand"}],
  "Web-Tender Matron": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"🕸 Swarm: +1×hand"}],
  "Brood-Tender": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"\ud83d\udd77 Swarm: +1\u00d7hand"}],
@@ -6749,17 +6787,6 @@ const CARD_RULES = {
   {
    "set": "opp_pow",
    "log": "🔄 Malia: power mirrors opponent"
-  }
- ],
- "Moro": [
-  {
-   "if": {
-    "v": "opp_kills",
-    "op": ">=",
-    "n": 6
-   },
-   "add": 3,
-   "log": "💀 Moro: +3"
   }
  ],
  "Zerith Var": [
@@ -7006,7 +7033,8 @@ const CARD_RULES = {
   { "addvar": "banish_len", "x": 1, "log": "🪶 Scout: +1×banish" }
  ],
  "Falk": [
-  { "addvar": "banish_len", "x": 2, "log": "🪶 Dive: +2×banish" }
+  { "addvar": "banish_len", "x": 2, "log": "🪶 Dive: +2×banish" },
+  { "if":{"v":"banish_len","op":">=","n":3}, "chargeGain":1, "log":"⚡ Dive: banish zone 3+ — gain 1 Charge" }
  ],
  "Wren": [
   { "add": 4, "log": "🪶 Wingmate: +4" }
@@ -7064,6 +7092,13 @@ function applyRuleList(rs, ctx, playerPow, oppPow, abilLog, stepSink, isOpp){
       if(_pool < r.energyCost){ abilLog.push((r.log||'Ability')+' — not enough energy, fizzles'); continue; }
       if(isOpp){ oppCharge-=r.energyCost; } else { charge-=r.energyCost; if(typeof renderCharge==='function') renderCharge(); }
     }
+    // 7/24/26: CARD_RULES-side charge gain (charge economy pass) -- mirrors CALLED's e.chargeGain,
+    // but per-rule and conditional (r.if already gated it above) rather than a flat always-fire field.
+    if('chargeGain' in r){
+      if(isOpp){ oppCharge=Math.min(duelEnergyCap(),oppCharge+r.chargeGain); }
+      else { charge=Math.min(duelEnergyCap(),charge+r.chargeGain); if(typeof renderCharge==='function') renderCharge(); }
+      if(r.log) abilLog.push(r.log);
+    }
     var _bp=playerPow, _bo=oppPow;
     if('add' in r) playerPow+=r.add;
     else if('addvar' in r) playerPow+=ctx[r.addvar]*(r.x||1);
@@ -7112,7 +7147,20 @@ function resolve(pc, oc, cond, playerCommittedPow){
   if(spellNullOpp) abilLog.push('\ud83d\udce1 Nullwave: opponent card ability suppressed this duel');
   { const _al = cond.id === 'abilitylock';
     if(!_al && pc.name === 'Conduit Adept'){ charge=Math.min(duelEnergyCap(),charge+1); abilLog.push('\u26a1 Conduit Adept: +1 Charge'); if(typeof renderCharge==='function') renderCharge(); }
-    if(!_al && pc.name === 'Voltcaller'){ spellDiscount += 2; abilLog.push('\u26a1 Voltcaller: your next Interrupt costs 2 less'); } }
+    if(!_al && pc.name === 'Voltcaller'){ spellDiscount += 2; abilLog.push('\u26a1 Voltcaller: your next Interrupt costs 2 less'); }
+    if(!_al && pc.name === 'Warpath Vanguard' && matchCommits===0){ divinerBonusNext+=1; abilLog.push('\u2694 Warpath Vanguard: +1 MAX Charge next turn (1st duel)'); }
+    if(!_al && pc.name === 'Trilogy Ward' && typeof effectiveCampOf==='function' && typeof campBeats==='function'){
+      var _twP=effectiveCampOf(pc,deckMasterCard), _twO=effectiveCampOf(oc,(typeof activeBot!=='undefined'&&activeBot)?activeBot.dmCard:null);
+      if(_twP!==_twO && campBeats(_twP,_twO)){ playerPow+=5; abilLog.push('\ud83d\udd31 Trilogy Ward: '+_twP+' overwhelms '+_twO+' \u2014 +5'); }
+      else abilLog.push('\ud83d\udd31 Trilogy Ward: no camp advantage this duel \u2014 no bonus');
+    }
+    if(!_al && pc.name === 'Moro'){
+      if(deckMasterCard && deckMasterCard!==pc.name){
+        var _moDm=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===deckMasterCard && !x.uid;}):null;
+        if(_moDm && (_moDm.pow||0)>playerPow){ abilLog.push('\ud83d\udc51 Moro \u2014 Royal Bearing: borrows your Deck Master\u2019s greater power ('+_moDm.pow+')'); playerPow=_moDm.pow; }
+      }
+      playerPow+=3; abilLog.push('\ud83d\udc51 Moro \u2014 Royal Bearing: +3 (the crown\u2019s power is always present)');
+    } }
   // ── REAR-GUARD: Called (always fires) + same-group Link Skill ──
   { var _rgc={match_commits:matchCommits, last_result:lastResult, hand_len:hand.length, opp_deaths:oc.deaths||0, opp_kills:oc.kills||0, wins:playerScore[0], losses:playerScore[1], wc_len:winnersCircle.length, chaos:(cond.tag==='chaos')};
     // SNIPE pass runs first, both directions, before either side's Called/Link effects below --
@@ -9492,15 +9540,15 @@ function deckTab(t){
 // ══ DECK PRESETS (saved decks) ══
 const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Valcarion'];   // Black Wings — banish/discard. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Bixie Bee moved out 7/19/26 -- narrowed to Warpath/Keawe's Circle only.
 const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned Skull Soldiers','Uso Oso',"Uso Oso's Skeletal Summons",'Bone Choirmaster','Marrow Priest','Widow of the Vigil','Gravecaller Voss','Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','The Regenerating Horror','Signal Diviner'];   // The Deathless — Death-Remnant stack + draw. Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
-const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Bixie Bee','The Bronzed Beast, Hanse Waltz',"Legend Reborn, Keawe Kel'rua"];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Ruffius Rufeldro moved out 7/19/26 -- narrowed to Radiance + Ahdor's Pride only.
+const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Bixie Bee','The Bronzed Beast, Hanse Waltz',"Legend Reborn, Keawe Kel'rua",'Trophy Runner'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Ruffius Rufeldro moved out 7/19/26 -- narrowed to Radiance + Ahdor's Pride only.
 const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte','Skittering Drone','Hatchling Tide',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Signal Diviner','Faye Quicksilver','Veronica'];   // The Broodswarm — hand-size draw + power
 const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Shieldwall Recruit','Standard-Bearer Halden','Rank-Sworn Levy','Heir of Kaiga','Conduit Adept','Signal Diviner','Chieftain Reyva Vosh','Faye Quicksilver'];   // The Ironsworn — go wide with 1-cost bodies, Cassian scales biggest (Muster: +power per 1-cost ally). Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
 // 4 more added 7/19/26 -- lore-driven rather than mechanically uniform like the 5 above. Black
 // Council and Radiance got an explicit playstyle brief; Keawe's Circle and Ahdor's Pride are
 // closer to the existing LINK_GROUPS lore-clusters (Darwin's Court/Exiled Royalty/Squad 19/
 // Keawe's Circle itself) promoted to full archetype status, not a single shared mechanic.
-const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin','Kravyn the Collector'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members. Veronica + Ruffius Rufeldro moved out 7/19/26.
-const RADIANCE_PRESET = ['Moro','Malia','King Joris','Ruffius Rufeldro','Elowen Dawnspear','Bram the Bulwark','The Regenerating Horror','Kaelthar the Ascendant'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match.
+const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin','Kravyn the Collector','Court Cipher'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members. Veronica + Ruffius Rufeldro moved out 7/19/26.
+const RADIANCE_PRESET = ['Moro','Malia','King Joris','Ruffius Rufeldro','Elowen Dawnspear','Bram the Bulwark','The Regenerating Horror','Kaelthar the Ascendant','Lumen Acolyte','Oathlit Attendant','Oathlit Vanguard'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match.
 const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz','Fenrik Vench','Yard Sparring Partner','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger"];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms). 7/23/26: added the cadet-corps/Tosa Pact glue commons (Fenrik Vench is his real Ch.1 rival, per the Ascension storyline).
 const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 19 Quartermaster','Squad 19 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger"];   // Ahdor's Pride — Ahdorah Khaan + Squad 19. 7/23/26: filled out the deckbuilding spine with Squad 19 commons + a Rare sibling printing of Ahdorah herself (mirrors Keawe Kel'rua's base/evolved pattern) + shared Tosa Pact pieces. Still no card named Kynaht or tagged Vysh'ra race (Ahdor's people, per the KOTEI bible) -- that's a separate, real content gap, not addressed by this batch.
 // Archetype dev-view (7/18/26, expanded 7/19/26): the meta archetypes' full membership, for the
