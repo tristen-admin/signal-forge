@@ -11830,6 +11830,13 @@ function ascBattleEnd(){
   if(!ascParty.some(function(u){return !u.avatar && u.hp>0;})){ ascBattleLose('wipe'); return true; }
   return false;
 }
+// Ascension save-checkpoint policy. Right now ("dev mode" = everything pre-launch, per Keanu
+// 7/22/26) every battle win checkpoints immediately — losing test progress to a stray reload is
+// pure friction with no design payoff yet. FLIP THIS TO true once Tier 1 multiplayer ships: from
+// then on, only a boss clear checkpoints the run (saveState() is skipped after a non-boss win), so
+// quitting mid-stretch between bosses is real, intentional stakes — not a bug. Needs no other code
+// changes when flipped; ascBattleWin() already branches on this flag at both call sites below.
+const ASC_GATE_SAVES_TO_BOSS = false;
 function ascBattleWin(){
   if(ascRun&&ascRun.pvp){ return ascArenaEnd(true); }
   ascBattle.phase='over'; ascBusy=true; var node=ascBattle.node;
@@ -11845,9 +11852,20 @@ function ascBattleWin(){
   if(ascParty.every(function(u){ return u.avatar || u.hp>0; })) ascBountyProgress('flawless');
   ascLog('Victory! Each survivor +'+xp+' XP · +'+sig+' ◈');
   ascRenderBattle(); if(typeof ascPlayFx==='function')ascPlayFx(); if(typeof ascVictoryFx==='function')ascVictoryFx(); saveState();
+  // A boss only ends the whole Rite if it's the LAST node in this chapter's map — both new story
+  // chapters can have a boss mid-run (e.g. Chapter 1's "Instructor's Test" is stage 2 of 4), and
+  // treating every boss win as "Rite won" would boot the player back to setup before they ever see
+  // the remaining stages. This was previously unconditional, a leftover from when bosses only ever
+  // sat at a chapter's end.
+  var isLastNode = (node.tier >= ascRun.map.length-1);
   setTimeout(function(){
-    if(node.type==='boss'){ ascBattleRunEnd(true); return; }
-    ascRun.tier++; ascBattle=null; ascBusy=false; if(typeof toast==='function') toast('Battle won — +'+fmtPts(sig)+' ◈ · party advances', true); ascShowMap();
+    if(node.type==='boss' && isLastNode){ ascBattleRunEnd(true); return; }
+    ascRun.tier++; ascBattle=null; ascBusy=false;
+    // Real bug fixed 7/22/26: this branch used to never call saveState() at all, so a non-boss win
+    // (or, once ASC_GATE_SAVES_TO_BOSS flips on, ANY non-boss win) would advance tier in memory only
+    // — a reload silently reverted to the last save. See the flag's own comment above ascBattleWin().
+    if(!ASC_GATE_SAVES_TO_BOSS || node.type==='boss') saveState();
+    if(typeof toast==='function') toast('Battle won — +'+fmtPts(sig)+' ◈ · party advances', true); ascShowMap();
   }, 1900);
 }
 function ascBattleLose(reason){
