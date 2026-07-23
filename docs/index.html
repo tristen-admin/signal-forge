@@ -7318,15 +7318,21 @@ function resolve(pc, oc, cond, playerCommittedPow){
       abilLog.push('☠ your Remnants disperse — an enemy card was killed');
       deathRemnants = [];
       _deferField = function(){ document.getElementById('player-field').innerHTML = '<span class="placeholder">remnant cleared</span>'; };
-      sub.textContent = `${pc.name} (${Math.round(playerPow)}) defeated ${oc.name} (${Math.round(oppPow)}) — Remnant cleared · to Winners Circle`;
-    } else {
-      sub.textContent = `${pc.name} (${Math.round(playerPow)}) defeated ${oc.name} (${Math.round(oppPow)}) — to Winners Circle`;
     }
     playerScore[0]++;
-    if(pc.name==='Skullchain Reaver' || pc.name==='Kravyn the Collector' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1; if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':pc.name==='Kravyn the Collector'?'💰 Kravyn the Collector':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); }
-    else if(unbankNextWin){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); unbankNextWin=false; abilLog.push('🏳 Unbanked Victory — '+pc.name+' returns to your hand instead of banking to the Winners Circle'); }
-    else if(typeof dmUnitsReturnToHandThisDuel!=='undefined' && dmUnitsReturnToHandThisDuel){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push('💰 Kravyn — '+pc.name+' returns to your hand instead of the Winners Circle (Deck Master ability)'); }
+    // 7/22/26: decide the real destination FIRST, then build the headline off it. Previously
+    // sub.textContent was hardcoded to "to Winners Circle" above, before any of the branches
+    // below ran -- for Skullchain Reaver / Kravyn the Collector, that branch fires on literally
+    // every win, so the biggest, most-read line on the result screen was wrong 100% of the time
+    // for those cards (the small abilLog line underneath it was always correct).
+    var _destLabel = 'to Winners Circle';
+    if(pc.name==='Skullchain Reaver' || pc.name==='Kravyn the Collector' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1; if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':pc.name==='Kravyn the Collector'?'💰 Kravyn the Collector':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); _destLabel='to your hand'; }
+    else if(unbankNextWin){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); unbankNextWin=false; abilLog.push('🏳 Unbanked Victory — '+pc.name+' returns to your hand instead of banking to the Winners Circle'); _destLabel='to your hand'; }
+    else if(typeof dmUnitsReturnToHandThisDuel!=='undefined' && dmUnitsReturnToHandThisDuel){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push('💰 Kravyn — '+pc.name+' returns to your hand instead of the Winners Circle (Deck Master ability)'); _destLabel='to your hand'; }
     else { winnersCircle.push({...pc}); }
+    sub.textContent = remnantCleared
+      ? `${pc.name} (${Math.round(playerPow)}) defeated ${oc.name} (${Math.round(oppPow)}) — Remnant cleared · ${_destLabel}`
+      : `${pc.name} (${Math.round(playerPow)}) defeated ${oc.name} (${Math.round(oppPow)}) — ${_destLabel}`;
     lastResult = 'win';
     recordDuel(pc,'win'); signalPoints += 20;   // playtest: every match tracks K/D + pays
     if(typeof bumpQuestProgress==='function') bumpQuestProgress('win2');
