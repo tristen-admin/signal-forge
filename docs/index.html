@@ -1,4 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="description" content="Signal Forge — a living-card TCG where every card carries its permanent match history."><meta name="theme-color" content="#0b0e14"><link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="apple-touch-icon.jpg"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Signal Forge"></head><body>
+<meta charset="UTF-8">
 <title>Signal Forge</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -3029,6 +3030,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="result-overlay" id="result-overlay">
       <div class="result-label" id="result-label"></div>
       <div class="result-sub" id="result-sub"></div>
+      <div class="bd-why" id="result-why" style="display:none"></div>
       <div class="abil-log" id="abil-log"></div>
       <div class="snap-window" id="snap-window"></div>
       <button class="bd-btn" id="bd-btn" onclick="showBreakdown()">⚖ Why? — power breakdown</button>
@@ -4264,8 +4266,9 @@ function playMatchIntro(){
   _miSafe=setTimeout(function(){ if(!done && myseq===_miSeq) finish(); }, 8000);
 }
 // 15-second clock to act; on expiry, auto-commit the best available play.
-function startDecisionClock(seconds, label){ if(typeof tutorialMode!=='undefined'&&tutorialMode) return;
+function startDecisionClock(seconds, label, opts){ if(typeof tutorialMode!=='undefined'&&tutorialMode) return;
   seconds = seconds || 40;
+  opts = opts || {};
   if(decisionTimer){ clearInterval(decisionTimer); decisionTimer = null; }
   const strip = document.getElementById('clock-strip');
   const num = document.getElementById('clock-num');
@@ -4274,6 +4277,7 @@ function startDecisionClock(seconds, label){ if(typeof tutorialMode!=='undefined
   if(lbl) lbl.textContent = label || 'to decide';
   const urgentAt = Math.max(2, Math.ceil(seconds * 0.34));
   let t = seconds;
+  let _autoDeployWarned = false;
   strip.style.display = 'flex';
   strip.classList.remove('urgent');
   num.textContent = t;
@@ -4283,6 +4287,15 @@ function startDecisionClock(seconds, label){ if(typeof tutorialMode!=='undefined
     t--;
     num.textContent = Math.max(0, t);
     if(t <= urgentAt) strip.classList.add('urgent');
+    // opts.autoDeployName marks a clock whose timeout commits a card rather than forfeiting
+    // the round -- that has real stakes (a recorded win/loss on a card you never explicitly
+    // confirmed), unlike a forfeit clock where the pulse alone is enough ("your cards stay
+    // safe" either way). One unmissable toast, once, in the final seconds -- not just the
+    // shared urgent-pulse styling every clock already gets.
+    if(opts.autoDeployName && !_autoDeployWarned && t <= 5 && t > 0){
+      _autoDeployWarned = true;
+      if(typeof toast==='function') toast('⏱ '+t+'s — confirm now or '+opts.autoDeployName+' auto-deploys', false);
+    }
     if(t <= 0){
       clearInterval(decisionTimer); decisionTimer = null;
       strip.style.display = 'none';
@@ -4290,7 +4303,7 @@ function startDecisionClock(seconds, label){ if(typeof tutorialMode!=='undefined
     }
   }, 1000);
 }
-// Clock ran out. If a card is already chosen, AUTO-DEPLOY it — the 5s withdraw/deploy
+// Clock ran out. If a card is already chosen, AUTO-DEPLOY it — the 22s withdraw/deploy
 // window is a second-guess period, not a punishment. We only surrender a true no-reaction
 // during card selection (nothing picked at all).
 function onDecisionTimeout(){
@@ -4645,7 +4658,7 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
     var _dmov=document.getElementById('dm-fallback-overlay'); if(_dmov) _dmov.classList.add('show');
     return;   // no conjure-eligible card — Auto-Ride/Forfeit only, no normal decision clock
   }
-  startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:30);   // casual = 30s round timer; ranked keeps 40
+  startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:30, 'choose a card, or the round forfeits');   // casual = 30s round timer; ranked keeps 40
 }
 
 function tangeSurgeReady(c){ return !!c && c.name==='Tange Sazen' && typeof skullchainKills!=='undefined' && skullchainKills>0 && typeof playerScore!=='undefined' && playerScore[1]>=3; }
@@ -5242,7 +5255,7 @@ function castSpell(i){
   else if(s.id==='empower') spellSelfPow += 3;
   else if(s.id==='hex') spellOppPow -= 3;
   else if(s.id==='collapse') spellHalveField = true;
-  else if(s.id==='locus'){ var _nc=Math.floor(Math.random()*CONDITIONS.length); if(typeof revealCondition==='function') revealCondition(_nc); if(typeof startDecisionClock==='function') startDecisionClock(15,'to decide'); }
+  else if(s.id==='locus'){ var _nc=Math.floor(Math.random()*CONDITIONS.length); if(typeof revealCondition==='function') revealCondition(_nc); if(typeof startDecisionClock==='function') startDecisionClock(20,'choose a card, or the round forfeits'); }   // 7/22/26: bumped 15->20s -- shortest of the 3 clocks, deserves a little more room, not just the shared urgent-pulse warning
   else if(s.id==='drawsurge'){ if(typeof drawToHand==='function') drawToHand(3); if(typeof banishFromHand==='function') banishFromHand(1); }
   else if(s.id==='godhand') spellSelfPow += 10;
   else if(s.id==='sornshift'){ var _li=CONDITIONS.findIndex(function(x){return x.id==='lowest';}); if(_li>=0 && typeof revealCondition==='function'){ revealCondition(_li); conditionLocked=true; } }
@@ -5550,7 +5563,11 @@ function confirmSelection(){
         +'<span class="rp-vs">vs</span><span class="rp-opp">opp shows <b>'+(_pp.oppShown!=null?_pp.oppShown:'?')+'</b>'+(_pp.oppDelta?' <i>'+(_pp.oppDelta>0?'+':'')+_pp.oppDelta+' your Called</i>':'')+'</span>';
     } else if(_rp){ _rp.style.display='none'; } }
   setPhase('select');
-  startDecisionClock(22, 'to decide');   // withdraw phase — relaxed clock
+  // 7/22/26: names the real consequence instead of the generic "to decide" every clock used to
+  // share -- this specific clock auto-deploys the staged card on timeout (see onDecisionTimeout),
+  // unlike the reveal->stage clock which forfeits the round. autoDeployName drives the one-time
+  // toast warning in the final 5s (see startDecisionClock).
+  startDecisionClock(22, 'confirm, or '+c.name+' auto-deploys', {autoDeployName: c.name});   // withdraw phase — relaxed clock
 }
 
 function retreatCard(){
@@ -7372,6 +7389,11 @@ function resolve(pc, oc, cond, playerCommittedPow){
   const _revealOutcome = function(){
     if(_deferField) _deferField();
     overlay.classList.add('show');
+    // 7/22/26: surface the same swing/biggest-factor synthesis the "Why?" modal already computes
+    // (showBreakdown()/_bdWhy()) right on the main result screen -- so "why did I win/lose" is
+    // visible at a glance, not gated behind an extra click a player under a decision clock is
+    // likely to skip. The full per-card ledger is still one tap away via the existing button.
+    { var _rw=document.getElementById('result-why'); if(_rw && typeof _bdWhy==='function' && _lastBreakdown){ _rw.innerHTML=_bdWhy(_lastBreakdown); _rw.style.display=''; } }
     updateScore();
     const _nb = document.querySelector('#result-overlay .next-btn');
     if(_nb) _nb.textContent = (playerScore[0] >= matchWinThreshold() || playerScore[1] >= matchWinThreshold()) ? 'View Match Result →' : 'Continue →';
