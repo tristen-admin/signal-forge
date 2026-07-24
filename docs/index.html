@@ -2616,6 +2616,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
             </div>
             <button class="filter-chip kw-toggle" id="dfb-kw-toggle" onclick="toggleDeckKw()">Keywords ▾</button><div class="vh-group dfb-kw collapsed" id="dfb-kw"></div>
           </div>
+          <div class="vault-curve" id="deck-curve"></div>
           <div class="dlc-title">Collection — tap to inspect &amp; add · or drag it in <span class="ssc-count" id="deck-pool-count"></span></div>
           <div class="vault-grid" id="deck-pool-grid"></div>
         </div>
@@ -9663,8 +9664,16 @@ function buildDeckPool(){
     const kOk = !deckKeyword || cardHasKeyword(c, deckKeyword);
     const _own = (ownedCopies[c.uid||c.name]||0) > 0;
     const oOk = deckOwnFilter==='all' ? true : (deckOwnFilter==='owned' ? _own : !_own);
-    return rOk && kOk && oOk;
+    const costOk = !deckCostFilter || costBucket(conjureCost(c))===deckCostFilter;
+    return rOk && kOk && oOk && costOk;
   });
+  { var _dcEl=document.getElementById('deck-curve'); if(_dcEl) _dcEl.innerHTML=costCurveHTML(COLLECTION.filter(c => {
+    const rOk = deckFilter==='all' ? true : (deckFilter==='deck' ? activeDeck.has(c.uid||c.name) : c.rarity===deckFilter);
+    const kOk = !deckKeyword || cardHasKeyword(c, deckKeyword);
+    const _own = (ownedCopies[c.uid||c.name]||0) > 0;
+    const oOk = deckOwnFilter==='all' ? true : (deckOwnFilter==='owned' ? _own : !_own);
+    return rOk && kOk && oOk;   // curve itself always reflects rarity/keyword/owned filters, never the cost filter -- otherwise clicking a bar would erase all the other bars
+  }), deckCostFilter, 'filterDeckCost'); }
   if(deckSort==='kills') cards.sort((a,b)=> b.kills-a.kills || (RARITY_ORDER[a.rarity]-RARITY_ORDER[b.rarity]));
   else if(deckSort==='deaths') cards.sort((a,b)=> a.deaths-b.deaths || b.kills-a.kills);
   else cards.sort((a,b)=> (RARITY_ORDER[a.rarity]-RARITY_ORDER[b.rarity]) || (b.pow-a.pow));
@@ -9750,10 +9759,11 @@ function validateDeckMaster(){
 }
 
 // ══ DECK-BUILDER FILTER / SORT / KEYWORD ══
-let deckFilter='all', deckSort='rarity', deckKeyword=null, deckOwnFilter='all';
+let deckFilter='all', deckSort='rarity', deckKeyword=null, deckOwnFilter='all', deckCostFilter=null;
 function filterDeck(r, btn){ deckFilter=r; document.querySelectorAll('.dfb-rarity .filter-chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); buildDeckPool(); }
 function filterDeckOwned(m, btn){ deckOwnFilter=m; document.querySelectorAll('.dfb-own .filter-chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); buildDeckPool(); }
 function sortDeck(s, btn){ deckSort=s; document.querySelectorAll('.dfb-sort .filter-chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); buildDeckPool(); }
+function filterDeckCost(k,btn){ deckCostFilter = deckCostFilter===k ? null : k; buildDeckPool(); }
 function updateDeckKwToggle(){ var t=document.getElementById('dfb-kw-toggle'), g=document.getElementById('dfb-kw'); if(!t||!g) return; var caret=g.classList.contains('collapsed')?' ▾':' ▴'; if(deckKeyword){ t.classList.add('active'); t.textContent='Keyword: '+deckKeyword+caret; } else { t.classList.remove('active'); t.textContent='Keywords'+caret; } }
 function toggleDeckKw(){ var g=document.getElementById('dfb-kw'); if(g) g.classList.toggle('collapsed'); updateDeckKwToggle(); }
 function keywordDeck(kw, btn){ deckKeyword=kw; document.querySelectorAll('.dfb-kw .filter-chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); buildDeckPool(); if(typeof updateDeckKwToggle==='function') updateDeckKwToggle(); }
@@ -10631,18 +10641,18 @@ function _acquiredDate(c){ var r=cardRecords[c.uid||c.name]; var ch=r&&r.chain; 
 // bar-per-cost strip above the Vault grid that doubles as a click-to-filter, same convention as
 // the existing rarity/keyword/archetype filter chips (hard filter, toggle off on re-click).
 function costBucket(cost){ return cost>=6 ? '6+' : String(cost); }
-function costCurveHTML(cards){
+function costCurveHTML(cards, activeFilter, onclickFn){
   const buckets={'0':0,'1':0,'2':0,'3':0,'4':0,'5':0,'6+':0};
   cards.forEach(c=>{ buckets[costBucket(conjureCost(c))]++; });
   // only show buckets that actually have cards (or are the active filter, so it stays clickable-off) --
   // dynamic on purpose: hardcoding which costs exist would silently go stale the next time a card is added
   // at a currently-empty cost.
-  const shown=Object.keys(buckets).filter(k=>buckets[k]>0||vaultCostFilter===k);
+  const shown=Object.keys(buckets).filter(k=>buckets[k]>0||activeFilter===k);
   const max=Math.max(1,...shown.map(k=>buckets[k]));
   return '<span class="vh-label">Cost</span><div class="curve-bars">'+shown.map(k=>{
     const h=Math.round((buckets[k]/max)*100);
-    const on=vaultCostFilter===k?' on':'';
-    return `<button class="curve-bar${on}" style="--h:${Math.max(h,6)}%" onclick="filterVaultCost('${k}',this)" title="${buckets[k]} card${buckets[k]===1?'':'s'} at cost ${k}"><span class="cb-count">${buckets[k]}</span><span class="cb-label">${k}</span></button>`;
+    const on=activeFilter===k?' on':'';
+    return `<button class="curve-bar${on}" style="--h:${Math.max(h,6)}%" onclick="${onclickFn}('${k}',this)" title="${buckets[k]} card${buckets[k]===1?'':'s'} at cost ${k}"><span class="cb-count">${buckets[k]}</span><span class="cb-label">${k}</span></button>`;
   }).join('')+'</div>';
 }
 function filterVaultCost(k,btn){
@@ -10663,7 +10673,7 @@ function buildVault(){
     const kOk = !vaultKeyword || cardHasKeyword(c, vaultKeyword);
     const aOk = !vaultArchetype || cardArchetypes(c.name).some(a=>a.id===vaultArchetype);
     return rOk && kOk && aOk;   // curve itself always reflects rarity/keyword/archetype filters, never the cost filter -- otherwise clicking a bar would erase all the other bars
-  })); }
+  }), vaultCostFilter, 'filterVaultCost'); }
   let entries=[];
   base.forEach(c=>{
     const key=c.uid||c.name;
