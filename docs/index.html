@@ -1585,6 +1585,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .ds-remove{background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;flex-shrink:0;padding:2px 5px;border-radius:3px;transition:color 0.12s,background 0.12s}
 .ds-remove:hover{color:#E08080;background:rgba(184,58,58,0.12)}
 .ds-dm{background:none;border:none;color:var(--text3);font-size:14px;cursor:pointer;flex-shrink:0;padding:2px 5px;border-radius:3px;transition:color 0.12s,background 0.12s}
+.ds-sig{font-size:11px;vertical-align:middle}
 .ds-dm:hover{color:var(--gold);background:rgba(212,168,67,0.12)}
 .ds-dm.on{color:var(--gold)}
 .deck-slot.filled.dm-master{border-left-color:var(--gold);box-shadow:inset 0 0 0 1px rgba(212,168,67,.35)}
@@ -1888,8 +1889,8 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .preset-save input{flex:1;min-width:0;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:7px 9px;font-size:11px;font-family:inherit}
 .preset-list{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
 .preset-chip{display:flex;gap:5px}
-.pc-load{flex:1;display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:11px;font-weight:600;padding:6px 9px;border-radius:5px;cursor:pointer;font-family:inherit}
-.pc-load:hover{border-color:var(--electric);color:var(--electric)}
+.pc-load{flex:1;display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent,var(--border));color:var(--text);font-size:11px;font-weight:600;padding:6px 9px;border-radius:5px;cursor:pointer;font-family:inherit}
+.pc-load:hover{border-color:var(--electric);border-left-color:var(--accent,var(--electric));color:var(--electric)}
 .pc-count{font-size:9px;color:var(--text3);background:var(--surface2);border-radius:8px;padding:1px 7px;font-variant-numeric:tabular-nums}
 .pc-del{background:none;border:1px solid var(--border);color:var(--text3);font-size:10px;padding:0 8px;border-radius:5px;cursor:pointer;font-family:inherit}
 .pc-del:hover{border-color:var(--lose);color:#E08080}
@@ -9410,12 +9411,16 @@ function buildDeckSlots(){
       const glyph=CARD_ART[c.artKey||c.name]?'🖼':(CARD_SIGIL[c.artKey||c.name]||'◈');
       const dmKey=(c.uid||c.name);
       const isDM = (typeof deckMasterCard!=='undefined') && deckMasterCard===dmKey;
-      const dmBtn = c.rarity!=='common' ? `<button class="ds-dm${isDM?' on':''}" title="${isDM?'Your Deck Master':'Name as Deck Master'}" onclick="event.stopPropagation();setDeckMaster('${dmKey.replace(/'/g,"\\'")}')">★</button>` : '';
+      // 7/24/26: signature badge -- only 7 cards game-wide currently carry a real DM_EXCLUSIVE
+      // tier-1 bonus; everything else non-Common still works as Deck Master (tier-2/3 math) but
+      // has no unique text. Surfacing this in-context answers "which of my cards is worth picking."
+      const hasSig = (typeof DM_EXCLUSIVE!=='undefined') && !!DM_EXCLUSIVE[c.name];
+      const dmBtn = c.rarity!=='common' ? `<button class="ds-dm${isDM?' on':''}" title="${isDM?'Your Deck Master':(hasSig?'Name as Deck Master — has a real signature bonus':'Name as Deck Master')}" onclick="event.stopPropagation();setDeckMaster('${dmKey.replace(/'/g,"\\'")}')">★</button>` : '';
       slots.push(`<div class="deck-slot filled ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()}${isDM?' dm-master':''}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}')" style="cursor:pointer">
         <span class="ds-num">${i+1}</span>
         <span class="ds-sigil">${glyph}</span>
         <div class="ds-body">
-          <div class="ds-name">${isDM?'★ ':''}${c.name}</div>
+          <div class="ds-name">${isDM?'★ ':''}${c.name}${hasSig?' <span class="ds-sig" title="Real signature bonus">⭐</span>':''}</div>
           <div class="ds-meta"><span class="ds-rar">${rlab(c.rarity)}</span> · <span class="k">${kdOf(c).k}K</span>/<span class="d">${kdOf(c).d}D</span></div>
         </div>
         <span class="ds-pow">${c.pow}</span>
@@ -9740,12 +9745,23 @@ function endTutorial(){ tutorialMode=false; ['coach-box','coach-spot','coach-ful
 window.startTutorial=startTutorial; window.tutorialAdvance=tutorialAdvance; window.endTutorial=endTutorial; window.tutorialStartDuel=tutorialStartDuel;
 
 
+// 7/24/26: client-rendering-only accent palette for the 9 archetype tiles -- not a data-model
+// change (ARCHETYPE_PRESETS itself carries no color), matches the UI mockup's proposed palette,
+// independent of the 3 canonical Camp colors (Amageras/Omitsuki/Kitanoo), which are a separate
+// classification system.
+const ARCHETYPE_TILE_COLOR = {blackwing:'#8a6bd6', deathless:'#7d9a8a', warpath:'#c25050', broodswarm:'#5fa050', ironsworn:'#5b83b0', blackcouncil:'#9a9a9a', radiance:'#d4af5a', keawescircle:'#4fb0ac', ahdorspride:'#c8813d'};
 function refreshPresets(){
   lsSet('sf_presets', deckPresets);
   const wrap = document.getElementById('preset-list'); if(!wrap) return;
   const names = Object.keys(deckPresets);
   wrap.innerHTML = names.length
-    ? names.map(n => { const e = n.replace(/'/g,"\\'"); return `<span class="preset-chip"><button class="pc-load" onclick="loadPreset('${e}')">${n}<span class="pc-count">${deckPresets[n].length}</span></button><button class="pc-del" title="Delete" onclick="deletePreset('${e}')">✕</button></span>`; }).join('')
+    ? names.map(n => {
+        const e = n.replace(/'/g,"\\'");
+        const arch = ARCHETYPE_PRESETS.find(a=>a.id===n);
+        const label = arch ? arch.name : n;   // fixes the raw-id display bug ("ahdorspride" -> "Ahdor's Pride")
+        const accent = ARCHETYPE_TILE_COLOR[n] || '#888';
+        return `<span class="preset-chip" style="--accent:${accent}"><button class="pc-load" onclick="loadPreset('${e}')">${label}<span class="pc-count">${deckPresets[n].length}</span></button><button class="pc-del" title="Delete" onclick="deletePreset('${e}')">✕</button></span>`;
+      }).join('')
     : '<span class="preset-empty">No saved decks yet — build a deck and Save.</span>';
 }
 function savePreset(){
