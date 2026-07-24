@@ -26,7 +26,7 @@
 
 **SHIPPED 7/23/26, commit `f833527`.** Authorized directly ("just make it") rather than routing through line-by-line approval, since this is additive roster-filling, not a rebalance of existing card numbers. Full detail in [[project_signalforge_squad19_cadet_batch]].
 
-- [ ] **Still not resolved — need your call:** you mentioned "make squad 16 a temporary thing, as we can assume if Ahdor was in squad 19 there was an 18 and 20 as well." Do you mean: (a) a specific "Squad 16" card representing a disbanded/legacy predecessor unit, or (b) something else entirely? Still flagging rather than inventing a card off an unclear read.
+- [x] **Squad 16 — resolved, shipped `037b807`.** One-off "Squad 16 Veteran" card (pow10/cost2/rare, +3 once 2+ duels played this match) — a disbanded predecessor unit, not a recurring naming prefix.
 
 ---
 
@@ -58,7 +58,7 @@
 - [x] **Kaelthar the Ascendant stays as-is** — not prioritized this round, per the original call.
 - [x] **Shared Radiance spine, "Consecrated Reserve"** — +1 power per Charge held, capped at +4. Wired through `ARCHETYPE_VANILLA`/a new `ARCHETYPE_MEMBERS['Radiance']` key (Moro, Elowen Dawnspear, Kaelthar the Ascendant, Oathlit Vanguard — non-Common only, excludes King Joris/Ruffius Rufeldro/Bram the Bulwark since they're already claimed by Warpath's own entry). Verified live: capped correctly at +4 even with 7 Charge held.
 - [x] **Oathlit Vanguard** — shipped as approved (pow12/cost2/rare, +5 while undefeated this match). "Gone for the rest of the match after your first loss" was simplified to "the bonus stops applying after your first loss" (`player_losses===0` gate) rather than a new card-removal-from-deck/hand mechanic — no confirmed primitive exists for removing one specific named card from wherever it might be (deck, hand, not yet drawn), and building one wasn't worth the risk for this one card's flavor text.
-- [ ] Reconsider swapping Ruffius Rufeldro/Bram the Bulwark out of the Radiance preset now that it has real unique pieces (Moro, Oathlit Vanguard) — still open, not decided.
+- [x] **Resolved: keep Ruffius Rufeldro/Bram the Bulwark in the Radiance preset**, no swap. Cross-deck presence with Warpath is fine as-is.
 
 ---
 
@@ -72,4 +72,4 @@
 
 ---
 
-_All sections above are shipped. The two open items (Squad 16 in §2, the Ruffius/Bram swap in §4b) remain genuinely unresolved and are not guessed at._
+_Every section and every open question in this file is now resolved and shipped. Nothing left pending._
