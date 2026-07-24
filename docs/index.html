@@ -2296,7 +2296,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
      zone was a small floating box in a sea of unbounded background art. Giving it its own
      dashed panel (sized well past the mini-card's own footprint) makes "this is a zone" legible
      without touching how many px .field itself is allotted by the flex column above it. */
-  .field .field-half{flex:0 1 auto;width:100%;max-width:250px;min-height:150px;display:flex;align-items:center;justify-content:center;overflow:visible;border:1px dashed rgba(245,194,77,0.28);border-radius:14px;background:rgba(8,10,14,0.22)}
+  .field .field-half{flex:0 1 auto;width:100%;max-width:250px;min-height:150px;display:flex;align-items:center;justify-content:center;overflow:visible;border:1px dashed rgba(245,194,77,0.28);border-radius:14px;background:rgba(8,10,14,0.22);transition:opacity .3s ease}
   .field .field-card{width:100%;max-width:150px;margin:0 auto}
   .field .rear-slot{width:100%;max-width:280px;margin:0 auto;flex:0 0 auto}
   .spell-tray{padding:1px 8px;gap:8px;flex-shrink:0;background:transparent!important;border-top:none!important;justify-content:center}
@@ -3945,14 +3945,32 @@ function setPhase(p){
   });
 }
 
-// desktop-only camera switch: 'solo' = your V-formation alone (pre-commit turn phases),
-// 'duo' = both sides' formations, seat-side controls which physical side you're on.
+// camera switch: 'solo' = your V-formation alone (pre-commit turn phases), 'duo' = both sides'
+// formations (post-commit -- the actual clash), seat-side controls which physical side you're on.
 function setCameraMode(mode){
   var f = document.querySelector('.field');
   if(!f) return;
   var wantSolo = mode!=='duo';
   if(f.classList.contains('cam-solo') === wantSolo) return;
-  f.classList.toggle('cam-solo', wantSolo);
+  if(!wantSolo){
+    // 7/24/26: the solo->duo reveal never animated on mobile. #opp-field/#opp-rear/#opp-rear2 are
+    // display:none while cam-solo -- a deliberate mobile-only optimization that reclaims vertical
+    // space desktop's wide grid never needed -- but display:none->flex can't itself be transitioned,
+    // so simply removing cam-solo popped the opponent's side in instantly with zero fade, unlike
+    // desktop's pure-opacity approach (never leaves the layout, so it was always animatable). Stage
+    // it across two frames instead: prime opacity:0 while still display:none, force a reflow once
+    // cam-solo drops (display has now flipped), then release the inline override so the .field-half
+    // opacity transition has a real "before" frame to animate from. No-op on desktop (its own
+    // cam-solo rule never used display:none, so this only ever primes/clears the same opacity the
+    // class swap already drove).
+    var revealIds = ['opp-field','opp-rear','opp-rear2'];
+    revealIds.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.opacity='0'; });
+    f.classList.remove('cam-solo');
+    void f.offsetWidth;
+    revealIds.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.opacity=''; });
+  } else {
+    f.classList.add('cam-solo');
+  }
   f.classList.add('cam-swing');
   setTimeout(function(){ f.classList.remove('cam-swing'); }, 600);
 }
