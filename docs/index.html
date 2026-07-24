@@ -1945,6 +1945,9 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .match-stake .ms-label{font-size:8px;letter-spacing:0.11em;color:var(--text3);text-transform:uppercase;font-weight:700}
 .match-stake .ms-pot{font-size:13px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;letter-spacing:0.01em}
 .match-stake .ms-mult{font-size:10px;font-weight:800;color:var(--electric)}
+.ms-chips{display:flex;gap:2px;margin-left:4px}
+.ms-chip{font-size:8px;font-weight:800;color:var(--text3);background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:1px 4px;font-variant-numeric:tabular-nums}
+.ms-chip.on{color:#2a1c02;background:linear-gradient(160deg,var(--gold),var(--gold-dim));border-color:var(--gold);box-shadow:0 0 6px rgba(245,194,77,.5)}
 .wager-hud{display:flex;align-items:center;gap:8px}
 .whud-btn{font-family:inherit;font-size:11px;font-weight:800;padding:6px 12px;border-radius:7px;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:background .12s,border-color .12s;white-space:nowrap}
 .whud-btn.raise{border-color:var(--gold-dim);color:var(--gold);background:rgba(212,168,67,0.12)}
@@ -4358,6 +4361,13 @@ function rankTier(rp){
   if(rp>=800) return 'Silver';
   return 'Bronze';
 }
+// 7/24/26: Wager ladder chip stack, integrated from the UI mockup (Snap Cubes-referenced).
+// Real progression confirmed from MAX_MULT/the raise button's own '×'+(stakeMult*2) logic:
+// doubles each raise, 1->2->4->8, capped at MAX_MULT -- NOT the mockup's invented "x16" rung.
+function stakeChipsHTML(mult){
+  var rungs=[]; for(var r=1;r<=MAX_MULT;r*=2) rungs.push(r);
+  return '<span class="ms-chips">'+rungs.map(function(r){ return '<span class="ms-chip'+(r===mult?' on':'')+'">'+(r===MAX_MULT?'MAX':'×'+r)+'</span>'; }).join('')+'</span>';
+}
 function updateStake(){
   const _hud=document.querySelector('.wager-hud'); const _free=!pvpMode && !rankedMode;
   if(_hud) _hud.style.display = _free ? 'none' : 'flex';
@@ -4365,7 +4375,7 @@ function updateStake(){
   const el=document.getElementById('match-stake');
   if(el){
     if(pvpMode){ el.innerHTML='<span class="ms-label">Pot</span><span class="ms-pot" style="color:#f2b8b8">🩸 '+(pvpPotMine||[]).length+' v '+(pvpPotTheirs||[]).length+'</span>'; }
-    else { const stake=matchWager*stakeMult; el.innerHTML='<span class="ms-label">Rank</span><span class="ms-pot">±'+fmtPts(stake)+' RP</span><span class="ms-mult">×'+stakeMult+'</span>'; }
+    else { const stake=matchWager*stakeMult; el.innerHTML='<span class="ms-label">Rank</span><span class="ms-pot">±'+fmtPts(stake)+' RP</span>'+stakeChipsHTML(stakeMult); }
   }
   const rb=document.getElementById('hud-raise-btn');
   if(rb){
