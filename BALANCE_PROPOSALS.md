@@ -46,7 +46,9 @@
 - [x] **The Black Ledger** — banish 2 RANDOM cards from your hand, draw 1 (was draw 2). Explicit "random" is now a real, deliberate downgrade under the player-choice-by-default rule, not a restatement of default behavior.
 - [x] **Black Wings, Ossian Drell's undisclosed second clause** (+2×hand-size if you banished from hand this turn) — now printed on his card face.
 
-**Still not started — genuinely separate, bigger initiatives, not part of this pass:** the player-choice-by-default engine infrastructure (auditing every `banishOwn`/hand-affecting card to decide choice-vs-explicit-random), a separate discard zone, and decking-out as a real threat.
+- [x] **Player-choice-by-default engine infrastructure — SHIPPED separately, commit `0cd17fc` (7/24/26).** Kiana, Gravecaller Voss, and all 12 `CALLED.banishOwn` support cards now let the player pick which hand card is banished via a new `chooseBanishFromHand()` modal, queued and resolved at commit time before `resolve()` ever runs. The Black Ledger above stays the one deliberate random exception, per its own printed text.
+
+**Still not started — genuinely separate, bigger initiatives, not part of this pass:** a separate discard zone, and decking-out as a real threat.
 
 ---
 
