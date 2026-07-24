@@ -9445,7 +9445,7 @@ function buildDeckPool(){
     const inDeck = activeDeck.has(c.uid||c.name);
     const owned = (ownedCopies[c.uid||c.name]||0) > 0;
     const pristine = ((typeof isPristine==='function')?isPristine(c):(c.deaths===0)) ? `<span class="vc-pristine">◈</span>` : '';
-    return `<div class="vault-card ${c.rarity} ${campCls} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="previewPoolCard('${nm}',this)" onmouseleave="hideCardPreview()">
+    return `<div class="vault-card ${c.rarity} ${campCls} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="previewPoolCardReadable('${nm}',this)" onmouseleave="hideCardPreview()">
       <div class="vc-art" style="${artFillStyle(c.artKey||c.name)}">
         ${sigilFor(c.artKey||c.name)}
         <span class="vc-rarity-ribbon">${rlab(c.rarity)}</span>
@@ -10435,7 +10435,7 @@ function buildVault(){
     const c=e.c;
     const pristine=isPristine(c)?`<span class="vc-pristine">◈ Pristine</span>`:'';
     const inDeck=activeDeck.has(c.uid||c.name)?'in-deck':'';
-    return `<div class="vault-card ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()} ${inDeck} ${e.fresh?'is-fresh':''} ${c.won?'is-won':''} ${foilClass(c)} ${frameClass(c)} ${e.locked?'locked-card':(typeof cardStateClasses==='function'?cardStateClasses(c):'')}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}',${e.fresh?'true':'false'})">
+    return `<div class="vault-card ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()} ${inDeck} ${e.fresh?'is-fresh':''} ${c.won?'is-won':''} ${foilClass(c)} ${frameClass(c)} ${e.locked?'locked-card':(typeof cardStateClasses==='function'?cardStateClasses(c):'')}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}',${e.fresh?'true':'false'})" onmouseenter="previewPoolCardReadable('${(c.uid||c.name).replace(/'/g,"\\'")}',this)" onmouseleave="hideCardPreview()">
       <div class="vc-art vc-frame">
         ${bigCardHTML(c)}
         ${pristine}
@@ -10756,6 +10756,10 @@ function showCardPreview(i){ if(window.matchMedia&&window.matchMedia('(hover:non
   if(c && el) previewCardEl(c, el, true);
 }
 function previewPoolCard(name, el){ if(typeof SFX!=='undefined') SFX.play('hover'); const c = COLLECTION.find(x => (x.uid||x.name) === name); if(c) previewCardEl(c, el); }
+// 7/24/26: readable-text variant for card-browsing grids (Vault, Deck Builder picker) -- reuses
+// the exact same floating #card-preview element and readableCardHTML() the Card Detail Drawer
+// already renders, just triggered on hover instead of requiring a click-through.
+function previewPoolCardReadable(name, el){ if(typeof SFX!=='undefined') SFX.play('hover'); const c = COLLECTION.find(x => (x.uid||x.name) === name); if(c) previewCardEl(c, el, true); }
 function hideCardPreview(){ var p=document.getElementById('card-preview'); if(p){ p.classList.remove('show','pinned'); p.onclick=null; } var sc=document.getElementById('preview-scrim'); if(sc) sc.remove(); }
 // Field-card hover/tap preview — every card on the field (staged, committed, resolution cinematic,
 // both sides) gets the same enlarged-detail preview hand cards already have. Delegated (mouseover/
