@@ -604,9 +604,21 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
   opacity:0;pointer-events:none;transition:opacity 0.3s;
 }
 .result-overlay.show{opacity:1;pointer-events:auto}
-.result-label{font-size:28px;font-weight:800;letter-spacing:0.04em;margin-bottom:6px}
+.result-label{font-size:28px;font-weight:800;letter-spacing:0.04em;margin-bottom:6px;position:relative}
 .result-label.win{color:var(--win)}
 .result-label.lose{color:var(--lose)}
+/* 7/24/26: resolution-moment visual weight, integrated from the UI mockup (Snap/Hearthstone-
+   referenced). Pure CSS, gated on the existing .win/.lose classes resolve() already sets --
+   does not touch playResolutionCinematic()'s timing/choreography, which is a separate, heavily-
+   tuned system (watchdog heartbeats, epic-mode particle scaling, DM/mythforged flourishes) not
+   worth destabilizing for a presentation-only enhancement. K/D badges at this moment were
+   considered and deliberately NOT done here -- .tf-kd is intentionally hidden during mini/
+   battlefield mode (7/13/26, "power at a glance") and showing a real before/after tick would need
+   threading an extra pre-recordDuel() snapshot through resolve() into the cinematic, a bigger,
+   separate change than a CSS pass should carry. */
+.result-label.win::before{content:'';position:absolute;left:50%;top:50%;width:340px;height:340px;transform:translate(-50%,-50%) scale(.6);border-radius:50%;background:radial-gradient(circle,rgba(245,194,77,.38),transparent 68%);z-index:-1;animation:resultBurst .6s cubic-bezier(.2,1.4,.4,1) both}
+.result-label.lose::before{content:'';position:absolute;left:50%;top:50%;width:260px;height:260px;transform:translate(-50%,-50%) scale(.6);border-radius:50%;background:radial-gradient(circle,rgba(150,150,160,.22),transparent 68%);z-index:-1;animation:resultBurst .6s cubic-bezier(.2,1.4,.4,1) both}
+@keyframes resultBurst{0%{transform:translate(-50%,-50%) scale(.3);opacity:0}55%{opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:.85}}
 .result-label.tie{color:var(--electric)}
 .result-sub{font-size:11px;color:var(--text2);margin-bottom:8px}
 .abil-log{display:flex;flex-direction:column;gap:3px;margin-bottom:12px;min-width:240px}
