@@ -1376,7 +1376,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 }
 .filter-chip:hover{border-color:var(--border2);color:var(--text)}
 .filter-chip.on{background:var(--gold-glow);border-color:var(--gold);color:var(--gold);box-shadow:inset 0 0 12px rgba(245,194,77,0.12),0 0 10px var(--gold-glow)}
-.vault-curve{padding:2px 18px 0}.curve-bars{display:flex;align-items:flex-end;gap:6px;height:52px;padding:6px 0 2px;max-width:520px}.curve-bar{flex:1;height:var(--h);background:linear-gradient(180deg,var(--gold),var(--gold-dim));border:1px solid var(--gold-dim);border-radius:4px 4px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:2px;opacity:.72;transition:opacity .15s ease,box-shadow .15s ease;cursor:pointer;min-height:16px}.curve-bar:hover,.curve-bar.on{opacity:1;box-shadow:0 0 10px var(--gold-glow)}.cb-count{font-size:9.5px;font-weight:800;color:var(--bg,#0a0806)}.cb-label{position:absolute;margin-top:16px;font-size:9px;color:var(--text3)}
+.vault-curve{padding:2px 18px 0;display:flex;align-items:center;gap:8px}.curve-bars{display:flex;align-items:flex-end;gap:6px;height:52px;padding:6px 0 2px;max-width:520px}.curve-bar{flex:1;height:var(--h);background:linear-gradient(180deg,var(--gold),var(--gold-dim));border:1px solid var(--gold-dim);border-radius:4px 4px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:2px;opacity:.72;transition:opacity .15s ease,box-shadow .15s ease;cursor:pointer;min-height:16px}.curve-bar:hover,.curve-bar.on{opacity:1;box-shadow:0 0 10px var(--gold-glow)}.cb-count{font-size:9.5px;font-weight:800;color:var(--bg,#0a0806)}.cb-label{position:absolute;margin-top:16px;font-size:9px;color:var(--text3)}
 .vault-body{flex:1;overflow-y:auto;padding:16px 18px}
 .vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px}.vault-tracker{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:11px 15px;margin:0 0 14px;background:var(--panel);border:1px solid var(--border);border-radius:11px}.vt-bar-wrap{display:flex;align-items:center;gap:11px;flex:1;min-width:230px}.vt-lbl{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);white-space:nowrap}.vt-bar{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;min-width:70px}.vt-bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:4px;transition:width .4s ease}.vt-count{font-size:13px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}.vt-count .vt-pct{font-size:11px;color:var(--gold);margin-left:3px}.vt-chips{display:flex;flex-wrap:wrap;gap:6px}.vt-chip{font-size:10px;font-weight:700;padding:2px 9px;border-radius:12px;border:1px solid var(--border2);color:var(--text2);background:var(--surface);white-space:nowrap;font-variant-numeric:tabular-nums}.vt-chip.done{color:var(--gold);border-color:var(--gold);background:var(--gold-glow)}.vt-chip.r-apex{border-left:3px solid var(--r-apex)}.vt-chip.r-ultra{border-left:3px solid var(--r-ultra)}.vt-chip.r-rare{border-left:3px solid var(--r-rare)}.vt-chip.r-common{border-left:3px solid var(--r-common)}
 .vault-empty{grid-column:1/-1;padding:48px 20px;text-align:center;color:var(--text3);font-style:italic;font-size:13px}
@@ -10634,8 +10634,12 @@ function costBucket(cost){ return cost>=6 ? '6+' : String(cost); }
 function costCurveHTML(cards){
   const buckets={'0':0,'1':0,'2':0,'3':0,'4':0,'5':0,'6+':0};
   cards.forEach(c=>{ buckets[costBucket(conjureCost(c))]++; });
-  const max=Math.max(1,...Object.values(buckets));
-  return '<div class="curve-bars">'+Object.keys(buckets).map(k=>{
+  // only show buckets that actually have cards (or are the active filter, so it stays clickable-off) --
+  // dynamic on purpose: hardcoding which costs exist would silently go stale the next time a card is added
+  // at a currently-empty cost.
+  const shown=Object.keys(buckets).filter(k=>buckets[k]>0||vaultCostFilter===k);
+  const max=Math.max(1,...shown.map(k=>buckets[k]));
+  return '<span class="vh-label">Cost</span><div class="curve-bars">'+shown.map(k=>{
     const h=Math.round((buckets[k]/max)*100);
     const on=vaultCostFilter===k?' on':'';
     return `<button class="curve-bar${on}" style="--h:${Math.max(h,6)}%" onclick="filterVaultCost('${k}',this)" title="${buckets[k]} card${buckets[k]===1?'':'s'} at cost ${k}"><span class="cb-count">${buckets[k]}</span><span class="cb-label">${k}</span></button>`;
