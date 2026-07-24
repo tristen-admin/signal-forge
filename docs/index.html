@@ -3985,12 +3985,12 @@ function setCameraSeat(side){
 
 function updatePiles(){
   document.getElementById('deck-count').textContent = deckSize;
-  { var _hc=document.getElementById('hand-count'); if(_hc) _hc.textContent=(typeof hand!=='undefined'&&hand)?hand.length:0; }
+  { var _hc=document.getElementById('hand-count'); if(_hc) _hc.textContent=((typeof hand!=='undefined'&&hand)?hand.length:0)+'/'+MAX_HAND; }
   document.getElementById('wc-count').textContent = winnersCircle.length;
   document.getElementById('banish-count').textContent = banishPile.length;
   document.getElementById('opp-wc-count').textContent = oppWC;
   { var _od=document.getElementById('opp-deck-count'); if(_od) _od.textContent=oppDeckBot.length;
-    var _oh=document.getElementById('opp-hand-count'); if(_oh) _oh.textContent=oppHandBot.length;
+    var _oh=document.getElementById('opp-hand-count'); if(_oh) _oh.textContent=oppHandBot.length+'/'+MAX_HAND;
     var _ob=document.getElementById('opp-banish-count'); if(_ob) _ob.textContent=oppBanishBot.length; }
   const pile = document.getElementById('pile-wc-chip');
   pile.style.borderColor = winnersCircle.length > 0 ? 'rgba(212,168,67,0.5)' : '';
@@ -4146,6 +4146,21 @@ function buildMatchView(){
 function drawCard(force){ if(typeof tutorialAdvance==='function')setTimeout(function(){tutorialAdvance('draw');},90);
   if(phase !== 'predraw' && !force) return;
 
+  if(hand.length >= MAX_HAND){
+    // Hand at the cap — the card stays in the deck rather than being drawn then burned (no discard pile exists).
+    setPhase('drawn');
+    document.getElementById('draw-btn').style.display = 'none';
+    document.getElementById('commit-btn').style.display = 'none';
+    document.getElementById('reveal-btn').disabled = false;
+    document.getElementById('cond-eyebrow').textContent = `Hand full (${MAX_HAND}/${MAX_HAND}) — no card drawn. Play from your hand.`;
+    document.getElementById('select-hint').textContent = 'Hand full — reveal the condition and commit from hand';
+    document.getElementById('commit-hint').textContent = 'Hand full — reveal the condition.';
+    document.getElementById('opp-area').innerHTML = '⏳ Opponent drew. Waiting…';
+    buildHand(); updatePiles();
+    startRoundCountdown('Hand full — no card drawn this turn.');
+    return;
+  }
+
   // Winners Circle when recovering after a loss; otherwise the top of the shuffled deck.
   const useWC = false;  // Stage 2: WC recovery is the explicit draw-on-loss choice, not an auto-draw
   let drawn, source, fromWC = false;
@@ -4170,8 +4185,8 @@ function drawCard(force){ if(typeof tutorialAdvance==='function')setTimeout(func
     return;
   }
   hand.push(drawn);
-  for(var _xd=1;_xd<DRAW_PER_TURN;_xd++){ if(drawPile.length){ hand.push(drawPile.pop()); } } deckSize=drawPile.length;
-  if(typeof dmForfeitDrawBonus!=='undefined' && dmForfeitDrawBonus){ dmForfeitDrawBonus=false; if(drawPile.length){ hand.push(drawPile.pop()); deckSize=drawPile.length; } if(typeof toast==='function') toast('★ Deck Master — forfeit bonus: drew an extra card.', true); }
+  for(var _xd=1;_xd<DRAW_PER_TURN;_xd++){ if(drawPile.length && hand.length<MAX_HAND){ hand.push(drawPile.pop()); } } deckSize=drawPile.length;
+  if(typeof dmForfeitDrawBonus!=='undefined' && dmForfeitDrawBonus){ dmForfeitDrawBonus=false; if(drawPile.length && hand.length<MAX_HAND){ hand.push(drawPile.pop()); deckSize=drawPile.length; if(typeof toast==='function') toast('★ Deck Master — forfeit bonus: drew an extra card.', true); } else if(typeof toast==='function') toast('★ Deck Master — forfeit bonus fizzled: hand is full.', true); }
 
   // Ourevos loses 3 power for good each time the god is dragged back from the Winners Circle
   if(fromWC && drawn.name === 'Ourevos, the Golden Dragon'){
@@ -5123,7 +5138,7 @@ function projectPlay(){
   var oppShown=pendingOppCard?(pendingOppCard.pow||0):null;
   return {base:base, called:called, link:link, spell:spell, rally:rally, total:base+called+link+spell+rally, oppDelta:oppDelta, oppShown:oppShown, linkName:linkName};
 }
-function drawToHand(n){ if(typeof drawPile==='undefined'||typeof hand==='undefined') return 0; var got=0; for(var i=0;i<(n||0);i++){ if(!drawPile.length) break; hand.push(drawPile.pop()); got++; } if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(got && typeof buildHand==='function') buildHand(); return got; }
+function drawToHand(n){ if(typeof drawPile==='undefined'||typeof hand==='undefined') return 0; var got=0; for(var i=0;i<(n||0);i++){ if(!drawPile.length || hand.length>=MAX_HAND) break; hand.push(drawPile.pop()); got++; } if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(got && typeof buildHand==='function') buildHand(); return got; }
 // SCRY: look at the top card of the deck, choose to keep it on top or move it to the bottom.
 // onDone(card) fires after the choice (or immediately with null if the deck is empty) so callers
 // can chain a conditional follow-up (e.g. Keawe Kel'rua's cost discount if the card costs 2+).
@@ -5175,7 +5190,7 @@ function chooseBanishFromHand(sourceName, onDone){
     if(onDone) onDone(card);
   };
 }
-function oppDrawN(n){ for(var _oi=0;_oi<(n||0);_oi++){ if(typeof oppDeckBot!=='undefined'&&oppDeckBot.length) oppHandBot.push(oppDeckBot.shift()); } }
+function oppDrawN(n){ for(var _oi=0;_oi<(n||0);_oi++){ if(typeof oppDeckBot!=='undefined'&&oppDeckBot.length&&oppHandBot.length<MAX_HAND) oppHandBot.push(oppDeckBot.shift()); } }
 function oppBanishN(n){ for(var _oj=0;_oj<(n||0);_oj++){ if(typeof oppHandBot!=='undefined'&&oppHandBot.length>1){ oppBanishBot.push(oppHandBot.splice(Math.floor(Math.random()*oppHandBot.length),1)[0]); } } }   // never drain the bot's last card -- same floor as pickOppRears, or dredge strands it at 0 with no supports for the rest of the match
 // stepSink (7/13/26): same real bug class as applyRuleList's fix — this function has NEVER taken a
 // stepSink, so its abilLog.push calls relied entirely on the outer RS monkeypatch, which reads
@@ -9552,6 +9567,10 @@ const STARTING_HAND = 5;
 const DRAW_PER_TURN = 1;   // cards drawn per turn — 1/turn, symmetric w/ bot (owner flagged the draw-2 surplus). Draw-heavy decks use their own draw cards.
 const DECK_SIZE = 20;
 const MIN_DECK = 16;   // decks are 16-20 by design -- no deckout stalling risk in this game, so a range is fine, not a bug (confirmed 7/17/26)
+const MAX_HAND = 10;   // 7/24/26: owner-reported 9-in-hand snowball on turn 3 — draws (both the mandatory
+// per-turn draw and every bonus-draw effect) simply stop once hand is at the cap; the card stays in the
+// deck/Winners Circle rather than being drawn-then-burned, since this file has no discard-pile concept to
+// burn it into. Applied symmetrically to the bot's oppHandBot (see oppDrawN/oppEndDuelCycle).
 // Curated fallback starter deck (used when no full custom deck is built) — NOT resized to the new
 // 15/20 format (still 12 cards); a content decision left for the owner, not silently expanded here.
 const DEFAULT_DECK = ['Kotei','Lagertha Waltz','Kiana','Zerith Var','Arch-Grim Korrin','Darwin','Ruffius Rufeldro','King Joris','Ahdorah Khaan, Determined Soul','Cletus Gwyndull','Bram the Bulwark','Old Garrick'];
@@ -10236,7 +10255,7 @@ function oppEndDuelCycle(){
     if(_bw){ oppLossStreak=0; }
     else { oppLossStreak=Math.min(3,(oppLossStreak||0)+1);
       try{ if(typeof oppWonBot!=='undefined' && oppWonBot.size){ var _pool=[].concat(typeof OPP_CARDS!=='undefined'?OPP_CARDS:[], typeof COLLECTION!=='undefined'?COLLECTION:[]); var _best=null,_bp=-1; oppWonBot.forEach(function(nm){ var _c=_pool.find(function(x){return x.name===nm;}); var _pw=_c?(_c.pow||0):0; if(_pw>_bp){_bp=_pw;_best=nm;} }); if(_best){ oppWonBot.delete(_best); if(typeof oppWC!=='undefined') oppWC=oppWonBot.size; var _bc=_pool.find(function(x){return x.name===_best;}); if(_bc) oppHandBot.push(Object.assign({},_bc)); } } }catch(e){} } }
-  for(var _bd=0;_bd<DRAW_PER_TURN;_bd++){ if(oppDeckBot.length) oppHandBot.push(oppDeckBot.shift()); }   // draw DRAW_PER_TURN per turn — same speed as player
+  for(var _bd=0;_bd<DRAW_PER_TURN;_bd++){ if(oppDeckBot.length && oppHandBot.length<MAX_HAND) oppHandBot.push(oppDeckBot.shift()); }   // draw DRAW_PER_TURN per turn — same speed as player, same hand cap
 }
 function _oppStamp(card){ var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null; return Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{}); }
 // 7/22/26: removed a dead, superseded pickOppCard() that used to sit here -- it was fully
