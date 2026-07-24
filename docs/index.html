@@ -375,6 +375,10 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .clock-strip{display:flex;align-items:center;gap:10px;padding:6px 16px;background:rgba(10,11,15,0.5);border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0}
 .spell-tray{display:flex;align-items:center;gap:12px;padding:8px 16px;background:transparent;border-top:none;flex-shrink:0;flex-wrap:wrap}
 .charge-meter{font-size:13px;color:var(--electric);font-weight:800;white-space:nowrap;letter-spacing:0.03em;text-shadow:0 1px 5px rgba(0,0,0,.9),0 0 10px rgba(91,192,235,.35)}
+.charge-pips{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap}
+.c-pip{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--electric);background:transparent;flex-shrink:0}
+.c-pip.filled{background:var(--electric);box-shadow:0 0 5px var(--elec-glow,rgba(91,192,235,.6))}
+.c-pip.bonus{background:var(--gold);border-color:var(--gold);box-shadow:0 0 6px rgba(245,194,77,.7)}
 .charge-meter b{font-size:22px;font-variant-numeric:tabular-nums}
 .charge-meter span{color:var(--text3);font-weight:500}
 .spell-tray-cards{display:flex;gap:8px;flex-wrap:wrap}
@@ -2965,6 +2969,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <!-- ENERGY / SPELL TRAY -->
     <div class="spell-tray" id="spell-tray">
       <div class="charge-meter">⚡ Charge <b id="charge-val">3</b><span>/<span id="charge-cap">3</span></span></div>
+      <div class="charge-pips" id="charge-pips"></div>
       <div class="spell-tray-cards" id="spell-tray-cards"></div>
     </div>
 
@@ -5241,7 +5246,22 @@ function fieldBond(fighter, supportOrName){
   var tier=formationTier(count);
   return tier ? {name:tier.name, bonus:tier.bonus, count:count} : null;
 }
-function renderCharge(){ const v=document.getElementById('charge-val'); if(v) v.textContent=charge; var cp=document.getElementById('charge-cap'); if(cp&&typeof duelEnergyCap==='function') cp.textContent=duelEnergyCap(); buildSpellTray(); }
+function renderCharge(){ const v=document.getElementById('charge-val'); if(v) v.textContent=charge; var cp=document.getElementById('charge-cap'); if(cp&&typeof duelEnergyCap==='function') cp.textContent=duelEnergyCap(); buildSpellTray();
+  // 7/24/26: pip meter, integrated from the UI mockup (Hearthstone-referenced individual crystal
+  // pips). "Bonus" pips are real, not decorative -- they only exist when charge currently exceeds
+  // duelEnergyCap(), which can only happen via Signal Diviner/Warpath Vanguard's "+N MAX Charge"
+  // effects (the only things in this engine that add to charge AFTER the cap-clamp). No new state
+  // needed: comparing live charge to the cap is the whole signal.
+  var pr=document.getElementById('charge-pips');
+  if(pr && typeof duelEnergyCap==='function'){
+    var cap=duelEnergyCap(), normal=Math.min(charge,cap), bonus=Math.max(0,charge-cap), empty=Math.max(0,cap-normal);
+    var html='';
+    for(var i=0;i<normal;i++) html+='<span class="c-pip filled"></span>';
+    for(var i=0;i<bonus;i++) html+='<span class="c-pip bonus" title="Bonus charge from a MAX Charge effect"></span>';
+    for(var i=0;i<empty;i++) html+='<span class="c-pip"></span>';
+    pr.innerHTML=html;
+  }
+}
 // Real bug (7/13/26, reported live: 3-cost Drell + 1-cost Empower at 3/3 max energy -- 4 spent
 // from a 3 pool): stageFighter()'s affordability check only looks at LIVE charge at the moment you
 // stage a fighter -- but commitCard() doesn't actually deduct until commit, so charge can still
