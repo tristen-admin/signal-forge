@@ -9677,6 +9677,8 @@ const GUIDE_TIPS = {
   asc: "Ascension is a solo run with one card as your Deck Master. Squad choices here can earn real Bonds that follow those cards everywhere else.",
 };
 function _guideCSS(){ if(document.getElementById('gd-style')) return; var st=document.createElement('style'); st.id='gd-style'; st.textContent=`
+  .guide-scrim{position:fixed;inset:0;z-index:189;display:none;background:rgba(0,0,0,0.01)}
+  .guide-scrim.on{display:block}
   .guide-dlg{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:190;display:none;max-width:min(92vw,560px);width:100%}
   .guide-dlg.on{display:block}
   .guide-dlg .gd-portrait{width:84px;height:84px;border-radius:50%;overflow:hidden;position:absolute;left:18px;top:-38px;border:3px solid var(--gold,#D4A843);background:#141020 center/cover no-repeat;box-shadow:0 6px 18px rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;font-size:34px}
@@ -9689,14 +9691,24 @@ function _guideCSS(){ if(document.getElementById('gd-style')) return; var st=doc
   .guide-dlg .gd-ok:hover{background:rgba(212,168,67,0.22)}
   @media(max-width:480px){.guide-dlg .gd-portrait{width:64px;height:64px;left:14px;top:-28px;font-size:26px}.guide-dlg .gd-box{padding-left:90px}}
 `; document.head.appendChild(st); }
-function _guideDismiss(){ var d=document.getElementById('guide-dlg'); if(d) d.classList.remove('on'); }
+function _guideDismiss(){ var d=document.getElementById('guide-dlg'); if(d) d.classList.remove('on'); var s=document.getElementById('guide-scrim'); if(s) s.classList.remove('on'); }
+// 7/24/26: this dialogue previously had NO click-blocking at all -- .guide-dlg is a small
+// bottom-anchored box with no backdrop, so the entire Hub (or whatever view is showing) stayed
+// fully clickable underneath it the whole time it was up. A click meant to dismiss it (or just an
+// impatient click anywhere) landed on real page content instead -- e.g. the Hub's Featured Ranked
+// Ladder card -- with no way back to a clean view. Fix: a near-invisible full-viewport scrim
+// (background nearly transparent, so the lightweight "character tip" feel is unchanged) that
+// blocks and dismisses on click, same pattern howto-ov's scrim already uses correctly.
 function showGuideDialogue(text, opts){
   _guideCSS();
+  var s=document.getElementById('guide-scrim');
+  if(!s){ s=document.createElement('div'); s.id='guide-scrim'; s.className='guide-scrim'; s.onclick=_guideDismiss; document.body.appendChild(s); }
   var d=document.getElementById('guide-dlg');
   if(!d){ d=document.createElement('div'); d.id='guide-dlg'; d.className='guide-dlg'; document.body.appendChild(d); }
   var okLabel=(opts&&opts.okLabel)||'Got it';
   d.innerHTML='<div class="gd-portrait"><img src="'+GUIDE_CHAR_SRC+'" onerror="this.style.display=\'none\';this.parentElement.textContent=\'★\'"></div>'
     +'<div class="gd-box"><button class="gd-close" onclick="_guideDismiss()">✕</button><div class="gd-text">'+text+'</div><button class="gd-ok" onclick="_guideDismiss()">'+okLabel+'</button></div>';
+  s.classList.add('on');
   d.classList.add('on');
 }
 function showGuideTipIfDue(id){
