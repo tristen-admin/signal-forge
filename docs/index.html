@@ -3450,7 +3450,7 @@ const DECK_POOL = [
   {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:'rare',timing:"on",abil:"Purity: +5 while this card is Pristine (0 deaths, 1+ kill)."},
   {name:"Kravyn the Collector",pow:18,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +3. At 10+ career kills this unit gains Kill Escalation: +5. At 25+ career kills this unit gains Kill Escalation +7 instead. When this unit kills its enemy unit, you may choose to return this unit to the hand instead of placing it in the winners circle."},
   {name:"Fifth Frequency Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Elemental Flurry: +3, +4 more with 5+ cards in hand, +7 more with 4+ cards in your banish zone."},
-  {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +1 power for every 2 cards remaining in your deck. Death Remnant +6"},
+  {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +1 power for every 2 cards remaining in your deck. Death Remnant +8"},
   {name:"Ilma the Patient",pow:13,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Late Bloomer: +5 from the 3rd commit onward."},
   {name:"Old Garrick",pow:12,kills:0,deaths:0,rarity:"common",timing:"on",abil:"Grizzled Veteran: +5 at 20+ kills; +5 more at 8+ deaths."},
   {name:"Faye Quicksilver",pow:14,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Snowball: +2 for every round you have already won this match."},
@@ -3795,7 +3795,7 @@ function remnantPowSum(){ return deathRemnants.reduce(function(a,r){return a+(r.
 let oppDeathRemnants = [];   // 7/24/26: bot-side mirror -- was missing entirely, Korrin's kit was inert bot-side (see note above applyBotDeckMasterResolveEffects)
 function oppRemnantPowSum(){ return oppDeathRemnants.reduce(function(a,r){return a+(r.pow||0);},0); }
 let oppDmRemnantPowOverride = null;   // bot-side mirror of dmRemnantPowOverride
-const REMNANT_POW = {'Arch-Grim Korrin':8,'Summoned Skull Soldiers':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk "Gnarly" Judarr':6,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5,'Grave-Warden':3};
+const REMNANT_POW = {'Arch-Grim Korrin':8,'Summoned Skull Soldiers':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk "Gnarly" Judarr':8,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5,'Grave-Warden':3};   // 7/24/26: Ghorruk corrected 6->8 to match the 2026-07-07 owner-spec override below, then that now-redundant override line was removed -- one source of truth, not two disagreeing ones.
 const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5,'Uso Oso':2};   // PROACTIVE: raise a Death Remnant on commit — no death needed. Uso Oso added 7/24/26, Stage 1 of "The Bulwark of Bones"
 const RALLY = {'Bannerlord Cassian':5,'Ironsworn Vanguard':3,'Warden of the Wall':3,'Oathkeeper Sena':3,'Oathbound Shield':3,'Sworn Duelist':3,'Shieldwall Recruit':3};   // MUSTER: +N power per 1-COST ally (1-cost called supports this duel + 1-cost cards in Winners Circle)
 const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk "Gnarly" Judarr','Sister Mire','Kiba','Grave-Fed Ghoul','Bone Choirmaster','Gravecaller Voss',"Uso Oso's Skeletal Summons"];
@@ -7648,9 +7648,26 @@ function resolve(pc, oc, cond, playerCommittedPow){
     // above (which is why this can't reuse chargeGainIfWon -- that field checks cumulative match
     // wins via applyCalled()'s pre-outcome ctx, not "did this specific duel resolve as a win").
     if(rg.name==='Kotei' && won==='win'){ charge=Math.min(duelEnergyCap(),charge+2); if(typeof renderCharge==='function') renderCharge(); hand.push({...rg}); if(typeof buildHand==='function') buildHand(); abilLog.push('👑 Kotei — the sovereign returns: +2 Charge, back to your hand instead of the deck'); }
+    // Same bug, same fix, different card: Tange Sazen's Called text promises the identical
+    // "returns to your hand instead of going to the winners circle" redirect -- found while
+    // fixing Kotei above. No charge grant here; his text never promised one.
+    else if(rg.name==='Tange Sazen' && won==='win'){ hand.push({...rg}); if(typeof buildHand==='function') buildHand(); abilLog.push('⚔ Tange Sazen — returns to your hand instead of the deck'); }
     else if(typeof LINGERING_SUPPORTS!=='undefined' && LINGERING_SUPPORTS.indexOf(rg.name)>=0){ var _lp=(typeof REMNANT_POW!=='undefined'&&REMNANT_POW[rg.name]!=null)?REMNANT_POW[rg.name]:(rg.pow||0); deathRemnants.push({name:rg.name,pow:_lp}); abilLog.push('☠ '+rg.name+' lingers as a Remnant (+'+_lp+' to your commits until an enemy dies)'); }
     else { drawPile.unshift(rg); abilLog.push('↩ '+rg.name+' (support) → deck bottom'); }
   }); if(rearGuards.length) deckSize=drawPile.length;
+  // 7/24/26: bot-side mirror of the loop just above -- was entirely missing. pendingOppRears used
+  // to just get wiped below with zero handling: no Remnant lingering, no deck-bottom recycle. Any
+  // bot fielding a LINGERING_SUPPORTS card (Ghorruk, Uso Oso, Sister Mire, Kiba, Grave-Fed Ghoul,
+  // Bone Choirmaster, Gravecaller Voss, Uso Oso's Skeletal Summons) as a rear guard got nothing --
+  // a real, previously-undiscovered gap in the same family as the Fighter-mode Korrin fix
+  // (oppDeathRemnants already exists and is already read by oppEvalPow()'s remnant_count and the
+  // real bot resolve()-time power math -- this just makes it actually receive rear-guard sources
+  // too, not only Fighter-mode ones). oppDeckBot.push() is the bot's own "recycle to the bottom"
+  // convention (its draw functions all read via .shift(), matching the reclaimWC fix earlier).
+  pendingOppRears.forEach(function(og){ if(!og) return;
+    if(typeof LINGERING_SUPPORTS!=='undefined' && LINGERING_SUPPORTS.indexOf(og.name)>=0){ var _olp=(typeof REMNANT_POW!=='undefined'&&REMNANT_POW[og.name]!=null)?REMNANT_POW[og.name]:(og.pow||0); oppDeathRemnants.push({name:og.name,pow:_olp}); abilLog.push('☠ Opp '+og.name+' lingers as a Remnant (+'+_olp+' to their commits until an enemy dies)'); }
+    else { oppDeckBot.push(og); abilLog.push('↩ Opp '+og.name+' (support) → deck bottom'); }
+  });
   rearGuards=[]; pendingOppRears=[];
   abilLogEl.innerHTML = abilLog.map(e => `<div class="abil-log-entry">${e}</div>`).join('');
   const _revealOutcome = function(){
@@ -9862,7 +9879,6 @@ CARD_RULES['Kaelthar the Ascendant']=[{"if":{"v":"player_wins","op":">","v2":"pl
 CARD_RULES['Trophy-Hunter Kessa']=[{"addvar":"both_wc","x":2,"log":"🏆 Kessa: +2 per trophy (both Circles)"}];
 CARD_RULES['Ghorruk "Gnarly" Judarr']=[{"if":{"v":"deck_len","op":">","n":0},"addvar":"deck_len","x":0.5,"log":"💀 Ghorruk: +1 per 2 cards left in deck"}];
 CARD_RULES['The Bronzed Beast, Hanse Waltz']=[{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":5,"log":"🌑 Blood Moon: +5 (behind)"}];
-if(typeof REMNANT_POW!=='undefined'){ REMNANT_POW['Ghorruk "Gnarly" Judarr']=8; REMNANT_POW['Arch-Grim Korrin']=8; }
 
 ;/* ===== COACHED TUTORIAL (stage 1: overlay + spotlight + step engine; gated by tutorialMode) ===== */
 var tutorialMode=false, tutorialStep=0;
