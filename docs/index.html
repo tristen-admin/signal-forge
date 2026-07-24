@@ -12551,7 +12551,13 @@ body:has(#v-turn.on) .howto-btn{display:none}
 (function(){
   window.showHowTo=function(){ var o=document.getElementById('howto-ov'); if(o) o.classList.add('on'); };
   window.closeHowTo=function(){ var o=document.getElementById('howto-ov'); if(o) o.classList.remove('on'); try{ localStorage.setItem('sf_howto_seen','1'); }catch(e){} if(window._needStarterChoice && typeof showStarterChooser==='function'){ var _sc=true; try{ _sc=!localStorage.getItem('sf_starter_chosen'); }catch(e){} if(_sc) setTimeout(function(){ showStarterChooser(); }, 320); } };   // 7/18/26: intro video pulled from the flow -- no real file exists yet, and the missing-asset fallback was auto-skipping in ~30ms, a jarring flash right before the starter chooser. showIntroVideo() itself is left intact, unreferenced, for whenever a real video is ready to wire back in.
-  try{ if(localStorage.getItem('sf_howto_seen')!=='1'){ setTimeout(function(){ if(window.showHowTo) showHowTo(); }, 1100); } }catch(e){}
+  // 7/24/26: was a 1100ms setTimeout -- left a real gap where the Hub underneath was already
+  // fully loaded and clickable before this modal appeared, so an eager click-to-skip landed on
+  // whatever real Hub content was under the cursor (e.g. the Ranked Ladder card) instead of the
+  // modal, and there was no way back to a clean "dismiss the intro, land on Hub" path. Now fires
+  // synchronously -- the modal (a position:fixed, full-viewport scrim) is present from the first
+  // moment the Hub renders, so there is no window where a click can reach the content underneath.
+  try{ if(localStorage.getItem('sf_howto_seen')!=='1'){ if(window.showHowTo) showHowTo(); } }catch(e){}
   document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var o=document.getElementById('howto-ov'); if(o&&o.classList.contains('on')) closeHowTo(); } });
 })();
 </script>
