@@ -6725,7 +6725,23 @@ function dmAutoRide(){
   if(typeof updatePiles==='function') updatePiles();
   if(typeof toast==='function') toast('🔄 Auto-Ride — hand bottomed and redrawn, no score change.', true);
   setPhase('revealed');
-  if(dmShouldOfferFallback()){ if(ov) ov.classList.add('show'); }   // unlucky redraw — offer again rather than leave a stuck all-Common hand
+  // 7/24/26: an unlucky redraw that's ALSO all-Common re-shows this exact same overlay -- but
+  // removing then re-adding the .show class in the same synchronous tick never gives the browser
+  // a paint frame in between, so the CSS fade-in animation silently doesn't restart. The overlay
+  // never visually leaves the screen at all, so a real reshow is pixel-identical to a frozen one --
+  // confirmed via direct testing (a forced common-only redraw looped with animationName unchanged
+  // both before and after). The toast above still fires, but a small transient toast isn't enough
+  // on its own when the whole-screen modal in front of it looks completely static. Fix: force a
+  // reflow between remove and re-add so the animation genuinely restarts every time, and swap the
+  // panel copy so a loop reads as a loop instead of a no-op.
+  if(dmShouldOfferFallback()){
+    if(ov){
+      void ov.offsetWidth;   // forces the browser to commit the .show removal before it's re-added
+      ov.classList.add('show');
+      var _dmp = ov.querySelector('p');
+      if(_dmp) _dmp.textContent = 'Redrawn again — still every card in hand is Common-tier. Choose how to proceed.';
+    }
+  }
 }
 // Forfeit: concede the round (scored exactly like a normal loss/surrender), guaranteed +1 extra
 // draw next turn. Mirrors onDecisionTimeout()'s existing surrender presentation almost exactly.
