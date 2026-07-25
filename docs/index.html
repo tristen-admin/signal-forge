@@ -3797,9 +3797,22 @@ function renderDeckMasterAbilityStrip(){
   var opts=document.getElementById('dm-ability-options');
   var ab = deckMasterCard ? DM_ACTIVATED_ABILITY[deckMasterCard] : null;
   var eligiblePhase = (typeof phase!=='undefined') && phase!=='committed' && phase!=='resolved';
-  if(!ab || dmAbilityUsedThisMatch || !eligiblePhase){ strip.style.display='none'; if(opts) opts.innerHTML=''; return; }
-  strip.style.display='flex';
-  if(opts) opts.innerHTML = '<button class="instant-card-btn" style="border-color:rgba(212,168,67,0.6);color:var(--gold)" onclick="activateDeckMasterAbility()">★ '+deckMasterCard+' — '+ab.log+' ('+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus))+')</button>';
+  if(ab && !dmAbilityUsedThisMatch && eligiblePhase){
+    strip.style.display='flex';
+    if(opts) opts.innerHTML = '<button class="instant-card-btn" style="border-color:rgba(212,168,67,0.6);color:var(--gold)" onclick="activateDeckMasterAbility()">★ '+deckMasterCard+' — '+ab.log+' ('+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus))+')</button>';
+    return;
+  }
+  // Passive-only Deck Masters (DM_EXCLUSIVE but no DM_ACTIVATED_ABILITY, e.g. Korrin) had zero in-duel
+  // confirmation their bonus was live -- the strip only ever rendered the clickable activated-ability
+  // case above. A non-clickable badge fixes that without implying there's anything to click.
+  var dmx = deckMasterCard ? DM_EXCLUSIVE[deckMasterCard] : null;
+  if(dmx && dmx.length && eligiblePhase){
+    strip.style.display='flex';
+    var dmxText = dmx.map(function(r){ return r.log||''; }).filter(Boolean).join(' / ');
+    if(opts) opts.innerHTML = '<span class="instant-card-btn" style="border-color:rgba(212,168,67,0.4);color:var(--gold);cursor:default;opacity:.85">★ '+deckMasterCard+' — '+dmxText+' (passive, always active)</span>';
+    return;
+  }
+  strip.style.display='none'; if(opts) opts.innerHTML='';
 }
 let divinerBonusNext = 0;
 let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + lingering supports); each {name,pow}; persists until an enemy card is killed
