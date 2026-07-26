@@ -6574,11 +6574,35 @@ const ARCHETYPE_MEMBERS = {
   // accumulated undocumented gaps over time; starting these two at full coverage avoids repeating
   // that same audit finding a third and fourth time.
   "Keawe's Circle": ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz','Fenrik Vench','Yard Sparring Partner','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger"],
-  "Ahdor's Pride": ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 19 Quartermaster','Squad 19 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 19 Signalman','Squad 19 Chronicler']
+  "Ahdor's Pride": ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 19 Quartermaster','Squad 19 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 19 Signalman','Squad 19 Chronicler'],
+  // Added 7/25/26, archetype balance audit -- Black Wings and Black Council were the last 2 of the
+  // game's 9 real archetypes with zero Deck Master coverage (no key here, no ARCHETYPE_VANILLA, no
+  // DM_EXCLUSIVE splash-tier card). Full roster, not a curated subset -- same anti-gap-accumulation
+  // reasoning as Keawe's Circle/Ahdor's Pride above.
+  'Black Wings': ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Valcarion'],
+  'Black Council': ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin','Kravyn the Collector','Court Cipher']
 };
 function archetypeOf(cardName){
   for(var arch in ARCHETYPE_MEMBERS){ if(ARCHETYPE_MEMBERS[arch].indexOf(cardName)>=0) return arch; }
   return null;
+}
+// 7/25/26: conjureTierOf() was already fixed (7/24/26, see its own comment) to check the CONJURED
+// card's membership directly instead of trusting archetypeOf(card)===dmArch -- but dmArch itself
+// (used for the tier-2 VANILLA bonus lookup, both here and at every archetypeOf(deckMasterCard)/
+// archetypeOf(activeBot.dmCard) call site below) was still resolved via archetypeOf()'s first-match
+// order. A Deck Master who is themselves a dual-archetype card (Conduit of Chaos, Kleydson: Keawe's
+// Circle + Ahdor's Pride; Val Kreigh/Ruffius Rufeldro: Warpath + Ahdor's Pride) always resolved to
+// whichever key was inserted first, so an Ahdor's-Pride deck run with Kleydson as Deck Master got
+// Keawe's Circle's vanilla bonus (wrong text, wrong condition) and Ahdor's-Pride-only conjures wrongly
+// fell to tier 3. Resolves the same ambiguity conjureTierOf() does, using the SAME lever: prefer
+// whichever of the Deck Master's own archetypes the card actually being conjured is ALSO a member of.
+function dmVanillaArch(dmName, cardName){
+  if(!dmName) return null;
+  var keys=[]; for(var k in ARCHETYPE_MEMBERS){ if(ARCHETYPE_MEMBERS[k].indexOf(dmName)>=0) keys.push(k); }
+  if(!keys.length) return null;
+  if(keys.length===1) return keys[0];
+  for(var i=0;i<keys.length;i++){ if(ARCHETYPE_MEMBERS[keys[i]].indexOf(cardName)>=0) return keys[i]; }
+  return keys[0];
 }
 // Tier 1 — fires ONLY when the player's own named Deck Master card is the one conjured.
 // Rule-object shape matches CARD_RULES (if/add/addvar/x/log) wherever the effect is pure
@@ -6655,7 +6679,12 @@ const ARCHETYPE_VANILLA = {
   "Keawe's Circle": [{"if":{"v":"losses","op":">","n":0},"add":2,"log":"🤝 Found Family: +2 power once you've lost a duel this match — they don't leave you behind"}],
   // Balance audit round 2 §7, 7/24/26 -- reuses match_commits, the same field Squad 16 Veteran
   // and Ilma the Patient already key off individually.
-  "Ahdor's Pride": [{"if":{"v":"match_commits","op":">=","n":2},"add":2,"log":"🎖 Squad Discipline: +2 power once you've played 2 or more duels this match"}]
+  "Ahdor's Pride": [{"if":{"v":"match_commits","op":">=","n":2},"add":2,"log":"🎖 Squad Discipline: +2 power once you've played 2 or more duels this match"}],
+  // Archetype balance audit, 7/25/26 -- closing the last 2 DM-coverage gaps. Both keyed off a
+  // condition distinct from every other archetype's vanilla trigger (§ hand_len/wc_len/charge/
+  // losses/match_commits are all already spoken for), matching each archetype's own stated theme.
+  'Black Wings': [{"if":{"v":"banish_len","op":">","n":0},"add":2,"log":"🖤 Wings in Shadow: +2 power once you've banished a card this match"}],
+  'Black Council': [{"if":{"v":"behind","op":">","n":0},"add":2,"log":"🂠 Court's Advantage: +2 power while you're behind on committed power this duel"}]
 };
 const DM_VANILLA_OVERRIDE = {
   // her signature draw stays stronger than the archetype baseline (draws 2, not 1)
@@ -6710,7 +6739,7 @@ function applyDeckMasterCommitEffects(pc){
       if('deathLingerBuffOverride' in r){ dmRemnantPowOverride = r.deathLingerBuffOverride; }
     });
   } else if(tier===2){
-    var arch = archetypeOf(deckMasterCard);
+    var arch = dmVanillaArch(deckMasterCard, pc.name);
     var vrules = DM_VANILLA_OVERRIDE[pc.name] || (arch ? (ARCHETYPE_VANILLA[arch]||[]) : []);
     vrules.forEach(function(r){
       if('draw' in r && typeof drawToHand==='function' && evalRuleCond(r.if, {remnant_count:(typeof deathRemnants!=='undefined'?deathRemnants.length:0)})){
@@ -6752,11 +6781,13 @@ function applyDeckMasterResolveEffects(pc, playerPow, oppPow, abilLog, stepSink)
   ctx.charge_capped = Math.min(4, typeof charge!=='undefined'?charge:0);   // 7/24/26: Consecrated Reserve (Radiance shared spine)
   ctx.match_commits = (typeof matchCommits!=='undefined'?matchCommits:0);   // 7/24/26: balance audit round 2 §7 (Ahdor's Pride tier-2, Kotei tier-1)
   ctx.losses = (typeof playerScore!=='undefined'?playerScore[1]:0);        // 7/24/26: balance audit round 2 §7 (Keawe's Circle tier-2, Ahdorah Khaan tier-1)
+  ctx.banish_len = (typeof banishPile!=='undefined'?banishPile.length:0);  // 7/25/26: Black Wings tier-2 ("Wings in Shadow")
+  ctx.behind = (playerPow<oppPow) ? 1 : 0;                                 // 7/25/26: Black Council tier-2 ("Court's Advantage")
   if(tier===1){
     var r1 = applyRuleList((DM_EXCLUSIVE[pc.name]||[]).filter(_dmIsPowRule), ctx, playerPow, oppPow, abilLog, stepSink);
     playerPow=r1[0]; oppPow=r1[1];
   } else if(tier===2){
-    var arch = archetypeOf(deckMasterCard);
+    var arch = dmVanillaArch(deckMasterCard, pc.name);
     var vrules = DM_VANILLA_OVERRIDE[pc.name] || (arch ? (ARCHETYPE_VANILLA[arch]||[]) : []);
     var r2 = applyRuleList(vrules.filter(_dmIsPowRule), ctx, playerPow, oppPow, abilLog, stepSink);
     playerPow=r2[0]; oppPow=r2[1];
@@ -6786,11 +6817,13 @@ function applyBotDeckMasterResolveEffects(oc, playerPow, oppPow, abilLog, stepSi
   ctx.charge_capped = Math.min(4, typeof oppCharge!=='undefined'?oppCharge:0);   // 7/24/26: Consecrated Reserve (Radiance shared spine), bot mirror
   ctx.match_commits = (typeof matchCommits!=='undefined'?matchCommits:0);   // 7/24/26: balance audit round 2 §7, bot mirror
   ctx.losses = (typeof playerScore!=='undefined'?playerScore[0]:0);        // 7/24/26: bot's own losses = player's wins
+  ctx.banish_len = (typeof oppBanishBot!=='undefined'&&oppBanishBot?oppBanishBot.length:0);   // 7/25/26: Black Wings tier-2, bot mirror
+  ctx.behind = (oppPow<playerPow) ? 1 : 0;   // 7/25/26: Black Council tier-2, bot mirror -- oppPow is the bot's OWN power in this function's naming (oc = the bot's conjured card)
   if(tier===1){
     var r1 = applyRuleList((DM_EXCLUSIVE[oc.name]||[]).filter(_dmIsPowRule), ctx, oppPow, playerPow, abilLog, stepSink, true);
     oppPow=r1[0]; playerPow=r1[1];
   } else if(tier===2){
-    var arch = archetypeOf(activeBot.dmCard);
+    var arch = dmVanillaArch(activeBot.dmCard, oc.name);
     var vrules = DM_VANILLA_OVERRIDE[oc.name] || (arch ? (ARCHETYPE_VANILLA[arch]||[]) : []);
     var r2 = applyRuleList(vrules.filter(_dmIsPowRule), ctx, oppPow, playerPow, abilLog, stepSink, true);
     oppPow=r2[0]; playerPow=r2[1];
@@ -7146,7 +7179,8 @@ const CARD_RULES = {
   }
  ],
  "Kiana": [
-  { "add": 6, "log": "🪶 Order Initiate: +6" }
+  { "add": 3, "log": "🪶 Elemental Flurry: +3" },
+  { "if": { "v": "hand_len", "op": ">=", "n": 4 }, "add": 4, "log": "🪶 Elemental Flurry: +4 more (4+ hand)" }
  ],
  "King Joris": [
   {
