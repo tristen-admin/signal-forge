@@ -973,6 +973,35 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 #v-hub .hub-action.ha-soon .ha-txt{flex:0 1 auto}
 #v-hub .hub-action.ha-soon .ha-title{font-size:15px;color:#B9A876}
 #v-hub .hub-action.ha-soon .ha-sub{white-space:normal;color:#7E8CA6;font-style:normal}
+/* ══ HUB — Camp Standing identity banner (owner-picked hub direction, 7/25/26) ══
+   Your Camp (Amageras/Omitsuki/Kitanoo) as the dominant hub moment, tied to your actual Deck
+   Master via campOf() -- the same identity rule Bloodlines Clash already uses (see note above
+   campOf/ascCampCls). Real CAMP_COLOR/CAMP_TITLE/CAMP_ICON, not invented flavor. Purely additive:
+   a new element above the existing hero, everything else on the Hub keeps its current styling. */
+.camp-banner{
+  --camp-c:#4a4a44; --camp-d:#222220;
+  position:relative;padding:24px 30px 34px;text-align:center;
+  background:linear-gradient(180deg,var(--camp-c),var(--camp-d));
+  clip-path:polygon(0 0,100% 0,100% 82%,50% 100%,0 82%);
+  box-shadow:0 16px 40px -18px rgba(0,0,0,.7);
+}
+.camp-banner.camp-amageras{--camp-c:#E8873A;--camp-d:#6b3d18}
+.camp-banner.camp-omitsuki{--camp-c:#5B2C8F;--camp-d:#271340}
+.camp-banner.camp-kitanoo{--camp-c:#2D6A4F;--camp-d:#143324}
+.camp-banner .cb-sigil{width:42px;height:42px;border-radius:50%;margin:0 auto 10px;background:var(--gold);
+  color:#241d0c;display:flex;align-items:center;justify-content:center;font-size:19px;
+  box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.camp-banner.camp-none .cb-sigil{background:var(--surface2);color:var(--text3);box-shadow:none;
+  border:1px solid var(--border2)}
+.camp-banner .cb-title{font-family:'Trajan Pro','Cinzel','Hoefler Text',Palatino,Georgia,serif;
+  font-size:clamp(20px,2.6vw,28px);font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:#fbf6e6;text-shadow:0 2px 10px rgba(0,0,0,.5)}
+.camp-banner.camp-none .cb-title{color:var(--text2);font-size:17px;text-shadow:none}
+.camp-banner .cb-sub{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.72);
+  margin-top:7px;font-weight:700}
+.camp-banner.camp-none .cb-sub{color:var(--text3);text-transform:none;letter-spacing:normal;font-weight:400;
+  font-size:12px;max-width:40ch;margin:7px auto 0;line-height:1.4}
+@media(max-width:640px){.camp-banner{padding:18px 18px 26px}}
 .asc-cond{display:flex;align-items:center;gap:12px;background:linear-gradient(180deg,rgba(245,194,77,0.08),rgba(11,11,14,0.5));border:1px solid rgba(245,194,77,0.28);border-radius:12px;padding:11px 15px;margin-bottom:14px}
 .asc-cond-ico{font-size:24px;flex-shrink:0}
 .asc-cond-txt{font-size:13px;color:var(--text);display:flex;flex-direction:column;gap:2px}
@@ -2488,6 +2517,11 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   <div class="view on" id="v-hub">
     <video class="hub-bg-video" id="hub-bg-video" muted playsinline onerror="this.style.display='none'"></video>
     <div class="hub">
+      <div class="camp-banner camp-none" id="camp-banner">
+        <div class="cb-sigil" id="cb-sigil">◈</div>
+        <div class="cb-title" id="cb-title">No Banner Raised</div>
+        <div class="cb-sub" id="cb-sub">Name a Deck Master in the Deck Builder to raise your Camp's banner</div>
+      </div>
       <div class="hub-hero">
         <div class="hero-left">
           <div class="hero-welcome">
@@ -5318,6 +5352,7 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
 // that existing system rather than left as a second parallel one. Kept small for v1 (draw,
 // chargeGain); extend per-card as the owner designs specific instant effects.
 const INSTANT_EFFECTS = {
+  "Kiba":                          {text:"draw a card", draw:1}
 };
 function pickOppRears(fighter){
   var out=[];
@@ -10526,6 +10561,29 @@ function buildHub(){
   renderFeatured();
   startFeaturedRotation();
   if(typeof renderDailyQuests==='function') renderDailyQuests();
+  renderCampBanner();
+}
+// Camp Standing banner (7/25/26, owner-picked hub direction): your Camp identity as the dominant
+// hub moment, driven by campOf(deckMasterCard) -- the same "you and your Deck Master share one
+// identity" rule Bloodlines Clash already uses (see note above campOf/ascCampCls). Real
+// CAMP_COLOR/CAMP_TITLE/CAMP_ICON constants, not invented flavor -- no Deck Master named yet shows
+// a neutral prompt instead of assigning a random camp.
+function renderCampBanner(){
+  var el=document.getElementById('camp-banner'); if(!el) return;
+  var dm=(typeof deckMasterCard!=='undefined')?deckMasterCard:null;
+  var camp=dm?campOf(dm):null;
+  el.className='camp-banner'+(camp?' camp-'+camp.toLowerCase():' camp-none');
+  var sigil=document.getElementById('cb-sigil'), title=document.getElementById('cb-title'), sub=document.getElementById('cb-sub');
+  if(camp){
+    if(sigil) sigil.textContent=CAMP_ICON[camp]||'◈';
+    if(title) title.textContent=CAMP_TITLE[camp]||camp;
+    var _dmc=COLLECTION.find(function(c){return (c.uid||c.name)===dm;});
+    if(sub) sub.textContent=(_dmc?_dmc.name:dm)+' — your Deck Master';
+  } else {
+    if(sigil) sigil.textContent='◈';
+    if(title) title.textContent='No Banner Raised';
+    if(sub) sub.textContent="Name a Deck Master in the Deck Builder to raise your Camp's banner";
+  }
 }
 function ownedFeaturedList(){ return featuredCards.filter(key=>COLLECTION.find(c=>(c.uid||c.name)===key) && (ownedCopies[key]||0)>0); }
 function renderFeatured(){
