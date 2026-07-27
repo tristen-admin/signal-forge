@@ -4517,6 +4517,7 @@ let pendingBotRaise=0;   // a rival raise proposal awaiting YOUR agreement (0 = 
 const MAX_MULT=8;   // rank stake caps at x8 (max 160 RP/match) — prevents tier-skipping exploits
 const MAX_POT=4;    // PvP pot caps at 4 cards per side
 function enterWagerPhase(){
+  window._cinBeat=Date.now();   // this UI state is alive and player-paced, not the stuck cinematic the watchdog above is guarding against
   updateStake();
   document.getElementById('result-overlay').classList.remove('show');
   playerReady=false; botReady=false; wagerDone=false; wagerLeft=15; raisedThisPhase=false;
@@ -4672,6 +4673,7 @@ function retreat(who){
 }
 // Best-of-7 conclusion — win/loss screen with Signal payout.
 function showMatchComplete(mode, amt){
+  window._cinBeat=Date.now();   // this UI state is alive and player-paced, not the stuck cinematic the watchdog above is guarding against
   clearTurnTimers();
   if(typeof matchPlayed!=='undefined' && matchPlayed.size>=2){ var _bondCrossed=recordFormationBonds([...matchPlayed]); matchPlayed=new Set(); if(_bondCrossed && _bondCrossed.length) setTimeout(function(){ showBondBeat(_bondCrossed[0]); }, 900); }
   wagerDone=true; if(wagerTimer){ clearInterval(wagerTimer); wagerTimer=null; } { const _wo=document.getElementById('wager-overlay'); if(_wo) _wo.classList.remove('show'); }
@@ -12913,7 +12915,17 @@ body:has(#v-turn.on) .howto-btn{display:none}
       // step/clash/finish) -- the longest legitimate gap between beats is the ~2.8s finish-to-reveal
       // tail, so 6s of true silence still means genuinely stuck, not just a long-but-alive animation.
       var age=Date.now()-(window._cinBeat||window._phaseAt||Date.now());
-      if(p==='committed' && !resultShown() && age>6000 && typeof afterResult==='function'){ afterResult(); }
+      // Real bug (7/27/26): same root cause as the 7/13/26 fix above, one step later. Neither
+      // enterWagerPhase() nor showMatchComplete() moves `phase` off 'committed', and neither
+      // refreshes _cinBeat (that heartbeat is scoped to the resolution cinematic, not what comes
+      // after it) — so once the wager countdown (up to 15s) or the match-complete screen had been
+      // showing for 6+ silent seconds, this watchdog read it as a stuck cinematic and fired
+      // afterResult() a second time on top of a screen that was already correctly showing,
+      // producing the victory/wager/result overlap. Bail out if either is already up; that screen
+      // is alive and player-paced, not stuck, regardless of elapsed time.
+      var wagerShown=(function(){ var w=document.getElementById('wager-overlay'); return w&&w.classList.contains('show'); })();
+      var matchEndShown=(function(){ var m=document.getElementById('match-end'); return m&&m.classList.contains('show'); })();
+      if(p==='committed' && !resultShown() && !wagerShown && !matchEndShown && age>6000 && typeof afterResult==='function'){ afterResult(); }
     }catch(e){}
   }, 3000);
   function wireResultTap(){ var o=document.getElementById('result-overlay'); if(!o) return; o.addEventListener('click', function(e){ if(!o.classList.contains('show')) return; if(e.target.closest && (e.target.closest('button')||e.target.closest('a'))) return; if(typeof afterResult==='function') afterResult(); }); }
