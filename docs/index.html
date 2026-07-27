@@ -91,14 +91,19 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .duel-strip{
   flex:1;display:flex;flex-direction:column;
   overflow-y:auto;overflow-x:hidden;
-  min-height:0;
+  min-height:0;position:relative;
   background-size:cover;background-position:center;background-repeat:no-repeat;
 }
 
-/* opponent zone */
+/* opponent zone (7/27/26): floats over the field instead of reserving its own row, so the
+   field behind it -- support zones included -- stays visible and the field can claim the
+   full duel-strip height. Translucent + blurred rather than solid so it still reads as its
+   own panel; position:absolute doesn't affect its children's existing click handlers. */
 .opp-zone{
-  background:rgba(10,11,15,0.5);border-bottom:1px solid rgba(255,255,255,0.06);
+  background:rgba(10,11,15,0.32);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+  border-bottom:1px solid rgba(255,255,255,0.06);
   padding:10px 16px;display:flex;align-items:center;gap:12px;flex-shrink:0;
+  position:absolute;top:0;left:0;right:0;z-index:6;
 }
 .zone-label{font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-right:4px}
 
@@ -171,11 +176,16 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .reveal-btn:hover{border-color:var(--electric);color:var(--electric);background:rgba(91,192,235,0.06)}
 .reveal-btn:disabled{opacity:0.3;cursor:default}
 
-/* player zone */
+/* player zone (7/27/26): same floating treatment as .opp-zone above -- pinned to the bottom
+   of duel-strip instead of sitting in-flow, so the field reclaims the height this used to
+   reserve and support zones aren't squeezed by the hand row. Gradient (not a flat fill) so
+   the field is fully visible right above the cards, darkening only where the cards themselves
+   sit, for legibility. */
 .player-zone{
-  background:transparent;
+  background:linear-gradient(to top, rgba(10,11,15,0.42) 0%, rgba(10,11,15,0.42) 55%, rgba(10,11,15,0) 100%);
   padding:4px 14px 6px;display:flex;flex-direction:column;gap:6px;
   flex-shrink:0;
+  position:absolute;bottom:0;left:0;right:0;z-index:6;
 }
 .hand-row{display:flex;gap:8px;align-items:flex-end;justify-content:center;overflow-x:auto;padding-bottom:2px}
 
@@ -184,6 +194,9 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
   flex:1;display:grid;grid-template-columns:1fr 1fr;
   gap:1px;background:transparent;min-height:180px;overflow:hidden;
   position:relative;
+  /* 7/27/26: clearance so rear-guard slots don't render under the now-floating opp-zone/
+     player-zone overlays above -- align-content:center still centers within this padding box. */
+  padding:58px 0 46px;
 }
 /* supports render as physical card frames + a readable effect label */
 .rear-slot.rg-card{flex-direction:column;border:none!important;background:transparent!important;padding:0;gap:3px;min-height:0;max-width:none;box-shadow:none}
@@ -837,6 +850,12 @@ body{flex-direction:row!important}
 .nav-toggle:hover{background:rgba(245,194,77,0.22);transform:scale(1.15)}
 body.nav-collapsed .sidebar{width:48px!important;min-width:48px!important;overflow:hidden}
 body.nav-collapsed .sidebar > *{display:none!important}
+/* 7/27/26: the mobile/tablet media queries below (max-width:720px, max-width:1024px) already
+   hide the sidebar+topbar during a duel ("arena gets full width mid-duel") -- that rule was
+   never given a base/desktop copy, so above 1024px the nav rail and topbar stayed visible
+   alongside the match instead of the duel going truly fullscreen. Same fix, just unscoped. */
+body:has(#v-turn.on) .sidebar{display:none}
+body:has(#v-turn.on) .topbar{display:none}
 /* 7/16/26: .brand is the actual toggle button (onclick="toggleSidebar()") but is a sibling of
    .nav, not a child of it -- the blanket rule above hid it with nothing re-showing it, so once
    collapsed there was nothing left to click to reopen the menu. Re-show it, icon-only.
@@ -2994,12 +3013,12 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="cond-bg" id="cond-bg"></div>
       <div class="cond-card">
         <div class="cond-eyebrow" id="cond-eyebrow">Draw a card to start the turn</div>
-        <div class="cond-main" id="cond-main">
+        <div class="cond-main expanded" id="cond-main">
           <div class="cond-icon" id="cond-icon">?</div>
           <div class="cond-body">
             <div class="cond-name-row">
               <div class="cond-name" id="cond-name">Condition hidden</div>
-              <button class="cond-toggle" id="cond-toggle" onclick="toggleCondDetail()" title="Show condition details" aria-expanded="false">▾</button>
+              <button class="cond-toggle" id="cond-toggle" onclick="toggleCondDetail()" title="Hide condition details" aria-expanded="true">▾</button>
             </div>
             <div class="cond-rule" id="cond-rule">Draw first, then reveal the condition.</div>
             <div class="cond-strat" id="cond-strat"></div>
