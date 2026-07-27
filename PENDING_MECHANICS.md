@@ -4,6 +4,8 @@ Cards whose ability/Called display **text** describes behavior the game engine d
 
 Standing practice: add an entry here any time a CALLED/CARD_RULES/ability text edit describes something the current schema/engine has no field or logic for, instead of only mentioning it in chat.
 
+**Player-facing counterpart, added 7/27/26:** `FLAGGED_ABILITIES` (in the game file, near `COST_OVERRIDE`/`SHIELD_OVERRIDE`) is the in-game indicator version of this list — a whole-card outline ring on the battlefield card plus an explicit "not fully working yet" section in the detail view. Keep the two in sync: when a new Open entry below describes text that's genuinely still live on a player-visible card (not a dev-only gap like Tange Sazen's, where the overpromising text was already removed), add it to `FLAGGED_ABILITIES` too with a short plain-language reason. When an entry moves here to Resolved, remove it from `FLAGGED_ABILITIES` in the same pass.
+
 **7/27/26 note:** this file had drifted badly from the real code — several "open" entries below had already been fixed in later passes (via a hardcoded name-check special case, or by simplifying the text to match a simpler real mechanic) without this file being updated to match. Before touching anything in a fresh "fix the backlog" pass, re-verify each entry against the actual code (`sf_query.py card "Name"` + a targeted grep for the card's name in `resolve()`/`applyCalled()`) rather than trusting this list at face value. See [[project_signalforge_sf_query_tool]] for the query tool and [[project_signalforge_pending_mechanics_batch]] for the full audit and batch that produced this rewrite.
 
 ## Open
