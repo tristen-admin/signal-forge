@@ -15,6 +15,7 @@
   --gold-glow:rgba(245,194,77,0.22);
   --win:#46CC8A;
   --lose:#F0625F;
+  --flag-warn:#D9A441;
   --text:#ECECF1;
   --text2:#9C9CA7;
   --text3:#61616B;
@@ -335,6 +336,11 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
    exact numbers. */
 .tf-shield{position:absolute;left:24%;width:31%;top:85.8%;height:6.6%;z-index:4;display:flex;align-items:center;justify-content:center;gap:2px;color:#1c2c38;font-weight:800;font-size:11px;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 rgba(207,227,240,0.5)}
 .bigcard.mini .tf-shield{display:none}
+/* Flagged-ability indicator (7/27/26): a whole-card outline ring rather than another positioned
+   corner badge -- the existing corners (cost, camp, sf-pip, pow, shield, kd) are already crowded,
+   and outline traces the element's own box edge regardless of internal layout, so it can't collide
+   with anything or need pixel-guessing against art we can't see. */
+.bigcard.tframe.flagged-ability{outline:2px solid var(--flag-warn);outline-offset:3px;border-radius:3px}
 .tframe .tf-camp{position:absolute;right:5%;width:17.2%;top:4%;height:12.7%;z-index:4;display:flex;align-items:center;justify-content:center;font-size:15px;text-shadow:0 1px 2px rgba(0,0,0,.5)}
 .bigcard.mini .tf-camp{display:none}
 .tframe .tf-kd .k{color:var(--win);font-weight:700}.tframe .tf-kd .d{color:var(--lose);font-weight:700}
@@ -555,6 +561,8 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .rc-sec{font-size:12.5px;line-height:1.5;color:var(--text);margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
 .rc-lbl{display:block;font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);margin-bottom:3px}
 .rc-called .rc-lbl{color:var(--electric)}
+.rc-flag{border-top-color:rgba(217,164,65,.35)}
+.rc-flag .rc-lbl{color:var(--flag-warn)}
 .rc-traits{margin-top:9px}
 .rc-art{height:150px;border-radius:9px;margin-bottom:10px;background-size:cover;background-position:center top;border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:#0d0a06}
 .rc-art .rc-sig{font-size:46px;opacity:.5;color:var(--gold)}
@@ -4921,6 +4929,14 @@ const ENERGY_SPELLS = [
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
 const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdorah Khaan, Determined Soul":2, "Tange Sazen":2, "Kotei":3, "Darwin":2, "Lagertha Waltz":1, "The Bronzed Beast, Hanse Waltz":3, "Hanse Waltz":2, "Uso Oso":2, "Zerith Var":3, "Lagertha Waltz, Wrathful Transformation":3, "Bixie Bee":1, "Keawe Kel'rua":2, "Veronica":1, "Sister Mire, Wailing Nightmare":1};   // ability-strength nudges above the power band (balance dial)
 const SHIELD_OVERRIDE = {};   // (7/27/26) per-card hand-tuning on top of shield()'s formula default, same pattern as COST_OVERRIDE above — editable from the Shift+D dev table
+// FLAGGED_ABILITIES (7/27/26): name -> plain-language reason, for printed ability text that currently
+// overpromises what the engine actually does (see PENDING_MECHANICS.md's Open section for the full
+// dev-facing detail). This is the player-facing counterpart -- keep the two in sync: when an entry
+// moves from PENDING_MECHANICS.md's Open list to Resolved, remove it here too; when a NEW open entry
+// is genuinely player-visible (the overpromising text is still live on the card), add it here as well.
+const FLAGGED_ABILITIES = {
+  'Kravyn the Collector': "“You may choose” isn't a real choice yet — he always returns to hand on a win or a close loss, no prompt.",
+};
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
 const RACES = ['Human','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Marrowen','Dreikan','Dractyl','Thennlar','Xylotes','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
 const CARD_RACE = {
@@ -11194,7 +11210,8 @@ function bigCardHTML(c, opts){
   // the rear-guard flip-in animation, cardStateClasses()) already depends on.
   const miniCls = (opts && opts.mini) ? ' mini' : '';
   const campCls = 'camp-'+(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase();
-  return `<div class="bigcard tframe${miniCls} ${c.rarity||''} ${campCls} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})" data-cn="${(c.name||'').replace(/"/g,'&quot;')}">
+  const flagReason = (typeof FLAGGED_ABILITIES!=='undefined') ? FLAGGED_ABILITIES[c.name] : null;
+  return `<div class="bigcard tframe${miniCls} ${c.rarity||''} ${campCls}${flagReason?' flagged-ability':''} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" style="--frame:url(${TEMP_FRAME})" data-cn="${(c.name||'').replace(/"/g,'&quot;')}"${flagReason?` title="⚠ Not fully working yet: ${flagReason.replace(/"/g,'&quot;')}"`:''}>
     <div class="tf-runes side-l"></div>
     <div class="tf-runes side-r"></div>
     <div class="tf-runes bottom"></div>
@@ -11226,6 +11243,7 @@ function readableCardHTML(c){
     + (typeof keywordChipsHTML==='function'?keywordChipsHTML(c):'')
     + '<div class="rc-sec"><span class="rc-lbl">⚔ Conjured — Fighter</span>'+gl(c.abil)+'</div>'
     + (called?'<div class="rc-sec rc-called"><span class="rc-lbl">📣 Called — Support</span>'+gl(called.text)+'</div>':'')
+    + ((typeof FLAGGED_ABILITIES!=='undefined' && FLAGGED_ABILITIES[c.name])?'<div class="rc-sec rc-flag"><span class="rc-lbl">⚠ Not fully working yet</span>'+FLAGGED_ABILITIES[c.name]+'</div>':'')
     + '</div>';
 }
 function previewCardEl(c, el, readable){
