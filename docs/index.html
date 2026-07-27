@@ -3711,6 +3711,7 @@ let dmSupportAddPowThisDuel = false;       // Kotei DM skill: called supports ad
 let dmSupportDoubleCostThisDuel = false;   // Darwin DM skill: called supports add DOUBLE their conjure cost to your Fighter
 let dmNullifyOppSupportsThisDuel = false;  // Ahdorah Khaan DM skill: opponent's called supports contribute nothing this duel
 let dmZeroCostThisDuel = false;            // Anorith Keeling DM skill: every card in hand costs 0 to conjure this duel
+let dmDarwinHandRefillArmed = false;       // Darwin DM skill, 2nd clause: once activated, persists the REST OF THE MATCH (not just this duel, unlike the flags above) -- "whenever your hand is 2 or less after your draw phase" is an ongoing passive, not a this-duel-only effect. Reset at match end only, see resetMatchState().
 let handBanishedThisTurn = false, oppHandBanishedThisTurn = false;   // Ossian Drell on-conjure condition -- was a card banished FROM HAND (not deck) this turn
 let handReturnCount = {};   // cardName -> times that exact card has returned to hand due to a card effect instead of its normal fate -- per MATCH, not per duel
 let spellsUsedRound=[];  // each spell castable only ONCE per round  // Rebirth season — cumulative match W/L across ranked + staked
@@ -3750,7 +3751,7 @@ const DM_ACTIVATED_ABILITY = {
     drawToHand(1);
     scryOne(function(card){
       if(card && (typeof conjureCost==='function'?conjureCost(card):(card.cost||0)) >= 2){
-        card._dmScryDiscount = 1;
+        card._costDiscount = 1;
         if(typeof toast==='function') toast('\ud83d\udde1 Keawe \u2014 '+card.name+' costs 1 less next time you conjure it', true);
       }
     });
@@ -3809,8 +3810,9 @@ const DM_ACTIVATED_ABILITY = {
     scryOne();
     if(typeof updatePiles==='function') updatePiles();
   }},
-  'Darwin': {log:'Bloodline Ascendant', desc:'called supports add DOUBLE their conjure cost to your Fighter this duel', run:function(){
+  'Darwin': {log:'Bloodline Ascendant', desc:'called supports add DOUBLE their Shield this duel; whenever your hand is 2 or fewer cards after your draw phase for the rest of the match, draw 2 and banish 1', run:function(){
     dmSupportDoubleCostThisDuel = true;
+    dmDarwinHandRefillArmed = true;
   }},
   'Ourevos, the Golden Dragon': {log:"Shattered Chronoplain", desc:'your next conjure\u2019s power is doubled', run:function(){
     dmNextConjureDouble = true;
@@ -4242,6 +4244,14 @@ function drawCard(force){ if(typeof tutorialAdvance==='function')setTimeout(func
   hand.push(drawn);
   for(var _xd=1;_xd<DRAW_PER_TURN;_xd++){ if(drawPile.length && hand.length<MAX_HAND){ hand.push(drawPile.pop()); } } deckSize=drawPile.length;
   if(typeof dmForfeitDrawBonus!=='undefined' && dmForfeitDrawBonus){ dmForfeitDrawBonus=false; if(drawPile.length && hand.length<MAX_HAND){ hand.push(drawPile.pop()); deckSize=drawPile.length; if(typeof toast==='function') toast('★ Deck Master — forfeit bonus: drew an extra card.', true); } else if(typeof toast==='function') toast('★ Deck Master — forfeit bonus fizzled: hand is full.', true); }
+  // Darwin DM skill, 2nd clause (7/27/26): recurring check, not a one-time activation effect --
+  // fires after EVERY draw phase for the rest of the match once armed, per the card's own "whenever"
+  // wording. deckMasterCard gate matters: the flag can stay armed even if the player later swaps
+  // decks mid-browsing, so re-check identity here rather than trusting the flag alone.
+  if(dmDarwinHandRefillArmed && deckMasterCard==='Darwin' && hand.length<=2){
+    var _dgot=drawToHand(2);
+    if(_dgot){ banishFromHand(1); if(typeof toast==='function') toast('🧬 Darwin — hand refilled low: drew '+_dgot+', banished 1.', true); }
+  }
 
   // Ourevos loses 3 power for good each time the god is dragged back from the Winners Circle
   if(fromWC && drawn.name === 'Ourevos, the Golden Dragon'){
@@ -5027,12 +5037,12 @@ function conjureCost(c){
   if(!c) return 1;
   if(typeof dmZeroCostThisDuel!=='undefined' && dmZeroCostThisDuel) return 0;
   var base = baseCardCost(c);
-  return c._dmScryDiscount ? Math.max(0, base-c._dmScryDiscount) : base;
+  return c._costDiscount ? Math.max(0, base-c._costDiscount) : base;
 }
 // Shield (7/27/26): a support's power-when-Called contribution, replacing the old invisible
 // conjureCost()-as-power addend. Printed & visible on the card face (unlike conjureCost's use as
 // power, which was silent). Deliberately keyed to the card's fixed BASE cost, not conjureCost()'s
-// runtime value — a temporary Charge discount (dmZeroCostThisDuel, _dmScryDiscount) must not also
+// runtime value — a temporary Charge discount (dmZeroCostThisDuel, _costDiscount) must not also
 // warp a card's printed Shield stat. Inverse-to-cost by design: cheap supports carry more Shield,
 // mirroring the "cheap body = better support" intent the old per-card add: values used to encode.
 function shield(c){
@@ -5076,7 +5086,7 @@ const CALLED = {
   "Kiana":                         {text:"banish a card from your hand; your Fighter gains this card's Shield", banishOwn:1},
   "Heir of Kaiga":                 {text:"your Fighter gains this card's Shield · draw 1", draw:1},
   "Melanie":                       {text:"your Fighter gains this card's Shield · draw 1", draw:1},
-  "Darwin":                        {text:"your Fighter gains this card's Shield, and play the top card of your deck into your open support circle"},
+  "Darwin":                        {text:"your Fighter gains this card's Shield, and play the top card of your deck into your open support circle", conjureTopToSupport:true},
   "La \"La\" Ballora, the Broodqueen":      {text:"your Fighter gains this card's Shield"},
   "Envoy of Tyrants, Ella Ballora":                  {text:"your Fighter gains this card's Shield"},
   "Valcarion":            {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
@@ -5110,7 +5120,7 @@ const CALLED = {
   "Old Garrick":                   {text:"your Fighter gains this card's Shield"},
   "Keawe Kel'rua":                 {text:"your Fighter gains this card's Shield, if there have been at least 2 duels this match then draw 1"},
   "Black Wings, Ossian Drell":                  {text:"your Fighter +1 for every card in your banish zone", addPerBanish:1},
-  "Corvus":                        {text:"your Fighter gains this card's Shield, scry 1"},
+  "Corvus":                        {text:"your Fighter gains this card's Shield, scry 1", scry:1},
   "Wren":                          {text:"return a banished card to your hand, your Fighter gains this card's Shield", recurPlain:1},
   "Rook":                          {text:"your Fighter gains this card's Shield"},
   "Falk":                          {text:"your Fighter gains this card's Shield"},
@@ -5158,11 +5168,11 @@ const CALLED = {
   "Sister Mire, Wailing Nightmare": {text:"draw 2, banish 1 from hand; your Fighter +1 per card in your hand", draw:2, banishOwn:1, addPerHand:1},
   "Forgemask":                     {text:"your Fighter gains this card's Shield"},
   "Fifth Frequency Stormcaller":             {text:"your Fighter gains this card's Shield"},
-  "Ghorruk \"Gnarly\" Judarr":            {text:"return 1 banished card to the bottom of the deck, scry 1, then +2 power", recurBuff:1},
+  "Ghorruk \"Gnarly\" Judarr":            {text:"return 1 banished card to the bottom of the deck, scry 1, then +2 power", recurBuff:1, recurDest:'deck', scry:1},
   "Elowen Dawnspear":              {text:"your Fighter gains this card's Shield"},
   "Bixie Bee":                     {text:"your Fighter gains this card's Shield"},
-  "Uso Oso":                       {text:"your Fighter gains this card's Shield; the lowest power card in your hand is automatically played as a death remnant."},
-  "Veronica":                      {text:"your fighter gains +2, then scry 1."},
+  "Uso Oso":                       {text:"your Fighter gains this card's Shield; the lowest power card in your hand is automatically played as a death remnant.", autoRemnantLowest:true},
+  "Veronica":                      {text:"your fighter gains +2, then scry 1.", add:2, scry:1},
   // Warpath combo pieces (7/12/26) — genuinely new effect kinds, not reusable from the existing
   // vocabulary above: nothing here lets a Called support redirect where a FUTURE win banks to, or
   // pull a card back OUT of the Winners Circle once it's there.
@@ -5321,8 +5331,48 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
     else { var _obl=(typeof oppBanishBot!=='undefined'&&oppBanishBot)?oppBanishBot.length:0; var _oblb=_obl*e.addPerBanish; if(_oblb){ oppPow+=_oblb; abilLog.push("🪶 Opp "+support.name+": +"+_oblb+" ("+_obl+" banished)"); } }
   }
   if(e.recurBuff){
-    if(!isOpp){ var _got=0; for(var _r=0;_r<e.recurBuff;_r++){ if(banishPile.length){ var _rc=banishPile.pop(); _rc._bo=(_rc._bo||0)+2; hand.push(_rc); _got++; } } if(_got) abilLog.push("♻ "+support.name+" — returned "+_got+" from banish, +2 power each"); if(typeof buildHand==="function")buildHand(); }
-    else { var _ogot=0; for(var _or2=0;_or2<e.recurBuff;_or2++){ if(oppBanishBot.length){ var _orc2=oppBanishBot.pop(); _orc2._bo=(_orc2._bo||0)+2; oppHandBot.push(_orc2); _ogot++; } } if(_ogot) abilLog.push("♻ Opp "+support.name+" — returned "+_ogot+" from banish, +2 power each"); }
+    // recurDest (7/27/26): Ghorruk's text has always said "to the BOTTOM OF THE DECK", not hand --
+    // this shared field defaulted every recurBuff card to hand (correct for The Regenerating Horror,
+    // wrong for Ghorruk). "Bottom" means opposite ends for the two sides' arrays: the player's own
+    // drawPile reads its "top" via .pop() (see Corvus's banish, or the Trigger check at
+    // drawPile[drawPile.length-1]), so bottom is .unshift(); the bot's oppDeckBot instead DRAWS via
+    // .shift() (front), so bottom there is .push() -- same "opposite array convention" already
+    // documented on the reclaimWC fix just above.
+    if(!isOpp){ var _got=0; for(var _r=0;_r<e.recurBuff;_r++){ if(banishPile.length){ var _rc=banishPile.pop(); _rc._bo=(_rc._bo||0)+2; if(e.recurDest==='deck'){ drawPile.unshift(_rc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; } else { hand.push(_rc); } _got++; } } if(_got) abilLog.push("♻ "+support.name+" — returned "+_got+" from banish"+(e.recurDest==='deck'?" to the bottom of your deck":"")+", +2 power each"); if(typeof buildHand==="function")buildHand(); if(typeof updatePiles==='function') updatePiles(); }
+    else { var _ogot=0; for(var _or2=0;_or2<e.recurBuff;_or2++){ if(oppBanishBot.length){ var _orc2=oppBanishBot.pop(); _orc2._bo=(_orc2._bo||0)+2; if(e.recurDest==='deck'){ if(typeof oppDeckBot!=='undefined') oppDeckBot.push(_orc2); } else { oppHandBot.push(_orc2); } _ogot++; } } if(_ogot) abilLog.push("♻ Opp "+support.name+" — returned "+_ogot+" from banish, +2 power each"); }
+  }
+  if(e.scry && !isOpp && typeof scryOne==='function'){ abilLog.push("🔮 "+support.name+" — Scry"); scryOne(function(){}); }
+  if(e.conjureTopToSupport && !isOpp && drawPile.length){
+    // Player-only, matching the existing precedent for this whole class of effect (Uso Oso's
+    // Skeletal Summons, Valcarion's banish-recall) -- neither has a bot-side mirror today, so this
+    // isn't a new asymmetry, it's the established shape for "conjure something into an open
+    // support slot" support effects.
+    var _dtc=drawPile.pop();
+    if(rearGuards.length < RG_SLOTS){ rearGuards.push(_dtc); abilLog.push("🧬 "+support.name+" — "+_dtc.name+" from the top of your deck joins your support circle"); }
+    else { hand.push(_dtc); if(typeof buildHand==='function') buildHand(); abilLog.push("🧬 "+support.name+" — supports full, "+_dtc.name+" goes to your hand instead"); }
+    if(typeof deckSize!=='undefined') deckSize=drawPile.length;
+    if(typeof updatePiles==='function') updatePiles();
+  }
+  if(e.autoRemnantLowest){
+    if(!isOpp){
+      if(hand.length){
+        var _uli=0; for(var _uli2=1;_uli2<hand.length;_uli2++){ if((hand[_uli2].pow||0)<(hand[_uli].pow||0)) _uli=_uli2; }
+        var _ulc=hand.splice(_uli,1)[0];
+        var _ulp=(typeof REMNANT_POW!=='undefined'&&REMNANT_POW[_ulc.name]!=null)?REMNANT_POW[_ulc.name]:(_ulc.pow||0);
+        if(typeof deathRemnants!=='undefined') deathRemnants.push({name:_ulc.name,pow:_ulp});
+        abilLog.push("☠ "+support.name+" — "+_ulc.name+" is played as a +"+_ulp+" Death Remnant");
+        if(typeof buildHand==='function') buildHand();
+        if(typeof updatePiles==='function') updatePiles();
+      }
+    } else {
+      if(typeof oppHandBot!=='undefined' && oppHandBot && oppHandBot.length){
+        var _ouli=0; for(var _ouli2=1;_ouli2<oppHandBot.length;_ouli2++){ if((oppHandBot[_ouli2].pow||0)<(oppHandBot[_ouli].pow||0)) _ouli=_ouli2; }
+        var _oulc=oppHandBot.splice(_ouli,1)[0];
+        var _oulp=(typeof REMNANT_POW!=='undefined'&&REMNANT_POW[_oulc.name]!=null)?REMNANT_POW[_oulc.name]:(_oulc.pow||0);
+        if(typeof oppDeathRemnants!=='undefined') oppDeathRemnants.push({name:_oulc.name,pow:_oulp});
+        abilLog.push("☠ Opp "+support.name+" — "+_oulc.name+" is played as a +"+_oulp+" Death Remnant");
+      }
+    }
   }
   if(e.recurPlain){
     if(!isOpp){ var _gp=0; for(var _rp2=0;_rp2<e.recurPlain;_rp2++){ if(banishPile.length){ hand.push(banishPile.pop()); _gp++; } } if(_gp) abilLog.push("↩ Returned "+_gp+" from banish to hand"); if(typeof buildHand==="function")buildHand(); }
@@ -5464,7 +5514,7 @@ function buildSpellTray(){
   const castable = (phase==='revealed'||phase==='selecting'||phase==='select');
   if(!spellHand.length){ t.innerHTML='<span class="tray-empty">No spells in hand \u2014 lose a round to draw one.</span>'; return; }
   const spendable = charge - stagedConjureReserve();
-  t.innerHTML = spellHand.map(function(id,i){ const s=ENERGY_SPELLS.find(function(x){return x.id===id;}); if(!s) return ''; const cost=Math.max(0,s.cost-spellDiscount); const used=(typeof spellsUsedRound!=='undefined'&&spellsUsedRound.indexOf(id)>=0); const can=castable && spendable>=cost && !used;
+  t.innerHTML = spellHand.map(function(id,i){ const s=ENERGY_SPELLS.find(function(x){return x.id===id;}); if(!s) return ''; const cost=(typeof dmZeroCostThisDuel!=='undefined'&&dmZeroCostThisDuel)?0:Math.max(0,s.cost-spellDiscount); const used=(typeof spellsUsedRound!=='undefined'&&spellsUsedRound.indexOf(id)>=0); const can=castable && spendable>=cost && !used;
     return '<button class="spell-chip'+(can?'':' dim')+'" onclick="castSpell('+i+')"><span class="sc-top"><span class="sc-name">'+s.name+'</span><span class="sc-cost">'+cost+'\u26a1</span></span><span class="sc-fx">'+(used?'\u2713 used this round':s.fx)+'</span></button>';
   }).join('');
 }
@@ -5472,7 +5522,7 @@ function castSpell(i){
   const id=spellHand[i]; if(id===undefined) return;
   const s=ENERGY_SPELLS.find(function(x){return x.id===id;}); if(!s) return;
   if(!(phase==='revealed'||phase==='selecting'||phase==='select')){ toast('Cast spells during your turn, before you commit.', false); return; }
-  const cost=Math.max(0, s.cost - spellDiscount);
+  const cost=(typeof dmZeroCostThisDuel!=='undefined'&&dmZeroCostThisDuel)?0:Math.max(0, s.cost - spellDiscount);
   const reserve=stagedConjureReserve();
   if(charge - reserve < cost){
     toast(reserve>0
@@ -5908,7 +5958,27 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   if(pc.name==='The Black Ledger'){ if(typeof banishFromHand==='function') banishFromHand(2); if(typeof drawToHand==='function') drawToHand(1); }   // 7/24/26: draw nerfed 2->1, banish stays random (explicit exception to the player-choice default)
   if(pc.name==='Ashen Reclaimer' && banishPile.length){ var _ar=banishPile.pop(); _ar._bo=(_ar._bo||0)+3; hand.push(_ar); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==="Hoarder's Gambit" && typeof drawToHand==='function'){ drawToHand(2); }
-  if(pc.name==='Arch-Grim Korrin' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(deathRemnants.length); }
+  if(pc.name==='Arch-Grim Korrin' && drawPile.length){
+    // Real gap fixed 7/27/26: this used to draw cards equal to remnant count -- leftover from
+    // before his ability text was rewritten (task #154), matched nothing his CURRENT printed text
+    // says. Replaced with what the text actually promises: look at the top 2, one to an open
+    // support slot, one raised as a Death Remnant. Deck's "top" is the end of the array (see
+    // Corvus's drawPile.pop() banish, the Trigger check at drawPile[drawPile.length-1]).
+    var _kTop=[]; if(drawPile.length) _kTop.push(drawPile.pop()); if(drawPile.length) _kTop.push(drawPile.pop());
+    var _kMsg=[];
+    if(_kTop[0]){
+      if(rearGuards.length < RG_SLOTS){ rearGuards.push(Object.assign({}, _kTop[0], {_bo:0})); _kMsg.push(_kTop[0].name+' to support'); }
+      else { hand.push(_kTop[0]); if(typeof buildHand==='function') buildHand(); _kMsg.push(_kTop[0].name+' to hand (supports full)'); }
+    }
+    if(_kTop[1]){
+      var _kp=(typeof REMNANT_POW!=='undefined'&&REMNANT_POW[_kTop[1].name]!=null)?REMNANT_POW[_kTop[1].name]:(_kTop[1].pow||0);
+      if(typeof deathRemnants!=='undefined') deathRemnants.push({name:_kTop[1].name, pow:_kp});
+      _kMsg.push(_kTop[1].name+' rises as a +'+_kp+' Remnant');
+    }
+    if(typeof deckSize!=='undefined') deckSize=drawPile.length;
+    if(typeof updatePiles==='function') updatePiles();
+    if(_kMsg.length && typeof toast==='function') toast('👻 Korrin looks to the deck — '+_kMsg.join(', ')+'.', true);
+  }
   if(pc.name==='Pale Gravedigger' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(1); }
   if(pc.name==='Widow of the Vigil' && typeof deathRemnants!=='undefined' && deathRemnants.length && typeof drawToHand==='function'){ drawToHand(2); }
   if(pc.name==='Conduit of Chaos, Kleydson'){ energyLoadoutOverride=['drawsurge','godhand']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Lesser Chaos — lose a round and you\'ll draw Draw Surge or Godhand instead of your usual loadout.', true); }
@@ -5916,7 +5986,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   if(pc.name==='Wren' && banishPile.length){ hand.push(banishPile.pop()); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name==='La "La" Ballora, the Broodqueen' && typeof drawToHand==='function'){ drawToHand(2); }
   if(pc.name==="Web-Weaver's Return"){ if(banishPile.length){ var _rb=banishPile.splice(0,banishPile.length); drawPile=drawPile.concat(_rb); if(typeof shuffle==='function') shuffle(drawPile); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof toast==='function') toast('🕸 Web-Weaver\'s Return \u2014 '+_rb.length+' banished cards rewoven into your deck.', true); } if(typeof drawToHand==='function') drawToHand(1); if(typeof updatePiles==='function') updatePiles(); }
-  if(pc.name==='Legend Reborn, Keawe Kel\'rua'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=15;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+') to your hand.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 15+ left in your deck to tutor.', false); } }
+  if(pc.name==='Legend Reborn, Keawe Kel\'rua'){ var _ti=drawPile.findIndex(function(x){return (x.pow||0)>=15;}); if(_ti>=0){ var _tc=drawPile.splice(_ti,1)[0]; _tc._costDiscount=((_tc._costDiscount||0)+1); hand.push(_tc); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🗡 Keawe, A Legend Reborn — tutored '+_tc.name+' ('+(_tc.pow||0)+'), costs 1 less to conjure.', true); } else if(typeof toast==='function'){ toast('Keawe — no card of power 15+ left in your deck to tutor.', false); } }
   if(pc.name==='Anorith Keeling'){ energyLoadoutOverride=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your future spell draws into the Chaos Trinity — lose a round to draw one.', true); }
   if(pc.name==='Sister Mire, Wailing Nightmare'){ drawToHand(2); if(hand.length){ var _smci=Math.floor(Math.random()*hand.length); drawPile.unshift(hand.splice(_smci,1)[0]); if(typeof deckSize!=='undefined') deckSize=drawPile.length; } if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); if(typeof toast==='function') toast('🌫 Sister Mire wails — draw 2, one card sinks back into the deck.', true); }
   if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
@@ -7333,6 +7403,16 @@ const CARD_RULES = {
    },
    "add": 3,
    "log": "⚡ Rising Talent: +3"
+  },
+  {
+   "if": {
+    "and": [
+     { "v": "last_result", "op": "==", "s": "lose" },
+     { "v": "rear_count", "op": "<=", "n": 1 }
+    ]
+   },
+   "add": 3,
+   "log": "⚡ Rising Talent: +3 more (repeat, 1 or fewer supports)"
   }
  ],
  "Rhaess Korvain": [
@@ -12675,7 +12755,7 @@ function resetMatchState(){
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[];
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
-  banishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0;
+  banishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
   charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
