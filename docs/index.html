@@ -542,6 +542,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .rc-cost{background:var(--electric);color:#04141c;font-weight:800;font-size:13px;border-radius:7px;padding:2px 8px;flex-shrink:0}
 .rc-name{flex:1;font-size:15px;font-weight:800;color:#fff;line-height:1.12}
 .rc-pow{font-size:23px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;flex-shrink:0}
+.rc-shield{background:#3a4a5c;color:#cfe3f0;font-weight:800;font-size:13px;border-radius:7px;padding:2px 8px;flex-shrink:0}
 .rc-meta{font-size:10px;color:var(--text3);letter-spacing:.05em}
 .rc-meta .k{color:var(--win)}.rc-meta .d{color:var(--lose)}
 .rc-sec{font-size:12.5px;line-height:1.5;color:var(--text);margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)}
@@ -3442,7 +3443,7 @@ const HAND_CARDS = [
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, and +3 if you lost your last duel. The whole effect repeats for every round this match has completed.'},
   {name:'Uso Oso',pow:14,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant +10; When this card is conjured, call a "Oso\'s skeletal summons" from outside of your deck to an open support circle. On commit: raise a +2 Death Remnant, no death needed. The Bulwark of Bones: while you hold 3+ Remnants, a loss becomes a tie instead.'},
   {name:'Tannis',pow:10,kills:0,deaths:0,rarity:'uncommon',timing:'instant',abil:'⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.'},
-  {name:'Bixie Bee',pow:13,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power per card in your banish zone. As a support (Called), your Fighter +3.'},
+  {name:'Bixie Bee',pow:13,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power per card in your banish zone. As a support (Called), your Fighter gains this card\'s Shield.'},
   {name:'Veronica',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: copy opponent\'s card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability.'},
 ];
 
@@ -3512,11 +3513,11 @@ const DECK_POOL = [
   // unglamorous, resource-smoothing pieces on purpose — the rares/URs can come later.
   {name:'Ahdorah Khaan, Squad 19 Recruit',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"An earlier printing — before the Determined Soul, just a recruit finding her footing. On commit: +3 power if you lost your last duel."},
   {name:'Squad 16 Veteran',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"The last of a squad disbanded before Ahdorah's time — reassigned, scattered, mostly forgotten. On commit: +3 power once you've played 2 or more duels this match."},
-  {name:'Squad 19 Vanguard',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the squad holds the line.'},
-  {name:'Squad 19 Medic',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2 and draw a card.'},
+  {name:'Squad 19 Vanguard',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter gains this card\'s Shield — the squad holds the line.'},
+  {name:'Squad 19 Medic',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter gains this card\'s Shield and draw a card.'},
   {name:'Squad 19 Quartermaster',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +4 power while your hand has 3 or fewer cards — keeping the squad supplied.'},
   {name:'Squad 19 Scout',pow:4,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), draw a card.'},
-  {name:'Barracks Drill Sergeant',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2. [Tosa Pact]'},
+  {name:'Barracks Drill Sergeant',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter gains this card\'s Shield. [Tosa Pact]'},
   {name:'Cadet Corps Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +3 power on the 1st or 2nd duel of the match. [Tosa Pact]'},
   {name:"Writ-Sergeant's Ledger",pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), gain 1 Charge. [Tosa Pact]'},
   // 7/24/26: Ahdor's Pride charge economy — the archetype had zero Charge access at all (balance
@@ -3525,7 +3526,7 @@ const DECK_POOL = [
   {name:'Squad 19 Signalman',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: gain 1 Charge. [Tosa Pact]'},
   {name:'Squad 19 Chronicler',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:"As a support (Called), gain 1 Charge once you've played 2 or more duels this match. [Tosa Pact]"},
   {name:'Fenrik Vench',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"A causeway-lord's son, first to prove himself against you in the yard. On commit: +3 power if you have lost a duel this match — the rivalry sharpens him."},
-  {name:'Yard Sparring Partner',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3.'},
+  {name:'Yard Sparring Partner',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter gains this card\'s Shield.'},
   // Charge economy pass, 7/24/26 -- one on-commit + one support card per starved archetype (Black Wings, Black Council, Radiance, Warpath)
   {name:"Pyre-Keeper's Apprentice",pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), gain 1 Charge.'},
   {name:'Court Cipher',pow:7,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), gain 1 Charge if the active condition is locked this turn.'},
@@ -3554,7 +3555,7 @@ const DECK_POOL = [
   {name:'Envoy of Tyrants, Ella Ballora',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Bloodrage: on commit +3 with 3+ cards in hand, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
   {name:'Kiana',pow:15,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Elemental Flurry: on commit +3 power, and +4 more if you have 4 or more cards in your hand'},
   // ── KOTEI Series 1 Expansion ──
-  {name:'Melanie',pow:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter +5 and draw a card. Keawe\'s mother — a civilian, not a fighter, but she still knows how to help. At 1 power she quietly wins under Lowest Wins.'},
+  {name:'Melanie',pow:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter gains this card\'s Shield and draw a card. Keawe\'s mother — a civilian, not a fighter, but she still knows how to help. At 1 power she quietly wins under Lowest Wins.'},
   {name:'Uso Oso\'s Skeletal Summons',pow:5,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: these bones don\'t stay down — when the summons falls it lingers on the field, +5 to your committed cards until an opponent\'s card is killed.'},
   {name:'King Joris',pow:12,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rightful Claim: on commit, +1 power for every death on the opponent\'s record — the betrayed king judges every usurper\'s sins.'},
   {name:'The Regenerating Horror',pow:11,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Regeneration (one use per match): the first time this card would lose, it regrows instead — the duel ties, no death is recorded, and it returns to your hand. Only a finisher truly ends it.'},
@@ -3575,16 +3576,16 @@ const DECK_POOL = [
   {name:'Wren',pow:9,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wingmate: on commit, return a banished card to your hand, then +4 power — Wren never leaves one behind.'},
   {name:'Rook',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Scout: on commit, banish the top card of your deck, then +1 power for every card in your banish zone.'},
   {name:'Falk',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Dive: on commit, +2 power for every card in your banish zone.'},
-  {name:'Sable',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Quartermaster: as a support (Called), banish a card from your hand and give your Fighter +5.'},
+  {name:'Sable',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Quartermaster: as a support (Called), banish a card from your hand and your Fighter gains this card\'s Shield.'},
   {name:'Bannerlord Cassian',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 5: on commit, +5 power for each 1-cost ally — your 1-cost supports this duel plus every 1-cost card in your Winners Circle. The banner of the cheap and the many.'},
   {name:'Ironsworn Vanguard',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 power per 1-cost ally (1-cost supports this duel + 1-cost cards in your Winners Circle).'},
   {name:'Warden of the Wall',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. A wall is only as strong as the line beside it.'},
-  {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.'},
+  {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), your Fighter gains this card\'s Shield.'},
   {name:'Muster-Sergeant Bryn',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), give your Fighter +1 for every card in your Winners Circle.'},
   {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
   {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
-  {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the banner lifts the whole line.'},
-  {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2.'},
+  {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter gains this card\'s Shield — the banner lifts the whole line.'},
+  {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter gains this card\'s Shield.'},
   {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 per 1-cost ally. Weak alone, unbroken together.'},
   
   {name:'Skittering Drone',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: on commit, +1 power for each card in your hand.'},
@@ -3594,10 +3595,10 @@ const DECK_POOL = [
   {name:'Venombrood Queen',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Broodswarm: on commit, +2 power for each card in your hand.'},
   
   {name:'Wingblade Scout',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Wingblade: on commit, +1 power for every card in your banish zone.'},
-  {name:'Feather-Marked Skirmisher',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), banish a card from your hand and give your Fighter +4.'},
+  {name:'Feather-Marked Skirmisher',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), banish a card from your hand and your Fighter gains this card\'s Shield.'},
   {name:'Squad-Captain Vesk',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone.'},
   {name:'Grave-Warden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Death Remnant: when it falls, +3 to your cards until an enemy dies.'},
-  {name:'Bone-Stitcher',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), your Fighter +3; if a Remnant is on the field, draw a card.'},
+  {name:'Bone-Stitcher',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), your Fighter gains this card\'s Shield; if a Remnant is on the field, draw a card.'},
   
   {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, and +3 if you lost your last duel. The whole effect repeats for every round this match has completed.'},
   // ── art-swapped in from Set 2 storage ──
@@ -3934,13 +3935,13 @@ const OPP_CARDS = [
   {name:'Bannerlord Cassian',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 5: on commit, +5 power for each 1-cost ally — your 1-cost supports this duel plus every 1-cost card in your Winners Circle. The banner of the cheap and the many.'},
   {name:'Ironsworn Vanguard',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 power per 1-cost ally (1-cost supports this duel + 1-cost cards in your Winners Circle).'},
   {name:'Warden of the Wall',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. A wall is only as strong as the line beside it.'},
-  {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.'},
+  {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), your Fighter gains this card\'s Shield.'},
   {name:'Muster-Sergeant Bryn',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), give your Fighter +1 for every card in your Winners Circle.'},
   {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
   {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
   {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 per 1-cost ally. Weak alone, unbroken together.'},
-  {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the banner lifts the whole line.'},
-  {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2.'},
+  {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter gains this card\'s Shield — the banner lifts the whole line.'},
+  {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter gains this card\'s Shield.'},
   {name:'Heir of Kaiga',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Early Bravado: on commit, +3 power on the 1st duel of the match only — bold at the outset, fading fast.'},
   {name:'Conduit Adept',pow:6,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: gain 1 Charge.'},
   {name:'Chieftain Reyva Vosh',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"Warriors in Reserve: on commit, +2 power for each card in your Winners Circle — she commits her hold's warriors once the stakes are undeniable."},
@@ -5008,11 +5009,24 @@ function deriveDisciplines(c){
   return DISC_ROLLS[key];
 }
 function setDisciplines(name, might, cunning, grit){ if(!name) return; DISC_OVERRIDE[name]={might:might,cunning:cunning,grit:grit}; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name){ c.might=might; c.cunning=cunning; c.grit=grit; } }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\u2694\ufe0f Disciplines set: '+name+' \u2192 M'+might+'/C'+cunning+'/G'+grit, true); }
+function baseCardCost(c){
+  if(!c) return 1;
+  return (c.cost!=null) ? c.cost : ((COST_OVERRIDE[c.name]!=null) ? COST_OVERRIDE[c.name] : (function(){ var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; })());
+}
 function conjureCost(c){
   if(!c) return 1;
   if(typeof dmZeroCostThisDuel!=='undefined' && dmZeroCostThisDuel) return 0;
-  var base = (c.cost!=null) ? c.cost : ((COST_OVERRIDE[c.name]!=null) ? COST_OVERRIDE[c.name] : (function(){ var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; })());
+  var base = baseCardCost(c);
   return c._dmScryDiscount ? Math.max(0, base-c._dmScryDiscount) : base;
+}
+// Shield (7/27/26): a support's power-when-Called contribution, replacing the old invisible
+// conjureCost()-as-power addend. Printed & visible on the card face (unlike conjureCost's use as
+// power, which was silent). Deliberately keyed to the card's fixed BASE cost, not conjureCost()'s
+// runtime value — a temporary Charge discount (dmZeroCostThisDuel, _dmScryDiscount) must not also
+// warp a card's printed Shield stat. Inverse-to-cost by design: cheap supports carry more Shield,
+// mirroring the "cheap body = better support" intent the old per-card add: values used to encode.
+function shield(c){
+  return Math.max(2, 10 - 2*baseCardCost(c));
 }
 // Energy rework (7/12/26, direct spec): both players start at 2 max energy, gaining +1 max per duel
 // through duel 4, then +2 max per duel from duel 5 onward — no fixed ceiling (Hearthstone-style
@@ -5028,45 +5042,45 @@ function energyRegenPerTurn(){ var d=(typeof matchCommits!=='undefined')?((match
 // Inverse-scaling: fighter cards -> simple static (+N / opp -N); low-power/support -> rich combos.
 const CALLED = {
   // 7/23/26: Squad 19 / Tosa Pact glue commons — see COLLECTION for the matching printed text.
-  "Squad 19 Vanguard":                   {text:"your Fighter +3", add:3},
-  "Squad 19 Medic":                      {text:"your Fighter +2, draw 1", add:2, draw:1},
+  "Squad 19 Vanguard":                   {text:"your Fighter gains this card's Shield"},
+  "Squad 19 Medic":                      {text:"your Fighter gains this card's Shield, draw 1", draw:1},
   "Squad 19 Scout":                      {text:"draw 1", draw:1},
-  "Barracks Drill Sergeant":             {text:"your Fighter +2", add:2},
+  "Barracks Drill Sergeant":             {text:"your Fighter gains this card's Shield"},
   "Writ-Sergeant's Ledger":              {text:"gain 1 Charge", chargeGain:1},
-  "Yard Sparring Partner":               {text:"your Fighter +3", add:3},
+  "Yard Sparring Partner":               {text:"your Fighter gains this card's Shield"},
   "Pyre-Keeper's Apprentice":            {text:"gain 1 Charge", chargeGain:1},
   "Court Cipher":                        {text:"gain 1 Charge if condition locked", chargeGainIfLocked:1},
   "Oathlit Attendant":                   {text:"gain 1 Charge", chargeGain:1},
   "Trophy Runner":                       {text:"gain 1 Charge if you've won a duel this match", chargeGainIfWon:1},
   "Legend Reborn, Keawe Kel'rua":        {text:"destroy and nullify the opposing support in the mirrored slot, if there is no card to destroy, give your fighter +3 instead.", snipeSupport:true, snipeFailAdd:3},
   // Support buff scales INVERSE to conjure cost: ⚡1=+5, ⚡2=+4, ⚡3=+3, ⚡4=+2 (cheap body = better support). Utility/recur/draw Calleds unchanged.
-  "Kaelthar the Ascendant":        {text:"your Fighter +2", add:2},
-  "Young Darwin, Predetermined Dictator":           {text:"your Fighter +3", add:3},
-  "Courtroom Colossus":            {text:"your Fighter +3", add:3},
-  "Kessuae, Tide of Ruin":         {text:"your Fighter +3, draw 1 then discard 1", add:3},
-  "Kotei":                         {text:"your Fighter +2; if your fighter wins the battle with this unit supporting, gain +2 charge and instead of going to the winners circle the card returns to the player's hand.", add:2},
-  "Conduit of Chaos, Kleydson":                      {text:"your Fighter +3 · gain 1 Charge", add:3, chargeGain:1},
-  "Lagertha Waltz":                {text:"your Fighter +3, add an additional +2 if that unit is a Nightclaw", add:3, twinBuff:5},
-  "Hanse Waltz":                   {text:"your Fighter +3, add an additional +2 if that unit is a Nightclaw", add:5, twinBuff:5},
-  "Kiana":                         {text:"banish a card from your hand; your Fighter +4", banishOwn:1, add:4},
-  "Heir of Kaiga":                 {text:"your Fighter +5 · draw 1", add:5, draw:1},
-  "Melanie":                       {text:"your Fighter +5 · draw 1", add:5, draw:1},
-  "Darwin":                        {text:"your Fighter +2, and play the top card of your deck into your open support circle", add:2},
-  "La \"La\" Ballora, the Broodqueen":      {text:"your Fighter +3", add:3},
-  "Envoy of Tyrants, Ella Ballora":                  {text:"your Fighter +3", add:3},
+  "Kaelthar the Ascendant":        {text:"your Fighter gains this card's Shield"},
+  "Young Darwin, Predetermined Dictator":           {text:"your Fighter gains this card's Shield"},
+  "Courtroom Colossus":            {text:"your Fighter gains this card's Shield"},
+  "Kessuae, Tide of Ruin":         {text:"your Fighter gains this card's Shield, draw 1 then discard 1"},
+  "Kotei":                         {text:"your Fighter gains this card's Shield; if your fighter wins the battle with this unit supporting, gain +2 charge and instead of going to the winners circle the card returns to the player's hand."},
+  "Conduit of Chaos, Kleydson":                      {text:"your Fighter gains this card's Shield · gain 1 Charge", chargeGain:1},
+  "Lagertha Waltz":                {text:"your Fighter gains this card's Shield, add an additional +2 if that unit is a Nightclaw", twinBuff:5},
+  "Hanse Waltz":                   {text:"your Fighter gains this card's Shield, add an additional +2 if that unit is a Nightclaw", twinBuff:5},
+  "Kiana":                         {text:"banish a card from your hand; your Fighter gains this card's Shield", banishOwn:1},
+  "Heir of Kaiga":                 {text:"your Fighter gains this card's Shield · draw 1", draw:1},
+  "Melanie":                       {text:"your Fighter gains this card's Shield · draw 1", draw:1},
+  "Darwin":                        {text:"your Fighter gains this card's Shield, and play the top card of your deck into your open support circle"},
+  "La \"La\" Ballora, the Broodqueen":      {text:"your Fighter gains this card's Shield"},
+  "Envoy of Tyrants, Ella Ballora":                  {text:"your Fighter gains this card's Shield"},
   "Valcarion":            {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
-  "Zerith Var":                    {text:"your Fighter +2, draw 2 cards and banish 1", add:2, draw:2, banishOwn:1},
-  "Ruffius Rufeldro":              {text:"your Fighter +3", add:3},
-  "Ahdorah Khaan, Determined Soul":                         {text:"your Fighter +2; destroy and nullify the opposing support in the mirrored slot", add:2, snipeSupport:true},
-  "Val Kreigh":                    {text:"your Fighter +3", add:3},
-  "King Joris":                    {text:"your Fighter +4 · draw 1", add:4, draw:1},
-  "Malia":                         {text:"your Fighter +4", add:4},
+  "Zerith Var":                    {text:"your Fighter gains this card's Shield, draw 2 cards and banish 1", draw:2, banishOwn:1},
+  "Ruffius Rufeldro":              {text:"your Fighter gains this card's Shield"},
+  "Ahdorah Khaan, Determined Soul":                         {text:"your Fighter gains this card's Shield; destroy and nullify the opposing support in the mirrored slot", snipeSupport:true},
+  "Val Kreigh":                    {text:"your Fighter gains this card's Shield"},
+  "King Joris":                    {text:"your Fighter gains this card's Shield · draw 1", draw:1},
+  "Malia":                         {text:"your Fighter gains this card's Shield"},
   "Moro":                          {text:"return 1 banished card to hand", recurPlain:1},
-  "Ourevos, the Golden Dragon":    {text:"your Fighter +5, fill the other support slot with a copy of this card, then draw a card", add:2},
-  "Tange Sazen":                   {text:"your Fighter +3, and your conjured unit returns to your hand instead of going to the winners circle", add:3},
-  "Kiba":                          {text:"your Fighter +5", add:5},
-  "The Bronzed Beast, Hanse Waltz":   {text:"your Fighter +3", add:3, twinBuff:5},
-  "Lagertha Waltz, Wrathful Transformation":{text:"your Fighter +3", add:3, twinBuff:5},
+  "Ourevos, the Golden Dragon":    {text:"your Fighter gains this card's Shield, fill the other support slot with a copy of this card, then draw a card"},
+  "Tange Sazen":                   {text:"your Fighter gains this card's Shield, and your conjured unit returns to your hand instead of going to the winners circle"},
+  "Kiba":                          {text:"your Fighter gains this card's Shield"},
+  "The Bronzed Beast, Hanse Waltz":   {text:"your Fighter gains this card's Shield", twinBuff:5},
+  "Lagertha Waltz, Wrathful Transformation":{text:"your Fighter gains this card's Shield", twinBuff:5},
   "Anorith Keeling":               {text:"return this unit from the support circle to your deck, banish 1 card from your hand, draw 2 and gain 1 charge", banishOwn:1},
   // ── Engines — generic utility kept (the neutral engine every deck can splash) ──
   "Conduit Adept":                 {text:"gain 2 Charge + draw 1", chargeGain:2, draw:1},
@@ -5077,66 +5091,66 @@ const CALLED = {
   "Voltcaller":                    {text:"your next Interrupt costs 2 less", spellDiscountGain:2},
   "Uso Oso's Skeletal Summons":    {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
   "Sister Mire":                   {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
-  "Josef":                         {text:"your Fighter +5 · draw 1", add:5, draw:1},
-  "Faye Quicksilver":              {text:"your Fighter +3", add:3},
+  "Josef":                         {text:"your Fighter gains this card's Shield · draw 1", draw:1},
+  "Faye Quicksilver":              {text:"your Fighter gains this card's Shield"},
   "The Regenerating Horror":       {text:"return 1 banished card to hand, +2 power", recurBuff:1},
-  "Ilma the Patient":              {text:"your Fighter +4", add:4},
-  "Broodmother":                   {text:"your Fighter +3, then draw 1", add:3, draw:1},
-  "Old Garrick":                   {text:"your Fighter +4", add:4},
-  "Keawe Kel'rua":                 {text:"your Fighter +3, if there have been at least 2 duels this match then draw 1", add:3},
+  "Ilma the Patient":              {text:"your Fighter gains this card's Shield"},
+  "Broodmother":                   {text:"your Fighter gains this card's Shield, then draw 1", draw:1},
+  "Old Garrick":                   {text:"your Fighter gains this card's Shield"},
+  "Keawe Kel'rua":                 {text:"your Fighter gains this card's Shield, if there have been at least 2 duels this match then draw 1"},
   "Black Wings, Ossian Drell":                  {text:"your Fighter +1 for every card in your banish zone", addPerBanish:1},
-  "Corvus":                        {text:"your Fighter +3, scry 1", add:4},
-  "Wren":                          {text:"return a banished card to your hand, your Fighter +3", recurPlain:1, add:3},
-  "Rook":                          {text:"your Fighter +2", add:2},
-  "Falk":                          {text:"your Fighter +3", add:3},
-  "Sable":                         {text:"banish a card from your hand, your Fighter +5", banishOwn:1, add:5},
-  "Rhaess Korvain":                {text:"banish 1 from your hand; your Fighter +3", banishOwn:1, add:3},
-  "Grave-Tithe Acolyte":           {text:"banish 1 from your hand; your Fighter +3", banishOwn:1, add:3},
-  "Ashen Reclaimer":               {text:"return a banished card to your hand; your Fighter +2", recurPlain:1, add:2},
-  "Cinder-Marked Hound":           {text:"your Fighter +3", add:3},
-  "The Black Ledger":              {text:"draw 1; your Fighter +2", draw:1, add:2},
-  "Pyre-Keeper Vayle":             {text:"your Fighter +4", add:4},
-  "Hollow Mendicant":              {text:"banish a card from your hand; your Fighter +4", banishOwn:1, add:4},
-  "Arch-Grim Korrin":              {text:"your Fighter +4; if you hold a Remnant, draw 1", add:4, drawIfRemnant:true},
-  "Bone Choirmaster":              {text:"your Fighter +3 · draw 1", add:3, draw:1},
-  "Grave-Fed Ghoul":               {text:"your Fighter +3", add:3},
+  "Corvus":                        {text:"your Fighter gains this card's Shield, scry 1"},
+  "Wren":                          {text:"return a banished card to your hand, your Fighter gains this card's Shield", recurPlain:1},
+  "Rook":                          {text:"your Fighter gains this card's Shield"},
+  "Falk":                          {text:"your Fighter gains this card's Shield"},
+  "Sable":                         {text:"banish a card from your hand, your Fighter gains this card's Shield", banishOwn:1},
+  "Rhaess Korvain":                {text:"banish 1 from your hand; your Fighter gains this card's Shield", banishOwn:1},
+  "Grave-Tithe Acolyte":           {text:"banish 1 from your hand; your Fighter gains this card's Shield", banishOwn:1},
+  "Ashen Reclaimer":               {text:"return a banished card to your hand; your Fighter gains this card's Shield", recurPlain:1},
+  "Cinder-Marked Hound":           {text:"your Fighter gains this card's Shield"},
+  "The Black Ledger":              {text:"draw 1; your Fighter gains this card's Shield", draw:1},
+  "Pyre-Keeper Vayle":             {text:"your Fighter gains this card's Shield"},
+  "Hollow Mendicant":              {text:"banish a card from your hand; your Fighter gains this card's Shield", banishOwn:1},
+  "Arch-Grim Korrin":              {text:"your Fighter gains this card's Shield; if you hold a Remnant, draw 1", drawIfRemnant:true},
+  "Bone Choirmaster":              {text:"your Fighter gains this card's Shield · draw 1", draw:1},
+  "Grave-Fed Ghoul":               {text:"your Fighter gains this card's Shield"},
   "Silk-Spinner Drone":            {text:"draw a card", draw:1},
   "Web-Tender Matron":             {text:"draw 2 cards", draw:2},
-  "Feather-Marked Skirmisher":     {text:"banish 1 from hand \u00b7 your Fighter +4", banishOwn:1, add:4},
-  "Bone-Stitcher":                 {text:"your Fighter +3; draw if a Remnant is out", add:3, drawIfRemnant:true},
-  "Rank-Sworn Levy":               {text:"your Fighter +2", add:2},
-  "Standard-Bearer Halden":        {text:"your Fighter +3", add:3},
-  "Oathkeeper Sena":               {text:"your Fighter +2", add:2},
+  "Feather-Marked Skirmisher":     {text:"banish 1 from hand \u00b7 your Fighter gains this card's Shield", banishOwn:1},
+  "Bone-Stitcher":                 {text:"your Fighter gains this card's Shield; draw if a Remnant is out", drawIfRemnant:true},
+  "Rank-Sworn Levy":               {text:"your Fighter gains this card's Shield"},
+  "Standard-Bearer Halden":        {text:"your Fighter gains this card's Shield"},
+  "Oathkeeper Sena":               {text:"your Fighter gains this card's Shield"},
   "Muster-Sergeant Bryn":          {text:"your Fighter +1 per Winners Circle card", perWC:1, perWCcap:8},
-  "Marrow Priest":                 {text:"your Fighter +3; if a Remnant is on the field, draw 1", add:3, drawIfRemnant:true},
-  "Summoned Skull Soldiers":                 {text:"your Fighter +5", add:5},
-  "Pale Gravedigger":              {text:"your Fighter +2; if you hold a Remnant, draw 1", add:2, drawIfRemnant:true},
-  "Widow of the Vigil":            {text:"your Fighter +3 · draw 1", add:3, draw:1},
-  "Bloodwake Duelist":             {text:"your Fighter +3", add:3},
-  "Warpath Vanguard":              {text:"your Fighter +4", add:4},
-  "Skullchain Reaver":             {text:"your Fighter +4", add:4},
-  "Trophy-Hunter Kessa":           {text:"your Fighter +4", add:4},
-  "First-Blood Squire":            {text:"your Fighter +3", add:3},
-  "The Undefeated":                {text:"your Fighter +3", add:3},
-  "Kravyn's Protege":              {text:"your Fighter +2", add:2},
-  "Web-Spinner Acolyte":           {text:"draw 1; your Fighter +1", draw:1, add:1},
-  "Hoarder's Gambit":              {text:"draw 1; your Fighter +2", draw:1, add:2},
-  "The Gathering Swarm":           {text:"your Fighter +3", add:3},
-  "Silkbound Sentinel":            {text:"draw a card; your Fighter +2", draw:1, add:2},
-  "Widow's Patience":              {text:"your Fighter +3", add:3},
-  "Mirror Shade":                  {text:"your Fighter +2", add:2},
-  "Tosa Envoy":                    {text:"your Fighter +3", add:3},
-  "Bram the Bulwark":              {text:"your Fighter +3", add:3},
-  "Cletus Gwyndull":                     {text:"your Fighter +3", add:3},
+  "Marrow Priest":                 {text:"your Fighter gains this card's Shield; if a Remnant is on the field, draw 1", drawIfRemnant:true},
+  "Summoned Skull Soldiers":                 {text:"your Fighter gains this card's Shield"},
+  "Pale Gravedigger":              {text:"your Fighter gains this card's Shield; if you hold a Remnant, draw 1", drawIfRemnant:true},
+  "Widow of the Vigil":            {text:"your Fighter gains this card's Shield · draw 1", draw:1},
+  "Bloodwake Duelist":             {text:"your Fighter gains this card's Shield"},
+  "Warpath Vanguard":              {text:"your Fighter gains this card's Shield"},
+  "Skullchain Reaver":             {text:"your Fighter gains this card's Shield"},
+  "Trophy-Hunter Kessa":           {text:"your Fighter gains this card's Shield"},
+  "First-Blood Squire":            {text:"your Fighter gains this card's Shield"},
+  "The Undefeated":                {text:"your Fighter gains this card's Shield"},
+  "Kravyn's Protege":              {text:"your Fighter gains this card's Shield"},
+  "Web-Spinner Acolyte":           {text:"draw 1; your Fighter gains this card's Shield", draw:1},
+  "Hoarder's Gambit":              {text:"draw 1; your Fighter gains this card's Shield", draw:1},
+  "The Gathering Swarm":           {text:"your Fighter gains this card's Shield"},
+  "Silkbound Sentinel":            {text:"draw a card; your Fighter gains this card's Shield", draw:1},
+  "Widow's Patience":              {text:"your Fighter gains this card's Shield"},
+  "Mirror Shade":                  {text:"your Fighter gains this card's Shield"},
+  "Tosa Envoy":                    {text:"your Fighter gains this card's Shield"},
+  "Bram the Bulwark":              {text:"your Fighter gains this card's Shield"},
+  "Cletus Gwyndull":                     {text:"your Fighter gains this card's Shield"},
   "Chieftain Reyva Vosh":          {text:"draw 2 cards", draw:2},
   "Kravyn the Collector":          {text:"draw 1; your Fighter +2 for every time it's returned to hand via a card effect this match", draw:1},
   "Sister Mire, Wailing Nightmare": {text:"draw 2, banish 1 from hand; your Fighter +1 per card in your hand", draw:2, banishOwn:1, addPerHand:1},
-  "Forgemask":                     {text:"your Fighter +3", add:3},
-  "Fifth Frequency Stormcaller":             {text:"your Fighter +3", add:3},
+  "Forgemask":                     {text:"your Fighter gains this card's Shield"},
+  "Fifth Frequency Stormcaller":             {text:"your Fighter gains this card's Shield"},
   "Ghorruk \"Gnarly\" Judarr":            {text:"return 1 banished card to the bottom of the deck, scry 1, then +2 power", recurBuff:1},
-  "Elowen Dawnspear":              {text:"your Fighter +3", add:3},
-  "Bixie Bee":                     {text:"your Fighter +3", add:3},
-  "Uso Oso":                       {text:"your Fighter +2; the lowest power card in your hand is automatically played as a death remnant.", add:3},
+  "Elowen Dawnspear":              {text:"your Fighter gains this card's Shield"},
+  "Bixie Bee":                     {text:"your Fighter gains this card's Shield"},
+  "Uso Oso":                       {text:"your Fighter gains this card's Shield; the lowest power card in your hand is automatically played as a death remnant."},
   "Veronica":                      {text:"your fighter gains +2, then scry 1."},
   // Warpath combo pieces (7/12/26) — genuinely new effect kinds, not reusable from the existing
   // vocabulary above: nothing here lets a Called support redirect where a FUTURE win banks to, or
@@ -7467,11 +7481,11 @@ function resolve(pc, oc, cond, playerCommittedPow){
 
     rearGuards.forEach(function(rg,_rgi){ if(!rg) return; if(pc&&pc.name==='Kaelthar the Ascendant') return;
       RS._inRules=true; var _rr=applyCalled(rg, _rgc, playerPow, oppPow, abilLog, false, RS); playerPow=_rr[0]; oppPow=_rr[1]; RS._inRules=false; RS._resync();
-      var _rgc2=(typeof conjureCost==='function')?conjureCost(rg):0; if(_rgc2){ playerPow+=_rgc2; abilLog.push('📣 '+rg.name+' called — +'+_rgc2+' (its own conjure cost)'); }
+      var _rgc2=(typeof shield==='function')?shield(rg):0; if(_rgc2){ playerPow+=_rgc2; abilLog.push('🛡️ '+rg.name+' called — +'+_rgc2+' (Shield)'); }
       var _lk=fieldLink(pc, rg); if(_lk){ playerPow+=_lk.pow; abilLog.push('🔗 '+_lk.name+' Link — '+pc.name+' + '+rg.name+': +'+_lk.pow); var _tb=(typeof CALLED!=='undefined'&&CALLED[rg.name]&&CALLED[rg.name].twinBuff)||0; if(_tb){ playerPow+=_tb; abilLog.push('🐺 '+rg.name+' rallies the twins — '+pc.name+' +'+_tb); } }
       var _bd=(typeof fieldBond==='function')?fieldBond(pc, rg):null; if(_bd){ playerPow+=_bd.bonus; abilLog.push('🤝 '+_bd.name+' Bond — '+pc.name+' + '+rg.name+': +'+_bd.bonus+' ('+_bd.count+' fought together in Ascension)'); }
       if(typeof dmSupportBonusThisDuel!=='undefined' && dmSupportBonusThisDuel){ playerPow+=dmSupportBonusThisDuel; abilLog.push('★ Collector\u2019s Due — '+rg.name+' as support: +'+dmSupportBonusThisDuel); }
-      if(typeof dmSupportDoubleCostThisDuel!=='undefined' && dmSupportDoubleCostThisDuel){ var _ddc=(typeof conjureCost==='function')?conjureCost(rg):0; if(_ddc){ playerPow+=_ddc*2; abilLog.push('🧬 Darwin — '+rg.name+' as support: +'+(_ddc*2)+' (double cost)'); } }
+      if(typeof dmSupportDoubleCostThisDuel!=='undefined' && dmSupportDoubleCostThisDuel){ var _ddc=(typeof shield==='function')?shield(rg):0; if(_ddc){ playerPow+=_ddc*2; abilLog.push('🧬 Darwin — '+rg.name+' as support: +'+(_ddc*2)+' (double Shield)'); } }
       if(typeof dmSupportAddPowThisDuel!=='undefined' && dmSupportAddPowThisDuel){ var _dap=(rg.chaosPow?0:(rg.pow||0)); if(_dap){ playerPow+=_dap; abilLog.push('🔥 Kotei — '+rg.name+' adds its own power: +'+_dap); } }
       if(rg.name==='Kravyn the Collector'){ var _hrc=(typeof handReturnCount!=='undefined'&&handReturnCount[pc.name])||0; if(_hrc){ playerPow+=2*_hrc; abilLog.push('📣 Kravyn — '+pc.name+' returned to hand '+_hrc+'x this match: +'+(2*_hrc)); } }
     });
@@ -7480,7 +7494,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     pendingOppRears.forEach(function(og){ if(!og) return;
       if(typeof dmNullifyOppSupportsThisDuel!=='undefined' && dmNullifyOppSupportsThisDuel){ abilLog.push('🛡 Ahdorah Khaan — Opp '+og.name+' nullified, no support effect applied'); return; }
       RS._inRules=true; var _or3=applyCalled(og, _orc, oppPow, playerPow, abilLog, true, RS); oppPow=_or3[0]; playerPow=_or3[1]; RS._inRules=false; RS._resync();
-      var _ogc2=(typeof conjureCost==='function')?conjureCost(og):0; if(_ogc2){ oppPow+=_ogc2; abilLog.push('📣 Opp '+og.name+' called — +'+_ogc2+' (its own conjure cost)'); }
+      var _ogc2=(typeof shield==='function')?shield(og):0; if(_ogc2){ oppPow+=_ogc2; abilLog.push('🛡️ Opp '+og.name+' called — +'+_ogc2+' (Shield)'); }
       var _lk2=fieldLink(oc, og); if(_lk2){ oppPow+=_lk2.pow; abilLog.push('🔗 Opp '+_lk2.name+' Link — '+oc.name+' + '+og.name+': +'+_lk2.pow); var _tb2=(typeof CALLED!=='undefined'&&CALLED[og.name]&&CALLED[og.name].twinBuff)||0; if(_tb2){ oppPow+=_tb2; } }
     });
     if(typeof dmAhdorahBonusPending!=='undefined' && dmAhdorahBonusPending){ dmAhdorahBonusPending=false; if(!pendingOppRears.filter(Boolean).length){ var _dak=drawToHand(2); if(_dak) abilLog.push('🛡 Ahdorah Khaan — opponent called no supports, drew '+_dak); } }
@@ -11115,7 +11129,7 @@ function readableCardHTML(c){
   var sig=hasArt?'':('<span class="rc-sig">'+(((typeof CARD_SIGIL!=='undefined')&&CARD_SIGIL[c.name])||'◈')+'</span>');
   return '<div class="rcard '+c.rarity+' camp-'+(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()+' '+(typeof cardStateClasses==='function'?cardStateClasses(c):'')+'">'
     + '<div class="rc-art"'+(art?' style="'+art+'"':'')+'>'+sig+'</div>'
-    + '<div class="rc-top"><span class="rc-cost">⚡'+cost+'</span><span class="rc-name">'+dispName(c.name)+'</span><span class="rc-pow">'+(c.chaosPow?'?':((c.pow||0)+(c._bo||0)))+'</span></div>'
+    + '<div class="rc-top"><span class="rc-cost">⚡'+cost+'</span><span class="rc-name">'+dispName(c.name)+'</span><span class="rc-pow">'+(c.chaosPow?'?':((c.pow||0)+(c._bo||0)))+'</span><span class="rc-shield" title="Power your Fighter gains if this card is Called as a support">🛡'+(typeof shield==='function'?shield(c):'')+'</span></div>'
     + '<div class="rc-meta">'+String(c.rarity).toUpperCase()+' · <span class="k">'+kd.k+'K</span> / <span class="d">'+kd.d+'D</span>'+pristine+'</div>'
     + (typeof keywordChipsHTML==='function'?keywordChipsHTML(c):'')
     + '<div class="rc-sec"><span class="rc-lbl">⚔ Conjured — Fighter</span>'+gl(c.abil)+'</div>'
