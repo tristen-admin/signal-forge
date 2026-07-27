@@ -3595,16 +3595,16 @@ const DECK_POOL = [
   {name:'Pit Thrall',pow:12,kills:0,deaths:0,rarity:'common',timing:null,abil:'No ability — a nameless conscript of the Sorn-Vallis pits. (Placeholder, will be redesigned.)'},
   {name:'Mirror Shade',pow:6,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"On commit: your power becomes the opponent's committed power +1."},
   {name:"Kaelthar the Ascendant",pow:23,cost:4,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Ascendant: on commit, −20 while you hold the match lead, +20 while you are behind. Your Support effects do not fire when he is conjured."},
-  {name:"Young Darwin, Predetermined Dictator",pow:14,cost:2,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"On commit: +4, and the opponent takes −3 if their card is Pristine (0 deaths)."},
+  {name:"Young Darwin, Predetermined Dictator",pow:10,cost:1,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"On commit: +4, and the opponent takes −3 if their card is Pristine (0 deaths)."},
   {name:"Courtroom Colossus",pow:15,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Colossus: +3, and +5 more from the 3rd commit onward — a late-game bomb."},
   {name:"Kessuae, Tide of Ruin",pow:15,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: while you are behind, this destroys the active location (nullifies it). +5 if both support slots are full."},
-  {name:"Elowen Dawnspear",pow:17,kills:0,deaths:0,rarity:'rare',timing:"on",abil:"Purity: +5 while this card is Pristine (0 deaths, 1+ kill)."},
+  {name:"Elowen Dawnspear",pow:13,kills:0,deaths:0,rarity:'rare',timing:"on",abil:"Purity: +5 while this card is Pristine (0 deaths, 1+ kill). If this card has over 5 deaths, it gains +2 instead."},
   {name:"Kravyn the Collector",pow:18,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +3. At 10+ career kills this unit gains Kill Escalation: +5. At 25+ career kills this unit gains Kill Escalation +7 instead. When this unit kills its enemy unit, you may choose to return this unit to the hand instead of placing it in the winners circle."},
   {name:"Fifth Frequency Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Elemental Flurry: +3, +4 more with 5+ cards in hand, +7 more with 4+ cards in your banish zone."},
   {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +1 power for every 2 cards remaining in your deck. Death Remnant +8"},
   {name:"Ilma the Patient",pow:13,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Late Bloomer: +5 from the 3rd commit onward."},
   {name:"Old Garrick",pow:12,kills:0,deaths:0,rarity:"common",timing:"on",abil:"Grizzled Veteran: +5 at 20+ kills; +5 more at 8+ deaths."},
-  {name:"Faye Quicksilver",pow:14,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Snowball: +2 for every round you have already won this match."},
+  {name:"Faye Quicksilver",pow:13,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Snowball: +2 for every round you have already won this match."},
   {name:"Bram the Bulwark",pow:15,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Last Stand — a loss by 3 power or less becomes a tie."},
   // Energy-synergy bodies (Stage 1)
   {name:'Conduit Adept',pow:6,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: gain 1 Charge. As a support (Called), gain 2 Charge and draw a card.'},
@@ -3638,15 +3638,15 @@ const DECK_POOL = [
   {name:'Oathlit Attendant',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), gain 1 Charge.'},
   {name:'Trophy Runner',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:"As a support (Called), gain 1 Charge if you've earned a kill this match."},
   // Skyward Trilogy tech piece, 7/24/26 -- occasional deckbuilding option, not archetype-specific, not systemic
-  {name:'Trilogy Ward',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: +5 power if your card's camp beats the opponent's on the Skyward Trilogy wheel (Amageras>Omitsuki>Kitanoo>Amageras). Same camp on both sides: no bonus."},
+  {name:'Trilogy Ward',pow:15,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: +5 power if your card's camp beats the opponent's on the Skyward Trilogy wheel (Amageras>Omitsuki>Kitanoo>Amageras). Same camp on both sides: no bonus."},
   {name:'Oathlit Vanguard',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power while you remain undefeated this match — gone the moment you take your first loss.'},
   // Uncommons
   {name:'Darwin',pow:19,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: if 3rd+ commit this match, +5 power. Returns from Winners Circle: banish from hand to curse opponent\'s next committed card −10 power.'},
   {name:'Hanse Waltz',pow:15,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.'},
   // Rares
   {name:'Arch-Grim Korrin',pow:17,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: look at the top 2 cards of your deck, place 1 in the support zone and 1 as a Death Remnant. If opponent's card has fewer career kills than this card, +6 power."},
-  {name:'Cletus Gwyndull',pow:15,kills:0,deaths:0,rarity:'rare',timing:'pre',abil:'Pre-commit: lock the active condition this turn — opponent cannot shift it.'},
-  {name:'Val Kreigh',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if this is the 1st duel of the match, +6 power.'},
+  {name:'Cletus Gwyndull',pow:10,kills:0,deaths:0,rarity:'rare',timing:'pre',abil:'Pre-commit: lock the active condition this turn — opponent cannot shift it.'},
+  {name:'Val Kreigh',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if this is the 1st duel of the match, +6 power. If it is the second duel of the match or later, +2 instead.'},
   {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'apex',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
   // Warpath combo pieces (7/12/26) — makes the empty-Winners-Circle Deck Master mechanic (Tange/Kravyn)
   // a sustainable loop instead of a one-time front-loaded bonus. Not in WARPATH_PRESET by default —
@@ -3657,7 +3657,7 @@ const DECK_POOL = [
   {name:'Lagertha Waltz',pow:8,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +6 if you lost your last duel. -2 if you won your last duel.'},
   {name:'Valcarion',pow:17,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if there is a card in your banish zone, add it to your hand — or call it to an open support circle.'},
   {name:'Envoy of Tyrants, Ella Ballora',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Bloodrage: on commit +3 with 3+ cards in hand, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
-  {name:'Kiana',pow:15,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Elemental Flurry: on commit +3 power, and +4 more if you have 4 or more cards in your hand'},
+  {name:'Kiana',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Elemental Flurry: on commit +3 power, and +4 more if you have 4 or more cards in your hand'},
   // ── KOTEI Series 1 Expansion ──
   {name:'Melanie',pow:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter +5 and draw a card. Keawe\'s mother — a civilian, not a fighter, but she still knows how to help. At 1 power she quietly wins under Lowest Wins.'},
   {name:'Uso Oso\'s Skeletal Summons',pow:5,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: these bones don\'t stay down — when the summons falls it lingers on the field, +5 to your committed cards until an opponent\'s card is killed.'},
@@ -3668,14 +3668,14 @@ const DECK_POOL = [
   {name:"Web-Weaver's Return",pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: shuffle your banish pile back into your deck, then draw a card — the web is rewoven.'},
   {name:'Chieftain Reyva Vosh',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Warriors in Reserve: on commit, +2 power for each card in your Winners Circle — she commits her hold\'s warriors once the stakes are undeniable.'},
   {name:'Forgemask',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Reforged: on commit, +3 power, and +4 more if you lost your last duel — the forge tempers what breaks.'},
-  {name:'Lagertha Waltz, Wrathful Transformation',pow:18,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Alpha\'s Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack\'s fury peaks in mourning.'},
+  {name:'Lagertha Waltz, Wrathful Transformation',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Alpha\'s Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack\'s fury peaks in mourning.'},
   {name:'The Bronzed Beast, Hanse Waltz',pow:20,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 while behind — if you were behind when you kill an opponent fighter, this returns to your hand at its original power.'},
   {name:'La "La" Ballora, the Broodqueen',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw 2 cards — her brood is her hand.'},
   {name:'Ourevos, the Golden Dragon',pow:30,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel. Repeat this effect if you have 1 or fewer support units this battle.'},
   {name:'Legend Reborn, Keawe Kel\'rua',pow:13,cost:1,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'A Legend Reborn — Conjure (1⚡): add a card of power 15 or higher from your deck to your hand, and reduce its cost by 1.'},
   {name:'Rhaess Korvain',pow:13,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish the top card of your deck, then +2 power for every card in your banish zone.'},
-  {name:'Black Wings, Ossian Drell',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone. If you banished a card from your hand this turn, also +2 power for every card in your hand.'},
+  {name:'Black Wings, Ossian Drell',pow:16,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone. If you banished a card from your hand this turn, also +2 power for every card in your hand.'},
   {name:'Corvus',pow:17,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Raven's Feast: on commit, banish the top 2 cards of your deck, then +2 power for every card in your banish zone."},
   {name:'Wren',pow:9,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wingmate: on commit, return a banished card to your hand, then +4 power — Wren never leaves one behind.'},
   {name:'Rook',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Scout: on commit, banish the top card of your deck, then +1 power for every card in your banish zone.'},
@@ -3709,7 +3709,7 @@ const DECK_POOL = [
   {name:'Ruffius Rufeldro',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you are down 2 or more duels this match, double this card\'s power.'},
   {name:'Kiba',pow:2,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: when Kiba dies it stays on field. Your cards here gain +2 power until an opponent\'s card is killed, then Remnant is removed.'},
   {name:'Malia',pow:10,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: your power becomes the opponent\'s committed card power for this duel.'},
-  {name:'Moro',pow:19,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Royal Bearing: on commit, if your Deck Master\'s printed power is higher than Moro\'s current total, borrow it. Then +3 power — the crown\'s power is always present.'},
+  {name:'Moro',pow:15,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Royal Bearing: on commit, if your Deck Master\'s printed power is higher than Moro\'s current total, borrow it. Then +3 power — the crown\'s power is always present.'},
   {name:'Zerith Var',pow:19,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2; if your opponent\'s base power is higher, +4 power.'},
   
   {name:'Anorith Keeling',pow:1,cost:4,chaosPow:true,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Chaos Deity — its base power is a question mark, determined by the number of duels completed prior to Anorith being conjured multiplied by the number of cards in hand. On commit, warp every spell in your deck into the Chaos Trinity: Draw Surge (2⚡ draw 3, banish 1), Godhand (1⚡ your card +10), and Sorn-Vallis Shift (3⚡ warp the location to Sorn-Vallis — lowest power wins).'},
@@ -3729,15 +3729,15 @@ const DECK_POOL = [
   {name:'Bone Choirmaster',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +5 to your cards until an enemy dies. On a win, draw a card.'},
   {name:'Grave-Fed Ghoul',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Death Remnant: when it falls, +4 to your cards until an enemy dies.'},
   {name:'Marrow Priest',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Support: your Fighter +3; if a Remnant is on the field, draw a card.'},
-  {name:'Summoned Skull Soldiers',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +7 to your cards until an enemy dies. On commit: +3 power for each Remnant you hold.'},
+  {name:'Summoned Skull Soldiers',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +7 to your cards until an enemy dies. On commit: +3 power for each Remnant you hold.'},
   {name:'Pale Gravedigger',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: raise a +3 Death Remnant, then draw a card while you hold a Remnant.'},
   {name:'Gravecaller Voss',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish a card from your hand to raise a Death Remnant worth +5 — no death required. Called as a support: lingers as a +5 Remnant.'},
   {name:'Widow of the Vigil',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you have a Remnant, draw 2; otherwise +3 power.'},
   // ── THE WARPATH (early champ, Winners-Circle recycle, Kill Escalation) ──
   {name:'Bloodwake Duelist',pow:11,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: on commit, +2 power for every kill you have earned this match.'},
   {name:'Warpath Vanguard',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power on the 1st or 2nd duel of the match.'},
-  {name:'Skullchain Reaver',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power per kill earned this match; when it wins, it returns to your hand instead of the Winners Circle.'},
-  {name:'Trophy-Hunter Kessa',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every card in BOTH players Winners Circle.'},
+  {name:'Skullchain Reaver',pow:18,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power per kill earned this match; when it wins, it returns to your hand instead of the Winners Circle.'},
+  {name:'Trophy-Hunter Kessa',pow:17,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every card in BOTH players Winners Circle.'},
   {name:'First-Blood Squire',pow:12,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +4 power on the 1st duel of the match only.'},
   {name:'The Undefeated',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every duel you have already won this match.'},
   {name:"Kravyn's Protege",pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +3 power once this card has earned 6 or more career kills.'},
@@ -5024,7 +5024,7 @@ const ENERGY_SPELLS = [
 ];
 // ══ REAR-GUARD / CALLED SYSTEM (v1) ══
 const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
-const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdorah Khaan, Determined Soul":2, "Tange Sazen":2, "Kotei":3, "Darwin":2, "Lagertha Waltz":1, "The Bronzed Beast, Hanse Waltz":3, "Hanse Waltz":2, "Uso Oso":2, "Zerith Var":3, "Lagertha Waltz, Wrathful Transformation":3, "Bixie Bee":1, "Keawe Kel'rua":2, "Veronica":1, "Sister Mire, Wailing Nightmare":1};   // ability-strength nudges above the power band (balance dial)
+const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdorah Khaan, Determined Soul":2, "Tange Sazen":2, "Kotei":3, "Darwin":2, "Lagertha Waltz":1, "The Bronzed Beast, Hanse Waltz":3, "Hanse Waltz":2, "Uso Oso":2, "Zerith Var":3, "Lagertha Waltz, Wrathful Transformation":2, "Bixie Bee":1, "Keawe Kel'rua":2, "Veronica":1, "Sister Mire, Wailing Nightmare":1, "Moro":2, "Elowen Dawnspear":2, "Cletus Gwyndull":1, "Val Kreigh":2, "Faye Quicksilver":2, "Envoy of Tyrants, Ella Ballora":2, "Forgemask":2};   // ability-strength nudges above the power band (balance dial)
 const SHIELD_OVERRIDE = {};   // (7/27/26) per-card hand-tuning on top of shield()'s formula default, same pattern as COST_OVERRIDE above — editable from the Shift+D dev table
 // FLAGGED_ABILITIES (7/27/26): name -> plain-language reason, for printed ability text that currently
 // overpromises what the engine actually does (see PENDING_MECHANICS.md's Open section for the full
@@ -5033,6 +5033,7 @@ const SHIELD_OVERRIDE = {};   // (7/27/26) per-card hand-tuning on top of shield
 // is genuinely player-visible (the overpromising text is still live on the card), add it here as well.
 const FLAGGED_ABILITIES = {
   'Kravyn the Collector': "“You may choose” isn't a real choice yet — he always returns to hand on a win or a close loss, no prompt.",
+  'Moro': "The \"or banish 1 from the top of your deck for +4\" alternative isn't built yet — Called still only returns 1 banished card to hand (recurPlain).",
 };
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
 const RACES = ['Human','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Marrowen','Dreikan','Dractyl','Thennlar','Xylotes','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
@@ -5209,7 +5210,7 @@ const CALLED = {
   "Val Kreigh":                    {text:"your Fighter +3", add:3},
   "King Joris":                    {text:"your Fighter +4 · draw 1", add:4, draw:1},
   "Malia":                         {text:"your Fighter +4", add:4},
-  "Moro":                          {text:"return 1 banished card to hand", recurPlain:1},
+  "Moro":                          {text:"return 1 banished card to hand, or banish 1 card from the top of your deck to give +4 to your conjured unit.", recurPlain:1},
   "Ourevos, the Golden Dragon":    {text:"your Fighter +5, fill the other support slot with a copy of this card, then draw a card", add:2},
   "Tange Sazen":                   {text:"your Fighter +3, and your conjured unit returns to your hand instead of going to the winners circle", add:3},
   "Kiba":                          {text:"your Fighter +5", add:5},
@@ -5276,7 +5277,7 @@ const CALLED = {
   "Tosa Envoy":                    {text:"your Fighter +3", add:3},
   "Bram the Bulwark":              {text:"your Fighter +3", add:3},
   "Cletus Gwyndull":                     {text:"your Fighter +3", add:3},
-  "Chieftain Reyva Vosh":          {text:"draw 2 cards", draw:2},
+  "Chieftain Reyva Vosh":          {text:"draw 2 cards, and double this unit's Shield value", draw:2, doubleShield:true},
   "Kravyn the Collector":          {text:"draw 1; your Fighter +2 for every time it's returned to hand via a card effect this match", draw:1},
   "Sister Mire, Wailing Nightmare": {text:"draw 2, banish 1 from hand; your Fighter +1 per card in your hand", draw:2, banishOwn:1, addPerHand:1},
   "Forgemask":                     {text:"your Fighter +3", add:3},
@@ -5419,6 +5420,14 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
   if(e.chargeGainIfHandFull && (ctx.hand_len||0)>=4){ if(isOpp){ oppCharge=Math.min(duelEnergyCap(),oppCharge+e.chargeGainIfHandFull); } else { charge=Math.min(duelEnergyCap(),charge+e.chargeGainIfHandFull); if(typeof renderCharge==="function") renderCharge(); } }
   if(e.chargeGainIfVeteran && (ctx.match_commits||0)>=2){ if(isOpp){ oppCharge=Math.min(duelEnergyCap(),oppCharge+e.chargeGainIfVeteran); } else { charge=Math.min(duelEnergyCap(),charge+e.chargeGainIfVeteran); if(typeof renderCharge==="function") renderCharge(); } }
   if(e.spellDiscountGain && !isOpp && typeof spellDiscount!=='undefined'){ spellDiscount+=e.spellDiscountGain; }   // bot never casts spells -- correctly player-only
+  // 7/27/26: Chieftain Reyva Vosh's own Called text -- an extra Shield bonus on top of the universal
+  // shield(rg) add every Called support already gets (see resolve()'s rear-guard loop), same
+  // "double Shield" math Darwin's DM ability already applies via dmSupportDoubleCostThisDuel, just
+  // sourced from this card's own printed text instead of a Deck Master flag.
+  if(e.doubleShield && typeof shield==='function'){
+    var _dsv = shield(support)||0;
+    if(_dsv){ if(isOpp){ oppPow+=_dsv; } else { playerPow+=_dsv; } abilLog.push("🛡️ "+(isOpp?"Opp ":"")+support.name+" — Called doubles its own Shield: +"+_dsv); }
+  }
   if(e.draw){
     if(!isOpp){ drawToHand(e.draw); }
     else if(typeof oppDrawN==='function'){ oppDrawN(e.draw); }
@@ -7191,7 +7200,7 @@ const CARD_RULES = {
  "The Hollow King": [{"if": {"v": "player_losses", "op": ">", "v2": "player_wins"}, "add": 7, "log": "💀 Hollow King: +7 (behind)"}],
  "Sirefax the Warden": [{"if": {"and":[{"v": "opp_deaths", "op": "==", "n": 0},{"v":"opp_kills","op":">=","n":1}]}, "add": 3, "log": "🛡 Sirefax: +3 vs Pristine"}],
  "Mordezh, Blood Prophet": [{"if": {"v": "player_losses", "op": ">", "v2": "player_wins"}, "add": 5, "log": "🩸 Mordezh: +5 (behind)"}, {"if": {"v": "last_result", "op": "==", "s": "lose"}, "add": 2, "log": "🩸 Mordezh: +2 (lost last)"}],
- "Elowen Dawnspear": [{"if": {"and":[{"v": "pc_deaths", "op": "==", "n": 0},{"v":"pc_kills","op":">=","n":1}]}, "add": 5, "log": "✨ Elowen: +5 (Pristine)"}],
+ "Elowen Dawnspear": [{"if": {"and":[{"v": "pc_deaths", "op": "==", "n": 0},{"v":"pc_kills","op":">=","n":1}]}, "add": 5, "log": "✨ Elowen: +5 (Pristine)"},{"if": {"v": "pc_deaths", "op": ">", "n": 5}, "add": 2, "log": "✨ Elowen: +2 (over 5 deaths)"}],
  "Fifth Frequency Stormcaller": [{"add": 3, "log": "🌪️ Veyra: +3"}, {"if": {"chaos": true}, "add": 4, "log": "🌪️ Veyra: +4 (chaos)"}],
  "Sable the Unseen": [{"if": {"v": "opp_deaths", "op": "==", "n": 0}, "oppadd": -4, "log": "🕷️ Sable: opponent −4 (purity drained)"}],
  "Torvald Ninefingers": [{"if": {"v": "hand_len", "op": "<=", "n": 2}, "add": 3, "log": "🪓 Torvald: +3 (low hand)"}],
@@ -7322,6 +7331,15 @@ const CARD_RULES = {
    },
    "add": 6,
    "log": "⚔️ Val Kreigh: +6 (first duel)"
+  },
+  {
+   "if": {
+    "v": "match_commits",
+    "op": ">=",
+    "n": 2
+   },
+   "add": 2,
+   "log": "⚔️ Val Kreigh: +2 (second duel or later)"
   }
  ],
  "Unbanked Victory": [
@@ -10116,7 +10134,7 @@ const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of t
 // Keawe's Circle itself) promoted to full archetype status, not a single shared mechanic.
 const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin','Kravyn the Collector','Court Cipher'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members. Veronica + Ruffius Rufeldro moved out 7/19/26.
 const RADIANCE_PRESET = ['Moro','Malia','King Joris','Ruffius Rufeldro','Elowen Dawnspear','Bram the Bulwark','The Regenerating Horror','Kaelthar the Ascendant','Lumen Acolyte','Oathlit Attendant','Oathlit Vanguard'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match.
-const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz','Fenrik Vench','Yard Sparring Partner','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger"];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms). 7/23/26: added the cadet-corps/Tosa Pact glue commons (Fenrik Vench is his real Ch.1 rival, per the Ascension storyline).
+const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz','Fenrik Vench','Yard Sparring Partner','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Lagertha Waltz, Wrathful Transformation'];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms). 7/23/26: added the cadet-corps/Tosa Pact glue commons (Fenrik Vench is his real Ch.1 rival, per the Ascension storyline).
 const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 19 Quartermaster','Squad 19 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 19 Signalman','Squad 19 Chronicler'];   // Ahdor's Pride — Ahdorah Khaan + Squad 19. 7/23/26: filled out the deckbuilding spine with Squad 19 commons + a Rare sibling printing of Ahdorah herself (mirrors Keawe Kel'rua's base/evolved pattern) + shared Tosa Pact pieces. 7/24/26: +2 charge-economy commons (balance audit round 2 §5). Still no card named Kynaht or tagged Vysh'ra race (Ahdor's people, per the KOTEI bible) -- that's a separate, real content gap, not addressed by this batch.
 // Archetype dev-view (7/18/26, expanded 7/19/26): the meta archetypes' full membership, for the
 // Vault's Archetype filter -- reuses these *_PRESET arrays directly (the actual full-deck lists)

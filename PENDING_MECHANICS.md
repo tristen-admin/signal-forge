@@ -10,6 +10,11 @@ Standing practice: add an entry here any time a CALLED/CARD_RULES/ability text e
 
 ## Open
 
+### Moro — Called's "or banish from deck for +4" alternative isn't built
+**Text says:** "return 1 banished card to hand, or banish 1 card from the top of your deck to give +4 to your conjured unit."
+**What actually fires today:** only the first half — `recurPlain:1` (return 1 banished card to hand). The "or banish from the top of your deck for +4" branch has no field or logic yet; this is a real choice (pick one of two effects), same class of gap as Kravyn's below, not a simple declarative add.
+**Why paused:** needs an actual choice prompt at Called-resolution time (return-from-banish vs. banish-from-deck-for-power), not just a new boolean flag — worth building alongside Kravyn's below rather than as a rushed one-off, since both need the same kind of "pick one of two Called effects" UI.
+
 ### Kravyn the Collector — on-kill hand-return is automatic, not a real choice (needs a decision)
 **Text says:** "When this unit kills its enemy unit, you may choose to return this unit to the hand instead of placing it in the winners circle."
 **What actually fires today:** `resolve()`'s win branch (name-hardcoded, alongside Skullchain Reaver) ALWAYS returns Kravyn to hand on any win, and a separate close-loss branch ALSO always returns him to hand on any loss by ≤3 power margin. Both fire unconditionally — there is no prompt, no "you may choose."
