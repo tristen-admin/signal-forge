@@ -10,11 +10,6 @@ Standing practice: add an entry here any time a CALLED/CARD_RULES/ability text e
 
 ## Open
 
-### Moro — Called's "or banish from deck for +4" alternative isn't built
-**Text says:** "return 1 banished card to hand, or banish 1 card from the top of your deck to give +4 to your conjured unit."
-**What actually fires today:** only the first half — `recurPlain:1` (return 1 banished card to hand). The "or banish from the top of your deck for +4" branch has no field or logic yet; this is a real choice (pick one of two effects), same class of gap as Kravyn's below, not a simple declarative add.
-**Why paused:** needs an actual choice prompt at Called-resolution time (return-from-banish vs. banish-from-deck-for-power), not just a new boolean flag — worth building alongside Kravyn's below rather than as a rushed one-off, since both need the same kind of "pick one of two Called effects" UI.
-
 ### Kravyn the Collector — on-kill hand-return is automatic, not a real choice (needs a decision)
 **Text says:** "When this unit kills its enemy unit, you may choose to return this unit to the hand instead of placing it in the winners circle."
 **What actually fires today:** `resolve()`'s win branch (name-hardcoded, alongside Skullchain Reaver) ALWAYS returns Kravyn to hand on any win, and a separate close-loss branch ALSO always returns him to hand on any loss by ≤3 power margin. Both fire unconditionally — there is no prompt, no "you may choose."
@@ -24,6 +19,13 @@ Standing practice: add an entry here any time a CALLED/CARD_RULES/ability text e
 **Text says (second half):** "...and make your opponent return 1 card to the bottom of the deck."
 **What actually exists:** no `DM_ACTIVATED_ABILITY['Tange Sazen']` entry at all today — only his passive `DM_EXCLUSIVE` (+8 power if your Winners Circle is empty), with a code comment directly above it already flagging this gap explicitly. `oppDrawPileBot` (the variable that would need to model this) is declared and reset every match but never populated or read anywhere — dead scaffolding from an unfinished feature, not a small fix.
 **Why this is paused:** the bot's card pool isn't modeled as a real orderable deck anywhere in the engine (`OPP_CARDS`/`activeBot.pool` feed a padded random draw, not a persistent ordered array the way the player's `drawPile` is). Building this properly means modeling a real bot deck array first — a bot-AI architecture change, not a card-text fix — and deserves its own dedicated pass rather than a rushed addition alongside a text-mismatch batch.
+
+## Resolved
+
+### Moro — Called's "or banish from deck for +4" alternative, shipped 7/27/26
+**Text says:** "return 1 banished card to hand, or banish 1 card from the top of your deck to give +4 to your conjured unit."
+**Initially misflagged as needing a new choice-UI** (own correction needed: the `drawPile.pop()`→`banishPile.push()` primitive already existed and was already proven — Corvus/Rook/Grave-Tithe Acolyte/Rhaess Korvain's on-commit abilities already banish from the top of the deck via the `_btmap` lookup in `commitCard()`. Not a new-mechanic problem, just a missed existing-code-search before assuming a gap.
+**What ships:** two new CALLED fields, `deckBanishIfEmpty`/`deckBanishAdd`, checked inside the existing `e.recurPlain` block in `applyCalled()` — if returning from the banish pile found nothing (banish pile was empty), falls through to banishing from the top of the deck instead for the stated power bonus. Player-only, matching the established precedent for this whole class of effect (Uso Oso, Valcarion, Darwin's `conjureTopToSupport`) — the bot has no real ordered deck to pop from (same root limitation as Tange Sazen's gap above).
 
 ## Resolved
 

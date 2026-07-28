@@ -5033,7 +5033,6 @@ const SHIELD_OVERRIDE = {};   // (7/27/26) per-card hand-tuning on top of shield
 // is genuinely player-visible (the overpromising text is still live on the card), add it here as well.
 const FLAGGED_ABILITIES = {
   'Kravyn the Collector': "“You may choose” isn't a real choice yet — he always returns to hand on a win or a close loss, no prompt.",
-  'Moro': "The \"or banish 1 from the top of your deck for +4\" alternative isn't built yet — Called still only returns 1 banished card to hand (recurPlain).",
 };
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
 const RACES = ['Human','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Marrowen','Dreikan','Dractyl','Thennlar','Xylotes','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
@@ -5210,7 +5209,7 @@ const CALLED = {
   "Val Kreigh":                    {text:"your Fighter +3", add:3},
   "King Joris":                    {text:"your Fighter +4 · draw 1", add:4, draw:1},
   "Malia":                         {text:"your Fighter +4", add:4},
-  "Moro":                          {text:"return 1 banished card to hand, or banish 1 card from the top of your deck to give +4 to your conjured unit.", recurPlain:1},
+  "Moro":                          {text:"return 1 banished card to hand, or banish 1 card from the top of your deck to give +4 to your conjured unit.", recurPlain:1, deckBanishIfEmpty:1, deckBanishAdd:4},
   "Ourevos, the Golden Dragon":    {text:"your Fighter +5, fill the other support slot with a copy of this card, then draw a card", add:2},
   "Tange Sazen":                   {text:"your Fighter +3, and your conjured unit returns to your hand instead of going to the winners circle", add:3},
   "Kiba":                          {text:"your Fighter +5", add:5},
@@ -5277,7 +5276,7 @@ const CALLED = {
   "Tosa Envoy":                    {text:"your Fighter +3", add:3},
   "Bram the Bulwark":              {text:"your Fighter +3", add:3},
   "Cletus Gwyndull":                     {text:"your Fighter +3", add:3},
-  "Chieftain Reyva Vosh":          {text:"draw 2 cards, and double this unit's Shield value", draw:2, doubleShield:true},
+  "Chieftain Reyva Vosh":          {text:"draw 1 card, and double this unit's Shield value", draw:1, doubleShield:true},
   "Kravyn the Collector":          {text:"draw 1; your Fighter +2 for every time it's returned to hand via a card effect this match", draw:1},
   "Sister Mire, Wailing Nightmare": {text:"draw 2, banish 1 from hand; your Fighter +1 per card in your hand", draw:2, banishOwn:1, addPerHand:1},
   "Forgemask":                     {text:"your Fighter +3", add:3},
@@ -5497,7 +5496,22 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
     }
   }
   if(e.recurPlain){
-    if(!isOpp){ var _gp=0; for(var _rp2=0;_rp2<e.recurPlain;_rp2++){ if(banishPile.length){ hand.push(banishPile.pop()); _gp++; } } if(_gp) abilLog.push("↩ Returned "+_gp+" from banish to hand"); if(typeof buildHand==="function")buildHand(); }
+    if(!isOpp){ var _gp=0; for(var _rp2=0;_rp2<e.recurPlain;_rp2++){ if(banishPile.length){ hand.push(banishPile.pop()); _gp++; } } if(_gp) abilLog.push("↩ Returned "+_gp+" from banish to hand"); if(typeof buildHand==="function")buildHand();
+      // 7/27/26: Moro's "or banish from the top of your deck" fallback -- reuses the same
+      // drawPile.pop()->banishPile.push() primitive Corvus/Rook/Grave-Tithe Acolyte/Rhaess Korvain
+      // already use on-commit (see the _btmap lookup in commitCard()), just triggered from Called
+      // instead of on-commit, and only when there was nothing in the banish pile to return (an
+      // empty banish pile is the only time "return 1 banished card" has nothing to do, so that's
+      // the natural point to fall through to the deck-banish alternative instead of a real prompt).
+      // Player-only, matching the established precedent for this whole class of effect (Uso Oso,
+      // Valcarion, Darwin's conjureTopToSupport) -- the bot has no real ordered deck to pop from.
+      if(!_gp && e.deckBanishIfEmpty && drawPile.length){
+        var _dbn=0; for(var _dbi=0;_dbi<e.deckBanishIfEmpty && drawPile.length;_dbi++){ banishPile.push(drawPile.pop()); _dbn++; }
+        if(typeof deckSize!=='undefined') deckSize=drawPile.length;
+        if(_dbn && e.deckBanishAdd){ playerPow+=e.deckBanishAdd; abilLog.push("☠ "+support.name+" — nothing to return, banished "+_dbn+" from the top of your deck instead: +"+e.deckBanishAdd); }
+        if(typeof updatePiles==='function') updatePiles();
+      }
+    }
     else { var _ogp=0; for(var _orp=0;_orp<e.recurPlain;_orp++){ if(oppBanishBot.length){ oppHandBot.push(oppBanishBot.pop()); _ogp++; } } if(_ogp) abilLog.push("↩ Opp returned "+_ogp+" from banish to hand"); }
   }
   if(e.bothBanish){
