@@ -5970,7 +5970,7 @@ function updateLivePow(){
   badge.className='live-pow '+cls;
   badge.innerHTML='<span class="lp-ic">\u2694</span><span class="lp-total">'+pp.total+'</span>'+(delta?'<span class="lp-delta">'+(delta>0?'+':'')+delta+'</span>':'')+(pp.oppShown!=null?'<span class="lp-vs">vs '+pp.oppShown+'</span>':'');
 }
-function confirmSelection(){
+function confirmSelection(){ if(typeof tutorialAdvance==='function')setTimeout(function(){tutorialAdvance('confirm');},90);
   if(phase !== 'selecting' || preSelectedCard === null) return;
   { var _is=document.getElementById('instant-strip'); if(_is) _is.style.display='none'; }
   selectedCard = preSelectedCard;
@@ -6152,7 +6152,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
     var _btTaxed={'Corvus':1,'Grave-Tithe Acolyte':1,'Rhaess Korvain':1};
     if(_btn && _btTaxed[pc.name]){
       if(charge>=1){ charge-=1; if(typeof renderCharge==='function') renderCharge(); }
-      else { _btn=0; abilLog.push('⚡ '+pc.name+' — not enough Charge, self-banish fizzles'); }
+      else { _btn=0; if(typeof toast==='function') toast('⚡ '+pc.name+' — not enough Charge, self-banish fizzles', false); }
     }
     if(_btn){ for(var _bti=0;_bti<_btn && drawPile.length;_bti++) banishPile.push(drawPile.pop()); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof updatePiles==='function') updatePiles(); } }
   if(pc.name==='The Black Ledger'){ if(typeof banishFromHand==='function') banishFromHand(2); if(typeof drawToHand==='function') drawToHand(1); }   // 7/24/26: draw nerfed 2->1, banish stays random (explicit exception to the player-choice default)
@@ -10304,7 +10304,8 @@ var TUTORIAL_SCRIPT=[
  {say:"A Condition reveals up top — a rule that reshapes the duel. Always read it before you commit.", spot:'#cond-main', on:'reveal'},
  {say:"Now conjure your Fighter — tap a card in your hand to send it to the field. This card does the fighting.", spot:'#hand-row', on:'stage'},
  {say:"You can also call up to 2 Supports to the rear slots — free, and they boost your Fighter. Or just commit.", spot:'.rear-slot', btn:"Got it"},
- {say:"Commit to lock it in. Both sides reveal at once — the higher total power wins the duel.", spot:'#commit-btn', on:'commit'},
+ {say:"Ready? Confirm Selection locks in your pick — you can still back out until you do.", spot:'#confirm-btn', on:'confirm'},
+ {say:"Commit to lock it in. Both sides reveal at once — the higher total power wins the duel.", spot:'.rr-commit-btn', on:'commit'},
  {say:"The clash resolves. First to win 4 of 7 duels takes the match — and every result is written to your card forever.", spot:null, btn:"Next"},
  {say:"That's the whole loop, Commander. Finish this match at your own pace — the field is yours.", spot:null, btn:"Finish"}
 ];
@@ -10312,7 +10313,8 @@ function _coachCSS(){ if(document.getElementById('coach-style'))return; var st=d
 .coach-spot{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(4,6,11,.80);transition:all .3s ease;pointer-events:none;z-index:300;border:2px solid var(--gold);animation:coachPulse 1.6s ease-in-out infinite}
 @keyframes coachPulse{0%,100%{box-shadow:0 0 0 9999px rgba(4,6,11,.80),0 0 0 0 rgba(245,194,77,.5)}50%{box-shadow:0 0 0 9999px rgba(4,6,11,.80),0 0 22px 4px rgba(245,194,77,.5)}}
 .coach-fulldim{position:fixed;inset:0;background:rgba(4,6,11,.80);z-index:300;pointer-events:none}
-.coach-box{position:fixed;left:50%;bottom:4.5%;transform:translateX(-50%);z-index:302;width:min(92vw,540px);background:linear-gradient(180deg,#151a28,#0c0f17);border:1px solid var(--gold);border-radius:14px;padding:15px 17px;box-shadow:0 18px 50px rgba(0,0,0,.65);display:flex;gap:13px;align-items:flex-start}
+.coach-box{position:fixed;left:50%;bottom:4.5%;transform:translateX(-50%);z-index:302;width:min(92vw,540px);background:linear-gradient(180deg,#151a28,#0c0f17);border:1px solid var(--gold);border-radius:14px;padding:15px 17px;box-shadow:0 18px 50px rgba(0,0,0,.65);display:flex;gap:13px;align-items:flex-start;pointer-events:none}
+.coach-box .cb-skip,.coach-box .cb-next{pointer-events:auto}
 .coach-box .cb-mentor{width:46px;height:46px;border-radius:11px;background:var(--gold-glow,rgba(245,194,77,.15));border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
 .coach-box .cb-body{flex:1;min-width:0}
 .coach-box .cb-step{font-size:9.5px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:3px}
