@@ -5,6 +5,20 @@
 
 ---
 
+## Fixed post-audit — user-reported (commit `af5064c`)
+
+🔴 **Coached tutorial: hand cards were unclickable from step 4 onward, no way to proceed except Skip.** `#coach-box` (the tutorial dialog, anchored `bottom:4.5%`) physically overlapped ~95% of every hand card's clickable area and had no `pointer-events` rule of its own — confirmed with `elementFromPoint()` that a click at a card's own center hit the dialog, not the card, before this fix. Fixed with the same cascading-pointer-events pattern used elsewhere in this file: `.coach-box` is now `pointer-events:none`, with `pointer-events:auto` explicitly restored on just its two real controls (Skip, Next).
+
+🔴 **The tutorial script had no step for Confirm Selection**, a real, required button between staging a Fighter and Commit — so even with the click-blocking fixed, the coach jumped straight from "stage a Fighter" to a commit step with nothing valid to spotlight. Added a step gated on the real `confirmSelection()` call.
+
+🟡 **The commit step's spotlight target, `#commit-btn`, is dead UI** — grep confirms it is only ever set to `display:none` everywhere in the file; the real button is `.rr-commit-btn` in the record-reveal panel (already fixed under task #300, just never updated here). The spotlight was silently falling back to a full-screen dim with nothing highlighted. Repointed to the real button.
+
+🔴 **Bonus find while verifying the above: `commitCard()` crashed outright when conjuring Corvus, Grave-Tithe Acolyte, or Rhaess Korvain at 0 Charge.** Its self-banish-tax branch called `abilLog.push(...)`, but `abilLog` is a variable local to the separate `resolve()` function — a guaranteed `ReferenceError` that aborted the commit mid-mutation (the card was already removed from hand, phase already flipped to `'committed'`) any time a player tried to conjure one of those three cards while out of Charge. Replaced with the same `toast()` pattern already used one line above for an analogous message.
+
+Verified live end-to-end (properly spaced calls, not batched, to avoid racing the tutorial's own 90ms advance hooks): a fresh tutorial run through all 10 steps — draw, reveal, stage, supports, confirm, commit, resolve — reaches a clean `endTutorial()` with zero console errors.
+
+---
+
 ## Fixed this pass (commits `996ff9c`, `e59d3ca`, `d296e44`, `3452404`, `80c6439` — all verified live before deploy)
 
 🔴 **Ascension: "Resume the Rite" silently wiped the whole run.** `ascParty`/`ascPartySel` were never persisted, only `ascRun` was — a reload mid-Rite left `ascParty` empty, which the wipe-check read as a full party wipe, permanently deleting the run. Both now save/restore correctly.
