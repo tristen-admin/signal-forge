@@ -5256,7 +5256,7 @@ const CALLED = {
   "Old Garrick":                   {text:"your Fighter +4", add:4},
   "Keawe Kel'rua":                 {text:"your Fighter +3, if there have been at least 2 duels this match then draw 1", add:3},
   "Black Wings, Ossian Drell":                  {text:"your Fighter +1 for every card in your banish zone", addPerBanish:1},
-  "Corvus":                        {text:"your Fighter +3, scry 1", add:4, scry:1},
+  "Corvus":                        {text:"your Fighter +4, scry 1", add:4, scry:1},
   "Wren":                          {text:"return a banished card to your hand, your Fighter +3", recurPlain:1, add:3},
   "Rook":                          {text:"your Fighter +2", add:2},
   "Falk":                          {text:"your Fighter +3", add:3},
@@ -5278,7 +5278,7 @@ const CALLED = {
   "Rank-Sworn Levy":               {text:"your Fighter +2", add:2},
   "Standard-Bearer Halden":        {text:"your Fighter +3", add:3},
   "Oathkeeper Sena":               {text:"your Fighter +2", add:2},
-  "Muster-Sergeant Bryn":          {text:"your Fighter +1 per Winners Circle card", perWC:1, perWCcap:8},
+  "Muster-Sergeant Bryn":          {text:"your Fighter +1 per Winners Circle card, capped at +8", perWC:1, perWCcap:8},
   "Marrow Priest":                 {text:"your Fighter +3; if a Remnant is on the field, draw 1", add:3, drawIfRemnant:true},
   "Summoned Skull Soldiers":                 {text:"your Fighter +5", add:5},
   "Pale Gravedigger":              {text:"your Fighter +2; if you hold a Remnant, draw 1", add:2, drawIfRemnant:true},
@@ -5307,7 +5307,7 @@ const CALLED = {
   "Ghorruk \"Gnarly\" Judarr":            {text:"return 1 banished card to the bottom of the deck, scry 1, then +2 power", recurBuff:1, recurDest:'deck', scry:1},
   "Elowen Dawnspear":              {text:"your Fighter +3", add:3},
   "Bixie Bee":                     {text:"your Fighter +3", add:3},
-  "Uso Oso":                       {text:"your Fighter +2; the lowest power card in your hand is automatically played as a death remnant.", add:3, autoRemnantLowest:true},
+  "Uso Oso":                       {text:"your Fighter +3; the lowest power card in your hand is automatically played as a death remnant.", add:3, autoRemnantLowest:true},
   "Veronica":                      {text:"your fighter gains +2, then scry 1.", add:2, scry:1},
   // Warpath combo pieces (7/12/26) — genuinely new effect kinds, not reusable from the existing
   // vocabulary above: nothing here lets a Called support redirect where a FUTURE win banks to, or
@@ -7218,10 +7218,8 @@ const CARD_RULES = {
    "log": "🐝 Swarm: +1 per banished card"
   }
  ],
- "Kaelthar the Ascendant": [{"if":{"v":"player_wins","op":">","v2":"player_losses"},"add":6,"log":"🐉 Ascendant: +6 (holding the lead)"}],
  "Young Darwin, Predetermined Dictator": [{"add":4,"log":"🌑 Voidmaw: +4"},{"if":{"v":"opp_deaths","op":"==","n":0},"oppadd":-3,"log":"🌑 Voidmaw: opponent −3 (Pristine prey)"}],
  "Courtroom Colossus": [{"add":3,"log":"☀️ Colossus: +3"},{"if":{"v":"match_commits","op":">=","n":3},"add":5,"log":"☀️ Colossus: +5 (late game)"}],
- "Kessuae, Tide of Ruin": [{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":7,"log":"🌊 Kessuae: +7 (behind)"}],
  "Vharos, the Iron Crown": [{"if": {"and":[{"v": "opp_deaths", "op": "==", "n": 0},{"v":"opp_kills","op":">=","n":1}]}, "add": 5, "log": "👑 Vharos: +5 vs Pristine"}],
  "Nyx, Devourer of Legends": [{"add": 4, "log": "🌑 Nyx: +4"}, {"if": {"v": "last_result", "op": "==", "s": "lose"}, "add": 4, "log": "🌑 Nyx: +4 vengeance"}],
  "Aurelion Prime": [{"if": {"v": "pc_kills", "op": ">=", "n": 30}, "add": 6, "log": "⚔️ Aurelion: +6 (30+ kills)"}, {"if": {"and": [{"v": "pc_kills", "op": ">=", "n": 15}, {"v": "pc_kills", "op": "<", "n": 30}]}, "add": 3, "log": "⚔️ Aurelion: +3 (15+ kills)"}],
@@ -7229,7 +7227,6 @@ const CARD_RULES = {
  "Sirefax the Warden": [{"if": {"and":[{"v": "opp_deaths", "op": "==", "n": 0},{"v":"opp_kills","op":">=","n":1}]}, "add": 3, "log": "🛡 Sirefax: +3 vs Pristine"}],
  "Mordezh, Blood Prophet": [{"if": {"v": "player_losses", "op": ">", "v2": "player_wins"}, "add": 5, "log": "🩸 Mordezh: +5 (behind)"}, {"if": {"v": "last_result", "op": "==", "s": "lose"}, "add": 2, "log": "🩸 Mordezh: +2 (lost last)"}],
  "Elowen Dawnspear": [{"if": {"and":[{"v": "pc_deaths", "op": "==", "n": 0},{"v":"pc_kills","op":">=","n":1}]}, "add": 5, "log": "✨ Elowen: +5 (Pristine)"},{"if": {"v": "pc_deaths", "op": ">", "n": 5}, "add": 2, "log": "✨ Elowen: +2 (over 5 deaths)"}],
- "Fifth Frequency Stormcaller": [{"add": 3, "log": "🌪️ Veyra: +3"}, {"if": {"chaos": true}, "add": 4, "log": "🌪️ Veyra: +4 (chaos)"}],
  "Sable the Unseen": [{"if": {"v": "opp_deaths", "op": "==", "n": 0}, "oppadd": -4, "log": "🕷️ Sable: opponent −4 (purity drained)"}],
  "Torvald Ninefingers": [{"if": {"v": "hand_len", "op": "<=", "n": 2}, "add": 3, "log": "🪓 Torvald: +3 (low hand)"}],
  "Kessa Brightblade": [{"if": {"and":[{"v": "opp_deaths", "op": "==", "n": 0},{"v":"opp_kills","op":">=","n":1}]}, "add": 4, "log": "⚔️ Kessa: +4 vs Pristine"}],
@@ -7417,21 +7414,6 @@ const CARD_RULES = {
   }
  ],
  "Valcarion": [],
- "Envoy of Tyrants, Ella Ballora": [
-  {
-   "add": 3,
-   "log": "⚔️ Bloodrage: +3"
-  },
-  {
-   "if": {
-    "v": "player_losses",
-    "op": ">",
-    "n": 0
-   },
-   "add": 3,
-   "log": "⚔️ Bloodrage: +3 (wounded)"
-  }
- ],
  "Kiana": [
   { "add": 3, "log": "🪶 Elemental Flurry: +3" },
   { "if": { "v": "hand_len", "op": ">=", "n": 4 }, "add": 4, "log": "🪶 Elemental Flurry: +4 more (4+ hand)" }
@@ -7527,17 +7509,6 @@ const CARD_RULES = {
    "log": "🪖 Thrall Swarm: +5"
   }
  ],
- "The Bronzed Beast, Hanse Waltz": [
-  {
-   "if": {
-    "v": "player_losses",
-    "op": ">",
-    "v2": "player_wins"
-   },
-   "add": 5,
-   "log": "🐺 Blood Moon: +5"
-  }
- ],
  "Lagertha Waltz, Wrathful Transformation": [
   {
    "add": 3,
@@ -7607,7 +7578,6 @@ const CARD_RULES = {
  "Bloodwake Duelist": [{ "addvar": "skullchain", "x": 2, "log": "💀 Bloodwake: +2×kill" }],
  "Warpath Vanguard": [{ "if": { "v": "match_commits", "op": "<=", "n": 2 }, "add": 5, "log": "⚔ Vanguard: +5 (early)" }],
  "Skullchain Reaver": [{ "addvar": "skullchain", "x": 2, "log": "💀 Reaver: +2×kill" }],
- "Trophy-Hunter Kessa": [{ "addvar": "wc_len", "x": 2, "log": "🏆 Kessa: +2×trophy" }],
  "First-Blood Squire": [{ "if": { "v": "match_commits", "op": "==", "n": 1 }, "add": 4, "log": "⚔ First Blood: +4" }],
  "The Undefeated": [{ "addvar": "player_wins", "x": 2, "log": "⚔ Undefeated: +2×win" }],
  "Kravyn's Protege": [{ "if": { "v": "pc_kills", "op": ">=", "n": 6 }, "add": 3, "log": "💀 Protege: +3" }],
@@ -11848,6 +11818,13 @@ function acceptTrade(i){
   if((ownedCopies[o.want]||0)<=0){ if(typeof toast==='function') toast('You no longer own '+o.wantName+'.', false); buildTrade(); return; }
   ownedCopies[o.want]=ownedCopies[o.want]-1; if(ownedCopies[o.want]<=0) delete ownedCopies[o.want];
   ownedCopies[o.give]=(ownedCopies[o.give]||0)+1;
+  // Real bug (7/28/26): transferToMe() -- a complete, already-written function that resets a card's
+  // owner-only K/D (ok/od) and appends a real provenance chain entry -- was never called anywhere in
+  // the file. The Growth Codex explicitly promises this reset happens "when the card changes hands";
+  // Trade was the one ownership-changing path that skipped it, so a re-acquired card could silently
+  // carry a stale ok/od from a previous owner, and its Card DNA provenance would fall back to a
+  // generic "Held in vault" reason instead of ever saying "Traded."
+  { var _tc=(typeof COLLECTION!=='undefined'?COLLECTION:[]).find(function(x){ return (x.uid||x.name)===o.give; }); if(_tc && typeof transferToMe==='function') transferToMe(_tc, 'Traded'); }
   if(typeof saveState==='function') saveState(); if(typeof buildVault==='function') buildVault();
   if(typeof toast==='function') toast('🤝 Traded '+o.wantName+' → '+o.give+' with '+o.partner+'.', true);
   tradeOffers.splice(i,1); buildTrade();
@@ -12453,6 +12430,12 @@ function ascPickNode(ti,ni){
   if(node.beat){ ascStoryBeat(node); return; }
   if(node.type==='sanctum'){ ascSanctum(node); }
   else if(node.type==='merchant'){ ascMerchant(node); }
+  // Real bug (7/28/26): this dispatcher never had a 'crossroads' case, so a fully-built, correct
+  // reward-picker (ascCrossroads() below -- "Choose your path / One reward joins your Rite") was
+  // 100% dead code. Crossroads nodes fell through to the else branch and silently launched a real
+  // combat encounter instead -- the map explicitly labels/describes these nodes as a no-combat
+  // reward waypoint, so a player got an unannounced fight where the UI promised a free choice.
+  else if(node.type==='crossroads'){ ascCrossroads(node); }
   else { ascEnterEncounter(node); }
 }
 let ascDuel=null;   // active best-of-3 encounter within the Rite (real cards, real abilities, rolled condition)
@@ -12819,13 +12802,18 @@ function ascEndRun(won){
   if(!avatarBond[key]) avatarBond[key]={wins:0,runs:0,bestLevel:1};
   const b=avatarBond[key]; const preW=b.wins; b.runs++;
   let sig=0, forgeGain=0;
-  if(won){ b.wins++; if(flawless){ b.wins++; b.flawless=(b.flawless||0)+1; } sig=300+lvl*25+(flawless?150:0); forgeGain=300+lvl*80+(flawless?600:0); signalPoints+=sig+forgeGain; if(typeof updateBalance==='function') updateBalance(); }
+  // Real bug (7/28/26): forgeGain -- named, scaled, and displayed (color:var(--electric), the exact
+  // CSS variable the top-bar's Forge stat pill uses) as a Forge reward -- was being added to
+  // signalPoints instead of forgeBalance. Ascension could never actually grant any Forge, while
+  // silently paying out roughly double the intended Signal on every win. forgeBalance is the real
+  // variable (declared alongside signalPoints, both updated via updateBalance()).
+  if(won){ b.wins++; if(flawless){ b.wins++; b.flawless=(b.flawless||0)+1; } sig=300+lvl*25+(flawless?150:0); forgeGain=300+lvl*80+(flawless?600:0); signalPoints+=sig; forgeBalance+=forgeGain; if(typeof updateBalance==='function') updateBalance(); }
   else { if(av && av.name) recordDuel(av,'death'); }
   if(lvl>b.bestLevel) b.bestLevel=lvl;
   if(won && av && av.rarity){ const rws=masteryRewardsOf(av.rarity), preL=Math.min(MASTERY_MAX,preW), postL=Math.min(MASTERY_MAX,b.wins); const hit=rws.find(function(r){return r.lvl>preL && r.lvl<=postL;}); if(hit){ setTimeout(function(){ toast('👑 '+av.name+' Mastery Lv '+hit.lvl+' — unlocked '+masteryName(av,hit.type)+'!', true); }, 1300); } }
   ascRun=null; saveState();
   ascHideAll(); const a=document.getElementById('asc-arena'); if(!a) return; a.style.display='';
-  a.innerHTML='<div class="asc-result '+(won?'won':'lost')+'"><div class="asc-res-eyebrow">Ascension · The Rite</div><h1>'+(won?'THE RITE IS WON':'THE CHAMPION FALLS')+'</h1><div class="asc-res-sub">'+av.name+' reached <b>Ascension Lv '+lvl+'</b>'+(won?' and broke the Boss.'+(flawless?' <b>Flawless</b> — not a single vitality lost.':'')+' <b>+'+fmtPts(sig)+' ◈ Signal</b> · <b style="color:var(--electric)">+'+forgeGain+' ◈ Signal</b> · +'+(flawless?2:1)+' Rite bond.':'. Fell at Tier '+(tier+1)+' after clearing '+cleared+' champion'+(cleared===1?'':'s')+'. A <b>scar</b> is recorded to its permanent record — but its mastery endures.')+'</div><button class="enter-btn" onclick="buildAscension()">'+(won?'⚜ Begin a new Rite':'⚜ Try again')+'</button></div>';
+  a.innerHTML='<div class="asc-result '+(won?'won':'lost')+'"><div class="asc-res-eyebrow">Ascension · The Rite</div><h1>'+(won?'THE RITE IS WON':'THE CHAMPION FALLS')+'</h1><div class="asc-res-sub">'+av.name+' reached <b>Ascension Lv '+lvl+'</b>'+(won?' and broke the Boss.'+(flawless?' <b>Flawless</b> — not a single vitality lost.':'')+' <b>+'+fmtPts(sig)+' ◈ Signal</b> · <b style="color:var(--electric)">+'+forgeGain+' ❖ Forge</b> · +'+(flawless?2:1)+' Rite bond.':'. Fell at Tier '+(tier+1)+' after clearing '+cleared+' champion'+(cleared===1?'':'s')+'. A <b>scar</b> is recorded to its permanent record — but its mastery endures.')+'</div><button class="enter-btn" onclick="buildAscension()">'+(won?'⚜ Begin a new Rite':'⚜ Try again')+'</button></div>';
 }
 function buildLobby(){
   const grid=document.getElementById('bot-grid');
