@@ -13126,6 +13126,9 @@ table.dev-tbl tr:hover td{background:#121722}
 .dev-tbl .ceil{font-weight:800;color:#F5C24D}
 .dev-in{width:46px;background:#0c0f16;border:1px solid #303a47;color:#e6e9f0;border-radius:5px;padding:2px 5px;font:inherit;font-family:ui-monospace,Menlo,monospace;text-align:right}
 .dev-in-name{width:100%;min-width:140px;text-align:left;font-family:inherit;font-weight:600}
+.dev-in-icon{width:40px;text-align:center;font-size:15px}
+.dev-in-wide{width:100%;text-align:left;font-family:inherit;font-style:italic}
+.dev-loc-note-row td{padding-top:0;padding-bottom:8px;border-top:none}
 .dev-in.ed,.ab.ed{background:#2a2410;border-color:#6b5a18}
 .dev-sel{background:#0c0f16;border:1px solid #303a47;color:#e6e9f0;border-radius:5px;padding:2px 4px;font:inherit;font-size:11px}
 .dev-tbl .ab{color:#aeb7c6;font-size:11.5px;max-width:360px;cursor:text;border-radius:4px}
@@ -13375,10 +13378,11 @@ body::before{background:
     <button class="dev-t" data-v="curve">↕ Power curve — drag</button>
     <button class="dev-t" data-v="flags">⚑ Flags</button>
     <button class="dev-t" data-v="effects">⚡ Abilities</button>
+    <button class="dev-t" data-v="locations">📍 Locations</button>
   </div>
   <div class="dev-body" id="dev-body"></div>
   <div class="dev-exp" id="dev-expbox" hidden></div>
-  <div class="dev-note">Power edits take effect in your <b>next match</b> and across the app. <b>Cost</b> edits are live instantly, from either tab. The <b>⚡ Abilities</b> tab additionally edits Called and CARD_RULES behavior — also instantly. (The Edit-table's ability field is display text only.) <b>DM Passive</b> (ongoing effects, always on while this card is Deck Master)/<b>DM Activated</b> (a once-per-match ability you press to use) only apply when this card is set as your Deck Master, and accept either real JSON (applies live) or plain English (gold text — saved as a note for Claude to build, nothing breaks if it's not valid JSON). A greyed-out DM Activated cell means that card's ability runs custom code and isn't editable here, source only.</div>
+  <div class="dev-note">Power edits take effect in your <b>next match</b> and across the app. <b>Cost</b> edits are live instantly, from either tab. The <b>⚡ Abilities</b> tab additionally edits Called and CARD_RULES behavior — also instantly. (The Edit-table's ability field is display text only.) <b>DM Passive</b> (ongoing effects, always on while this card is Deck Master)/<b>DM Activated</b> (a once-per-match ability you press to use) only apply when this card is set as your Deck Master, and accept either real JSON (applies live) or plain English (gold text — saved as a note for Claude to build, nothing breaks if it's not valid JSON). A greyed-out DM Activated cell means that card's ability runs custom code and isn't editable here, source only. <b>📍 Locations</b> tab edits conditions the same way — all display fields (name/icon/mechanic/tag/prob/rule/strategy) apply live instantly, the note row under each location is for describing an actual mechanic change in plain English for Claude to build (the real per-location logic is hand-coded, no live JSON editor for it yet).</div>
 </div>
 <script>
 (function(){
@@ -13397,6 +13401,24 @@ body::before{background:
     function setProp(n,k,v){DECK_POOL.forEach(function(c){if(c.name===n)c[k]=v;});COLLECTION.forEach(function(c){if(c.name===n)c[k]=v;});}
     function loadOV(){try{var o=JSON.parse(localStorage.getItem(KEY)||'{}');var dirty=false;Object.keys(o).forEach(function(n){if(o[n]&&o[n].r==='genesis'){o[n].r='apex';dirty=true;}});if(dirty)try{localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}return o;}catch(e){return {};}}
     var OV=loadOV();
+    // 7/28/26: Locations (CONDITIONS) editor -- same override+persist shape as the card OV above,
+    // parallel not shared, since a condition's own fields are a different shape than a card's.
+    // name/mech/icon/tag/prob/rule/strat are all display-only (confirmed: nothing else in the
+    // engine looks a condition up by anything but its `id`, which this never touches) so they're
+    // safe to mutate directly on the live CONDITIONS objects, same as cards' name field. The actual
+    // MECHANIC (what a location does to power) is hand-coded per condition in resolve() -- there's
+    // no generic rule-interpreter for locations the way CALLED/CARD_RULES exists for cards, so a
+    // real mechanic change goes through the same "plain English note, Claude builds it" fallback
+    // already established for DM Passive/DM Activated.
+    var LOC_KEY='sf_dev_loc_overrides_v1';
+    function loadLocOV(){try{return JSON.parse(localStorage.getItem(LOC_KEY)||'{}');}catch(e){return {};}}
+    var LOC_OV=loadLocOV();
+    function saveLocOV(){try{localStorage.setItem(LOC_KEY,JSON.stringify(LOC_OV));}catch(e){}}
+    var LOC_ORIG={}; (typeof CONDITIONS!=='undefined'?CONDITIONS:[]).forEach(function(c){LOC_ORIG[c.id]={name:c.name,mech:c.mech,icon:c.icon,rule:c.rule,strat:c.strat,tag:c.tag,prob:c.prob};});
+    function applyLocOV(){Object.keys(LOC_OV).forEach(function(id){var c=(typeof CONDITIONS!=='undefined'?CONDITIONS:[]).find(function(x){return x.id===id;});if(!c)return;var o=LOC_OV[id];['name','mech','icon','rule','strat','tag','prob'].forEach(function(f){if(o[f]!=null)c[f]=o[f];});});}
+    function recordLocFx(id,f,v){if(!LOC_OV[id])LOC_OV[id]={};if(v==null||v==='')delete LOC_OV[id][f];else LOC_OV[id][f]=v;if(LOC_OV[id]&&!Object.keys(LOC_OV[id]).length)delete LOC_OV[id];saveLocOV();chg();}
+    function recordLocLive(id,f,v){var c=(typeof CONDITIONS!=='undefined'?CONDITIONS:[]).find(function(x){return x.id===id;});if(c)c[f]=v;var og=LOC_ORIG[id]?LOC_ORIG[id][f]:undefined;recordLocFx(id,f,(''+v)===(''+og)?null:v);}
+    applyLocOV();
     function rarOf(r){return RAR[r]||RAR.common;}
     function saveOV(){try{localStorage.setItem(KEY,JSON.stringify(OV));}catch(e){}}
     var GRP_KEY='sf_dev_groups_v1';
@@ -13413,7 +13435,7 @@ body::before{background:
     function ceil(c){return c.p+swing(c.a);}
     function med(a){a=a.slice().sort(function(x,y){return x-y;});var m=Math.floor(a.length/2);return a.length?(a.length%2?a[m]:(a[m-1]+a[m])/2):0;}
     function esc(s){return (''+s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
-    function chg(){document.getElementById('dev-chg').textContent=Object.keys(OV).length+' edits';}
+    function chg(){document.getElementById('dev-chg').textContent=(Object.keys(OV).length+Object.keys(LOC_OV).length)+' edits';}
     function record(n,f,v){var map={p:'pow',r:'rarity',t:'timing',a:'abil'};setProp(n,map[f],v);var o=ORIG[n];if(!OV[n])OV[n]={};var og=o?o[f]:undefined;if((''+v)===(''+og))delete OV[n][f];else OV[n][f]=v;if(OV[n]&&!Object.keys(OV[n]).length)delete OV[n];saveOV();chg();schedVault();}
     var cur='table', sortK='p', sortD=-1, devRar='', devArch='';
     function renderTable(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=devRar;var af=devArch;var d=model().filter(function(c){return (!q||c.n.toLowerCase().indexOf(q)>=0)&&(!rf||c.r===rf)&&(!af||(typeof cardArchetypes==='function'&&cardArchetypes(c.n).some(function(a){return a.id===af;})));});
@@ -13543,13 +13565,51 @@ body::before{background:
         }catch(e){msg.textContent='✗ '+e.message;msg.style.color='#F0625F';}
       };});
     }
-    var R={table:renderTable,curve:renderCurve,flags:renderFlags,effects:renderEffects};
+    function locModel(){return (typeof CONDITIONS!=='undefined'?CONDITIONS:[]).map(function(c){return {id:c.id,icon:c.icon,name:c.name,mech:c.mech,tag:c.tag,prob:c.prob,rule:c.rule,strat:c.strat,note:(LOC_OV[c.id]&&LOC_OV[c.id].note)||''};});}
+    function renderLocations(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();
+      var d=locModel().filter(function(c){return !q||c.name.toLowerCase().indexOf(q)>=0||c.mech.toLowerCase().indexOf(q)>=0;});
+      var h='<div class="dev-fxnote"><b>📍 Locations</b> are picked uniformly at random each duel — the <b>Prob</b> column is flavor text only, editing it does not change real selection odds (there is no weighting in the actual pick). Icon/Name/Mechanic/Tag/Prob/Rule/Strategy all apply live and are purely descriptive. The real MECHANIC — what a location actually does to power — is hand-coded per location in resolve(), the same way DM Passive/DM Activated work for cards: describe a change in the note row and Claude builds it, nothing breaks if you leave it as plain English.</div>';
+      h+='<table class="dev-tbl"><thead><tr><th>Icon</th><th>Name</th><th>Mechanic</th><th>Tag</th><th class="num">Prob</th><th>Rule (click to edit)</th><th>Strategy (click to edit)</th></tr></thead><tbody>';
+      d.forEach(function(c){var o=LOC_ORIG[c.id];
+        h+='<tr data-id="'+esc(c.id)+'">'
+          +'<td><input data-f="icon" type="text" class="dev-in dev-in-icon'+(o&&c.icon!=o.icon?' ed':'')+'" value="'+esc(c.icon)+'" maxlength="4"></td>'
+          +'<td class="nm"><input data-f="name" type="text" class="dev-in dev-in-name'+(o&&c.name!=o.name?' ed':'')+'" value="'+esc(c.name)+'"></td>'
+          +'<td><input data-f="mech" type="text" class="dev-in'+(o&&c.mech!=o.mech?' ed':'')+'" value="'+esc(c.mech)+'"></td>'
+          +'<td><select data-f="tag" class="dev-sel">'+['flip','lock','chaos','info','boost','neutral'].map(function(t){return '<option value="'+t+'"'+(t===c.tag?' selected':'')+'>'+t+'</option>';}).join('')+'</select></td>'
+          +'<td class="num"><input data-f="prob" type="text" class="dev-in'+(o&&c.prob!=o.prob?' ed':'')+'" value="'+esc(c.prob)+'" title="Display only — selection is uniform random, this text does not change real odds" style="width:52px"></td>'
+          +'<td class="ab'+(o&&c.rule!=o.rule?' ed':'')+'" data-rule>'+esc(c.rule.length>92?c.rule.slice(0,90)+'…':c.rule)+'</td>'
+          +'<td class="ab'+(o&&c.strat!=o.strat?' ed':'')+'" data-strat>'+esc(c.strat.length>92?c.strat.slice(0,90)+'…':c.strat)+'</td>'
+          +'</tr>'
+          +'<tr class="dev-loc-note-row" data-noteid="'+esc(c.id)+'"><td colspan="7"><input data-f="note" type="text" class="dev-in dev-in-wide" placeholder="Describe a MECHANIC change for '+esc(c.name)+' — plain words, Claude implements it" value="'+esc(c.note)+'"></td></tr>';
+      });
+      h+='</tbody></table>';
+      BODY.innerHTML=h;
+      BODY.querySelectorAll('tr[data-id]').forEach(function(tr){var id=tr.getAttribute('data-id');
+        var iconIn=tr.querySelector('[data-f=icon]'),nameIn=tr.querySelector('[data-f=name]'),mechIn=tr.querySelector('[data-f=mech]'),tagSel=tr.querySelector('[data-f=tag]'),probIn=tr.querySelector('[data-f=prob]'),ruleTd=tr.querySelector('[data-rule]'),stratTd=tr.querySelector('[data-strat]');
+        iconIn.addEventListener('change',function(){recordLocLive(id,'icon',iconIn.value);iconIn.classList.toggle('ed',LOC_ORIG[id]&&iconIn.value!=LOC_ORIG[id].icon);});
+        nameIn.addEventListener('change',function(){recordLocLive(id,'name',nameIn.value);nameIn.classList.toggle('ed',LOC_ORIG[id]&&nameIn.value!=LOC_ORIG[id].name);});
+        mechIn.addEventListener('change',function(){recordLocLive(id,'mech',mechIn.value);mechIn.classList.toggle('ed',LOC_ORIG[id]&&mechIn.value!=LOC_ORIG[id].mech);});
+        tagSel.addEventListener('change',function(){recordLocLive(id,'tag',tagSel.value);});
+        probIn.addEventListener('change',function(){recordLocLive(id,'prob',probIn.value);probIn.classList.toggle('ed',LOC_ORIG[id]&&probIn.value!=LOC_ORIG[id].prob);});
+        ruleTd.addEventListener('click',function(){if(ruleTd.querySelector('textarea'))return;var cc=(typeof CONDITIONS!=='undefined'?CONDITIONS:[]).find(function(x){return x.id===id;});var ta=document.createElement('textarea');ta.className='dev-ta';ta.value=cc?cc.rule:'';ruleTd.textContent='';ruleTd.appendChild(ta);ta.focus();
+          ta.addEventListener('blur',function(){recordLocLive(id,'rule',ta.value);var nv=ta.value;ruleTd.textContent=nv.length>92?nv.slice(0,90)+'…':nv;ruleTd.classList.toggle('ed',LOC_ORIG[id]&&nv!=LOC_ORIG[id].rule);});});
+        stratTd.addEventListener('click',function(){if(stratTd.querySelector('textarea'))return;var cc=(typeof CONDITIONS!=='undefined'?CONDITIONS:[]).find(function(x){return x.id===id;});var ta=document.createElement('textarea');ta.className='dev-ta';ta.value=cc?cc.strat:'';stratTd.textContent='';stratTd.appendChild(ta);ta.focus();
+          ta.addEventListener('blur',function(){recordLocLive(id,'strat',ta.value);var nv=ta.value;stratTd.textContent=nv.length>92?nv.slice(0,90)+'…':nv;stratTd.classList.toggle('ed',LOC_ORIG[id]&&nv!=LOC_ORIG[id].strat);});});
+      });
+      BODY.querySelectorAll('.dev-loc-note-row').forEach(function(row){var id=row.getAttribute('data-noteid'),inp=row.querySelector('[data-f=note]');
+        inp.addEventListener('change',function(){recordLocFx(id,'note',inp.value.trim());});
+      });
+    }
+    var R={table:renderTable,curve:renderCurve,flags:renderFlags,effects:renderEffects,locations:renderLocations};
     function render(){R[cur]();}
     document.getElementById('dev-tabs').addEventListener('click',function(e){var b=e.target.closest('.dev-t');if(!b)return;document.querySelectorAll('.dev-t').forEach(function(t){t.classList.remove('on');});b.classList.add('on');cur=b.getAttribute('data-v');render();});
     Q.addEventListener('input',function(){if(cur==='table')renderTable();else if(cur==='effects')renderEffects();});
     if(RARF)RARF.addEventListener('click',function(e){var b=e.target.closest('.dev-rc');if(!b)return;devRar=b.getAttribute('data-rar')||'';RARF.querySelectorAll('.dev-rc').forEach(function(x){x.classList.toggle('on',x===b);});render();});
     if(ARCHF)ARCHF.addEventListener('click',function(e){var b=e.target.closest('.dev-rc');if(!b)return;devArch=b.getAttribute('data-arch')||'';ARCHF.querySelectorAll('.dev-rc').forEach(function(x){x.classList.toggle('on',x===b);});render();});
-    document.getElementById('dev-exp').onclick=function(){var lines=Object.keys(OV).map(function(n){var o=OV[n],g=ORIG[n]||{},c=[];if(o.p!=null&&(''+o.p)!==(''+g.p))c.push('pow '+(g.p==null?'?':g.p)+'→'+o.p);if(o.r!=null&&o.r!==g.r)c.push('rarity '+(g.r||'?')+'→'+o.r);if(o.t!=null&&o.t!==g.t)c.push('timing '+(g.t||'?')+'→'+o.t);if(o.a!=null&&o.a!==g.a)c.push('ability → "'+o.a+'"');if(o.cost!=null&&(''+o.cost)!==(''+g.cost))c.push('cost →'+o.cost);if(o.rename!=null)c.push('RENAME → "'+o.rename+'" (canonical rename — Claude to apply)');if(o.links!=null&&!_sameSet(o.links,g.links))c.push('links → ['+o.links.join(', ')+']');if(o.arch!=null&&!_sameSet(o.arch,g.arch))c.push('archetypes → ['+o.arch.join(', ')+']');if(o.called!=null&&o.called!==g.called)c.push('CALLED →'+o.called);if(o.rules!=null&&o.rules!==g.rules)c.push('CARD_RULES →'+o.rules);if(o.dmx!=null&&o.dmx!==g.dmx)c.push('DM_EXCLUSIVE →'+o.dmx);if(o.dma!=null&&o.dma!==g.dma)c.push('DM_ACTIVATED_ABILITY →'+o.dma);if(o.dmxNote!=null)c.push('DM Passive (plain-language, needs building) → "'+o.dmxNote+'"');if(o.dmaNote!=null)c.push('DM Activated (plain-language, needs building) → "'+o.dmaNote+'"');if(o.note!=null)c.push('note: "'+o.note+'"');return c.length?(n+': '+c.join(', ')):null;}).filter(Boolean);EXP.hidden=false;EXP.innerHTML='<textarea readonly>'+esc(lines.length?lines.join('\n'):'No changes yet.')+'</textarea>';try{EXP.querySelector('textarea').select();}catch(_){}};
+    document.getElementById('dev-exp').onclick=function(){var lines=Object.keys(OV).map(function(n){var o=OV[n],g=ORIG[n]||{},c=[];if(o.p!=null&&(''+o.p)!==(''+g.p))c.push('pow '+(g.p==null?'?':g.p)+'→'+o.p);if(o.r!=null&&o.r!==g.r)c.push('rarity '+(g.r||'?')+'→'+o.r);if(o.t!=null&&o.t!==g.t)c.push('timing '+(g.t||'?')+'→'+o.t);if(o.a!=null&&o.a!==g.a)c.push('ability → "'+o.a+'"');if(o.cost!=null&&(''+o.cost)!==(''+g.cost))c.push('cost →'+o.cost);if(o.rename!=null)c.push('RENAME → "'+o.rename+'" (canonical rename — Claude to apply)');if(o.links!=null&&!_sameSet(o.links,g.links))c.push('links → ['+o.links.join(', ')+']');if(o.arch!=null&&!_sameSet(o.arch,g.arch))c.push('archetypes → ['+o.arch.join(', ')+']');if(o.called!=null&&o.called!==g.called)c.push('CALLED →'+o.called);if(o.rules!=null&&o.rules!==g.rules)c.push('CARD_RULES →'+o.rules);if(o.dmx!=null&&o.dmx!==g.dmx)c.push('DM_EXCLUSIVE →'+o.dmx);if(o.dma!=null&&o.dma!==g.dma)c.push('DM_ACTIVATED_ABILITY →'+o.dma);if(o.dmxNote!=null)c.push('DM Passive (plain-language, needs building) → "'+o.dmxNote+'"');if(o.dmaNote!=null)c.push('DM Activated (plain-language, needs building) → "'+o.dmaNote+'"');if(o.note!=null)c.push('note: "'+o.note+'"');return c.length?(n+': '+c.join(', ')):null;}).filter(Boolean);
+      var locLines=Object.keys(LOC_OV).map(function(id){var o=LOC_OV[id],g=LOC_ORIG[id]||{},c=[];if(o.name!=null&&o.name!==g.name)c.push('name '+(g.name||'?')+'→"'+o.name+'"');if(o.mech!=null&&o.mech!==g.mech)c.push('mechanic label →"'+o.mech+'"');if(o.icon!=null&&o.icon!==g.icon)c.push('icon →'+o.icon);if(o.tag!=null&&o.tag!==g.tag)c.push('tag '+(g.tag||'?')+'→'+o.tag);if(o.prob!=null&&o.prob!==g.prob)c.push('prob (display only) →'+o.prob);if(o.rule!=null&&o.rule!==g.rule)c.push('rule →"'+o.rule+'"');if(o.strat!=null&&o.strat!==g.strat)c.push('strategy →"'+o.strat+'"');if(o.note!=null)c.push('MECHANIC CHANGE (plain-language, needs building) → "'+o.note+'"');return c.length?('[Location] '+(g.name||id)+': '+c.join(', ')):null;}).filter(Boolean);
+      var allLines=lines.concat(locLines);
+      EXP.hidden=false;EXP.innerHTML='<textarea readonly>'+esc(allLines.length?allLines.join('\n'):'No changes yet.')+'</textarea>';try{EXP.querySelector('textarea').select();}catch(_){}};
     var _rq=document.getElementById('dev-req'); if(_rq) _rq.onclick=function(){ var lines=Object.keys(OV).filter(function(n){return OV[n]&&OV[n].note;}).map(function(n){ var cur=(typeof CALLED!=='undefined'&&CALLED[n])?JSON.stringify(CALLED[n]):'(none yet)'; var cst=(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[n]!=null)?(' [⚡'+COST_OVERRIDE[n]+']'):''; return n+cst+': '+OV[n].note+'   (current: '+cur+')'; }); EXP.hidden=false; EXP.innerHTML='<textarea readonly>'+esc(lines.length?('CALLED-EFFECT REQUESTS — paste to Claude:\n\n'+lines.join('\n\n')):'No descriptions yet — open ⚡ Abilities and describe a card in the plain-words box.')+'</textarea>'; try{EXP.querySelector('textarea').select();}catch(_){} };
     document.getElementById('dev-rst').onclick=function(){if(!confirm('Reset ALL dev edits back to original values?'))return;Object.keys(OV).forEach(function(n){var o=ORIG[n];if(!o)return;
       setProp(n,'pow',o.p);setProp(n,'rarity',o.r);setProp(n,'timing',o.t);setProp(n,'abil',o.a);
@@ -13560,7 +13620,10 @@ body::before{background:
       if(typeof DM_ACTIVATED_ABILITY!=='undefined'&&(!DM_ACTIVATED_ABILITY[n]||!DM_ACTIVATED_ABILITY[n].run)){if(o.dma!=null){try{DM_ACTIVATED_ABILITY[n]=JSON.parse(o.dma);}catch(e){}}else delete DM_ACTIVATED_ABILITY[n];}
       (typeof ARCHETYPE_PRESETS!=='undefined'?ARCHETYPE_PRESETS:[]).forEach(function(a){var i=a.members.indexOf(n);var should=(o.arch||[]).indexOf(a.id)>=0;if(should&&i<0)a.members.push(n);else if(!should&&i>=0)a.members.splice(i,1);});
       (typeof LINK_GROUPS!=='undefined'?LINK_GROUPS:[]).forEach(function(g){var i=g.members.indexOf(n);var should=(o.links||[]).indexOf(g.id)>=0;if(should&&i<0)g.members.push(n);else if(!should&&i>=0)g.members.splice(i,1);});
-    });OV={};saveOV();chg();try{if(typeof buildVault==='function')buildVault();}catch(e){}render();};
+    });OV={};saveOV();
+      Object.keys(LOC_OV).forEach(function(id){var o=LOC_ORIG[id],c=(typeof CONDITIONS!=='undefined'?CONDITIONS:[]).find(function(x){return x.id===id;});if(!o||!c)return;c.name=o.name;c.mech=o.mech;c.icon=o.icon;c.rule=o.rule;c.strat=o.strat;c.tag=o.tag;c.prob=o.prob;});
+      LOC_OV={};saveLocOV();
+      chg();try{if(typeof buildVault==='function')buildVault();}catch(e){}render();};
     var _np=document.getElementById('dev-newplayer'); if(_np) _np.onclick=function(){ if(typeof newPlayerReset==='function'){ closeDev(); newPlayerReset(); } };
     function openDev(){OVL.classList.add('on');chg();render();}
     function closeDev(){OVL.classList.remove('on');clearTimeout(vt);try{if(typeof buildVault==='function')buildVault();}catch(e){}}
