@@ -7711,6 +7711,35 @@ function resolve(pc, oc, cond, playerCommittedPow){
       }
       playerPow+=3; abilLog.push('\ud83d\udc51 Moro \u2014 Royal Bearing: +3 (the crown\u2019s power is always present)');
     } }
+  // ── FIRE ON-COMMIT ABILITIES (before condition, before support/rear-guard effects) ──
+  // Reordered 7/28/26, direct request: this stage (the committed Fighter's own CARD_RULES, plus
+  // the Deck Master's conjure-tier bonus via applyDeckMasterResolveEffects) used to run AFTER
+  // rear-guard/support Called effects below -- so a support whose Called effect reads hand size
+  // (chargeGainIfHandFull, CARD_RULES hand_len checks) saw the PRE-commit-effect hand, missing any
+  // card the conjured Fighter's own on-commit ability had just drawn. Commit effects must be fully
+  // resolved before support effects evaluate anything derived from their result, so this whole
+  // stage now runs first. abilityLocked is hoisted up to gate it (originally computed further
+  // down, right before its own log line -- that log line and akatoshUnmakes below still read the
+  // same variable, just declared here instead).
+  const abilityLocked = cond.id === 'abilitylock';
+  if(!abilityLocked){
+    // Kotei: +3 if opponent is 0-death OR you lost your last duel; whole effect repeats if Keawe already won a duel this match
+    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),banish_len:banishPile.length,remnant_count:(typeof deathRemnants!=='undefined'?deathRemnants.length:0),deck_len:(typeof drawPile!=='undefined'?drawPile.length:0),both_wc:(winnersCircle.length+((typeof oppWonBot!=='undefined'&&oppWonBot&&oppWonBot.size)?oppWonBot.size:0)),rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0),wc_names:winnersCircle.map(function(c){return c.name;}),hand_banished:handBanishedThisTurn};
+    if(pc.name==='Veronica'){
+      var _oa=oc.abil||'';
+      if(!_oa||_oa.indexOf('No ability')===0){ abilLog.push('🔄 Veronica: opponent has no ability — no effect'); }
+      else { abilLog.push('🔄 Veronica copies: '+oc.name); RS._inRules=true; var _vv=applyCardRules(oc.name,_ctx,playerPow,oppPow,abilLog,RS); playerPow=_vv[0]; oppPow=_vv[1]; RS._inRules=false; RS._resync(); }
+    } else {
+      RS._inRules=true; var _rr0=applyCardRules(pc.name,_ctx,playerPow,oppPow,abilLog,RS); playerPow=_rr0[0]; oppPow=_rr0[1]; RS._inRules=false; RS._resync();
+    }
+    if(typeof applyDeckMasterResolveEffects==='function'){ RS._inRules=true; var _dmr=applyDeckMasterResolveEffects(pc,playerPow,oppPow,abilLog,RS); playerPow=_dmr[0]; oppPow=_dmr[1]; RS._inRules=false; RS._resync(); }
+    /* BOT fighter fires its OWN on-commit ability — bot-centric ctx, pow args swapped so its +power lands on the bot */
+    if(oc && oc.name && (typeof CARD_RULES!=='undefined') && CARD_RULES[oc.name] && CARD_RULES[oc.name].length){
+      var _octx0={opp_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_pow:pc.pow,pc_pow:oc.pow,last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)),match_commits:matchCommits,player_wins:playerScore[1],player_losses:playerScore[0],hand_len:(typeof oppHandBot!=='undefined'?oppHandBot.length:0),wc_len:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0),skullchain:0,ragwing:0,chaos:(cond.tag==='chaos'),banish_len:(typeof oppBanishBot!=='undefined'?oppBanishBot.length:0),remnant_count:(typeof oppDeathRemnants!=='undefined'?oppDeathRemnants.length:0),deck_len:(typeof oppDeckBot!=='undefined'?oppDeckBot.length:0),both_wc:(((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+winnersCircle.length),rear_count:((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0),wc_names:((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot):[]),hand_banished:oppHandBanishedThisTurn};
+      RS._inRules=true; var _ov0=applyCardRules(oc.name,_octx0,oppPow,playerPow,abilLog,RS,true); oppPow=_ov0[0]; playerPow=_ov0[1]; RS._inRules=false; RS._resync();
+    }
+    if(typeof applyBotDeckMasterResolveEffects==='function'){ RS._inRules=true; var _bdm0=applyBotDeckMasterResolveEffects(oc,playerPow,oppPow,abilLog,RS); playerPow=_bdm0[0]; oppPow=_bdm0[1]; RS._inRules=false; RS._resync(); }
+  }
   // ── REAR-GUARD: Called (always fires) + same-group Link Skill ──
   { var _rgc={match_commits:matchCommits, last_result:lastResult, hand_len:hand.length, opp_deaths:oc.deaths||0, opp_kills:oc.kills||0, wins:playerScore[0], losses:playerScore[1], wc_len:winnersCircle.length, chaos:(cond.tag==='chaos')};
     // SNIPE pass runs first, both directions, before either side's Called/Link effects below --
@@ -7770,7 +7799,6 @@ function resolve(pc, oc, cond, playerCommittedPow){
       else if(_at.id==='feared'){ playerPow-=1; abilLog.push('😤 '+oc.name+' is Feared — your card −1 power'); }
     } }
   let glacialForcedTie = false;
-  const abilityLocked = cond.id === 'abilitylock';
   if(abilityLocked) abilLog.push('⚡ Ability Lock — all card effects suppressed');
   const akatoshUnmakes = (pc.name === 'Ourevos, the Golden Dragon') && !abilityLocked;  // on-commit fires after the condition; a lock gags it first
   if(akatoshUnmakes) abilLog.push('🐉 Ourevos unmakes the arena — the active condition takes no effect this duel.');
@@ -7780,26 +7808,6 @@ function resolve(pc, oc, cond, playerCommittedPow){
     oppPow += oppNextDebuff;
     abilLog.push(`🧬 Darwin's Curse: opponent −${Math.abs(oppNextDebuff)} power`);
     oppNextDebuff = 0;
-  }
-
-  // ── FIRE ON-COMMIT ABILITIES (before condition) ──
-  if(!abilityLocked){
-    // Kotei: +3 if opponent is 0-death OR you lost your last duel; whole effect repeats if Keawe already won a duel this match
-    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),banish_len:banishPile.length,remnant_count:(typeof deathRemnants!=='undefined'?deathRemnants.length:0),deck_len:(typeof drawPile!=='undefined'?drawPile.length:0),both_wc:(winnersCircle.length+((typeof oppWonBot!=='undefined'&&oppWonBot&&oppWonBot.size)?oppWonBot.size:0)),rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0),wc_names:winnersCircle.map(function(c){return c.name;}),hand_banished:handBanishedThisTurn};
-    if(pc.name==='Veronica'){
-      var _oa=oc.abil||'';
-      if(!_oa||_oa.indexOf('No ability')===0){ abilLog.push('🔄 Veronica: opponent has no ability — no effect'); }
-      else { abilLog.push('🔄 Veronica copies: '+oc.name); RS._inRules=true; var _vv=applyCardRules(oc.name,_ctx,playerPow,oppPow,abilLog,RS); playerPow=_vv[0]; oppPow=_vv[1]; RS._inRules=false; RS._resync(); }
-    } else {
-      RS._inRules=true; var _rr=applyCardRules(pc.name,_ctx,playerPow,oppPow,abilLog,RS); playerPow=_rr[0]; oppPow=_rr[1]; RS._inRules=false; RS._resync();
-    }
-    if(typeof applyDeckMasterResolveEffects==='function'){ RS._inRules=true; var _dmr=applyDeckMasterResolveEffects(pc,playerPow,oppPow,abilLog,RS); playerPow=_dmr[0]; oppPow=_dmr[1]; RS._inRules=false; RS._resync(); }
-    /* BOT fighter fires its OWN on-commit ability — bot-centric ctx, pow args swapped so its +power lands on the bot */
-    if(oc && oc.name && (typeof CARD_RULES!=='undefined') && CARD_RULES[oc.name] && CARD_RULES[oc.name].length){
-      var _octx={opp_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_pow:pc.pow,pc_pow:oc.pow,last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)),match_commits:matchCommits,player_wins:playerScore[1],player_losses:playerScore[0],hand_len:(typeof oppHandBot!=='undefined'?oppHandBot.length:0),wc_len:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0),skullchain:0,ragwing:0,chaos:(cond.tag==='chaos'),banish_len:(typeof oppBanishBot!=='undefined'?oppBanishBot.length:0),remnant_count:(typeof oppDeathRemnants!=='undefined'?oppDeathRemnants.length:0),deck_len:(typeof oppDeckBot!=='undefined'?oppDeckBot.length:0),both_wc:(((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+winnersCircle.length),rear_count:((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0),wc_names:((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot):[]),hand_banished:oppHandBanishedThisTurn};
-      RS._inRules=true; var _ov=applyCardRules(oc.name,_octx,oppPow,playerPow,abilLog,RS,true); oppPow=_ov[0]; playerPow=_ov[1]; RS._inRules=false; RS._resync();
-    }
-    if(typeof applyBotDeckMasterResolveEffects==='function'){ RS._inRules=true; var _bdm=applyBotDeckMasterResolveEffects(oc,playerPow,oppPow,abilLog,RS); playerPow=_bdm[0]; oppPow=_bdm[1]; RS._inRules=false; RS._resync(); }
   }
 
   // ── APPLY CONDITION ──
@@ -13181,7 +13189,19 @@ body:has(#v-turn.on) .howto-btn{display:none}
       // is alive and player-paced, not stuck, regardless of elapsed time.
       var wagerShown=(function(){ var w=document.getElementById('wager-overlay'); return w&&w.classList.contains('show'); })();
       var matchEndShown=(function(){ var m=document.getElementById('match-end'); return m&&m.classList.contains('show'); })();
-      if(p==='committed' && !resultShown() && !wagerShown && !matchEndShown && age>6000 && typeof afterResult==='function'){ afterResult(); }
+      // Real bug (7/28/26): same root cause as the two fixes above, one step EARLIER. commitCard()
+      // calls setPhase('committed') before running any commit effects, then some cards (Kiana,
+      // Gravecaller Voss, any CALLED.banishOwn support) queue an interactive chooseBanishFromHand()
+      // choice that blocks the rest of commitCard() -- including the eventual call into
+      // playResolutionCinematic() -- until the player clicks a card in #banish-choice-modal.
+      // Nothing refreshes _cinBeat while that modal waits, so a player who takes more than 6 honest
+      // seconds to pick (completely normal for a real choice) got the watchdog firing afterResult()
+      // out from under them: the choice/commit effects had already mutated real state (hand, banish
+      // pile, etc.) but the cinematic and result overlay for THAT duel never ran, and the next duel's
+      // reveal started on top of it -- "gloss over the resolution, cards moved as if it resolved, no
+      // conclusion shown." Same fix shape as wager/match-end: bail out while the choice is up.
+      var banishChoiceShown=(function(){ var b=document.getElementById('banish-choice-modal'); return b&&b.classList.contains('on'); })();
+      if(p==='committed' && !resultShown() && !wagerShown && !matchEndShown && !banishChoiceShown && age>6000 && typeof afterResult==='function'){ afterResult(); }
     }catch(e){}
   }, 3000);
   function wireResultTap(){ var o=document.getElementById('result-overlay'); if(!o) return; o.addEventListener('click', function(e){ if(!o.classList.contains('show')) return; if(e.target.closest && (e.target.closest('button')||e.target.closest('a'))) return; if(typeof afterResult==='function') afterResult(); }); }
