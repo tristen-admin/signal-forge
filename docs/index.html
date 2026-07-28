@@ -3547,6 +3547,9 @@ const HAND_CARDS = [
   {name:'Kotei',pow:21,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, and +3 if you lost your last duel. The whole effect repeats for every round this match has completed.'},
   {name:'Uso Oso',pow:14,kills:0,deaths:0,rarity:'rare',timing:'resolution',abil:'Death Remnant +10; When this card is conjured, call a "Oso\'s skeletal summons" from outside of your deck to an open support circle. On commit: raise a +2 Death Remnant, no death needed. The Bulwark of Bones: while you hold 3+ Remnants, a loss becomes a tie instead.'},
   {name:'Tannis',pow:10,kills:0,deaths:0,rarity:'uncommon',timing:'instant',abil:'⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.'},
+  {name:'Fleeting Cipher',pow:7,kills:0,deaths:0,rarity:'common',timing:'instant',abil:'⚡ Instant: return this card to the bottom of your deck. Your next conjured card gains +6 power this duel only.'},
+  {name:"Warden's Feint",pow:8,kills:0,deaths:0,rarity:'common',timing:'instant',abil:"⚡ Instant: return this card to the bottom of your deck. Block 1 of your opponent's support zones this duel."},
+  {name:'Ashfall Tithe',pow:9,kills:0,deaths:0,rarity:'common',timing:'instant',abil:'⚡ Instant: send this card to the banish pile. Your next conjured card gains +7 power this duel only.'},
   {name:'Bixie Bee',pow:13,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power per card in your banish zone. As a support (Called), your Fighter +3.'},
   {name:'Veronica',pow:8,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: copy opponent\'s card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability.'},
 ];
@@ -3807,6 +3810,7 @@ let dmUnitsReturnToHandThisDuel = false;   // Kravyn DM skill v2: your winning c
 let dmSupportAddPowThisDuel = false;       // Kotei DM skill: called supports add their own power to your Fighter's total
 let dmSupportDoubleCostThisDuel = false;   // Darwin DM skill: called supports add DOUBLE their conjure cost to your Fighter
 let dmNullifyOppSupportsThisDuel = false;  // Ahdorah Khaan DM skill: opponent's called supports contribute nothing this duel
+let oppSupportSlotsBlocked = 0;  // 7/28/26: Warden's Feint et al -- opponent fields fewer support slots this duel (pickOppRears), distinct from nullifying an already-placed support's effect
 let dmZeroCostThisDuel = false;            // Anorith Keeling DM skill: every card in hand costs 0 to conjure this duel
 let dmDarwinHandRefillArmed = false;       // Darwin DM skill, 2nd clause: once activated, persists the REST OF THE MATCH (not just this duel, unlike the flags above) -- "whenever your hand is 2 or less after your draw phase" is an ongoing passive, not a this-duel-only effect. Reset at match end only, see resetMatchState().
 let handBanishedThisTurn = false, oppHandBanishedThisTurn = false;   // Ossian Drell on-conjure condition -- was a card banished FROM HAND (not deck) this turn
@@ -4400,7 +4404,7 @@ function openTurn(){
   // only energyRegenPerTurn() replenishes each turn, so leftover/spent charge carries across turns
   // and players have to play smaller conjures to bank enough for bigger plays or spells later.
   // oppCharge mirrors charge exactly (bots get the same regen/cap rule as the player).
-  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; dmZeroCostThisDuel=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -4957,10 +4961,18 @@ function activateInstant(i){
       charge-=e.energyCost; if(typeof renderCharge==='function') renderCharge();
     }
     // Data-driven override (7/12/26) — a specific card can define its own instant effect instead of
-    // the universal Surge below. Same cost either way: banished once resolved.
+    // the universal Surge below. Same cost either way: leaves the hand once resolved (banished by
+    // default, or to the bottom of the deck if returnToDeck is set -- see below).
     if(e.draw) drawToHand(e.draw);
     if(e.chargeGain){ charge=Math.min(duelEnergyCap(),charge+e.chargeGain); if(typeof renderCharge==='function') renderCharge(); }
-    hintSelect = `${c.name} — ${e.text} (banished)`;
+    // 7/28/26: surge lets an override still feed the same banishSurge reservoir the default path
+    // uses, with an explicit amount instead of defaulting to the card's own pow (Tannis-blueprint
+    // variations). oppSupportBlock denies the opponent a support SLOT this duel -- distinct from
+    // dmNullifyOppSupportsThisDuel, which lets a support through but zeroes its Called effect.
+    if(e.surge) banishSurge = e.surge;
+    if(e.oppSupportBlock){ oppSupportSlotsBlocked += e.oppSupportBlock; }
+    var _destTxt = e.returnToDeck ? 'returned to your deck' : 'banished';
+    hintSelect = `${c.name} — ${e.text} (${_destTxt})`;
     hintCommit = `${c.name} — ${e.text}. Now commit a card.`;
   } else {
     // Default Surge: banish this card, store its power for your next commit. Unchanged behavior —
@@ -4969,7 +4981,8 @@ function activateInstant(i){
     hintSelect = `${c.name} banished — next commit gains +${banishSurge} power`;
     hintCommit = `Surge ready (+${banishSurge}). Now commit a card.`;
   }
-  banishPile.push(c);
+  if(e && e.returnToDeck){ drawPile.unshift(c); if(typeof deckSize!=='undefined') deckSize=drawPile.length; }
+  else { banishPile.push(c); }
   // Re-locate by identity rather than trusting index i: an effect (e.g. draw) can have already
   // pushed new cards into hand before this splice runs. Then shift any OTHER tracked indices
   // (staged fighter, called supports) that sat after the removed card, same bookkeeping the
@@ -5563,10 +5576,21 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
 // that existing system rather than left as a second parallel one. Kept small for v1 (draw,
 // chargeGain); extend per-card as the owner designs specific instant effects.
 const INSTANT_EFFECTS = {
+  // 7/28/26: Tannis-blueprint variations (owner request) -- same "spend this card now, fuel your
+  // next commit" shape as the universal default Surge, but two new orthogonal knobs: returnToDeck
+  // sends it to the bottom of the draw pile instead of the banish pile (so it can be drawn again
+  // later, and does NOT feed banish-count payoffs like Ossian Drell/Pyre-Keeper Vayle), and surge
+  // sets an explicit power amount instead of defaulting to the card's own pow. oppSupportBlock is a
+  // new, distinct effect (see oppSupportSlotsBlocked/pickOppRears) -- denies a support SLOT, unlike
+  // dmNullifyOppSupportsThisDuel which lets a support through but zeroes its Called effect.
+  'Fleeting Cipher': {text:'return to your deck, next commit +6 power', returnToDeck:true, surge:6},
+  "Warden's Feint": {text:"return to your deck, block 1 opponent support zone this duel", returnToDeck:true, oppSupportBlock:1},
+  'Ashfall Tithe': {text:'banish, next commit +7 power', surge:7},
 };
 function pickOppRears(fighter){
   var out=[];
-  for(var k=0;k<RG_SLOTS;k++){
+  var _slots = Math.max(0, RG_SLOTS - (oppSupportSlotsBlocked||0));   // 7/28/26: Warden's Feint et al
+  for(var k=0;k<_slots;k++){
     if(!oppHandBot.length) break;
     if(oppHandBot.length<=1) break;   // never spend the bot's literal last card on a support — always reserve one for next turn's fighter, or the hand can never recover (was: bottoms out at hand=1 forever, 0 supports, once drained)
     var handConserve = oppHandBot.length<=3 ? 0.35 : 0;   // thin hand -> back off supports so the 1/turn refill can catch back up, instead of staying drained
@@ -10137,7 +10161,7 @@ function deckTab(t){
 }
 
 // ══ DECK PRESETS (saved decks) ══
-const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Valcarion'];   // Black Wings — banish/discard. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Bixie Bee moved out 7/19/26 -- narrowed to Warpath/Keawe's Circle only.
+const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Valcarion','Ashfall Tithe'];   // Black Wings — banish/discard. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Bixie Bee moved out 7/19/26 -- narrowed to Warpath/Keawe's Circle only. Ashfall Tithe added 7/28/26 -- a self-banishing instant feeds Ossian Drell/Pyre-Keeper Vayle's banish-count payoffs directly, the owner-flagged synergy for this class of card.
 const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned Skull Soldiers','Uso Oso',"Uso Oso's Skeletal Summons",'Bone Choirmaster','Marrow Priest','Widow of the Vigil','Gravecaller Voss','Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','The Regenerating Horror','Signal Diviner'];   // The Deathless — Death-Remnant stack + draw. Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
 const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Bixie Bee','The Bronzed Beast, Hanse Waltz',"Legend Reborn, Keawe Kel'rua",'Trophy Runner'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Ruffius Rufeldro moved out 7/19/26 -- narrowed to Radiance + Ahdor's Pride only.
 const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte','Skittering Drone','Hatchling Tide',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Signal Diviner','Faye Quicksilver','Veronica','Silk-Fed Hatchling','Broodweb Keeper'];   // The Broodswarm — hand-size draw + power. 7/24/26: +2 charge-economy commons (balance audit round 2 §5).
@@ -12918,7 +12942,7 @@ function resetMatchState(){
   banishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
-  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
+  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
