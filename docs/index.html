@@ -2920,18 +2920,6 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   </div>
 </div>
 
-<div class="approve-overlay" id="dm-fallback-overlay">
-  <div class="approve-panel">
-    <div class="lh-eyebrow" style="color:var(--gold)">★ Deck Master</div>
-    <div class="approve-title">No Apex/Ultra/Rare card in hand</div>
-    <p style="color:var(--text2);font-size:13px;line-height:1.5;margin:0 0 16px">Every card in hand is Common-tier — no conjure skill would fire this turn. Choose how to proceed.</p>
-    <div class="approve-btns">
-      <button class="enter-btn" onclick="dmAutoRide()" style="background:linear-gradient(180deg,#14303a,#0a1c22);box-shadow:inset 0 0 0 1px rgba(111,211,255,0.4)">🔄 Auto-Ride<br><span style="font-weight:400;font-size:11px;opacity:0.85">Bottom your hand, redraw fresh — no score cost</span></button>
-      <button class="enter-btn" onclick="dmForfeit()" style="background:linear-gradient(180deg,#3a1414,#220a0a);box-shadow:inset 0 0 0 1px rgba(184,58,58,0.4)">🏳 Forfeit<br><span style="font-weight:400;font-size:11px;opacity:0.85">Concede the round — draw 2 next turn</span></button>
-    </div>
-  </div>
-</div>
-
   <div class="view" id="v-lobby">
     <div class="lobby">
       <div class="lobby-head">
@@ -4355,7 +4343,6 @@ function drawCard(force){ if(typeof tutorialAdvance==='function')setTimeout(func
   }
   hand.push(drawn);
   for(var _xd=1;_xd<DRAW_PER_TURN;_xd++){ if(drawPile.length && hand.length<MAX_HAND){ hand.push(drawPile.pop()); } } deckSize=drawPile.length;
-  if(typeof dmForfeitDrawBonus!=='undefined' && dmForfeitDrawBonus){ dmForfeitDrawBonus=false; if(drawPile.length && hand.length<MAX_HAND){ hand.push(drawPile.pop()); deckSize=drawPile.length; if(typeof toast==='function') toast('★ Deck Master — forfeit bonus: drew an extra card.', true); } else if(typeof toast==='function') toast('★ Deck Master — forfeit bonus fizzled: hand is full.', true); }
   // Darwin DM skill, 2nd clause (7/27/26): recurring check, not a one-time activation effect --
   // fires after EVERY draw phase for the rest of the match once armed, per the card's own "whenever"
   // wording. deckMasterCard gate matters: the flag can stay armed even if the player later swaps
@@ -4931,11 +4918,7 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   // below since the ability is free (no Energy cost) and could rescue an otherwise-unplayable hand.
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
   if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
-  if(typeof cheapestFighterCost==='function' && charge < cheapestFighterCost()){ energyForfeit(); return; }   // can't afford ANY fighter in hand — hard forfeit, checked before the Deck Master fallback since it's the more fundamental blocker
-  if(typeof dmShouldOfferFallback==='function' && dmShouldOfferFallback()){
-    var _dmov=document.getElementById('dm-fallback-overlay'); if(_dmov) _dmov.classList.add('show');
-    return;   // no conjure-eligible card — Auto-Ride/Forfeit only, no normal decision clock
-  }
+  if(typeof cheapestFighterCost==='function' && charge < cheapestFighterCost()){ energyForfeit(); return; }   // can't afford ANY fighter in hand — hard forfeit, the only real "can't conjure" case (rarity never gates conjure-eligibility — an all-Common hand plays exactly like any other)
   startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:30, 'choose a card, or the round forfeits');   // casual = 30s round timer; ranked keeps 40
 }
 
@@ -7133,82 +7116,28 @@ function applyBotDeckMasterResolveEffects(oc, playerPow, oppPow, abilLog, stepSi
   }
   return [playerPow, oppPow];
 }
-// Deck Master Phase F — cannot-conjure fallback. True only when every card in hand is Common
-// (no tier 1/2/3 conjure skill could possibly fire this turn). Universal (7/12/26) — fires whenever
-// a Deck Master is named, in any mode, not just the dedicated one.
-function dmShouldOfferFallback(){
-  return !!(deckMasterCard && typeof hand!=='undefined' && hand.length>0 && !hand.some(function(c){ return c && c.rarity!=='common'; }));
-}
-// Auto-Ride: bottom the whole hand, redraw fresh — no match-score cost, pure variance risk.
-function dmAutoRide(){
-  var ov=document.getElementById('dm-fallback-overlay'); if(ov) ov.classList.remove('show');
-  var n=hand.length;
-  drawPile=drawPile.concat(hand); hand=[];
-  if(typeof shuffle==='function') shuffle(drawPile);
-  if(typeof drawToHand==='function') drawToHand(n);
-  deckSize=drawPile.length;
-  if(typeof buildHand==='function') buildHand();
-  if(typeof updatePiles==='function') updatePiles();
-  if(typeof toast==='function') toast('🔄 Auto-Ride — hand bottomed and redrawn, no score change.', true);
-  setPhase('revealed');
-  // 7/24/26: an unlucky redraw that's ALSO all-Common re-shows this exact same overlay -- but
-  // removing then re-adding the .show class in the same synchronous tick never gives the browser
-  // a paint frame in between, so the CSS fade-in animation silently doesn't restart. The overlay
-  // never visually leaves the screen at all, so a real reshow is pixel-identical to a frozen one --
-  // confirmed via direct testing (a forced common-only redraw looped with animationName unchanged
-  // both before and after). The toast above still fires, but a small transient toast isn't enough
-  // on its own when the whole-screen modal in front of it looks completely static. Fix: force a
-  // reflow between remove and re-add so the animation genuinely restarts every time, and swap the
-  // panel copy so a loop reads as a loop instead of a no-op.
-  if(dmShouldOfferFallback()){
-    if(ov){
-      void ov.offsetWidth;   // forces the browser to commit the .show removal before it's re-added
-      ov.classList.add('show');
-      var _dmp = ov.querySelector('p');
-      if(_dmp) _dmp.textContent = 'Redrawn again — still every card in hand is Common-tier. Choose how to proceed.';
-    }
-  }
-}
-// Forfeit: concede the round (scored exactly like a normal loss/surrender), guaranteed +1 extra
-// draw next turn. Mirrors onDecisionTimeout()'s existing surrender presentation almost exactly.
-function dmForfeit(){
-  var ov=document.getElementById('dm-fallback-overlay'); if(ov) ov.classList.remove('show');
-  clearTurnTimers();
-  document.getElementById('record-reveal').style.display = 'none';
-  document.getElementById('instant-strip').style.display = 'none';
-  document.getElementById('confirm-btn').style.display = 'none';
-  document.getElementById('commit-btn').style.display = 'none';
-  document.getElementById('player-field').innerHTML = '<span class="placeholder">🏳 forfeited</span>';
-  document.getElementById('opp-field').innerHTML = '<span class="placeholder">no contest</span>';
-  playerScore[1]++;
-  lastResult = 'lose';
-  dmForfeitDrawBonus = true;
-  document.getElementById('result-label').textContent = '🏳 ROUND FORFEITED';
-  document.getElementById('result-label').className = 'result-label lose';
-  document.getElementById('result-sub').textContent = 'No Apex/Ultra/Rare card in hand — you forfeited the round. Draw 2 next turn.';
-  document.getElementById('abil-log').innerHTML = '<div class="abil-log-entry">🏳 Deck Master: no conjure-eligible card — round forfeited</div>';
-  if(typeof updateScore==='function') updateScore();
-  var _nb=document.querySelector('#result-overlay .next-btn'); if(_nb) _nb.textContent=(playerScore[0]>=matchWinThreshold()||playerScore[1]>=matchWinThreshold())?'View Match Result →':'Continue →';
-  if(typeof updateStake==='function') updateStake();
-  document.getElementById('result-overlay').classList.add('show');
-  setPhase('resolved');
-  if(typeof updatePiles==='function') updatePiles();
-}
+// Removed 7/28/26: the old "Phase F" all-Common fallback (dmShouldOfferFallback/dmAutoRide/
+// dmForfeit) forced Auto-Ride-or-Forfeit whenever every card in hand was Common, treating "no
+// tier 1/2/3 Deck Master bonus would trigger" as if it meant "cannot conjure." Rarity never gates
+// conjure-eligibility -- a Common card fields as a Fighter exactly like any other; that's the
+// whole point of vanilla commons (see feedback_no_coin_flip_conditions-adjacent design-identity
+// rule). The only real "cannot conjure" case is energy-lockout below, which is a true legality
+// blocker (nothing in hand is affordable), not a rarity check.
 // Energy-lockout forfeit (7/18/26, direct request): if even the cheapest non-instant card in hand
 // costs more than current charge, you cannot legally conjure anything -- replaces the old "cheapest
 // fighter conjures free" safety net (stageFighter() used to guarantee "you can always field a
-// fighter") with a hard forfeit instead. No compensation draw, unlike dmForfeit() -- not asked for.
+// fighter") with a hard forfeit instead. No compensation draw -- not asked for.
 // Checked twice: at reveal (revealCondition(), before the normal decision clock would start -- the
 // common case) and again inside stageFighter() as a defense-in-depth catch for the rarer case where
 // an energy-cost spell gets cast mid-window and drops charge below the floor after reveal already
-// passed. Same surrender presentation as dmForfeit()/onDecisionTimeout().
+// passed. Same surrender presentation as onDecisionTimeout().
 function cheapestFighterCost(){
   var costs = (typeof hand!=='undefined'?hand:[]).filter(function(h){ return h && h.timing!=='instant'; }).map(conjureCost);
   return costs.length ? Math.min.apply(null, costs) : Infinity;
 }
 // Shared surrender presentation (7/18/26 extraction): energyForfeit()/voluntaryForfeit() both
-// concede the round the same way dmForfeit()/onDecisionTimeout() already do -- pulled the common
-// body out once here instead of copy-pasting a 5th near-identical block.
+// concede the round the same way onDecisionTimeout() already does -- pulled the common
+// body out once here instead of copy-pasting a near-identical block per caller.
 function surrenderRound(placeholderTxt, resultLabel, resultSub, logTxt){
   clearTurnTimers();
   document.getElementById('record-reveal').style.display = 'none';
@@ -7236,8 +7165,7 @@ function energyForfeit(){
 }
 // Voluntary forfeit (direct request): a player may always give up a round on purpose -- to bank
 // energy for a bigger play later, or just skip a round they don't want to spend charge contesting.
-// No compensation draw, matching energyForfeit()'s own precedent (only dmForfeit() grants one, tied
-// specifically to the Deck Master no-eligible-card case). Available any time staging/committing a
+// No compensation draw, matching energyForfeit()'s own precedent. Available any time staging/committing a
 // card would be (phase 'revealed' or 'selecting'); visibility kept in sync inside buildHand() rather
 // than threaded through every existing show/hide call site for the other action buttons.
 function voluntaryForfeit(){
@@ -10620,7 +10548,6 @@ let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward 
 // either way; the bot side has its own separate, always-on activeBot.dmCard path.
 let deckMasterMode = false;
 let deckMasterRecord = lsGet('sf_dm_record', {k:0,d:0});   // Phase E: assimilated K/D, ADDITIVE alongside the card's own normal cardRecords/kdOf() — never replaces it
-let dmForfeitDrawBonus = false;   // Phase F: set by dmForfeit(), consumed for +1 extra draw on the very next drawCard() call
 let unbankNextWin = false;        // Warpath combo (7/12/26): set by Unbanked Victory's Called effect, consumed at the player's next WC-banking decision in resolve()
 let oppUnbankNextWin = false;     // same, bot-side — consumed in the resolve() win-tracking wrapper near the bottom of this file
 let activeBot = null;
