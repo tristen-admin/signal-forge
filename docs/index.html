@@ -3130,6 +3130,13 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div id="dm-ability-options"></div>
     </div>
 
+    <!-- BANISH-ZONE CONJURE (hidden by default) -- Circle of Life: banishOnly cards sitting in your
+         banish pile, conjurable straight from there instead of hand -->
+    <div class="instant-strip" id="banish-conjure-strip" style="display:none">
+      <span class="instant-label">☠ Banish Zone</span>
+      <div id="banish-conjure-options"></div>
+    </div>
+
     <!-- ENERGY / SPELL TRAY -->
     <div class="spell-tray" id="spell-tray">
       <div class="charge-meter">⚡ Charge <b id="charge-val">3</b><span>/<span id="charge-cap">3</span></span></div>
@@ -3615,6 +3622,11 @@ const DECK_POOL = [
   {name:'Signal Diviner',pow:12,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On win: next turn gain 2 max Charge. As a support (Called), gain 3 Charge.'},
   // Commons
   {name:'Ahdorah Khaan, Determined Soul',pow:15,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. When Ahdor returns to your hand from the effect of "Record Guard", two random hand cards gain +3.'},
+  // 7/28/26: Circle of Life signature pair (owner request — rename from Ahdor's Pride, archetype's
+  // real mechanical identity is now "play strong effects from your own banish pile," gated by
+  // banishOnly so the power can't just be splashed without real banish-fill setup first).
+  {name:'Ahdorah Khaan, Circle Unbroken',pow:20,kills:0,deaths:0,rarity:'ultra',timing:'on',banishOnly:true,abil:'Cannot be conjured from your hand — only from your banish pile. On commit: +4 power for every card in your banish pile.'},
+  {name:'Kynaht, Ashen Return',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',banishOnly:true,abil:"Cannot be conjured from your hand — only from your banish pile. On commit: your opponent's Called supports contribute nothing this duel."},
   // 7/23/26: Squad 19 / Tosa Pact glue commons — deckbuilding infrastructure for Ahdor's Pride and
   // Keawe's Circle, both thin/borrowed-heavy archetypes per this session's balance audit. Cheap,
   // unglamorous, resource-smoothing pieces on purpose — the rares/URs can come later.
@@ -3811,6 +3823,7 @@ let dmSupportAddPowThisDuel = false;       // Kotei DM skill: called supports ad
 let dmSupportDoubleCostThisDuel = false;   // Darwin DM skill: called supports add DOUBLE their conjure cost to your Fighter
 let dmNullifyOppSupportsThisDuel = false;  // Ahdorah Khaan DM skill: opponent's called supports contribute nothing this duel
 let oppSupportSlotsBlocked = 0;  // 7/28/26: Warden's Feint et al -- opponent fields fewer support slots this duel (pickOppRears), distinct from nullifying an already-placed support's effect
+let _stagingFromBanish = false;  // 7/28/26: Circle of Life -- one-shot bypass flag so stageFighterFromBanish() can route a banishOnly card through the normal stageFighter() logic without tripping its own hand-staging guard
 let dmZeroCostThisDuel = false;            // Anorith Keeling DM skill: every card in hand costs 0 to conjure this duel
 let dmDarwinHandRefillArmed = false;       // Darwin DM skill, 2nd clause: once activated, persists the REST OF THE MATCH (not just this duel, unlike the flags above) -- "whenever your hand is 2 or less after your draw phase" is an ongoing passive, not a this-duel-only effect. Reset at match end only, see resetMatchState().
 let handBanishedThisTurn = false, oppHandBanishedThisTurn = false;   // Ossian Drell on-conjure condition -- was a card banished FROM HAND (not deck) this turn
@@ -3934,6 +3947,7 @@ function activateDeckMasterAbility(){
   if(ab.run){ ab.run(); }
   else { if(ab.draw && typeof drawToHand==='function') drawToHand(ab.draw); dmNextConjureBonus = ab.nextConjureBonus || 0; }
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
+  if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   if(typeof buildHand==='function') buildHand();
   if(typeof toast==='function') toast('★ '+deckMasterCard+' — '+ab.log+': '+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus)), true);
 }
@@ -4142,6 +4156,7 @@ function setCameraSeat(side){
 }
 
 function updatePiles(){
+  if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   document.getElementById('deck-count').textContent = deckSize;
   { var _hc=document.getElementById('hand-count'); if(_hc) _hc.textContent=((typeof hand!=='undefined'&&hand)?hand.length:0)+'/'+MAX_HAND; }
   document.getElementById('wc-count').textContent = winnersCircle.length;
@@ -4919,6 +4934,7 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   // right when the condition reveals, not after. Placed before the energy-forfeit/DM-fallback gates
   // below since the ability is free (no Energy cost) and could rescue an otherwise-unplayable hand.
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
+  if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   if(typeof cheapestFighterCost==='function' && charge < cheapestFighterCost()){ energyForfeit(); return; }   // can't afford ANY fighter in hand — hard forfeit, checked before the Deck Master fallback since it's the more fundamental blocker
   if(typeof dmShouldOfferFallback==='function' && dmShouldOfferFallback()){
     var _dmov=document.getElementById('dm-fallback-overlay'); if(_dmov) _dmov.classList.add('show');
@@ -4995,6 +5011,7 @@ function activateInstant(i){
   document.getElementById('commit-hint').textContent = hintCommit;
   if(typeof renderInstantStrip==='function') renderInstantStrip();
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
+  if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   buildHand();
   if(typeof renderRearSlot==='function') renderRearSlot();
   updatePiles();
@@ -5050,6 +5067,8 @@ const FLAGGED_ABILITIES = {
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
 const RACES = ['Human','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Marrowen','Dreikan','Dractyl','Thennlar','Xylotes','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
 const CARD_RACE = {
+  // Vysh'ra (Ahdor's people, per the KOTEI bible) — first real card tagged to this race, 7/28/26
+  'Kynaht, Ashen Return':"Vysh'ra",
   // Dragonkin
   'Ourevos, the Golden Dragon':'Dragonkin','Dragan Korr':'Dragonkin','Heir of Kaiga':'Dragonkin','Dragon':'Dragonkin','Scale Guard':'Dragonkin','Dragonfire':'Dragonkin','Wing Buffet':'Dragonkin','Ragefire':'Dragonkin',
   // Nightclaw
@@ -5219,6 +5238,8 @@ const CALLED = {
   "Zerith Var":                    {text:"your Fighter +2, draw 2 cards and banish 1", add:2, draw:2, banishOwn:1},
   "Ruffius Rufeldro":              {text:"your Fighter +3", add:3},
   "Ahdorah Khaan, Determined Soul":                         {text:"your Fighter +2; destroy and nullify the opposing support in the mirrored slot", add:2, snipeSupport:true},
+  "Ahdorah Khaan, Circle Unbroken":                         {text:"your Fighter +3", add:3},
+  "Kynaht, Ashen Return":                                   {text:"your Fighter +3", add:3},
   "Val Kreigh":                    {text:"your Fighter +3", add:3},
   "King Joris":                    {text:"your Fighter +4 · draw 1", add:4, draw:1},
   "Malia":                         {text:"your Fighter +4", add:4},
@@ -5776,6 +5797,7 @@ function _dmConjureFx(name){
 }
 function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview(); if(typeof tutorialAdvance==='function')setTimeout(function(){tutorialAdvance('stage');},90);
   var c=hand[i]; if(!c || c.timing==='instant') return;
+  if(c.banishOnly && !_stagingFromBanish){ if(typeof toast==='function') toast(c.name+' can only be conjured from your banish pile.', false); return; }
   if(phase!=='revealed' && phase!=='selecting') return;
   { var _cc=conjureCost(c);
     if(_cc > charge){
@@ -5800,9 +5822,38 @@ function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview
   document.getElementById('opp-area').innerHTML = '⏳ Opponent locked in — assemble your play';
   if(typeof renderInstantStrip==='function') renderInstantStrip();
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
+  if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   document.getElementById('confirm-btn').style.display = 'flex';
   setPhase('selecting');
   buildHand(); renderRearSlot(); refreshStageHint();
+}
+// 7/28/26: Circle of Life -- conjure a banishOnly card straight from the banish pile. Moves it into
+// hand and routes it through the real stageFighter() (via the _stagingFromBanish bypass flag) rather
+// than duplicating that function's staging/energy/opponent-reveal logic; the energy check happens
+// BEFORE the move so a failed attempt never leaves the card stranded in hand instead of back in banish.
+function stageFighterFromBanish(bIdx){
+  if(phase!=='revealed' && phase!=='selecting') return;
+  var c = banishPile[bIdx];
+  if(!c || !c.banishOnly) return;
+  var _cc = conjureCost(c);
+  if(_cc > charge){ if(typeof toast==='function') toast('Not enough energy — '+c.name+' costs ⚡'+_cc+' (⚡'+charge+' available).', false); return; }
+  banishPile.splice(bIdx, 1);
+  hand.push(c);
+  _stagingFromBanish = true;
+  stageFighter(hand.length-1);
+  _stagingFromBanish = false;
+  if(typeof updatePiles==='function') updatePiles();
+}
+function renderBanishConjureStrip(){
+  var strip=document.getElementById('banish-conjure-strip'); if(!strip) return;
+  var opts=document.getElementById('banish-conjure-options');
+  var eligible = (typeof banishPile!=='undefined'?banishPile:[]).filter(function(c){ return c && c.banishOnly; });
+  if(!eligible.length || (phase!=='revealed' && phase!=='selecting')){ strip.style.display='none'; if(opts) opts.innerHTML=''; return; }
+  strip.style.display='flex';
+  if(opts) opts.innerHTML = eligible.map(function(c){
+    var idx = banishPile.indexOf(c);
+    return '<button class="instant-card-btn" style="border-color:rgba(188,114,245,0.6);color:var(--violet)" onclick="stageFighterFromBanish('+idx+')">☠ '+c.name+' — conjure from banish (⚡'+conjureCost(c)+')</button>';
+  }).join('');
 }
 function callSupportIdx(i){ if(typeof hideCardPreview==='function')hideCardPreview();
   if(preSelectedCard===null){ if(typeof toast==='function') toast('Conjure a Fighter first, then Call a support.', false); return; }
@@ -6117,6 +6168,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
     if(_btn){ for(var _bti=0;_bti<_btn && drawPile.length;_bti++) banishPile.push(drawPile.pop()); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof updatePiles==='function') updatePiles(); } }
   if(pc.name==='The Black Ledger'){ if(typeof banishFromHand==='function') banishFromHand(2); if(typeof drawToHand==='function') drawToHand(1); }   // 7/24/26: draw nerfed 2->1, banish stays random (explicit exception to the player-choice default)
   if(pc.name==='Ashen Reclaimer' && banishPile.length){ var _ar=banishPile.pop(); _ar._bo=(_ar._bo||0)+3; hand.push(_ar); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
+  if(pc.name==='Kynaht, Ashen Return'){ dmNullifyOppSupportsThisDuel=true; abilLog.push("☠ Kynaht, Ashen Return — opponent's Called supports contribute nothing this duel"); }
   if(pc.name==="Hoarder's Gambit" && typeof drawToHand==='function'){ drawToHand(2); }
   if(pc.name==='Arch-Grim Korrin' && drawPile.length){
     // Real gap fixed 7/27/26: this used to draw cards equal to remnant count -- leftover from
@@ -7610,6 +7662,7 @@ const CARD_RULES = {
  ],
  "Grave-Tithe Acolyte": [{ "add": 5, "log": "☠ Grave-Tithe: +5" }],
  "Cinder-Marked Hound": [{ "addvar": "banish_len", "x": 1, "log": "☠ Cinder: +1×banish" }],
+ "Ahdorah Khaan, Circle Unbroken": [{ "addvar": "banish_len", "x": 4, "log": "☠ Circle Unbroken: +4×banish" }],
  "Pyre-Keeper Vayle": [{ "if": { "v": "banish_len", "op": ">=", "n": 2 }, "add": 5, "log": "☠ Pyre-Keeper: +5" }],
  "Summoned Skull Soldiers": [{ "addvar": "remnant_count", "x": 3, "log": "⚰ Ossuary: +3×remnant" }],
  "Widow of the Vigil": [{ "if": { "v": "remnant_count", "op": "==", "n": 0 }, "add": 3, "log": "⚰ Vigil: +3 (no remnant)" }],
@@ -10173,7 +10226,7 @@ const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of t
 const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin','Kravyn the Collector','Court Cipher'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members. Veronica + Ruffius Rufeldro moved out 7/19/26.
 const RADIANCE_PRESET = ['Moro','Malia','King Joris','Ruffius Rufeldro','Elowen Dawnspear','Bram the Bulwark','The Regenerating Horror','Kaelthar the Ascendant','Lumen Acolyte','Oathlit Attendant','Oathlit Vanguard'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match.
 const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz','Fenrik Vench','Yard Sparring Partner','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Lagertha Waltz, Wrathful Transformation'];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms). 7/23/26: added the cadet-corps/Tosa Pact glue commons (Fenrik Vench is his real Ch.1 rival, per the Ascension storyline).
-const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 19 Quartermaster','Squad 19 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 19 Signalman','Squad 19 Chronicler'];   // Ahdor's Pride — Ahdorah Khaan + Squad 19. 7/23/26: filled out the deckbuilding spine with Squad 19 commons + a Rare sibling printing of Ahdorah herself (mirrors Keawe Kel'rua's base/evolved pattern) + shared Tosa Pact pieces. 7/24/26: +2 charge-economy commons (balance audit round 2 §5). Still no card named Kynaht or tagged Vysh'ra race (Ahdor's people, per the KOTEI bible) -- that's a separate, real content gap, not addressed by this batch.
+const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 19 Quartermaster','Squad 19 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 19 Signalman','Squad 19 Chronicler','Ahdorah Khaan, Circle Unbroken','Kynaht, Ashen Return'];   // Circle of Life (renamed from Ahdor's Pride, 7/28/26) — Ahdorah Khaan + Squad 19, now also the archetype whose signature identity is conjuring very strong banishOnly cards straight from your own banish pile (owner request: gate real power behind needing genuine banish-fill setup first, so it can't just be splashed). 7/23/26: filled out the deckbuilding spine with Squad 19 commons + a Rare sibling printing of Ahdorah herself (mirrors Keawe Kel'rua's base/evolved pattern) + shared Tosa Pact pieces. 7/24/26: +2 charge-economy commons (balance audit round 2 §5). 7/28/26: Kynaht, Ashen Return closes the long-noted gap (no card named Kynaht / tagged Vysh'ra race, Ahdor's people per the KOTEI bible) while also serving as the archetype's disruption-flavored banishOnly signature card.
 // Archetype dev-view (7/18/26, expanded 7/19/26): the meta archetypes' full membership, for the
 // Vault's Archetype filter -- reuses these *_PRESET arrays directly (the actual full-deck lists)
 // rather than ARCHETYPE_MEMBERS (a narrower, Deck-Master-tier-eligibility-only list that excludes
@@ -10191,7 +10244,7 @@ const ARCHETYPE_PRESETS = [
   {id:'blackcouncil', name:'Black Council', members:BLACK_COUNCIL_PRESET},
   {id:'radiance', name:'Radiance', members:RADIANCE_PRESET},
   {id:'keawescircle', name:"Keawe's Circle", members:KEAWES_CIRCLE_PRESET},
-  {id:'ahdorspride', name:"Ahdor's Pride", members:AHDORS_PRIDE_PRESET}
+  {id:'ahdorspride', name:"Circle of Life", members:AHDORS_PRIDE_PRESET}
 ];
 function cardArchetypes(name){ return ARCHETYPE_PRESETS.filter(function(a){ return a.members.indexOf(name)>=0; }); }
 let deckPresets = lsGet('sf_presets', {});
