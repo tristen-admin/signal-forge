@@ -139,6 +139,25 @@ Ranked and Staked PvP both disclose "(Rival AI stands in until networked play sh
 
 **Art/asset pipeline**: `CARD_ART`/`CARD_ART_FULL`/`CARD_SIGIL`/`VIDEO_*`, all inline base64. Resolution order: video > static image > sigil-on-gradient. **71 of 173 collection cards (41%) currently have no unique art or sigil** — an active, ongoing content-production gap, not a code defect (includes all 8 Squad 19 cards and several named Apex/Ultra characters).
 
+## 12. Reference, Records & Market
+
+**Reference** (sidebar group): three static-lookup screens, none of them affect live play — **Conditions** (the 32-entry `CONDITIONS` table, §7, with its live Shift+D dev-editor), **Abilities** (`buildAbilView()`, the `KEYWORDS` glossary — 15+ entries like Instant/Rally/Death Remnant/Record Guard/Kill Escalation/Last Stand/Banish Surge — one plain-English paragraph per keyword, shown wherever a card carries that tag), and **Card Growth** (`buildGrowthCodex()`, the living-card doctrine: K/D tracking, the Ownership Chain, Pristine status, and the trade-transfer promise, see below).
+
+**Records** (sidebar group): four screens reading the same underlying data from different angles.
+- **Legend Board** (`buildLegendBoard()`): every collection card ranked by `legendScore()` (a weighted fusion of match record, mastery, and bonds, `legendBreakdown()`), bucketed into tiers by `legendTier()`, with an estimated `legendPrice()` (`marketPrice(c) * legendMultiplier(c)`) shown per row. **This estimate is displayed with the ❖ Forge icon, but the real Marketplace it's estimating a value for transacts exclusively in ◈ Signal** — a live icon/currency mismatch (see fix sheet).
+- **Match Arc**: per-match narrative/turn-by-turn log.
+- **Card DNA**: per-card career K/D, K/D *since this copy was acquired* (resets via `transferToMe()`, wired into trades this session — previously dead code, see fix sheet), the full Ownership Chain (`{owner, date, via}` per entry), and a flavor-only deterministic "Provenance" index (hash of the card's name, no real backing store).
+- **Match Replay**: step-through visual reconstruction of a completed match's turn sequence.
+
+**Market** (sidebar group): two screens, two different economies.
+- **Shop**: the mock-purchase Forge storefront (packs, cosmetics) — no real payment processing exists anywhere in this file.
+- **Marketplace** (`buildMarket()`): peer-to-peer style card listings, ◈ Signal only ("◈ only / No cash-out" is a permanent, correct stat tile). Floor price, active-listing count, and a "30d volume" figure are all computed live from `marketListings` — **except volume, which has a hardcoded `+184200` floor added on top of real sold totals every time** (`index.html:8389`), so the stat can never honestly read as a quiet/dead market. Selling (`listCard()`) and buying (`buyMarket()`) both move `signalPoints` directly and call `saveState()`; a bought card is minted as a fresh instance via `mintWon()` carrying the seller's `k`/`d` record forward, not reset — by design, since the Marketplace's whole pitch is "the buyer takes its full record."
+- **`deckMasterRecord`** (`{k,d}`, `sf_dm_record` in storage) tracks wins/deaths specifically *while a card was your active Deck Master* — incremented and persisted at two call sites (`index.html:7967`, `7980`) but **never read back by any screen**. Currently pure overhead with no player-facing payoff (see fix sheet).
+
+### Cross-cutting: CALLED text vs. real mechanism (a recurring bug class)
+
+Several cards' printed `CALLED` support text describes behavior beyond what their object literal's real fields execute — the text was written aspirationally and the code caught up partially, or not at all. Confirmed instances this pass (full detail in the fix sheet): **Ourevos, the Golden Dragon** (promises a slot-fill-with-copy that has no primitive), **Anorith Keeling** (promises self-return-to-deck + draw/charge that aren't wired), **Kessuae, Tide of Ruin** (promises a "discard" — this engine has no discard-pile concept anywhere, only banish), **Keawe Kel'rua** base card (promises a duel-count condition on its draw that isn't checked — the bonus is unconditional and the draw never fires), and the **Waltz Twins** support pair (Lagertha Waltz / Hanse Waltz base forms describe their bonus as race-gated ("if that unit is a Nightclaw") when the real gate is Link-group membership via `fieldLink()` — a different system entirely, and the two evolved Waltz forms have the identical mechanic with no text describing it at all). None of these are guesses — each was confirmed by reading the card's live object literal against `applyCalled()`'s actual vocabulary.
+
 ---
 
 ## Open items (see MASTER_FIX_SHEET.md for the full, prioritized list)

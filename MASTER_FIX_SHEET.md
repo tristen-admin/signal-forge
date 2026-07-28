@@ -5,7 +5,7 @@
 
 ---
 
-## Fixed this pass (commits `996ff9c`, `e59d3ca`, `d296e44`, `3452404` — all verified live before deploy)
+## Fixed this pass (commits `996ff9c`, `e59d3ca`, `d296e44`, `3452404`, `80c6439` — all verified live before deploy)
 
 🔴 **Ascension: "Resume the Rite" silently wiped the whole run.** `ascParty`/`ascPartySel` were never persisted, only `ascRun` was — a reload mid-Rite left `ascParty` empty, which the wipe-check read as a full party wipe, permanently deleting the run. Both now save/restore correctly.
 
@@ -40,6 +40,16 @@
 🟢 A ~1.9s window in `ascBattleWin()` meant a reload between two save calls could re-grant a win's rewards on re-clearing the same node — tier now advances before either save fires.
 
 🟢 `autoSimPvp()` hygiene: hardcoded `4` → `matchWinThreshold()` (no behavior change today).
+
+🔴 **Ascension: Crossroads nodes launched real combat instead of the built reward-picker.** `ascPickNode()`'s dispatcher special-cased `sanctum`/`merchant` but let every other node type — including `crossroads` — fall through to `ascEnterEncounter()`. `ascCrossroads()` (a complete, working no-combat reward-choice screen) existed and was simply never called. The map's own node-type promise was silently broken on every run. Added the missing `else if(node.type==='crossroads')` branch.
+
+🟡 **Ascension Rite wins could never actually grant Forge, and overpaid Signal ~2x.** `ascEndRun(won)` added `forgeGain` — a value scaled and labeled as Forge everywhere else in the UI — directly into `signalPoints` instead of `forgeBalance`. Fixed the currency target and the reward-reveal text/icon to match. Verified live: a forced win now shows 525 Signal / 1140 Forge with no cross-contamination, matching the formulas exactly.
+
+🟢 **6 dead `CARD_RULES` entries removed** (Kaelthar the Ascendant, Kessuae Tide of Ruin, Fifth Frequency Stormcaller, Envoy of Tyrants Ella Ballora, Trophy-Hunter Kessa, The Bronzed Beast Hanse Waltz) — each was silently shadowed by a later `CARD_RULES['Name']=[...]` assignment appended further down the file (plain JS last-write-wins). The live rule already matched printed card text in every case, so this is pure cleanup — but it closes a real trap where a future balance edit to the "obvious" first-found entry would have had zero effect.
+
+🟢 **Three CALLED text corrections**, each brought in line with the already-correct working code: Corvus ("+3" → "+4", matching `add:4`), Uso Oso ("+2" → "+3", matching `add:3`), Muster-Sergeant Bryn (text now discloses its existing `perWCcap:8`).
+
+🟢 **`transferToMe()` — a complete function, never called anywhere — wired into `acceptTrade()`.** The Growth Codex explicitly promises a card's owner-only K/D resets "when the card changes hands," but the reset function that does exactly this was dead code. A traded-in card silently kept its previous owner's K/D and showed a generic "Held in vault" Card DNA reason instead of "Traded." Verified live: forced a trade, confirmed `ok`/`od` reset to 0 and the chain's last entry reads `{owner:'@keanu', via:'Traded'}`.
 
 ---
 
@@ -84,7 +94,27 @@
 🟢 Dead-code hygiene (verified non-visible to players): an orphaned, permanently-hidden legacy sound-toggle button; a computed-but-never-attached "trust rating" variable on every Hub render; an unreachable placeholder headline string; one dead `SCREEN_TITLES` entry; a rival's PvP stake card is fully deterministic (same bot always offers the same specific card, zero variation).
 
 ### Reference / Records / Market / cross-cutting
-*(Pending — the dedicated audit pass for this area was interrupted by a machine crash before it completed and is being re-run. This section will be filled in once it reports back.)*
+
+*Fixed this pass — see above: Crossroads mis-dispatch, Forge/Signal misdirection, 6 dead CARD_RULES entries, 3 CALLED text corrections, transferToMe wire-up.*
+
+🟡 **Legend Board's price estimate shows the wrong currency icon.** `buildLegendBoard()` prints every card's `legendPrice()` as `'≈ ❖ '+fmtPts(...)` (❖ = Forge), but the actual Marketplace it's estimating a value for (`buildMarket()`, `listCard()`, `buyMarket()`) transacts exclusively in ◈ Signal — the wallet, the floor price, every listing, every buy confirmation. A player comparing "what my card might sell for" against "what it actually costs to buy on the Marketplace" sees two different currency symbols for the same number. One-line icon fix once you confirm ❖ was a mistake and not a deliberate signal that Legend "value" and Marketplace price are different things.
+
+🟢 **Marketplace's "30d volume" stat has a hardcoded +184,200 floor baked in permanently.** `buildMarket()`: `const vol = marketListings.reduce(...) + 184200;` — real sold-volume is added on top of a fixed number that never moves, rather than replacing it once real activity exists. Reads as a deliberate "the market looks alive" placeholder rather than a bug, but it means the stat can never honestly reflect a quiet market — flagging for your call on whether/when to retire the floor.
+
+📋 **Two CALLED entries promise mechanics that don't exist anywhere in the engine:**
+- **Ourevos, the Golden Dragon** (`CALLED`): text reads "your Fighter +5, **fill the other support slot with a copy of this card**, then draw a card" — only `add:2` is a real field. No "fill empty support slot with a duplicate" primitive exists in `applyCalled()` or anywhere else.
+- **Anorith Keeling** (`CALLED`): text reads "**return this unit from the support circle to your deck**, banish 1 card from your hand, draw 2 and gain 1 charge" — only `banishOwn:1` is real. Self-return-to-deck for a support and the draw/charge grant are both unbuilt.
+Both need either a real primitive (support-to-deck return, empty-slot-detection + card-copy insertion) or a text rewrite to match `add`/`banishOwn` alone — a scope call, not a quick patch, since the Ourevos case in particular is a genuinely new mechanic (nothing today lets a card duplicate itself into an empty slot).
+
+🟡 **Kessuae, Tide of Ruin's CALLED text promises a "discard" that cannot exist.** Text: "your Fighter +3, draw 1 then discard 1" (`add:3` is the only real field). Confirmed via direct search: this engine has no discard-pile concept anywhere (already self-documented in a code comment at line ~9903 — "this file has no discard-pile concept"). Every other card that uses discard-flavored language ("Dredge," the Sift spell) actually banishes, it doesn't discard. Kessuae's text is the one place that promises a draw-then-discard cycle nothing backs — rewrite to describe the flat +3, or build the draw+banish pairing other cards already use as the real pattern to copy.
+
+🟢 **Keawe Kel'rua's base CALLED text promises a condition it doesn't check.** Text: "your Fighter +3, if there have been at least 2 duels this match then draw 1" — the object literal is `{add:3}` only, no `if`/`draw` field. The bonus is unconditional and there is no draw, ever, regardless of duel count. (Note: his Legend Reborn variant's own DM Activated Ability *does* implement a real duel-count-gated scry/cost-discount elsewhere — this is specifically the base card's Called text that's unbacked.)
+
+🟡 **The "Waltz Twins" support bonus text describes the wrong system — race, when the real gate is Link-group membership.** Lagertha Waltz's and Hanse Waltz's (base forms) CALLED text both read "add an additional +2 if that unit is a Nightclaw" — a `raceOf()`/`CARD_RACE` check. But the actual `+2` (`twinBuff:5`, applied at `index.html:7734`) only fires when `fieldLink()` finds the committed Fighter and this support in the **same LINK_GROUPS entry** ("Waltz Twins," `index.html:6721`) — a completely separate system from race. Worse, the two evolved forms (The Bronzed Beast Hanse Waltz, Lagertha Waltz Wrathful Transformation) carry the identical `twinBuff:5` mechanic but their CALLED text doesn't mention it at all. Net effect: 2 cards describe a condition that isn't the real one, 2 cards don't describe the real mechanic they have. One consistent rewrite ("+2 more if fielded alongside its Waltz Twins partner") would fix all 4 — a text-only fix once you confirm the Link-group gate (not race) is the intended design, which every other twinBuff card already assumes.
+
+🟢 **`deckMasterRecord` is write-only — tracked, persisted, never shown.** Two call sites increment and save it (`index.html:7967`, `7980`, `lsSet('sf_dm_record', ...)`) every time your current Deck Master personally wins or dies, but no screen anywhere reads it back. Legend Board, Card DNA, and the Hub stat row all show *card* K/D, never this DM-specific ledger. Either surface it (a natural fit for the Hub stat row or Legend Board) or remove the tracking — right now it's pure overhead with no player-facing payoff.
+
+🟢 **Dead-code hygiene** (verified non-visible to players, zero gameplay impact): roughly a dozen functions across the Reference/Records/Market screens and cross-cutting helpers are defined but never called from any live render path — superseded by later rewrites the same way the earlier-fixed `pickOppCard()` duplicate was. Noted for the next cleanup pass rather than itemized here individually, since none affect current behavior.
 
 ---
 
