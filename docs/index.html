@@ -2853,7 +2853,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="lobby-head">
       <div class="lh-eyebrow">Ranked · Matchmade</div>
       <h1>Ranked Ladder</h1>
-      <p>One tap and we pair you with an opponent near your rating for a best-of-7. Every match moves your <strong style="color:var(--gold)">Ladder Rank</strong> — win RP or lose it. <span style="color:var(--text3)">(Rival AI stands in until networked play ships.)</span></p>
+      <p>One tap and we pair you with an opponent near your rating for a best-of-3. Every match moves your <strong style="color:var(--gold)">Ladder Rank</strong> — win RP or lose it. <span style="color:var(--text3)">(Rival AI stands in until networked play ships.)</span></p>
     </div>
     <div class="ranked-rankbar" id="ranked-rankbar"></div>
     <div class="ranked-queue" id="ranked-queue"></div>
@@ -2890,7 +2890,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="lobby-head">
       <div class="lh-eyebrow" style="color:var(--lose)">Staked PvP · High Stakes</div>
       <h1>Wager Duel — cards on the line</h1>
-      <p>Stake one of your cards against a rival's. Win the best-of-7 and <strong style="color:var(--gold)">their card is yours</strong>. Lose and <strong style="color:var(--lose)">yours is forfeited</strong> — removed from your collection. No Signal, no rank — just the cards. <span style="color:var(--text3)">(Rival AI stands in until networked play ships.)</span></p>
+      <p>Stake one of your cards against a rival's. Win the best-of-7 and <strong style="color:var(--gold)">their card is yours</strong>. Lose and <strong style="color:var(--lose)">yours is forfeited</strong> — removed from your collection. No rank staked — just the cards, plus a small Signal payout for the win. <span style="color:var(--text3)">(Rival AI stands in until networked play ships.)</span></p>
       <div class="market-disclaimer">⚖ <strong>Skill-based · no real money in this prototype.</strong> Cards you stake are won and lost for keeps — but never for cash. Real-money-stakes wagering would need qualified legal counsel first and is not enabled here.</div>
     </div>
     <div class="pvp-stakes">
@@ -4922,7 +4922,13 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:30, 'choose a card, or the round forfeits');   // casual = 30s round timer; ranked keeps 40
 }
 
-function tangeSurgeReady(c){ return !!c && c.name==='Tange Sazen' && typeof skullchainKills!=='undefined' && skullchainKills>0 && typeof playerScore!=='undefined' && playerScore[1]>=3; }
+// Real bug (7/28/26): hardcoded ">=3" assumed casual's best-of-7 threshold (4) -- "opponent is one
+// win from taking the match" needs playerScore[1] >= matchWinThreshold()-1, not a bare 3. Ranked's
+// threshold is 2, so the literal 3 could never be reached before a Ranked match already ended --
+// Tange Sazen's whole signature ability (his printed text is exactly this "one win away" condition)
+// was unreachable for the entire duration of every Ranked match. matchWinThreshold()-1 == 3 for
+// casual/PvP (unchanged) and == 1 for Ranked (now correctly reachable).
+function tangeSurgeReady(c){ return !!c && c.name==='Tange Sazen' && typeof skullchainKills!=='undefined' && skullchainKills>0 && typeof playerScore!=='undefined' && typeof matchWinThreshold==='function' && playerScore[1]>=matchWinThreshold()-1; }
 function renderInstantStrip(){
   var strip=document.getElementById('instant-strip'); if(!strip) return;
   var opts=document.getElementById('instant-options');
@@ -6454,7 +6460,11 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
           var fl=document.createElement('div'); fl.className='rc-flash'; fld.appendChild(fl); void fl.offsetWidth; fl.classList.add('go');
           setTimeout(function(){ if(fl.parentNode) fl.parentNode.removeChild(fl); if(fld) fld.classList.remove('rc-shake'); }, 640); }
         if(typeof FX!=='undefined'){ var ctr=(function(){ var a=document.getElementById('rc-card-me'),b=document.getElementById('rc-card-opp'); if(!a||!b) return {x:innerWidth/2,y:innerHeight/2}; var ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect(); return {x:(ra.left+ra.right+rb.left+rb.right)/4,y:(ra.top+ra.bottom+rb.top+rb.bottom)/4}; })();
-          var _epic=(typeof playerScore!=='undefined')&&((won==='win'&&playerScore[0]>=3)||(won==='lose'&&playerScore[1]>=3)), _m=_epic?1.7:1;
+          // Real bug (7/28/26): same ">=3" literal as tangeSurgeReady() above -- silently never hit
+          // in Ranked (threshold 2), so this "match point" epic-VFX boost never played in the mode
+          // most likely to want it. matchWinThreshold()-1 == 3 for casual/PvP (unchanged), ==1 Ranked.
+          var _mwt1=(typeof matchWinThreshold==='function')?matchWinThreshold()-1:3;
+          var _epic=(typeof playerScore!=='undefined')&&((won==='win'&&playerScore[0]>=_mwt1)||(won==='lose'&&playerScore[1]>=_mwt1)), _m=_epic?1.7:1;
           var _wc=won==='win'?['#fff6d8','#f5c24d','#ffb347','#ff7a3c']:won==='lose'?['#ffd9d9','#ef5a5a','#b82828','#ff7676']:['#e6edf6','#9fb3c8','#6d7f96'];
           FX.flash(_epic?0.95:0.68, won==='lose'?'#ffe0e0':'#fff'); FX.ring(ctr.x,ctr.y,{c:_wc[1],vr:11,w:6,life:40}); FX.ring(ctr.x,ctr.y,{c:'rgba(255,255,255,.85)',vr:17,w:3,life:26}); FX.burst(ctr.x,ctr.y,{n:Math.round(72*_m),colors:_wc,speed:9*_m,size:3.6,life:48,sparkRate:0.5,up:1.4}); }
         if(typeof SFX!=='undefined') SFX.play('impact');
@@ -8578,7 +8588,7 @@ const SAVE_KEY = 'signalforge_save_v2';
 let _saveFailedOnce = false;   // 7/18/26: throttle the failure toast to once per session -- a quota-exceeded save fails on EVERY subsequent saveState() call otherwise, which would spam a toast on nearly every action
 function saveState(){
   try{
-    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]}));
+    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, ascParty, ascPartySel, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]}));
   }catch(e){
     // Previously silent -- a change could visibly apply in-memory (card updates, a "success" toast
     // already fired from the caller) while the save itself failed underneath, e.g. localStorage
@@ -8609,6 +8619,17 @@ function loadState(){
     if(s.avatarBond && typeof s.avatarBond==='object') avatarBond=s.avatarBond;
     if(s.pairBonds && typeof s.pairBonds==='object') pairBonds=s.pairBonds;
     if(s.ascRun && s.ascRun.map) ascRun=s.ascRun;
+    // Real bug (7/28/26): ascRun (map/tier/inventory) was the only Ascension state ever saved --
+    // ascParty (the live party's HP/moves/status) and ascPartySel (which companions were chosen)
+    // were never persisted, so "Resume the Rite" restored the map but ascParty stayed at its
+    // initial []. ascBattleEnd()'s wipe check (!ascParty.some(u=>!u.avatar&&u.hp>0)) reads `true`
+    // on an empty array, so the very next battle instantly registered as a full party wipe and
+    // permanently deleted the whole run (ascBattleRunEnd(false) nulls ascRun and saves that).
+    // Restoring both here, alongside ascRun, closes the gap -- ascParty's objects are plain data
+    // (no functions/DOM refs; confirmed via ascBegin()'s mkA/mkC constructors), so a direct
+    // round-trip through JSON is safe and preserves exact HP/move-uses state.
+    if(Array.isArray(s.ascParty) && s.ascParty.length) ascParty=s.ascParty;
+    if(s.ascPartySel && typeof s.ascPartySel==='object' && s.ascPartySel.avatarId) ascPartySel=s.ascPartySel;
     if(typeof s.forgeBalance==='number') forgeBalance = s.forgeBalance >= 0 ? s.forgeBalance : 12000;
       if(typeof s.bountyBalance==='number') bountyBalance = s.bountyBalance;
       if(typeof s.seasonRewardClaimed==='boolean') seasonRewardClaimed = s.seasonRewardClaimed;
@@ -9982,9 +10003,14 @@ function buildDeckBuilder(){
   { var _dt=document.getElementById('dlc-deck-title'); if(_dt) _dt.textContent=`Your ${DECK_SIZE}-Card Deck`; }
   { let _pw=0; activeDeck.forEach(function(k){ var c=COLLECTION.find(function(x){return (x.uid||x.name)===k;}); if(c) _pw+=(c.pow||0); }); var _pe=document.getElementById('deck-power'); if(_pe) _pe.textContent = n ? (_pw+' pow \u00b7 avg '+(_pw/n).toFixed(1)) : ''; }
   const status=document.getElementById('deck-status');
-  if(n===DECK_SIZE){ status.textContent='✓ Deck ready'; status.className='dh-status ready'; }
+  // Real bug (7/28/26): this only ever showed "ready" at exactly 20 cards, even though 16-19 are
+  // equally legal, playable decks by design (MIN_DECK's own comment: "decks are 16-20 by design --
+  // no deckout stalling risk"). The Hub's own deck tile already gets this right ("N/20 · min 16 to
+  // play"); this was the ONE screen whose entire job is telling you if your deck is playable, and
+  // it disagreed with the Hub while you were looking straight at it.
+  if(n>=MIN_DECK && n<=DECK_SIZE){ status.textContent = n===DECK_SIZE ? '✓ Deck ready' : `✓ Deck ready (${n}/${DECK_SIZE})`; status.className='dh-status ready'; }
   else if(n>DECK_SIZE){ status.textContent=`Remove ${n-DECK_SIZE}`; status.className='dh-status over'; }
-  else { status.textContent=`Add ${DECK_SIZE-n} more`; status.className='dh-status'; }
+  else { status.textContent=`Add ${MIN_DECK-n} more (min ${MIN_DECK})`; status.className='dh-status'; }
 }
 function buildDeckSlots(){
   const names=[...activeDeck];
@@ -9996,16 +10022,21 @@ function buildDeckSlots(){
       const glyph=CARD_ART[c.artKey||c.name]?'🖼':(CARD_SIGIL[c.artKey||c.name]||'◈');
       const dmKey=(c.uid||c.name);
       const isDM = (typeof deckMasterCard!=='undefined') && deckMasterCard===dmKey;
-      // 7/24/26: signature badge -- only 7 cards game-wide currently carry a real DM_EXCLUSIVE
-      // tier-1 bonus; everything else non-Common still works as Deck Master (tier-2/3 math) but
-      // has no unique text. Surfacing this in-context answers "which of my cards is worth picking."
+      // 7/24/26: signature badge -- only 9 cards game-wide currently carry a real DM_EXCLUSIVE
+      // tier-1 bonus; everything else still works as Deck Master (tier-2/3/4 math) but has no
+      // unique text. Surfacing this in-context answers "which of my cards is worth picking."
       const hasSig = (typeof DM_EXCLUSIVE!=='undefined') && !!DM_EXCLUSIVE[c.name];
-      const dmBtn = c.rarity!=='common' ? `<button class="ds-dm${isDM?' on':''}" title="${isDM?'Your Deck Master':(hasSig?'Name as Deck Master — has a real signature bonus':'Name as Deck Master')}" onclick="event.stopPropagation();setDeckMaster('${dmKey.replace(/'/g,"\\'")}')">★</button>` : '';
+      // Real bug (7/28/26): setDeckMaster() itself has carried no rarity check since 7/12/26 --
+      // "rarity gate lifted by direct request -- any card can be Deck Master now" -- but this button
+      // was still hidden for Common cards, and startDeckMasterMatch()'s failure toast still claimed
+      // "must be AR/Ultra/Rare" (fixed below too). Same "rarity never gates capability" principle as
+      // this session's earlier conjure-eligibility fix, just a second UI spot that one didn't reach.
+      const dmBtn = `<button class="ds-dm${isDM?' on':''}" title="${isDM?'Your Deck Master':(hasSig?'Name as Deck Master — has a real signature bonus':'Name as Deck Master')}" onclick="event.stopPropagation();setDeckMaster('${dmKey.replace(/'/g,"\\'")}')">★</button>`;
       slots.push(`<div class="deck-slot filled ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()}${isDM?' dm-master':''}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}')" style="cursor:pointer">
         <span class="ds-num">${i+1}</span>
         <span class="ds-sigil">${glyph}</span>
         <div class="ds-body">
-          <div class="ds-name">${isDM?'★ ':''}${c.name}${hasSig?' <span class="ds-sig" title="Real signature bonus">⭐</span>':''}</div>
+          <div class="ds-name">${isDM?'★ ':''}${dispName(c.name)}${hasSig?' <span class="ds-sig" title="Real signature bonus">⭐</span>':''}</div>
           <div class="ds-meta"><span class="ds-rar">${rlab(c.rarity)}</span> · <span class="k">${kdOf(c).k}K</span>/<span class="d">${kdOf(c).d}D</span></div>
         </div>
         <span class="ds-pow">${c.pow}</span>
@@ -11657,7 +11688,8 @@ function autoSimPvp(){
   resetMatchState();
   const myPool=(activeDeck.size===DECK_SIZE)?[...activeDeck].map(k=>COLLECTION.find(c=>(c.uid||c.name)===k)).filter(Boolean):COLLECTION.filter(c=>(ownedCopies[c.uid||c.name]||0)>0);
   playerScore=[0,0]; let g=0;
-  while(playerScore[0]<4 && playerScore[1]<4 && g++<60){
+  var _mwt=(typeof matchWinThreshold==='function')?matchWinThreshold():4;   // hygiene fix 7/28/26: was a hardcoded 4, a duplicated magic number that would've silently drifted from casual's real threshold if it ever changed (PvP never sets rankedMode, so behavior is unchanged today)
+  while(playerScore[0]<_mwt && playerScore[1]<_mwt && g++<60){
     const mine=myPool.length?myPool[Math.floor(Math.random()*myPool.length)]:{pow:10};
     const opp=pickOppCard();
     const mp=(mine.pow||10)+Math.floor(Math.random()*9)-4;
@@ -11992,13 +12024,29 @@ const ASC_CHAPTERS=[
 ];
 var ascChapterIdx=0;
 function ascChapterUnlocked(i){ if(i<=0) return true; var t=0; for(var k in ascUnitProg){ var p=ascUnitProg[k]||{}; t+=(p.bosses||0)+(p.rites||0); } return t>0; }
-function ascPickChapter(i){ if(!ASC_CHAPTERS[i]) return; if(!ascChapterUnlocked(i)){ if(typeof toast==='function') toast('Win a Rite first to unlock '+ASC_CHAPTERS[i].title+'.', false); return; } ascChapterIdx=i; if(typeof ascRenderSetup==='function') ascRenderSetup(); }
-function ascChapterPicker(){ if(ascEditing) return ''; return '<div class="asc-chapters">'+ASC_CHAPTERS.map(function(c,i){ var lk=!ascChapterUnlocked(i); return '<button class="asc-chapter'+(i===ascChapterIdx?' on':'')+(lk?' locked':'')+'" onclick="ascPickChapter('+i+')"><span class="ach-t">'+c.title+(lk?' 🔒':'')+'</span><span class="ach-s">'+(lk?'Win a Rite to unlock':c.sub)+'</span></button>'; }).join('')+'</div>'; }
+function ascPickChapter(i){ if(!ASC_CHAPTERS[i]) return; if(!ascChapterUnlocked(i)){ if(typeof toast==='function') toast('Beat a boss first to unlock '+ASC_CHAPTERS[i].title+'.', false); return; } ascChapterIdx=i; if(typeof ascRenderSetup==='function') ascRenderSetup(); }
+// Real bug (7/28/26): this copy said "Win a Rite to unlock" but ascChapterUnlocked() only ever
+// requires ONE accumulated boss/rite credit anywhere in ascUnitProg -- a single mid-chapter boss
+// kill (e.g. Chapter 1's non-final Ossian Drell fight) unlocks Chapter 2 even if that run is later
+// lost, no full Rite clear required. Fixed the copy to describe the real, working gate rather than
+// loosening or tightening the gate itself to match the old text.
+function ascChapterPicker(){ if(ascEditing) return ''; return '<div class="asc-chapters">'+ASC_CHAPTERS.map(function(c,i){ var lk=!ascChapterUnlocked(i); return '<button class="asc-chapter'+(i===ascChapterIdx?' on':'')+(lk?' locked':'')+'" onclick="ascPickChapter('+i+')"><span class="ach-t">'+c.title+(lk?' 🔒':'')+'</span><span class="ach-s">'+(lk?'Beat a boss to unlock':c.sub)+'</span></button>'; }).join('')+'</div>'; }
 function ascSetVistaLoc(loc){ try{ var img=LOCATION_ART[loc]; var v=document.getElementById('v-asc'); if(v&&img) v.style.setProperty('--vista','url("'+img+'")'); }catch(e){} }
 function ascTierLoc(ti){ var t=ascRun&&ascRun.map&&ascRun.map[ti]; var n=t&&t[0]; return (n&&n.loc)||ascLocationFor(ti); }
 function ascStoryMap(){
+  // Real bug (7/28/26): `tier` (used both for this chapter's own "is this the last node" check
+  // AND, via ascFoeStats(), for foe difficulty scaling) restarts at 0 every chapter -- so Chapter
+  // 2's own finale (tier 2 of 0-2) scaled softer than Chapter 1's mid-chapter boss (tier 1 of 0-3),
+  // let alone Chapter 1's own finale (tier 3). Can't just make `tier` itself cumulative -- the
+  // isLastNode check in ascBattleWin() (`node.tier >= ascRun.map.length-1`) needs it chapter-local,
+  // comparing against THIS chapter's own map length. Added a separate `globalTier` -- a running
+  // total across every chapter before this one -- that ascFoeStats() reads instead, so difficulty
+  // keeps climbing across the whole Ascension experience while the per-chapter completion check
+  // is untouched. Endless Rite's ascGenMap() never sets globalTier, so ascFoeStats() falls back to
+  // the plain (already-correct, single-run) `tier` there -- no change to that mode's own curve.
+  var priorNodes=0; for(var c=0;c<ascChapterIdx;c++){ priorNodes += (ASC_CHAPTERS[c]&&ASC_CHAPTERS[c].beats)?ASC_CHAPTERS[c].beats.length:0; }
   var _ch=(ASC_CHAPTERS[ascChapterIdx]||ASC_CHAPTERS[0]).beats; return _ch.map(function(sn,i){ var boss=sn.type==='boss', el=sn.type==='elite';
-    return [{ id:'story'+i, type:sn.type, champName:sn.champ, champArt:sn.art, pow:8+i*3+(el?4:0)+(boss?9:0), vit:boss?4:el?3:2, tier:i, loc:sn.loc, beat:sn.beat, title:sn.title, requires:sn.requires, foes:sn.foes }]; });
+    return [{ id:'story'+i, type:sn.type, champName:sn.champ, champArt:sn.art, pow:8+i*3+(el?4:0)+(boss?9:0), vit:boss?4:el?3:2, tier:i, globalTier:priorNodes+i, loc:sn.loc, beat:sn.beat, title:sn.title, requires:sn.requires, foes:sn.foes }]; });
 }
 function ascStoryStart(){
   var av=ASC_UNITS.find(function(u){return u.id===ascPartySel.avatarId;});
@@ -12108,11 +12156,11 @@ function ascHowTo(){
   function sec(t,rows){ return '<div class="acd-sec"><div class="acd-sec-t">'+t+'</div>'+rows+'</div>'; }
   function row(ic,nm,ds){ return '<div class="acd-link"><span class="acd-link-n">'+ic+' '+nm+'</span><span class="acd-link-fx">'+ds+'</span></div>'; }
   a.innerHTML='<div class="asc-panel"><div class="asc-panel-head"><button class="asc-back" onclick="ascHomeAsc()">← Ascension</button><div><div class="asc-res-eyebrow">Ascension · Field Manual</div><h2 class="asc-panel-title">How the Rite Works</h2></div></div>'
-   +'<p class="asc-panel-sub">You descend a six-tier gauntlet as a Champion and a party of Allies. A party wipe ends the run, and HP carries between battles — so pace yourself and heal when you can.</p>'
+   +'<p class="asc-panel-sub">You lead a Champion and a party of Allies through a run of battles — a short, story-driven Chapter, or the longer six-tier Endless Rite. A party wipe ends the run, and HP carries between battles — so pace yourself and heal when you can.</p>'
    +sec('Your Party', row('★','Champion (Patron)','Never fights. It grants your party a passive and charges an Ultimate you unleash at the crest of battle.')+row('⚔','Companions','Your fighters. Each learns a new move at Lv 3, 6 and 10.'))
    +sec('Move Kinds', row('⚔','Damage / 💥 AoE','Strike one foe, or all of them.')+row('❤️','Heal','Restore an ally.')+row('🛡','Guard','The party takes less damage for a few turns — soak a big hit.')+row('⤴','Buff','An ally strikes harder for a few turns — set up a nuke.')+row('🎯','Vulnerable','A foe takes extra damage — soften the tank.')+row('🩸','Bleed / Burn','Damage every turn, no roll needed.')+row('☠','Execute','Bonus damage against low-HP foes — close it out.'))
    +sec('Link Auras', row('🔗','Lore Links','Field 2+ units from the same lore group (Dragon-Pact, Waltz Twins, Darwin’s Court…) to activate a run-long team buff. Fighting together deepens the bond and strengthens the aura.'))
-   +sec('The Map', row('⚔','Duel / 👑 Elite','Battles — the backbone of the run.')+row('⚡','Trial','Optional harder fight with a modifier — bigger rewards and guaranteed gear.')+row('🔀','Crossroads','Choose one of three rewards.')+row('🛒','Merchant','Spend Signal on gear and consumables.')+row('❤️','Sanctum','Rest and heal the party.')+row('☠️','Boss','Tier six — the run’s final test.'))
+   +sec('The Map', row('⚔','Duel / 👑 Elite','Battles — the backbone of the run.')+row('⚡','Trial','Optional harder fight with a modifier — bigger rewards and guaranteed gear.')+row('🔀','Crossroads','Choose one of three rewards.')+row('🛒','Merchant','Spend Signal on gear and consumables.')+row('❤️','Sanctum','Rest and heal the party.')+row('☠️','Boss','The run’s final test — the last tier of Endless Rite, or a Chapter’s climactic battle in Story Mode.'))
    +sec('Your Legend', row('🎖','Bounties','Three optional run goals — complete them for bonus card value and Signal.')+row('🤝','Bonds','Allies who fight together forge bonds that raise their card value and strengthen shared links.')+row('👑','Card Value','Levels, Rites and bosses felled all raise an ally card’s market value — your Rite legend is a real asset.'))
    +'<button class="enter-btn" style="margin-top:18px" onclick="ascHomeAsc()">Got it — back to Ascension</button></div>';
 }
@@ -12487,7 +12535,7 @@ function ascRenderBag(){
 }
 function ascFoeStats(node){
   var count = node.type==='boss'?1 : node.type==='elite'?3 : 2;
-  var mult = 1 + node.tier*0.22;
+  var mult = 1 + (node.globalTier!=null?node.globalTier:node.tier)*0.22;
   var tr = (node.type==='trial') ? (ASC_TRIALS.find(function(x){return x.id===node.mod;})||null) : null;
   var atkMod = (tr&&tr.foeAtk)||1;
   var pool = (node.foes && node.foes.length) ? node.foes : ASC_FOES;   // per-node themed filler override (see ASC_FOES_CADETS/ASC_FOES_WRIT)
@@ -12658,20 +12706,29 @@ function ascBattleWin(){
   if((ascRun.links||[]).length>=2) ascBountyProgress('links');
   if(ascParty.every(function(u){ return u.avatar || u.hp>0; })) ascBountyProgress('flawless');
   ascLog('Victory! Each survivor +'+xp+' XP · +'+sig+' ◈');
-  ascRenderBattle(); if(typeof ascPlayFx==='function')ascPlayFx(); if(typeof ascVictoryFx==='function')ascVictoryFx(); saveState();
+  ascRenderBattle(); if(typeof ascPlayFx==='function')ascPlayFx(); if(typeof ascVictoryFx==='function')ascVictoryFx();
   // A boss only ends the whole Rite if it's the LAST node in this chapter's map — both new story
   // chapters can have a boss mid-run (e.g. Chapter 1's "Instructor's Test" is stage 2 of 4), and
   // treating every boss win as "Rite won" would boot the player back to setup before they ever see
   // the remaining stages. This was previously unconditional, a leftover from when bosses only ever
   // sat at a chapter's end.
   var isLastNode = (node.tier >= ascRun.map.length-1);
+  var isRunEnd = (node.type==='boss' && isLastNode);
+  // Real bug fixed 7/28/26: tier++ and its save used to happen together 1900ms later, inside the
+  // setTimeout below -- but THIS point already saved unconditionally, right above, before the
+  // increment. That left a real ~1.9s window where a reload resumed on the PRE-advance tier with
+  // this win's XP/Signal/bounty progress already permanently banked; re-clearing the same node then
+  // re-granted all of it. Tier now advances immediately, in the same synchronous tick as the rest of
+  // this win's state change, so there is exactly one consistent state to persist -- not two that can
+  // drift apart across a real timing gap. (Real bug fixed 7/22/26, preserved here: a non-boss win
+  // must still call saveState() itself once ASC_GATE_SAVES_TO_BOSS flips on and the unconditional
+  // first save above goes away -- that's why this single save is gated the same way the old second
+  // call was, not left unconditional.)
+  if(!isRunEnd) ascRun.tier++;
+  if(!ASC_GATE_SAVES_TO_BOSS || node.type==='boss') saveState();
   setTimeout(function(){
-    if(node.type==='boss' && isLastNode){ ascBattleRunEnd(true); return; }
-    ascRun.tier++; ascBattle=null; ascBusy=false;
-    // Real bug fixed 7/22/26: this branch used to never call saveState() at all, so a non-boss win
-    // (or, once ASC_GATE_SAVES_TO_BOSS flips on, ANY non-boss win) would advance tier in memory only
-    // — a reload silently reverted to the last save. See the flag's own comment above ascBattleWin().
-    if(!ASC_GATE_SAVES_TO_BOSS || node.type==='boss') saveState();
+    if(isRunEnd){ ascBattleRunEnd(true); return; }
+    ascBattle=null; ascBusy=false;
     if(typeof toast==='function') toast('Battle won — +'+fmtPts(sig)+' ◈ · party advances', true); ascShowMap();
   }, 1900);
 }
@@ -12844,7 +12901,7 @@ function startMatch(mode){
 // (rankedFindMatch calls startMatch() then sets rankedMode=true right after). Player-only:
 // the bot is untouched, same activeBot/BOT_OPPONENTS as every other mode.
 function startDeckMasterMatch(){
-  if(!deckMasterCard || !activeDeck.has(deckMasterCard)){ toast('Name a Deck Master in the Deck Builder first — must be AR/Ultra/Rare and in your deck.', false); return; }
+  if(!deckMasterCard || !activeDeck.has(deckMasterCard)){ toast('Name a Deck Master in the Deck Builder first — any card in your deck qualifies.', false); return; }
   // Real bug (7/12/26): this guard only checked membership, not deck size. dealNewDeck() silently
   // falls back to the hardcoded DEFAULT_DECK whenever activeDeck.size < MIN_DECK — if the named
   // Deck Master isn't one of DEFAULT_DECK's 12 cards, the whole match ran on a different deck
@@ -12915,9 +12972,21 @@ function buildDraft(){
   if(!_draftRow) dealDraftRow();
   s.innerHTML='<div class="draft-prog">Pick '+(draftPool.length+1)+' of '+DRAFT_PICKS+'</div><div class="draft-row">'+_draftRow.map(function(c,i){ return '<div class="draft-card '+c.rarity+'" onclick="draftInspect('+i+')" onmouseenter="draftHover('+i+',this)" onmouseleave="hideCardPreview()"><div class="dc-pow">'+c.pow+'</div><div class="dc-name">'+(typeof dispName==="function"?dispName(c.name):c.name)+'</div><div class="dc-rar">'+c.rarity+'</div><div class="dc-hint" style="font-size:9px;color:var(--text3);margin-top:5px;letter-spacing:.03em">👁 view / draft</div></div>'; }).join('')+'</div>'+(draftPool.length?'<div class="draft-picked">Drafted: '+draftPool.join(' \u00b7 ')+'</div>':'');
 }
+// Real bug (7/28/26): this used to unconditionally clear timers and jump straight to the lobby --
+// no call into retreat()/pvpEndMatch(), no RP change, no pot forfeiture, no confirmation. Down 1-3
+// in a Ranked series, or about to forfeit a staked card in PvP? Click "Exit to Lobby" instead of
+// losing, and walk away with the RP/cards you'd otherwise lose intact. hudFold() is the existing,
+// correct handler for exactly this "player deliberately quits mid-match" case -- it already does
+// the right thing per mode (PvP: pvpEndMatch(false), full pot forfeit; Ranked: retreat('player'),
+// half-RP penalty; casual: retreat('player') too, but retreat()'s own RP branch is a no-op outside
+// rankedMode, matching casual's real zero-stakes framing) and already routes to the proper
+// match-complete/retreat screen instead of silently vanishing. Reusing it here instead of
+// duplicating its logic a second time (the Weekend Tournament feature already had to special-case
+// hudFold()/exitMatch() divergence once, at line ~13708 -- proof this gap was a real, live trap).
 function exitMatch(){
   clearTurnTimers();
-  show('lobby', document.getElementById('nav-lobby'));
+  if(typeof hudFold==='function') hudFold();
+  else show('lobby', document.getElementById('nav-lobby'));
 }
 
 // reset the duel engine for a fresh match
@@ -13133,7 +13202,7 @@ body:has(#v-turn.on) .howto-btn{display:none}
   <div class="howto-scrim" onclick="closeHowTo()"></div>
   <div class="howto-panel">
     <button class="howto-x" onclick="closeHowTo()" aria-label="Close">✕</button>
-    <div class="howto-head"><span class="howto-mark">🃏</span><div><div class="howto-title">How to Play</div><div class="howto-sub">Best of 7 duels — win 4 to take the match</div></div></div>
+    <div class="howto-head"><span class="howto-mark">🃏</span><div><div class="howto-title">How to Play</div><div class="howto-sub">Best of 7, win 4 — except Ranked, which is best of 3, win 2</div></div></div>
     <div class="howto-body">
       <div class="ht-step"><span class="ht-n">1</span><div><b>Draw</b><p>Tap to draw and start the turn.</p></div></div>
       <div class="ht-step"><span class="ht-n">2</span><div><b>Reveal the Condition</b><p>A rule that reshapes this duel, shown up top. Read it — it can flip the whole fight.</p></div></div>
