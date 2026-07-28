@@ -3499,8 +3499,6 @@ const CONDITIONS = [
   {id:"commonsrevolt",mech:"Commons' Revolt",icon:"✊",name:"The Undercity",rule:"The low-born rise up — the lower-rarity card gains +6.",strat:"Commons and Rares punch up here.",tag:"flip",prob:"3%"},
   {id:"giantslayer",mech:"Giant Slayer",icon:"🗡️",name:"Kaeldren Pass",rule:"When base powers differ by 8 or more, the weaker card fells the giant outright.",strat:"Bait a huge card with a small one.",tag:"flip",prob:"3%"},
   {id:"highroller",mech:"High Roller",icon:"🎲",name:"The Gambler's Den",rule:"Fortune tips the scales — each card gains a random +0 to +10.",strat:"Pure variance; size your bets down.",tag:"chaos",prob:"3%"},
-  {id:"chaosrift",mech:"Chaos Rift",icon:"🌀",name:"The Sundered Veil",rule:"Reality frays — both powers are reforged at random from 1 to 20.",strat:"Base power is meaningless here.",tag:"chaos",prob:"3%"},
-  {id:"coinsedge",mech:"The Coin's Edge",icon:"🪙",name:"Fortune's Table",rule:"A single toss decides all — the winner is random, power be damned.",strat:"A coin flip. Never rely on it.",tag:"chaos",prob:"3%"},
   {id:"momentumtide",mech:"Momentum's Tide",icon:"🌊",name:"The Turning Shore",rule:"The trailing side surges — whoever is behind in the match gains +6.",strat:"A comeback engine when you are down.",tag:"boost",prob:"3%"},
   {id:"eldersreach",mech:"Elder's Reach",icon:"📜",name:"The Long Memory",rule:"Experience tells — +1 power per 4 duels fought (kills + deaths).",strat:"Field cards with long histories.",tag:"boost",prob:"3%"},
   {id:"doubleedged",mech:"Double-Edged",icon:"⚔️",name:"The Twin Blades",rule:"History is a blade both ways — net record (kills − deaths) swings power.",strat:"Great records soar; losing records sink.",tag:"neutral",prob:"3%"},
@@ -3538,8 +3536,6 @@ const COND_EFF = {
   commonsrevolt:"The lower-rarity card gains +6.",
   giantslayer:"If base powers differ by 8+, the weaker card wins outright.",
   highroller:"Each card gains a random +0 to +10.",
-  chaosrift:"Both powers are re-rolled at random, 1–20.",
-  coinsedge:"The winner is random — power is ignored.",
   momentumtide:"Whoever is behind in the match gains +6.",
   eldersreach:"+1 power per 4 duels fought (kills + deaths).",
   doubleedged:"Power shifts by net record (kills − deaths).",
@@ -7887,8 +7883,6 @@ function resolve(pc, oc, cond, playerCommittedPow){
   else if(cond.id==="commonsrevolt"){ var _rp=RARITY_ORDER[pc.rarity],_ro=RARITY_ORDER[oc.rarity]; if(_rp>_ro){playerPow+=6;} else if(_ro>_rp){oppPow+=6;} abilLog.push("✊ Commons' Revolt: the lower rarity +6"); }
   else if(cond.id==="giantslayer"){ if(Math.abs((pc.pow||0)-(oc.pow||0))>=8){ if((pc.pow||0)<(oc.pow||0)){playerPow=oppPow+1;abilLog.push("🗡️ Giant Slayer: your underdog fells the giant");} else {oppPow=playerPow+1;abilLog.push("🗡️ Giant Slayer: their underdog fells the giant");} } else { abilLog.push("🗡️ Giant Slayer: no giant to slay (gap < 8)"); } }
   else if(cond.id==="highroller"){ var _a=Math.floor(Math.random()*11),_b=Math.floor(Math.random()*11); playerPow+=_a; oppPow+=_b; abilLog.push("🎲 High Roller: +"+_a+" you, +"+_b+" opponent"); }
-  else if(cond.id==="chaosrift"){ playerPow=1+Math.floor(Math.random()*20); oppPow=1+Math.floor(Math.random()*20); abilLog.push("🌀 Chaos Rift: powers reforged at random ("+playerPow+" vs "+oppPow+")"); }
-  else if(cond.id==="coinsedge"){ if(Math.random()<0.5){playerPow=1;oppPow=0;abilLog.push("🪙 The Coin's Edge: fate favors you");} else {playerPow=0;oppPow=1;abilLog.push("🪙 The Coin's Edge: fate favors the opponent");} }
   else if(cond.id==="momentumtide"){ if(playerScore[0]<playerScore[1]){playerPow+=6;abilLog.push("🌊 Momentum's Tide: you are behind — +6");} else if(playerScore[1]<playerScore[0]){oppPow+=6;abilLog.push("🌊 Momentum's Tide: opponent behind — +6");} else {abilLog.push("🌊 Momentum's Tide: even match — no swing");} }
   else if(cond.id==="eldersreach"){ playerPow+=Math.floor(((pc.kills||0)+(pc.deaths||0))/4); oppPow+=Math.floor(((oc.kills||0)+(oc.deaths||0))/4); abilLog.push("📜 Elder's Reach: +1 power per 4 duels fought"); }
   else if(cond.id==="doubleedged"){ playerPow=Math.max(1,playerPow+((pc.kills||0)-(pc.deaths||0))); oppPow=Math.max(1,oppPow+((oc.kills||0)-(oc.deaths||0))); abilLog.push("⚔️ Double-Edged: net record (kills − deaths) swings power"); }
