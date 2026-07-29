@@ -3930,6 +3930,13 @@ const DM_ACTIVATED_ABILITY = {
   'Ahdorah Khaan, Determined Soul': {log:'Record Guard \u2014 Denial', desc:"nullify the opponent's called supports this duel; if they called none at all, draw 2", run:function(){
     dmNullifyOppSupportsThisDuel = true;
     dmAhdorahBonusPending = true;
+  }},
+  'Tange Sazen': {log:'Warpath Ascendant \u2014 Disruption', desc:'draw 1, then send 1 card from the top of your opponent\u2019s deck to the bottom', run:function(){
+    drawToHand(1);
+    if(typeof oppDeckBot!=='undefined' && oppDeckBot.length){
+      oppDeckBot.push(oppDeckBot.shift());
+      if(typeof toast==='function') toast('\u2694 Tange Sazen \u2014 sent the opponent\u2019s next draw to the bottom of their deck', true);
+    }
   }}
 };
 function activateDeckMasterAbility(){
@@ -4009,6 +4016,7 @@ let dmRemnantPowOverride = null;   // Deck Master Phase D: one-duel override for
 let conditionLocked = false;
 let matchWager = 1000;
 let stakeMult = 1;
+let raiseLock = null;   // 7/29/26: turn-alternation on raises -- 'player'/'bot' names whoever is allowed to INITIATE the next raise, set on any raise attempt (accepted or declined) by the other side; null means either side may raise. Prevents one side from repeatedly re-raising every phase. Suspended on the tiebreaker duel (see isTiebreakerDuel()).
 let rankRP = 1000;   // competitive ladder rating — what the snap wagers (NOT Signal)
 
 const OPP_CARDS = [
@@ -4620,10 +4628,11 @@ function updateStake(){
   const rb=document.getElementById('hud-raise-btn');
   if(rb){
     if(pendingBotRaise){ rb.disabled=false; rb.textContent='🤝 Agree ×'+pendingBotRaise; }
-    else { const maxed=!pvpMode && stakeMult>=MAX_MULT, potFull=pvpMode && (pvpPotMine||[]).length>=MAX_POT; rb.disabled = raisedThisPhase || maxed || potFull || matchComplete; rb.textContent = pvpMode ? '🩸 Raise' : (maxed ? '⚡ Max ×'+MAX_MULT : (raisedThisPhase ? '⚡ Raised' : '⚡ Raise ×'+(stakeMult*2))); }
+    else { const maxed=!pvpMode && stakeMult>=MAX_MULT, potFull=pvpMode && (pvpPotMine||[]).length>=MAX_POT; const lockedOut=!pvpMode && raiseLock==='bot' && !isTiebreakerDuel(); rb.disabled = raisedThisPhase || maxed || potFull || matchComplete || lockedOut; rb.textContent = pvpMode ? '🩸 Raise' : (maxed ? '⚡ Max ×'+MAX_MULT : (raisedThisPhase ? '⚡ Raised' : (lockedOut ? '🔒 Their turn' : '⚡ Raise ×'+(stakeMult*2)))); }
   }
 }
 function matchOver(){ return playerScore[0]>=matchWinThreshold() || playerScore[1]>=matchWinThreshold(); }
+function isTiebreakerDuel(){ var t=matchWinThreshold(); return playerScore[0]===playerScore[1] && playerScore[0]===t-1; }   // 7/29/26: the raise-turn-lock is suspended here — a tied match-point duel, either side may raise regardless of whose turn it is
 // ══ WAGER PHASE ══ (renamed from "Snap") — a real between-duels phase with a 30s window.
 // Either side may Raise the wager; both choosing Continue before the clock elapses skips the rest.
 // vs-bot stakes RANK (RP); PvP stakes CARDS (see PvP raise).
@@ -4656,11 +4665,12 @@ function enterWagerPhase(){
 }
 function renderWager(statusMsg){
   const stake=matchWager*stakeMult;
-  const st=document.getElementById('wager-stake'); if(st) st.innerHTML='Rank on the line · <b>'+fmtPts(stake)+' RP</b> · ×'+stakeMult+(stakeMult>=MAX_MULT?' · <span style="color:var(--text3)">max stake</span>':(raisedThisPhase?' · <span style="color:var(--text3)">raised this turn</span>':''));
+  const botName=(activeBot&&activeBot.name)||'Rival';
+  const lockedOut = raiseLock==='bot' && !isTiebreakerDuel();
+  const st=document.getElementById('wager-stake'); if(st) st.innerHTML='Rank on the line · <b>'+fmtPts(stake)+' RP</b> · ×'+stakeMult+(stakeMult>=MAX_MULT?' · <span style="color:var(--text3)">max stake</span>':(raisedThisPhase?' · <span style="color:var(--text3)">raised this turn</span>':(lockedOut?' · <span style="color:var(--text3)">'+botName+'’s turn to raise</span>':'')));
   const status=document.getElementById('wager-status'); if(status) status.innerHTML=statusMsg||'';
   const btns=document.getElementById('wager-btns'); if(!btns) return;
-  const botName=(activeBot&&activeBot.name)||'Rival';
-  const canRaise = !raisedThisPhase && stakeMult<MAX_MULT && !playerReady;
+  const canRaise = !raisedThisPhase && stakeMult<MAX_MULT && !playerReady && !lockedOut;
   btns.innerHTML =
     (canRaise ? '<button class="wager-btn raise" onclick="playerRaise()">⚡ Raise → ×'+(stakeMult*2)+' · '+fmtPts(matchWager*stakeMult*2)+' RP</button>' : '')+
     '<button class="wager-btn ready '+(playerReady?'on':'')+'" onclick="playerReadyUp()" '+(playerReady?'disabled':'')+'>'+(playerReady?'✓ Ready — waiting on '+botName+'…':'Continue →')+'</button>';
@@ -4675,7 +4685,8 @@ function botWagerDecision(){
     botReady=true; renderWagerPvP(playerReady?'Both ready — advancing…':((activeBot&&activeBot.name)||'Rival')+' is ready. Continue when you are.'); checkBothReady(); return;
   }
   const botBehind = playerScore[1] < playerScore[0];
-  if(!raisedThisPhase && botBehind && stakeMult<MAX_MULT && Math.random()<0.45){ botRaise(); return; }
+  const botMayRaise = raiseLock==null || raiseLock==='bot' || isTiebreakerDuel();
+  if(!raisedThisPhase && botBehind && botMayRaise && stakeMult<MAX_MULT && Math.random()<0.45){ botRaise(); return; }
   botReady=true;
   const botName=(activeBot&&activeBot.name)||'Rival';
   renderWager(playerReady?'Both ready — advancing…':botName+' is ready. Continue when you are.');
@@ -4683,23 +4694,36 @@ function botWagerDecision(){
 }
 function playerRaise(){
   if(wagerDone || raisedThisPhase || stakeMult>=MAX_MULT) return;
+  if(raiseLock==='bot' && !isTiebreakerDuel()){ if(typeof toast==='function') toast("It's "+((activeBot&&activeBot.name)||'Rival')+"'s turn to raise next, not yours.", false); return; }
   raisedThisPhase=true;
   const botName=(activeBot&&activeBot.name)||'Rival';
   const botLeads=playerScore[1]>=playerScore[0];
   const botAccepts=botLeads||Math.random()<0.55;
-  if(botAccepts){ stakeMult=Math.min(MAX_MULT, stakeMult*2); updateStake(); playerReady=false; botReady=true; renderWager(botName+' <b>matched</b> — stake is now ×'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP). Continue when ready. <span style="color:var(--text3)">(one raise per turn)</span>'); }
-  else retreat('bot');
+  raiseLock='bot';
+  if(botAccepts){ stakeMult=Math.min(MAX_MULT, stakeMult*2); updateStake(); playerReady=false; botReady=true; renderWager(botName+' <b>matched</b> — stake is now ×'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP). Continue when ready. <span style="color:var(--text3)">('+botName+'’s turn to raise next)</span>'); }
+  else { updateStake(); renderWager(botName+' <b>declined</b> — stake stays ×'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP). Continue when ready. <span style="color:var(--text3)">('+botName+'’s turn to raise next)</span>'); }
 }
 function botRaise(){
   if(wagerDone || raisedThisPhase || stakeMult>=MAX_MULT) return;
   raisedThisPhase=true;
+  const _preRaiseMult=stakeMult;
   stakeMult=Math.min(MAX_MULT, stakeMult*2); updateStake(); botReady=false; playerReady=false;
+  raiseLock='player';
   const botName=(activeBot&&activeBot.name)||'Rival';
-  renderWager('⚡ <b>'+botName+' RAISED</b> to ×'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP). Match it or fold.');
+  renderWager('⚡ <b>'+botName+' RAISED</b> to ×'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP). Match it or decline.');
   const btns=document.getElementById('wager-btns'); if(!btns) return;
   btns.innerHTML =
     '<button class="wager-btn raise" onclick="matchRaise()">Match ×'+stakeMult+'</button>'+
-    '<button class="wager-btn fold" onclick="retreat(\'player\')">Fold — cut losses (−'+fmtPts(Math.round(matchWager*stakeMult/2))+' RP)</button>';
+    '<button class="wager-btn fold" onclick="declineBotRaise('+_preRaiseMult+')">Decline — stay at ×'+_preRaiseMult+'</button>';
+}
+// 7/29/26: declining a raise settles just this negotiation, not the whole match — retreat() (full
+// forfeit) is reserved for the standing "forfeit this match" button (hudFold()). Stake reverts to
+// its pre-raise level and play continues to the next round normally.
+function declineBotRaise(preMult){
+  if(wagerDone) return;
+  stakeMult=preMult; updateStake();
+  const botName=(activeBot&&activeBot.name)||'Rival';
+  renderWager('You declined — stake stays ×'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP). Continue when ready. <span style="color:var(--text3)">(your turn to raise next)</span>');
 }
 function matchRaise(){ if(wagerDone) return; renderWager('Raise matched at ×'+stakeMult+'. Advancing…'); playerReady=true; botReady=true; setTimeout(proceedFromWager,400); }
 function proceedFromWager(){
@@ -4727,19 +4751,22 @@ function hudRaise(){
     return;
   }
   if(stakeMult>=MAX_MULT){ toast('Stake is maxed at x'+MAX_MULT+'.', false); return; }
+  if(raiseLock==='bot' && !isTiebreakerDuel()){ toast("It's "+((activeBot&&activeBot.name)||'Rival')+"'s turn to raise next, not yours.", false); return; }
   // Propose a raise — it only scales if the rival agrees
   raisedThisPhase=true; updateStake();
   const proposed=Math.min(MAX_MULT, stakeMult*2);
   const rival=(activeBot&&activeBot.name)||'Rival';
   const botLeads=playerScore[1]>playerScore[0];
   const agrees = botLeads || Math.random()<0.5;
+  raiseLock='bot';
   if(agrees){ stakeMult=proposed; updateStake(); toast('You raised - '+rival+' agreed. Stake is now x'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP).', true); }
-  else { updateStake(); toast(rival+' declined your raise - stake stays x'+stakeMult+'.', false); }
+  else { updateStake(); toast(rival+' declined your raise - stake stays x'+stakeMult+'. ('+rival+'’s turn to raise next)', false); }
 }
 function botMaybeRaise(){
   if(matchComplete||matchOver()||pvpMode||raisedThisPhase||pendingBotRaise||stakeMult>=MAX_MULT) return;
+  if(!(raiseLock==null || raiseLock==='bot' || isTiebreakerDuel())) return;
   if(playerScore[1] < playerScore[0] && Math.random()<0.30){
-    pendingBotRaise=Math.min(MAX_MULT, stakeMult*2); raisedThisPhase=true; updateStake();
+    pendingBotRaise=Math.min(MAX_MULT, stakeMult*2); raisedThisPhase=true; raiseLock='player'; updateStake();
     toast(((activeBot&&activeBot.name)||'Rival')+' proposes raising to x'+pendingBotRaise+' — tap Agree to accept, or play on to decline.', true);
   }
 }
@@ -13087,7 +13114,7 @@ function resetMatchState(){
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
   charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; condSupportZonesLocked=false; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
-  stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
+  stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; raiseLock=null; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
   document.getElementById('instant-strip').style.display='none';
@@ -14012,10 +14039,10 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
 <script>
 /* ═══ REAL OPPONENT DECK — bots draw from a per-match deck WITHOUT replacement; ═══
    ═══ a card the bot WINS with goes to its Winners Circle and never returns.     ═══ */
-var oppDrawPileBot=[], oppWonBot=new Set(), oppLossStreak=0;
+var oppWonBot=new Set(), oppLossStreak=0;
 function _oppShuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 /* rebuild the bot deck at the start of every match */
-if(typeof resetMatchState==='function'){ var _oppRMS=resetMatchState; resetMatchState=function(){ oppDrawPileBot=[]; oppWonBot=new Set(); if(typeof oppWC!=='undefined') oppWC=0; if(typeof oppInitDeck==='function') oppInitDeck(); return _oppRMS.apply(this,arguments); }; }
+if(typeof resetMatchState==='function'){ var _oppRMS=resetMatchState; resetMatchState=function(){ oppWonBot=new Set(); if(typeof oppWC!=='undefined') oppWC=0; if(typeof oppInitDeck==='function') oppInitDeck(); return _oppRMS.apply(this,arguments); }; }
 /* replace random-with-replacement selection with a real deck draw */
 function oppEvalPow(card){
   // "does the bot understand its own cards" -- estimate a candidate's REAL power
