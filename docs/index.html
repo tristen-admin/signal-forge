@@ -3812,6 +3812,7 @@ let dmZeroCostThisDuel = false;            // Anorith Keeling DM skill: every ca
 let dmDarwinHandRefillArmed = false;       // Darwin DM skill, 2nd clause: once activated, persists the REST OF THE MATCH (not just this duel, unlike the flags above) -- "whenever your hand is 2 or less after your draw phase" is an ongoing passive, not a this-duel-only effect. Reset at match end only, see resetMatchState().
 let handBanishedThisTurn = false, oppHandBanishedThisTurn = false;   // Ossian Drell on-conjure condition -- was a card banished FROM HAND (not deck) this turn
 let handReturnCount = {};   // cardName -> times that exact card has returned to hand due to a card effect instead of its normal fate -- per MATCH, not per duel
+let pendingHandReturn = null;   // {name, from:'wc'|'deck'} -- set when OPTIONAL_HAND_RETURN offers a real choice on this duel's outcome, cleared once the player answers
 let spellsUsedRound=[];  // each spell castable only ONCE per round  // Rebirth season — cumulative match W/L across ranked + staked
 let hand = [...HAND_CARDS];
 let deckSize = 12;
@@ -5047,7 +5048,14 @@ const SHIELD_OVERRIDE = {};   // (7/27/26) per-card hand-tuning on top of shield
 // moves from PENDING_MECHANICS.md's Open list to Resolved, remove it here too; when a NEW open entry
 // is genuinely player-visible (the overpromising text is still live on the card), add it here as well.
 const FLAGGED_ABILITIES = {
-  'Kravyn the Collector': "“You may choose” isn't a real choice yet — he always returns to hand on a win or a close loss, no prompt.",
+};
+// OPTIONAL_HAND_RETURN (7/28/26): cards whose printed text offers a genuine "you may choose"
+// prompt -- not an automatic return -- when they'd otherwise bank to the Winners Circle or recycle
+// to the deck. onWin/onCloseLoss (max power-gap margin, or null) are independent; a future card can
+// use either or both. Add a new card HERE, not as a new hardcoded resolve() branch -- the choice UI
+// (renderHandReturnChoice/resolveHandReturnChoice, below) is fully data-driven off this table.
+const OPTIONAL_HAND_RETURN = {
+  'Kravyn the Collector': {onWin:true, onCloseLoss:3},
 };
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
 const RACES = ['Human','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Marrowen','Dreikan','Dractyl','Thennlar','Xylotes','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
@@ -5748,6 +5756,38 @@ function lossChooseWinner(){
     toast('\u267b Recovered '+card.name+' from the Winners Circle', true);
   }
   const sw=document.getElementById('snap-window'); if(sw) sw.innerHTML='';
+  afterResult();
+}
+// A real "you may choose" prompt for OPTIONAL_HAND_RETURN cards (7/28/26) -- same shape as
+// renderLossChoice()/lossChoose*() above: takes over #snap-window, hides #next-btn, and each
+// option calls afterResult() itself once it's done. Reusable by data (see OPTIONAL_HAND_RETURN)
+// rather than a new hardcoded pair of functions per card.
+function renderHandReturnChoice(){
+  const sw=document.getElementById('snap-window'); const nb=document.getElementById('next-btn');
+  if(!sw || !pendingHandReturn) return;
+  const p=pendingHandReturn;
+  const destLabel = p.from==='wc' ? 'the Winners Circle' : 'your deck';
+  sw.innerHTML='<div class="loss-choice"><div class="lc-title">\ud83d\udcb0 '+p.name+' \u2014 you may choose</div><div class="lc-opts">'+
+    '<button class="lc-btn" onclick="resolveHandReturnChoice(true)"><b>\u21a9 Return to hand</b><span>keep it for another round</span></button>'+
+    '<button class="lc-btn" onclick="resolveHandReturnChoice(false)"><b>Leave it</b><span>stays in '+destLabel+'</span></button>'+
+    '</div></div>';
+  if(nb) nb.style.display='none';
+}
+function resolveHandReturnChoice(takeIt){
+  const p=pendingHandReturn; pendingHandReturn=null;
+  const sw=document.getElementById('snap-window'); if(sw) sw.innerHTML='';
+  if(takeIt && p){
+    var card=null;
+    if(p.from==='wc'){ var idx=winnersCircle.map(function(c){return c.name;}).lastIndexOf(p.name); if(idx>=0) card=winnersCircle.splice(idx,1)[0]; }
+    else if(p.from==='deck'){ if(drawPile.length && drawPile[0] && drawPile[0].name===p.name){ card=drawPile.shift(); } else { var di=drawPile.findIndex(function(c){return c.name===p.name;}); if(di>=0) card=drawPile.splice(di,1)[0]; } deckSize=drawPile.length; }
+    if(card){
+      hand.push(card);
+      if(typeof handReturnCount!=='undefined') handReturnCount[p.name]=(handReturnCount[p.name]||0)+1;
+      if(typeof buildHand==='function') buildHand();
+      if(typeof toast==='function') toast('\ud83d\udcb0 '+p.name+' returns to your hand', true);
+      if(typeof updatePiles==='function') updatePiles();
+    }
+  }
   afterResult();
 }
 
@@ -7955,10 +7995,14 @@ function resolve(pc, oc, cond, playerCommittedPow){
     // every win, so the biggest, most-read line on the result screen was wrong 100% of the time
     // for those cards (the small abilLog line underneath it was always correct).
     var _destLabel = 'to Winners Circle';
-    if(pc.name==='Skullchain Reaver' || pc.name==='Kravyn the Collector' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1; if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':pc.name==='Kravyn the Collector'?'💰 Kravyn the Collector':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); _destLabel='to your hand'; }
+    pendingHandReturn = null;
+    if(pc.name==='Skullchain Reaver' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1; if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); _destLabel='to your hand'; }
     else if(unbankNextWin){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); unbankNextWin=false; abilLog.push('🏳 Unbanked Victory — '+pc.name+' returns to your hand instead of banking to the Winners Circle'); _destLabel='to your hand'; }
     else if(typeof dmUnitsReturnToHandThisDuel!=='undefined' && dmUnitsReturnToHandThisDuel){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push('💰 Kravyn — '+pc.name+' returns to your hand instead of the Winners Circle (Deck Master ability)'); _destLabel='to your hand'; }
-    else { winnersCircle.push({...pc}); }
+    else {
+      winnersCircle.push({...pc});
+      if(typeof OPTIONAL_HAND_RETURN!=='undefined' && OPTIONAL_HAND_RETURN[pc.name] && OPTIONAL_HAND_RETURN[pc.name].onWin){ pendingHandReturn = {name:pc.name, from:'wc'}; }
+    }
     sub.textContent = remnantCleared
       ? `${pc.name} (${Math.round(playerPow)}) defeated ${oc.name} (${Math.round(oppPow)}) — Remnant cleared · ${_destLabel}`
       : `${pc.name} (${Math.round(playerPow)}) defeated ${oc.name} (${Math.round(oppPow)}) — ${_destLabel}`;
@@ -7991,10 +8035,12 @@ function resolve(pc, oc, cond, playerCommittedPow){
         <div class="c-pow" style="color:var(--lose)">+${_rp}↑</div>
         <div class="c-abil" style="font-size:8px;color:var(--lose)">Remnant — your cards gain +${remnantPowSum()}</div>
       </div>`; };
-    } else if(pc.name==='Kravyn the Collector' && Math.abs(playerPow-oppPow)<=3){
-      hand.push({...pc}); if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1; if(typeof buildHand==='function') buildHand();
-      sub.textContent = `${oc.name} (${Math.round(oppPow)}) defeated ${pc.name} (${Math.round(playerPow)}) — a close loss (\u2264 3), Kravyn returns to hand`;
-      abilLog.push('💰 Kravyn the Collector — lost by '+Math.round(Math.abs(playerPow-oppPow))+': returns to your hand instead of the deck');
+    } else if(typeof OPTIONAL_HAND_RETURN!=='undefined' && OPTIONAL_HAND_RETURN[pc.name] && OPTIONAL_HAND_RETURN[pc.name].onCloseLoss!=null && Math.abs(playerPow-oppPow)<=OPTIONAL_HAND_RETURN[pc.name].onCloseLoss){
+      var _margin=Math.abs(playerPow-oppPow);
+      drawPile.unshift(pc); deckSize=drawPile.length;
+      sub.textContent = `${oc.name} (${Math.round(oppPow)}) defeated ${pc.name} (${Math.round(playerPow)}) — a close loss (\u2264 ${OPTIONAL_HAND_RETURN[pc.name].onCloseLoss}), to deck bottom`;
+      abilLog.push('💰 '+pc.name+' — lost by '+Math.round(_margin)+': recycles to the bottom of your deck (close enough to reclaim)');
+      pendingHandReturn = {name:pc.name, from:'deck'};
     } else {
       sub.textContent = `${oc.name} (${Math.round(oppPow)}) defeated ${pc.name} (${Math.round(playerPow)}) — to deck bottom`;
       drawPile.unshift(pc); deckSize=drawPile.length; abilLog.push('↩ '+pc.name+' recycles to the bottom of your deck');
@@ -8062,7 +8108,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
     updateScore();
     const _nb = document.querySelector('#result-overlay .next-btn');
     if(_nb) _nb.textContent = (playerScore[0] >= matchWinThreshold() || playerScore[1] >= matchWinThreshold()) ? 'View Match Result →' : 'Continue →';
-    if(typeof renderLossChoice==='function') renderLossChoice(won==='lose' && !(playerScore[0] >= matchWinThreshold() || playerScore[1] >= matchWinThreshold()));
+    if(pendingHandReturn && typeof renderHandReturnChoice==='function'){ renderHandReturnChoice(); }
+    else if(typeof renderLossChoice==='function') renderLossChoice(won==='lose' && !(playerScore[0] >= matchWinThreshold() || playerScore[1] >= matchWinThreshold()));
     updateStake();
     buildHand();  // reflect any hand mutations (Ahdor +4, returns) immediately
     saveState();
