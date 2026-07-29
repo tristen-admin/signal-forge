@@ -5,7 +5,7 @@
 
 ---
 
-## Fixed post-audit — user-reported (commits `af5064c`, `3cdc0a5`)
+## Fixed post-audit — user-reported (commits `af5064c`, `3cdc0a5`, `d32f368`)
 
 🔴 **Coached tutorial: hand cards were unclickable from step 4 onward, no way to proceed except Skip.** `#coach-box` (the tutorial dialog, anchored `bottom:4.5%`) physically overlapped ~95% of every hand card's clickable area and had no `pointer-events` rule of its own — confirmed with `elementFromPoint()` that a click at a card's own center hit the dialog, not the card, before this fix. Fixed with the same cascading-pointer-events pattern used elsewhere in this file: `.coach-box` is now `pointer-events:none`, with `pointer-events:auto` explicitly restored on just its two real controls (Skip, Next).
 
@@ -16,6 +16,8 @@
 🔴 **Bonus find while verifying the above: `commitCard()` crashed outright when conjuring Corvus, Grave-Tithe Acolyte, or Rhaess Korvain at 0 Charge.** Its self-banish-tax branch called `abilLog.push(...)`, but `abilLog` is a variable local to the separate `resolve()` function — a guaranteed `ReferenceError` that aborted the commit mid-mutation (the card was already removed from hand, phase already flipped to `'committed'`) any time a player tried to conjure one of those three cards while out of Charge. Replaced with the same `toast()` pattern already used one line above for an analogous message.
 
 Verified live end-to-end (properly spaced calls, not batched, to avoid racing the tutorial's own 90ms advance hooks): a fresh tutorial run through all 10 steps — draw, reveal, stage, supports, confirm, commit, resolve — reaches a clean `endTutorial()` with zero console errors.
+
+🔴 **Coached tutorial screen was too dim to read, on top of the click-blocking fix above.** Root cause was two-fold, not just the opacity value: (1) the ever-present "?" How to Play button has no awareness of the tutorial — a player who opens it during the tutorial's first two Hub-side steps carries it, still open, into the duel screen, stacking its own independent dim layer on top of the coach's own (a real, always-reachable path for any curious new player). `startTutorial()` now hides the button and force-closes the modal; `endTutorial()` restores it. (2) Even the correctly-isolated single overlay was 80% opacity black, heavy enough to make hand card names/condition text/Charge readouts hard to read — dropped to 58%.
 
 🔴 **Kravyn the Collector — "you may choose" is now a real choice.** Owner's direction: build it properly and make it reusable, since Kravyn won't be the only card with this effect. Built `OPTIONAL_HAND_RETURN` (a plain data table — adding a future card is the whole integration point, no new branch needed) plus `renderHandReturnChoice()`/`resolveHandReturnChoice()`, which take over the result screen exactly the way the existing "round lost — take your pick" choice already does. The card still banks/recycles to its normal destination immediately; the choice offers to redirect it afterward. Verified live: forced both outcomes directly, confirmed both "Return to Hand" (pulls from Winners Circle/deck, increments `handReturnCount`) and "Leave It" (no-op) work correctly, and confirmed the close-loss check reads real post-modifier power, not a naive pre-modifier guess.
 
