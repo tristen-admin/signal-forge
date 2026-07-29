@@ -8823,9 +8823,9 @@ const PACKS = [
   {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & an Apex shot — no commons.', odds:{rare:78, ultra:20, apex:2}},
 ];
 const PREMIUM_PACKS = [
-  {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{uncommon:14, rare:60, ultra:23, apex:3}},
-  {id:'fforge', name:'Forgemaster Vault', icon:'❖', price:5000, blurb:'Ultra-dense with a real Apex shot.', odds:{rare:44, ultra:48, apex:8}},
-  {id:'fmythic', name:'Mythic Rite', icon:'👑', price:6000, blurb:'The top-tier summon — highest Apex rate in the game.', odds:{ultra:78, apex:22}},
+  {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{uncommon:14, rare:60, ultra:5, apex:21}},
+  {id:'fforge', name:'Forgemaster Vault', icon:'❖', price:5000, blurb:'Apex-forward — a real coinflip shot at the very best.', odds:{rare:44, ultra:5, apex:51}},
+  {id:'fmythic', name:'Mythic Rite', icon:'👑', price:6000, blurb:'The top-tier summon — highest Apex rate in the game.', odds:{ultra:5, apex:95}},
 ];
 function mintLedgerHTML(){
   const t=rarityTypeCounts();
@@ -8859,10 +8859,7 @@ function rollPackRarity(p, avail){
   if(rar==='apex'){ packPityApex=0; packPityUltra=0; } else if(rar==='ultra'){ packPityUltra=0; }
   return rar;
 }
-function _pullFrom(p){
-  var avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;});
-  if(!avail.length) return null;
-  var rar=rollPackRarity(p, avail);
+function _mintRarity(rar, p){
   supply[rar].left=Math.max(0,supply[rar].left-1);
   var poolC=COLLECTION.filter(function(c){return c.rarity===rar && !c.uid;});
   var card=poolC[Math.floor(Math.random()*poolC.length)]||COLLECTION[0];
@@ -8872,14 +8869,29 @@ function _pullFrom(p){
 }
 function openPack5(id){
   var p=PACKS.find(function(x){return x.id===id;}) || PREMIUM_PACKS.find(function(x){return x.id===id;}); if(!p) return;
+  var isPremium = PREMIUM_PACKS.indexOf(p)>=0;
   var avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;});
   if(!avail.length){ toast(p.name+' \u2014 every rarity it offers is minted out',false); return; }
   var cost=p.price*5;
   if(signalPoints<cost){ toast('Not enough Signal for a 5\u00d7 summon (\u25c8 '+fmtPts(cost)+')',false); return; }
   if(!confirm('Open 5\u00d7 '+p.name+' for \u25c8 '+fmtPts(cost)+' Signal?\n\nMints you five random cards.')) return;
   signalPoints-=cost;
-  var results=[];
-  for(var i=0;i<5;i++){ var pull=_pullFrom(p); if(!pull) break; results.push(pull); }
+  var rarities=[];
+  for(var i=0;i<5;i++){ var _avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;}); if(!_avail.length) break; rarities.push(rollPackRarity(p, _avail)); }
+  // 7/29/26: 5x floor -- a basic-tier 5x guarantees at least 1 Rare-or-better, a premium-tier 5x
+  // guarantees at least 1 Ultra-or-better. Decided here, on the ROLLED rarities, before any card is
+  // minted -- mintPulled() has real, irreversible side effects (a new owned card instance, a
+  // cardRecords entry, a wonCounter bump), so there is no safe way to mint-then-discard a "wasted"
+  // pull to enforce the floor after the fact.
+  var floorRarity = isPremium ? 'ultra' : 'rare';
+  if(rarities.length===5 && p.odds[floorRarity]!=null && supply[floorRarity] && supply[floorRarity].left>0){
+    var floorMet = rarities.some(function(r){ return RARITY_ORDER[r] <= RARITY_ORDER[floorRarity]; });
+    if(!floorMet){
+      var weakestIdx=0; for(var w=1;w<rarities.length;w++){ if(RARITY_ORDER[rarities[w]] > RARITY_ORDER[rarities[weakestIdx]]) weakestIdx=w; }
+      rarities[weakestIdx]=floorRarity;
+    }
+  }
+  var results=rarities.filter(function(r){ return supply[r] && supply[r].left>0; }).map(function(r){ return _mintRarity(r, p); });
   saveState(); updateBalance(); buildShop();
   (function revealNext(k){
     if(k>=results.length){
