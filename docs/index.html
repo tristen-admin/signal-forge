@@ -3475,28 +3475,28 @@ const CONDITIONS = [
   {id:'recordties',mech:'Record Breaks Ties',icon:'💀',name:'Noctreach',rule:'Where two legends once destroyed each other, legacy decides — if power is tied after all effects, the card with more career kills wins. Zero-kill cards lose all ties.',strat:'Pristine records matter here. High-kill veterans carry this condition.',tag:'boost',prob:'9%'},
   {id:'provingground',mech:'Proving Ground',icon:'⛰️',name:'North Kasac',rule:'Skarrow Hold tests restraint, not strength — the higher-base-power card takes −5 power (to a minimum of 1). The mountain humbles the mighty.',strat:'Commit your smaller card into their favorite — underdogs are rewarded here.',tag:'flip',prob:'8%'},
   {id:'mirror',mech:'Mirror',icon:'🔄',name:'Yozai-no-Sato',rule:'In the illusion-warped village nothing is itself — each committed card\'s power becomes equal to the opponent\'s committed base power.',strat:'Turns the duel into a record and ability game — raw power is irrelevant.',tag:'chaos',prob:'7%'},
-  {id:'hollowreckoning',mech:'Hollow Reckoning',icon:'🌫️',name:'The Gray',rule:'In the void identity falls away — each card\'s power becomes its career kills. Only what you have done remains.',strat:'Veterans dominate; fresh cards are helpless. Bring your record, not your power.',tag:'chaos',prob:'7%'},
-  {id:"veteranedge",mech:"Veteran's Edge",icon:"🎖️",name:"The War College",rule:"Each card gains +1 power for every 3 kills on its record — the seasoned rise.",strat:"Field high-kill veterans; unproven cards gain nothing.",tag:"boost",prob:"3%"},
-  {id:"freshblood",mech:"Fresh Blood",icon:"🌱",name:"Rookery Hollow",rule:"Cards with zero kills fight with everything to prove — 0-kill cards gain +6.",strat:"Deploy your untested rookies here.",tag:"flip",prob:"3%"},
+  {id:'hollowreckoning',mech:'Hollow Reckoning',icon:'🌫️',name:'The Gray',rule:'In the void identity falls away — if a unit\'s base power is lower than its kill count, that card\'s power becomes its career kills.',strat:'Veterans whose kill count outgrew their base power dominate; fresh or high-power cards are untouched.',tag:'chaos',prob:'7%'},
+  {id:"veteranedge",mech:"Veteran's Edge",icon:"🎖️",name:"The War College",rule:"Experience favors the underdog — the weaker card gains +1 power for every 5 kills on its record.",strat:"Field your lower-power veteran; the stronger card gains nothing here.",tag:"boost",prob:"3%"},
+  {id:"freshblood",mech:"Fresh Blood",icon:"🌱",name:"Rookery Hollow",rule:"Cards with zero kills fight with everything to prove — 0-kill cards gain +10.",strat:"Deploy your untested rookies here.",tag:"flip",prob:"3%"},
   {id:"puritytrial",mech:"Purity Trial",icon:"✨",name:"The White Sanctum",rule:"Flawless records are exalted — Pristine (0 deaths, 1+ kill) cards gain +5.",strat:"Bring your never-beaten cards.",tag:"boost",prob:"3%"},
   {id:"puritydrain",mech:"Purity Drain",icon:"🕷️",name:"The Tarnish Marsh",rule:"The spotless are hunted — Pristine (0 deaths, 1+ kill) cards suffer −5.",strat:"Keep your Pristine cards home; field the scarred.",tag:"flip",prob:"3%"},
-  {id:"bloodreckoning",mech:"Blood Reckoning",icon:"💀",name:"Scarhold",rule:"Every scar is a weakness — each card loses 1 power per death on its record.",strat:"Field clean records; battered cards crumble.",tag:"flip",prob:"3%"},
+  {id:"bloodreckoning",mech:"Blood Reckoning",icon:"💀",name:"Scarhold",rule:"Every scar is a weakness — each card loses 1 power per 2 deaths on its record.",strat:"Field clean records; battered cards crumble.",tag:"flip",prob:"3%"},
   {id:"deathwish",mech:"Deathwish",icon:"☠️",name:"The Charnel Arena",rule:"Scars fuel fury — each card gains +1 power per death on its record.",strat:"Your most-beaten veterans hit hardest here.",tag:"boost",prob:"3%"},
-  {id:"underdog",mech:"Underdog Rising",icon:"📉",name:"Dust Bowl",rule:"The lesser rises — the lower base-power card gains +7.",strat:"Commit a weak card into their strong one.",tag:"flip",prob:"3%"},
-  {id:"rarityreckoning",mech:"Rarity Reckoning",icon:"💎",name:"The Gilded Court",rule:"Pedigree wins — the rarer card gains +5.",strat:"Bring your Apex and Ultra cards.",tag:"boost",prob:"3%"},
-  {id:"commonsrevolt",mech:"Commons' Revolt",icon:"✊",name:"The Undercity",rule:"The low-born rise up — the lower-rarity card gains +6.",strat:"Commons and Rares punch up here.",tag:"flip",prob:"3%"},
-  {id:"giantslayer",mech:"Giant Slayer",icon:"🗡️",name:"Kaeldren Pass",rule:"When base powers differ by 8 or more, the weaker card fells the giant outright.",strat:"Bait a huge card with a small one.",tag:"flip",prob:"3%"},
-  {id:"highroller",mech:"High Roller",icon:"🎲",name:"The Gambler's Den",rule:"Fortune tips the scales — each card gains a random +0 to +10.",strat:"Pure variance; size your bets down.",tag:"chaos",prob:"3%"},
-  {id:"momentumtide",mech:"Momentum's Tide",icon:"🌊",name:"The Turning Shore",rule:"The trailing side surges — whoever is behind in the match gains +6.",strat:"A comeback engine when you are down.",tag:"boost",prob:"3%"},
+  {id:"underdog",mech:"Underdog Rising",icon:"📉",name:"Dust Bowl",rule:"The lesser rises — the lower base-power card gains +3.",strat:"Commit a weak card into their strong one.",tag:"flip",prob:"3%"},
+  {id:"rarityreckoning",mech:"Rarity Reckoning",icon:"💎",name:"The Gilded Court",rule:"Pedigree wins — the rarer card gains +3.",strat:"Bring your Apex and Ultra cards.",tag:"boost",prob:"3%"},
+  {id:"commonsrevolt",mech:"Commons' Revolt",icon:"✊",name:"The Undercity",rule:"The low-born rise up — the lower-rarity card gains +5.",strat:"Commons and Rares punch up here.",tag:"flip",prob:"3%"},
+  {id:"giantslayer",mech:"Giant Slayer",icon:"🗡️",name:"Kaeldren Pass",rule:"When base powers differ by 10 or more, the weaker card fells the giant outright.",strat:"Bait a huge card with a small one.",tag:"flip",prob:"3%"},
+  {id:"highroller",mech:"High Roller",icon:"🎲",name:"The Gambler's Den",rule:"Fortune tips the scales — each card gains a random +5 to +10.",strat:"Pure variance; size your bets down.",tag:"chaos",prob:"5%"},
+  {id:"momentumtide",mech:"Momentum's Tide",icon:"🌊",name:"The Turning Shore",rule:"The trailing side surges — whoever is behind in the match gains +3.",strat:"A comeback engine when you are down.",tag:"boost",prob:"8%"},
   {id:"eldersreach",mech:"Elder's Reach",icon:"📜",name:"The Long Memory",rule:"Experience tells — +1 power per 4 duels fought (kills + deaths).",strat:"Field cards with long histories.",tag:"boost",prob:"3%"},
-  {id:"doubleedged",mech:"Double-Edged",icon:"⚔️",name:"The Twin Blades",rule:"History is a blade both ways — net record (kills − deaths) swings power.",strat:"Great records soar; losing records sink.",tag:"neutral",prob:"3%"},
-  {id:"legendsclash",mech:"Legends' Clash",icon:"👑",name:"The Hall of Legends",rule:"A stage for the great — Apex cards gain +4, all others suffer −2.",strat:"Reserve this for your Apex legends.",tag:"boost",prob:"3%"},
-  {id:"woundedbeast",mech:"Wounded Beast",icon:"🐺",name:"The Broken Fang",rule:"The grizzled fight hardest — cards with 3 or more deaths gain +5.",strat:"Field your battle-worn survivors.",tag:"boost",prob:"3%"},
+  {id:"doubleedged",mech:"Twin Surge",icon:"⚔️",name:"The Twin Blades",rule:"Both blades cut true — both players' conjured units gain +5 power.",strat:"A flat boost for everyone; no record required.",tag:"boost",prob:"8%"},
+  {id:"legendsclash",mech:"Legends' Clash",icon:"👑",name:"The Hall of Legends",rule:"A stage for the great — Apex cards gain +2, all others suffer −2.",strat:"Reserve this for your Apex legends.",tag:"boost",prob:"2%"},
+  {id:"woundedbeast",mech:"Wounded Beast",icon:"🐺",name:"The Broken Fang",rule:"The grizzled fight hardest — cards with 3 or more deaths gain +2.",strat:"Field your battle-worn survivors.",tag:"boost",prob:"3%"},
   {id:"survivorsground",mech:"Survivor's Ground",icon:"⚰️",name:"Last Light Hold",rule:"Endurance is rewarded — the card with fewer deaths gains +3.",strat:"Cleaner records edge it out.",tag:"neutral",prob:"3%"},
-  {id:"purereflection",mech:"Pure Reflection",icon:"🪞",name:"The Mirror Deep",rule:"You fight with your enemy's past — each card's power becomes the OPPONENT's career kills.",strat:"Turns their record against them.",tag:"flip",prob:"3%"},
+  {id:"purereflection",mech:"Pure Reflection",icon:"🪞",name:"The Mirror Deep",rule:"The deep reflects only what a card is worth — each card's power becomes its own Charge cost ×10.",strat:"Expensive cards dominate; cheap cards are exposed.",tag:"flip",prob:"3%"},
   {id:'reinforce',mech:'Reinforcements',icon:'🃏',name:'The Muster Yard',rule:'The banners call fresh blood to the line — both players draw 1 card when this ground is revealed.',strat:'Pure card advantage. Great when your hand runs thin.',tag:'boost',prob:'6%'},
-  {id:'dredge',mech:'Dredge',icon:'🌊',name:'The Drowned Vault',rule:'The tide gives and takes — both players draw 2 cards, then discard 2 to the banish pile.',strat:'Digs deep and fuels banish-recur engines.',tag:'chaos',prob:'5%'},
-  {id:'wildpit',mech:'Wild Pit',icon:'🎲',name:'The Feral Menagerie',rule:'Beasts are loosed at random — both players draw 1 card, then after commit each conjured fighter is chosen at random from the hand.',strat:'Draw fuels the chaos. Commit knowing the pit decides.',tag:'chaos',prob:'5%'},
+  {id:'dredge',mech:'Dredge',icon:'🌊',name:'The Drowned Vault',rule:'The tide gives and takes — both players draw 2 cards, then discard 2 to the banish pile.',strat:'Digs deep and fuels banish-recur engines.',tag:'chaos',prob:'3%'},
+  {id:'wildpit',mech:'Wild Pit',icon:'🎲',name:'The Feral Menagerie',rule:'The beasts tolerate no aid — both players draw 1 card, then both players\' support zones are locked for the duel.',strat:'A pure fighter-vs-fighter duel. Called effects sit this one out.',tag:'chaos',prob:'5%'},
   {id:'bloodlinesclash',mech:'Bloodlines Clash',icon:'🔱',name:'Skyward Trilogy',rule:'Every bloodline answers to another — Amageras\'s Blessing overwhelms Omitsuki\'s Path, Omitsuki\'s Path overwhelms Kitanoo\'s Hunt, and Kitanoo\'s Hunt overwhelms Amageras\'s Blessing in turn. Whoever\'s camp beats the other\'s gets +6 power. Same camp on both sides means no swing.',strat:'Check a card\'s Camp in its detail view before you commit — the wheel decides this one, not the printed power.',tag:'boost',prob:'4%'},
 ];
 const COND_EFF = {
@@ -3506,31 +3506,31 @@ const COND_EFF = {
   forceswap:"After commit, your card becomes a random one from your hand.",
   reinforce:"Both players draw 1 card.",
   dredge:"Both draw 2, then discard 2 to banish.",
-  wildpit:"Both draw 1; each fighter is then chosen at random.",
+  wildpit:"Both draw 1; both players' support zones are locked this duel.",
   surge:"+6 power strikes one random committed card after both lock in.",
   openbook:"Both cards' identities are revealed before you commit.",
   recordties:"If power ties, the card with more career kills wins.",
   provingground:"The higher-base-power card takes −5 (min 1).",
   mirror:"Each card's power becomes the opponent's base power.",
-  hollowreckoning:"Each card's power becomes its career kills.",
-  veteranedge:"+1 power per 3 kills on the card's record.",
-  freshblood:"0-kill cards gain +6.",
+  hollowreckoning:"If base power is lower than kills, power becomes career kills.",
+  veteranedge:"The weaker base-power card gains +1 power per 5 kills on its record.",
+  freshblood:"0-kill cards gain +10.",
   puritytrial:"Pristine (0 deaths, 1+ kill) cards gain +5.",
   puritydrain:"Pristine (0 deaths, 1+ kill) cards take −5.",
-  bloodreckoning:"−1 power per death on the card's record.",
+  bloodreckoning:"−1 power per 2 deaths on the card's record.",
   deathwish:"+1 power per death on the card's record.",
-  underdog:"The lower base-power card gains +7.",
-  rarityreckoning:"The rarer card gains +5.",
-  commonsrevolt:"The lower-rarity card gains +6.",
-  giantslayer:"If base powers differ by 8+, the weaker card wins outright.",
-  highroller:"Each card gains a random +0 to +10.",
-  momentumtide:"Whoever is behind in the match gains +6.",
+  underdog:"The lower base-power card gains +3.",
+  rarityreckoning:"The rarer card gains +3.",
+  commonsrevolt:"The lower-rarity card gains +5.",
+  giantslayer:"If base powers differ by 10+, the weaker card wins outright.",
+  highroller:"Each card gains a random +5 to +10.",
+  momentumtide:"Whoever is behind in the match gains +3.",
   eldersreach:"+1 power per 4 duels fought (kills + deaths).",
-  doubleedged:"Power shifts by net record (kills − deaths).",
-  legendsclash:"Apex cards gain +4; all others take −2.",
-  woundedbeast:"Cards with 3+ deaths gain +5.",
+  doubleedged:"Both players' conjured units gain +5 power.",
+  legendsclash:"Apex cards gain +2; all others take −2.",
+  woundedbeast:"Cards with 3+ deaths gain +2.",
   survivorsground:"The card with fewer deaths gains +3.",
-  purereflection:"Each card's power becomes the opponent's career kills.",
+  purereflection:"Each card's power becomes its own Charge cost ×10.",
   bloodlinesclash:"Camp beats camp (Amageras>Omitsuki>Kitanoo>Amageras) for +6; same camp = no swing."
 };
 
@@ -3815,6 +3815,7 @@ let dmNullifyOppSupportsThisDuel = false;  // Ahdorah Khaan DM skill: opponent's
 let oppSupportSlotsBlocked = 0;  // 7/28/26: Warden's Feint et al -- opponent fields fewer support slots this duel (pickOppRears), distinct from nullifying an already-placed support's effect
 let _stagingFromBanish = false;  // 7/28/26: Circle of Life -- one-shot bypass flag so stageFighterFromBanish() can route a banishOnly card through the normal stageFighter() logic without tripping its own hand-staging guard
 let condHiddenFromOpp = false;   // 7/28/26: Ridgeline Scout/Warden -- the active location's power effect this duel resolves for the wielder only; the opponent's committed power is restored to its pre-condition value right after the condition block runs (see resolve())
+let condSupportZonesLocked = false;   // 7/28/26: Wild Pit (The Feral Menagerie) -- neither side may field a support this duel; checked at every rearGuards-entry site (callSupportIdx, pickOppRears, and the handful of on-commit/CALLED effects that place a card into an open support slot)
 let dmZeroCostThisDuel = false;            // Anorith Keeling DM skill: every card in hand costs 0 to conjure this duel
 let dmDarwinHandRefillArmed = false;       // Darwin DM skill, 2nd clause: once activated, persists the REST OF THE MATCH (not just this duel, unlike the flags above) -- "whenever your hand is 2 or less after your draw phase" is an ongoing passive, not a this-duel-only effect. Reset at match end only, see resetMatchState().
 let handBanishedThisTurn = false, oppHandBanishedThisTurn = false;   // Ossian Drell on-conjure condition -- was a card banished FROM HAND (not deck) this turn
@@ -4410,7 +4411,7 @@ function openTurn(){
   // only energyRegenPerTurn() replenishes each turn, so leftover/spent charge carries across turns
   // and players have to play smaller conjures to bank enough for bigger plays or spells later.
   // oppCharge mirrors charge exactly (bots get the same regen/cap rule as the player).
-  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; condSupportZonesLocked=false; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -4891,7 +4892,7 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   strat.textContent = '';        // flavor + coaching live in the Codex
   if(c.id==='reinforce'){ drawToHand(1); if(typeof oppDrawN==='function')oppDrawN(1); if(typeof toast==='function')toast('🃏 Reinforcements — both draw 1',true); }
   else if(c.id==='dredge'){ drawToHand(2); if(typeof banishFromHand==='function')banishFromHand(2); if(typeof oppDrawN==='function'){oppDrawN(2);oppBanishN(2);} if(typeof toast==='function')toast('🌊 Dredge — both draw 2, discard 2',true); }
-  else if(c.id==='wildpit'){ drawToHand(1); if(typeof oppDrawN==='function')oppDrawN(1); if(typeof toast==='function')toast('🎲 Wild Pit — both draw 1; fighters go random',true); }
+  else if(c.id==='wildpit'){ drawToHand(1); if(typeof oppDrawN==='function')oppDrawN(1); condSupportZonesLocked=true; if(typeof toast==='function')toast('🎲 Wild Pit — both draw 1; both support zones are locked this duel',true); }
   if((c.id==='reinforce'||c.id==='dredge'||c.id==='wildpit') && typeof updatePiles==='function') updatePiles();
   btn.disabled = true;
 
@@ -5507,8 +5508,8 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
     // isn't a new asymmetry, it's the established shape for "conjure something into an open
     // support slot" support effects.
     var _dtc=drawPile.pop();
-    if(rearGuards.length < RG_SLOTS){ rearGuards.push(_dtc); abilLog.push("🧬 "+support.name+" — "+_dtc.name+" from the top of your deck joins your support circle"); }
-    else { hand.push(_dtc); if(typeof buildHand==='function') buildHand(); abilLog.push("🧬 "+support.name+" — supports full, "+_dtc.name+" goes to your hand instead"); }
+    if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS){ rearGuards.push(_dtc); abilLog.push("🧬 "+support.name+" — "+_dtc.name+" from the top of your deck joins your support circle"); }
+    else { hand.push(_dtc); if(typeof buildHand==='function') buildHand(); abilLog.push("🧬 "+support.name+" — "+(condSupportZonesLocked?"support zones locked":"supports full")+", "+_dtc.name+" goes to your hand instead"); }
     if(typeof deckSize!=='undefined') deckSize=drawPile.length;
     if(typeof updatePiles==='function') updatePiles();
   }
@@ -5614,6 +5615,7 @@ const INSTANT_EFFECTS = {
 };
 function pickOppRears(fighter){
   var out=[];
+  if(condSupportZonesLocked) return out;   // 7/28/26: Wild Pit -- support zones locked, bot fields zero
   var _slots = Math.max(0, RG_SLOTS - (oppSupportSlotsBlocked||0));   // 7/28/26: Warden's Feint et al
   for(var k=0;k<_slots;k++){
     if(!oppHandBot.length) break;
@@ -5897,6 +5899,7 @@ function callSupportIdx(i){ if(typeof hideCardPreview==='function')hideCardPrevi
   var c=hand[i]; if(!c || c.timing==='instant') return;
   var p=rearGuardIdxs.indexOf(i);
   if(p>=0){ rearGuardIdxs.splice(p,1); }
+  else if(condSupportZonesLocked){ if(typeof toast==='function') toast('🎲 Wild Pit — support zones are locked this duel.', false); }
   else if(rearGuardIdxs.length<RG_SLOTS){ rearGuardIdxs.push(i); if(typeof SFX!=='undefined')SFX.play('deploy'); }
   else { if(typeof toast==='function') toast('Rear-guard slots full ('+RG_SLOTS+') — tap a called card to swap.', false); }
   buildHand(); renderRearSlot(); refreshStageHint();
@@ -6216,8 +6219,8 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
     var _kTop=[]; if(drawPile.length) _kTop.push(drawPile.pop()); if(drawPile.length) _kTop.push(drawPile.pop());
     var _kMsg=[];
     if(_kTop[0]){
-      if(rearGuards.length < RG_SLOTS){ rearGuards.push(Object.assign({}, _kTop[0], {_bo:0})); _kMsg.push(_kTop[0].name+' to support'); }
-      else { hand.push(_kTop[0]); if(typeof buildHand==='function') buildHand(); _kMsg.push(_kTop[0].name+' to hand (supports full)'); }
+      if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS){ rearGuards.push(Object.assign({}, _kTop[0], {_bo:0})); _kMsg.push(_kTop[0].name+' to support'); }
+      else { hand.push(_kTop[0]); if(typeof buildHand==='function') buildHand(); _kMsg.push(_kTop[0].name+(condSupportZonesLocked?' to hand (support zones locked)':' to hand (supports full)')); }
     }
     if(_kTop[1]){
       var _kp=(typeof REMNANT_POW!=='undefined'&&REMNANT_POW[_kTop[1].name]!=null)?REMNANT_POW[_kTop[1].name]:(_kTop[1].pow||0);
@@ -6239,8 +6242,8 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   if(pc.name==='Anorith Keeling'){ energyLoadoutOverride=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your future spell draws into the Chaos Trinity — lose a round to draw one.', true); }
   if(pc.name==='Sister Mire, Wailing Nightmare'){ drawToHand(2); if(hand.length){ var _smci=Math.floor(Math.random()*hand.length); drawPile.unshift(hand.splice(_smci,1)[0]); if(typeof deckSize!=='undefined') deckSize=drawPile.length; } if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); if(typeof toast==='function') toast('🌫 Sister Mire wails — draw 2, one card sinks back into the deck.', true); }
   if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
-  if(pc.name==='Uso Oso' && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
-  if(pc.name==='Valcarion' && banishPile.length){ var _rec=banishPile.pop(); if(rearGuards.length < RG_SLOTS){ rearGuards.push(_rec); if(typeof toast==='function') toast('🩸 Valcarion calls '+_rec.name+' from banish to support.', true); } else { hand.push(_rec); if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🩸 Valcarion reclaims '+_rec.name+' from banish to hand.', true); } if(typeof updatePiles==='function') updatePiles(); }
+  if(pc.name==='Uso Oso' && !condSupportZonesLocked && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
+  if(pc.name==='Valcarion' && banishPile.length){ var _rec=banishPile.pop(); if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS){ rearGuards.push(_rec); if(typeof toast==='function') toast('🩸 Valcarion calls '+_rec.name+' from banish to support.', true); } else { hand.push(_rec); if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🩸 Valcarion reclaims '+_rec.name+' from banish to hand.', true); } if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name === 'Darwin') flameVeilFromWC = false;
   if(typeof applyDeckMasterCommitEffects==='function') applyDeckMasterCommitEffects(pc);
   document.getElementById('commit-btn').disabled = true;
@@ -7841,24 +7844,24 @@ function resolve(pc, oc, cond, playerCommittedPow){
   // ── APPLY CONDITION ──
   var _oppPowPreCond = oppPow;   // 7/28/26: Ridgeline Scout/Warden -- snapshot so the opponent's side can be rolled back after the block below, regardless of which branch fires or how it mutates oppPow
   if(!akatoshUnmakes){
-  if(cond.id==="veteranedge"){ playerPow+=Math.floor((pc.kills||0)/3); oppPow+=Math.floor((oc.kills||0)/3); abilLog.push("🎖️ Veteran's Edge: +1 power per 3 career kills"); }
-  else if(cond.id==="freshblood"){ if((pc.kills||0)===0){playerPow+=6;} if((oc.kills||0)===0){oppPow+=6;} abilLog.push("🌱 Fresh Blood: unproven cards (0 kills) +6"); }
+  if(cond.id==="veteranedge"){ if((pc.pow||0)<(oc.pow||0)){ playerPow+=Math.floor((pc.kills||0)/5); abilLog.push("🎖️ Veteran's Edge: your weaker card gains +1 power per 5 career kills"); } else if((oc.pow||0)<(pc.pow||0)){ oppPow+=Math.floor((oc.kills||0)/5); abilLog.push("🎖️ Veteran's Edge: their weaker card gains +1 power per 5 career kills"); } else { abilLog.push("🎖️ Veteran's Edge: equal base power — no edge"); } }
+  else if(cond.id==="freshblood"){ if((pc.kills||0)===0){playerPow+=10;} if((oc.kills||0)===0){oppPow+=10;} abilLog.push("🌱 Fresh Blood: unproven cards (0 kills) +10"); }
   else if(cond.id==="puritytrial"){ if((pc.deaths||0)===0&&(pc.kills||0)>=1){playerPow+=5;} if((oc.deaths||0)===0&&(oc.kills||0)>=1){oppPow+=5;} abilLog.push("✨ Purity Trial: Pristine (0 deaths, 1+ kill) +5"); }
   else if(cond.id==="puritydrain"){ if((pc.deaths||0)===0&&(pc.kills||0)>=1){playerPow=Math.max(1,playerPow-5);} if((oc.deaths||0)===0&&(oc.kills||0)>=1){oppPow=Math.max(1,oppPow-5);} abilLog.push("🕷️ Purity Drain: Pristine cards are hunted −5"); }
-  else if(cond.id==="bloodreckoning"){ playerPow=Math.max(1,playerPow-(pc.deaths||0)); oppPow=Math.max(1,oppPow-(oc.deaths||0)); abilLog.push("💀 Blood Reckoning: −1 power per death on record"); }
+  else if(cond.id==="bloodreckoning"){ playerPow=Math.max(1,playerPow-Math.floor((pc.deaths||0)/2)); oppPow=Math.max(1,oppPow-Math.floor((oc.deaths||0)/2)); abilLog.push("💀 Blood Reckoning: −1 power per 2 deaths on record"); }
   else if(cond.id==="deathwish"){ playerPow+=(pc.deaths||0); oppPow+=(oc.deaths||0); abilLog.push("☠️ Deathwish: scars fuel fury — +1 power per death"); }
-  else if(cond.id==="underdog"){ if((pc.pow||0)<(oc.pow||0)){playerPow+=7;} else if((oc.pow||0)<(pc.pow||0)){oppPow+=7;} abilLog.push("📉 Underdog Rising: the weaker base power +7"); }
-  else if(cond.id==="rarityreckoning"){ var _rp=RARITY_ORDER[pc.rarity],_ro=RARITY_ORDER[oc.rarity]; if(_rp<_ro){playerPow+=5;} else if(_ro<_rp){oppPow+=5;} abilLog.push("💎 Rarity Reckoning: the rarer card +5"); }
-  else if(cond.id==="commonsrevolt"){ var _rp=RARITY_ORDER[pc.rarity],_ro=RARITY_ORDER[oc.rarity]; if(_rp>_ro){playerPow+=6;} else if(_ro>_rp){oppPow+=6;} abilLog.push("✊ Commons' Revolt: the lower rarity +6"); }
-  else if(cond.id==="giantslayer"){ if(Math.abs((pc.pow||0)-(oc.pow||0))>=8){ if((pc.pow||0)<(oc.pow||0)){playerPow=oppPow+1;abilLog.push("🗡️ Giant Slayer: your underdog fells the giant");} else {oppPow=playerPow+1;abilLog.push("🗡️ Giant Slayer: their underdog fells the giant");} } else { abilLog.push("🗡️ Giant Slayer: no giant to slay (gap < 8)"); } }
-  else if(cond.id==="highroller"){ var _a=Math.floor(Math.random()*11),_b=Math.floor(Math.random()*11); playerPow+=_a; oppPow+=_b; abilLog.push("🎲 High Roller: +"+_a+" you, +"+_b+" opponent"); }
-  else if(cond.id==="momentumtide"){ if(playerScore[0]<playerScore[1]){playerPow+=6;abilLog.push("🌊 Momentum's Tide: you are behind — +6");} else if(playerScore[1]<playerScore[0]){oppPow+=6;abilLog.push("🌊 Momentum's Tide: opponent behind — +6");} else {abilLog.push("🌊 Momentum's Tide: even match — no swing");} }
+  else if(cond.id==="underdog"){ if((pc.pow||0)<(oc.pow||0)){playerPow+=3;} else if((oc.pow||0)<(pc.pow||0)){oppPow+=3;} abilLog.push("📉 Underdog Rising: the weaker base power +3"); }
+  else if(cond.id==="rarityreckoning"){ var _rp=RARITY_ORDER[pc.rarity],_ro=RARITY_ORDER[oc.rarity]; if(_rp<_ro){playerPow+=3;} else if(_ro<_rp){oppPow+=3;} abilLog.push("💎 Rarity Reckoning: the rarer card +3"); }
+  else if(cond.id==="commonsrevolt"){ var _rp=RARITY_ORDER[pc.rarity],_ro=RARITY_ORDER[oc.rarity]; if(_rp>_ro){playerPow+=5;} else if(_ro>_rp){oppPow+=5;} abilLog.push("✊ Commons' Revolt: the lower rarity +5"); }
+  else if(cond.id==="giantslayer"){ if(Math.abs((pc.pow||0)-(oc.pow||0))>=10){ if((pc.pow||0)<(oc.pow||0)){playerPow=oppPow+1;abilLog.push("🗡️ Giant Slayer: your underdog fells the giant");} else {oppPow=playerPow+1;abilLog.push("🗡️ Giant Slayer: their underdog fells the giant");} } else { abilLog.push("🗡️ Giant Slayer: no giant to slay (gap < 10)"); } }
+  else if(cond.id==="highroller"){ var _a=5+Math.floor(Math.random()*6),_b=5+Math.floor(Math.random()*6); playerPow+=_a; oppPow+=_b; abilLog.push("🎲 High Roller: +"+_a+" you, +"+_b+" opponent"); }
+  else if(cond.id==="momentumtide"){ if(playerScore[0]<playerScore[1]){playerPow+=3;abilLog.push("🌊 Momentum's Tide: you are behind — +3");} else if(playerScore[1]<playerScore[0]){oppPow+=3;abilLog.push("🌊 Momentum's Tide: opponent behind — +3");} else {abilLog.push("🌊 Momentum's Tide: even match — no swing");} }
   else if(cond.id==="eldersreach"){ playerPow+=Math.floor(((pc.kills||0)+(pc.deaths||0))/4); oppPow+=Math.floor(((oc.kills||0)+(oc.deaths||0))/4); abilLog.push("📜 Elder's Reach: +1 power per 4 duels fought"); }
-  else if(cond.id==="doubleedged"){ playerPow=Math.max(1,playerPow+((pc.kills||0)-(pc.deaths||0))); oppPow=Math.max(1,oppPow+((oc.kills||0)-(oc.deaths||0))); abilLog.push("⚔️ Double-Edged: net record (kills − deaths) swings power"); }
-  else if(cond.id==="legendsclash"){ playerPow=Math.max(1,playerPow+(pc.rarity==="apex"?4:-2)); oppPow=Math.max(1,oppPow+(oc.rarity==="apex"?4:-2)); abilLog.push("👑 Legends' Clash: Apex +4, all others −2"); }
-  else if(cond.id==="woundedbeast"){ if((pc.deaths||0)>=3){playerPow+=5;} if((oc.deaths||0)>=3){oppPow+=5;} abilLog.push("🐺 Wounded Beast: 3+ deaths veterans +5"); }
+  else if(cond.id==="doubleedged"){ playerPow+=5; oppPow+=5; abilLog.push("⚔️ Twin Surge: both conjured units +5 power"); }
+  else if(cond.id==="legendsclash"){ playerPow=Math.max(1,playerPow+(pc.rarity==="apex"?2:-2)); oppPow=Math.max(1,oppPow+(oc.rarity==="apex"?2:-2)); abilLog.push("👑 Legends' Clash: Apex +2, all others −2"); }
+  else if(cond.id==="woundedbeast"){ if((pc.deaths||0)>=3){playerPow+=2;} if((oc.deaths||0)>=3){oppPow+=2;} abilLog.push("🐺 Wounded Beast: 3+ deaths veterans +2"); }
   else if(cond.id==="survivorsground"){ if((pc.deaths||0)<(oc.deaths||0)){playerPow+=3;} else if((oc.deaths||0)<(pc.deaths||0)){oppPow+=3;} abilLog.push("⚰️ Survivor's Ground: fewer deaths +3"); }
-  else if(cond.id==="purereflection"){ playerPow=(oc.kills||0); oppPow=(pc.kills||0); abilLog.push("🪞 Pure Reflection: power becomes the opponent's career kills"); }
+  else if(cond.id==="purereflection"){ playerPow=conjureCost(pc)*10; oppPow=conjureCost(oc)*10; abilLog.push(`🪞 Pure Reflection: power becomes Charge cost ×10 (you ${playerPow} vs opp ${oppPow})`); }
   else if(cond.id==="bloodlinesclash"){
     var _campP=(typeof effectiveCampOf==='function')?effectiveCampOf(pc,deckMasterCard):'Amageras', _campO=(typeof effectiveCampOf==='function')?effectiveCampOf(oc,(typeof activeBot!=='undefined'&&activeBot)?activeBot.dmCard:null):'Amageras';
     if(_campP!==_campO && campBeats(_campP,_campO)){ playerPow+=6; abilLog.push("🔱 Bloodlines Clash: "+_campP+" overwhelms "+_campO+" — +6"); }
@@ -7873,7 +7876,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   } else if(cond.id === 'mirror'){
     playerPow = oc.pow; oppPow = pc.pow;
     abilLog.push(`🔄 Mirror: your power → ${oc.pow}, opp power → ${pc.pow}`);
-  } else if(cond.id === 'forceswap' || cond.id === 'wildpit'){
+  } else if(cond.id === 'forceswap'){
     // swap committed cards with random hand cards
     if(hand.length > 0){
       const swapIdx = Math.floor(Math.random()*hand.length);
@@ -7882,13 +7885,17 @@ function resolve(pc, oc, cond, playerCommittedPow){
     } else { abilLog.push('🎲 Force Swap: no hand cards — stays as is'); }
     oppPow = OPP_CARDS[Math.floor(Math.random()*OPP_CARDS.length)].pow;
     abilLog.push(`🎲 ${cond.mech}: opponent's fighter is scrambled to ${oppPow}`);
+  } else if(cond.id === 'wildpit'){
+    abilLog.push('🎲 Wild Pit: support zones stayed locked all duel — pure fighter power stands');
   } else if(cond.id === 'provingground'){
     if(pc.pow > oc.pow){ playerPow = Math.max(1, playerPow - 5); abilLog.push(`⛰️ Proving Ground: your card is the favorite (${pc.pow} vs ${oc.pow}) — −5`); }
     else if(oc.pow > pc.pow){ oppPow = Math.max(1, oppPow - 5); abilLog.push(`⛰️ Proving Ground: opponent is the favorite (${oc.pow} vs ${pc.pow}) — −5`); }
     else abilLog.push('⛰️ Proving Ground: evenly matched — no penalty');
   } else if(cond.id === 'hollowreckoning'){
-    playerPow = (typeof getRec==='function'?getRec(pc).k:pc.kills); oppPow = oc.kills;
-    abilLog.push(`🌫️ Hollow Reckoning: power → career kills (you ${playerPow} vs opp ${oppPow})`);
+    var _hrpk = (typeof getRec==='function'?getRec(pc).k:pc.kills), _hrok = oc.kills;
+    if((pc.pow||0) < _hrpk){ playerPow = _hrpk; abilLog.push(`🌫️ Hollow Reckoning: your base power (${pc.pow}) < kills (${_hrpk}) — power becomes career kills`); }
+    if((oc.pow||0) < _hrok){ oppPow = _hrok; abilLog.push(`🌫️ Hollow Reckoning: opponent's base power (${oc.pow}) < kills (${_hrok}) — power becomes career kills`); }
+    if((pc.pow||0) >= _hrpk && (oc.pow||0) >= _hrok){ abilLog.push('🌫️ Hollow Reckoning: both base powers already outpace their kills — no swing'); }
   }
   }
   if(condHiddenFromOpp && oppPow!==_oppPowPreCond){ oppPow=_oppPowPreCond; abilLog.push('🗺️ The location\'s effect never reached the opponent'); }
@@ -13079,7 +13086,7 @@ function resetMatchState(){
   banishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
-  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
+  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; condSupportZonesLocked=false; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
