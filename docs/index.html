@@ -10357,9 +10357,9 @@ var TUTORIAL_SCRIPT=[
  {say:"That's the whole loop, Commander. Finish this match at your own pace — the field is yours.", spot:null, btn:"Finish"}
 ];
 function _coachCSS(){ if(document.getElementById('coach-style'))return; var st=document.createElement('style'); st.id='coach-style'; st.textContent=`
-.coach-spot{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(4,6,11,.80);transition:all .3s ease;pointer-events:none;z-index:300;border:2px solid var(--gold);animation:coachPulse 1.6s ease-in-out infinite}
-@keyframes coachPulse{0%,100%{box-shadow:0 0 0 9999px rgba(4,6,11,.80),0 0 0 0 rgba(245,194,77,.5)}50%{box-shadow:0 0 0 9999px rgba(4,6,11,.80),0 0 22px 4px rgba(245,194,77,.5)}}
-.coach-fulldim{position:fixed;inset:0;background:rgba(4,6,11,.80);z-index:300;pointer-events:none}
+.coach-spot{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(4,6,11,.58);transition:all .3s ease;pointer-events:none;z-index:300;border:2px solid var(--gold);animation:coachPulse 1.6s ease-in-out infinite}
+@keyframes coachPulse{0%,100%{box-shadow:0 0 0 9999px rgba(4,6,11,.58),0 0 0 0 rgba(245,194,77,.5)}50%{box-shadow:0 0 0 9999px rgba(4,6,11,.58),0 0 22px 4px rgba(245,194,77,.5)}}
+.coach-fulldim{position:fixed;inset:0;background:rgba(4,6,11,.58);z-index:300;pointer-events:none}
 .coach-box{position:fixed;left:50%;bottom:4.5%;transform:translateX(-50%);z-index:302;width:min(92vw,540px);background:linear-gradient(180deg,#151a28,#0c0f17);border:1px solid var(--gold);border-radius:14px;padding:15px 17px;box-shadow:0 18px 50px rgba(0,0,0,.65);display:flex;gap:13px;align-items:flex-start;pointer-events:none}
 .coach-box .cb-skip,.coach-box .cb-next{pointer-events:auto}
 .coach-box .cb-mentor{width:46px;height:46px;border-radius:11px;background:var(--gold-glow,rgba(245,194,77,.15));border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
@@ -10394,8 +10394,16 @@ function showCoachStep(){
 function nextCoachStep(){ tutorialStep++; if(tutorialStep>=TUTORIAL_SCRIPT.length){ endTutorial(); return; } showCoachStep(); }
 function tutorialAdvance(trigger){ if(!tutorialMode) return; var step=TUTORIAL_SCRIPT[tutorialStep]; if(step && step.on===trigger) nextCoachStep(); }
 function tutorialStartDuel(){ try{ var bots=(typeof BOT_OPPONENTS!=='undefined')?BOT_OPPONENTS.slice().sort(function(a,b){return (a.diff||9)-(b.diff||9);}):[]; if(bots[0]) selectedBot=bots[0].id; if(typeof startMatch==='function') startMatch(); }catch(e){} nextCoachStep(); }
-function startTutorial(){ tutorialMode=true; tutorialStep=0; _coachCSS(); showCoachStep(); }
-function endTutorial(){ tutorialMode=false; ['coach-box','coach-spot','coach-fulldim'].forEach(function(id){ var e=document.getElementById(id); if(e) e.remove(); }); try{ localStorage.setItem('sf_tutorial_done','1'); }catch(e){} if(typeof toast==='function') toast('🎓 Tutorial complete — the field is yours.', true); }
+function startTutorial(){ tutorialMode=true; tutorialStep=0; _coachCSS();
+  // 7/28/26: the "?" How to Play button has no awareness of the coached tutorial (or vice versa) --
+  // clicking it mid-tutorial opens a second, independently-dimmed full-screen overlay on top of the
+  // coach's own, stacking two dim layers into a near-black screen a new player can't read. Hiding it
+  // for the tutorial's duration is simpler and safer than teaching either overlay about the other.
+  var _hb=document.getElementById('howto-btn'); if(_hb) _hb.style.display='none';
+  var _howto=document.getElementById('howto-ov'); if(_howto && _howto.classList.contains('on')) _howto.classList.remove('on');
+  showCoachStep();
+}
+function endTutorial(){ tutorialMode=false; ['coach-box','coach-spot','coach-fulldim'].forEach(function(id){ var e=document.getElementById(id); if(e) e.remove(); }); var _hb=document.getElementById('howto-btn'); if(_hb) _hb.style.display=''; try{ localStorage.setItem('sf_tutorial_done','1'); }catch(e){} if(typeof toast==='function') toast('🎓 Tutorial complete — the field is yours.', true); }
 window.startTutorial=startTutorial; window.tutorialAdvance=tutorialAdvance; window.endTutorial=endTutorial; window.tutorialStartDuel=tutorialStartDuel;
 
 
