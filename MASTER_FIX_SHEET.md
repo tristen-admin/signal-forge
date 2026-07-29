@@ -5,7 +5,7 @@
 
 ---
 
-## Fixed post-audit — user-reported (commit `af5064c`)
+## Fixed post-audit — user-reported (commits `af5064c`, `3cdc0a5`)
 
 🔴 **Coached tutorial: hand cards were unclickable from step 4 onward, no way to proceed except Skip.** `#coach-box` (the tutorial dialog, anchored `bottom:4.5%`) physically overlapped ~95% of every hand card's clickable area and had no `pointer-events` rule of its own — confirmed with `elementFromPoint()` that a click at a card's own center hit the dialog, not the card, before this fix. Fixed with the same cascading-pointer-events pattern used elsewhere in this file: `.coach-box` is now `pointer-events:none`, with `pointer-events:auto` explicitly restored on just its two real controls (Skip, Next).
 
@@ -16,6 +16,8 @@
 🔴 **Bonus find while verifying the above: `commitCard()` crashed outright when conjuring Corvus, Grave-Tithe Acolyte, or Rhaess Korvain at 0 Charge.** Its self-banish-tax branch called `abilLog.push(...)`, but `abilLog` is a variable local to the separate `resolve()` function — a guaranteed `ReferenceError` that aborted the commit mid-mutation (the card was already removed from hand, phase already flipped to `'committed'`) any time a player tried to conjure one of those three cards while out of Charge. Replaced with the same `toast()` pattern already used one line above for an analogous message.
 
 Verified live end-to-end (properly spaced calls, not batched, to avoid racing the tutorial's own 90ms advance hooks): a fresh tutorial run through all 10 steps — draw, reveal, stage, supports, confirm, commit, resolve — reaches a clean `endTutorial()` with zero console errors.
+
+🔴 **Kravyn the Collector — "you may choose" is now a real choice.** Owner's direction: build it properly and make it reusable, since Kravyn won't be the only card with this effect. Built `OPTIONAL_HAND_RETURN` (a plain data table — adding a future card is the whole integration point, no new branch needed) plus `renderHandReturnChoice()`/`resolveHandReturnChoice()`, which take over the result screen exactly the way the existing "round lost — take your pick" choice already does. The card still banks/recycles to its normal destination immediately; the choice offers to redirect it afterward. Verified live: forced both outcomes directly, confirmed both "Return to Hand" (pulls from Winners Circle/deck, increments `handReturnCount`) and "Leave It" (no-op) work correctly, and confirmed the close-loss check reads real post-modifier power, not a naive pre-modifier guess.
 
 ---
 
@@ -69,9 +71,7 @@ Verified live end-to-end (properly spaced calls, not batched, to avoid racing th
 
 ## Confirmed still open (pre-existing tracking, re-verified this pass)
 
-🔴 **Kravyn the Collector — "you may choose" is not a real choice.** The code always auto-returns him to hand on any win (and separately on any close loss). *(`PENDING_MECHANICS.md`.)* Needs a decision: build the real choice modal, or simplify the text to match the deterministic behavior.
-
-🟡 **Tange Sazen's DM Activated disruption clause has no target to act on** — the bot's card pool isn't modeled as a real ordered deck anywhere in the engine. *(`PENDING_MECHANICS.md`.)* Needs a bot-deck-modeling pass, not a quick patch.
+🟡 **Tange Sazen's DM Activated disruption clause has no target to act on** — the bot's card pool isn't modeled as a real ordered deck anywhere in the engine (`oppDrawPileBot` is dead scaffolding: declared and reset every match, never populated or read). *(`PENDING_MECHANICS.md`.)* Owner's direction (7/28/26): build it for real — this is a bot-AI architecture change (a real, orderable bot deck array, mirroring the player's `drawPile`), not a card-text fix, and other cards will want to target "the opponent's remaining deck" too once it exists. Scoped as its own dedicated pass, not bundled into a smaller batch.
 
 📋 Broodswarm's hand-size identity (12/17 members) and Ironsworn's repeated Muster-N template (7/15, 5 at N=3) — flagged as deliberate identity, open question is whether Ironsworn's empty tier-2 slot should get one small distinct rule. *(`BALANCE_PROPOSALS_ROUND2.md` §8.)*
 
