@@ -3611,6 +3611,12 @@ const DECK_POOL = [
   // banishOnly so the power can't just be splashed without real banish-fill setup first).
   {name:'Ahdorah Khaan, Circle Unbroken',pow:20,kills:0,deaths:0,rarity:'ultra',timing:'on',banishOnly:true,abil:'Cannot be conjured from your hand — only from your banish pile. On commit: +4 power for every card in your banish pile.'},
   {name:'Kynaht, Ashen Return',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',banishOnly:true,abil:"Cannot be conjured from your hand — only from your banish pile. On commit: your opponent's Called supports contribute nothing this duel."},
+  // 7/28/26: owner-requested pair — the active location's power effect this duel applies only to
+  // the wielder; the opponent commits as if the arena's rule were never revealed to them. Same
+  // stat-scaled-sibling shape as Hanse Waltz/Bronzed Beast Hanse Waltz (identical clause, bigger
+  // body on the Ultra) rather than a mechanically-different upgrade.
+  {name:'Ridgeline Scout',pow:12,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"On commit: this duel's location effect applies only to you — your opponent's power is untouched by it, for better or worse."},
+  {name:'Ridgeline Warden',pow:18,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: this duel's location effect applies only to you — your opponent's power is untouched by it, for better or worse."},
   // 7/23/26: Squad 19 / Tosa Pact glue commons — deckbuilding infrastructure for Ahdor's Pride and
   // Keawe's Circle, both thin/borrowed-heavy archetypes per this session's balance audit. Cheap,
   // unglamorous, resource-smoothing pieces on purpose — the rares/URs can come later.
@@ -3808,6 +3814,7 @@ let dmSupportDoubleCostThisDuel = false;   // Darwin DM skill: called supports a
 let dmNullifyOppSupportsThisDuel = false;  // Ahdorah Khaan DM skill: opponent's called supports contribute nothing this duel
 let oppSupportSlotsBlocked = 0;  // 7/28/26: Warden's Feint et al -- opponent fields fewer support slots this duel (pickOppRears), distinct from nullifying an already-placed support's effect
 let _stagingFromBanish = false;  // 7/28/26: Circle of Life -- one-shot bypass flag so stageFighterFromBanish() can route a banishOnly card through the normal stageFighter() logic without tripping its own hand-staging guard
+let condHiddenFromOpp = false;   // 7/28/26: Ridgeline Scout/Warden -- the active location's power effect this duel resolves for the wielder only; the opponent's committed power is restored to its pre-condition value right after the condition block runs (see resolve())
 let dmZeroCostThisDuel = false;            // Anorith Keeling DM skill: every card in hand costs 0 to conjure this duel
 let dmDarwinHandRefillArmed = false;       // Darwin DM skill, 2nd clause: once activated, persists the REST OF THE MATCH (not just this duel, unlike the flags above) -- "whenever your hand is 2 or less after your draw phase" is an ongoing passive, not a this-duel-only effect. Reset at match end only, see resetMatchState().
 let handBanishedThisTurn = false, oppHandBanishedThisTurn = false;   // Ossian Drell on-conjure condition -- was a card banished FROM HAND (not deck) this turn
@@ -4403,7 +4410,7 @@ function openTurn(){
   // only energyRegenPerTurn() replenishes each turn, so leftover/spent charge carries across turns
   // and players have to play smaller conjures to bank enough for bigger plays or spells later.
   // oppCharge mirrors charge exactly (bots get the same regen/cap rule as the player).
-  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -6197,7 +6204,8 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
     if(_btn){ for(var _bti=0;_bti<_btn && drawPile.length;_bti++) banishPile.push(drawPile.pop()); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof updatePiles==='function') updatePiles(); } }
   if(pc.name==='The Black Ledger'){ if(typeof banishFromHand==='function') banishFromHand(2); if(typeof drawToHand==='function') drawToHand(1); }   // 7/24/26: draw nerfed 2->1, banish stays random (explicit exception to the player-choice default)
   if(pc.name==='Ashen Reclaimer' && banishPile.length){ var _ar=banishPile.pop(); _ar._bo=(_ar._bo||0)+3; hand.push(_ar); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
-  if(pc.name==='Kynaht, Ashen Return'){ dmNullifyOppSupportsThisDuel=true; abilLog.push("☠ Kynaht, Ashen Return — opponent's Called supports contribute nothing this duel"); }
+  if(pc.name==='Kynaht, Ashen Return'){ dmNullifyOppSupportsThisDuel=true; if(typeof toast==='function') toast("☠ Kynaht, Ashen Return — opponent's Called supports contribute nothing this duel", true); }
+  if(pc.name==='Ridgeline Scout' || pc.name==='Ridgeline Warden'){ condHiddenFromOpp=true; if(typeof toast==='function') toast('🗺️ '+pc.name+' — the location\'s effect resolves for you alone this duel', true); }
   if(pc.name==="Hoarder's Gambit" && typeof drawToHand==='function'){ drawToHand(2); }
   if(pc.name==='Arch-Grim Korrin' && drawPile.length){
     // Real gap fixed 7/27/26: this used to draw cards equal to remnant count -- leftover from
@@ -7831,6 +7839,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   }
 
   // ── APPLY CONDITION ──
+  var _oppPowPreCond = oppPow;   // 7/28/26: Ridgeline Scout/Warden -- snapshot so the opponent's side can be rolled back after the block below, regardless of which branch fires or how it mutates oppPow
   if(!akatoshUnmakes){
   if(cond.id==="veteranedge"){ playerPow+=Math.floor((pc.kills||0)/3); oppPow+=Math.floor((oc.kills||0)/3); abilLog.push("🎖️ Veteran's Edge: +1 power per 3 career kills"); }
   else if(cond.id==="freshblood"){ if((pc.kills||0)===0){playerPow+=6;} if((oc.kills||0)===0){oppPow+=6;} abilLog.push("🌱 Fresh Blood: unproven cards (0 kills) +6"); }
@@ -7882,6 +7891,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     abilLog.push(`🌫️ Hollow Reckoning: power → career kills (you ${playerPow} vs opp ${oppPow})`);
   }
   }
+  if(condHiddenFromOpp && oppPow!==_oppPowPreCond){ oppPow=_oppPowPreCond; abilLog.push('🗺️ The location\'s effect never reached the opponent'); }
 
   // ── BOT COMEBACK: mirror the player's on-loss spell/WC economy so the bot doesn't get swung on late ──
   if(typeof oppLossStreak!=='undefined' && oppLossStreak>0 && (typeof pvpMode==='undefined'||!pvpMode) && cond.id!=='mirror' && cond.id!=='hollowreckoning'){ var _cb=Math.min(6,oppLossStreak*2); oppPow+=_cb; abilLog.push('🩸 '+oc.name+' rallies from behind — comeback +'+_cb); }
@@ -10787,14 +10797,21 @@ function runExpedition(locId){
   if(typeof saveState==='function') saveState();
   buildExpeditions();
 }
+function commitSelectedExpedition(){
+  var sel = document.getElementById('exp-loc-select');
+  if(!sel || !sel.value) return;
+  runExpedition(sel.value);
+}
 function buildExpeditions(){
   var el = document.getElementById('expeditions-body'); if(!el) return;
   expeditionRegen();
   var readyCount = 0;
+  var readyLocs = [], availableLocs = [];
   var pins = WORLD_LOCATIONS.map(function(l){
     var exp = expeditionsActive[l.id];
     if(exp && expeditionReady(exp)){
       readyCount++;
+      readyLocs.push(l);
       return '<button class="exp-pin exp-pin-ready" style="left:'+l.x+'%;top:'+l.y+'%" title="'+l.name+' — ready to claim!" onclick="runExpedition(\''+l.id+'\')">'
         + '<span class="exp-pin-dot"></span><span class="exp-pin-label">🎁 '+l.name+'</span></button>';
     }
@@ -10803,6 +10820,7 @@ function buildExpeditions(){
       return '<button class="exp-pin exp-pin-active" style="left:'+l.x+'%;top:'+l.y+'%" title="'+l.name+' — adventuring, '+left+' left" disabled>'
         + '<span class="exp-pin-dot"></span><span class="exp-pin-label">'+l.name+' · '+left+'</span></button>';
     }
+    availableLocs.push(l);
     return '<button class="exp-pin" style="left:'+l.x+'%;top:'+l.y+'%" title="'+l.name+' — '+l.blurb+'" onclick="runExpedition(\''+l.id+'\')"'+(expeditionCharges<=0?' disabled':'')+'>'
       + '<span class="exp-pin-dot"></span><span class="exp-pin-label">'+l.name+'</span></button>';
   }).join('');
@@ -10811,8 +10829,27 @@ function buildExpeditions(){
     + (expeditionCharges<expeditionMaxCharges ? '<span class="exp-charge-next">next in '+expeditionTimeLabel(expeditionNextChargeMs())+'</span>' : '')
     + (readyCount>0 ? '<span class="exp-claim-banner">🎁 '+readyCount+' expedition'+(readyCount>1?'s':'')+' ready to claim!</span>' : '')
     + '</div>';
+  // Reliable button-based flow (7/28/26) -- the map pins are tiny absolutely-positioned dots inside
+  // a scrolling panel, and on touch a tap that drifts even a little reads as a scroll instead of a
+  // click, so it can take several tries to land one. This adds a plain select + Commit button that
+  // calls the exact same runExpedition() as the pins, one location at a time, no precision required.
+  var claimSection = '';
+  if(readyLocs.length){
+    claimSection = '<div class="exp-quick exp-quick-claim"><strong>Ready to claim:</strong>'
+      + readyLocs.map(function(l){ return '<button class="btn" onclick="runExpedition(\''+l.id+'\')">🎁 Claim — '+l.name+'</button>'; }).join('')
+      + '</div>';
+  }
+  var commitSection = '<div class="exp-quick">'
+    + '<label for="exp-loc-select"><strong>Send a charge:</strong></label> '
+    + '<select id="exp-loc-select"'+(expeditionCharges<=0||!availableLocs.length?' disabled':'')+'>'
+    + (availableLocs.length ? availableLocs.map(function(l){ return '<option value="'+l.id+'">'+l.name+'</option>'; }).join('') : '<option>No locations available</option>')
+    + '</select> '
+    + '<button class="btn" onclick="commitSelectedExpedition()"'+(expeditionCharges<=0||!availableLocs.length?' disabled':'')+'>Commit</button>'
+    + '</div>';
   el.innerHTML = '<p class="exp-intro">Send a charge to a marked location — the longer the expedition, the better the odds of a rare find. Charges refill over time — check back every few hours.</p>'
     + chargeRow
+    + claimSection
+    + commitSection
     + '<div class="exp-map"><img class="exp-map-img" src="'+WORLD_MAP_IMG+'" alt=""><div class="exp-map-fallback"></div>' + pins + '</div>';
 }
 // Daily Quests (7/15/26) -- 3 simple, engine-tracked quests, todayISO()-keyed reset mirroring the
@@ -13042,7 +13079,7 @@ function resetMatchState(){
   banishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0;
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
-  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
+  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
