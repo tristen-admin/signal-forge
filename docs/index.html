@@ -6894,7 +6894,7 @@ function legendBreakdown(c){
   const rows=[];
   rows.push(['Rarity ('+c.rarity+')', LEGEND_RARITY_BASE[c.rarity]||4]);
   rows.push(['Wins '+wins+'×2'+(wr?' · '+Math.min(40,Math.round(wr*0.4))+' rate':''), wins*2 + Math.min(40,Math.round(wr*0.4))]);
-  if(deaths===0 && wins>=5) rows.push(['Pristine (0 deaths)', 40]);
+  if(deaths===0 && wins>=1) rows.push(['Pristine (0 deaths, 1+ win)', 40]);
   if(m>0) rows.push(['Mastery Lv '+m+' ×8', m*8]);
   if(c.ascendant) rows.push(['Ascendant variant', 120]);
   if(formationPts) rows.push(['Best bond', formationPts]);
@@ -8490,7 +8490,7 @@ function buildMarket(){
       const _mc=COLLECTION.find(x=>x.name===marketFocus); const _r=_mc?getRec(_mc):null;
       const _m=marketListings.filter(l=>l.name===marketFocus && !l.sold);
       const _lo=_m.length?Math.min(..._m.map(l=>l.price)):0;
-      _mf.innerHTML='<div class="mf-inner"><div class="mf-txt">Comparing your <b>'+marketFocus+'</b>'+(_r?' — '+_mc.rarity+' · '+_r.k+'K / '+_r.d+'D · '+(_r.d===0?'◈ Pristine':'Battle-worn'):'')+' vs <b>'+_m.length+'</b> live listing'+(_m.length===1?'':'s')+(_m.length?' · floor ◈ '+fmtPts(_lo):' — none for sale right now')+'.</div><button class="mf-clear" onclick="marketFocus=null;buildMarket()">Show all \u2715</button></div>';
+      _mf.innerHTML='<div class="mf-inner"><div class="mf-txt">Comparing your <b>'+marketFocus+'</b>'+(_r?' — '+_mc.rarity+' · '+_r.k+'K / '+_r.d+'D · '+((_r.d===0&&_r.k>=1)?'◈ Pristine':'Battle-worn'):'')+' vs <b>'+_m.length+'</b> live listing'+(_m.length===1?'':'s')+(_m.length?' · floor ◈ '+fmtPts(_lo):' — none for sale right now')+'.</div><button class="mf-clear" onclick="marketFocus=null;buildMarket()">Show all \u2715</button></div>';
     } else _mf.innerHTML='';
   }
   let _mk = marketListings.map((l,idx)=>({l,idx}));
@@ -8522,7 +8522,7 @@ function buildLegendBoard(){
     return '<div style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--border2);border-radius:10px;background:var(--panel);margin-bottom:8px">'
       +'<div style="font-size:18px;font-weight:800;color:var(--text3);width:34px;font-variant-numeric:tabular-nums">#'+(i+1)+'</div>'
       +'<div style="width:38px;height:38px;border-radius:8px;flex-shrink:0;'+artFillStyle(c.name)+'"></div>'
-      +'<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.name+'</div><div style="font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="lg-badge '+t.cls+'">'+t.name+'</span> '+rlab(c.rarity)+' · '+r.k+'K / '+r.d+'D'+(r.d===0?' · ◈ Pristine':'')+'</div></div>'
+      +'<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.name+'</div><div style="font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="lg-badge '+t.cls+'">'+t.name+'</span> '+rlab(c.rarity)+' · '+r.k+'K / '+r.d+'D'+((r.d===0&&r.k>=1)?' · ◈ Pristine':'')+'</div></div>'
       +'<div style="text-align:right;flex-shrink:0;padding-left:6px"><div style="font-size:20px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums">'+s+'</div><div style="font-size:9px;color:var(--text3);letter-spacing:.08em">LEGEND</div></div>'
       +'<div class="lb-price" style="text-align:right;min-width:72px;flex-shrink:0;color:var(--electric);font-size:12px;font-weight:700">≈ ◈ '+fmtPts(legendPrice(c))+'</div>'
       +'</div>';
