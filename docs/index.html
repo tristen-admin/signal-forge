@@ -2628,7 +2628,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <button class="hub-action ha-hero" style="--accent:#F5C24D" onclick="show('ranked', document.getElementById('nav-ranked'))"><span class="ha-icon">🪜</span><span class="ha-txt"><span class="ha-eyebrow">Featured</span><span class="ha-title">Ranked Ladder</span><span class="ha-sub">Matchmade duels — ascend the ranks and claim your standing</span></span><span class="ha-arrow">→</span></button>
           <button class="hub-action" style="--accent:#5BC0EB" onclick="show('lobby', document.getElementById('nav-lobby'))"><span class="ha-icon">⚔</span><span class="ha-txt"><span class="ha-title">Public Server</span><span class="ha-sub">All cards · casual · zero consequence</span></span><span class="ha-arrow">→</span></button>
           <button class="hub-action" style="--accent:#E0503C" onclick="show('pvp', document.getElementById('nav-pvp'))"><span class="ha-icon">🩸</span><span class="ha-txt"><span class="ha-title">Staked PvP</span><span class="ha-sub">Wager cards · winner takes them</span></span><span class="ha-arrow">→</span></button>
-          <button class="hub-action" style="--accent:#7C8CF8" onclick="show('draft', document.getElementById('nav-draft')); buildDraft()"><span class="ha-icon">🌀</span><span class="ha-txt"><span class="ha-title">Draft</span><span class="ha-sub">Pull ten from the vortex — keep every card</span></span><span class="ha-arrow">→</span></button>
+          <button class="hub-action" style="--accent:#7C8CF8" onclick="show('draft', document.getElementById('nav-draft')); buildDraft()"><span class="ha-icon">🌀</span><span class="ha-txt"><span class="ha-title">Draft</span><span class="ha-sub">Pull twenty from the vortex — keep every card</span></span><span class="ha-arrow">→</span></button>
           <button class="hub-action" style="--accent:#C88CF5" onclick="show('asc', document.getElementById('nav-asc'))"><span class="ha-icon">👑</span><span class="ha-txt"><span class="ha-title">Ascension · The Rite</span><span class="ha-sub">Forge one card through a gauntlet of duels</span></span><span class="ha-arrow">→</span></button>
         </div>
       </div>
@@ -2785,7 +2785,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="lobby-head" style="text-align:center">
         <div class="lh-eyebrow">Onboarding · The Draft</div>
         <h1>Pull your first deck from the vortex</h1>
-        <p>Pay entry, draft ten cards one per row, and <strong style="color:var(--gold)">keep every one</strong>. A <strong>balanced format</strong> &mdash; a new player&#39;s real shot against veterans; your skill, not your collection size &mdash; with a genuine <strong style="color:var(--electric)">chance at rares</strong>. <span class="draft-paywall">Entry: 2,500 &#9672; Signal (the onboarding paywall) &middot; prototype pricing.</span></p>
+        <p>Pay entry, draft twenty cards one per row, and <strong style="color:var(--gold)">keep every one</strong>. A <strong>balanced format</strong> &mdash; a new player&#39;s real shot against veterans; your skill, not your collection size &mdash; with a genuine <strong style="color:var(--electric)">chance at rares</strong>. <span class="draft-paywall">Entry: 5,000 &#9672; Signal (the onboarding paywall) &middot; prototype pricing.</span></p>
       </div>
       <div id="draft-stage"></div>
     </div>
@@ -5276,12 +5276,12 @@ const CALLED = {
   "King Joris":                    {text:"your Fighter +4 · draw 1", add:4, draw:1},
   "Malia":                         {text:"your Fighter +4", add:4},
   "Moro":                          {text:"return 1 banished card to hand, or banish 1 card from the top of your deck to give +4 to your conjured unit.", recurPlain:1, deckBanishIfEmpty:1, deckBanishAdd:4},
-  "Ourevos, the Golden Dragon":    {text:"your Fighter +5, fill the other support slot with a copy of this card, then draw a card", add:2},
+  "Ourevos, the Golden Dragon":    {text:"your Fighter +5, fill the other support slot with a copy of this card, then draw a card", add:5, draw:1, duplicateSelfToSupport:true},
   "Tange Sazen":                   {text:"your Fighter +3, and your conjured unit returns to your hand instead of going to the winners circle", add:3},
   "Kiba":                          {text:"your Fighter +5", add:5},
   "The Bronzed Beast, Hanse Waltz":   {text:"your Fighter +3, +5 more if fielded alongside its Waltz Twins partner", add:3, twinBuff:5},
   "Lagertha Waltz, Wrathful Transformation":{text:"your Fighter +3, +5 more if fielded alongside its Waltz Twins partner", add:3, twinBuff:5},
-  "Anorith Keeling":               {text:"return this unit from the support circle to your deck, banish 1 card from your hand, draw 2 and gain 1 charge", banishOwn:1},
+  "Anorith Keeling":               {text:"return this unit from the support circle to your deck, banish 1 card from your hand, draw 2 and gain 1 charge", banishOwn:1, draw:2, chargeGain:1, returnSelfToDeck:true},
   // ── Engines — generic utility kept (the neutral engine every deck can splash) ──
   "Conduit Adept":                 {text:"gain 2 Charge + draw 1", chargeGain:2, draw:1},
   // 7/24/26: balance audit round 2 §5 -- Broodswarm/Ahdor's Pride charge economy, Called half.
@@ -5539,6 +5539,26 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
     else { hand.push(_dtc); if(typeof buildHand==='function') buildHand(); abilLog.push("🧬 "+support.name+" — "+(condSupportZonesLocked?"support zones locked":"supports full")+", "+_dtc.name+" goes to your hand instead"); }
     if(typeof deckSize!=='undefined') deckSize=drawPile.length;
     if(typeof updatePiles==='function') updatePiles();
+  }
+  if(e.duplicateSelfToSupport && !isOpp){
+    // Ourevos, the Golden Dragon (7/30/26): a new primitive distinct from conjureTopToSupport just
+    // above -- the support duplicates ITSELF into the other slot instead of pulling a different card
+    // in. Player-only, same precedent as conjureTopToSupport/Valcarion/Uso Oso's Skeletal Summons --
+    // no bot-side mirror built yet for this whole "fill an open support slot" effect family.
+    if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS){ rearGuards.push(Object.assign({}, support)); abilLog.push("🐉 "+support.name+" — a second "+support.name+" fills the other support slot"); }
+    else { abilLog.push("🐉 "+support.name+" — "+(condSupportZonesLocked?"support zones locked":"supports full")+", no duplicate this time"); }
+  }
+  if(e.returnSelfToDeck && !isOpp){
+    // Anorith Keeling (7/30/26): the support returns itself to the deck the same duel it's Called --
+    // a one-shot burst, not a card that lingers. Null-in-place (not splice) so the live
+    // rearGuards.forEach() this fires from doesn't skip whatever's in the OTHER slot this same pass --
+    // same safe-removal shape snipeSupport already uses (rearGuards[idx]=null, never a splice).
+    var _rsi = rearGuards.indexOf(support);
+    // Deck bottom via unshift, no shuffle -- matches the exact convention every other support's
+    // default end-of-duel recycle already uses (resolve()'s post-duel rear-guard cleanup, "(support)
+    // → deck bottom"), so this card's explicit self-return reads and behaves the same as the
+    // generic path it's pre-empting, not a different destination for no reason.
+    if(_rsi >= 0){ rearGuards[_rsi] = null; drawPile.unshift(support); if(typeof deckSize!=='undefined') deckSize=drawPile.length; if(typeof updatePiles==='function') updatePiles(); abilLog.push("🌀 "+support.name+" — returns from the support circle to your deck"); }
   }
   if(e.autoRemnantLowest){
     if(!isOpp){
@@ -8051,9 +8071,11 @@ function resolve(pc, oc, cond, playerCommittedPow){
       ? `${pc.name} (${Math.round(playerPow)}) defeated ${oc.name} (${Math.round(oppPow)}) — Remnant cleared · ${_destLabel}`
       : `${pc.name} (${Math.round(playerPow)}) defeated ${oc.name} (${Math.round(oppPow)}) — ${_destLabel}`;
     lastResult = 'win';
-    recordDuel(pc,'win'); signalPoints += 20;   // playtest: every match tracks K/D + pays
+    // Public Server/Sandbox (lobbyMode) promises zero consequence -- pays Signal like any match,
+    // but a card's permanent K/D record and its Deck Master's record must never move here.
+    if(!lobbyMode){ recordDuel(pc,'win'); if(deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.k=(deckMasterRecord.k||0)+1; lsSet('sf_dm_record', deckMasterRecord); } }
+    signalPoints += 20;
     if(typeof bumpQuestProgress==='function') bumpQuestProgress('win2');
-    if(deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.k=(deckMasterRecord.k||0)+1; lsSet('sf_dm_record', deckMasterRecord); }
     if(pc.name === 'Signal Diviner'){ divinerBonusNext=2; abilLog.push('Signal Diviner: +2 max Charge next turn'); }
     if(pc.name === 'Tange Sazen') skullchainKills++;
     if(pc.name === 'Kotei') ragwingWins++;
@@ -8065,8 +8087,8 @@ function resolve(pc, oc, cond, playerCommittedPow){
     lastResult = 'lose';
     playerScore[1]++;
     charge=Math.min(duelEnergyCap(),charge+1); if(typeof renderCharge==='function') renderCharge();
-    recordDuel(pc,'death');   // playtest: every match records the death
-    if(deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.d=(deckMasterRecord.d||0)+1; lsSet('sf_dm_record', deckMasterRecord); }
+    // Public Server/Sandbox (lobbyMode): no mark on the permanent record, win or lose.
+    if(!lobbyMode){ recordDuel(pc,'death'); if(deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.d=(deckMasterRecord.d||0)+1; lsSet('sf_dm_record', deckMasterRecord); } }
     { if(typeof drawPile!=='undefined' && drawPile.length){ var _tt=drawPile[drawPile.length-1]; var _tr=_tt&&TRIGGERS[_tt.name]; if(_tr){ drawPile.pop(); hand.push(_tt); if(_tr.draw) drawToHand(_tr.draw); if(_tr.recur){ for(var _tri=0;_tri<_tr.recur;_tri++){ if(banishPile.length) hand.push(banishPile.pop()); } } abilLog.push("✨ Trigger — "+_tt.name+": "+_tr.text); if(typeof toast==='function') toast("✨ Trigger! "+_tt.name+" — "+_tr.text, true); if(typeof buildHand==='function') buildHand(); } } }
     if(isDeathRemnant){
       var _rp=(typeof dmRemnantPowOverride!=='undefined'&&dmRemnantPowOverride!=null)?dmRemnantPowOverride:((typeof REMNANT_POW!=='undefined'&&REMNANT_POW[pc.name]!=null)?REMNANT_POW[pc.name]:pc.pow);
@@ -10323,7 +10345,7 @@ const GUIDE_TIPS = {
   lobby: "Public Server is casual, zero-consequence play — the best place to test a new deck before it matters.",
   ranked: "Ranked wagers RP on every match and pays real Signal for wins. Best-2-of-3, so every duel counts more than it does elsewhere.",
   pvp: "Staked PvP wagers actual cards — winner takes them. Only stake what you're really willing to lose.",
-  draft: "Draft pulls ten cards from a shared pool — you keep everything you take, win or lose.",
+  draft: "Draft pulls twenty cards from a shared pool — you keep everything you take, win or lose.",
   asc: "Ascension is a solo run with one card as your Deck Master. Squad choices here can earn real Bonds that follow those cards everywhere else.",
 };
 function _guideCSS(){ if(document.getElementById('gd-style')) return; var st=document.createElement('style'); st.id='gd-style'; st.textContent=`
@@ -10673,6 +10695,7 @@ var BOT_ARCH_PRESET = {kleydson:IRONSWORN_PRESET, korrin:DEATHLESS_PRESET, anori
 function refreshBotPool(b){ if(b && BOT_ARCH_PRESET[b.id]) b.pool = pick(BOT_ARCH_PRESET[b.id]); }
 let selectedBot = null;
 let rankedMode = false;   // true only for Ranked Ladder matches (Signal-reward gate)
+let lobbyMode = false;   // true only for Public Server/Sandbox — the one mode that promises zero consequence, so resolve() must skip recordDuel()/deckMasterRecord here
 // 7/12/26: no longer gates the Deck Master mechanic itself — deckMasterCard alone does that now,
 // universally, in every mode (matching activeBot.dmCard's un-gated bot-side pattern, and the user's
 // own stated intent that Deck Master was meant to be the game's baseline behavior, not a separate
@@ -11755,7 +11778,7 @@ function startPvpMatch(){
   if(!pvpRival||!pvpStakeMine) return;
   const b=BOT_OPPONENTS.find(x=>x.id===pvpRival); if(!b) return;
   refreshBotPool(b);
-  pvpMode=true; activeBot=b; pvpStakeTheirs=rivalStakeFor(b); deckMasterMode=false;
+  pvpMode=true; activeBot=b; pvpStakeTheirs=rivalStakeFor(b); deckMasterMode=false; lobbyMode=false;
   pvpPotMine=[pvpStakeMine]; pvpPotTheirs=[pvpStakeTheirs]; pvpForced=null;
   resetMatchState();
   const mine=COLLECTION.find(c=>(c.uid||c.name)===pvpStakeMine)||{name:'your card'};
@@ -11800,7 +11823,7 @@ function autoSimPvp(){
   const o=document.getElementById('approve-overlay'); if(o) o.classList.remove('show');
   const b=BOT_OPPONENTS.find(x=>x.id===pvpRival); if(!b) return;
   refreshBotPool(b);
-  pvpMode=true; activeBot=b; pvpStakeTheirs=rivalStakeFor(b); deckMasterMode=false;
+  pvpMode=true; activeBot=b; pvpStakeTheirs=rivalStakeFor(b); deckMasterMode=false; lobbyMode=false;
   pvpPotMine=[pvpStakeMine]; pvpPotTheirs=[pvpStakeTheirs]; pvpForced=null;
   resetMatchState();
   const myPool=(activeDeck.size===DECK_SIZE)?[...activeDeck].map(k=>COLLECTION.find(c=>(c.uid||c.name)===k)).filter(Boolean):COLLECTION.filter(c=>(ownedCopies[c.uid||c.name]||0)>0);
@@ -13016,6 +13039,7 @@ function startMatch(mode){
   refreshBotPool(b);
   activeBot=b;
   pvpMode=false;
+  lobbyMode=false;
   // Flags MUST be set to their final value before resetMatchState()/dealNewDeck() run below —
   // those functions read deckMasterMode (guaranteed opening-hand draw, badge paint) synchronously
   // during this same call. Setting the flag AFTER startMatch() returns (the old "call shared fn,
@@ -13058,10 +13082,12 @@ function deckMasterReady(){
 // who hasn't named one yet still gets a normal match instead of a dead end.
 function enterPublicMatch(){
   if(deckMasterReady()){ startDeckMasterMatch(); } else { startMatch(); }
+  lobbyMode=true;   // set AFTER startMatch()/startDeckMasterMatch() -- both reset it false internally
 }
 function playSandbox(){
   if(!selectedBot){ selectedBot = BOT_OPPONENTS[Math.floor(Math.random()*BOT_OPPONENTS.length)].id; }
   sandboxNext=true; startMatch();
+  lobbyMode=true;
   // Real gap (7/12/26): the only mode indicator used to be this toast, which fades in a few seconds —
   // after that, the persistent title just said generic "Match — vs X", identical to every other mode,
   // with nothing distinguishing "this hand is random, not your built deck" once you're a few turns in.
@@ -13070,7 +13096,7 @@ function playSandbox(){
   if(typeof toast==='function') toast('🌐 Sandbox — random all-card deck · zero consequence', true);
 }
 let draftPool=[], _draftRow=null, drafting=false, draftGranted=false;
-const DRAFT_PICKS=10, DRAFT_ROW=4, DRAFT_ENTRY=2500;   // entry paywall (Signal); you KEEP every card you draft
+const DRAFT_PICKS=20, DRAFT_ROW=4, DRAFT_ENTRY=5000;   // 7/30/26: 10->20 picks (pool is majority Common/Rare, a bigger haul is justified); entry rescaled 2500->5000 to hold the same 250/card rate. You KEEP every card you draft
 function startDraft(){
   if(signalPoints < DRAFT_ENTRY){ if(typeof toast==='function') toast('Draft entry is '+fmtPts(DRAFT_ENTRY)+' \u25c8 Signal \u2014 earn more in play.', false); return; }
   signalPoints -= DRAFT_ENTRY; if(typeof updateBalance==='function') updateBalance();
@@ -13852,7 +13878,7 @@ function tourneyStartRound(){
   var b=tourneyQueue[tourneyIdx]; if(!b){ tourneyFinish(); return; }
   var ov=document.getElementById('tourney-overlay'); if(ov) ov.classList.remove('show');
   refreshBotPool(b);
-  activeBot=b; pvpMode=false; rankedMode=false; deckMasterMode=false;
+  activeBot=b; pvpMode=false; rankedMode=false; deckMasterMode=false; lobbyMode=false;
   if(typeof resetMatchState==='function') resetMatchState();
   var bn=document.getElementById('match-bot-name'); if(bn) bn.textContent=b.name;
   var bt=document.getElementById('match-bot-tag'); if(bt) bt.textContent='Tournament · Round '+(tourneyIdx+1)+'/'+tourneyQueue.length+' · '+b.arch;
