@@ -8819,11 +8819,11 @@ const SEASON = { chapter:'Chapter 1', name:'Rebirth', pack:'Legends Reborn' };
 // reachable -- both remaining packs already carry a small apex% in their own odds table below,
 // and the Pity system (PITY_APEX) still triggers off those same odds, untouched.
 const PACKS = [
-  {id:'std', name:'Legends Reborn Booster', icon:'📦', price:500, blurb:'Common through Rare — a whisper of higher.', odds:{common:63.9, uncommon:25, rare:7.6, ultra:3.5}},
+  {id:'std', name:'Legends Reborn Booster', icon:'📦', price:150, tenX:true, blurb:'Common through Rare — a whisper of higher.', odds:{common:91.6, rare:7.6, ultra:0.8}},
   {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & an Apex shot — no commons.', odds:{rare:78, ultra:20, apex:2}},
 ];
 const PREMIUM_PACKS = [
-  {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{uncommon:14, rare:77.2, ultra:7, apex:1.8}},
+  {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{rare:91.2, ultra:7, apex:1.8}},
   {id:'fforge', name:'Forgemaster Vault', icon:'❖', price:5000, blurb:'Rare-dense with a real Apex shot.', odds:{rare:91.2, ultra:7, apex:1.8}},
   {id:'fmythic', name:'Mythic Rite', icon:'👑', price:6000, blurb:'The top-tier summon — highest Apex rate in the game.', odds:{rare:91.2, ultra:7, apex:1.8}},
 ];
@@ -8842,7 +8842,7 @@ function packCardHTML(p){
   return `<div class="pack-card wide">
     <div class="pack-head"><div class="pack-icon">${p.icon}</div><div><div class="pack-name">${p.name}</div><div class="pack-blurb">${p.blurb}</div></div></div>
     <div class="pack-odds">${odds}</div>
-    <div class="pack-buy-row"><button class="pack-buy" ${soldOut?'disabled':''} onclick="openPack('${p.id}')">${soldOut?'Minted Out':'Open · ◈ '+fmtPts(p.price)}</button>${soldOut?'':`<button class="pack-buy pack-buy5" onclick="openPack5('${p.id}')" title="Open five at once">5× · ◈ ${fmtPts(p.price*5)}</button>`}</div>
+    <div class="pack-buy-row"><button class="pack-buy" ${soldOut?'disabled':''} onclick="openPack('${p.id}')">${soldOut?'Minted Out':'Open · ◈ '+fmtPts(p.price)}</button>${soldOut?'':`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',5)" title="Open five at once">5× · ◈ ${fmtPts(p.price*5)}</button>`}${(!soldOut && p.tenX)?`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',10)" title="Open ten at once">10× · ◈ ${fmtPts(p.price*10)}</button>`:''}</div>
   </div>`;
 }
 function packsSectionHTML(){
@@ -8867,24 +8867,24 @@ function _mintRarity(rar, p){
   if(cardSupply[card.name] && cardSupply[card.name].left>0) cardSupply[card.name].left--;
   return {card:card, rar:rar, mint:_mint};
 }
-function openPack5(id){
+function openPackN(id, n){
   var p=PACKS.find(function(x){return x.id===id;}) || PREMIUM_PACKS.find(function(x){return x.id===id;}); if(!p) return;
   var isPremium = PREMIUM_PACKS.indexOf(p)>=0;
   var avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;});
   if(!avail.length){ toast(p.name+' \u2014 every rarity it offers is minted out',false); return; }
-  var cost=p.price*5;
-  if(signalPoints<cost){ toast('Not enough Signal for a 5\u00d7 summon (\u25c8 '+fmtPts(cost)+')',false); return; }
-  if(!confirm('Open 5\u00d7 '+p.name+' for \u25c8 '+fmtPts(cost)+' Signal?\n\nMints you five random cards.')) return;
+  var cost=p.price*n;
+  if(signalPoints<cost){ toast('Not enough Signal for a '+n+'\u00d7 summon (\u25c8 '+fmtPts(cost)+')',false); return; }
+  if(!confirm('Open '+n+'\u00d7 '+p.name+' for \u25c8 '+fmtPts(cost)+' Signal?\n\nMints you '+n+' random cards.')) return;
   signalPoints-=cost;
   var rarities=[];
-  for(var i=0;i<5;i++){ var _avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;}); if(!_avail.length) break; rarities.push(rollPackRarity(p, _avail)); }
-  // 7/29/26: 5x floor -- a basic-tier 5x guarantees at least 1 Rare-or-better, a premium-tier 5x
-  // guarantees at least 1 Ultra-or-better. Decided here, on the ROLLED rarities, before any card is
-  // minted -- mintPulled() has real, irreversible side effects (a new owned card instance, a
-  // cardRecords entry, a wonCounter bump), so there is no safe way to mint-then-discard a "wasted"
-  // pull to enforce the floor after the fact.
+  for(var i=0;i<n;i++){ var _avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;}); if(!_avail.length) break; rarities.push(rollPackRarity(p, _avail)); }
+  // 7/29/26: bundle floor -- a basic-tier bundle guarantees at least 1 Rare-or-better, a premium-tier
+  // bundle guarantees at least 1 Ultra-or-better, regardless of bundle size (5x or 10x). Decided here,
+  // on the ROLLED rarities, before any card is minted -- mintPulled() has real, irreversible side
+  // effects (a new owned card instance, a cardRecords entry, a wonCounter bump), so there is no safe
+  // way to mint-then-discard a "wasted" pull to enforce the floor after the fact.
   var floorRarity = isPremium ? 'ultra' : 'rare';
-  if(rarities.length===5 && p.odds[floorRarity]!=null && supply[floorRarity] && supply[floorRarity].left>0){
+  if(rarities.length===n && p.odds[floorRarity]!=null && supply[floorRarity] && supply[floorRarity].left>0){
     var floorMet = rarities.some(function(r){ return RARITY_ORDER[r] <= RARITY_ORDER[floorRarity]; });
     if(!floorMet){
       var weakestIdx=0; for(var w=1;w<rarities.length;w++){ if(RARITY_ORDER[rarities[w]] > RARITY_ORDER[rarities[weakestIdx]]) weakestIdx=w; }
@@ -8896,7 +8896,7 @@ function openPack5(id){
   (function revealNext(k){
     if(k>=results.length){
       var summ=results.map(function(r){return rlab(r.rar);}).join(' ');
-      toast('5\u00d7 '+p.name+' \u2014 pulled '+summ+' \u2192 your Vault', true);
+      toast(n+'\u00d7 '+p.name+' \u2014 pulled '+summ+' \u2192 your Vault', true);
       if(typeof buildVault==='function') buildVault();
       return;
     }
