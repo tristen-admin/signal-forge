@@ -10,17 +10,17 @@ Standing practice: add an entry here any time a CALLED/CARD_RULES/ability text e
 
 ## Open
 
-### Kravyn the Collector — on-kill hand-return is automatic, not a real choice (needs a decision)
-**Text says:** "When this unit kills its enemy unit, you may choose to return this unit to the hand instead of placing it in the winners circle."
-**What actually fires today:** `resolve()`'s win branch (name-hardcoded, alongside Skullchain Reaver) ALWAYS returns Kravyn to hand on any win, and a separate close-loss branch ALSO always returns him to hand on any loss by ≤3 power margin. Both fire unconditionally — there is no prompt, no "you may choose."
-**Why this is paused, not built or silently rewritten:** two real options exist and they're a genuine gameplay-balance call, not just an implementation detail — (a) build a real kill-time choice modal (matches the printed text exactly, but the current always-return behavior on a close loss is itself a curious "consolation" mechanic worth keeping deliberately, or losing deliberately), or (b) simplify the printed text to match the current deterministic behavior (matches this session's precedent for Signal Diviner/Conduit of Chaos, where a text/code mismatch was resolved by rewriting the text instead of building new mechanics). Neither was picked without checking first.
-
-### Tange Sazen — DM Activated ability, opponent-deck disruption has no real target
-**Text says (second half):** "...and make your opponent return 1 card to the bottom of the deck."
-**What actually exists:** no `DM_ACTIVATED_ABILITY['Tange Sazen']` entry at all today — only his passive `DM_EXCLUSIVE` (+8 power if your Winners Circle is empty), with a code comment directly above it already flagging this gap explicitly. `oppDrawPileBot` (the variable that would need to model this) is declared and reset every match but never populated or read anywhere — dead scaffolding from an unfinished feature, not a small fix.
-**Why this is paused:** the bot's card pool isn't modeled as a real orderable deck anywhere in the engine (`OPP_CARDS`/`activeBot.pool` feed a padded random draw, not a persistent ordered array the way the player's `drawPile` is). Building this properly means modeling a real bot deck array first — a bot-AI architecture change, not a card-text fix — and deserves its own dedicated pass rather than a rushed addition alongside a text-mismatch batch.
+*(none currently tracked — both entries below were the only open items as of 7/28/26 and are now resolved)*
 
 ## Resolved
+
+### Kravyn the Collector — on-kill hand-return, real choice shipped 7/28/26 (commit `3cdc0a5`)
+**Text said:** "When this unit kills its enemy unit, you may choose to return this unit to the hand instead of placing it in the winners circle."
+**What shipped:** a real, reusable choice system — `OPTIONAL_HAND_RETURN` (a plain data table; adding a future card with this effect is the whole integration point, no new branch needed) plus `renderHandReturnChoice()`/`resolveHandReturnChoice()`, which take over the result screen the same way the existing "round lost — take your pick" choice already did. The card still banks/recycles to its normal destination immediately; the choice offers to redirect it afterward. The close-loss ≤3-margin auto-return kept as a deliberate, separate "consolation" mechanic, not folded into the new choice. Verified live: forced both outcomes ("Return to Hand" and "Leave It") directly. See [[project_signalforge_kravyn_optional_hand_return]].
+
+### Tange Sazen — DM Activated ability, opponent-deck disruption shipped 7/29/26 (commit `5152d05`)
+**Text said (second half):** "...and make your opponent return 1 card to the bottom of the deck."
+**What shipped:** a real `DM_ACTIVATED_ABILITY['Tange Sazen']` entry — draw 1, then `oppDeckBot.push(oppDeckBot.shift())` sends the opponent's next draw to the bottom of their real deck. Turned out the "bot-AI architecture change" this entry scoped as a prerequisite already existed — a full real ordered bot deck (`oppDeckBot`/`oppHandBot`/`oppBanishBot`, draw-without-replacement, Winners-Circle exclusion, post-duel recycling) had been built in an earlier pass, just never wired to this specific card. This file's own "isn't modeled as a real orderable deck" claim was stale by the time this was picked back up — see [[project_signalforge_tange_and_raise_redesign]] for the full correction. Verified live: confirmed the top deck card provably moves to the bottom (rest of order preserved), draw clause confirmed separately.
 
 ### Moro — Called's "or banish from deck for +4" alternative, shipped 7/27/26
 **Text says:** "return 1 banished card to hand, or banish 1 card from the top of your deck to give +4 to your conjured unit."

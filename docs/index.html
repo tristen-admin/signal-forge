@@ -5255,11 +5255,11 @@ const CALLED = {
   "Kaelthar the Ascendant":        {text:"your Fighter +2", add:2},
   "Young Darwin, Predetermined Dictator":           {text:"your Fighter +3", add:3},
   "Courtroom Colossus":            {text:"your Fighter +3", add:3},
-  "Kessuae, Tide of Ruin":         {text:"your Fighter +3, draw 1 then discard 1", add:3},
+  "Kessuae, Tide of Ruin":         {text:"your Fighter +3", add:3},
   "Kotei":                         {text:"your Fighter +2; if your fighter wins the battle with this unit supporting, gain +2 charge and instead of going to the winners circle the card returns to the player's hand.", add:2},
   "Conduit of Chaos, Kleydson":                      {text:"your Fighter +3 · gain 1 Charge", add:3, chargeGain:1},
-  "Lagertha Waltz":                {text:"your Fighter +3, add an additional +2 if that unit is a Nightclaw", add:3, twinBuff:5},
-  "Hanse Waltz":                   {text:"your Fighter +3, add an additional +2 if that unit is a Nightclaw", add:5, twinBuff:5},
+  "Lagertha Waltz":                {text:"your Fighter +3, +5 more if fielded alongside its Waltz Twins partner", add:3, twinBuff:5},
+  "Hanse Waltz":                   {text:"your Fighter +5, +5 more if fielded alongside its Waltz Twins partner", add:5, twinBuff:5},
   "Kiana":                         {text:"banish a card from your hand; your Fighter +4", banishOwn:1, add:4},
   "Heir of Kaiga":                 {text:"your Fighter +5 · draw 1", add:5, draw:1},
   "Melanie":                       {text:"your Fighter +5 · draw 1", add:5, draw:1},
@@ -5279,8 +5279,8 @@ const CALLED = {
   "Ourevos, the Golden Dragon":    {text:"your Fighter +5, fill the other support slot with a copy of this card, then draw a card", add:2},
   "Tange Sazen":                   {text:"your Fighter +3, and your conjured unit returns to your hand instead of going to the winners circle", add:3},
   "Kiba":                          {text:"your Fighter +5", add:5},
-  "The Bronzed Beast, Hanse Waltz":   {text:"your Fighter +3", add:3, twinBuff:5},
-  "Lagertha Waltz, Wrathful Transformation":{text:"your Fighter +3", add:3, twinBuff:5},
+  "The Bronzed Beast, Hanse Waltz":   {text:"your Fighter +3, +5 more if fielded alongside its Waltz Twins partner", add:3, twinBuff:5},
+  "Lagertha Waltz, Wrathful Transformation":{text:"your Fighter +3, +5 more if fielded alongside its Waltz Twins partner", add:3, twinBuff:5},
   "Anorith Keeling":               {text:"return this unit from the support circle to your deck, banish 1 card from your hand, draw 2 and gain 1 charge", banishOwn:1},
   // ── Engines — generic utility kept (the neutral engine every deck can splash) ──
   "Conduit Adept":                 {text:"gain 2 Charge + draw 1", chargeGain:2, draw:1},
@@ -5297,7 +5297,7 @@ const CALLED = {
   "Ilma the Patient":              {text:"your Fighter +4", add:4},
   "Broodmother":                   {text:"your Fighter +3, then draw 1", add:3, draw:1},
   "Old Garrick":                   {text:"your Fighter +4", add:4},
-  "Keawe Kel'rua":                 {text:"your Fighter +3, if there have been at least 2 duels this match then draw 1", add:3},
+  "Keawe Kel'rua":                 {text:"your Fighter +3", add:3},
   "Black Wings, Ossian Drell":                  {text:"your Fighter +1 for every card in your banish zone", addPerBanish:1},
   "Corvus":                        {text:"your Fighter +4, scry 1", add:4, scry:1},
   "Wren":                          {text:"return a banished card to your hand, your Fighter +3", recurPlain:1, add:3},
@@ -8524,7 +8524,7 @@ function buildLegendBoard(){
       +'<div style="width:38px;height:38px;border-radius:8px;flex-shrink:0;'+artFillStyle(c.name)+'"></div>'
       +'<div style="flex:1;min-width:0"><div style="font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.name+'</div><div style="font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span class="lg-badge '+t.cls+'">'+t.name+'</span> '+rlab(c.rarity)+' · '+r.k+'K / '+r.d+'D'+(r.d===0?' · ◈ Pristine':'')+'</div></div>'
       +'<div style="text-align:right;flex-shrink:0;padding-left:6px"><div style="font-size:20px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums">'+s+'</div><div style="font-size:9px;color:var(--text3);letter-spacing:.08em">LEGEND</div></div>'
-      +'<div class="lb-price" style="text-align:right;min-width:72px;flex-shrink:0;color:var(--electric);font-size:12px;font-weight:700">≈ ❖ '+fmtPts(legendPrice(c))+'</div>'
+      +'<div class="lb-price" style="text-align:right;min-width:72px;flex-shrink:0;color:var(--electric);font-size:12px;font-weight:700">≈ ◈ '+fmtPts(legendPrice(c))+'</div>'
       +'</div>';
   }).join('');
   var top=cards[0], mythic=cards.filter(function(x){return x.s>=550;}).length;
