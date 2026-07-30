@@ -3691,8 +3691,8 @@ const DECK_POOL = [
   {name:'Warden of the Wall',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. A wall is only as strong as the line beside it.'},
   {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.'},
   {name:'Muster-Sergeant Bryn',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), give your Fighter +1 for every card in your Winners Circle.'},
-  {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
-  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
+  {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Last Stand: if this card loses by 3 power or less, the duel ties instead — no death recorded.'},
+  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: +2 power at 5+ career kills, +2 more at 15+ career kills.'},
   {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the banner lifts the whole line.'},
   {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2.'},
   {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 per 1-cost ally. Weak alone, unbroken together.'},
@@ -3981,7 +3981,7 @@ function oppRemnantPowSum(){ return oppDeathRemnants.reduce(function(a,r){return
 let oppDmRemnantPowOverride = null;   // bot-side mirror of dmRemnantPowOverride
 const REMNANT_POW = {'Arch-Grim Korrin':8,'Summoned Skull Soldiers':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk "Gnarly" Judarr':8,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5,'Grave-Warden':3};   // 7/24/26: Ghorruk corrected 6->8 to match the 2026-07-07 owner-spec override below, then that now-redundant override line was removed -- one source of truth, not two disagreeing ones.
 const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5,'Uso Oso':2};   // PROACTIVE: raise a Death Remnant on commit — no death needed. Uso Oso added 7/24/26, Stage 1 of "The Bulwark of Bones"
-const RALLY = {'Bannerlord Cassian':5,'Ironsworn Vanguard':3,'Warden of the Wall':3,'Oathkeeper Sena':3,'Oathbound Shield':3,'Sworn Duelist':3,'Shieldwall Recruit':3};   // MUSTER: +N power per 1-COST ally (1-cost called supports this duel + 1-cost cards in Winners Circle)
+const RALLY = {'Bannerlord Cassian':5,'Ironsworn Vanguard':3,'Warden of the Wall':3,'Oathkeeper Sena':3,'Shieldwall Recruit':3};   // MUSTER: +N power per 1-COST ally (1-cost called supports this duel + 1-cost cards in Winners Circle). 7/29/26: Oathbound Shield + Sworn Duelist reworked off Muster (see their abil text) -- removed here so the RALLY table stops silently granting them a bonus their printed text no longer describes.
 const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk "Gnarly" Judarr','Sister Mire','Kiba','Grave-Fed Ghoul','Bone Choirmaster','Gravecaller Voss',"Uso Oso's Skeletal Summons"];
 let lastResult = null;
 let matchCommits = 0;
@@ -4062,8 +4062,8 @@ const OPP_CARDS = [
   {name:'Warden of the Wall',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. A wall is only as strong as the line beside it.'},
   {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.'},
   {name:'Muster-Sergeant Bryn',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), give your Fighter +1 for every card in your Winners Circle.'},
-  {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
-  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 power per 1-cost ally.'},
+  {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Last Stand: if this card loses by 3 power or less, the duel ties instead — no death recorded.'},
+  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: +2 power at 5+ career kills, +2 more at 15+ career kills.'},
   {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 per 1-cost ally. Weak alone, unbroken together.'},
   {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the banner lifts the whole line.'},
   {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2.'},
@@ -10390,6 +10390,13 @@ function showStarterChooser(){ _pathChooserCSS(); var ov=document.getElementById
 window.showStarterChooser=showStarterChooser; window.chooseStarterPath=chooseStarterPath;
 ;/* ── BALANCE PASS 2026-07-07 (owner spec): reworked CARD_RULES + remnant values ── */
 CARD_RULES['Kravyn the Collector']=[{"add":3,"log":"⚔️ Kravyn: +3"},{"if":{"v":"pc_kills","op":">=","n":10},"add":5,"log":"⚔️ Kravyn: +5 (Kill Escalation, 10+ kills)"},{"if":{"v":"pc_kills","op":">=","n":25},"add":2,"log":"⚔️ Kravyn: +2 more (Kill Escalation, 25+ kills — total +7)"}];
+// 7/29/26: Ironsworn 1-cost rework -- Oathbound Shield/Sworn Duelist were identical Muster-3 reskins
+// of Shieldwall Recruit (all 3 paid +0 on the very first 1-cost conjured in a match, since Muster only
+// counts OTHER 1-costs already fielded/won). Shieldwall Recruit keeps Muster; these two get real,
+// board-independent identities instead. Oathbound Shield needs no CARD_RULES entry -- "Last Stand" in
+// its abil text alone triggers the existing generic isShellward text-match in resolve() (see Hanse
+// Waltz/Bram the Bulwark/Torvald/Calla Thorn for the same pattern).
+CARD_RULES['Sworn Duelist']=[{"if":{"v":"pc_kills","op":">=","n":5},"add":2,"log":"⚔️ Sworn Duelist: +2 (Kill Escalation, 5+ kills)"},{"if":{"v":"pc_kills","op":">=","n":15},"add":2,"log":"⚔️ Sworn Duelist: +2 more (Kill Escalation, 15+ kills — total +4)"}];
 CARD_RULES['Fifth Frequency Stormcaller']=[{"add":3,"log":"🌪️ Flurry: +3"},{"if":{"v":"hand_len","op":">=","n":5},"add":4,"log":"🌪️ Flurry: +4 (5+ hand)"},{"if":{"v":"banish_len","op":">=","n":4},"add":7,"log":"🌪️ Flurry: +7 (4+ banish)"}];
 CARD_RULES['Envoy of Tyrants, Ella Ballora']=[{"if":{"v":"hand_len","op":">=","n":3},"add":3,"log":"⚔️ Bloodrage: +3 (3+ hand)"},{"if":{"v":"player_losses","op":">","n":0},"add":3,"log":"⚔️ Bloodrage: +3 (wounded)"}];
 CARD_RULES['Kessuae, Tide of Ruin']=[{"if":{"v":"rear_count","op":">=","n":2},"add":5,"log":"🌊 Kessuae: +5 (both supports)"}];
