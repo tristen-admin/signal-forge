@@ -3118,6 +3118,12 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div id="dm-ability-options"></div>
     </div>
 
+    <!-- MĀYĀ TRANSFORM (hidden by default) -- hand-only, any pre-commit phase, same as DM ability -->
+    <div class="instant-strip" id="maya-strip" style="display:none">
+      <span class="instant-label">🌙 Māyā</span>
+      <div id="maya-options"></div>
+    </div>
+
     <!-- BANISH-ZONE CONJURE (hidden by default) -- Circle of Life: banishOnly cards sitting in your
          banish pile, conjurable straight from there instead of hand -->
     <div class="instant-strip" id="banish-conjure-strip" style="display:none">
@@ -3693,6 +3699,7 @@ const DECK_POOL = [
   {name:'Forgemask',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Reforged: on commit, +3 power, and +4 more if you lost your last duel — the forge tempers what breaks.'},
   {name:'Lagertha Waltz, Wrathful Transformation',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Alpha\'s Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack\'s fury peaks in mourning.'},
   {name:'The Bronzed Beast, Hanse Waltz',pow:20,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 while behind — if you were behind when you kill an opponent fighter, this returns to your hand at its original power.'},
+  {name:'Hanse, Rogue Fangs',pow:12,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rogue Fangs: on commit, +2 power, +2 more on your 1st or 2nd duel this match — quick, vicious, not yet the Beast. Māyā (2⚡, from hand): pay the cost to become "The Bronzed Beast, Hanse Waltz."'},
   {name:'La "La" Ballora, the Broodqueen',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw 2 cards — her brood is her hand.'},
   {name:'Ourevos, the Golden Dragon',pow:30,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel. Repeat this effect if you have 1 or fewer support units this battle.'},
@@ -4080,26 +4087,42 @@ const DM_ACTIVATED_ABILITY = {
     if(typeof toast==='function') toast('\u2696 The Between \u2014 chaos and order, balanced: next conjure +12', true);
   }}
 };
-function activateDeckMasterAbility(){
+// Avatāra (8/3/26, owner redefine): "the Avatāra keyword and the Deck Master effect are
+// synonymous... it exclusively goes off when you conjure your deckmaster." Previously a manual,
+// player-clicked button usable any pre-commit phase (see the 7/27/26 fix note on
+// renderDeckMasterAbilityStrip's caller in stageFighter's reveal path -- Kotei's Rally in
+// particular was written to be used BEFORE staging, to draw into a better hand first). That
+// button/click model is gone entirely now -- fireDeckMasterAvatara() is called automatically
+// from applyDeckMasterCommitEffects()'s tier===1 branch (conjureTierOf() returning 1 already
+// means exactly "the card just committed IS deckMasterCard", the precise trigger asked for), not
+// from a UI element. Real consequence, not hidden: Kotei's Rally (draw 2, return your highest-
+// power card, THEN pick what to stage) loses its old "improve your hand before you choose" value
+// -- it now only fires after you've already committed Kotei himself, same as every other DM's
+// Avatāra. Flagged in the report-back, not quietly patched around, since the owner's instruction
+// was explicit and uniform across every Deck Master, not a per-card exception.
+function fireDeckMasterAvatara(pc){
   if(!deckMasterCard || dmAbilityUsedThisMatch) return;
+  if(!pc || pc.name !== deckMasterCard) return;
   var ab = DM_ACTIVATED_ABILITY[deckMasterCard]; if(!ab) return;
-  if(phase==='committed' || phase==='resolved') return;   // any MAIN phase, not after you've locked in
   dmAbilityUsedThisMatch = true;
   if(ab.run){ ab.run(); }
   else { if(ab.draw && typeof drawToHand==='function') drawToHand(ab.draw); dmNextConjureBonus = ab.nextConjureBonus || 0; }
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
   if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   if(typeof buildHand==='function') buildHand();
-  if(typeof toast==='function') toast('★ '+deckMasterCard+' — '+ab.log+': '+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus)), true);
+  if(typeof toast==='function') toast('🌙 Avatāra — '+deckMasterCard+' — '+ab.log+': '+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus)), true);
 }
 function renderDeckMasterAbilityStrip(){
   var strip=document.getElementById('dm-ability-strip'); if(!strip) return;
   var opts=document.getElementById('dm-ability-options');
   var ab = deckMasterCard ? DM_ACTIVATED_ABILITY[deckMasterCard] : null;
   var eligiblePhase = (typeof phase!=='undefined') && phase!=='committed' && phase!=='resolved';
+  // No longer a button -- Avatāra fires automatically on conjuring the Deck Master card itself
+  // (fireDeckMasterAvatara(), called from applyDeckMasterCommitEffects()). This is now a passive
+  // status badge only, same non-clickable style as the DM_EXCLUSIVE case right below.
   if(ab && !dmAbilityUsedThisMatch && eligiblePhase){
     strip.style.display='flex';
-    if(opts) opts.innerHTML = '<button class="instant-card-btn" style="border-color:rgba(212,168,67,0.6);color:var(--gold)" onclick="activateDeckMasterAbility()">★ '+deckMasterCard+' — '+ab.log+' ('+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus))+')</button>';
+    if(opts) opts.innerHTML = '<span class="instant-card-btn" style="border-color:rgba(212,168,67,0.6);color:var(--gold);cursor:default;opacity:.85">🌙 '+deckMasterCard+' — '+ab.log+' ('+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus))+') — fires when you conjure '+deckMasterCard+'</span>';
     return;
   }
   // Passive-only Deck Masters (DM_EXCLUSIVE but no DM_ACTIVATED_ABILITY, e.g. Korrin) had zero in-duel
@@ -4113,6 +4136,44 @@ function renderDeckMasterAbilityStrip(){
     return;
   }
   strip.style.display='none'; if(opts) opts.innerHTML='';
+}
+// ══ MĀYĀ TRANSFORM ENGINE (8/3/26, KOTEI keyword redefine) ══ a real pay-a-cost identity swap.
+// HAND-only by design: once a card is conjured its stats are already live inside a duel's
+// playerPow math (CARD_RULES already applied, resolve() already reasoning about it) -- unwinding
+// that mid-duel to swap the card out from under its own resolution would be real engine surgery
+// this build doesn't attempt. Transforming while still in hand sidesteps that entirely: pay the
+// cost, the hand slot becomes a fresh copy of the target card, then conjure normally whenever.
+// One entry so far (Hanse's two-stage print, "Rogue Fangs" -> "the Bronzed Beast") -- built as a
+// small lookup table rather than Legend Reborn's fully-hardcoded style specifically so a second
+// Māyā card (Keawe's flood-form, Ruffius's forced true form -- both still flavor-only) can reuse
+// this same engine later without a rewrite.
+const MAYA_TRANSFORM = {
+  'Hanse, Rogue Fangs': {into:'The Bronzed Beast, Hanse Waltz', cost:2, log:'Māyā — the Beast awakens'}
+};
+function activateMayaTransform(i){
+  if(phase==='committed' || phase==='resolved') return;   // any MAIN phase, not after you've locked in
+  var c = hand[i]; if(!c) return;
+  var t = MAYA_TRANSFORM[c.name]; if(!t) return;
+  if(charge < t.cost){ if(typeof toast==='function') toast(c.name+' needs '+t.cost+' energy to transform.', false); return; }
+  var target = COLLECTION.find(function(d){ return d.name===t.into; }); if(!target) return;
+  charge -= t.cost; if(typeof renderCharge==='function') renderCharge();
+  hand[i] = Object.assign({}, target, {kills:0, deaths:0});
+  if(typeof renderMayaStrip==='function') renderMayaStrip();
+  if(typeof buildHand==='function') buildHand();
+  if(typeof toast==='function') toast('🌙 '+t.log+': '+c.name+' → '+t.into, true);
+}
+function renderMayaStrip(){
+  var strip=document.getElementById('maya-strip'); if(!strip) return;
+  var opts=document.getElementById('maya-options');
+  var eligiblePhase = (typeof phase!=='undefined') && phase!=='committed' && phase!=='resolved';
+  var candidates = (eligiblePhase && typeof hand!=='undefined') ? hand.map(function(c,i){return {c:c,i:i};}).filter(function(x){ return x.c && MAYA_TRANSFORM[x.c.name]; }) : [];
+  if(!candidates.length){ strip.style.display='none'; if(opts) opts.innerHTML=''; return; }
+  strip.style.display='flex';
+  if(opts) opts.innerHTML = candidates.map(function(x){
+    var t = MAYA_TRANSFORM[x.c.name];
+    var afford = charge >= t.cost;
+    return '<button class="instant-card-btn" style="border-color:rgba(155,109,214,0.6);color:#c9a6f0'+(afford?'':';opacity:.5;cursor:not-allowed')+'" '+(afford?('onclick="activateMayaTransform('+x.i+')"'):'disabled')+'>🌙 '+x.c.name+' — '+t.log+' ('+t.cost+'⚡, from hand)</button>';
+  }).join('');
 }
 let divinerBonusNext = 0;
 let deathRemnants = [];   // The Deathless: unified Remnant stack (on-death + lingering supports); each {name,pow}; persists until an enemy card is killed
@@ -5100,14 +5161,12 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   document.getElementById('commit-btn').style.display = 'none';
   document.getElementById('select-hint').textContent = 'Click a card to enter the Select phase';
   buildHand();
-  // 7/27/26 fix: activateDeckMasterAbility() has always allowed 'revealed' phase (its own guard is
-  // only phase==='committed'||'resolved'), but nothing ever called renderDeckMasterAbilityStrip()
-  // here -- the strip only became visible as an incidental side effect of stageFighter(), i.e. only
-  // AFTER a Fighter was already staged. A once-per-match ability like Kotei's Rally (draw 2, then
-  // pick what to stage) is most useful BEFORE that choice is locked in, so the button needs to show
-  // right when the condition reveals, not after. Placed before the energy-forfeit/DM-fallback gates
-  // below since the ability is free (no Energy cost) and could rescue an otherwise-unplayable hand.
+  // 7/27/26 fix (superseded 8/3/26 -- Avatāra is conjure-triggered now, no button, see
+  // fireDeckMasterAvatara()): this used to matter because a manual DM-ability button needed to
+  // show right when the condition reveals, before staging -- kept for history, now just refreshes
+  // the passive status badge at the same point in the flow.
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
+  if(typeof renderMayaStrip==='function') renderMayaStrip();
   if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   if(typeof cheapestFighterCost==='function' && charge < cheapestFighterCost()){ energyForfeit(); return; }   // can't afford ANY fighter in hand — hard forfeit, the only real "can't conjure" case (rarity never gates conjure-eligibility — an all-Common hand plays exactly like any other)
   startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:30, 'choose a card, or the round forfeits');   // casual = 30s round timer; ranked keeps 40
@@ -5187,6 +5246,7 @@ function activateInstant(i){
   document.getElementById('commit-hint').textContent = hintCommit;
   if(typeof renderInstantStrip==='function') renderInstantStrip();
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
+  if(typeof renderMayaStrip==='function') renderMayaStrip();
   if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   buildHand();
   if(typeof renderRearSlot==='function') renderRearSlot();
@@ -5324,166 +5384,161 @@ function effectiveCampOf(card, dmName){ return dmName ? campOf(dmName) : campOf(
 function campBeats(a,b){ return CAMP_BEATS[a]===b; }
 function setCamp(name, camp){ if(!name) return; campOverride[name]=camp; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.camp=camp; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83c\udfd5 Camp set: '+name+' \u2192 '+camp, true); }
 
-// \u2550\u2550 KOTEI MAGIC-SYSTEM INTEGRATION (8/2/26) \u2550\u2550 built from the handoff package at
-// /Users/kotei/KOTEI_Project/tcg_bible/SIGNAL_FORGE_BUILD_BRIEF.md (+ MAGIC_MAP.md,
+// \u2550\u2550 KOTEI MAGIC-SYSTEM INTEGRATION (8/2/26, re-audited 8/3/26) \u2550\u2550 built from the handoff
+// package at /Users/kotei/KOTEI_Project/tcg_bible/SIGNAL_FORGE_BUILD_BRIEF.md (+ MAGIC_MAP.md,
 // LEGENDARIES.md, WORLD_PRIMER.md) -- the KOTEI story bible's own Domain x Method essence
 // system, now retagged onto the real card pool. Three NEW, independent fields -- roofOf(),
 // factionOf(), domainClassOf() -- none of them touch or replace any existing field.
 //
-// Roof = the 5 ability-shape categories (+ Avat\u0101ra, the 1 apex keyword, kept separate --
-// see the Deck Master section below). Retag, not rebuild: these describe what a card's
-// EXISTING ability already does, no new effects.
+// Roof = the 5 ability-shape categories that explain the game's MAGIC specifically (+ Avat\u0101ra,
+// the 1 apex keyword, kept separate -- see the Deck Master section below). These are NOT the
+// only keywords in the game -- a card whose identity isn't magic (a knight with sword and armor,
+// a generic Muster soldier, pure Charge economy) simply carries none of the 5 and keeps whatever
+// existing ability-shape it already had (Last Stand, Muster N, Record Guard, etc.) untouched.
+// Owner's own precise definitions (8/3/26), reflected exactly in this table:
+//   Vajra   = power manipulation in totality -- self power gain OR opponent power reduction,
+//             either direction, as long as it's a guaranteed on-commit effect (not conditioned
+//             on already having won/killed -- that's Astra below).
+//   Astra   = "on hit" effects -- conditioned on combat already won/killed this match (Kill
+//             Escalation, career-kill scaling, duels-already-won scaling).
+//   Nirm\u0101\u1e47a = summoning -- support-zone calls, Death Remnants being CREATED (not just checked
+//             for), and any deck-to-hand card generation (draw, tutor, banish-pile retrieval).
+//   M\u0101y\u0101    = a real pay-a-cost transform into a different printing (currently only the new
+//             Hanse "Rogue Fangs"/"Bronzed Beast" pair -- see the transform engine below).
+//   Bandha  = restricts a player's hand or field, or binds/locks/nullifies cards or the active
+//             condition -- for either player, self-locks included (e.g. Kaelthar's own supports).
+// CRITICAL SCOPE RULE (owner, 8/3/26): keywords apply ONLY to a card's CONJURE (Fighter/on-
+// commit) effect. A card's Called/support-mode ability, however magic-shaped, never earns it a
+// Sanskrit tag -- "no sanskrit keywords will appear on support effects." Re-audited from scratch
+// against every card's real abil/CARD_RULES text under this exact rule (110 of 144 DECK_POOL
+// cards tagged; the other 34 are the non-magic/mundane-identity cards above, by design, not a
+// gap -- e.g. Bram the Bulwark's Last Stand, pure Charge-gain supports, generic Muster fodder).
+// The 4 Instant-only cards that had tags in the first pass (Tannis, Fleeting Cipher, Ashfall
+// Tithe, Warden's Feint) are dropped from this table entirely on the same "conjure means Fighter-
+// mode" logic -- an Instant cast is a third mode, not a conjure, same exclusion as Called.
+// Untagged cards get NO badge now (see roofOf()'s fallback below) -- forcing everything to a
+// default Vajra was correct under the old system but is factually wrong under this precise one.
 const ROOF_VAJRA='Vajra', ROOF_ASTRA='Astra', ROOF_NIRMANA='Nirm\u0101\u1e47a', ROOF_MAYA='M\u0101y\u0101', ROOF_BANDHA='Bandha';
-const ROOF_LABEL = {Vajra:'strengthens', Astra:'single-target hit', 'Nirm\u0101\u1e47a':'creates', 'M\u0101y\u0101':'transforms', Bandha:'controls'};
-// First-pass retag, 129 of 143 cards (name-keyed, not rarity/cost-keyed -- safe across reprints).
-// Built from real abil/CARD_RULES text (buff-shaped -> Vajra, opponent-facing oppadd -> Astra,
-// conjure/summon/Death-Remnant-raise -> Nirm\u0101\u1e47a, evolved/reborn print -> M\u0101y\u0101, snipe/lock/banish-
-// opponent's -> Bandha), cross-checked against a direct oppadd grep, not eyeballed per card.
-// Cards not in this table (mostly generic Common filler with no distinct effect shape) fall
-// through to the Vajra default in roofOf() -- flagged as a first pass, not an audited final.
+const ROOF_LABEL = {Vajra:'strengthens', Astra:'on-hit escalation', 'Nirm\u0101\u1e47a':'summons', 'M\u0101y\u0101':'transforms', Bandha:'binds'};
 const ROOF_MAP = {
-  // The 8 new signature Legendary cards (8/2/26) -- roofs per their LEGENDARIES.md sketch.
-  "The Borrowed Green, Keawe Kel'rua":['M\u0101y\u0101'],
+  // The 8 new signature Legendary cards (8/2/26) -- re-audited 8/3/26 against the precise rules
+  // above like every other card; none of them have a real M\u0101y\u0101 transform built yet (that's a
+  // brand-new engine, see below), so none carry it just from flavor/aspiration anymore.
+  "The Borrowed Green, Keawe Kel'rua":['Vajra'],
   'The Kept Blade, Ahdor':['Vajra'],
-  "The Nightmare's Toll, Hanse Waltz":['M\u0101y\u0101'],
-  'The Claim, Lagertha Waltz':['Vajra'],
-  'Throne of Bones, Uso Oso':['Nirm\u0101\u1e47a'],
-  'The Reliquary, Ruffius Rufeldro':['Bandha'],
-  'The Unending Flame, Tange Sazen':['Astra'],
-  'The Between, Kleydson':['M\u0101y\u0101'],
-  'Ahdorah Khaan, Circle Unbroken':['M\u0101y\u0101','Vajra'],
-  'Ahdorah Khaan, Determined Soul':['Bandha','M\u0101y\u0101'],
+  "The Nightmare's Toll, Hanse Waltz":['Vajra'],
+  'The Claim, Lagertha Waltz':['Vajra','Astra'],
+  'Throne of Bones, Uso Oso':['Vajra'],
+  'The Reliquary, Ruffius Rufeldro':['Vajra'],
+  'The Unending Flame, Tange Sazen':['Vajra'],
+  'The Between, Kleydson':['Vajra'],
+  'Ahdorah Khaan, Circle Unbroken':['Vajra'],
   'Ahdorah Khaan, Squad 19 Recruit':['Vajra'],
-  'Anorith Keeling':['Vajra'],
-  'Arch-Grim Korrin':['Nirm\u0101\u1e47a'],
-  'Ashen Reclaimer':['Vajra'],
-  'Ashfall Tithe':['Vajra'],
+  'Anorith Keeling':['Nirm\u0101\u1e47a'],
+  'Arch-Grim Korrin':['Vajra','Astra','Nirm\u0101\u1e47a'],
+  'Ashen Reclaimer':['Vajra','Nirm\u0101\u1e47a'],
   'Bannerlord Cassian':['Vajra'],
-  'Barracks Drill Sergeant':['Vajra'],
-  'Bixie Bee':['Vajra'],
   'Black Wings, Ossian Drell':['Vajra'],
-  'Bloodwake Duelist':['Vajra'],
+  'Bloodwake Duelist':['Vajra','Astra'],
   'Bone Choirmaster':['Nirm\u0101\u1e47a'],
-  'Bone-Stitcher':['Vajra'],
-  'Bram the Bulwark':['Vajra'],
   'Broodmother':['Vajra'],
-  'Broodweb Keeper':['Vajra'],
   'Cadet Corps Recruit':['Vajra'],
+  'Chieftain Reyva Vosh':['Vajra'],
   'Cinder-Marked Hound':['Vajra'],
   'Cletus Gwyndull':['Bandha'],
-  'Conduit Adept':['Vajra'],
-  'Conduit of Chaos, Kleydson':['Vajra'],
+  'Conduit of Chaos, Kleydson':['Nirm\u0101\u1e47a'],
   'Corvus':['Vajra'],
-  'Court Cipher':['Bandha','Vajra'],
   'Courtroom Colossus':['Vajra'],
+  'Darwin':['Vajra'],
   'Elowen Dawnspear':['Vajra'],
   'Envoy of Tyrants, Ella Ballora':['Vajra'],
   'Falk':['Vajra'],
   'Faye Quicksilver':['Vajra'],
-  'Feather-Marked Skirmisher':['Vajra'],
   'Fenrik Vench':['Vajra'],
   'Fifth Frequency Stormcaller':['Vajra'],
   'First-Blood Squire':['Vajra'],
   'Fledgling Broodmother':['Vajra'],
-  'Fleeting Cipher':['Vajra'],
   'Forgemask':['Vajra'],
-  'Ghorruk "Gnarly" Judarr':['Nirm\u0101\u1e47a','Vajra'],
+  'Ghorruk "Gnarly" Judarr':['Vajra','Nirm\u0101\u1e47a'],
   'Grave-Fed Ghoul':['Nirm\u0101\u1e47a'],
   'Grave-Tithe Acolyte':['Vajra'],
   'Grave-Warden':['Nirm\u0101\u1e47a'],
   'Gravecaller Voss':['Nirm\u0101\u1e47a'],
-  'Hanse Waltz':['Vajra'],
+  'Hanse, Rogue Fangs':['Vajra','M\u0101y\u0101'],
   'Hatchling Tide':['Vajra'],
   'Heir of Kaiga':['Vajra'],
-  'Hoarder\'s Gambit':['Vajra'],
-  'Hollow Mendicant':['Vajra'],
+  "Hoarder's Gambit":['Vajra','Nirm\u0101\u1e47a'],
   'Ilma the Patient':['Vajra'],
   'Ironsworn Vanguard':['Vajra'],
-  'Josef':['Vajra'],
-  'Kaelthar the Ascendant':['Vajra'],
-  'Keawe Kel\'rua':['Vajra'],
-  'Kessuae, Tide of Ruin':['Bandha','Vajra'],
+  'Josef':['Vajra','Astra'],
+  'Kaelthar the Ascendant':['Vajra','Bandha'],
+  "Keawe Kel'rua":['Vajra'],
+  'Kessuae, Tide of Ruin':['Vajra','Bandha'],
   'Kiana':['Vajra'],
-  'Kravyn the Collector':['Vajra'],
-  'Kravyn\'s Protege':['Vajra'],
-  'Kynaht, Ashen Return':['Bandha','M\u0101y\u0101'],
-  'La "La" Ballora, the Broodqueen':['Vajra'],
+  'Kiba':['Nirm\u0101\u1e47a'],
+  'King Joris':['Vajra'],
+  'Kotei':['Vajra'],
+  'Kravyn the Collector':['Vajra','Astra'],
+  "Kravyn's Protege":['Vajra','Astra'],
+  'Kynaht, Ashen Return':['Bandha'],
+  'La "La" Ballora, the Broodqueen':['Vajra','Nirm\u0101\u1e47a'],
   'Lagertha Waltz':['Vajra'],
-  'Lagertha Waltz, Wrathful Transformation':['M\u0101y\u0101'],
-  'Legend Reborn, Keawe Kel\'rua':['M\u0101y\u0101','Nirm\u0101\u1e47a'],
-  'Lumen Acolyte':['Vajra'],
-  'Marrow Priest':['Vajra'],
+  'Lagertha Waltz, Wrathful Transformation':['Vajra'],
+  "Legend Reborn, Keawe Kel'rua":['Nirm\u0101\u1e47a'],
+  'Malia':['Vajra'],
   'Mirror Shade':['Vajra'],
-  'Muster-Sergeant Bryn':['Vajra'],
-  'Oathbound Shield':['Vajra'],
+  'Moro':['Vajra'],
   'Oathkeeper Sena':['Vajra'],
-  'Oathlit Attendant':['Vajra'],
   'Oathlit Vanguard':['Vajra'],
   'Old Garrick':['Vajra'],
+  'Ourevos, the Golden Dragon':['Vajra','Bandha'],
   'Pale Gravedigger':['Nirm\u0101\u1e47a'],
-  'Pit Thrall':['Vajra'],
   'Pyre-Keeper Vayle':['Vajra'],
-  'Rank-Sworn Levy':['Vajra'],
   'Reclaim the Colors':['Vajra'],
   'Rhaess Korvain':['Vajra'],
-  'Ridgeline Scout':['Vajra'],
-  'Ridgeline Warden':['Vajra'],
+  'Ridgeline Scout':['Bandha'],
+  'Ridgeline Warden':['Bandha'],
   'Rook':['Vajra'],
-  'Sable':['Vajra'],
+  'Ruffius Rufeldro':['Vajra'],
   'Shieldwall Recruit':['Vajra'],
-  'Signal Diviner':['Vajra'],
-  'Silk-Fed Hatchling':['Vajra'],
   'Silk-Spinner Drone':['Vajra'],
-  'Silkbound Sentinel':['Vajra'],
-  'Sister Mire, Wailing Nightmare':['Vajra'],
+  'Sister Mire':['Nirm\u0101\u1e47a'],
+  'Sister Mire, Wailing Nightmare':['Vajra','Astra','Nirm\u0101\u1e47a'],
   'Skittering Drone':['Vajra'],
-  'Skullchain Reaver':['Vajra'],
+  'Skullchain Reaver':['Vajra','Astra'],
   'Squad 16 Veteran':['Vajra'],
-  'Squad 19 Chronicler':['Vajra'],
-  'Squad 19 Medic':['Vajra'],
   'Squad 19 Quartermaster':['Vajra'],
-  'Squad 19 Scout':['Vajra'],
-  'Squad 19 Signalman':['Vajra'],
-  'Squad 19 Vanguard':['Vajra'],
   'Squad-Captain Vesk':['Vajra'],
-  'Standard-Bearer Halden':['Vajra'],
-  'Summoned Skull Soldiers':['Nirm\u0101\u1e47a','Vajra'],
-  'Sworn Duelist':['Vajra'],
-  'Tange Sazen':['Bandha','Vajra'],
-  'Tannis':['Vajra'],
-  'The Black Ledger':['Vajra'],
-  'The Bronzed Beast, Hanse Waltz':['M\u0101y\u0101','Vajra'],
-  'The Gathering Swarm':['Astra','Vajra'],
-  'The Regenerating Horror':['Vajra'],
-  'The Undefeated':['Vajra'],
-  'Tosa Envoy':['Bandha','Vajra'],
+  'Summoned Skull Soldiers':['Vajra','Nirm\u0101\u1e47a'],
+  'Sworn Duelist':['Vajra','Astra'],
+  'Tange Sazen':['Vajra','Astra'],
+  'The Black Ledger':['Nirm\u0101\u1e47a'],
+  'The Bronzed Beast, Hanse Waltz':['Vajra'],
+  'The Gathering Swarm':['Vajra'],
+  'The Undefeated':['Vajra','Astra'],
+  'Tosa Envoy':['Vajra','Bandha'],
   'Trilogy Ward':['Vajra'],
-  'Trophy Runner':['Vajra'],
   'Trophy-Hunter Kessa':['Vajra'],
   'Unbanked Victory':['Vajra'],
-  'Uso Oso':['Nirm\u0101\u1e47a'],
-  'Uso Oso\'s Skeletal Summons':['Nirm\u0101\u1e47a'],
+  "Uso Oso's Skeletal Summons":['Nirm\u0101\u1e47a'],
   'Val Kreigh':['Vajra'],
-  'Valcarion':['Vajra'],
+  'Valcarion':['Nirm\u0101\u1e47a'],
   'Venombrood Queen':['Vajra'],
-  'Voltcaller':['Vajra'],
   'Warden of the Wall':['Vajra'],
-  'Warden\'s Feint':['Bandha'],
   'Warpath Vanguard':['Vajra'],
   'Web-Spinner Acolyte':['Vajra'],
   'Web-Tender Matron':['Vajra'],
-  'Web-Weaver\'s Return':['Vajra'],
-  'Widow of the Vigil':['Vajra'],
-  'Widow\'s Patience':['Vajra'],
+  "Web-Weaver's Return":['Nirm\u0101\u1e47a'],
+  'Widow of the Vigil':['Vajra','Nirm\u0101\u1e47a'],
+  "Widow's Patience":['Vajra'],
   'Wingblade Scout':['Vajra'],
-  'Wren':['Vajra'],
-  'Writ-Sergeant\'s Ledger':['Vajra'],
-  'Yard Sparring Partner':['Vajra'],
-  'Young Darwin, Predetermined Dictator':['Astra']
+  'Wren':['Vajra','Nirm\u0101\u1e47a'],
+  'Young Darwin, Predetermined Dictator':['Vajra'],
+  'Zerith Var':['Vajra']
 };
 function roofOf(nameOrCard){
   var name=(nameOrCard && typeof nameOrCard==='object')?nameOrCard.name:nameOrCard;
-  return (name && ROOF_MAP[name]) || [ROOF_VAJRA];
+  return (name && ROOF_MAP[name]) || [];   // no default Vajra -- a card with no magic-shaped conjure effect carries no Roof badge at all
 }
 
 // Faction = Light/Dark, the world's fundamental duality (MAGIC_MAP.md \u00a74). Archetype-level
@@ -5543,6 +5598,7 @@ const FACTION_MAP = {
   'Grave-Tithe Acolyte':'Dark',
   'Gravecaller Voss':'Dark',
   'Hanse Waltz':'Dark',
+  'Hanse, Rogue Fangs':'Dark',
   'Heir of Kaiga':'Light',
   'Ironsworn Vanguard':'Light',
   'Kaelthar the Ascendant':'Light',
@@ -5657,6 +5713,7 @@ const DOMAIN_MAP = {
   'Grave-Tithe Acolyte':'Omitsuki',
   'Gravecaller Voss':'Omitsuki',
   'Hanse Waltz':'Kitanoo',
+  'Hanse, Rogue Fangs':'Kitanoo',
   'Heir of Kaiga':'Amagera',
   'Kaelthar the Ascendant':'Amagera',
   'Keawe Kel\'rua':'Amagera',
@@ -6450,6 +6507,7 @@ function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview
   document.getElementById('opp-area').innerHTML = '⏳ Opponent locked in — assemble your play';
   if(typeof renderInstantStrip==='function') renderInstantStrip();
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
+  if(typeof renderMayaStrip==='function') renderMayaStrip();
   if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   document.getElementById('confirm-btn').style.display = 'flex';
   setPhase('selecting');
@@ -7670,6 +7728,10 @@ function applyDeckMasterCommitEffects(pc){
   if(!deckMasterCard || !pc) return;   // 7/12/26: universal, matches applyBotDeckMasterResolveEffects's un-gated pattern
   var tier = conjureTierOf(pc, deckMasterCard);
   if(tier===1){
+    // Avatāra (8/3/26): tier===1 already means exactly "pc.name === deckMasterCard" (see
+    // conjureTierOf) -- the precise "you conjured your own Deck Master" moment the owner asked
+    // Avatāra to trigger on. See fireDeckMasterAvatara()'s own comment for the full rationale.
+    if(typeof fireDeckMasterAvatara==='function') fireDeckMasterAvatara(pc);
     (DM_EXCLUSIVE[pc.name]||[]).forEach(function(r){
       if('raiseRemnant' in r && typeof deathRemnants!=='undefined'){
         var amt = (r.raiseRemnant==='self_pow') ? (pc.pow||0) : (r.raiseRemnant||0);
@@ -10819,7 +10881,7 @@ function deckTab(t){
 // ══ DECK PRESETS (saved decks) ══
 const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Valcarion','Ashfall Tithe'];   // Black Wings — banish/discard. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Bixie Bee moved out 7/19/26 -- narrowed to Warpath/Keawe's Circle only. Ashfall Tithe added 7/28/26 -- a self-banishing instant feeds Ossian Drell/Pyre-Keeper Vayle's banish-count payoffs directly, the owner-flagged synergy for this class of card.
 const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned Skull Soldiers','Uso Oso',"Uso Oso's Skeletal Summons",'Bone Choirmaster','Marrow Priest','Widow of the Vigil','Gravecaller Voss','Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','The Regenerating Horror','Signal Diviner'];   // The Deathless — Death-Remnant stack + draw. Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
-const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Bixie Bee','The Bronzed Beast, Hanse Waltz',"Legend Reborn, Keawe Kel'rua",'Trophy Runner'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Ruffius Rufeldro moved out 7/19/26 -- narrowed to Radiance + Ahdor's Pride only.
+const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Bixie Bee','The Bronzed Beast, Hanse Waltz','Hanse, Rogue Fangs',"Legend Reborn, Keawe Kel'rua",'Trophy Runner'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Ruffius Rufeldro moved out 7/19/26 -- narrowed to Radiance + Ahdor's Pride only.
 const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte','Skittering Drone','Hatchling Tide',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Signal Diviner','Faye Quicksilver','Veronica','Silk-Fed Hatchling','Broodweb Keeper'];   // The Broodswarm — hand-size draw + power. 7/24/26: +2 charge-economy commons (balance audit round 2 §5).
 const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Shieldwall Recruit','Standard-Bearer Halden','Rank-Sworn Levy','Heir of Kaiga','Conduit Adept','Signal Diviner','Chieftain Reyva Vosh','Faye Quicksilver'];   // The Ironsworn — go wide with 1-cost bodies, Cassian scales biggest (Muster: +power per 1-cost ally). Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
 // 4 more added 7/19/26 -- lore-driven rather than mechanically uniform like the 5 above. Black
@@ -10828,7 +10890,7 @@ const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of t
 // Keawe's Circle itself) promoted to full archetype status, not a single shared mechanic.
 const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin','Kravyn the Collector','Court Cipher'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members. Veronica + Ruffius Rufeldro moved out 7/19/26.
 const RADIANCE_PRESET = ['Moro','Malia','King Joris','Ruffius Rufeldro','Elowen Dawnspear','Bram the Bulwark','The Regenerating Horror','Kaelthar the Ascendant','Lumen Acolyte','Oathlit Attendant','Oathlit Vanguard'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match.
-const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz','Fenrik Vench','Yard Sparring Partner','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Lagertha Waltz, Wrathful Transformation'];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms). 7/23/26: added the cadet-corps/Tosa Pact glue commons (Fenrik Vench is his real Ch.1 rival, per the Ascension storyline).
+const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz','Hanse, Rogue Fangs','Fenrik Vench','Yard Sparring Partner','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Lagertha Waltz, Wrathful Transformation'];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms). 7/23/26: added the cadet-corps/Tosa Pact glue commons (Fenrik Vench is his real Ch.1 rival, per the Ascension storyline).
 const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 19 Quartermaster','Squad 19 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 19 Signalman','Squad 19 Chronicler','Ahdorah Khaan, Circle Unbroken','Kynaht, Ashen Return'];   // Circle of Life (renamed from Ahdor's Pride, 7/28/26) — Ahdorah Khaan + Squad 19, now also the archetype whose signature identity is conjuring very strong banishOnly cards straight from your own banish pile (owner request: gate real power behind needing genuine banish-fill setup first, so it can't just be splashed). 7/23/26: filled out the deckbuilding spine with Squad 19 commons + a Rare sibling printing of Ahdorah herself (mirrors Keawe Kel'rua's base/evolved pattern) + shared Tosa Pact pieces. 7/24/26: +2 charge-economy commons (balance audit round 2 §5). 7/28/26: Kynaht, Ashen Return closes the long-noted gap (no card named Kynaht / tagged Vysh'ra race, Ahdor's people per the KOTEI bible) while also serving as the archetype's disruption-flavored banishOnly signature card.
 // Archetype dev-view (7/18/26, expanded 7/19/26): the meta archetypes' full membership, for the
 // Vault's Archetype filter -- reuses these *_PRESET arrays directly (the actual full-deck lists)
@@ -10972,6 +11034,7 @@ CARD_RULES['Throne of Bones, Uso Oso']=[{"add":7,"log":"☠ Throne of Bones: +7"
 CARD_RULES['The Reliquary, Ruffius Rufeldro']=[{"add":3,"log":"🎭 The Reliquary: +3"},{"oppadd":-5,"log":"🎭 The Reliquary: opponent −5 (a blessing that isn't)"}];
 CARD_RULES['The Unending Flame, Tange Sazen']=[{"oppadd":-6,"log":"🔥 Unending Flame: opponent −6 (cannot be healed, cleansed, or prevented)"}];
 CARD_RULES['The Between, Kleydson']=[{"add":4,"log":"⚖ Contrast to Balance: +4"},{"if":{"v":"match_commits","op":">=","n":2},"add":6,"log":"⚖ Contrast to Balance: +6 more (chaos and order finding their balance)"}];
+CARD_RULES['Hanse, Rogue Fangs']=[{"add":2,"log":"🐺 Rogue Fangs: +2"},{"if":{"v":"match_commits","op":"<=","n":2},"add":2,"log":"🐺 Rogue Fangs: +2 more (still early, still hungry)"}];
 CARD_RULES['Fifth Frequency Stormcaller']=[{"add":3,"log":"🌪️ Flurry: +3"},{"if":{"v":"hand_len","op":">=","n":5},"add":4,"log":"🌪️ Flurry: +4 (5+ hand)"},{"if":{"v":"banish_len","op":">=","n":4},"add":7,"log":"🌪️ Flurry: +7 (4+ banish)"}];
 CARD_RULES['Envoy of Tyrants, Ella Ballora']=[{"if":{"v":"hand_len","op":">=","n":3},"add":3,"log":"⚔️ Bloodrage: +3 (3+ hand)"},{"if":{"v":"player_losses","op":">","n":0},"add":3,"log":"⚔️ Bloodrage: +3 (wounded)"}];
 CARD_RULES['Kessuae, Tide of Ruin']=[{"if":{"v":"rear_count","op":">=","n":2},"add":5,"log":"🌊 Kessuae: +5 (both supports)"}];
