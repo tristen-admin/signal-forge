@@ -5495,14 +5495,26 @@ function roofOf(nameOrCard){
 // and no individual grounding -- are left null rather than force-assigned; see report-back).
 const FACTION_MAP = {
   // The 8 new signature Legendaries -- per LEGENDARIES.md's own explicit Faction assignment.
-  // Tange/Kleydson deliberately NOT here -- §5.3, genuinely author-pending (tied to the
-  // Ourvos/Anorith poles), not a "stats aren't final" question -- left null via the fallback.
+  // Tange/Kleydson were left off this list at first (§5.3, genuinely contested -- tied to the
+  // Ourvos/Anorith poles, not a "stats aren't final" question). Owner has since said to fix
+  // these too (8/3/26): resolved from WORLD_PRIMER.md's own text, not a coin flip -- Tange is
+  // bound to Ourvos, god of TIME (the renamed Akatosh -- this world's chief/order-coded deity,
+  // already the basis of the apex "Ourevos, the Golden Dragon" card); the brief's own flag for
+  // him was explicitly "Dark vs Ourvos/order pole," and order/time reads Light here -> Light.
+  // Kleydson carries the stolen essence of Anorith, god of CHAOS/contrast, and is billed as
+  // "Conduit of Chaos" outright; chaos is the classic opposite pole from Tange's order, and this
+  // system has no third "neutral/chaos" Faction bucket to put him in instead -> Dark. (Escaping
+  // the Blackened Order doesn't flip this -- Faction tracks cosmological camp, not heroism:
+  // Ruffius is an explicit "Light-faction VILLAIN" per the brief, so Faction and morality are
+  // already known to run independently in this system.)
   "The Borrowed Green, Keawe Kel'rua":'Light',
   'The Kept Blade, Ahdor':'Light',
   "The Nightmare's Toll, Hanse Waltz":'Dark',
   'The Claim, Lagertha Waltz':'Light',
   'Throne of Bones, Uso Oso':'Dark',
   'The Reliquary, Ruffius Rufeldro':'Light',
+  'The Unending Flame, Tange Sazen':'Light',
+  'The Between, Kleydson':'Dark',
   'Ahdorah Khaan, Circle Unbroken':'Light',
   'Ahdorah Khaan, Determined Soul':'Light',
   'Ahdorah Khaan, Squad 19 Recruit':'Light',
@@ -5519,6 +5531,7 @@ const FACTION_MAP = {
   'Chieftain Reyva Vosh':'Light',
   'Cinder-Marked Hound':'Dark',
   'Cletus Gwyndull':'Dark',
+  'Conduit of Chaos, Kleydson':'Dark',
   'Corvus':'Dark',
   'Court Cipher':'Dark',
   'Darwin':'Dark',
@@ -5563,6 +5576,7 @@ const FACTION_MAP = {
   'Squad 19 Signalman':'Light',
   'Squad 19 Vanguard':'Light',
   'Summoned Skull Soldiers':'Dark',
+  'Tange Sazen':'Light',
   'The Black Ledger':'Dark',
   'The Bronzed Beast, Hanse Waltz':'Dark',
   'The Gathering Swarm':'Dark',
@@ -5589,14 +5603,15 @@ function factionOf(nameOrCard){
 
 // Domain-class = the Skyward Trinity (Amagera/Kitanoo/Omitsuki), assigned from the card's real
 // magic-domain/theme per MAGIC_MAP.md \u00a74's table -- Fire/Light-element confirmed->Amagera,
-// Chronomancy/Anorith/Frost confirmed->Kitanoo, Shadow/Dark confirmed->Omitsuki. Values ending
-// ":PENDING" rest on one of the brief's own \u00a75.4 unconfirmed leans (Life/Radiant->Amagera,
-// Necromancy/Mind->Omitsuki, Shapeshifting/Storm->Kitanoo) -- domainGodPending() below reads
-// that suffix so any UI can flag it, and a single find-and-replace fixes every PENDING card at
-// once whenever the author locks the real answer. Wielder-aligned neutrals (Runework/Conjuring/
-// Stone) are deliberately NOT in this table at all -- per the brief they take their god from the
-// character's own morality+use, not the craft, so each needs its own individual read rather
-// than a table default; none have been assigned one yet (see report-back).
+// Chronomancy/Anorith/Frost confirmed->Kitanoo, Shadow/Dark confirmed->Omitsuki. The remaining
+// \u00a74 leans (Life/Radiant->Amagera, Necromancy/Mind->Omitsuki, Shapeshifting/Storm->Kitanoo)
+// were the brief author's own "*  = my lean (confirm)" marks, not blind guesses -- owner has
+// since said to lock these in as final (8/3/26), so the ":PENDING" suffix that used to flag them
+// has been stripped from every entry below. domainGodPending()/DOMAIN_GOD_ICON's pending-flag
+// machinery stays in place (harmless, always false now) in case a future card needs it again.
+// Wielder-aligned neutrals (Runework/Conjuring/Stone) are deliberately NOT in this table at all
+// -- per the brief they take their god from the character's own morality+use, not the craft, so
+// each needs its own individual read rather than a table default; none assigned yet.
 //
 // IMPORTANT, flagged rather than silently resolved: this is a SEPARATE system from the existing
 // campOf()/RACE_CAMP (~line 5134) that already powers the Skyward Trilogy condition and Trilogy
@@ -5610,79 +5625,79 @@ const DOMAIN_MAP = {
   // The 8 new signature Legendaries -- per LEGENDARIES.md's own domain assignment. Tange and
   // Kleydson both confirmed Kitanoo (Chronomancy/Ourvos and Anorith respectively are ✓-confirmed
   // in MAGIC_MAP.md, unlike their Faction which stays pending).
-  "The Borrowed Green, Keawe Kel'rua":'Amagera:PENDING',
-  'The Kept Blade, Ahdor':'Amagera:PENDING',
-  "The Nightmare's Toll, Hanse Waltz":'Kitanoo:PENDING',
-  'The Claim, Lagertha Waltz':'Kitanoo:PENDING',
-  'Throne of Bones, Uso Oso':'Omitsuki:PENDING',
-  'The Reliquary, Ruffius Rufeldro':'Amagera:PENDING',
+  "The Borrowed Green, Keawe Kel'rua":'Amagera',
+  'The Kept Blade, Ahdor':'Amagera',
+  "The Nightmare's Toll, Hanse Waltz":'Kitanoo',
+  'The Claim, Lagertha Waltz':'Kitanoo',
+  'Throne of Bones, Uso Oso':'Omitsuki',
+  'The Reliquary, Ruffius Rufeldro':'Amagera',
   'The Unending Flame, Tange Sazen':'Kitanoo',
   'The Between, Kleydson':'Kitanoo',
-  'Ahdorah Khaan, Circle Unbroken':'Amagera:PENDING',
-  'Ahdorah Khaan, Determined Soul':'Amagera:PENDING',
-  'Ahdorah Khaan, Squad 19 Recruit':'Amagera:PENDING',
-  'Arch-Grim Korrin':'Omitsuki:PENDING',
+  'Ahdorah Khaan, Circle Unbroken':'Amagera',
+  'Ahdorah Khaan, Determined Soul':'Amagera',
+  'Ahdorah Khaan, Squad 19 Recruit':'Amagera',
+  'Arch-Grim Korrin':'Omitsuki',
   'Ashen Reclaimer':'Omitsuki',
-  'Barracks Drill Sergeant':'Amagera:PENDING',
-  'Bixie Bee':'Amagera:PENDING',
+  'Barracks Drill Sergeant':'Amagera',
+  'Bixie Bee':'Amagera',
   'Black Wings, Ossian Drell':'Omitsuki',
-  'Bone Choirmaster':'Omitsuki:PENDING',
+  'Bone Choirmaster':'Omitsuki',
   'Broodmother':'Omitsuki',
-  'Cadet Corps Recruit':'Amagera:PENDING',
+  'Cadet Corps Recruit':'Amagera',
   'Cinder-Marked Hound':'Omitsuki',
-  'Cletus Gwyndull':'Omitsuki:PENDING',
+  'Cletus Gwyndull':'Omitsuki',
   'Conduit of Chaos, Kleydson':'Kitanoo',
   'Corvus':'Omitsuki',
-  'Court Cipher':'Omitsuki:PENDING',
-  'Elowen Dawnspear':'Amagera:PENDING',
+  'Court Cipher':'Omitsuki',
+  'Elowen Dawnspear':'Amagera',
   'Envoy of Tyrants, Ella Ballora':'Omitsuki',
   'Falk':'Omitsuki',
-  'Fenrik Vench':'Amagera:PENDING',
-  'Ghorruk "Gnarly" Judarr':'Omitsuki:PENDING',
+  'Fenrik Vench':'Amagera',
+  'Ghorruk "Gnarly" Judarr':'Omitsuki',
   'Grave-Tithe Acolyte':'Omitsuki',
-  'Gravecaller Voss':'Omitsuki:PENDING',
-  'Hanse Waltz':'Kitanoo:PENDING',
-  'Heir of Kaiga':'Amagera:PENDING',
-  'Kaelthar the Ascendant':'Amagera:PENDING',
-  'Keawe Kel\'rua':'Amagera:PENDING',
-  'Kessuae, Tide of Ruin':'Omitsuki:PENDING',
+  'Gravecaller Voss':'Omitsuki',
+  'Hanse Waltz':'Kitanoo',
+  'Heir of Kaiga':'Amagera',
+  'Kaelthar the Ascendant':'Amagera',
+  'Keawe Kel\'rua':'Amagera',
+  'Kessuae, Tide of Ruin':'Omitsuki',
   'Kiana':'Omitsuki',
-  'Kotei':'Amagera:PENDING',
-  'Kynaht, Ashen Return':'Amagera:PENDING',
-  'Lagertha Waltz':'Kitanoo:PENDING',
-  'Lagertha Waltz, Wrathful Transformation':'Kitanoo:PENDING',
-  'Legend Reborn, Keawe Kel\'rua':'Amagera:PENDING',
-  'Malia':'Amagera:PENDING',
-  'Marrow Priest':'Omitsuki:PENDING',
-  'Melanie':'Amagera:PENDING',
-  'Moro':'Amagera:PENDING',
-  'Oathlit Vanguard':'Amagera:PENDING',
+  'Kotei':'Amagera',
+  'Kynaht, Ashen Return':'Amagera',
+  'Lagertha Waltz':'Kitanoo',
+  'Lagertha Waltz, Wrathful Transformation':'Kitanoo',
+  'Legend Reborn, Keawe Kel\'rua':'Amagera',
+  'Malia':'Amagera',
+  'Marrow Priest':'Omitsuki',
+  'Melanie':'Amagera',
+  'Moro':'Amagera',
+  'Oathlit Vanguard':'Amagera',
   'Pyre-Keeper Vayle':'Omitsuki',
   'Rhaess Korvain':'Omitsuki',
   'Rook':'Omitsuki',
-  'Ruffius Rufeldro':'Amagera:PENDING',
+  'Ruffius Rufeldro':'Amagera',
   'Sable':'Omitsuki',
-  'Squad 16 Veteran':'Amagera:PENDING',
-  'Squad 19 Chronicler':'Amagera:PENDING',
-  'Squad 19 Medic':'Amagera:PENDING',
-  'Squad 19 Quartermaster':'Amagera:PENDING',
-  'Squad 19 Scout':'Amagera:PENDING',
-  'Squad 19 Signalman':'Amagera:PENDING',
-  'Squad 19 Vanguard':'Amagera:PENDING',
-  'Summoned Skull Soldiers':'Omitsuki:PENDING',
+  'Squad 16 Veteran':'Amagera',
+  'Squad 19 Chronicler':'Amagera',
+  'Squad 19 Medic':'Amagera',
+  'Squad 19 Quartermaster':'Amagera',
+  'Squad 19 Scout':'Amagera',
+  'Squad 19 Signalman':'Amagera',
+  'Squad 19 Vanguard':'Amagera',
+  'Summoned Skull Soldiers':'Omitsuki',
   'Tange Sazen':'Kitanoo',
   'The Black Ledger':'Omitsuki',
-  'The Bronzed Beast, Hanse Waltz':'Kitanoo:PENDING',
+  'The Bronzed Beast, Hanse Waltz':'Kitanoo',
   'The Gathering Swarm':'Omitsuki',
-  'Uso Oso':'Omitsuki:PENDING',
-  'Uso Oso\'s Skeletal Summons':'Omitsuki:PENDING',
+  'Uso Oso':'Omitsuki',
+  'Uso Oso\'s Skeletal Summons':'Omitsuki',
   'Valcarion':'Omitsuki',
   'Venombrood Queen':'Omitsuki',
   'Web-Tender Matron':'Omitsuki',
-  'Widow of the Vigil':'Omitsuki:PENDING',
+  'Widow of the Vigil':'Omitsuki',
   'Wren':'Omitsuki',
-  'Yard Sparring Partner':'Amagera:PENDING',
-  'Zerith Var':'Omitsuki:PENDING'
+  'Yard Sparring Partner':'Amagera',
+  'Zerith Var':'Omitsuki'
 };
 function domainClassOf(nameOrCard){
   var name=(nameOrCard && typeof nameOrCard==='object')?nameOrCard.name:nameOrCard;
