@@ -9335,7 +9335,7 @@ function loadState(){
       if(s.DISC_OVERRIDE && typeof s.DISC_OVERRIDE==='object'){ DISC_OVERRIDE=Object.assign({}, DISC_OVERRIDE, s.DISC_OVERRIDE); }   // 7/16/26: merge, not replace -- a save file's own overrides must not wipe out the hand-tuned source defaults for cards it never touched
       if(s.DISC_ROLLS && typeof s.DISC_ROLLS==='object') DISC_ROLLS=s.DISC_ROLLS;   // no in-code seed data here, plain replace is safe
       if(s.ASC_DISC_BONUS && typeof s.ASC_DISC_BONUS==='object') ASC_DISC_BONUS=s.ASC_DISC_BONUS;
-      try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(!c) return; c.camp=campOf(c.name); var _d=deriveDisciplines(c); c.might=_d.might; c.cunning=_d.cunning; c.grit=_d.grit; }); }catch(e){}
+      try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(!c) return; c.camp=campOf(c.name);}); }catch(e){}
       if(s.cardFoilMax && typeof s.cardFoilMax==='object') cardFoilMax=s.cardFoilMax;
       if(s.cardFrames && typeof s.cardFrames==='object') cardFrames=s.cardFrames;
       if(Array.isArray(s.ownedFrames)) ownedFrames=new Set(s.ownedFrames);
@@ -11965,7 +11965,22 @@ function openCardDetail(id, fresh, tab){
       <div class="dr-rarity">${rlab(c.rarity)}${pristine?' · ◈ Pristine':''}${fresh?' · ✦ Fresh Mint':''}</div>
       <div class="dr-name">${dispName(c.name)}</div>
       <div class="dr-race-row">🧬 <span class="dr-race-lbl">Race</span> <select class="dr-race-sel" data-cardname="${(c.name||'').replace(/"/g,'&quot;')}" onchange="setRace(this.dataset.cardname, this.value)">${RACES.map(function(r){return '<option'+(raceOf(c.name)===r?' selected':'')+'>'+r+'</option>';}).join('')}</select></div>
-      <div class="dr-race-row">${CAMP_ICON[c.camp||campOf(c.name)]||'🏕'} <span class="dr-race-lbl" style="color:${CAMP_COLOR[c.camp||campOf(c.name)]||'inherit'}">${CAMP_TITLE[c.camp||campOf(c.name)]||c.camp||campOf(c.name)}</span> <span class="dr-disc-stats">⚔ ${c.might||0} Might &middot; 🧠 ${c.cunning||0} Cunning &middot; 🪨 ${c.grit||0} Grit</span></div>
+      <div class="dr-race-row">${CAMP_ICON[c.camp||campOf(c.name)]||'🏕'} <span class="dr-race-lbl" style="color:${CAMP_COLOR[c.camp||campOf(c.name)]||'inherit'}">${CAMP_TITLE[c.camp||campOf(c.name)]||c.camp||campOf(c.name)}</span></div>
+      ${(function(){
+        // KOTEI magic-system surfacing (8/3/26) -- roofOf()/factionOf()/domainClassOf() were real,
+        // tested, shipped functions with zero UI hookup anywhere -- this is the fix. Same dr-race-row
+        // style as the Camp row above for visual consistency; gracefully renders nothing for any
+        // piece a card doesn't have (34 cards have no Roof at all, by design -- see ROOF_MAP's comment).
+        var _roofs=(typeof roofOf==='function')?roofOf(c):[];
+        var _fac=(typeof factionOf==='function')?factionOf(c):null;
+        var _dom=(typeof domainClassOf==='function')?domainClassOf(c):null;
+        if(!_roofs.length && !_fac && !_dom) return '';
+        var _parts=[];
+        if(_roofs.length) _parts.push('✦ '+_roofs.join(' &middot; '));
+        if(_fac) _parts.push(_fac);
+        if(_dom) _parts.push((DOMAIN_GOD_ICON[_dom]||'')+' '+_dom);
+        return '<div class="dr-race-row dr-kotei-row">'+_parts.join(' &middot; ')+'</div>';
+      })()}
       <div class="dr-powline"><span class="dr-pow">${c.pow}</span><span class="dr-pow-label">Base Power</span><span class="dr-pow" style="color:var(--electric);margin-left:16px">⚡${conjureCost(c)}</span><span class="dr-pow-label">Conjure</span></div>
     </div>
     <div class="dr-tabs">
@@ -13820,7 +13835,7 @@ buildMatchView();
 updateScore();
 rpRender();
 initOwnedCopies();
-(function(){ try{ if(typeof COLLECTION!=='undefined') COLLECTION.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.camp=campOf(c.name); var _d=deriveDisciplines(c); c.might=_d.might; c.cunning=_d.cunning; c.grit=_d.grit; }); if(typeof OPP_CARDS!=='undefined') OPP_CARDS.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.camp=campOf(c.name); var _d2=deriveDisciplines(c); c.might=_d2.might; c.cunning=_d2.cunning; c.grit=_d2.grit; }); var _pk=[]; if(typeof PACKS!=='undefined')_pk=_pk.concat(PACKS); if(typeof FORGE_PACKS!=='undefined')_pk=_pk.concat(FORGE_PACKS); _pk.forEach(function(p){ if(p.odds&&p.odds.uncommon!=null){ p.odds.common=(p.odds.common||0)+p.odds.uncommon; delete p.odds.uncommon; } }); }catch(e){} })();
+(function(){ try{ if(typeof COLLECTION!=='undefined') COLLECTION.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.camp=campOf(c.name);}); if(typeof OPP_CARDS!=='undefined') OPP_CARDS.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.camp=campOf(c.name);}); var _pk=[]; if(typeof PACKS!=='undefined')_pk=_pk.concat(PACKS); if(typeof FORGE_PACKS!=='undefined')_pk=_pk.concat(FORGE_PACKS); _pk.forEach(function(p){ if(p.odds&&p.odds.uncommon!=null){ p.odds.common=(p.odds.common||0)+p.odds.uncommon; delete p.odds.uncommon; } }); }catch(e){} })();
   supply = defaultSupply(); cardSupply=defaultCardSupply();
 const _hadSave=(function(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}})();
 window._sfReturningSession = _hadSave;   // captured before loadState()/startNewPlayer() can write a fresh save -- Hub's one-time reveal reads this
@@ -14200,7 +14215,7 @@ body::before{background:
     var ARCH_SHORT={blackwing:'BW',deathless:'DL',warpath:'WP',broodswarm:'BS',ironsworn:'IS'};
     var HAND=(typeof HAND_CARDS!=='undefined')?HAND_CARDS:[];
     function baseList(){var s={},l=[];HAND.concat(DECK_POOL).forEach(function(c){if(!s[c.name]){s[c.name]=1;l.push(c);}});return l;}
-    var ORIG={}; baseList().forEach(function(c){ORIG[c.name]={p:c.pow,r:c.rarity,t:c.timing||'—',a:c.abil||'',cost:(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[c.name]!=null)?COST_OVERRIDE[c.name]:((typeof conjureCost==='function')?conjureCost(c):null),shield:(typeof shield==='function')?shield(c):null,might:c.might,cunning:c.cunning,grit:c.grit,camp:c.camp,called:(typeof CALLED!=='undefined'&&CALLED[c.name])?JSON.stringify(CALLED[c.name]):null,rules:(typeof CARD_RULES!=='undefined'&&CARD_RULES[c.name])?JSON.stringify(CARD_RULES[c.name]):null,dmx:(typeof DM_EXCLUSIVE!=='undefined'&&DM_EXCLUSIVE[c.name])?JSON.stringify(DM_EXCLUSIVE[c.name]):null,dma:(typeof DM_ACTIVATED_ABILITY!=='undefined'&&DM_ACTIVATED_ABILITY[c.name]&&!DM_ACTIVATED_ABILITY[c.name].run)?JSON.stringify(DM_ACTIVATED_ABILITY[c.name]):null,arch:(typeof cardArchetypes==='function'?cardArchetypes(c.name).map(function(a){return a.id;}).sort():[]),links:(typeof cardLinkGroups==='function'?cardLinkGroups(c.name).map(function(g){return g.id;}).sort():[])};});
+    var ORIG={}; baseList().forEach(function(c){ORIG[c.name]={p:c.pow,r:c.rarity,t:c.timing||'—',a:c.abil||'',cost:(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[c.name]!=null)?COST_OVERRIDE[c.name]:((typeof conjureCost==='function')?conjureCost(c):null),shield:(typeof shield==='function')?shield(c):null,might:(typeof deriveDisciplines==='function'?deriveDisciplines(c).might:c.might),cunning:(typeof deriveDisciplines==='function'?deriveDisciplines(c).cunning:c.cunning),grit:(typeof deriveDisciplines==='function'?deriveDisciplines(c).grit:c.grit),camp:c.camp,called:(typeof CALLED!=='undefined'&&CALLED[c.name])?JSON.stringify(CALLED[c.name]):null,rules:(typeof CARD_RULES!=='undefined'&&CARD_RULES[c.name])?JSON.stringify(CARD_RULES[c.name]):null,dmx:(typeof DM_EXCLUSIVE!=='undefined'&&DM_EXCLUSIVE[c.name])?JSON.stringify(DM_EXCLUSIVE[c.name]):null,dma:(typeof DM_ACTIVATED_ABILITY!=='undefined'&&DM_ACTIVATED_ABILITY[c.name]&&!DM_ACTIVATED_ABILITY[c.name].run)?JSON.stringify(DM_ACTIVATED_ABILITY[c.name]):null,arch:(typeof cardArchetypes==='function'?cardArchetypes(c.name).map(function(a){return a.id;}).sort():[]),links:(typeof cardLinkGroups==='function'?cardLinkGroups(c.name).map(function(g){return g.id;}).sort():[])};});
     function _sameSet(a,b){var as=(a||[]).slice().sort(),bs=(b||[]).slice().sort();return as.length===bs.length&&as.every(function(x,i){return x===bs[i];});}
     function setProp(n,k,v){DECK_POOL.forEach(function(c){if(c.name===n)c[k]=v;});COLLECTION.forEach(function(c){if(c.name===n)c[k]=v;});}
     function loadOV(){try{var o=JSON.parse(localStorage.getItem(KEY)||'{}');var dirty=false;Object.keys(o).forEach(function(n){if(o[n]&&o[n].r==='genesis'){o[n].r='apex';dirty=true;}});if(dirty)try{localStorage.setItem(KEY,JSON.stringify(o));}catch(e){}return o;}catch(e){return {};}}
@@ -14319,7 +14334,8 @@ body::before{background:
         var note=(OV[n]&&OV[n].note)?OV[n].note:'';
         var rules=(typeof CARD_RULES!=='undefined'&&CARD_RULES[n])?JSON.stringify(CARD_RULES[n]):'';
         h+='<div class="dfx-card" data-n="'+esc(n)+'"><div class="dfx-h"><input class="dfx-name" data-fx="rename" value="'+esc(NAME_OVERRIDE[n]||n)+'" title="Display name (card face). Export hands the canonical rename to Claude."><span class="dfx-cost">⚡ <input type="number" data-fx="cost" value="'+cost+'" min="0" max="6"></span></div>'+'<div class="dfx-pr"><span class="dfx-q"><i>Power</i><input type="number" data-fx="pow" class="dfx-qin" value="'+(c.pow||0)+'" min="0" max="40"></span><span class="dfx-q"><i>Rarity</i><select data-fx="rar" class="dfx-qin">'+['apex','ultra','rare','common'].map(function(r){return '<option'+(c.rarity===r?' selected':'')+'>'+r+'</option>';}).join('')+'</select></span></div>'
-          +'<div class="dfx-pr dfx-disc"><span class="dfx-q"><i>Might</i><input type="number" data-fx="might" class="dfx-qin" value="'+(c.might||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Cunning</i><input type="number" data-fx="cunning" class="dfx-qin" value="'+(c.cunning||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Grit</i><input type="number" data-fx="grit" class="dfx-qin" value="'+(c.grit||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Camp</i><select data-fx="camp" class="dfx-qin">'+Object.keys(CAMP_BEATS).map(function(cm){return '<option'+((c.camp||campOf(n))===cm?' selected':'')+'>'+cm+'</option>';}).join('')+'</select></span></div>'
+          +(function(){ var _d=(typeof deriveDisciplines==='function')?deriveDisciplines(c):{might:c.might||0,cunning:c.cunning||0,grit:c.grit||0};
+          return '<div class="dfx-pr dfx-disc"><span class="dfx-q"><i>Might (Ascension only)</i><input type="number" data-fx="might" class="dfx-qin" value="'+(_d.might||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Cunning</i><input type="number" data-fx="cunning" class="dfx-qin" value="'+(_d.cunning||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Grit</i><input type="number" data-fx="grit" class="dfx-qin" value="'+(_d.grit||0)+'" min="1" max="30"></span><span class="dfx-q"><i>Camp</i><select data-fx="camp" class="dfx-qin">'+Object.keys(CAMP_BEATS).map(function(cm){return '<option'+((c.camp||campOf(n))===cm?' selected':'')+'>'+cm+'</option>';}).join('')+'</select></span></div>'; })()
           +'<label class="dfx-l">Conjured ability — display text</label><textarea data-fx="abil" class="dfx-ta">'+esc(c.abil||'')+'</textarea>'
           +'<label class="dfx-l">📣 Called — quick build (flat effect)</label>'
           +'<div class="dfx-quick">'
