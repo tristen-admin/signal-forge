@@ -3586,6 +3586,24 @@ const MATCH_STEPS = [
 
 // ── DECK POOL ──
 const DECK_POOL = [
+  // ══ KOTEI SIGNATURE LEGENDARIES (8/2/26) — 8 real, new cards per SIGNAL_FORGE_LEGENDARIES.md,
+  // built as genuinely separate printings (Epithet, CharacterName), not a reskin of any existing
+  // base card — same precedent as "Legend Reborn, Keawe Kel'rua"/"The Bronzed Beast, Hanse Waltz"
+  // already being separate printings of the same person. Stats/exact ability wording are
+  // deliberately barebones (owner: "weren't meant to be final product") — Ultra/Power/Cost taken
+  // directly from the brief's own spec table. Faction/Domain-class per LEGENDARIES.md's own
+  // assignments; Tange/Kleydson's Faction stays null — that's a real §5 pending item, not a
+  // stats question. Each card's conditional bonus (below, via CARD_RULES) is a simplified-but-
+  // real mechanism standing in for the fuller barebones sketch, using only primitives that
+  // already exist (no new engine hooks invented for these 8).
+  {name:"The Borrowed Green, Keawe Kel'rua",pow:23,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Uncontrolled Flood: on commit, +9 power — and the opponent also gains +5 power. Power without aim; the flood answers no one's call."},
+  {name:"The Kept Blade, Ahdor",pow:22,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Earned, not given: on commit, +5 power, +3 more if you have 0 losses this match (disciplined play, the earn-it vow kept)."},
+  {name:"The Nightmare's Toll, Hanse Waltz",pow:21,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Blood-Toll: on commit, +8 power, +4 more once this card has taken a death this match (the toll already paid)."},
+  {name:"The Claim, Lagertha Waltz",pow:20,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"The Claim: on commit, +6 power, +4 more once this card has earned a career kill (dibs collected)."},
+  {name:"Throne of Bones, Uso Oso",pow:22,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Throne of Bones: on commit, +7 power, +5 more while you command a Death Remnant (Grey-Giant mode)."},
+  {name:"The Reliquary, Ruffius Rufeldro",pow:23,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"The Reliquary — a blessing that isn't: on commit, +3 power, and the opponent takes −5 (radiant light, slow execution). The mask holds."},
+  {name:"The Unending Flame, Tange Sazen",pow:22,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Unending Flame: on commit, the opponent takes −6 power. Fire pinned outside of time — cannot be healed, cleansed, or prevented."},
+  {name:"The Between, Kleydson",pow:20,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Contrast to Balance: on commit, +4 power, +6 more once this is your 2nd or later duel this match (chaos and order finding their balance)."},
   {name:'Pit Thrall',pow:12,kills:0,deaths:0,rarity:'common',timing:null,abil:'No ability — a nameless conscript of the Sorn-Vallis pits. (Placeholder, will be redesigned.)'},
   {name:'Mirror Shade',pow:6,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"On commit: your power becomes the opponent's committed power +1."},
   {name:"Kaelthar the Ascendant",pow:23,cost:4,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Ascendant: on commit, −20 while you hold the match lead, +20 while you are behind. Your Support effects do not fire when he is conjured."},
@@ -3856,25 +3874,28 @@ let oathTargetName = null;      // kill-vow-style oaths (Lagertha): the named ta
 // — author tunes every number here (§5.2). condition() returns true if the vow was kept, checked
 // once at showMatchComplete(). Every entry's penalty must be a real cost (not just "no bonus").
 const DM_OATH = {
-  "Keawe Kel'rua": {
+  // Keyed to the 8 new signature-card names (8/2/26), not the base printings -- Oath/Avatāra are
+  // this new anchor card's identity, the base card stays an ordinary Fighter with no Deck-Master
+  // apex mechanics attached.
+  "The Borrowed Green, Keawe Kel'rua": {
     vow: "Survival vow — against his own stolen clock: end the match without your Fighter (Keawe) ever falling.",
     condition: function(dmName){ return true; },   // barebones: "ended the match at all" stands in for "his clock didn't run out" until a real timer mechanic exists
     payoff: {sig:+4, desc:'+4 Signal payout, this match'},
     penalty: {sig:-6, desc:'−6 Signal, below the match-complete baseline'},
   },
-  'Ahdor': {
+  'The Kept Blade, Ahdor': {
     vow: "Earn-it vow — protect the squad: win the match without conceding a single duel by forfeit.",
     condition: function(dmName){ return true; },
     payoff: {sig:+3, desc:'+3 Signal payout, this match'},
     penalty: {sig:-4, desc:'−4 Signal, below the match-complete baseline'},
   },
-  'Hanse Waltz': {
+  "The Nightmare's Toll, Hanse Waltz": {
     vow: "Grim vow — “I’ll be the monster so they don’t have to”: win the match.",
     condition: function(dmName){ return lastResult!=null && playerScore && playerScore[0]>playerScore[1]; },
     payoff: {sig:+5, desc:'+5 Signal payout, this match'},
     penalty: {sig:-5, desc:'−5 Signal, below the match-complete baseline (the toll bleeds you either way)'},
   },
-  'Lagertha Waltz': {
+  'The Claim, Lagertha Waltz': {
     // THE signature oath per the brief — a real kill-vow, not a generic win/survive check.
     // Barebones target: named automatically at match start as the opponent's own Deck Master
     // (resetMatchState(), oathTargetName), rather than a full player-facing target-picker UI —
@@ -3888,25 +3909,25 @@ const DM_OATH = {
     payoff: {sig:+6, desc:'+6 Signal payout, this match'},
     penalty: {sig:-8, desc:'−8 Signal — dibs unfulfilled, below the match-complete baseline'},
   },
-  'Uso Oso': {
+  'Throne of Bones, Uso Oso': {
     vow: "Freedom vow — “nobody’s slave, not ever again”: win the match.",
     condition: function(dmName){ return lastResult!=null && playerScore && playerScore[0]>playerScore[1]; },
     payoff: {sig:+5, desc:'+5 Signal payout, this match'},
     penalty: {sig:-5, desc:'−5 Signal, below the match-complete baseline'},
   },
-  'Ruffius Rufeldro': {
+  'The Reliquary, Ruffius Rufeldro': {
     vow: "Serene-superiority vow — the mask holds: win the match without your true form (Māyā flip) ever being forced.",
     condition: function(dmName){ return true; },
     payoff: {sig:+4, desc:'+4 Signal payout, this match'},
     penalty: {sig:-4, desc:'−4 Signal, below the match-complete baseline'},
   },
-  'Tange Sazen': {
+  'The Unending Flame, Tange Sazen': {
     vow: "Duty vow — “he tells me where to stand; I stand there”: win the match.",
     condition: function(dmName){ return lastResult!=null && playerScore && playerScore[0]>playerScore[1]; },
     payoff: {sig:+4, desc:'+4 Signal payout, this match'},
     penalty: {sig:-5, desc:'−5 Signal, below the match-complete baseline'},
   },
-  'Conduit of Chaos, Kleydson': {
+  'The Between, Kleydson': {
     vow: "Self-definition vow — out from under the Blackened Order: win the match.",
     condition: function(dmName){ return lastResult!=null && playerScore && playerScore[0]>playerScore[1]; },
     payoff: {sig:+4, desc:'+4 Signal payout, this match'},
@@ -4015,29 +4036,48 @@ const DM_ACTIVATED_ABILITY = {
       if(typeof toast==='function') toast('\u2694 Tange Sazen \u2014 sent the opponent\u2019s next draw to the bottom of their deck', true);
     }
   }},
-  // \u2550\u2550 AVAT\u0100RA (8/2/26, KOTEI \u00a72.4) \u2014 4 of the 8 signature Legendaries added here for real.
-  // The other 4 (Keawe Kel'rua, Ahdorah Khaan/"Ahdor", Tange Sazen, Conduit of Chaos Kleydson,
-  // all just above) ALREADY have a shipped DM_ACTIVATED_ABILITY with different flavor/mechanics
-  // than LEGENDARIES.md's Avat\u0101ra sketch for the same name \u2014 flagged, not silently overwritten
-  // (a duplicate object-literal key here would just shadow the existing one, the exact bug class
-  // this project has caught before). Author decides: keep the existing kit, or replace it with
-  // the Avat\u0101ra version below for those 4 too \u2014 see report-back.
-  'Hanse Waltz': {log:'Blood-Toll \u2014 the Bronzed Beast', desc:'discard 1 card: your next conjure +8, darkness-strike through claw and fang (barebones numbers)', run:function(){
+  // \u2550\u2550 AVAT\u0100RA (8/2/26, KOTEI \u00a72.4) \u2014 all 8 signature Legendaries, keyed to their NEW signature
+  // card names (not the base printings) now that each has a real, separate card \u2014 this also
+  // resolves what was flagged as a conflict in the first pass (Keawe Kel'rua/Ahdorah Khaan/Tange
+  // Sazen/Conduit of Chaos Kleydson's BASE names already carry a different, older
+  // DM_ACTIVATED_ABILITY \u2014 those stay completely untouched; these 4 new keys don't collide with
+  // them at all).
+  "The Borrowed Green, Keawe Kel'rua": {log:'Uncontrolled Flood \u2014 unleashed', desc:'your next conjure +10 (barebones \u2014 the fuller "AOE, uncontrolled" sketch needs a both-sides-damage primitive this build doesn\u2019t have yet)', run:function(){
+    dmNextConjureBonus = (dmNextConjureBonus||0) + 10;
+    if(typeof toast==='function') toast('\ud83c\udf0a The Borrowed Green \u2014 the flood answers, uncontrolled: next conjure +10', true);
+  }},
+  'The Kept Blade, Ahdor': {log:'Overdrive \u2014 the Kaio-ken', desc:'draw 1, your next conjure +8 (barebones \u2014 "redlined precognition" simplified to a power/draw spike, no recoil-next-turn cost modeled yet)', run:function(){
+    drawToHand(1);
+    dmNextConjureBonus = (dmNextConjureBonus||0) + 8;
+    if(typeof toast==='function') toast('\u2694 The Kept Blade \u2014 Overdrive: draw 1, next conjure +8', true);
+  }},
+  "The Nightmare's Toll, Hanse Waltz": {log:'Blood-Toll \u2014 the Bronzed Beast', desc:'discard 1 card: your next conjure +8, darkness-strike through claw and fang (barebones numbers)', run:function(){
     if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
     dmNextConjureBonus = (dmNextConjureBonus||0) + 8;
-    if(typeof toast==='function') toast('\ud83c\udf19 Hanse Waltz \u2014 Blood-Toll paid: the Bronzed Beast rises, next conjure +8', true);
+    if(typeof toast==='function') toast('\ud83c\udf19 The Nightmare\u2019s Toll \u2014 Blood-Toll paid: the Bronzed Beast rises, next conjure +8', true);
   }},
-  'Lagertha Waltz': {log:'the Claim \u2014 Oath-Beast', desc:'called supports add their own power this duel (barebones \u2014 "stronger together" fused with her kill-vow)', run:function(){
+  'The Claim, Lagertha Waltz': {log:'the Claim \u2014 Oath-Beast', desc:'called supports add their own power this duel (barebones \u2014 "stronger together" fused with her kill-vow)', run:function(){
     dmSupportAddPowThisDuel = true;
-    if(typeof toast==='function') toast('\ud83d\udc3a Lagertha Waltz \u2014 the Claim: called supports add their own power this duel', true);
+    if(typeof toast==='function') toast('\ud83d\udc3a The Claim \u2014 Oath-Beast: called supports add their own power this duel', true);
   }},
-  'Uso Oso': {log:'Throne of Bones \u2014 Grey Giant', desc:'your next conjure +6 (barebones lesser mode \u2014 the full Throne-of-Bones zone is a bigger build, not attempted here)', run:function(){
+  'Throne of Bones, Uso Oso': {log:'Throne of Bones \u2014 Grey Giant', desc:'your next conjure +6 (barebones lesser mode \u2014 the full Throne-of-Bones zone is a bigger build, not attempted here)', run:function(){
     dmNextConjureBonus = (dmNextConjureBonus||0) + 6;
-    if(typeof toast==='function') toast('\u2620 Uso Oso \u2014 Grey Giant: next conjure +6', true);
+    if(typeof toast==='function') toast('\u2620 Throne of Bones \u2014 Grey Giant: next conjure +6', true);
   }},
-  'Ruffius Rufeldro': {log:'the Mask Drops', desc:'nullify the opponent\u2019s called supports this duel (barebones \u2014 "the Reliquary" removal-disguised-as-blessing, simplified to a straight nullify)', run:function(){
+  'The Reliquary, Ruffius Rufeldro': {log:'the Mask Drops', desc:'nullify the opponent\u2019s called supports this duel (barebones \u2014 "the Reliquary" removal-disguised-as-blessing, simplified to a straight nullify)', run:function(){
     dmNullifyOppSupportsThisDuel = true;
-    if(typeof toast==='function') toast('\ud83c\udfad Ruffius Rufeldro \u2014 the mask drops: opponent\u2019s called supports nullified this duel', true);
+    if(typeof toast==='function') toast('\ud83c\udfad The Reliquary \u2014 the mask drops: opponent\u2019s called supports nullified this duel', true);
+  }},
+  'The Unending Flame, Tange Sazen': {log:'Time-Locked Eternal Flame', desc:'draw 1, send 2 cards from the top of your opponent\u2019s deck to the bottom (barebones \u2014 "time control" simplified/doubled from the existing Tange Sazen base-card ability)', run:function(){
+    drawToHand(1);
+    if(typeof oppDeckBot!=='undefined' && oppDeckBot.length){
+      for(var _tf=0;_tf<2 && oppDeckBot.length;_tf++){ oppDeckBot.push(oppDeckBot.shift()); }
+      if(typeof toast==='function') toast('\ud83d\udd25 The Unending Flame \u2014 time pinned: sent 2 of the opponent\u2019s next draws to the bottom of their deck', true);
+    }
+  }},
+  'The Between, Kleydson': {log:'the Between', desc:'your next conjure +12 (barebones \u2014 the real "requires a live fire AND ice effect" gate needs a domain-effect tracker this build doesn\u2019t have yet, so it\u2019s unconditional here)', run:function(){
+    dmNextConjureBonus = (dmNextConjureBonus||0) + 12;
+    if(typeof toast==='function') toast('\u2696 The Between \u2014 chaos and order, balanced: next conjure +12', true);
   }}
 };
 function activateDeckMasterAbility(){
@@ -5302,6 +5342,15 @@ const ROOF_LABEL = {Vajra:'strengthens', Astra:'single-target hit', 'Nirm\u0101\
 // Cards not in this table (mostly generic Common filler with no distinct effect shape) fall
 // through to the Vajra default in roofOf() -- flagged as a first pass, not an audited final.
 const ROOF_MAP = {
+  // The 8 new signature Legendary cards (8/2/26) -- roofs per their LEGENDARIES.md sketch.
+  "The Borrowed Green, Keawe Kel'rua":['M\u0101y\u0101'],
+  'The Kept Blade, Ahdor':['Vajra'],
+  "The Nightmare's Toll, Hanse Waltz":['M\u0101y\u0101'],
+  'The Claim, Lagertha Waltz':['Vajra'],
+  'Throne of Bones, Uso Oso':['Nirm\u0101\u1e47a'],
+  'The Reliquary, Ruffius Rufeldro':['Bandha'],
+  'The Unending Flame, Tange Sazen':['Astra'],
+  'The Between, Kleydson':['M\u0101y\u0101'],
   'Ahdorah Khaan, Circle Unbroken':['M\u0101y\u0101','Vajra'],
   'Ahdorah Khaan, Determined Soul':['Bandha','M\u0101y\u0101'],
   'Ahdorah Khaan, Squad 19 Recruit':['Vajra'],
@@ -5445,6 +5494,15 @@ function roofOf(nameOrCard){
 // Coverage: 78 of 143 cards (the rest -- mostly generic neutral filler with no archetype tag
 // and no individual grounding -- are left null rather than force-assigned; see report-back).
 const FACTION_MAP = {
+  // The 8 new signature Legendaries -- per LEGENDARIES.md's own explicit Faction assignment.
+  // Tange/Kleydson deliberately NOT here -- §5.3, genuinely author-pending (tied to the
+  // Ourvos/Anorith poles), not a "stats aren't final" question -- left null via the fallback.
+  "The Borrowed Green, Keawe Kel'rua":'Light',
+  'The Kept Blade, Ahdor':'Light',
+  "The Nightmare's Toll, Hanse Waltz":'Dark',
+  'The Claim, Lagertha Waltz':'Light',
+  'Throne of Bones, Uso Oso':'Dark',
+  'The Reliquary, Ruffius Rufeldro':'Light',
   'Ahdorah Khaan, Circle Unbroken':'Light',
   'Ahdorah Khaan, Determined Soul':'Light',
   'Ahdorah Khaan, Squad 19 Recruit':'Light',
@@ -5549,6 +5607,17 @@ function factionOf(nameOrCard){
 // (retiring the race+hash placeholder for a lore-grounded one) or the two should stay separate
 // lenses is an open question for the author -- not decided here, nothing about campOf() changed.
 const DOMAIN_MAP = {
+  // The 8 new signature Legendaries -- per LEGENDARIES.md's own domain assignment. Tange and
+  // Kleydson both confirmed Kitanoo (Chronomancy/Ourvos and Anorith respectively are ✓-confirmed
+  // in MAGIC_MAP.md, unlike their Faction which stays pending).
+  "The Borrowed Green, Keawe Kel'rua":'Amagera:PENDING',
+  'The Kept Blade, Ahdor':'Amagera:PENDING',
+  "The Nightmare's Toll, Hanse Waltz":'Kitanoo:PENDING',
+  'The Claim, Lagertha Waltz':'Kitanoo:PENDING',
+  'Throne of Bones, Uso Oso':'Omitsuki:PENDING',
+  'The Reliquary, Ruffius Rufeldro':'Amagera:PENDING',
+  'The Unending Flame, Tange Sazen':'Kitanoo',
+  'The Between, Kleydson':'Kitanoo',
   'Ahdorah Khaan, Circle Unbroken':'Amagera:PENDING',
   'Ahdorah Khaan, Determined Soul':'Amagera:PENDING',
   'Ahdorah Khaan, Squad 19 Recruit':'Amagera:PENDING',
@@ -10878,6 +10947,16 @@ CARD_RULES['Kravyn the Collector']=[{"add":3,"log":"⚔️ Kravyn: +3"},{"if":{"
 // its abil text alone triggers the existing generic isShellward text-match in resolve() (see Hanse
 // Waltz/Bram the Bulwark/Torvald/Calla Thorn for the same pattern).
 CARD_RULES['Sworn Duelist']=[{"if":{"v":"pc_kills","op":">=","n":5},"add":2,"log":"⚔️ Sworn Duelist: +2 (Kill Escalation, 5+ kills)"},{"if":{"v":"pc_kills","op":">=","n":15},"add":2,"log":"⚔️ Sworn Duelist: +2 more (Kill Escalation, 15+ kills — total +4)"}];
+// KOTEI signature Legendaries (8/2/26) -- simplified-but-real mechanisms for the 8 new cards
+// above (DECK_POOL), using only context vars that already exist elsewhere in this table.
+CARD_RULES["The Borrowed Green, Keawe Kel'rua"]=[{"add":9,"log":"🌊 Uncontrolled Flood: +9"},{"oppadd":5,"log":"🌊 Uncontrolled Flood: the flood answers no one's call — opponent +5 too"}];
+CARD_RULES['The Kept Blade, Ahdor']=[{"add":5,"log":"🗡 Earned, not given: +5"},{"if":{"v":"player_losses","op":"==","n":0},"add":3,"log":"🗡 Earned, not given: +3 more (0 losses this match — the vow kept)"}];
+CARD_RULES["The Nightmare's Toll, Hanse Waltz"]=[{"add":8,"log":"🌙 Blood-Toll: +8"},{"if":{"v":"pc_deaths","op":">=","n":1},"add":4,"log":"🌙 Blood-Toll: +4 more (the toll already paid)"}];
+CARD_RULES['The Claim, Lagertha Waltz']=[{"add":6,"log":"🐺 The Claim: +6"},{"if":{"v":"pc_kills","op":">=","n":1},"add":4,"log":"🐺 The Claim: +4 more (dibs collected)"}];
+CARD_RULES['Throne of Bones, Uso Oso']=[{"add":7,"log":"☠ Throne of Bones: +7"},{"if":{"v":"remnant_count","op":">=","n":1},"add":5,"log":"☠ Throne of Bones: +5 more (Grey-Giant mode — a Remnant answers)"}];
+CARD_RULES['The Reliquary, Ruffius Rufeldro']=[{"add":3,"log":"🎭 The Reliquary: +3"},{"oppadd":-5,"log":"🎭 The Reliquary: opponent −5 (a blessing that isn't)"}];
+CARD_RULES['The Unending Flame, Tange Sazen']=[{"oppadd":-6,"log":"🔥 Unending Flame: opponent −6 (cannot be healed, cleansed, or prevented)"}];
+CARD_RULES['The Between, Kleydson']=[{"add":4,"log":"⚖ Contrast to Balance: +4"},{"if":{"v":"match_commits","op":">=","n":2},"add":6,"log":"⚖ Contrast to Balance: +6 more (chaos and order finding their balance)"}];
 CARD_RULES['Fifth Frequency Stormcaller']=[{"add":3,"log":"🌪️ Flurry: +3"},{"if":{"v":"hand_len","op":">=","n":5},"add":4,"log":"🌪️ Flurry: +4 (5+ hand)"},{"if":{"v":"banish_len","op":">=","n":4},"add":7,"log":"🌪️ Flurry: +7 (4+ banish)"}];
 CARD_RULES['Envoy of Tyrants, Ella Ballora']=[{"if":{"v":"hand_len","op":">=","n":3},"add":3,"log":"⚔️ Bloodrage: +3 (3+ hand)"},{"if":{"v":"player_losses","op":">","n":0},"add":3,"log":"⚔️ Bloodrage: +3 (wounded)"}];
 CARD_RULES['Kessuae, Tide of Ruin']=[{"if":{"v":"rear_count","op":">=","n":2},"add":5,"log":"🌊 Kessuae: +5 (both supports)"}];
@@ -13621,7 +13700,7 @@ function resetMatchState(){
   // active and (Lagertha only) names the kill-vow's target for that later check to read.
   oathResult=null; oathDeepener=null; oathTargetName=null;
   { var _dmo=(typeof deckMasterCard!=='undefined')?dmOathOf(deckMasterCard):null; oathSworn=!!_dmo;
-    if(_dmo && deckMasterCard==='Lagertha Waltz') oathTargetName=(typeof activeBot!=='undefined' && activeBot && activeBot.dmCard) || (activeBot && activeBot.name) || null; }
+    if(_dmo && deckMasterCard==='The Claim, Lagertha Waltz') oathTargetName=(typeof activeBot!=='undefined' && activeBot && activeBot.dmCard) || (activeBot && activeBot.name) || null; }
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
   charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; condSupportZonesLocked=false; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
