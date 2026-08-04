@@ -10544,14 +10544,20 @@ const KEYWORDS = {
   'Banish': 'Sends cards to your banish pile. That pile is the fuel your Recur cards feed on.',
   'Trigger': 'Revealed off the top of your deck after a lost duel, it fires a free comeback reward.',
   'Conjure': 'The Energy you must have available to deploy this card as your Fighter. Bigger bodies need more Energy, and conjuring spends it — plan your Charge across the turn.',
-  'Regeneration': 'The first time it would lose, the duel ties instead and it returns to your hand.'
+  'Regeneration': 'The first time it would lose, the duel ties instead and it returns to your hand.',
+  'Vajra': 'Power manipulation, either direction — a guaranteed on-commit effect that raises your own power or lowers your opponent’s.',
+  'Astra': 'An "on hit" effect, conditioned on kills or duels already won this match — it rewards a card that’s already proven itself, not a guaranteed on-commit effect.',
+  'Nirmāṇa': 'Summoning — calls a support into your rear guard, raises a Death Remnant from nothing, or generates cards from your deck (draw, tutor, banish-pile retrieval).',
+  'Bandha': 'Restricts a hand or field, or binds/locks/nullifies a card or the active condition — for either player, self-locks included.',
+  'Māyā': 'A paid transform into a different printing of this card — a real identity change, not a stat buff.'
 };
-const KW_FILTERABLE = ['Instant','Death Remnant','Record Guard','Kill Escalation','Last Stand','Pre-commit','Bloodrage','Elemental Flurry'];
+const KW_FILTERABLE = ['Instant','Death Remnant','Record Guard','Kill Escalation','Last Stand','Pre-commit','Bloodrage','Elemental Flurry','Vajra','Astra','Nirmāṇa','Bandha','Māyā'];
 const KW_KEYS = Object.keys(KEYWORDS).sort((a,b) => b.length - a.length);
 function cardHasKeyword(c, kw){
   const a = (c.abil || '').toLowerCase();
   if(kw === 'Instant') return c.timing === 'instant' || a.includes('instant');
   if(kw === 'Pre-commit') return c.timing === 'pre' || a.includes('pre-commit');
+  if(typeof roofOf==='function' && roofOf(c).indexOf(kw)>=0) return true;   // Roof tags (Vajra/Astra/Nirmāṇa/Bandha/Māyā) live in ROOF_MAP, never in printed abil text -- a substring search can never see them
   return a.includes(kw.toLowerCase());
 }
 function glossify(text){
@@ -10563,7 +10569,7 @@ function glossify(text){
     return `<span class="kw" data-kw="${key}">${m}</span>`;
   });
 }
-const KW_ICON = { 'Charge':'⚡','Called':'📣','Link':'🔗','Rally':'🤝','Recur':'♻','Banish':'☠','Trigger':'✨','Conjure':'🎴','Regeneration':'👁','Death Remnant':'💀','Record Guard':'🛡','Kill Escalation':'⚔️','Last Stand':'🌙','Bloodrage':'🩸','Banish Surge':'☠','Pre-commit':'📌','Instant':'⚡','Pristine':'◈','Elemental Flurry':'🌪️' };
+const KW_ICON = { 'Charge':'⚡','Called':'📣','Link':'🔗','Rally':'🤝','Recur':'♻','Banish':'☠','Trigger':'✨','Conjure':'🎴','Regeneration':'👁','Death Remnant':'💀','Record Guard':'🛡','Kill Escalation':'⚔️','Last Stand':'🌙','Bloodrage':'🩸','Banish Surge':'☠','Pre-commit':'📌','Instant':'⚡','Pristine':'◈','Elemental Flurry':'🌪️','Vajra':'💠','Astra':'🏹','Nirmāṇa':'🔮','Bandha':'⛓️','Māyā':'🎭' };
 const KW_DEMO = {
   'Charge': '<div class="kwd kwd-charge"><span class="kwd-pip"></span><span class="kwd-pip"></span><span class="kwd-pip"></span><span class="kwd-box">⚡ spell</span></div>',
   'Link': '<div class="kwd"><span class="kwd-card blue">A</span><span class="kwd-link">🔗</span><span class="kwd-card blue">B</span><span class="kwd-plus">+3</span></div>',
@@ -10582,6 +10588,7 @@ const KW_DEMO = {
 function cardKeywords(c){
   if(!c) return [];
   var out=[], seen={}; function add(k){ if(k&&KEYWORDS[k]&&!seen[k]){ seen[k]=1; out.push(k); } }
+  if(typeof roofOf==='function') roofOf(c).forEach(add);
   ['Record Guard','Last Stand','Regeneration','Kill Escalation','Death Remnant','Bloodrage','Elemental Flurry','Banish Surge','Pre-commit'].forEach(function(k){ if(typeof cardHasKeyword==='function'&&cardHasKeyword(c,k)) add(k); });
   var called=(typeof CALLED!=='undefined')&&CALLED[c.name];
   if(called){ if(called.chargeGain) add('Charge'); if(called.banishOwn||called.bothBanish) add('Banish'); if(called.recurBuff||called.recurPlain) add('Recur'); }
