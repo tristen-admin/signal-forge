@@ -6985,6 +6985,8 @@ function _injectResolveCSS(){
   +'.rc-chip.down{background:linear-gradient(180deg,#8e2a2a,#4a1515);color:#ffd0d0;border:1px solid #e06666}'
   +'.rc-chip.flat{background:linear-gradient(180deg,#3a3f52,#22252f);color:#cfd6e6;border:1px solid var(--border2)}'
   +'@keyframes rc-rise{0%{transform:translateY(16px) scale(.7);opacity:0}20%{transform:translateY(0) scale(1);opacity:1}78%{opacity:1}100%{transform:translateY(-32px) scale(.95);opacity:0}}'
+  +'.rc-chip.shield{font-size:15px;background:linear-gradient(180deg,#3a6b8f,#1b3547);color:#d9f0ff;border:1.5px solid #6fd3ff;box-shadow:0 4px 18px rgba(111,211,255,.4),0 0 0 1px rgba(111,211,255,.15) inset;animation:rc-shield-rise 1.5s cubic-bezier(.2,1.4,.3,1) forwards}'
+  +'@keyframes rc-shield-rise{0%{transform:translateY(10px) scale(.4);opacity:0}25%{transform:translateY(0) scale(1.22);opacity:1}45%{transform:scale(1)}80%{opacity:1}100%{transform:translateY(-32px) scale(.95);opacity:0}}'
   +'.rc-card.pu{animation:rc-gu .42s ease}.rc-card.pd{animation:rc-gd .42s ease}'
   +'@keyframes rc-gu{0%,100%{box-shadow:none}50%{box-shadow:0 0 24px rgba(87,196,106,.6)}}'
   +'@keyframes rc-gd{0%,100%{box-shadow:none}50%{box-shadow:0 0 24px rgba(224,102,102,.6)}}'
@@ -7099,6 +7101,10 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     function pw(side){ return document.getElementById('rc-pow-'+side); }
     function lbl(m){ var t=String(m).split(':')[0].split(' — ')[0].split(' · ')[0].trim(); return t.length>24?t.slice(0,24):t; }
     function chip(side,d,m){ var h=document.getElementById('rc-fx-'+side); if(!h) return; var c=document.createElement('div'); c.className='rc-chip '+(d>0?'up':(d<0?'down':'flat')); c.textContent=(d?((d>0?'+':'')+d+'  '):'')+lbl(m); h.appendChild(c); setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); },1650); }
+    function isShieldStep(s){ return /\(Shield\)/.test(s&&s.m||''); }
+    // Shield's own beat: distinct from the generic up/down/flat chip -- a clear "+N Shield" moniker,
+    // its own color/animation, ordered to play after every other effect this duel (see ps sort below).
+    function shieldChip(side,d){ var h=document.getElementById('rc-fx-'+side); if(!h||!d) return; var c=document.createElement('div'); c.className='rc-chip shield'; c.textContent='🛡️ +'+d+' Shield'; h.appendChild(c); setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); },2000); }
     function tic(side,v){ var e=pw(side); if(!e) return; e.textContent=R(v); e.classList.remove('tick'); void e.offsetWidth; e.classList.add('tick'); }
     function pulse(side,k){ var c=document.getElementById('rc-card-'+side); if(c){ c.classList.remove('pu','pd'); void c.offsetWidth; c.classList.add(k); } }
     function allCardEls(){
@@ -7182,6 +7188,16 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
       setTimeout(done, won==='tie'?1700:2800);
     }
     var ps=(steps||[]).filter(function(s){ return s.dp||s.dop; });
+    // Shield's bonus reads as an afterthought when it plays in-line with every other effect (a
+    // generic-looking chip among many) -- moved to the end so it lands as its own distinct beat
+    // once every other effect this duel has finished, not blended into the middle of the sequence.
+    // Each step's pp/op was captured in the ORIGINAL chronological order, so reordering invalidates
+    // those running totals (a moved-later Shield step's stale, lower snapshot would tick the
+    // on-screen power DOWN then back up) -- recomputed here so the ticker only ever moves in the
+    // direction the newly-reordered sequence actually plays, still landing on the same final total.
+    { var _reg=ps.filter(function(s){return !isShieldStep(s);}), _sh=ps.filter(isShieldStep); ps=_reg.concat(_sh);
+      var _runPP=basePP, _runOP=baseOP;
+      ps.forEach(function(s){ if(s.dp){ _runPP+=s.dp; s.pp=_runPP; } if(s.dop){ _runOP+=s.dop; s.op=_runOP; } }); }
     if(reduce){ finish(); return; }
     var RC_SPEED=0.71; // 7/23/26: resolution sped up another 30% on top of the prior 7/16/26 pass (0.92 / 1.3 = 0.71 -- speed up 30% means duration divides by 1.3, not multiplies) -- multiplies every pacing delay from here through clash()
     var HOLD=Math.round(1600*RC_SPEED); // let the flip land + a long tension beat before effects tic (relish it) -- was 1600
@@ -7191,8 +7207,9 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
       beat();
       if(i>=ps.length){ clash(); return; }
       var s=ps[i++];
-      if(s.dp){ tic('me',s.pp); chip('me',s.dp,s.m); pulse('me', s.dp>0?'pu':'pd'); }
-      if(s.dop){ tic('opp',s.op); chip('opp',s.dop,s.m); pulse('opp', s.dop>0?'pu':'pd'); }
+      var _shStep=isShieldStep(s);
+      if(s.dp){ tic('me',s.pp); if(_shStep) shieldChip('me',s.dp); else chip('me',s.dp,s.m); pulse('me', s.dp>0?'pu':'pd'); }
+      if(s.dop){ tic('opp',s.op); if(_shStep) shieldChip('opp',s.dop); else chip('opp',s.dop,s.m); pulse('opp', s.dop>0?'pu':'pd'); }
       shakeSource((s.dp?'me':'opp'), s.m);
       if(typeof SFX!=='undefined') SFX.play('commit');
       setTimeout(step, per);
