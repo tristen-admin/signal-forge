@@ -343,7 +343,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 
 /* ── HOVER CARD PREVIEW ── */
 #card-preview{position:fixed;z-index:90;width:auto;pointer-events:none;opacity:0;transform:translateX(-50%) scale(0.9);transform-origin:bottom center;transition:opacity 0.13s ease,transform 0.13s ease}
-#card-preview.show{opacity:1;transform:translateX(-50%) scale(1)}
+#card-preview.show{opacity:1;transform:translateX(-50%) scale(1);pointer-events:auto}
 .bigcard{border-radius:12px;border:2px solid;overflow:hidden;position:relative;box-shadow:0 18px 50px rgba(0,0,0,0.75)}
 .bigcard.camp-amageras{border-color:#E8873A;background:linear-gradient(160deg,#3A2408,#1C1002)}
 .bigcard.camp-omitsuki{border-color:#5B2C8F;background:linear-gradient(160deg,#1E1030,#0D0718)}
@@ -3038,7 +3038,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="top-hud">
     <div class="opp-zone">
       <span class="zone-label">Opponent</span>
-      <span id="opp-dm-badge" class="dm-badge" style="display:none" title="Their Deck Master" onmouseenter="if(typeof activeBot!=='undefined'&&activeBot&&activeBot.dmCard)previewPoolCard(activeBot.dmCard,this)" onmouseleave="hideCardPreview()">
+      <span id="opp-dm-badge" class="dm-badge" style="display:none" title="Their Deck Master — tap to pin" onmouseenter="cancelHidePreview();if(typeof activeBot!=='undefined'&&activeBot&&activeBot.dmCard)previewPoolCard(activeBot.dmCard,this)" onmouseleave="scheduleHidePreview()" onclick="if(typeof activeBot!=='undefined'&&activeBot&&activeBot.dmCard)pinPoolPreview(activeBot.dmCard,this)">
         <span id="opp-dm-badge-portrait" class="dm-badge-portrait"></span>
         <span class="dm-badge-label">★ <span id="opp-dm-badge-name"></span></span>
       </span>
@@ -3175,7 +3175,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="player-zone">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span class="zone-label">Your Hand</span>
-        <span id="dm-badge" class="dm-badge" style="display:none" title="Your Deck Master this match" onmouseenter="if(typeof deckMasterCard!=='undefined'&&deckMasterCard)previewPoolCard(deckMasterCard,this)" onmouseleave="hideCardPreview()">
+        <span id="dm-badge" class="dm-badge" style="display:none" title="Your Deck Master this match — tap to pin" onmouseenter="cancelHidePreview();if(typeof deckMasterCard!=='undefined'&&deckMasterCard)previewPoolCard(deckMasterCard,this)" onmouseleave="scheduleHidePreview()" onclick="if(typeof deckMasterCard!=='undefined'&&deckMasterCard)pinPoolPreview(deckMasterCard,this)">
           <span id="dm-badge-portrait" class="dm-badge-portrait"></span>
           <span class="dm-badge-label">★ <span id="dm-badge-name"></span></span>
         </span>
@@ -4435,8 +4435,8 @@ function buildHand(){
     }
     el.onclick = () => selectCard(i, el);
     el.onpointerdown = (e) => handPointerDown(e, i);
-    el.onmouseenter = () => showCardPreview(i);
-    el.onmouseleave = hideCardPreview;
+    el.onmouseenter = () => { cancelHidePreview(); showCardPreview(i); };
+    el.onmouseleave = scheduleHidePreview;
     row.appendChild(el);
   });
 }
@@ -12250,6 +12250,23 @@ function previewPoolCard(name, el){ if(typeof SFX!=='undefined') SFX.play('hover
 // already renders, just triggered on hover instead of requiring a click-through.
 function previewPoolCardReadable(name, el){ if(typeof SFX!=='undefined') SFX.play('hover'); const c = COLLECTION.find(x => (x.uid||x.name) === name); if(c) previewCardEl(c, el, true); }
 function hideCardPreview(){ var p=document.getElementById('card-preview'); if(p){ p.classList.remove('show','pinned'); p.onclick=null; } var sc=document.getElementById('preview-scrim'); if(sc) sc.remove(); }
+// In-gameplay hover fix (8/4/26, direct owner report): the preview used to close the instant the
+// mouse left the source card/badge -- so a player who didn't already recognize a keyword had no
+// way to reach it, since moving toward the popup to hover a .kw-chip (the keyword tooltip system
+// below already handles any .kw-chip anywhere) necessarily leaves the source element first. Fixed
+// with the standard hoverable-tooltip pattern: leaving a source schedules a short-grace hide
+// instead of hiding instantly; the popup's own hover (now reachable -- #card-preview.show is
+// pointer-events:auto, see its CSS rule) cancels that hide, so a mouse actually moving into the
+// popup keeps it open. A pinned preview (explicit dismiss only) never auto-hides either way.
+var _pvHideTimer = null;
+function scheduleHidePreview(){ clearTimeout(_pvHideTimer); _pvHideTimer = setTimeout(function(){ var p=document.getElementById('card-preview'); if(p && p.classList.contains('pinned')) return; hideCardPreview(); }, 220); }
+function cancelHidePreview(){ clearTimeout(_pvHideTimer); }
+function wirePreviewSelfHover(){
+  var p = document.getElementById('card-preview'); if(!p || p._selfHoverWired) return; p._selfHoverWired = true;
+  p.addEventListener('mouseenter', cancelHidePreview);
+  p.addEventListener('mouseleave', function(){ if(!p.classList.contains('pinned')) scheduleHidePreview(); });
+}
+if(typeof document!=='undefined'){ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', wirePreviewSelfHover); else wirePreviewSelfHover(); }
 // Field-card hover/tap preview — every card on the field (staged, committed, resolution cinematic,
 // both sides) gets the same enlarged-detail preview hand cards already have. Delegated (mouseover/
 // mouseout bubble; mouseenter/mouseleave don't, so those can't be used for delegation) and scoped to
@@ -12266,11 +12283,11 @@ function wireFieldCardPreview(){
     el.addEventListener('mouseover', function(e){
       if(window.matchMedia && window.matchMedia('(hover:none)').matches) return;
       var t=e.target.closest && e.target.closest('[data-cn]'); if(!t || el.contains(e.relatedTarget)) return;
-      var c=_dmFieldCardFromEl(t); if(c){ if(typeof SFX!=='undefined') SFX.play('hover'); previewCardEl(c, t, true); }
+      var c=_dmFieldCardFromEl(t); if(c){ cancelHidePreview(); if(typeof SFX!=='undefined') SFX.play('hover'); previewCardEl(c, t, true); }
     });
     el.addEventListener('mouseout', function(e){
       var t=e.target.closest && e.target.closest('[data-cn]'); if(!t || el.contains(e.relatedTarget)) return;
-      hideCardPreview();
+      scheduleHidePreview();
     });
     el.addEventListener('touchstart', function(e){
       var t=e.target.closest && e.target.closest('[data-cn]'); if(!t) return;
@@ -12285,6 +12302,10 @@ function wireFieldCardPreview(){
 }
 if(typeof document!=='undefined'){ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', wireFieldCardPreview); else wireFieldCardPreview(); }
 function pinPreview(i){ showCardPreview(i); var p=document.getElementById('card-preview'); if(!p) return; p.classList.add('pinned'); p.style.pointerEvents='auto'; p.onclick=hideCardPreview; var sc=document.getElementById('preview-scrim'); if(!sc){ sc=document.createElement('div'); sc.id='preview-scrim'; document.body.appendChild(sc); } sc.onclick=hideCardPreview; sc.ontouchstart=function(e){e.preventDefault();hideCardPreview();}; }
+// Deck Master badges have no hand index to pin by (previewPoolCard looks a named card up out of
+// COLLECTION directly) -- same pin/scrim mechanics as pinPreview() above, just keyed by name so
+// the badges reach parity with hand cards' existing ⓘ pin and field cards' existing tap-to-pin.
+function pinPoolPreview(name, el){ cancelHidePreview(); previewPoolCard(name, el); var p=document.getElementById('card-preview'); if(!p) return; p.classList.add('pinned'); p.style.pointerEvents='auto'; p.onclick=hideCardPreview; var sc=document.getElementById('preview-scrim'); if(!sc){ sc=document.createElement('div'); sc.id='preview-scrim'; document.body.appendChild(sc); } sc.onclick=hideCardPreview; sc.ontouchstart=function(e){e.preventDefault();hideCardPreview();}; }
 
 // ── KEYWORD DEFINITION TOOLTIP (hover any .kw term) ──
 function showKwTip(el){
