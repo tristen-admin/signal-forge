@@ -12915,6 +12915,16 @@ function ascIsLoaner(id){ return ascLoaners().indexOf(id)>=0; }
 function ascOwnsCharacter(name){
   return COLLECTION.some(function(c){ return c.name===name && (ownedCopies[c.uid||c.name]||0)>0; });
 }
+// Champion eligibility correction (8/4/26, direct owner report): "any owned card is avatar-eligible"
+// over-read the original ask -- a Champion is supposed to be a card with a REAL Deck Master ability
+// (DM_ACTIVATED_ABILITY or the DM_EXCLUSIVE passive table), not just any owned vanilla card. The 4
+// hand-authored lore-locked units (u.avatar===true) are Champion-eligible on their own hardcoded
+// merit and don't need an entry here. Every owned card stays Companion-eligible regardless -- this
+// only narrows the CHAMPION side of the split.
+function ascHasDMAbility(name){
+  return (typeof DM_ACTIVATED_ABILITY!=='undefined' && !!DM_ACTIVATED_ABILITY[name]) || (typeof DM_EXCLUSIVE!=='undefined' && !!DM_EXCLUSIVE[name]);
+}
+function ascChampionEligible(u){ return !!(u && (u.avatar===true || ascHasDMAbility(u.name))); }
 // hp/atk/spd for any card NOT one of the 11 above. Calibrated against the real 11's own stats
 // (pulled directly: hp 94-158, atk 18-33, spd 7-14) -- rarity does NOT cleanly predict combat
 // stats in that real sample (rare Forgemask outtanks apex Tange Sazen), so this leans on the
@@ -13309,14 +13319,16 @@ function ascRenderSetup(){
   var h;
   if(ascSetupStep==='avatar'){
     var pas=av?ASC_PASSIVES[av.id]:null;
-    // Any owned card is avatar-eligible now (8/3/26) -- only the 4 lore-locked units have a
-    // hand-authored passive in ASC_PASSIVES, so `pas` is legitimately null for a generic pick.
-    // The old (av&&pas?...) text fell all the way back to "no Champion chosen" in that case,
-    // which is wrong once one genuinely IS chosen -- show the Ultimate name regardless, and
-    // only prepend the passive line when one actually exists.
+    // Champion-eligible = the 4 lore-locked units, or any owned card with a real Deck Master
+    // ability (8/4/26 correction -- ascChampionEligible() below; "any owned card" over-read the
+    // original ask). Only the 4 lore-locked units have a hand-authored passive in ASC_PASSIVES, so
+    // `pas` is legitimately null for a DM-ability pick that isn't one of them. The old (av&&pas?...)
+    // text fell all the way back to "no Champion chosen" in that case, which is wrong once one
+    // genuinely IS chosen -- show the Ultimate name regardless, and only prepend the passive line
+    // when one actually exists.
     var avSub = av ? ((pas?pas.name+': '+pas.desc+' · ':'')+'Ultimate: '+av.ability.name) : 'Tap a Champion to see its aura and Ultimate.';
     h='<div class="lobby-head"><div class="lh-eyebrow" style="color:var(--violet)">The Rite · Step 1 of 2 · Choose your Champion</div><h1>Summon your Champion</h1><p>The card you pilot the Rift as. It empowers the units that serve you and charges your Ultimate — it never fights directly.</p></div>'+rankBar+
-      '<div class="asc-roster">'+ascUnifiedRoster().filter(function(u){return ascPartySel.companionIds.indexOf(u.id)<0;}).map(ascUnitCell).join('')+'</div>'+
+      '<div class="asc-roster">'+ascUnifiedRoster().filter(function(u){return ascPartySel.companionIds.indexOf(u.id)<0 && ascChampionEligible(u);}).map(ascUnitCell).join('')+'</div>'+
       '<div class="lobby-launch"><button class="asc-edit-team" onclick="ascHomeAsc()">⌂ Hub</button><div class="ll-info"><h3>'+(av?av.name.split(',')[0]+' — your Champion':'No Champion chosen')+'</h3><p class="'+(av?'':'ll-none')+'">'+avSub+'</p></div><button class="enter-btn" onclick="ascSetupToCompanions()"'+(av?'':' disabled')+'>Rally your units →</button></div>';
   } else {
     h='<div class="lobby-head"><div class="lh-eyebrow" style="color:var(--violet)">The Rite · Step 2 of 2 · Rally your units</div><h1>Choose your companions</h1><p>The units that fight for '+(av?av.name.split(',')[0]:'your Champion')+'. Choose 2 to 3.</p></div>'+
@@ -13329,10 +13341,13 @@ function ascRenderSetup(){
 function ascSelectUnit(id){
   var u=ascResolveUnit(id); if(!u) return;
   if(!ascOwnsCharacter(u.name) && !ascIsLoaner(id)){ toast('Own '+u.name.split(',')[0]+' — or wait for it to rotate in as a monthly Loaner.', false); return; }
-  // Avatar vs companion is which GRID you clicked in now (8/3/26), not a static per-card flag --
-  // any owned card is eligible for either role, mirroring Deck Master's "any card" rule. The 4
-  // lore-locked units (u.avatar===true) never appear in the companion grid in the first place
-  // (filtered out in ascRenderSetup), so this only ever fires for them from the avatar step.
+  // Avatar vs companion is which GRID you clicked in (8/3/26), not a static per-card flag -- but
+  // the avatar grid itself is now scoped to ascChampionEligible() (8/4/26 correction): a Champion
+  // is the 4 lore-locked units OR any card with a real Deck Master ability, not just any owned
+  // card. This guard is defense-in-depth for the same reason ascRenderSetup's own picker filter
+  // exists -- belt-and-suspenders against any other path that might call ascSelectUnit directly.
+  // Companions stay open to every owned card, matching "play with any units you own."
+  if(ascSetupStep==='avatar' && !ascChampionEligible(u)){ toast(u.name.split(',')[0]+' has no Deck Master ability — it can only join as a companion.', false); return; }
   if(ascSetupStep==='avatar'){ ascPartySel.avatarId = (ascPartySel.avatarId===id)?null:id; }
   else { var i=ascPartySel.companionIds.indexOf(id); if(i>=0) ascPartySel.companionIds.splice(i,1); else if(ascPartySel.companionIds.length<3) ascPartySel.companionIds.push(id); else toast('Party is full — 3 companions max.', false); }
   buildAscension();
