@@ -3474,6 +3474,16 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 
 <script>
 // ── DATA ──
+// Veteran-scaling cap (8/4/26, direct request): Elder's Reach/Veteran's Edge/Deathwish all scale
+// power off a card's PERMANENT match record (kills/deaths) with no ceiling -- fine in a fresh
+// collection, but that record only ever grows, so a long-lived card's bonus grows forever too
+// (confirmed live: one card already at +56 from Elder's Reach alone this session). Every OTHER
+// condition in this table caps out around a flat +10 (Fresh Blood); this keeps the 3 veteran-
+// scaling ones as genuinely the strongest bonuses in the table (rewarding real history) without
+// being unbounded. Top-level so both the CONDITIONS rule text below and resolve()'s own math
+// (much later in the file) read the exact same number -- one shared constant, not three magic
+// numbers scattered across the file, so a future rebalance is a one-line change.
+const CONDITION_VETERAN_CAP = 15;
 const CONDITIONS = [
   {id:'lowest',mech:'Lowest Wins',icon:'🔻',name:'Sorn-Vallis',rule:'In the slaver-city\'s pits the lowest are made to rise — lowest base power wins the duel. Abilities that add power are traps.',strat:'Your 3-power Starter might take out that 18-power Apex. Build for this.',tag:'flip',prob:'15%'},
   {id:'noretreat',mech:'No Retreat',icon:'🔒',name:'The Black Citadel',rule:'Darwin\'s fortress permits no escape — Withdraw is locked. Once you confirm your selection you must commit. The only exit is losing.',strat:'Read the record carefully before confirming. There is no fold.',tag:'lock',prob:'13%'},
@@ -3485,19 +3495,19 @@ const CONDITIONS = [
   {id:'provingground',mech:'Proving Ground',icon:'⛰️',name:'North Kasac',rule:'Skarrow Hold tests restraint, not strength — the higher-base-power card takes −5 power (to a minimum of 1). The mountain humbles the mighty.',strat:'Commit your smaller card into their favorite — underdogs are rewarded here.',tag:'flip',prob:'8%'},
   {id:'mirror',mech:'Mirror',icon:'🔄',name:'Yozai-no-Sato',rule:'In the illusion-warped village nothing is itself — each committed card\'s power becomes equal to the opponent\'s committed base power.',strat:'Turns the duel into a record and ability game — raw power is irrelevant.',tag:'chaos',prob:'7%'},
   {id:'hollowreckoning',mech:'Hollow Reckoning',icon:'🌫️',name:'The Gray',rule:'In the void identity falls away — if a unit\'s base power is lower than its kill count, that card\'s power becomes its career kills.',strat:'Veterans whose kill count outgrew their base power dominate; fresh or high-power cards are untouched.',tag:'chaos',prob:'7%'},
-  {id:"veteranedge",mech:"Veteran's Edge",icon:"🎖️",name:"The War College",rule:"Experience favors the underdog — the weaker card gains +1 power for every 5 kills on its record.",strat:"Field your lower-power veteran; the stronger card gains nothing here.",tag:"boost",prob:"3%"},
+  {id:"veteranedge",mech:"Veteran's Edge",icon:"🎖️",name:"The War College",rule:"Experience favors the underdog — the weaker card gains +1 power for every 5 kills on its record, capped at +"+CONDITION_VETERAN_CAP+".",strat:"Field your lower-power veteran; the stronger card gains nothing here.",tag:"boost",prob:"3%"},
   {id:"freshblood",mech:"Fresh Blood",icon:"🌱",name:"Rookery Hollow",rule:"Cards with zero kills fight with everything to prove — 0-kill cards gain +10.",strat:"Deploy your untested rookies here.",tag:"flip",prob:"3%"},
   {id:"puritytrial",mech:"Purity Trial",icon:"✨",name:"The White Sanctum",rule:"Flawless records are exalted — Pristine (0 deaths, 1+ kill) cards gain +5.",strat:"Bring your never-beaten cards.",tag:"boost",prob:"3%"},
   {id:"puritydrain",mech:"Purity Drain",icon:"🕷️",name:"The Tarnish Marsh",rule:"The spotless are hunted — Pristine (0 deaths, 1+ kill) cards suffer −5.",strat:"Keep your Pristine cards home; field the scarred.",tag:"flip",prob:"3%"},
   {id:"bloodreckoning",mech:"Blood Reckoning",icon:"💀",name:"Scarhold",rule:"Every scar is a weakness — each card loses 1 power per 2 deaths on its record.",strat:"Field clean records; battered cards crumble.",tag:"flip",prob:"3%"},
-  {id:"deathwish",mech:"Deathwish",icon:"☠️",name:"The Charnel Arena",rule:"Scars fuel fury — each card gains +1 power per death on its record.",strat:"Your most-beaten veterans hit hardest here.",tag:"boost",prob:"3%"},
+  {id:"deathwish",mech:"Deathwish",icon:"☠️",name:"The Charnel Arena",rule:"Scars fuel fury — each card gains +1 power per death on its record, capped at +"+CONDITION_VETERAN_CAP+".",strat:"Your most-beaten veterans hit hardest here.",tag:"boost",prob:"3%"},
   {id:"underdog",mech:"Underdog Rising",icon:"📉",name:"Dust Bowl",rule:"The lesser rises — the lower base-power card gains +3.",strat:"Commit a weak card into their strong one.",tag:"flip",prob:"3%"},
   {id:"rarityreckoning",mech:"Rarity Reckoning",icon:"💎",name:"The Gilded Court",rule:"Pedigree wins — the rarer card gains +3.",strat:"Bring your Apex and Ultra cards.",tag:"boost",prob:"3%"},
   {id:"commonsrevolt",mech:"Commons' Revolt",icon:"✊",name:"The Undercity",rule:"The low-born rise up — the lower-rarity card gains +5.",strat:"Commons and Rares punch up here.",tag:"flip",prob:"3%"},
   {id:"giantslayer",mech:"Giant Slayer",icon:"🗡️",name:"Kaeldren Pass",rule:"When base powers differ by 10 or more, the weaker card fells the giant outright.",strat:"Bait a huge card with a small one.",tag:"flip",prob:"3%"},
   {id:"highroller",mech:"High Roller",icon:"🎲",name:"The Gambler's Den",rule:"Fortune tips the scales — each card gains a random +5 to +10.",strat:"Pure variance; size your bets down.",tag:"chaos",prob:"5%"},
   {id:"momentumtide",mech:"Momentum's Tide",icon:"🌊",name:"The Turning Shore",rule:"The trailing side surges — whoever is behind in the match gains +3.",strat:"A comeback engine when you are down.",tag:"boost",prob:"8%"},
-  {id:"eldersreach",mech:"Elder's Reach",icon:"📜",name:"The Long Memory",rule:"Experience tells — +1 power per 4 duels fought (kills + deaths).",strat:"Field cards with long histories.",tag:"boost",prob:"3%"},
+  {id:"eldersreach",mech:"Elder's Reach",icon:"📜",name:"The Long Memory",rule:"Experience tells — +1 power per 4 duels fought (kills + deaths), capped at +"+CONDITION_VETERAN_CAP+".",strat:"Field cards with long histories.",tag:"boost",prob:"3%"},
   {id:"doubleedged",mech:"Twin Surge",icon:"⚔️",name:"The Twin Blades",rule:"Both blades cut true — both players' conjured units gain +5 power.",strat:"A flat boost for everyone; no record required.",tag:"boost",prob:"8%"},
   {id:"legendsclash",mech:"Legends' Clash",icon:"👑",name:"The Hall of Legends",rule:"A stage for the great — Apex cards gain +2, all others suffer −2.",strat:"Reserve this for your Apex legends.",tag:"boost",prob:"2%"},
   {id:"woundedbeast",mech:"Wounded Beast",icon:"🐺",name:"The Broken Fang",rule:"The grizzled fight hardest — cards with 3 or more deaths gain +2.",strat:"Field your battle-worn survivors.",tag:"boost",prob:"3%"},
@@ -7993,12 +8003,14 @@ function _rescueSearchDeck(){
   // to exactly the found card's cost -- never more -- so the normal gate passes; commitCard()'s own
   // deduction spends it straight back down, landing at the same real charge as before (net zero).
   if(charge < conjureCost(chosen)) charge = conjureCost(chosen);
-  // selectCard() alone only STAGES the pick (phase 'selecting', awaiting the normal confirm/withdraw
-  // window) -- commitCard() requires phase 'select' with selectedCard set, which only confirmSelection()
-  // does. Same 3-call sequence onDecisionTimeout() already uses to auto-commit a pending pick.
+  // Stage the found card like any normal pick (8/4/26 correction, direct owner report) -- selectCard()
+  // enters the normal 'selecting' phase, confirm-btn shown, and (per selectCard()'s own branching)
+  // clicking a DIFFERENT remaining hand card now correctly calls callSupportIdx() to add a rear-guard,
+  // exactly like a manual pick. Originally this auto-advanced straight through confirmSelection()+
+  // commitCard(), which skipped the support step entirely -- the found card committed alone even when
+  // the player had cards left to call as supports. Committing is now the player's own action via the
+  // normal Confirm button, not automatic.
   selectCard(newIdx);
-  confirmSelection();
-  commitCard();
 }
 // Voluntary forfeit (direct request): a player may always give up a round on purpose -- to bank
 // energy for a bigger play later, or just skip a round they don't want to spend charge contesting.
@@ -8614,21 +8626,22 @@ function resolve(pc, oc, cond, playerCommittedPow){
   }
 
   // ── APPLY CONDITION ──
+  // CONDITION_VETERAN_CAP is declared top-level, alongside CONDITIONS itself -- see the comment there.
   var _oppPowPreCond = oppPow;   // 7/28/26: Ridgeline Scout/Warden -- snapshot so the opponent's side can be rolled back after the block below, regardless of which branch fires or how it mutates oppPow
   if(!akatoshUnmakes){
-  if(cond.id==="veteranedge"){ if((pc.pow||0)<(oc.pow||0)){ playerPow+=Math.floor((pc.kills||0)/5); abilLog.push("🎖️ Veteran's Edge: your weaker card gains +1 power per 5 career kills"); } else if((oc.pow||0)<(pc.pow||0)){ oppPow+=Math.floor((oc.kills||0)/5); abilLog.push("🎖️ Veteran's Edge: their weaker card gains +1 power per 5 career kills"); } else { abilLog.push("🎖️ Veteran's Edge: equal base power — no edge"); } }
+  if(cond.id==="veteranedge"){ if((pc.pow||0)<(oc.pow||0)){ var _ve1=Math.min(CONDITION_VETERAN_CAP,Math.floor((pc.kills||0)/5)); playerPow+=_ve1; abilLog.push("🎖️ Veteran's Edge: your weaker card gains +1 power per 5 career kills (+"+_ve1+(_ve1>=CONDITION_VETERAN_CAP?", capped":"")+")"); } else if((oc.pow||0)<(pc.pow||0)){ var _ve2=Math.min(CONDITION_VETERAN_CAP,Math.floor((oc.kills||0)/5)); oppPow+=_ve2; abilLog.push("🎖️ Veteran's Edge: their weaker card gains +1 power per 5 career kills (+"+_ve2+(_ve2>=CONDITION_VETERAN_CAP?", capped":"")+")"); } else { abilLog.push("🎖️ Veteran's Edge: equal base power — no edge"); } }
   else if(cond.id==="freshblood"){ if((pc.kills||0)===0){playerPow+=10;} if((oc.kills||0)===0){oppPow+=10;} abilLog.push("🌱 Fresh Blood: unproven cards (0 kills) +10"); }
   else if(cond.id==="puritytrial"){ if((pc.deaths||0)===0&&(pc.kills||0)>=1){playerPow+=5;} if((oc.deaths||0)===0&&(oc.kills||0)>=1){oppPow+=5;} abilLog.push("✨ Purity Trial: Pristine (0 deaths, 1+ kill) +5"); }
   else if(cond.id==="puritydrain"){ if((pc.deaths||0)===0&&(pc.kills||0)>=1){playerPow=Math.max(1,playerPow-5);} if((oc.deaths||0)===0&&(oc.kills||0)>=1){oppPow=Math.max(1,oppPow-5);} abilLog.push("🕷️ Purity Drain: Pristine cards are hunted −5"); }
   else if(cond.id==="bloodreckoning"){ playerPow=Math.max(1,playerPow-Math.floor((pc.deaths||0)/2)); oppPow=Math.max(1,oppPow-Math.floor((oc.deaths||0)/2)); abilLog.push("💀 Blood Reckoning: −1 power per 2 deaths on record"); }
-  else if(cond.id==="deathwish"){ playerPow+=(pc.deaths||0); oppPow+=(oc.deaths||0); abilLog.push("☠️ Deathwish: scars fuel fury — +1 power per death"); }
+  else if(cond.id==="deathwish"){ var _dw1=Math.min(CONDITION_VETERAN_CAP,(pc.deaths||0)), _dw2=Math.min(CONDITION_VETERAN_CAP,(oc.deaths||0)); playerPow+=_dw1; oppPow+=_dw2; abilLog.push("☠️ Deathwish: scars fuel fury — +1 power per death (you +"+_dw1+(_dw1>=CONDITION_VETERAN_CAP?" capped":"")+", opp +"+_dw2+(_dw2>=CONDITION_VETERAN_CAP?" capped":"")+")"); }
   else if(cond.id==="underdog"){ if((pc.pow||0)<(oc.pow||0)){playerPow+=3;} else if((oc.pow||0)<(pc.pow||0)){oppPow+=3;} abilLog.push("📉 Underdog Rising: the weaker base power +3"); }
   else if(cond.id==="rarityreckoning"){ var _rp=RARITY_ORDER[pc.rarity],_ro=RARITY_ORDER[oc.rarity]; if(_rp<_ro){playerPow+=3;} else if(_ro<_rp){oppPow+=3;} abilLog.push("💎 Rarity Reckoning: the rarer card +3"); }
   else if(cond.id==="commonsrevolt"){ var _rp=RARITY_ORDER[pc.rarity],_ro=RARITY_ORDER[oc.rarity]; if(_rp>_ro){playerPow+=5;} else if(_ro>_rp){oppPow+=5;} abilLog.push("✊ Commons' Revolt: the lower rarity +5"); }
   else if(cond.id==="giantslayer"){ if(Math.abs((pc.pow||0)-(oc.pow||0))>=10){ if((pc.pow||0)<(oc.pow||0)){playerPow=oppPow+1;abilLog.push("🗡️ Giant Slayer: your underdog fells the giant");} else {oppPow=playerPow+1;abilLog.push("🗡️ Giant Slayer: their underdog fells the giant");} } else { abilLog.push("🗡️ Giant Slayer: no giant to slay (gap < 10)"); } }
   else if(cond.id==="highroller"){ var _a=5+Math.floor(Math.random()*6),_b=5+Math.floor(Math.random()*6); playerPow+=_a; oppPow+=_b; abilLog.push("🎲 High Roller: +"+_a+" you, +"+_b+" opponent"); }
   else if(cond.id==="momentumtide"){ if(playerScore[0]<playerScore[1]){playerPow+=3;abilLog.push("🌊 Momentum's Tide: you are behind — +3");} else if(playerScore[1]<playerScore[0]){oppPow+=3;abilLog.push("🌊 Momentum's Tide: opponent behind — +3");} else {abilLog.push("🌊 Momentum's Tide: even match — no swing");} }
-  else if(cond.id==="eldersreach"){ playerPow+=Math.floor(((pc.kills||0)+(pc.deaths||0))/4); oppPow+=Math.floor(((oc.kills||0)+(oc.deaths||0))/4); abilLog.push("📜 Elder's Reach: +1 power per 4 duels fought"); }
+  else if(cond.id==="eldersreach"){ var _er1=Math.min(CONDITION_VETERAN_CAP,Math.floor(((pc.kills||0)+(pc.deaths||0))/4)), _er2=Math.min(CONDITION_VETERAN_CAP,Math.floor(((oc.kills||0)+(oc.deaths||0))/4)); playerPow+=_er1; oppPow+=_er2; abilLog.push("📜 Elder's Reach: +1 power per 4 duels fought (you +"+_er1+(_er1>=CONDITION_VETERAN_CAP?" capped":"")+", opp +"+_er2+(_er2>=CONDITION_VETERAN_CAP?" capped":"")+")"); }
   else if(cond.id==="doubleedged"){ playerPow+=5; oppPow+=5; abilLog.push("⚔️ Twin Surge: both conjured units +5 power"); }
   else if(cond.id==="legendsclash"){ playerPow=Math.max(1,playerPow+(pc.rarity==="apex"?2:-2)); oppPow=Math.max(1,oppPow+(oc.rarity==="apex"?2:-2)); abilLog.push("👑 Legends' Clash: Apex +2, all others −2"); }
   else if(cond.id==="woundedbeast"){ if((pc.deaths||0)>=3){playerPow+=2;} if((oc.deaths||0)>=3){oppPow+=2;} abilLog.push("🐺 Wounded Beast: 3+ deaths veterans +2"); }
