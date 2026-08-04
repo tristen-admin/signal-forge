@@ -9276,7 +9276,7 @@ const SAVE_KEY = 'signalforge_save_v2';
 let _saveFailedOnce = false;   // 7/18/26: throttle the failure toast to once per session -- a quota-exceeded save fails on EVERY subsequent saveState() call otherwise, which would spam a toast on nearly every action
 function saveState(){
   try{
-    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, ascParty, ascPartySel, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]}));
+    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, ascParty, ascPartySel, ascUnitProg, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]}));
   }catch(e){
     // Previously silent -- a change could visibly apply in-memory (card updates, a "success" toast
     // already fired from the caller) while the save itself failed underneath, e.g. localStorage
@@ -9335,6 +9335,7 @@ function loadState(){
       if(s.DISC_OVERRIDE && typeof s.DISC_OVERRIDE==='object'){ DISC_OVERRIDE=Object.assign({}, DISC_OVERRIDE, s.DISC_OVERRIDE); }   // 7/16/26: merge, not replace -- a save file's own overrides must not wipe out the hand-tuned source defaults for cards it never touched
       if(s.DISC_ROLLS && typeof s.DISC_ROLLS==='object') DISC_ROLLS=s.DISC_ROLLS;   // no in-code seed data here, plain replace is safe
       if(s.ASC_DISC_BONUS && typeof s.ASC_DISC_BONUS==='object') ASC_DISC_BONUS=s.ASC_DISC_BONUS;
+      if(s.ascUnitProg && typeof s.ascUnitProg==='object') ascUnitProg=s.ascUnitProg;
       try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(!c) return; c.camp=campOf(c.name);}); }catch(e){}
       if(s.cardFoilMax && typeof s.cardFoilMax==='object') cardFoilMax=s.cardFoilMax;
       if(s.cardFrames && typeof s.cardFrames==='object') cardFrames=s.cardFrames;
@@ -12720,7 +12721,7 @@ function ascUnitMoveList(u){
 }
 function ascUnitUnlockedMoves(u){ var lv=ascUnitLevel(u.name); return ascUnitMoveList(u).filter(function(m){ return lv>=(m.unlock||1); }); }
 function ascUnitLoadout(base){ var lv=ascUnitLevel(base.name); var full=ascUnitMoveList(base); var un=[]; full.forEach(function(m,i){ if(lv>=(m.unlock||1)) un.push(i); }); var P=ascUnitProg[base.name]; var load=(P&&P.load)?P.load.filter(function(i){return un.indexOf(i)>=0;}):null; if(!load||!load.length) load=un.slice(0,4); return load.slice(0,4); }
-function ascToggleMove(unitId, idx){ var u=ASC_UNITS.find(function(x){return x.id===unitId;}); if(!u) return; var full=ascUnitMoveList(u); if(ascUnitLevel(u.name)<((full[idx]&&full[idx].unlock)||1)) return; var P=ascUnitProg[u.name]=ascUnitProg[u.name]||{level:1,xp:0,rites:0,bosses:0}; var load=(P.load&&P.load.slice())||ascUnitLoadout(u); var at=load.indexOf(idx); if(at>=0){ if(load.length<=1){ if(typeof toast==='function') toast('Keep at least one move equipped.', false); return; } load.splice(at,1); } else { if(load.length>=4){ if(typeof toast==='function') toast('Loadout full — 4 moves max. Unequip one first.', false); return; } load.push(idx); } P.load=load; saveState(); ascChampionDetail(unitId); }
+function ascToggleMove(unitId, idx){ var u=ascResolveUnit(unitId); if(!u) return; var full=ascUnitMoveList(u); if(ascUnitLevel(u.name)<((full[idx]&&full[idx].unlock)||1)) return; var P=ascUnitProg[u.name]=ascUnitProg[u.name]||{level:1,xp:0,rites:0,bosses:0}; var load=(P.load&&P.load.slice())||ascUnitLoadout(u); var at=load.indexOf(idx); if(at>=0){ if(load.length<=1){ if(typeof toast==='function') toast('Keep at least one move equipped.', false); return; } load.splice(at,1); } else { if(load.length>=4){ if(typeof toast==='function') toast('Loadout full — 4 moves max. Unequip one first.', false); return; } load.push(idx); } P.load=load; saveState(); ascChampionDetail(unitId); }
 // ── Lore link auras — ported from the TCG LINK_GROUPS: 2+ members in the party activates the link for the whole run ──
 const ASC_LINK_FX={
   dragon:  {icon:'🐉', atk:6,          desc:'+6 ATK to linked members'},
@@ -12750,12 +12751,85 @@ function ascApplyLinks(){
   ascRun.linkReward=ascLinkHas('royalty')?1.25:1;
   if(typeof ascRecomputeAll==='function') ascRecomputeAll();
 }
-function ascPatron(){ return (ascRun&&ASC_UNITS.find(function(u){return u.id===ascRun.avatarId;}))||null; }
+function ascPatron(){ return (ascRun&&ascResolveUnit(ascRun.avatarId))||null; }
 function ascPassive(){ var p=ascPatron(); return (p&&ASC_PASSIVES[p.id])||{}; }
 function ascMonthSeed(){ try{ var d=new Date(); return d.getFullYear()*12+d.getMonth(); }catch(e){ return 0; } }
-function ascLoaners(){ var seed=ascMonthSeed(); var rot=function(arr,n){ var out=[],L=arr.length; for(var i=0;i<n&&i<L;i++) out.push(arr[(seed+i)%L].id); return out; };
-  return rot(ASC_UNITS.filter(function(u){return u.avatar;}),2).concat(rot(ASC_UNITS.filter(function(u){return !u.avatar;}),3)); }
+function ascLoaners(){ var seed=ascMonthSeed(), pool=ascUnifiedRoster();
+  var out=[]; for(var i=0;i<5 && i<pool.length;i++) out.push(pool[(seed+i*37)%pool.length].id);
+  return out; }
 function ascIsLoaner(id){ return ascLoaners().indexOf(id)>=0; }
+// ══ ASCENSION OPEN ROSTER (8/3/26) ══ owner: "we are supposed to have the ability to play with
+// any units you own, and any deckmasters are avatars." ASC_UNITS above stays exactly as authored —
+// these functions layer a full, ownership-driven roster on top of it rather than replacing it, so
+// the 11 hand-tuned units keep their bespoke stats/abilities/passives untouched. Every OTHER owned
+// base character (no uid/variant/ascendant — a real printing, not a foil/bot-only instance) gets a
+// generic-but-real combat profile instead of being invisible to Ascension entirely.
+function ascOwnsCharacter(name){
+  return COLLECTION.some(function(c){ return c.name===name && (ownedCopies[c.uid||c.name]||0)>0; });
+}
+// hp/atk/spd for any card NOT one of the 11 above. Calibrated against the real 11's own stats
+// (pulled directly: hp 94-158, atk 18-33, spd 7-14) -- rarity does NOT cleanly predict combat
+// stats in that real sample (rare Forgemask outtanks apex Tange Sazen), so this leans on the
+// card's own `pow` for atk (the one real correlation) and a modest rarity nudge for hp/spd.
+// hashStr() (already defined above, name-hash utility) gives a small DETERMINISTIC spread --
+// never Math.random() -- so the same card always rolls the same stats, every session.
+function ascGenericBaseStats(card){
+  var pow = (typeof card.pow==='number') ? card.pow : 10;
+  var rarityHP  = {common:100, rare:112, ultra:122, apex:132}[card.rarity] || 108;
+  var raritySpd = {common:9,   rare:10,  ultra:10,  apex:11 }[card.rarity] || 9;
+  var atk = Math.max(14, Math.min(40, Math.round(16 + pow*0.55)));
+  var h = hashStr(card.name);
+  var hp  = Math.max(60, rarityHP  + (h%13) - 6);
+  var spd = Math.max(6,  raritySpd + (Math.floor(h/13)%5) - 2);
+  return { hp:hp, atk:atk, spd:spd };
+}
+function ascGenericRole(card){
+  var roofs=(typeof roofOf==='function')?roofOf(card):[];
+  var label = {'Vajra':'Empowered','Astra':'Striker','Nirmāṇa':'Warden','Bandha':'Binder','Māyā':'Shifter'};
+  return (roofs.length && label[roofs[0]]) || 'Wanderer';
+}
+// One signature Ultimate/move per Roof keyword, reusing the KOTEI magic-system tags shipped
+// earlier this session. Calibrated at/below both the hand-authored signature tier (dmg 40-44,
+// heal 34-50, aoe 22-30) and the unlock tier's buff/guard/vuln precedents (0.25-0.6 range) --
+// a generic unit gets exactly ONE ability forever (no unlock tree), so it should never outclass
+// hand-authored content.
+const ASC_ROOF_KIT = {
+  'Vajra':   {kind:'buff',  power:0.35, dur:2, uses:2, name:'Surge',     desc:'An ally strikes with +35% ATK for 2 turns.'},
+  'Astra':   {kind:'dmg',   power:42,          uses:2, name:'Reckoning', desc:'A heavy strike on one foe.'},
+  'Nirmāṇa': {kind:'heal',  power:36,          uses:2, name:'Ward',      desc:"Restore an ally's HP."},
+  'Bandha':  {kind:'vuln',  power:0.3,  dur:3, uses:2, name:'Bind',      desc:'A foe takes +30% damage for 3 turns.'},
+  'Māyā':    {kind:'guard', power:0.3,  dur:2, uses:2, name:'Shift',     desc:'The party takes 30% less damage for 2 turns.'}
+};
+const ASC_ROOFLESS_KIT = {kind:'dmg', power:32, uses:2, name:'Strike', desc:'A plain, dependable strike.'};
+function ascGenericAbility(card){
+  var roofs=(typeof roofOf==='function')?roofOf(card):[];
+  var kit = (roofs.length && ASC_ROOF_KIT[roofs[0]]) || ASC_ROOFLESS_KIT;
+  var first=(card.name||'').split(',')[0].split(' ')[0]||card.name;
+  return Object.assign({}, kit, {name:first+"'s "+kit.name});
+}
+// The single replacement for every ASC_UNITS.find(id===/name===) lookup. Checks the 11 hand-
+// authored units FIRST (by id or name -- they keep their exact original ids forever, e.g.
+// 'kotei'), only synthesizing a generic entry on a miss. No collision risk: none of the 11's
+// lowercase single-word ids match any real card name.
+function ascResolveUnit(key){
+  if(key==null) return null;
+  var hit = ASC_UNITS.find(function(x){ return x.id===key || x.name===key; });
+  if(hit) return hit;
+  var c = COLLECTION.find(function(x){ return !x.uid && !x.variant && !x.ascendant && x.name===key; });
+  if(!c) return null;
+  var st = ascGenericBaseStats(c), ab = ascGenericAbility(c);
+  return { id:c.name, name:c.name, art:c.artKey||c.name, role:ascGenericRole(c),
+           avatar:false, generic:true, hp:st.hp, atk:st.atk, spd:st.spd, ability:ab };
+}
+// Full playable roster: the 11 bespoke units + every other owned-or-not base character (deduped
+// by name against the 11 so Kotei/Ourevos/etc. never appear twice -- once bespoke, once generic).
+function ascUnifiedRoster(){
+  var named={}; ASC_UNITS.forEach(function(u){ named[u.name]=true; });
+  var generic = COLLECTION
+    .filter(function(c){ return !c.uid && !c.variant && !c.ascendant && !named[c.name]; })
+    .map(function(c){ return ascResolveUnit(c.name); });
+  return ASC_UNITS.concat(generic);
+}
 // Per-node themed filler pools (Chapter 1, Tosa) — the global ASC_FOES pool declared further
 // below is all monsters/undead, wrong tone for a cadet-corps yard. Must be declared BEFORE
 // ASC_STORY (unlike ASC_FOES itself, which is only ever read from inside a function body, these
@@ -12827,8 +12901,8 @@ function ascStoryMap(){
     return [{ id:'story'+i, type:sn.type, champName:sn.champ, champArt:sn.art, pow:8+i*3+(el?4:0)+(boss?9:0), vit:boss?4:el?3:2, tier:i, globalTier:priorNodes+i, loc:sn.loc, beat:sn.beat, title:sn.title, requires:sn.requires, foes:sn.foes }]; });
 }
 function ascStoryStart(){
-  var av=ASC_UNITS.find(function(u){return u.id===ascPartySel.avatarId;});
-  var comps=ascPartySel.companionIds.map(function(id){return ASC_UNITS.find(function(u){return u.id===id;});}).filter(Boolean);
+  var av=ascResolveUnit(ascPartySel.avatarId);
+  var comps=ascPartySel.companionIds.map(function(id){return ascResolveUnit(id);}).filter(Boolean);
   if(!av||comps.length<2){ toast('Assemble a party first.', false); return; }
   var pas=ASC_PASSIVES[av.id]||{};
   var mkA=function(u){ var st=ascUnitStats(u); return {id:u.id,name:u.name,art:u.art,role:u.role,avatar:true,maxhp:st.hp,hp:st.hp,atk:st.atk,spd:u.spd,ability:Object.assign({},u.ability),abilLeft:99}; };
@@ -12892,7 +12966,7 @@ function ascGrantXP(u, amount){ var P=ascUnitProg[u.name]=ascUnitProg[u.name]||{
 // Spends one pendingSpec point: +2 to the chosen stat, banked permanently in ASC_DISC_BONUS[name] --
 // earned growth for this Ascension character's identity, stacking on top of whichever owned copy's
 // random roll is currently best, not overwriting it (that's the whole point of keeping IV and EV separate).
-function ascSpecChoice(unitId, stat){ var u=ASC_UNITS.find(function(x){return x.id===unitId;}); if(!u) return;
+function ascSpecChoice(unitId, stat){ var u=ascResolveUnit(unitId); if(!u) return;
   var P=ascUnitProg[u.name]; if(!P || !(P.pendingSpec>0)) return;
   if(stat!=='might' && stat!=='cunning' && stat!=='grit') return;
   var b=ASC_DISC_BONUS[u.name]=ASC_DISC_BONUS[u.name]||{might:0,cunning:0,grit:0};
@@ -12908,7 +12982,7 @@ function ascHub(){
   var rank=ascRankInfo(), lvlCount=0, topName=null, topLv=0;
   for(var k in ascUnitProg){ var P=ascUnitProg[k]||{}; if((P.level||1)>1) lvlCount++; if((P.level||1)>topLv){ topLv=P.level; topName=k; } }
   var avName=(ascRun&&ascRun.avatarName)||topName||'Kotei';
-  var avUnit=ASC_UNITS.find(function(u){return u.name===avName;})||ASC_UNITS[0];
+  var avUnit=ascResolveUnit(avName)||ASC_UNITS[0];
   var resume=(ascRun&&ascRun.map)?'<button class="enter-btn asc-resume" onclick="ascShowMap()">▶ Resume the Rite · Tier '+(ascRun.tier+1)+'/'+ascRun.map.length+'</button>':'<button class="enter-btn" onclick="ascEnterTeam()">⚜ Enter the Rite</button>';
   hub.innerHTML='<div class="asc-hub-wrap"><div class="asc-hub-hero">'
     +'<div class="ahh-portrait" style="'+artFillStyle(avUnit.art)+'">'+(CARD_ART[avUnit.art]?'':sigilFor(avUnit.art))+'</div>'
@@ -12947,8 +13021,8 @@ function ascMovesBackToTeam(){ _ascMovesReturn=false; buildAscension(); }
 function ascChampions(){
   _ascMovesReturn=false;
   var a=ascShowPane('asc-arena'); if(!a) return; ascSetVista(0);
-  var cells=ASC_UNITS.map(function(u){
-    var owned=(ownedCopies[u.name]||0)>0, loaner=!owned&&ascIsLoaner(u.id);
+  var cells=ascUnifiedRoster().map(function(u){
+    var owned=ascOwnsCharacter(u.name), loaner=!owned&&ascIsLoaner(u.id);
     var P=ascUnitProg[u.name]||{level:1,xp:0,rites:0,bosses:0}, lv=P.level||1;
     var moves=ascUnitMoveList(u), unlocked=moves.filter(function(m){return lv>=(m.unlock||1);}).length;
     return '<button class="asc-champ-cell'+(u.avatar?' av':'')+(owned||loaner?'':' locked')+'" onclick="ascChampionDetail('+qk(u.id)+')">'
@@ -12959,8 +13033,8 @@ function ascChampions(){
   a.innerHTML='<div class="asc-panel"><div class="asc-panel-head"><button class="asc-back" onclick="ascHomeAsc()">← Ascension</button><div><div class="asc-res-eyebrow">Ascension · Allies</div><h2 class="asc-panel-title">Your Allies</h2></div></div><p class="asc-panel-sub">Every unit carries its own legend — level, abilities and standing. Tap an ally for detail.</p><div class="asc-champ-grid">'+cells+'</div></div>';
 }
 function ascChampionDetail(id){
-  var u=ASC_UNITS.find(function(x){return x.id===id;}); if(!u) return; var a=ascShowPane('asc-arena'); if(!a) return; ascSetVista(0);
-  var owned=(ownedCopies[u.name]||0)>0, loaner=!owned&&ascIsLoaner(u.id);
+  var u=ascResolveUnit(id); if(!u) return; var a=ascShowPane('asc-arena'); if(!a) return; ascSetVista(0);
+  var owned=ascOwnsCharacter(u.name), loaner=!owned&&ascIsLoaner(u.id);
   var P=ascUnitProg[u.name]||{level:1,xp:0,rites:0,bosses:0}, lv=P.level||1, need=lv*60, st=ascUnitStats(u);
   var _load=u.avatar?[]:ascUnitLoadout(u);
   var moves=ascUnitMoveList(u).map(function(m,mi){ var ok=lv>=(m.unlock||1); var eqd=_load.indexOf(mi)>=0; var btn=u.avatar?'':(ok?'<button class="acd-eq'+(eqd?' on':'')+'" onclick="ascToggleMove('+qk(u.id)+','+mi+')">'+(eqd?'✓ Equipped':'Equip')+'</button>':'<span class="acd-mv-lock">Lv '+m.unlock+'</span>'); return '<div class="acd-move'+(ok?'':' locked')+(eqd?' eqd':'')+' k-'+m.kind+'"><span class="acd-mv-ico">'+(ASC_KIND_ICON[m.kind]||'✦')+'</span><span class="acd-mv-body"><span class="acd-mv-name">'+m.name+(ok?'':' <span class="acd-mv-lock">unlocks Lv '+m.unlock+'</span>')+'</span><span class="acd-mv-desc">'+(m.desc||'')+'</span></span><span class="acd-mv-tag">'+ascMoveTag(m)+'</span>'+btn+'</div>'; }).join('');
@@ -13004,7 +13078,7 @@ function ascSkinOf(name){ var P=ascUnitProg[name]; return (P&&P.skin)||'none'; }
 function ascSkinStyle(name){ var d=ascSkinDef(ascSkinOf(name)); var css=''; if(d.glow) css+=';box-shadow:0 0 0 2px '+d.glow+',0 0 16px '+d.glow; if(d.filter) css+=';filter:'+d.filter; return css; }
 function ascSkinOwned(id){ return id==='none' || (typeof ownedCosmetics!=='undefined' && ownedCosmetics.has('ascskin:'+id)); }
 function ascSkinEligible(name){ var c=(typeof COLLECTION!=='undefined')&&COLLECTION.find(function(x){return x.name===name && !x.variant && !x.ascendant;}); var r=c&&c.rarity; return r==='ultra'||r==='apex'; }
-function ascEquipSkin(id, unitId){ var u=ASC_UNITS.find(function(x){return x.id===unitId;}); if(!u) return; if(id!=='none' && !ascSkinEligible(u.name)) return; var P=ascUnitProg[u.name]=ascUnitProg[u.name]||{level:1,xp:0,rites:0,bosses:0}; P.skin=id; saveState(); ascChampionDetail(unitId); }
+function ascEquipSkin(id, unitId){ var u=ascResolveUnit(unitId); if(!u) return; if(id!=='none' && !ascSkinEligible(u.name)) return; var P=ascUnitProg[u.name]=ascUnitProg[u.name]||{level:1,xp:0,rites:0,bosses:0}; P.skin=id; saveState(); ascChampionDetail(unitId); }
 function ascBuySkin(id, unitId){ var d=ascSkinDef(id); if(!d) return; if(ascSkinOwned(id)){ ascEquipSkin(id, unitId); return; } if(typeof forgeBalance==='undefined'||forgeBalance<d.price){ if(typeof toast==='function') toast('Not enough Forge — '+d.name+' costs ❖ '+d.price, false); return; } forgeBalance-=d.price; if(typeof ownedCosmetics!=='undefined') ownedCosmetics.add('ascskin:'+id); if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('Unlocked '+d.name+' regalia', true); ascEquipSkin(id, unitId); }
 function ascArenaHub(){
   var a=ascShowPane('asc-arena'); if(!a) return; ascSetVista(0);
@@ -13046,8 +13120,8 @@ let ascArenaRP=0, ascArenaW=0, ascArenaL=0;
 const ASC_ARENA_RANKS=[{min:0,name:'Unranked'},{min:100,name:'Bronze'},{min:250,name:'Silver'},{min:500,name:'Gold'},{min:850,name:'Ascendant'}];
 function ascArenaRank(){ var r=ASC_ARENA_RANKS[0]; for(var i=0;i<ASC_ARENA_RANKS.length;i++){ if(ascArenaRP>=ASC_ARENA_RANKS[i].min) r=ASC_ARENA_RANKS[i]; } return r.name; }
 function ascArenaStart(){
-  var av=ASC_UNITS.find(function(u){return u.id===ascPartySel.avatarId;});
-  var comps=ascPartySel.companionIds.map(function(id){return ASC_UNITS.find(function(u){return u.id===id;});}).filter(Boolean);
+  var av=ascResolveUnit(ascPartySel.avatarId);
+  var comps=ascPartySel.companionIds.map(function(id){return ascResolveUnit(id);}).filter(Boolean);
   if(!av||comps.length<2){ toast('Assemble a party first.', false); return; }
   var pas=ASC_PASSIVES[av.id]||{};
   var mkA=function(u){ var st=ascUnitStats(u); return {id:u.id,name:u.name,art:u.art,role:u.role,avatar:true,maxhp:st.hp,hp:st.hp,atk:st.atk,spd:u.spd,ability:Object.assign({},u.ability),abilLeft:99}; };
@@ -13072,36 +13146,46 @@ function ascArenaEnd(won){
     ascRun=null; ascBattle=null; ascParty=[]; saveState();
   }, 1300);
 }
-function ascUnitCell(u){ var owned=(ownedCopies[u.name]||0)>0, loaner=!owned&&ascIsLoaner(u.id), field=owned||loaner; var st=ascUnitStats(u), sel=(ascPartySel.avatarId===u.id||ascPartySel.companionIds.indexOf(u.id)>=0); var _spec=(ascUnitProg[u.name]&&ascUnitProg[u.name].pendingSpec)||0;
+function ascUnitCell(u){ var owned=ascOwnsCharacter(u.name), loaner=!owned&&ascIsLoaner(u.id), field=owned||loaner; var st=ascUnitStats(u), sel=(ascPartySel.avatarId===u.id||ascPartySel.companionIds.indexOf(u.id)>=0); var _spec=(ascUnitProg[u.name]&&ascUnitProg[u.name].pendingSpec)||0;
   return '<div class="asc-unit'+(sel?' sel':'')+(u.avatar?' av':'')+(field?'':' locked')+(loaner?' loaner':'')+'"'+(field?' onclick="ascSelectUnit('+qk(u.id)+')"':'')+'><div class="asc-unit-art" style="'+artFillStyle(u.art)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'<span class="asc-unit-lv">Lv '+st.lv+'</span>'+(sel?'<span class="asc-unit-check">✓</span>':'')+(field?'':'<span class="asc-unit-lock">🔒</span>')+(loaner?'<span class="asc-unit-loan">LOANER</span>':'')+(_spec>0?'<span class="asc-unit-loan" style="background:var(--gold);color:#241a05">✦ SPEC</span>':'')+'</div><div class="asc-unit-name">'+u.name.split(',')[0]+'</div><div class="asc-unit-role">'+(owned?(u.avatar?'★ Champion':u.role):(loaner?'✧ Loaner · free this month':'Own the card to field'))+'</div><div class="asc-unit-stat">'+st.hp+' HP · '+st.atk+' ATK</div><div class="asc-unit-abil">'+u.ability.name+'</div></div>'; }
 function ascSetupToAvatar(){ ascSetupGo('avatar'); }
 function ascSetupToCompanions(){ ascSetupGo('companions'); }
 function ascSetupGo(step){ if(step==='companions' && !ascPartySel.avatarId){ toast('Choose a Champion first.', false); return; } ascSetupStep=step; buildAscension(); }
 function ascRenderSetup(){
   var setup=document.getElementById('asc-setup'); if(!setup) return;
-  var av=ASC_UNITS.find(function(u){return u.id===ascPartySel.avatarId;});
-  var comps=ascPartySel.companionIds.map(function(id){return ASC_UNITS.find(function(u){return u.id===id;});}).filter(Boolean);
+  var av=ascResolveUnit(ascPartySel.avatarId);
+  var comps=ascPartySel.companionIds.map(function(id){return ascResolveUnit(id);}).filter(Boolean);
   var _lp=(function(){ var pl=ascComputeLinks([av].concat(comps).filter(Boolean).map(function(u){return {name:u.name};})); return '<div class="asc-linkprev"><span class="alp-label">Party links</span>'+(pl.length?pl.map(function(l){return '<span class="alp-chip" title="'+l.desc+'">'+l.icon+' '+l.name+'</span>';}).join(''):'<span class="alp-none">none yet — pair lore-linked units for auras</span>')+'</div>'; })();
   var rank=ascRankInfo();
   var rankBar='<div class="asc-rank-banner"><span class="ark-eyebrow">Ascension Rank</span><span class="ark-name">'+rank.name+'</span>'+(rank.next?'<span class="ark-next">score '+rank.score+' · next: '+rank.next.name+' at '+rank.next.min+'</span>':'<span class="ark-next">◆ max rank</span>')+'</div>';
   var h;
   if(ascSetupStep==='avatar'){
     var pas=av?ASC_PASSIVES[av.id]:null;
+    // Any owned card is avatar-eligible now (8/3/26) -- only the 4 lore-locked units have a
+    // hand-authored passive in ASC_PASSIVES, so `pas` is legitimately null for a generic pick.
+    // The old (av&&pas?...) text fell all the way back to "no Champion chosen" in that case,
+    // which is wrong once one genuinely IS chosen -- show the Ultimate name regardless, and
+    // only prepend the passive line when one actually exists.
+    var avSub = av ? ((pas?pas.name+': '+pas.desc+' · ':'')+'Ultimate: '+av.ability.name) : 'Tap a Champion to see its aura and Ultimate.';
     h='<div class="lobby-head"><div class="lh-eyebrow" style="color:var(--violet)">The Rite · Step 1 of 2 · Choose your Champion</div><h1>Summon your Champion</h1><p>The card you pilot the Rift as. It empowers the units that serve you and charges your Ultimate — it never fights directly.</p></div>'+rankBar+
-      '<div class="asc-roster">'+ASC_UNITS.filter(function(u){return u.avatar;}).map(ascUnitCell).join('')+'</div>'+
-      '<div class="lobby-launch"><button class="asc-edit-team" onclick="ascHomeAsc()">⌂ Hub</button><div class="ll-info"><h3>'+(av?av.name.split(',')[0]+' — your Champion':'No Champion chosen')+'</h3><p class="'+(av?'':'ll-none')+'">'+(av&&pas?pas.name+': '+pas.desc+' · Ultimate: '+av.ability.name:'Tap a Champion to see its aura and Ultimate.')+'</p></div><button class="enter-btn" onclick="ascSetupToCompanions()"'+(av?'':' disabled')+'>Rally your units →</button></div>';
+      '<div class="asc-roster">'+ascUnifiedRoster().filter(function(u){return ascPartySel.companionIds.indexOf(u.id)<0;}).map(ascUnitCell).join('')+'</div>'+
+      '<div class="lobby-launch"><button class="asc-edit-team" onclick="ascHomeAsc()">⌂ Hub</button><div class="ll-info"><h3>'+(av?av.name.split(',')[0]+' — your Champion':'No Champion chosen')+'</h3><p class="'+(av?'':'ll-none')+'">'+avSub+'</p></div><button class="enter-btn" onclick="ascSetupToCompanions()"'+(av?'':' disabled')+'>Rally your units →</button></div>';
   } else {
     h='<div class="lobby-head"><div class="lh-eyebrow" style="color:var(--violet)">The Rite · Step 2 of 2 · Rally your units</div><h1>Choose your companions</h1><p>The units that fight for '+(av?av.name.split(',')[0]:'your Champion')+'. Choose 2 to 3.</p></div>'+
-      '<div class="asc-party-preview">'+[av].concat(comps).filter(Boolean).map(function(u){ return '<div class="app-unit'+(u.avatar?' av':'')+'"><div class="app-art" style="'+artFillStyle(u.art)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'</div><div class="app-name">'+u.name.split(',')[0]+(u.avatar?' ★':'')+'</div>'+(u.avatar?'<span class="app-ult">★ Ultimate</span>':'<button class="app-moves" onclick="ascEditMoves('+qk(u.id)+')">✎ Moves</button>')+'</div>'; }).join('')+'</div>'+
-      _lp+'<div class="asc-roster">'+ASC_UNITS.filter(function(u){return !u.avatar;}).map(ascUnitCell).join('')+'</div>'+
+      '<div class="asc-party-preview">'+[av].concat(comps).filter(Boolean).map(function(u,i){ var isAv=(i===0); return '<div class="app-unit'+(isAv?' av':'')+'"><div class="app-art" style="'+artFillStyle(u.art)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'</div><div class="app-name">'+u.name.split(',')[0]+(isAv?' ★':'')+'</div>'+(isAv?'<span class="app-ult">★ Ultimate</span>':'<button class="app-moves" onclick="ascEditMoves('+qk(u.id)+')">✎ Moves</button>')+'</div>'; }).join('')+'</div>'+
+      _lp+'<div class="asc-roster">'+ascUnifiedRoster().filter(function(u){return u.avatar!==true && u.id!==ascPartySel.avatarId;}).map(ascUnitCell).join('')+'</div>'+
       ascChapterPicker()+'<div class="lobby-launch"><button class="asc-edit-team" onclick="ascHomeAsc()">⌂ Hub</button><button class="asc-edit-team" onclick="ascSetupToAvatar()">← Champion</button><div class="ll-info"><h3>'+(comps.length>=2?'Party ready':'Choose '+(2-comps.length)+' more')+'</h3><p>'+comps.length+' / 3 companions</p></div><button class="enter-btn"'+((av&&comps.length>=2)?'':' disabled')+' onclick="'+(ascEditing?'ascApplyTeamEdit()':'ascStoryStart()')+'">'+(ascEditing?'✓ Save team':'▶ Begin '+(ASC_CHAPTERS[ascChapterIdx]?ASC_CHAPTERS[ascChapterIdx].title:'Chapter 1: Rebirth'))+'</button></div>'+((!ascEditing)?'<div class="asc-altmodes"><span class="aam-label">Other modes</span><button class="asc-alt"'+((av&&comps.length>=2)?'':' disabled')+' onclick="ascBegin()">⚜ Endless Rite</button><button class="asc-alt"'+((av&&comps.length>=2)?'':' disabled')+' onclick="ascArenaStart()">⚔ The Arena · PvP</button></div>':'');
   }
   setup.innerHTML=h;
 }
 function ascSelectUnit(id){
-  var u=ASC_UNITS.find(function(x){return x.id===id;}); if(!u) return;
-  if((ownedCopies[u.name]||0)<=0 && !ascIsLoaner(id)){ toast('Own '+u.name.split(',')[0]+' — or wait for it to rotate in as a monthly Loaner.', false); return; }
-  if(u.avatar){ ascPartySel.avatarId = (ascPartySel.avatarId===id)?null:id; }
+  var u=ascResolveUnit(id); if(!u) return;
+  if(!ascOwnsCharacter(u.name) && !ascIsLoaner(id)){ toast('Own '+u.name.split(',')[0]+' — or wait for it to rotate in as a monthly Loaner.', false); return; }
+  // Avatar vs companion is which GRID you clicked in now (8/3/26), not a static per-card flag --
+  // any owned card is eligible for either role, mirroring Deck Master's "any card" rule. The 4
+  // lore-locked units (u.avatar===true) never appear in the companion grid in the first place
+  // (filtered out in ascRenderSetup), so this only ever fires for them from the avatar step.
+  if(ascSetupStep==='avatar'){ ascPartySel.avatarId = (ascPartySel.avatarId===id)?null:id; }
   else { var i=ascPartySel.companionIds.indexOf(id); if(i>=0) ascPartySel.companionIds.splice(i,1); else if(ascPartySel.companionIds.length<3) ascPartySel.companionIds.push(id); else toast('Party is full — 3 companions max.', false); }
   buildAscension();
 }
@@ -13180,17 +13264,20 @@ function ascEditTeam(){
   ascSetupStep='avatar'; buildAscension();
 }
 function ascApplyTeamEdit(){
-  var av=ASC_UNITS.find(function(u){return u.id===ascPartySel.avatarId;});
-  var comps=ascPartySel.companionIds.map(function(id){return ASC_UNITS.find(function(u){return u.id===id;});}).filter(Boolean);
+  var av=ascResolveUnit(ascPartySel.avatarId);
+  var comps=ascPartySel.companionIds.map(function(id){return ascResolveUnit(id);}).filter(Boolean);
   if(!av || comps.length<2){ toast('Keep a Champion and at least 2 companions.', false); return; }
   var prev={}; ascParty.forEach(function(u){ prev[u.name]=u; });
-  var mk=function(u){ var was=prev[u.name], st=ascUnitStats(u), g=ascGearDef(ascGearOn(u.name))||{}, ps=u.avatar?{}:ascPassive(); return {id:u.id, name:u.name, art:u.art, role:u.role, avatar:!!u.avatar, maxhp:st.hp+(g.hp||0)+(ps.hp||0), hp:was?Math.min(was.hp,st.hp+(g.hp||0)+(ps.hp||0)):st.hp+(g.hp||0)+(ps.hp||0), atk:st.atk+(g.atk||0)+(ps.atk||0), spd:u.spd+(g.spd||0), ability:Object.assign({}, u.ability), abilLeft:was?was.abilLeft:u.ability.uses}; };
-  ascParty=[mk(av)].concat(comps.map(mk));
+  // 8/3/26: avatar-ness is which SLOT a unit fills this edit, not its source's static `.avatar`
+  // field (a generic card picked as avatar always has avatar:false on the roster entry itself) --
+  // matches ascBegin()'s mkA()/mkC() pair, which already got this right by never reading u.avatar.
+  var mk=function(u,isAvatar){ var was=prev[u.name], st=ascUnitStats(u), g=ascGearDef(ascGearOn(u.name))||{}, ps=isAvatar?{}:ascPassive(); return {id:u.id, name:u.name, art:u.art, role:u.role, avatar:!!isAvatar, maxhp:st.hp+(g.hp||0)+(ps.hp||0), hp:was?Math.min(was.hp,st.hp+(g.hp||0)+(ps.hp||0)):st.hp+(g.hp||0)+(ps.hp||0), atk:st.atk+(g.atk||0)+(ps.atk||0), spd:u.spd+(g.spd||0), ability:Object.assign({}, u.ability), abilLeft:was?was.abilLeft:u.ability.uses}; };
+  ascParty=[mk(av,true)].concat(comps.map(function(u){ return mk(u,false); }));
   ascApplyLinks(); ascEditing=false; saveState(); toast('Team updated \u2014 wounds carry over.', true); ascShowMap();
 }
 function ascBegin(){
-  var av=ASC_UNITS.find(function(u){return u.id===ascPartySel.avatarId;});
-  var comps=ascPartySel.companionIds.map(function(id){return ASC_UNITS.find(function(u){return u.id===id;});}).filter(Boolean);
+  var av=ascResolveUnit(ascPartySel.avatarId);
+  var comps=ascPartySel.companionIds.map(function(id){return ascResolveUnit(id);}).filter(Boolean);
   if(!av || comps.length<2){ toast('Choose a Champion and at least 2 companions.', false); return; }
   var pas=ASC_PASSIVES[av.id]||{};
   var mkA=function(u){ var st=ascUnitStats(u); return {id:u.id, name:u.name, art:u.art, role:u.role, avatar:true, maxhp:st.hp, hp:st.hp, atk:st.atk, spd:u.spd, ability:Object.assign({}, u.ability), abilLeft:99}; };
@@ -13302,7 +13389,7 @@ const ASC_GEAR=[
 ];
 function ascGearDef(id){ return ASC_GEAR.find(function(x){return x.id===id;}); }
 function ascGearOn(name){ return (ascRun&&ascRun.equip&&ascRun.equip[name])||null; }
-function ascRecomputeAll(){ var pas=ascPassive(); ascParty.forEach(function(u){ var _dl=ascLinkMemberOf(u.name,'dragon'), _sl=ascLinkMemberOf(u.name,'squad19'); var la=_dl?(6+(_dl.bond||0)*2):0, ld=_sl?(0.15+(_sl.bond||0)*0.03):0; u.linkDef=ld; if(u.avatar) return; var base=ASC_UNITS.find(function(x){return x.name===u.name;}); if(!base) return; var st=ascUnitStats(base), g=ascGearDef(ascGearOn(u.name))||{}; var cur=u.hp; u.maxhp=st.hp+(g.hp||0)+(pas.hp||0); u.hp=Math.max(1,Math.min(cur,u.maxhp)); u.atk=st.atk+(g.atk||0)+(pas.atk||0)+la; u.spd=base.spd+(g.spd||0); }); }
+function ascRecomputeAll(){ var pas=ascPassive(); ascParty.forEach(function(u){ var _dl=ascLinkMemberOf(u.name,'dragon'), _sl=ascLinkMemberOf(u.name,'squad19'); var la=_dl?(6+(_dl.bond||0)*2):0, ld=_sl?(0.15+(_sl.bond||0)*0.03):0; u.linkDef=ld; if(u.avatar) return; var base=ascResolveUnit(u.name); if(!base) return; var st=ascUnitStats(base), g=ascGearDef(ascGearOn(u.name))||{}; var cur=u.hp; u.maxhp=st.hp+(g.hp||0)+(pas.hp||0); u.hp=Math.max(1,Math.min(cur,u.maxhp)); u.atk=st.atk+(g.atk||0)+(pas.atk||0)+la; u.spd=base.spd+(g.spd||0); }); }
 function ascBuyGear(id){ var it=ascGearDef(id); if(!it||!ascRun) return; ascRun.gear=ascRun.gear||[]; if(ascRun.gear.indexOf(id)>=0){ toast('Already owned.', false); return; } if(signalPoints<it.price){ toast('Not enough Signal', false); return; } signalPoints-=it.price; ascRun.gear.push(id); if(typeof updateBalance==='function') updateBalance(); saveState(); toast('Bought '+it.name+' — equip it in your Bag', true); ascRenderMerchant(); }
 function ascEquipGear(gearId, champName){ if(!ascRun) return; ascRun.equip=ascRun.equip||{}; for(var c in ascRun.equip){ if(ascRun.equip[c]===gearId) delete ascRun.equip[c]; } ascRun.equip[champName]=gearId; ascRecomputeAll(); saveState(); ascRenderBag(); }
 function ascUnequipGear(champName){ if(ascRun&&ascRun.equip){ delete ascRun.equip[champName]; ascRecomputeAll(); saveState(); ascRenderBag(); } }
@@ -13556,6 +13643,15 @@ function ascUltimate(){
   setTimeout(function(){
     if(ult.kind==='heal'){ ascParty.forEach(function(u){ if(!u.avatar&&u.hp>0) ascHealAmt(u,pw); }); ascLog('✦ '+ult.name+' mends the party (+'+pw+' HP each)'); }
     else if(ult.kind==='aoe'){ ascBattle.foes.forEach(function(f){ if(f.hp>0) ascApplyDamage(f,pw); }); ascLog('✦ '+ult.name+' devastates every foe for ~'+pw+'!'); }
+    // 8/3/26: buff/guard/vuln Ultimates (Vajra/Māyā/Bandha-archetype generic avatars) used to fall
+    // through to the single-target-nuke `else` below, since only heal/aoe/dmg were ever handled.
+    // Real bug avoided here: these are FRACTIONAL (0.0-1.0) percentages, so they must NOT reuse the
+    // `pw` above -- pw is Math.round()'d, and Math.round(0.35*1.4)===Math.round(0.49)===0, which
+    // would silently zero out every percentage-based ultimate. Each branch computes its own
+    // unrounded percentage instead.
+    else if(ult.kind==='buff'){ var pct=(ult.power||0.3)*1.4*((ascRun&&ascRun.linkUlt)||1); ascParty.forEach(function(u){ if(!u.avatar&&u.hp>0){ u.st=u.st||{}; u.st.atk=Math.max(u.st.atk||0,pct); u.st.atkT=Math.max(u.st.atkT||0,ult.dur||3);} }); ascLog('✦ '+ult.name+' empowers the whole party — +'+Math.round(pct*100)+'% ATK!'); }
+    else if(ult.kind==='guard'){ var pctG=(ult.power||0.3)*1.4*((ascRun&&ascRun.linkUlt)||1); ascParty.forEach(function(u){ if(!u.avatar&&u.hp>0){ u.st=u.st||{}; u.st.def=Math.max(u.st.def||0,pctG); u.st.defT=Math.max(u.st.defT||0,ult.dur||3);} }); ascLog('✦ '+ult.name+' shields the party — '+Math.round(pctG*100)+'% less damage taken!'); }
+    else if(ult.kind==='vuln'){ var pctV=(ult.power||0.3)*1.4*((ascRun&&ascRun.linkUlt)||1); ascBattle.foes.forEach(function(f){ if(f.hp>0){ f.st=f.st||{}; f.st.vuln=Math.max(f.st.vuln||0,pctV); f.st.vulnT=Math.max(f.st.vulnT||0,ult.dur||3);} }); ascLog('✦ '+ult.name+' marks every foe — +'+Math.round(pctV*100)+'% damage taken!'); }
     else { var alv=ascBattle.foes.filter(function(f){return f.hp>0;}); if(alv.length){ var tgt=alv.sort(function(x,y){return y.hp-x.hp;})[0]; var d=ascApplyDamage(tgt,pw); ascLog('✦ '+ult.name+' strikes '+tgt.name+' for '+d+'!'); } }
     saveState(); ascRenderBattle(); if(typeof ascPlayFx==='function')ascPlayFx({skipSpotlight:true});
     setTimeout(function(){ ascBusy=false; ascBattleNext(); }, 900);
