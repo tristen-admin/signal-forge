@@ -5168,7 +5168,7 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   if(typeof renderDeckMasterAbilityStrip==='function') renderDeckMasterAbilityStrip();
   if(typeof renderMayaStrip==='function') renderMayaStrip();
   if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
-  if(typeof cheapestFighterCost==='function' && charge < cheapestFighterCost()){ energyForfeit(); return; }   // can't afford ANY fighter in hand — hard forfeit, the only real "can't conjure" case (rarity never gates conjure-eligibility — an all-Common hand plays exactly like any other)
+  if(typeof cheapestFighterCost==='function' && charge < cheapestFighterCost()){ offerEnergyRescue(); return; }   // can't afford ANY fighter in hand — offer Desperate Search (discard+banish to find something affordable) or forfeit (rarity never gates conjure-eligibility — an all-Common hand plays exactly like any other)
   startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:30, 'choose a card, or the round forfeits');   // casual = 30s round timer; ranked keeps 40
 }
 
@@ -6491,8 +6491,8 @@ function stageFighter(i){ if(typeof hideCardPreview==='function')hideCardPreview
       // charge < even the cheapest fighter in hand -- can't legally conjure anything. This should
       // already have been caught by revealCondition()'s own check before the decision clock ever
       // started; reaching it here means charge dropped (an energy-cost spell cast, most likely)
-      // sometime during the pre-commit window. Same hard forfeit either way, no free conjure.
-      energyForfeit(); return;
+      // sometime during the pre-commit window. Same Desperate-Search-or-forfeit choice either way.
+      offerEnergyRescue(); return;
     }
   }
   if(typeof SFX!=='undefined')SFX.play('deploy');
@@ -7896,6 +7896,100 @@ function surrenderRound(placeholderTxt, resultLabel, resultSub, logTxt){
 }
 function energyForfeit(){
   surrenderRound('⚡ forfeited', '⚡ ROUND FORFEITED', 'Not enough energy to conjure any card in hand — the round is forfeited.', '⚡ Energy-starved — no affordable fighter, round forfeited');
+}
+// Desperate Search (8/4/26, direct request): the energy-lockout case above used to be an
+// immediate, silent hard forfeit with no player agency at all. Now offers a real choice first --
+// discard hand cards (1 Energy of search budget each) plus banish 2 from the deck to search for
+// a random card you CAN afford, or forfeit anyway. Reuses chooseBanishFromHand's exact grid/pick
+// UI shape and the _runBanishQueue-style "pick one, re-render, repeat" loop already established
+// for banish choices, rather than inventing a new multi-select control.
+var _rescueDiscards = [];
+function offerEnergyRescue(){
+  _rescueDiscards = [];
+  clearTurnTimers();
+  renderEnergyRescue();
+}
+function _rescueAffordableCount(budget){
+  return (typeof drawPile!=='undefined'?drawPile:[]).filter(function(c){ return conjureCost(c)<=budget; }).length;
+}
+function renderEnergyRescue(){
+  var ov = document.getElementById('energy-rescue-modal');
+  if(!ov){ ov=document.createElement('div'); ov.id='energy-rescue-modal'; ov.className='bd-modal on'; document.body.appendChild(ov); }
+  else ov.classList.add('on');
+  var budget = charge + _rescueDiscards.length;
+  var affordable = _rescueAffordableCount(budget);
+  var cardsHTML = hand.map(function(c, i){
+    return '<button class="bcm-card" onclick="_rescueDiscardPick('+i+')" title="Discard '+(c.name||'').replace(/"/g,'&quot;')+'">'+bigCardHTML(c, {mini:true})+'</button>';
+  }).join('');
+  ov.innerHTML = '<div class="bd-scrim"></div><div class="bd-panel" style="text-align:center;max-width:min(94vw,640px)">'
+    + '<div class="bd-head">⚡ Not Enough Energy</div>'
+    + '<div class="bd-why" style="text-align:left">Nothing in hand costs ⚡'+charge+' or less. Discard hand cards below to raise your search budget by +1 Energy each, then banish 2 from your deck to search it for a random card you CAN afford — or forfeit the round instead.</div>'
+    + '<div class="bd-why" style="text-align:left"><b style="color:var(--gold)">Search budget: ⚡'+budget+'</b>'+(_rescueDiscards.length?' (⚡'+charge+' + '+_rescueDiscards.length+' discarded)':'')+' — <b style="color:'+(affordable?'var(--win)':'var(--lose)')+'">'+affordable+' card'+(affordable===1?'':'s')+' in your deck would qualify</b></div>'
+    + (hand.length?('<div class="bcm-grid">'+cardsHTML+'</div>'):'<div class="bd-note">No hand cards left to discard.</div>')
+    + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;justify-content:center">'
+    + (_rescueDiscards.length?'<button class="bd-close2" onclick="_rescueUndo()">↩ Return last discard</button>':'')
+    + '<button class="bd-close2" style="border-color:'+(affordable?'var(--gold)':'var(--border2)')+';color:'+(affordable?'var(--gold)':'var(--text3)')+'"'+(affordable?'':' disabled')+' onclick="_rescueSearchDeck()">🔍 Search Deck (banish 2'+(_rescueDiscards.length?' + '+_rescueDiscards.length+' discarded':'')+')</button>'
+    + '<button class="bd-close2" onclick="_rescueForfeit()">🏳 Forfeit Round instead</button>'
+    + '</div></div>';
+}
+function _rescueDiscardPick(idx){
+  var card = hand.splice(idx,1)[0]; if(!card) return;
+  banishPile.push(card); handBanishedThisTurn = true; _rescueDiscards.push(card);
+  if(typeof buildHand==='function') buildHand();
+  if(typeof toast==='function') toast('Discarded '+card.name+' — search budget +1', true);
+  renderEnergyRescue();
+}
+function _rescueUndo(){
+  var card = _rescueDiscards.pop(); if(!card) return;
+  var bi = banishPile.lastIndexOf(card); if(bi>=0) banishPile.splice(bi,1);
+  hand.push(card);
+  if(typeof buildHand==='function') buildHand();
+  renderEnergyRescue();
+}
+function _rescueClose(){ var el=document.getElementById('energy-rescue-modal'); if(el) el.classList.remove('on'); }
+function _rescueForfeit(){
+  _rescueClose();
+  surrenderRound('🏳 forfeited', '🏳 ROUND FORFEITED', 'You chose to forfeit this round rather than search your deck.', '🏳 Player forfeited the round (Desperate Search declined)');
+}
+function _rescueSearchDeck(){
+  var budget = charge + _rescueDiscards.length;
+  if(_rescueAffordableCount(budget) <= 0) return;   // guard: button should already be disabled
+  // Banish 2 to fund the search — prefer cards that DON'T qualify at this budget first, so the
+  // random sacrifice can never accidentally eat the very options the player just paid to unlock.
+  var pool = drawPile.slice();
+  var unaffordable = [], affordablePool = [];
+  pool.forEach(function(c){ (conjureCost(c)<=budget ? affordablePool : unaffordable).push(c); });
+  var toBanish = Math.min(2, drawPile.length), banished = [];
+  for(var b=0; b<toBanish; b++){
+    var src = unaffordable.length ? unaffordable : affordablePool;
+    var pick = src.splice(Math.floor(Math.random()*src.length), 1)[0];
+    var di = drawPile.indexOf(pick); if(di>=0) drawPile.splice(di,1);
+    banished.push(pick);
+  }
+  banished.forEach(function(c){ banishPile.push(c); });
+  deckSize = drawPile.length;
+  var found = drawPile.filter(function(c){ return conjureCost(c)<=budget; });
+  if(!found.length){ _rescueClose(); if(typeof toast==='function') toast('The search came up empty — round forfeited.', false); energyForfeit(); return; }
+  var chosen = found[Math.floor(Math.random()*found.length)];
+  var fi = drawPile.indexOf(chosen); drawPile.splice(fi,1); deckSize = drawPile.length;
+  hand.push(chosen);
+  _rescueClose();
+  if(typeof toast==='function') toast('🔍 Desperate Search — banished '+banished.length+', discarded '+_rescueDiscards.length+', found '+chosen.name+' (⚡'+conjureCost(chosen)+')', true);
+  _rescueDiscards = [];
+  var newIdx = hand.length-1;
+  // The discards/banishes bought the SEARCH, not free Energy -- real charge is still whatever it
+  // was (possibly 0). stageFighter()'s own affordability gate checks real charge against the found
+  // card's real cost and would otherwise bounce right back into offerEnergyRescue() (infinite loop,
+  // caught live: selectedCard stayed null, hand never shrank, modal reopened itself). Top up charge
+  // to exactly the found card's cost -- never more -- so the normal gate passes; commitCard()'s own
+  // deduction spends it straight back down, landing at the same real charge as before (net zero).
+  if(charge < conjureCost(chosen)) charge = conjureCost(chosen);
+  // selectCard() alone only STAGES the pick (phase 'selecting', awaiting the normal confirm/withdraw
+  // window) -- commitCard() requires phase 'select' with selectedCard set, which only confirmSelection()
+  // does. Same 3-call sequence onDecisionTimeout() already uses to auto-commit a pending pick.
+  selectCard(newIdx);
+  confirmSelection();
+  commitCard();
 }
 // Voluntary forfeit (direct request): a player may always give up a round on purpose -- to bank
 // energy for a bigger play later, or just skip a round they don't want to spend charge contesting.
