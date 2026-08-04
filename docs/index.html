@@ -2957,6 +2957,8 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 .pile-chip{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:4px 8px;cursor:default}
 .pile-chip.winners{border-color:rgba(212,168,67,0.3);background:rgba(212,168,67,0.05)}
 .pile-chip.banish{border-color:rgba(120,48,184,0.3);background:rgba(120,48,184,0.05)}
+.pile-chip.charge{border-color:rgba(91,192,235,0.3);background:rgba(91,192,235,0.05)}
+.pile-chip.charge .pile-count{color:var(--electric)}
 .pile-icon{font-size:11px}
 .pile-count{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text)}
 .pile-label{font-size:9px;color:var(--text3);letter-spacing:0.05em;display:none}
@@ -3043,6 +3045,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <span class="dm-badge-label">★ <span id="opp-dm-badge-name"></span></span>
       </span>
       <div class="pile-strip" style="margin-right:4px">
+        <div class="pile-chip charge" title="Opponent's Charge"><span class="pile-icon">⚡</span><span class="pile-count" id="opp-charge-count">3/3</span><span class="pile-label">Charge</span></div>
         <div class="pile-chip" title="Opponent's hand"><span class="pile-icon">✋</span><span class="pile-count" id="opp-hand-count">4</span><span class="pile-label">Hand</span></div>
         <div class="pile-chip" title="Opponent's deck remaining"><span class="pile-icon">🂠</span><span class="pile-count" id="opp-deck-count">8</span><span class="pile-label">Deck</span></div>
         <div class="pile-chip winners" title="Opponent Winners Circle"><span class="pile-icon">🏆</span><span class="pile-count" id="opp-wc-count">0</span><span class="pile-label">WC</span></div>
@@ -6315,6 +6318,12 @@ function fieldBond(fighter, supportOrName){
   return tier ? {name:tier.name, bonus:tier.bonus, count:count} : null;
 }
 function renderCharge(){ const v=document.getElementById('charge-val'); if(v) v.textContent=charge; var cp=document.getElementById('charge-cap'); if(cp&&typeof duelEnergyCap==='function') cp.textContent=duelEnergyCap(); buildSpellTray();
+  // Opponent's own Charge (8/4/26, direct request): oppCharge has mirrored the player's pool exactly
+  // since the 7/12/26 energy rework, but was never actually surfaced anywhere -- a pure display gap,
+  // not new state. Piggybacks on this function's existing call sites (every one of them already fires
+  // whenever charge OR oppCharge changes in lockstep) instead of threading a new render call through
+  // every regen/spend/gain site across the file.
+  var ocv=document.getElementById('opp-charge-count'); if(ocv && typeof oppCharge!=='undefined' && typeof duelEnergyCap==='function') ocv.textContent=oppCharge+'/'+duelEnergyCap();
   // 7/24/26: pip meter, integrated from the UI mockup (Hearthstone-referenced individual crystal
   // pips). "Bonus" pips are real, not decorative -- they only exist when charge currently exceeds
   // duelEnergyCap(), which can only happen via Signal Diviner/Warpath Vanguard's "+N MAX Charge"
