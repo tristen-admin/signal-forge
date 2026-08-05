@@ -3094,10 +3094,13 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="field">
       <div class="rear-slot enemy" id="opp-rear" style="display:none"></div>
       <div class="rear-slot enemy" id="opp-rear2" style="display:none"></div>
+      <!-- 8/5/26: 3rd rear-guard slot, hidden until RG_SLOTS() steps to 3 (matchCommits>=4) -- see fillRearSlot() -->
+      <div class="rear-slot enemy" id="opp-rear3" style="display:none"></div>
       <div class="field-half" id="opp-field"><span class="placeholder">opponent card</span></div>
       <div class="field-half" id="player-field"><span class="placeholder">your card</span></div>
       <div class="rear-slot" id="player-rear" style="display:none"></div>
       <div class="rear-slot" id="player-rear2" style="display:none"></div>
+      <div class="rear-slot" id="player-rear3" style="display:none"></div>
       <div class="impact-fx" id="impact-fx"><span class="shock"></span><span class="shock shock2"></span></div>
       <div class="round-countdown" id="round-countdown" onclick="skipRoundCountdown()"><span id="rc-num"></span><span class="rc-skip-hint">tap to skip</span></div>
     </div>
@@ -4353,7 +4356,7 @@ function setCameraMode(mode){
     // opacity transition has a real "before" frame to animate from. No-op on desktop (its own
     // cam-solo rule never used display:none, so this only ever primes/clears the same opacity the
     // class swap already drove).
-    var revealIds = ['opp-field','opp-rear','opp-rear2'];
+    var revealIds = ['opp-field','opp-rear','opp-rear2','opp-rear3'];
     revealIds.forEach(function(id){ var el=document.getElementById(id); if(el) el.style.opacity='0'; });
     f.classList.remove('cam-solo');
     void f.offsetWidth;
@@ -5303,7 +5306,16 @@ const ENERGY_SPELLS = [
   {id:'sornshift', name:'Sorn-Vallis Shift', cost:3, fx:'Warp location to Sorn-Vallis', anorith:true},
 ];
 // ══ REAR-GUARD / CALLED SYSTEM (v1) ══
-const RG_SLOTS = 2;                       // rear-guard slots (v1=1; raise to expand)
+// 8/5/26: decision-density scaling (turn-pacing thread) -- was `const RG_SLOTS = 2` forever, same
+// exact shape from turn 1 to match point every duel of every match. Now a function so the cap can
+// grow with the match, same idiom this file already uses for duelEnergyCap() (computed fresh at
+// each call site, never a periodically-resynced variable). Floor stays 2 all match -- zero early-
+// game risk -- and steps to 3 at matchCommits>=4, the exact point duelEnergyCap()'s own formula
+// already changes slope (d<=4 branch -> 2*d-2 branch), so the biggest turns of a match are also the
+// ones with the most live decisions, not just the biggest numbers. Same global name kept
+// deliberately (RG_SLOTS() not rgSlotsCap()) so every existing call site only needed `()` added,
+// nothing renamed. Bot-symmetric for free: pickOppRears() reads this exact same identifier.
+function RG_SLOTS(){ return (typeof matchCommits!=='undefined' && matchCommits>=4) ? 3 : 2; }
 const COST_OVERRIDE = {"Signal Diviner":2, "Voltcaller":2, "Ahdorah Khaan, Determined Soul":2, "Tange Sazen":2, "Kotei":3, "Darwin":2, "Lagertha Waltz":1, "The Bronzed Beast, Hanse Waltz":3, "Hanse Waltz":2, "Uso Oso":2, "Zerith Var":3, "Lagertha Waltz, Wrathful Transformation":2, "Bixie Bee":1, "Keawe Kel'rua":2, "Veronica":1, "Sister Mire, Wailing Nightmare":1, "Moro":2, "Elowen Dawnspear":2, "Cletus Gwyndull":1, "Val Kreigh":2, "Faye Quicksilver":2, "Envoy of Tyrants, Ella Ballora":2, "Forgemask":2};   // ability-strength nudges above the power band (balance dial)
 const SHIELD_OVERRIDE = {};   // (7/27/26) per-card hand-tuning on top of shield()'s formula default, same pattern as COST_OVERRIDE above — editable from the Shift+D dev table
 // FLAGGED_ABILITIES (7/27/26): name -> plain-language reason, for printed ability text that currently
@@ -6149,7 +6161,7 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
     // isn't a new asymmetry, it's the established shape for "conjure something into an open
     // support slot" support effects.
     var _dtc=drawPile.pop();
-    if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS){ rearGuards.push(_dtc); abilLog.push("🧬 "+support.name+" — "+_dtc.name+" from the top of your deck joins your support circle"); }
+    if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS()){ rearGuards.push(_dtc); abilLog.push("🧬 "+support.name+" — "+_dtc.name+" from the top of your deck joins your support circle"); }
     else { hand.push(_dtc); if(typeof buildHand==='function') buildHand(); abilLog.push("🧬 "+support.name+" — "+(condSupportZonesLocked?"support zones locked":"supports full")+", "+_dtc.name+" goes to your hand instead"); }
     if(typeof deckSize!=='undefined') deckSize=drawPile.length;
     if(typeof updatePiles==='function') updatePiles();
@@ -6159,7 +6171,7 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
     // above -- the support duplicates ITSELF into the other slot instead of pulling a different card
     // in. Player-only, same precedent as conjureTopToSupport/Valcarion/Uso Oso's Skeletal Summons --
     // no bot-side mirror built yet for this whole "fill an open support slot" effect family.
-    if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS){ rearGuards.push(Object.assign({}, support)); abilLog.push("🐉 "+support.name+" — a second "+support.name+" fills the other support slot"); }
+    if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS()){ rearGuards.push(Object.assign({}, support)); abilLog.push("🐉 "+support.name+" — a second "+support.name+" fills the other support slot"); }
     else { abilLog.push("🐉 "+support.name+" — "+(condSupportZonesLocked?"support zones locked":"supports full")+", no duplicate this time"); }
   }
   if(e.returnSelfToDeck && !isOpp){
@@ -6277,7 +6289,7 @@ const INSTANT_EFFECTS = {
 function pickOppRears(fighter){
   var out=[];
   if(condSupportZonesLocked) return out;   // 7/28/26: Wild Pit -- support zones locked, bot fields zero
-  var _slots = Math.max(0, RG_SLOTS - (oppSupportSlotsBlocked||0));   // 7/28/26: Warden's Feint et al
+  var _slots = Math.max(0, RG_SLOTS() - (oppSupportSlotsBlocked||0));   // 7/28/26: Warden's Feint et al
   for(var k=0;k<_slots;k++){
     if(!oppHandBot.length) break;
     if(oppHandBot.length<=1) break;   // never spend the bot's literal last card on a support — always reserve one for next turn's fighter, or the hand can never recover (was: bottoms out at hand=1 forever, 0 supports, once drained)
@@ -6293,8 +6305,8 @@ function pickOppRears(fighter){
   }
   return out;
 }
-function playerRearEls(){ return [document.getElementById('player-rear'), document.getElementById('player-rear2')]; }
-function oppRearEls(){ return [document.getElementById('opp-rear'), document.getElementById('opp-rear2')]; }
+function playerRearEls(){ return [document.getElementById('player-rear'), document.getElementById('player-rear2'), document.getElementById('player-rear3')]; }
+function oppRearEls(){ return [document.getElementById('opp-rear'), document.getElementById('opp-rear2'), document.getElementById('opp-rear3')]; }
 function fillRearSlot(el, card, isOpp, fighter){
   if(!el) return;
   if(!card){ el.style.display='none'; el.innerHTML=''; el.className='rear-slot'+(isOpp?' enemy':''); return; }
@@ -6568,8 +6580,8 @@ function callSupportIdx(i){ if(typeof hideCardPreview==='function')hideCardPrevi
   var p=rearGuardIdxs.indexOf(i);
   if(p>=0){ rearGuardIdxs.splice(p,1); }
   else if(condSupportZonesLocked){ if(typeof toast==='function') toast('🎲 Wild Pit — support zones are locked this duel.', false); }
-  else if(rearGuardIdxs.length<RG_SLOTS){ rearGuardIdxs.push(i); if(typeof SFX!=='undefined')SFX.play('deploy'); }
-  else { if(typeof toast==='function') toast('Rear-guard slots full ('+RG_SLOTS+') — tap a called card to swap.', false); }
+  else if(rearGuardIdxs.length<RG_SLOTS()){ rearGuardIdxs.push(i); if(typeof SFX!=='undefined')SFX.play('deploy'); }
+  else { if(typeof toast==='function') toast('Rear-guard slots full ('+RG_SLOTS()+') — tap a called card to swap.', false); }
   buildHand(); renderRearSlot(); refreshStageHint();
 }
 function _dropZoneAt(x,y){ var el=document.elementFromPoint(x,y); if(!el||!el.closest) return null; if(el.closest('#player-field')) return 'fighter'; var rs=el.closest('.rear-slot'); if(rs && rs.id && rs.id.indexOf('player-rear')===0) return {zone:'rear', el:rs}; return null; }
@@ -6631,7 +6643,7 @@ function stagePointerUp(e){ window.removeEventListener('pointermove', stagePoint
 // removing supports), so the visual can never drift out of sync between the two call sites.
 function stageCardHTML(c){ return bigCardHTML(c, {mini:true}) + '<div class="stage-lock-ring" title="Staged — not yet committed"></div>'; }
 function _restage(){ var c=(preSelectedCard!=null)?hand[preSelectedCard]:null; if(!c){ deselectCard(); return; } var pf=document.getElementById('player-field'); if(pf) pf.innerHTML=stageCardHTML(c); attachFighterDrag(); buildHand(); renderRearSlot(); refreshStageHint(); if(typeof updateLivePow==='function') updateLivePow(); if(typeof SFX!=='undefined') SFX.play('deploy'); }
-function applyStageMove(src, z){ if(!src) return; if(z==='hand'){ if(src.t==='fighter') deselectCard(); else { var idx=rearGuardIdxs[src.slot]; if(idx!=null) callSupportIdx(idx); } return; } if(z==='fighter'){ if(src.t==='rear'){ var sIdx=rearGuardIdxs[src.slot]; if(sIdx==null) return; var oldF=preSelectedCard; var others=rearGuardIdxs.filter(function(_,k){return k!==src.slot;}); preSelectedCard=sIdx; rearGuardIdxs=others; if(oldF!=null && rearGuardIdxs.length<RG_SLOTS) rearGuardIdxs.push(oldF); _restage(); } return; } if(z && z.zone==='rear'){ var tSlot=(z.el.id==='player-rear2')?1:0; if(src.t==='fighter'){ var tIdx=rearGuardIdxs[tSlot]; if(tIdx!=null){ var oldF=preSelectedCard; preSelectedCard=tIdx; rearGuardIdxs[tSlot]=oldF; _restage(); } } else if(src.t==='rear' && src.slot!==tSlot){ var a=rearGuardIdxs[src.slot], b=rearGuardIdxs[tSlot]; if(b==null){ rearGuardIdxs.splice(src.slot,1); rearGuardIdxs.push(a); } else { rearGuardIdxs[src.slot]=b; rearGuardIdxs[tSlot]=a; } rearGuardIdxs=rearGuardIdxs.filter(function(x){return x!=null;}); _restage(); } } }
+function applyStageMove(src, z){ if(!src) return; if(z==='hand'){ if(src.t==='fighter') deselectCard(); else { var idx=rearGuardIdxs[src.slot]; if(idx!=null) callSupportIdx(idx); } return; } if(z==='fighter'){ if(src.t==='rear'){ var sIdx=rearGuardIdxs[src.slot]; if(sIdx==null) return; var oldF=preSelectedCard; var others=rearGuardIdxs.filter(function(_,k){return k!==src.slot;}); preSelectedCard=sIdx; rearGuardIdxs=others; if(oldF!=null && rearGuardIdxs.length<RG_SLOTS()) rearGuardIdxs.push(oldF); _restage(); } return; } if(z && z.zone==='rear'){ var tSlot=(z.el.id==='player-rear3')?2:(z.el.id==='player-rear2')?1:0; if(src.t==='fighter'){ var tIdx=rearGuardIdxs[tSlot]; if(tIdx!=null){ var oldF=preSelectedCard; preSelectedCard=tIdx; rearGuardIdxs[tSlot]=oldF; _restage(); } } else if(src.t==='rear' && src.slot!==tSlot){ var a=rearGuardIdxs[src.slot], b=rearGuardIdxs[tSlot]; if(b==null){ rearGuardIdxs.splice(src.slot,1); rearGuardIdxs.push(a); } else { rearGuardIdxs[src.slot]=b; rearGuardIdxs[tSlot]=a; } rearGuardIdxs=rearGuardIdxs.filter(function(x){return x!=null;}); _restage(); } } }
 
 // Back out of a staged selection (returns to the Select phase; opponent unlocks).
 function deselectCard(){ if(typeof hideCardPreview==='function')hideCardPreview();
@@ -6654,7 +6666,7 @@ function renderRearSlot(){
   var active=(phase==='selecting' && preSelectedCard!=null);
   for(var k=0;k<els.length;k++){
     var el=els[k]; if(!el) continue;
-    if(k>=RG_SLOTS){ el.style.display='none'; el.innerHTML=''; continue; }
+    if(k>=RG_SLOTS()){ el.style.display='none'; el.innerHTML=''; continue; }
     var ix=rearGuardIdxs[k];
     var card=(ix!=null && hand[ix]) ? hand[ix] : null;
     if(card){ fillRearSlot(el, card, false, f); el.style.cursor='grab'; (function(_s,_el){ _el.onpointerdown=function(ev){ if(typeof stagePointerDown==='function') stagePointerDown(ev,{t:'rear',slot:_s}); }; })(k,el); }
@@ -6669,7 +6681,7 @@ function refreshStageHint(){
   const cost=conjureCost(f); const pp=projectPlay();
   var sups=rearGuardIdxs.map(function(ix){return hand[ix]&&hand[ix].name;}).filter(Boolean);
   var msg=f.name+' — Fighter ⚡'+cost+' (⚡'+Math.max(0,charge-cost)+' left for spells). ';
-  msg+= sups.length ? ('Called: '+sups.join(' + ')+((pp&&pp.linkName)?' 🔗'+pp.linkName:'')+'. ') : ('Tap up to '+RG_SLOTS+' cards to Call as support. ');
+  msg+= sups.length ? ('Called: '+sups.join(' + ')+((pp&&pp.linkName)?' 🔗'+pp.linkName:'')+'. ') : ('Tap up to '+RG_SLOTS()+' cards to Call as support. ');
   if(pp) msg+='Your power ~'+pp.total+(pp.oppShown!=null?(' vs opp '+pp.oppShown):'')+'. ';
   msg+='Tap '+f.name+' again to clear · or confirm.';
   el.textContent=msg;
@@ -6887,7 +6899,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
     var _kTop=[]; if(drawPile.length) _kTop.push(drawPile.pop()); if(drawPile.length) _kTop.push(drawPile.pop());
     var _kMsg=[];
     if(_kTop[0]){
-      if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS){ rearGuards.push(Object.assign({}, _kTop[0], {_bo:0})); _kMsg.push(_kTop[0].name+' to support'); }
+      if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS()){ rearGuards.push(Object.assign({}, _kTop[0], {_bo:0})); _kMsg.push(_kTop[0].name+' to support'); }
       else { hand.push(_kTop[0]); if(typeof buildHand==='function') buildHand(); _kMsg.push(_kTop[0].name+(condSupportZonesLocked?' to hand (support zones locked)':' to hand (supports full)')); }
     }
     if(_kTop[1]){
@@ -6910,8 +6922,8 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   if(pc.name==='Anorith Keeling'){ energyLoadoutOverride=['drawsurge','godhand','sornshift']; if(typeof buildSpellTray==='function') buildSpellTray(); if(typeof toast==='function') toast('🌀 Anorith warps your future spell draws into the Chaos Trinity — lose a round to draw one.', true); }
   if(pc.name==='Sister Mire, Wailing Nightmare'){ drawToHand(2); if(hand.length){ var _smci=Math.floor(Math.random()*hand.length); drawPile.unshift(hand.splice(_smci,1)[0]); if(typeof deckSize!=='undefined') deckSize=drawPile.length; } if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); if(typeof toast==='function') toast('🌫 Sister Mire wails — draw 2, one card sinks back into the deck.', true); }
   if(pc.name==='Signal Diviner' && typeof drawToHand==='function'){ drawToHand(1); if(typeof toast==='function') toast('🔮 Signal Diviner — foresight: drew a card.', true); }
-  if(pc.name==='Uso Oso' && !condSupportZonesLocked && rearGuards.length < RG_SLOTS){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
-  if(pc.name==='Valcarion' && banishPile.length){ var _rec=banishPile.pop(); if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS){ rearGuards.push(_rec); if(typeof toast==='function') toast('🩸 Valcarion calls '+_rec.name+' from banish to support.', true); } else { hand.push(_rec); if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🩸 Valcarion reclaims '+_rec.name+' from banish to hand.', true); } if(typeof updatePiles==='function') updatePiles(); }
+  if(pc.name==='Uso Oso' && !condSupportZonesLocked && rearGuards.length < RG_SLOTS()){ var _skel=COLLECTION.find(function(x){return x.name==="Uso Oso's Skeletal Summons" && !x.uid;}); if(_skel){ rearGuards.push(Object.assign({}, _skel, {_bo:0})); if(typeof toast==='function') toast('☠ Uso conjures his Skeletal Summons to support.', true); } }
+  if(pc.name==='Valcarion' && banishPile.length){ var _rec=banishPile.pop(); if(!condSupportZonesLocked && rearGuards.length < RG_SLOTS()){ rearGuards.push(_rec); if(typeof toast==='function') toast('🩸 Valcarion calls '+_rec.name+' from banish to support.', true); } else { hand.push(_rec); if(typeof buildHand==='function') buildHand(); if(typeof toast==='function') toast('🩸 Valcarion reclaims '+_rec.name+' from banish to hand.', true); } if(typeof updatePiles==='function') updatePiles(); }
   if(pc.name === 'Darwin') flameVeilFromWC = false;
   if(typeof applyDeckMasterCommitEffects==='function') applyDeckMasterCommitEffects(pc);
   document.getElementById('commit-btn').disabled = true;
@@ -7115,7 +7127,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     }
     if(pf) pf.innerHTML=faceCard(pc,'me');
     if(of) of.innerHTML=faceCard(oc,'opp');
-    if(!reduce){ try{ document.querySelectorAll('#player-rear .bigcard,#player-rear2 .bigcard,#opp-rear .bigcard,#opp-rear2 .bigcard').forEach(function(el,ix){ el.style.animation='rc-flip .5s cubic-bezier(.2,.75,.3,1) both'; el.style.animationDelay=(0.04+ix*0.06)+'s'; }); }catch(e){} }
+    if(!reduce){ try{ document.querySelectorAll('#player-rear .bigcard,#player-rear2 .bigcard,#player-rear3 .bigcard,#opp-rear .bigcard,#opp-rear2 .bigcard,#opp-rear3 .bigcard').forEach(function(el,ix){ el.style.animation='rc-flip .5s cubic-bezier(.2,.75,.3,1) both'; el.style.animationDelay=(0.04+ix*0.06)+'s'; }); }catch(e){} }
     function tagPow(side,val){ var slot=document.getElementById('rc-card-'+side); if(!slot) return; var p=slot.querySelector('.tf-pow'); if(p){ p.id='rc-pow-'+side; p.classList.add('rc-pow'); p.textContent=R(val); } var v=slot.querySelector('video'); if(v){ try{ v.muted=true; v.play(); }catch(e){} } }
     tagPow('me',basePP); tagPow('opp',baseOP);
     function pw(side){ return document.getElementById('rc-pow-'+side); }
@@ -7129,8 +7141,8 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
     function pulse(side,k){ var c=document.getElementById('rc-card-'+side); if(c){ c.classList.remove('pu','pd'); void c.offsetWidth; c.classList.add(k); } }
     function allCardEls(){
       var out=[];
-      [['me',pc,['player-rear','player-rear2'],(typeof rearGuards!=='undefined'?rearGuards:[])],
-       ['opp',oc,['opp-rear','opp-rear2'],(typeof pendingOppRears!=='undefined'?pendingOppRears:[])]].forEach(function(row){
+      [['me',pc,['player-rear','player-rear2','player-rear3'],(typeof rearGuards!=='undefined'?rearGuards:[])],
+       ['opp',oc,['opp-rear','opp-rear2','opp-rear3'],(typeof pendingOppRears!=='undefined'?pendingOppRears:[])]].forEach(function(row){
         var side=row[0], fCard=row[1], ids=row[2], sups=row[3]||[];
         (sups||[]).forEach(function(sc,k){ if(sc && ids[k]){ var e=document.getElementById(ids[k]); if(e) out.push({name:sc.name, el:e}); } });
         var fEl=document.getElementById('rc-card-'+side); if(fEl && fCard) out.push({name:fCard.name, el:fEl});
@@ -7178,7 +7190,7 @@ function playResolutionCinematic(pc, oc, steps, basePP, baseOP, finalPP, finalOP
       try{ if(typeof cardVFXKind==='function'&&typeof playSkillVFX==='function'){ var _mk=cardVFXKind(pc); if(_mk){ var _mo=(_mk==='slash'&&typeof slashClip==='function')?{idx:slashClip(pc,(finalPP-basePP),won==='win')}:{}; playSkillVFX(_mk, document.getElementById('rc-card-me'), _mo); } var _ok=cardVFXKind(oc); if(_ok){ var _oo=(_ok==='slash'&&typeof slashClip==='function')?{idx:slashClip(oc,(finalOP-baseOP),won==='lose')}:{}; playSkillVFX(_ok, document.getElementById('rc-card-opp'), _oo); } } }catch(e){}
       var cm=document.getElementById('rc-card-me'), co=document.getElementById('rc-card-opp');
       if(cm) cm.classList.add('rc-clash'); if(co) co.classList.add('rc-clash');
-      ['player-rear','player-rear2','opp-rear','opp-rear2'].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.add('rc-dim'); });
+      ['player-rear','player-rear2','player-rear3','opp-rear','opp-rear2','opp-rear3'].forEach(function(id){ var e=document.getElementById(id); if(e) e.classList.add('rc-dim'); });
       var fld=document.querySelector('#v-turn .field');
       setTimeout(function(){
         if(fld){ fld.classList.remove('rc-shake'); void fld.offsetWidth; fld.classList.add('rc-shake');
@@ -8982,7 +8994,7 @@ function nextTurn(){
   pendingOppCard = null;
   preSelectedCard = null;
   rearGuardIdxs = []; pendingOppRears = [];
-  ['player-rear','player-rear2','opp-rear','opp-rear2'].forEach(function(_id){ var _e=document.getElementById(_id); if(_e){ _e.style.display='none'; _e.innerHTML=''; _e.className='rear-slot'+(_id.indexOf('opp')===0?' enemy':''); } });
+  ['player-rear','player-rear2','player-rear3','opp-rear','opp-rear2','opp-rear3'].forEach(function(_id){ var _e=document.getElementById(_id); if(_e){ _e.style.display='none'; _e.innerHTML=''; _e.className='rear-slot'+(_id.indexOf('opp')===0?' enemy':''); } });
   conditionLocked = false;
   flameVeilFromWC = false;
 
@@ -12400,7 +12412,7 @@ function wireFieldCardPreview(){
   // 7/13/26: rear-guard slots had zero rich preview before this -- only a bare native title
   // tooltip (see fillRearSlot()) -- so mini-ing their card face (name/K-D/chips now hidden per
   // .bigcard.mini) would have made that info genuinely inaccessible, not just decluttered.
-  ['player-field','opp-field','player-rear','player-rear2','opp-rear','opp-rear2'].forEach(function(id){
+  ['player-field','opp-field','player-rear','player-rear2','player-rear3','opp-rear','opp-rear2','opp-rear3'].forEach(function(id){
     var el=document.getElementById(id); if(!el || el._dmPreviewWired) return; el._dmPreviewWired=true;
     el.addEventListener('mouseover', function(e){
       if(window.matchMedia && window.matchMedia('(hover:none)').matches) return;
@@ -14084,7 +14096,7 @@ function resetMatchState(){
   document.getElementById('draw-btn').style.display='none';
   document.getElementById('player-field').innerHTML='<span class="placeholder">your card</span>';
   document.getElementById('opp-field').innerHTML='<span class="placeholder">opponent card</span>';
-  ['player-rear','player-rear2','opp-rear','opp-rear2'].forEach(function(_id){ var _e=document.getElementById(_id); if(_e){ _e.style.display='none'; _e.innerHTML=''; _e.className='rear-slot'+(_id.indexOf('opp')===0?' enemy':''); } });
+  ['player-rear','player-rear2','player-rear3','opp-rear','opp-rear2','opp-rear3'].forEach(function(_id){ var _e=document.getElementById(_id); if(_e){ _e.style.display='none'; _e.innerHTML=''; _e.className='rear-slot'+(_id.indexOf('opp')===0?' enemy':''); } });
   document.getElementById('opp-area').className='opp-waiting';
   document.getElementById('opp-area').innerHTML='⏳ Waiting for draw…';
   // reset condition slot
@@ -14284,7 +14296,7 @@ body:has(#v-turn.on) .howto-btn{display:none}
       <div class="ht-step"><span class="ht-n">1</span><div><b>Draw</b><p>Tap to draw and start the turn.</p></div></div>
       <div class="ht-step"><span class="ht-n">2</span><div><b>Reveal the Condition</b><p>A rule that reshapes this duel, shown up top. Read it — it can flip the whole fight.</p></div></div>
       <div class="ht-step"><span class="ht-n">3</span><div><b>Conjure a Fighter ⚡</b><p>Drag a card onto the field (or tap it). You need enough Energy (shown on the card) to conjure it — conjuring spends that Energy. This card does the fighting.</p></div></div>
-      <div class="ht-step"><span class="ht-n">4</span><div><b>Call Supports 📣 (free)</b><p>Drag up to 2 more cards to the rear slots. Their Called ability fires automatically and boosts your Fighter — no energy cost.</p></div></div>
+      <div class="ht-step"><span class="ht-n">4</span><div><b>Call Supports 📣 (free)</b><p>Drag more cards to the rear slots — 2 to start, growing to 3 deep into a long match. Their Called ability fires automatically and boosts your Fighter — no energy cost.</p></div></div>
       <div class="ht-step"><span class="ht-n">5</span><div><b>Links 🔗</b><p>When a support shares a lore group with your Fighter, the Link fires for bonus power. Tap a link name to see its members.</p></div></div>
       <div class="ht-step"><span class="ht-n">6</span><div><b>Commit</b><p>Lock it in. Both cards reveal and clash — the higher total power wins the duel.</p></div></div>
       <div class="ht-note"><b>⚡ Energy</b> only regenerates +1 a turn through the 4th duel — then about a third of your current cap each turn after that — against a cap that keeps climbing as the match goes on (3, 4, 5, 6, then +2 per duel). It does not refill to full. Leftover energy carries over, so play cheap Fighters to bank charge for bigger plays and Spells later. Conjuring a Fighter spends Energy equal to its cost; supports are free.</div>
