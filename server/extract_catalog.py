@@ -58,7 +58,9 @@ def find_number(s, name):
     if not m: sys.exit("no decl: "+name)
     return m.group(1)
 
-names=['HAND_CARDS','DECK_POOL','OPP_CARDS','LINK_GROUPS','STARTER_SET','CALLED','CARD_RULES','COST_OVERRIDE']
+names=['HAND_CARDS','DECK_POOL','OPP_CARDS','LINK_GROUPS','STARTER_SET','CALLED','CARD_RULES','COST_OVERRIDE',
+       'CARD_RACE','REMNANT_POW','TRIGGERS','OPTIONAL_HAND_RETURN']   # 8/5/26 Milestone A: Bloodlines Clash
+       # (camp-of-race) + Death Remnant power overrides + deck-trigger cards + optional hand-return rules
 blocks=["var %s = %s;"%(n, find_literal(html,n)) for n in names]
 # 8/5/26: CONDITIONS' `rule` field string-concatenates CONDITION_VETERAN_CAP -- must be in scope
 # before CONDITIONS is evaluated, or JSC throws a ReferenceError. Extract it first, as a number.
@@ -85,13 +87,14 @@ OPP_CARDS.forEach(function(c){ if(!cards[c.name]) add(c,true); });
 var links={}; LINK_GROUPS.forEach(function(g){ links[g.id]={name:g.name,icon:g.icon,pow:g.pow,members:g.members}; });
 var conditions=CONDITIONS.map(function(c){ return {id:c.id,mech:c.mech,tag:c.tag,prob:c.prob,rule:c.rule}; });
 var traits=TRAITS.map(function(t){ return {id:t.id,name:t.name,pow:t.pow,cond:t.cond||null,desc:t.desc}; });
-print(JSON.stringify({cards:cards, called:CALLED, rules:CARD_RULES, links:links, starter:starter, costOverride:COST_OVERRIDE, conditions:conditions, traits:traits}));
+print(JSON.stringify({cards:cards, called:CALLED, rules:CARD_RULES, links:links, starter:starter, costOverride:COST_OVERRIDE, conditions:conditions, traits:traits, cardRace:CARD_RACE, remnantPow:REMNANT_POW, triggers:TRIGGERS, optionalHandReturn:OPTIONAL_HAND_RETURN}));
 """
 tf=tempfile.NamedTemporaryFile('w',suffix='.js',delete=False,encoding='utf-8'); tf.write(prog); tf.close()
 r=subprocess.run([JSC,tf.name],capture_output=True,text=True); os.unlink(tf.name)
 if r.returncode!=0: print("JSC ERR rc",r.returncode,"\nOUT:",r.stdout[:800],"\nERR:",r.stderr[:800]); sys.exit(1)
 data=json.loads(r.stdout)
 json.dump(data, open(OUT,'w',encoding='utf-8'), ensure_ascii=False, indent=1)
-print("OK -> catalog.json | cards:%d starter:%d links:%d rules:%d called:%d conditions:%d traits:%d"%(
+print("OK -> catalog.json | cards:%d starter:%d links:%d rules:%d called:%d conditions:%d traits:%d cardRace:%d remnantPow:%d triggers:%d optionalHandReturn:%d"%(
     len(data['cards']), len(data['starter']), len(data['links']), len(data['rules']), len(data['called']),
-    len(data['conditions']), len(data['traits'])))
+    len(data['conditions']), len(data['traits']), len(data['cardRace']), len(data['remnantPow']),
+    len(data['triggers']), len(data['optionalHandReturn'])))

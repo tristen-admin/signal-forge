@@ -42,6 +42,11 @@ CREATE TABLE IF NOT EXISTS bonds(user_id TEXT NOT NULL, pair TEXT NOT NULL, coun
 -- match/Ascension run sessions (JSON state) so they survive a restart
 CREATE TABLE IF NOT EXISTS game_sessions(id TEXT PRIMARY KEY, kind TEXT NOT NULL, state TEXT NOT NULL, updated TEXT NOT NULL);
 
+-- 8/5/26 Milestone A: the player's saved deck (ordered card uids, JSON). One active build per
+-- user for now -- match/start reads this; falls back to owned[:4] when a user has never saved one
+-- (new accounts, or anyone who played before this table existed) so nothing breaks for them.
+CREATE TABLE IF NOT EXISTS decks(user_id TEXT PRIMARY KEY, card_uids TEXT NOT NULL, updated TEXT NOT NULL);
+
 -- secondary market
 CREATE TABLE IF NOT EXISTS listings(
   id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, seller_id TEXT,
@@ -119,3 +124,13 @@ def session_save(sid, kind, obj):
 def session_load(sid):
     r = conn().execute("SELECT state FROM game_sessions WHERE id=?", (sid,)).fetchone()
     return json.loads(r['state'], object_hook=_deser) if r else None
+
+# ── saved deck (Milestone A: real deck persistence, replacing the owned[:4] match/start stub) ──
+def deck_save(user_id, uids):
+    js = json.dumps(list(uids))
+    with tx() as c:
+        c.execute("INSERT INTO decks(user_id,card_uids,updated) VALUES(?,?,?) "
+                  "ON CONFLICT(user_id) DO UPDATE SET card_uids=?,updated=?", (user_id, js, now(), js, now()))
+def deck_load(user_id):
+    r = conn().execute("SELECT card_uids FROM decks WHERE user_id=?", (user_id,)).fetchone()
+    return json.loads(r["card_uids"]) if r else None

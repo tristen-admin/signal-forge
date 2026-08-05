@@ -41,6 +41,48 @@ FORGE_TIERS = {                  # real-money Forge purchase tiers (payment proc
 def card_pow(t):    return CARD_CATALOG.get(t, {}).get("pow", 8)
 def card_rarity(t): return CARD_CATALOG.get(t, {}).get("rarity", "common")
 def edition_of(t):  return EDITIONS.get(card_rarity(t), 1000)
+def card_cost(t):   return _CAT["costOverride"].get(t, CARD_FULL.get(t, {}).get("cost", 2))
+
+# 8/5/26 Milestone A: rarity ordinal ranking for 3 Conditions (Rarity Reckoning/Commons' Revolt/
+# Legends' Clash). Hand-maintained here (not extracted) because it's a fixed design ranking, not
+# per-card data -- same category as EDITIONS/RARITY_BASE above. Client's own RARITY_ORDER
+# (index.html:10597) still carries the dead uncommon:3 key too; harmless (no card is ever uncommon).
+RARITY_ORDER = {"apex": 0, "ultra": 1, "rare": 2, "common": 4}
+
+# ── Bloodlines Clash camp system (client index.html:5386-5405) ──
+# RACE_CAMP/CAMP_BEATS are fixed design constants (mirrors client exactly); CARD_RACE (72 explicit
+# entries) comes from catalog.json (extract_catalog.py) since it's real per-card data. Cards with
+# no CARD_RACE entry fall through to a deterministic hash-spread across the 3 camps -- ~80 of 152
+# collection cards have no race lore yet, and treating them all as 'Human'/Amageras would make
+# Bloodlines Clash a near no-op (see the client's own comment at the same spot). Ported faithfully,
+# NOT reapproximated -- differential-verified against a live jsc run of the real campOf() for all
+# 152 COLLECTION cards (server/verify_camp.py), 0 mismatches.
+CARD_RACE = _CAT.get("cardRace", {})
+REMNANT_POW = _CAT.get("remnantPow", {})
+TRIGGERS = _CAT.get("triggers", {})                    # fire off the top of the deck on a LOST duel
+OPTIONAL_HAND_RETURN = _CAT.get("optionalHandReturn", {})   # e.g. Kravyn the Collector: onWin/onCloseLoss
+RACE_CAMP = {
+    "Human": "Amageras", "Kaldrei": "Amageras", "Kaidrun": "Amageras", "Celestial": "Amageras", "Construct": "Amageras", "Dreikan": "Amageras",
+    "Marrowen": "Omitsuki", "Nightclaw": "Omitsuki", "Undying": "Omitsuki", "Revenant": "Omitsuki",
+    "Vysh'ra": "Kitanoo", "N'imkatta": "Kitanoo", "Wrothlan": "Kitanoo", "Dragonkin": "Kitanoo", "Beast": "Kitanoo",
+    "Spirit": "Kitanoo", "Fae": "Kitanoo", "Dractyl": "Kitanoo", "Thennlar": "Kitanoo", "Xylotes": "Kitanoo",
+}
+CAMP_BEATS = {"Amageras": "Omitsuki", "Omitsuki": "Kitanoo", "Kitanoo": "Amageras"}
+_CAMPS_FALLBACK = ["Amageras", "Omitsuki", "Kitanoo"]
+
+def _name_hash(s):
+    """Exact port of the client's _nameHash: h=(h<<5)-h+charCode, coerced to int32 each step, abs'd."""
+    h = 0
+    for ch in str(s or ""):
+        h = (h * 31 + ord(ch)) & 0xFFFFFFFF
+        if h >= 0x80000000: h -= 0x100000000
+    return abs(h)
+
+def race_of(name): return CARD_RACE.get(name, "Human")
+def camp_of(name):
+    if name in CARD_RACE: return RACE_CAMP.get(race_of(name), "Amageras")
+    return _CAMPS_FALLBACK[_name_hash(name) % 3]
+def camp_beats(a, b): return CAMP_BEATS.get(a) == b
 
 # ── auth ──
 def new_salt():  return secrets.token_hex(16)

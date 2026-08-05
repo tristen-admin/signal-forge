@@ -1,32 +1,70 @@
 """
 Signal Forge — authoritative match engine (server-side port of the client resolve()).
-Faithful transcription of the client's duel resolution: on-commit abilities, the 8 power
-conditions, Living-Card traits, and the resolution guards (Ahdor / Last Stand / Regen / Death
-Remnant), plus best-of-7 match state. The server owns every outcome; the client only requests.
+Faithful transcription of the client's Fighter-only duel resolution: on-commit abilities (both
+sides), all 32 real whole-duel Conditions, Living-Card traits, resolution guards (Ahdor / generic
+Record Guard / Last Stand / Regenerating Horror / Untouchable / Ledger Ward / Uso Oso's Bulwark),
+Death Remnants, win/lose/tie card-lifecycle routing, and the real charge/energy economy. The
+server owns every outcome; the client only requests.
 
-Parity note: this mirrors the client resolve() as of 2026-07-03. The client rules are hand-authored
-imperative JS and still changing (parallel session) — keep this in sync, or (better) migrate both to
-one data-driven rules spec. Formations are omitted here (server has no pairBonds table yet).
+Milestone A scope (rear-guard/Called/Link/Deck-Master-tier effects are Milestone B — see the
+per-mechanic comments below for exactly what's deferred and why). Parity verified against
+index.html as of 2026-08-05 via direct source reads + server/verify_camp.py + stress_test.py.
 """
 import json, os, random
 import rules
 
 # ── CARD CATALOG (name → pow/kills/deaths/rarity/abil), ported from HAND_CARDS + DECK_POOL ──
 CATALOG = {n: {"pow": c["pow"], "kills": 0, "deaths": 0, "rarity": c["rarity"], "abil": c["abil"]} for n, c in rules.CARD_FULL.items()}   # canonical (catalog.json)
-CHAOS_CONDS = {"forceswap", "surge", "mirror"}
+
+# Client's own top-level const (index.html:3493), read directly since catalog.json's static
+# extraction doesn't surface it (it's only consumed at extraction-time to let CONDITIONS' rule-text
+# string-concatenate it). Caps the 3 veteran-scaling Conditions -- see the 2026-08-01 fix history.
+CONDITION_VETERAN_CAP = 15
+
+# 8/5/26 Milestone A: full real tag set from catalog.json's CONDITIONS metadata (not hand-guessed).
+# The interpreter's chaos-check (_ctx's "chaos" key, read by CARD_RULES entries like {"chaos":true})
+# was silently wrong before this: CHAOS_CONDS only listed 3 ids (forceswap/surge/mirror) when the
+# client's real tag:'chaos' set is 7 (also hollowreckoning/highroller/dredge/wildpit) -- any card
+# whose ability checks the chaos flag was silently misjudging "is this a chaos condition" for 4 of
+# the 7 real cases. Sourced directly from the extracted data, not maintained by hand, so it can't
+# drift again the same way.
+CHAOS_CONDS = {c["id"] for c in rules._CAT["conditions"] if c.get("tag") == "chaos"}
 FORMATION_TIERS = [(15, "Legendary Duo", 3), (8, "Brothers-in-Arms", 2), (3, "Allied", 1)]
-# power conditions resolve() acts on (others — noretreat/openbook/recall etc. — don't touch power)
-POWER_CONDS = ["none","lowest","surge","mirror","forceswap","provingground","hollowreckoning","recordties","abilitylock"]
+
+# 8/5/26 Milestone A: real weighted condition selection. Was `random.choice(POWER_CONDS)` over a
+# hand-picked 9-item subset (the only ones the old resolve() knew how to apply at all) -- now draws
+# from all 32 real conditions, weighted by their real printed probabilities (catalog.json's
+# CONDITIONS, which mirrors the client's own CONDITIONS array byte-for-byte via extract_catalog.py).
+CONDITIONS = rules._CAT["conditions"]
+def _parse_prob(s):
+    try: return float(str(s).rstrip("%"))
+    except (TypeError, ValueError): return 1.0
+_COND_IDS = [c["id"] for c in CONDITIONS]
+_COND_WEIGHTS = [_parse_prob(c["prob"]) for c in CONDITIONS]
+def pick_condition():
+    return random.choices(_COND_IDS, weights=_COND_WEIGHTS, k=1)[0]
+
+# 8/5/26 Milestone A: reveal-time effects. Reinforce/Dredge/Wild Pit fire the MOMENT the condition
+# is picked -- before either side commits a fighter (index.html:5163-5166) -- not during resolve().
+# The server's pick_condition() call sites (match/start, end of match/commit) own the real uid-keyed
+# hand/deck lists engine.py never sees (m["hand"] is a bare type-name mirror, refreshed each commit
+# for CARD_RULES ctx purposes only) -- so this returns instructions, and app.py performs the actual
+# list moves, same separation as `destination` below. Wild Pit's OTHER effect (locking rear-guard
+# support zones) is a no-op until Milestone B's rear-guard slots exist -- nothing to lock yet.
+def condition_reveal_effects(cond_id):
+    if cond_id == "reinforce": return {"draw": 1, "discard": 0}
+    if cond_id == "dredge": return {"draw": 2, "discard": 2}
+    if cond_id == "wildpit": return {"draw": 1, "discard": 0}
+    return {"draw": 0, "discard": 0}
 
 def card(name):
     c = CATALOG.get(name, {"pow": 8, "kills": 0, "deaths": 0, "rarity": "common", "abil": ""})
     return {"name": name, **c}
 
-def new_match(deck_names):
-    # 8/5/26: starting charge was hardcoded 0 (also a duplicate dict key with spellDiscount,
-    # harmlessly self-overwriting but sloppy) -- client actually starts a match at
-    # duelEnergyCap(0)=3, not 0 (confirmed live: a fresh real match starts phase='drawn',
-    # charge=3). Both fixed: real starting value, duplicate keys removed.
+def new_match(deck_names, best_of=7, lobby_mode=False):
+    # 8/5/26: dual match-length (Milestone A) -- Public/Draft is Best-of-7-win-4, Ranked is
+    # Best-of-3-win-2 (was hardcoded >=4 forever, no way to run the Ranked format at all).
+    win_threshold = (best_of + 1) // 2
     return {"deck": list(deck_names), "hand": list(deck_names[:4]), "winnersCircle": [],
             "playerScore": [0, 0], "lastResult": None, "matchCommits": 0, "skullchainKills": 0,
             "ragwingWins": 0, "deathRemnantPow": 0, "oppNextDebuff": 0,
@@ -34,7 +72,8 @@ def new_match(deck_names):
             "untouchableUsed": False, "matchTraitPow": {}, "done": False, "log_last": [],
             "bonds": {}, "matchPlayed": set(), "banishPile": [], "charge": duel_energy_cap(0), "spellDiscount": 0,
             "spellOppPow": 0, "spellSelfPow": 0, "spellJam": False, "spellNullOpp": False,
-            "spellHand": [], "spellShield": False}
+            "spellHand": [], "spellShield": False, "deathRemnants": [],
+            "bestOf": best_of, "winThreshold": win_threshold, "lobbyMode": lobby_mode}
 
 def formation_tier(count):
     for n, name, bonus in FORMATION_TIERS:
@@ -47,39 +86,27 @@ def best_formation(card_name, deck_types, bonds):
         t = formation_tier(bonds.get("|".join(sorted([card_name, other])), 0))
         if t and (not best or t[1] > best[1]): best = (t[0], t[1], other)
     return best
-def pick_condition():
-    return random.choice(POWER_CONDS)
 
 def opponent_pool():
     return [n for n in CATALOG if n not in ("Bixie Bee", "Melanie")]
 
-# ── DATA-DRIVEN ABILITY SPEC (step 1 of the shared rules spec) ──
+# ── DATA-DRIVEN ABILITY SPEC ──
 # Each card -> ordered rules. A rule fires if its "if" condition holds, then applies one op:
-#   add:N  addvar:var,x:mult  mult:N  set:var  oppadd:N.  Conditions compare context vars.
-RULES = rules._CAT["rules"]   # canonical rules from catalog.json (was stale rules.json)
+#   add:N  addvar:var,x:mult  mult:N  set:var  oppadd:N  chargeGain:N.  Conditions compare context vars.
+RULES = rules._CAT["rules"]   # canonical rules from catalog.json
 SPELLS = json.load(open(os.path.join(os.path.dirname(__file__), "spells.json"), encoding="utf-8"))
 SPELL_IDS = [s["id"] for s in SPELLS]
 
 def _ctx(pc, oc, m, rec, cond_id):
-    # 8/5/26: banish_len added -- 13 real cards' CARD_RULES reference it (a banish-synergy
-    # archetype: Wingblade/Black Wings/Corvus/Rook/Falk/etc), surfaced by stress_test.py raising a
-    # loud KeyError the moment the freshly-regenerated 152-card catalog exercised one for the first
-    # time (previously silently absent from the stale 85-card/61-rule catalog). There is no real
-    # banish-pile mechanic server-side yet (Called/rear-guard effects are Milestone B) -- reads
-    # m["banishPile"] (added to new_match(), currently always empty) so this is honestly 0 for now,
-    # not faked, and needs zero further wiring once Milestone B actually starts populating it.
+    # 8/5/26: banish_len/rear_count/remnant_count/hand_banished are honest 0s -- no real rear-guard/
+    # Called/banish-pile state exists server-side yet (Milestone B). Not faked; will wire for free
+    # once that state exists, same reasoning as everywhere else in this file.
     return {"opp_deaths":oc["deaths"],"opp_kills":oc["kills"],"pc_kills":rec["k"],"pc_deaths":rec["d"],
             "opp_pow":oc["pow"],"pc_pow":pc["pow"],"last_result":m["lastResult"],"match_commits":m["matchCommits"],
             "player_wins":m["playerScore"][0],"player_losses":m["playerScore"][1],"hand_len":len(m["hand"]),
             "wc_len":len(m["winnersCircle"]),"skullchain":m["skullchainKills"],"ragwing":m["ragwingWins"],
             "banish_len":len(m.get("banishPile") or []),
-            # 8/5/26: same story as banish_len -- a systematic pass over every ctx var referenced
-            # anywhere in CARD_RULES (not just waiting for stress_test.py to stumble onto each one
-            # one at a time) found these 3 more: rear_count (rear-guard support count),
-            # remnant_count (Death Remnants), hand_banished (a hand-banish-effect count/flag).
-            # None have real server-side state yet -- all Milestone B (Called/rear-guard system) --
-            # honestly 0 for now, same as banish_len, not faked.
-            "rear_count":0, "remnant_count":0, "hand_banished":0,
+            "rear_count":0, "remnant_count":len(m.get("deathRemnants") or []), "hand_banished":0,
             "chaos":cond_id in CHAOS_CONDS,"wc_names":[c["name"] for c in m["winnersCircle"]]}
 def _cmp(a, op, b):
     if op == "==": return a == b
@@ -98,22 +125,25 @@ def eval_cond(cond, ctx):
     if "wc_has" in cond: return cond["wc_has"] in ctx["wc_names"]
     rhs = cond["n"] if "n" in cond else cond["s"] if "s" in cond else ctx[cond["v2"]]
     return _cmp(ctx[cond["v"]], cond["op"], rhs)
-# 8/5/26: op-code whitelist, versioned + loud-failure -- this is the actual anti-drift mechanism
-# for the interpreter itself (separate from re-syncing the DATA it reads). The condition-vocabulary
-# (eval_cond's or/and/chaos/wc_has/comparisons) held up for a month of daily CARD_RULES edits with
-# zero drift; the EFFECT-vocabulary did NOT -- chargeGain was added to real CARD_RULES entries
-# client-side (confirmed: `python3 -c "...set(r.keys() for r in RULES...)"` against a fresh
-# extract_catalog.py pull found it in live data) and this interpreter silently never applied it,
-# for who knows how long, with no error anywhere. A silent `continue`/skip on an unrecognized key
-# is exactly how that happened -- raising here means a THIRD undetected drift is now impossible;
-# the match resolution fails loudly and visibly instead.
-RULES_SCHEMA_VERSION = 1   # bump any time a new op-code is added below
+# 8/5/26: op-code whitelist, versioned + loud-failure -- the actual anti-drift mechanism for the
+# interpreter itself. A silent skip on an unrecognized key is exactly how chargeGain drifted
+# unnoticed once already; raising here means a third undetected drift is now impossible.
+RULES_SCHEMA_VERSION = 1
 KNOWN_RULE_OPS = {"add", "addvar", "mult", "set", "oppadd", "chargeGain"}
 
 def duel_energy_cap(match_commits):
     """Exact server-side mirror of the client's duelEnergyCap(): d=matchCommits+1; d<=4 ? d+2 : 2d-2."""
     d = (match_commits or 0) + 1
     return d + 2 if d <= 4 else 2*d - 2
+
+def energy_regen_per_turn(match_commits):
+    """Exact mirror of the client's energyRegenPerTurn(): d=matchCommits+1; d<5 -> 1, else
+    max(2, round(duelEnergyCap()/3)). Was a flat +1 forever server-side -- correct through duel 4,
+    silently under-regenerating every turn after (the client ramps regen alongside the rising cap;
+    a flat 1 falls further behind the cap every turn past the 4th)."""
+    d = (match_commits or 0) + 1
+    if d < 5: return 1
+    return max(2, round(duel_energy_cap(match_commits) / 3))
 
 def _apply_rules(name, ctx, playerPow, oppPow, log, m=None):
     for rule in RULES.get(name, []):
@@ -134,20 +164,22 @@ def _apply_rules(name, ctx, playerPow, oppPow, log, m=None):
 # ── the faithful resolve() port ──
 def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None):
     """pc, oc: card dicts. pc_record: the player card's live DB record {k,d,ok,od} (drives traits +
-    the pc.kills used by conditions). Returns dict with outcome/powers/log; mutates match state m."""
+    the pc.kills used by conditions). Returns dict with outcome/powers/log/destination; mutates
+    match state m. `destination` (winners_circle|hand|deck_bottom) and `draw_self` tell the caller
+    (app.py, which owns the real uid-keyed hand/deck lists) what list-move to perform."""
     playerPow = committed_pow if committed_pow is not None else pc["pow"]
     oppPow = oc["pow"]
     log = []
     rec = pc_record or {"k": pc["kills"], "d": pc["deaths"], "ok": 0, "od": 0}
     pcK, pcD = rec["k"], rec["d"]                    # player card's live record
-    ocK, ocD = oc["kills"], oc["deaths"]             # opponent card's record
-    hand_len = len(m["hand"])
+    ocK, ocD = oc["kills"], oc["deaths"]              # opponent card's record
     wc = m["winnersCircle"]
 
     # ── ENERGY SPELL EFFECTS (armed by the client Charge system; inert unless set) ──
     if m.get("spellJam"): cond_id = "jammed"; log.append("📡 Jammer: active condition negated")
     if m.get("spellOppPow"): oppPow += m["spellOppPow"]; log.append(f"⚡ Interrupt: opponent {m['spellOppPow']} power")
     if m.get("spellSelfPow"): playerPow += m["spellSelfPow"]; log.append(f"⚡ Amplify: +{m['spellSelfPow']} power")
+
     # ── LIVING-CARD TRAITS — ONE conditional trait per card (fires only in-context; mirrors client) ──
     _tctx = {"wins": m["playerScore"][0], "losses": m["playerScore"][1], "lastLose": (m["lastResult"] == "lose"),
              "oppDeaths": oc["deaths"], "oppKills": oc["kills"], "myKills": pc.get("kills", 0)}
@@ -167,13 +199,16 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None):
 
     abilityLocked = (cond_id == "abilitylock")
     if abilityLocked: log.append("⚡ Ability Lock — all card effects suppressed")
-    akatoshUnmakes = (pc["name"] == "Akatosh, the Golden Dragon") and not abilityLocked
-    if akatoshUnmakes: log.append("🐉 Akatosh unmakes the arena — condition takes no effect")
+    # 8/5/26: fixed stale hardcoded name -- client renamed this card 'Ourevos, the Golden Dragon'
+    # (task #166); server still checked the old 'Akatosh, the Golden Dragon', a dead guard nobody
+    # had noticed silently never firing.
+    akatoshUnmakes = (pc["name"] == "Ourevos, the Golden Dragon") and not abilityLocked
+    if akatoshUnmakes: log.append("🐉 Ourevos unmakes the arena — the active condition takes no effect this duel.")
 
     if m["oppNextDebuff"]:
         oppPow += m["oppNextDebuff"]; log.append(f"🧬 Darwin's Curse: opponent {m['oppNextDebuff']} power"); m["oppNextDebuff"] = 0
 
-    # ── ON-COMMIT ABILITIES ──
+    # ── ON-COMMIT ABILITIES (both fighters — client fires both, index.html:8568-8584) ──
     if not abilityLocked:
         n = pc["name"]
         if n == "Conduit Adept": m["charge"] = min(duel_energy_cap(m.get("matchCommits", 0)), m.get("charge", 0) + 1); log.append("⚡ Conduit Adept: +1 Charge")
@@ -188,20 +223,134 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None):
         else:
             playerPow, oppPow = _apply_rules(n, ctx, playerPow, oppPow, log, m)
 
-    # ── APPLY CONDITION ──
+        # 8/5/26 Milestone A: opponent's OWN on-commit ability now fires too (client fires BOTH
+        # fighters' CARD_RULES every duel; engine.py only ever fired the player's side, leaving any
+        # opponent card with a self-buff/debuff CARD_RULES entry — 99 real entries exist across the
+        # catalog — silently inert server-side, a systematic opponent-underpower bug). Bot-only
+        # stat fields the client reads from its own persistent bot-hand/WC/banish/deck simulation
+        # have no server equivalent (the server's opponent is a fresh random card per duel, not a
+        # persistent bot session — see opponent_pool()) and honestly default to 0/False, same
+        # pattern as the player's own rear_count/remnant_count above. m=None on this call:
+        # chargeGain in an opponent card's rules has no server-side opponent-charge target to add
+        # to, so it silently no-ops rather than incorrectly crediting the PLAYER's own charge.
+        if oc.get("name") and RULES.get(oc["name"]):
+            octx = {"opp_deaths": pcD, "opp_kills": pcK, "pc_kills": ocK, "pc_deaths": ocD,
+                    "opp_pow": pc["pow"], "pc_pow": oc["pow"],
+                    "last_result": {"win": "lose", "lose": "win"}.get(m["lastResult"], m["lastResult"]),
+                    "match_commits": m["matchCommits"], "player_wins": m["playerScore"][1], "player_losses": m["playerScore"][0],
+                    "hand_len": 0, "wc_len": 0, "skullchain": 0, "ragwing": 0,
+                    "banish_len": 0, "rear_count": 0, "remnant_count": 0, "hand_banished": 0,
+                    "chaos": cond_id in CHAOS_CONDS, "wc_names": []}
+            oppPow, playerPow = _apply_rules(oc["name"], octx, oppPow, playerPow, log, None)
+
+    # ── APPLY CONDITION — all 26 power/tiebreak conditions (the other 6 — noretreat/openbook/
+    # reinforce/dredge/wildpit's lock/abilitylock — don't touch power; see condition_reveal_effects
+    # and the abilityLocked gate above) ──
     if not akatoshUnmakes:
-        if cond_id == "lowest": playerPow, oppPow = -playerPow, -oppPow
+        if cond_id == "veteranedge":
+            cap = CONDITION_VETERAN_CAP
+            if (pc["pow"] or 0) < (oc["pow"] or 0):
+                v = min(cap, (pcK or 0)//5); playerPow += v
+                log.append(f"🎖️ Veteran's Edge: your weaker card +{v}" + (", capped" if v >= cap else ""))
+            elif (oc["pow"] or 0) < (pc["pow"] or 0):
+                v = min(cap, (ocK or 0)//5); oppPow += v
+                log.append(f"🎖️ Veteran's Edge: their weaker card +{v}" + (", capped" if v >= cap else ""))
+            else: log.append("🎖️ Veteran's Edge: equal base power — no edge")
+        elif cond_id == "freshblood":
+            if (pcK or 0) == 0: playerPow += 10
+            if (ocK or 0) == 0: oppPow += 10
+            log.append("🌱 Fresh Blood: unproven cards (0 kills) +10")
+        elif cond_id == "puritytrial":
+            if (pcD or 0) == 0 and (pcK or 0) >= 1: playerPow += 5
+            if (ocD or 0) == 0 and (ocK or 0) >= 1: oppPow += 5
+            log.append("✨ Purity Trial: Pristine (0 deaths, 1+ kill) +5")
+        elif cond_id == "puritydrain":
+            if (pcD or 0) == 0 and (pcK or 0) >= 1: playerPow = max(1, playerPow-5)
+            if (ocD or 0) == 0 and (ocK or 0) >= 1: oppPow = max(1, oppPow-5)
+            log.append("🕷️ Purity Drain: Pristine cards are hunted −5")
+        elif cond_id == "bloodreckoning":
+            playerPow = max(1, playerPow - (pcD or 0)//2); oppPow = max(1, oppPow - (ocD or 0)//2)
+            log.append("💀 Blood Reckoning: −1 power per 2 deaths on record")
+        elif cond_id == "deathwish":
+            dw1 = min(CONDITION_VETERAN_CAP, pcD or 0); dw2 = min(CONDITION_VETERAN_CAP, ocD or 0); playerPow += dw1; oppPow += dw2
+            log.append(f"☠️ Deathwish: scars fuel fury — you +{dw1}, opp +{dw2}")
+        elif cond_id == "underdog":
+            if (pc["pow"] or 0) < (oc["pow"] or 0): playerPow += 3
+            elif (oc["pow"] or 0) < (pc["pow"] or 0): oppPow += 3
+            log.append("📉 Underdog Rising: the weaker base power +3")
+        elif cond_id == "rarityreckoning":
+            rp, ro = rules.RARITY_ORDER.get(pc["rarity"], 4), rules.RARITY_ORDER.get(oc["rarity"], 4)
+            if rp < ro: playerPow += 3
+            elif ro < rp: oppPow += 3
+            log.append("💎 Rarity Reckoning: the rarer card +3")
+        elif cond_id == "commonsrevolt":
+            rp, ro = rules.RARITY_ORDER.get(pc["rarity"], 4), rules.RARITY_ORDER.get(oc["rarity"], 4)
+            if rp > ro: playerPow += 5
+            elif ro > rp: oppPow += 5
+            log.append("✊ Commons' Revolt: the lower rarity +5")
+        elif cond_id == "giantslayer":
+            if abs((pc["pow"] or 0) - (oc["pow"] or 0)) >= 10:
+                if (pc["pow"] or 0) < (oc["pow"] or 0): playerPow = oppPow + 1; log.append("🗡️ Giant Slayer: your underdog fells the giant")
+                else: oppPow = playerPow + 1; log.append("🗡️ Giant Slayer: their underdog fells the giant")
+            else: log.append("🗡️ Giant Slayer: no giant to slay (gap < 10)")
+        elif cond_id == "highroller":
+            a, b = 5 + random.randint(0, 5), 5 + random.randint(0, 5)
+            playerPow += a; oppPow += b; log.append(f"🎲 High Roller: +{a} you, +{b} opponent")
+        elif cond_id == "momentumtide":
+            if m["playerScore"][0] < m["playerScore"][1]: playerPow += 3; log.append("🌊 Momentum's Tide: you are behind — +3")
+            elif m["playerScore"][1] < m["playerScore"][0]: oppPow += 3; log.append("🌊 Momentum's Tide: opponent behind — +3")
+            else: log.append("🌊 Momentum's Tide: even match — no swing")
+        elif cond_id == "eldersreach":
+            er1 = min(CONDITION_VETERAN_CAP, ((pcK or 0)+(pcD or 0))//4); er2 = min(CONDITION_VETERAN_CAP, ((ocK or 0)+(ocD or 0))//4)
+            playerPow += er1; oppPow += er2; log.append(f"📜 Elder's Reach: +1 power per 4 duels fought (you +{er1}, opp +{er2})")
+        elif cond_id == "doubleedged":
+            playerPow += 5; oppPow += 5; log.append("⚔️ Twin Surge: both conjured units +5 power")
+        elif cond_id == "legendsclash":
+            playerPow = max(1, playerPow + (2 if pc["rarity"] == "apex" else -2))
+            oppPow = max(1, oppPow + (2 if oc["rarity"] == "apex" else -2))
+            log.append("👑 Legends' Clash: Apex +2, all others −2")
+        elif cond_id == "woundedbeast":
+            if (pcD or 0) >= 3: playerPow += 2
+            if (ocD or 0) >= 3: oppPow += 2
+            log.append("🐺 Wounded Beast: 3+ deaths veterans +2")
+        elif cond_id == "survivorsground":
+            if (pcD or 0) < (ocD or 0): playerPow += 3
+            elif (ocD or 0) < (pcD or 0): oppPow += 3
+            log.append("⚰️ Survivor's Ground: fewer deaths +3")
+        elif cond_id == "purereflection":
+            playerPow = rules.card_cost(pc["name"]) * 10; oppPow = rules.card_cost(oc["name"]) * 10
+            log.append(f"🪞 Pure Reflection: power becomes Charge cost ×10 (you {playerPow} vs opp {oppPow})")
+        elif cond_id == "bloodlinesclash":
+            # 8/5/26: uses the card's OWN camp only -- client's effectiveCampOf() lets a set Deck
+            # Master's camp override the committed card's own (index.html:5412-5419), but the
+            # server has no Deck-Master-identity concept for the current match at all yet
+            # (Deck-Master-tier resolve effects are the same gap — Milestone B). Simplification is
+            # honest and narrow: only matters for a match with a Deck Master set, and only changes
+            # which side of THIS one condition's +6 fires, not whether it fires.
+            campP, campO = rules.camp_of(pc["name"]), rules.camp_of(oc["name"])
+            if campP != campO and rules.camp_beats(campP, campO): playerPow += 6; log.append(f"🔱 Bloodlines Clash: {campP} overwhelms {campO} — +6")
+            elif campP != campO and rules.camp_beats(campO, campP): oppPow += 6; log.append(f"🔱 Bloodlines Clash: {campO} overwhelms {campP} — +6")
+            else: log.append(f"🔱 Bloodlines Clash: same camp ({campP}) — no swing")
+        elif cond_id == "lowest":
+            playerPow, oppPow = -playerPow, -oppPow
         elif cond_id == "surge":
             if random.random() > 0.5: playerPow += 6; log.append("🌪️ Surge: +6 you")
             else: oppPow += 6; log.append("🌪️ Surge: +6 opponent")
-        elif cond_id == "mirror": playerPow, oppPow = oc["pow"], pc["pow"]; log.append("🔄 Mirror")
+        elif cond_id == "mirror":
+            playerPow, oppPow = oc["pow"], pc["pow"]; log.append("🔄 Mirror")
         elif cond_id == "forceswap":
             if m["hand"]: sw = card(random.choice(m["hand"])); playerPow = sw["pow"]; log.append(f"🎲 Force Swap: → {sw['name']}")
             oppPow = card(random.choice(opponent_pool()))["pow"]; log.append("🎲 Force Swap: opp swapped")
+        elif cond_id == "wildpit":
+            log.append("🎲 Wild Pit: support zones stayed locked all duel — pure fighter power stands")
         elif cond_id == "provingground":
             if pc["pow"] > oc["pow"]: playerPow = max(1, playerPow-5); log.append("⛰️ Proving Ground: you −5")
             elif oc["pow"] > pc["pow"]: oppPow = max(1, oppPow-5); log.append("⛰️ Proving Ground: opp −5")
-        elif cond_id == "hollowreckoning": playerPow, oppPow = pcK, ocK; log.append(f"🌫️ Hollow Reckoning: {pcK} vs {ocK}")
+            else: log.append("⛰️ Proving Ground: evenly matched — no penalty")
+        elif cond_id == "hollowreckoning":
+            if (pc["pow"] or 0) < pcK: playerPow = pcK; log.append(f"🌫️ Hollow Reckoning: your power → career kills ({pcK})")
+            if (oc["pow"] or 0) < ocK: oppPow = ocK; log.append(f"🌫️ Hollow Reckoning: opponent power → career kills ({ocK})")
+            if (pc["pow"] or 0) >= pcK and (oc["pow"] or 0) >= ocK: log.append("🌫️ Hollow Reckoning: both already outpace their kills — no swing")
 
     # ── DETERMINE WINNER ──
     if playerPow > oppPow: won = "win"
@@ -210,21 +359,82 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None):
     if won == "tie" and cond_id == "recordties" and not akatoshUnmakes:
         if pcK > ocK: won = "win"; log.append("💀 Record Breaks Ties: win")
         elif pcK < ocK: won = "lose"; log.append("💀 Record Breaks Ties: lose")
+        else: log.append("💀 Record Breaks Ties: kills equal — true tie")
 
-    # ── RESOLUTION GUARDS ──
-    ability = pc.get("abil", "")
-    if won == "lose" and pc["name"] == "Ahdor" and not m["glacialGuardUsed"]:
-        m["glacialGuardUsed"] = True; won = "tie"; log.append("🛡 Record Guard: loss blocked, tied")
-    if won == "win" and not m["oppGuardUsed"] and not m.get("spellNullOpp") and "record guard" in (oc.get("abil", "").lower()):
-        m["oppGuardUsed"] = True; won = "tie"; log.append(f"🛡 {oc['name']} Record Guard: tied")
-    if won == "lose" and pc["name"] == "Hanse Waltz":
-        if abs(abs(playerPow) - abs(oppPow)) <= 3: won = "tie"; log.append("🌙 Last Stand: tied (≤3)")
+    # ── RESOLUTION GUARDS (exact client order, index.html:8738-8799) ──
+    forced_tie = False
+    # Ahdor Record Guard: block loss, force tie, return to hand (once per match). The client also
+    # grants +3 pow to 1-2 OTHER random hand cards -- deferred: the server's hand is a bare
+    # {uid,type} list with no per-instance power-modifier slot (power is always looked up fresh
+    # from CATALOG), so "a specific hand card is permanently +3 for the rest of this match" has
+    # nowhere to live yet. That's real new plumbing (a temp-bonus field threaded through hand
+    # storage + wherever a hand card's pow gets resolved at commit), not a one-line port -- the
+    # guard's CORE behavior (survive the loss, tie, return to hand) is faithfully ported below;
+    # only the bonus-power flourish is scoped out.
+    if won == "lose" and pc["name"] == "Ahdorah Khaan, Determined Soul" and not m["glacialGuardUsed"]:
+        m["glacialGuardUsed"] = True; forced_tie = True; won = "tie"
+        log.append("🛡 Record Guard: death blocked — Ahdor returns to hand (guard spent; +3 hand-card bonus not yet modeled server-side)")
+    # Opponent Record Guard — any opposing card with "record guard" ability text ties instead of losing (once per match)
+    if won == "win" and not m["oppGuardUsed"] and not m.get("spellNullOpp") and "record guard" in (oc.get("abil", "") or "").lower():
+        m["oppGuardUsed"] = True; won = "tie"
+        log.append(f"🛡 {oc['name']} Record Guard: tied")
+    # Last Stand: text-pattern match, NOT a hardcoded single name -- was hardcoded to literal
+    # name=='Hanse Waltz' server-side. Verified against the live catalog (not the client's own
+    # stale code-comment, which names 2 cards that no longer exist under those names): the real
+    # current carriers are Bram the Bulwark, Hanse Waltz (base printing), and Oathbound Shield.
+    # "The Bronzed Beast, Hanse Waltz" (the transformed variant) does NOT carry this text anymore
+    # -- it has its own distinct Blood Moon ability, handled separately in the destination logic below.
+    if won == "lose" and "last stand" in (pc.get("abil", "") or "").lower():
+        if abs(abs(playerPow) - abs(oppPow)) <= 3:   # faithful to the client's own abs(x)-abs(y) margin, not a plain diff
+            won = "tie"; log.append("🌙 Last Stand: lost by ≤3 — duel tied, no death recorded")
+    # The Regenerating Horror — regrows the first time it would lose (once per match)
     if won == "lose" and pc["name"] == "The Regenerating Horror" and not m["horrorRegenUsed"]:
-        m["horrorRegenUsed"] = True; won = "tie"; log.append("👁 Regeneration: tied, returns to hand")
+        m["horrorRegenUsed"] = True; forced_tie = True; won = "tie"
+        log.append("👁 Regeneration: severed and regrown — duel tied, no death, returns to your hand (spent this match)")
+    # Untouchable trait — a flawless record refuses the first loss (once per match)
     if won == "lose" and untouchable and not m["untouchableUsed"]:
-        m["untouchableUsed"] = True; won = "tie"; log.append("🛡 Untouchable: loss refused, tied")
+        m["untouchableUsed"] = True; forced_tie = True; won = "tie"
+        log.append("🛡 Untouchable: a flawless record refuses this loss — duel tied, returns to hand (once per match)")
     if won == "lose" and m.get("spellShield"):
-        won = "tie"; log.append("🛡 Ledger Ward: death blocked, tied")
+        forced_tie = True; won = "tie"; log.append("🛡 Ledger Ward: death negated — no loss written")
+    # Uso Oso's Bulwark of Bones — 3+ Death Remnants held denies the loss (Milestone A: Death
+    # Remnants are fighter-level, not rear-guard-dependent, so this fires correctly here already)
+    if won == "lose" and pc["name"] == "Uso Oso" and len(m.get("deathRemnants") or []) >= 3:
+        forced_tie = True; won = "tie"; log.append("🦴 The Bulwark of Bones: 3+ Remnants held — the loss is denied, duel ties instead")
+
+    # ── DEATH REMNANTS (fighter-level: a card with "Death Remnant" in its own ability text becomes
+    # a boosted-power echo on loss; any win disperses whatever remnants you're currently holding) ──
+    if won == "win" and m.get("deathRemnants"):
+        log.append("☠ your Remnants disperse — an enemy card was killed")
+        m["deathRemnants"] = []
+    if won == "lose" and "death remnant" in (pc.get("abil", "") or "").lower():
+        rp = rules.REMNANT_POW.get(pc["name"], pc["pow"])
+        m.setdefault("deathRemnants", []).append({"name": pc["name"], "pow": rp})
+        log.append(f"☠ {pc['name']} falls — Death Remnant active (+{rp}, {len(m['deathRemnants'])} on field)")
+
+    # ── CARD-LIFECYCLE DESTINATION (app.py performs the real hand/deck/winners-circle list move) ──
+    draw_self = 0
+    if won == "win":
+        if pc["name"] == "Skullchain Reaver" or (pc["name"] == "The Bronzed Beast, Hanse Waltz" and m["playerScore"][1] >= m["playerScore"][0]):
+            destination = "hand"
+            log.append(("💀 Skullchain Reaver" if pc["name"] == "Skullchain Reaver" else "🌑 Bronzed Beast (behind) — Blood Moon") + " returns to your hand instead of the Winners Circle")
+        else:
+            destination = "winners_circle"
+        if pc["name"] == "Bone Choirmaster": draw_self += 1; log.append("☠ Bone Choirmaster — the win feeds the choir: draw a card")
+    elif won == "lose":
+        destination = "deck_bottom"
+        ohr = rules.OPTIONAL_HAND_RETURN.get(pc["name"])
+        if ohr and ohr.get("onCloseLoss") is not None and abs(playerPow - oppPow) <= ohr["onCloseLoss"]:
+            log.append(f"💰 {pc['name']} — lost by {round(abs(playerPow-oppPow))}: recycles to the bottom of your deck (close enough to reclaim)")
+        else:
+            log.append(f"↩ {pc['name']} recycles to the bottom of your deck")
+    else:  # tie
+        if forced_tie:
+            destination = "hand"
+        elif "record guard" in (pc.get("abil", "") or "").lower():
+            destination = "hand"; log.append(f"🛡 Record Guard: tie — {pc['name']} bounces back to your hand")
+        else:
+            destination = "deck_bottom"; log.append(f"↩ {pc['name']} — tie, recycles to the bottom of your deck")
 
     # ── STATE UPDATE ──
     if won == "win":
@@ -239,15 +449,17 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None):
     else:
         m["lastResult"] = "tie"
     m["matchCommits"] += 1
-    # 8/5/26: cap fixed to the real scaling formula (was a flat 5 forever, ignoring match progress).
-    # The REGEN AMOUNT itself (flat +1/turn) is still a known simplification -- client's real regen
-    # is "+1/turn through duel 4, then ~1/3 of current cap per turn after," not flat forever. Left
-    # as-is deliberately: that's Milestone A's "real energy economy" scope, not a Phase-1 interpreter
-    # fix -- capping against the RIGHT ceiling is correct regardless of what the regen amount turns
-    # out to be, so fixing the cap now doesn't need to wait for that larger piece.
-    m["charge"] = min(duel_energy_cap(m.get("matchCommits", 0)), m.get("charge", 0) + 1)
+    # 8/5/26: real regen formula (was flat +1 forever) plus the client's separate lose-branch
+    # comeback bonus (+1 MORE specifically on a loss, index.html:8855) -- two distinct sources,
+    # each capped at each addition point (matches the client's own per-call Math.min chaining
+    # rather than summing first and capping once).
+    regen = energy_regen_per_turn(m["matchCommits"])
+    m["charge"] = min(duel_energy_cap(m["matchCommits"]), m.get("charge", 0) + regen)
+    if won == "lose":
+        m["charge"] = min(duel_energy_cap(m["matchCommits"]), m["charge"] + 1)
     m["spellJam"] = False; m["spellOppPow"] = 0; m["spellSelfPow"] = 0; m["spellNullOpp"] = False; m["spellShield"] = False
     m["log_last"] = log
+    win_threshold = m.get("winThreshold", 4)
     return {"outcome": won, "player_pow": playerPow, "opp_pow": oppPow, "log": log,
-            "score": list(m["playerScore"]), "match_over": m["playerScore"][0] >= 4 or m["playerScore"][1] >= 4}
-
+            "score": list(m["playerScore"]), "match_over": m["playerScore"][0] >= win_threshold or m["playerScore"][1] >= win_threshold,
+            "destination": destination, "draw_self": draw_self, "record_duel": not m.get("lobbyMode", False)}

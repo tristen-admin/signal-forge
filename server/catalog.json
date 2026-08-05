@@ -3560,5 +3560,118 @@
    "cond": null,
    "desc": "draws a card each duel it wins this match — card advantage, not raw power"
   }
- ]
+ ],
+ "cardRace": {
+  "Kynaht, Ashen Return": "Vysh'ra",
+  "Ourevos, the Golden Dragon": "Dragonkin",
+  "Dragan Korr": "Dragonkin",
+  "Heir of Kaiga": "Dragonkin",
+  "Dragon": "Dragonkin",
+  "Scale Guard": "Dragonkin",
+  "Dragonfire": "Dragonkin",
+  "Wing Buffet": "Dragonkin",
+  "Ragefire": "Dragonkin",
+  "The Bronzed Beast, Hanse Waltz": "Nightclaw",
+  "Lagertha Waltz, Wrathful Transformation": "Nightclaw",
+  "Wolfsblood Guard": "Nightclaw",
+  "Werewolf Fury": "Nightclaw",
+  "Feral Lunge": "Nightclaw",
+  "Valcarion": "Undying",
+  "Mordezh, Blood Prophet": "Undying",
+  "Kravyn the Collector": "Undying",
+  "Blood Moon": "Undying",
+  "Bloodline Surge": "Undying",
+  "Bloodline Momentum": "Undying",
+  "Crosscut Bleed": "Undying",
+  "Soul Reave": "Undying",
+  "Revenant": "Revenant",
+  "Revenant Mercy": "Revenant",
+  "The Regenerating Horror": "Revenant",
+  "Hollow Ravager": "Revenant",
+  "Twisted Specimen": "Revenant",
+  "Nyx, Devourer of Legends": "Revenant",
+  "Sythe Marrow": "Revenant",
+  "Soul Harvest": "Revenant",
+  "Grave Chill": "Revenant",
+  "Death Remnant": "Revenant",
+  "Phantom Cut": "Revenant",
+  "The Hollow King": "Revenant",
+  "Ghorruk \"Gnarly\" Judarr": "Wrothlan",
+  "Doru Blacktooth": "Wrothlan",
+  "Arch-Grim Korrin": "Wrothlan",
+  "Ruven Ashwalker": "Wrothlan",
+  "Skullchain Strike": "Wrothlan",
+  "Valkyrie": "Celestial",
+  "Valkyrie Rush": "Celestial",
+  "Elowen Dawnspear": "Celestial",
+  "Kessa Brightblade": "Celestial",
+  "Sister Mire": "Celestial",
+  "Aurelion Prime": "Celestial",
+  "Stormcaller Prime": "Celestial",
+  "Fifth Frequency Stormcaller": "Celestial",
+  "Rallying Cry": "Celestial",
+  "Sovereign": "Celestial",
+  "Sovereign Charge": "Celestial",
+  "Crownfall": "Celestial",
+  "Forgemask": "Construct",
+  "Anvil": "Construct",
+  "Bulwark": "Construct",
+  "Courtroom Colossus": "Construct",
+  "Aegis Protocol": "Construct",
+  "Reforge": "Construct",
+  "Shield Wall": "Construct",
+  "Shieldwall": "Construct",
+  "Shield Break": "Construct",
+  "Golden Maw": "Construct",
+  "Kingsmourne": "Construct",
+  "Bixie Bee": "Beast",
+  "Anorith Keeling": "Beast",
+  "Little Pox": "Beast",
+  "Broodmother": "Beast",
+  "Mip": "Beast",
+  "Wisp": "Spirit",
+  "Veil of Echoes": "Spirit",
+  "Echo Ward": "Spirit",
+  "Signal Diviner": "Spirit",
+  "Champion": "Spirit"
+ },
+ "remnantPow": {
+  "Arch-Grim Korrin": 8,
+  "Summoned Skull Soldiers": 7,
+  "Bone Choirmaster": 5,
+  "Grave-Fed Ghoul": 4,
+  "Uso Oso": 10,
+  "Ghorruk \"Gnarly\" Judarr": 8,
+  "Kiba": 2,
+  "Sythe Marrow": 5,
+  "Little Pox": 4,
+  "Sister Mire": 6,
+  "Uso Oso's Skeletal Summons": 5,
+  "Gravecaller Voss": 5,
+  "Grave-Warden": 3
+ },
+ "triggers": {
+  "Faye Quicksilver": {
+   "draw": 1,
+   "text": "draw a card"
+  },
+  "Val Kreigh": {
+   "draw": 1,
+   "text": "draw a card"
+  },
+  "Josef": {
+   "recur": 1,
+   "text": "return a banished card to hand"
+  },
+  "Old Garrick": {
+   "draw": 2,
+   "text": "draw 2 cards"
+  }
+ },
+ "optionalHandReturn": {
+  "Kravyn the Collector": {
+   "onWin": true,
+   "onCloseLoss": 3
+  }
+ }
 }

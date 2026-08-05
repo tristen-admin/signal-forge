@@ -5,7 +5,7 @@ import random, sys, secrets
 import engine, rules, app, store
 random.seed(11)
 names=list(engine.CATALOG.keys())
-conds=engine.POWER_CONDS + ['none','veteranedge','freshblood','highroller','chaosrift','coinsedge','abilitylock']
+conds=engine._COND_IDS + ['none','chaosrift','coinsedge']   # + deliberately-invalid ids (defensive no-op check)
 fail=0
 def rec(): return {'k':random.randint(0,40),'d':random.randint(0,10),'ok':random.randint(0,8),'od':0}
 

@@ -5,7 +5,7 @@ Run:  python3 server/app.py         → binds 127.0.0.1:8787
 The client may only READ state and REQUEST validated actions. It can never set its
 own balances, records, or outcomes — every mutation is computed and applied here.
 """
-import json, secrets, os, time, calendar
+import json, secrets, os, time, calendar, random
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs
 import store, rules, engine, asc
@@ -202,17 +202,43 @@ def _owned_cards(user_id):
     return [{"uid": r["uid"], "type": r["type"]} for r in
             store.conn().execute("SELECT uid,type FROM cards WHERE owner_id=? ORDER BY type", (user_id,)).fetchall()]
 
+def _apply_reveal(hand_cards, deck_cards, banish_cards, reveal):
+    """Reinforce/Dredge/Wild Pit's reveal-time draw+discard (engine.condition_reveal_effects).
+    Discard is RANDOM from hand, matching the client's own banishFromHand() (index.html:6062) --
+    not last-N, not player-choice (no interactive discard-picker exists server-side yet)."""
+    for _ in range(reveal.get("draw", 0)):
+        if deck_cards: hand_cards.append(deck_cards.pop(0))
+    for _ in range(reveal.get("discard", 0)):
+        if hand_cards: banish_cards.append(hand_cards.pop(random.randrange(len(hand_cards))))
+
 def h_match_start(user_id, body):
-    owned = _owned_cards(user_id)
-    if len(owned) < 4: return 400, {"error": "need at least 4 cards to start a match"}
-    m = engine.new_match([c["type"] for c in owned])
+    # 8/5/26 Milestone A: real deck persistence. Falls back to owned[:4]/[4:] (the original stub)
+    # only when the user has never saved a deck -- so accounts that predate deck/set still work.
+    saved = store.deck_load(user_id)
+    all_owned = _owned_cards(user_id)
+    if saved:
+        by_uid = {c["uid"]: c for c in all_owned}
+        owned = [by_uid[u] for u in saved if u in by_uid]   # drop any uid no longer owned (sold/traded since save)
+    else:
+        owned = all_owned
+    if len(owned) < 4: return 400, {"error": "need at least 4 cards in your deck to start a match"}
+    # 8/5/26: dual match-length -- {"mode":"ranked"} plays Best-of-3-win-2, anything else (Public/
+    # Draft default) plays the original Best-of-7-win-4. lobby_mode mirrors the client's Public
+    # Server/Sandbox: signal still pays out, but records/win-loss are never written (resolve()'s
+    # own record_duel flag, read below in match/commit).
+    best_of = 3 if body.get("mode") == "ranked" else 7
+    lobby_mode = bool(body.get("lobby_mode", False))
+    m = engine.new_match([c["type"] for c in owned], best_of=best_of, lobby_mode=lobby_mode)
     m["bonds"] = _load_bonds(user_id)
     mid = "m_" + secrets.token_hex(8)
-    hand_cards, deck_cards = owned[:4], owned[4:]
+    hand_cards, deck_cards, banish_cards = owned[:4], owned[4:], []
     m["hand"] = [c["type"] for c in hand_cards]
+    cond = engine.pick_condition()
+    _apply_reveal(hand_cards, deck_cards, banish_cards, engine.condition_reveal_effects(cond))
     MATCHES[mid] = {"user_id": user_id, "m": m, "hand_cards": hand_cards, "deck_cards": deck_cards,
-                    "condition": engine.pick_condition()}
-    return 200, {"matchId": mid, "hand": hand_cards, "condition": MATCHES[mid]["condition"], "score": m["playerScore"]}
+                    "banish_cards": banish_cards, "winners_circle_cards": [], "condition": cond}
+    return 200, {"matchId": mid, "hand": hand_cards, "condition": cond, "score": m["playerScore"],
+                 "charge": m["charge"], "bestOf": best_of, "locked_withdraw": cond == "noretreat"}
 
 def h_match_commit(user_id, body):
     sess = _get_match(user_id, body.get("matchId"))
@@ -223,25 +249,63 @@ def h_match_commit(user_id, body):
     c = store.conn()
     r = c.execute("SELECT k,d,ok,od FROM records WHERE uid=?", (hc["uid"],)).fetchone()
     rec = dict(r) if r else {"k": 0, "d": 0, "ok": 0, "od": 0}
-    pc = engine.card(hc["type"]); oc = engine.card(__import__("random").choice(engine.opponent_pool()))
+    pc = engine.card(hc["type"]); oc = engine.card(random.choice(engine.opponent_pool()))
     sess["m"]["hand"] = [x["type"] for x in sess["hand_cards"]]
     res = engine.resolve(sess["m"], pc, oc, sess["condition"], pc_record=rec)
-    # apply the duel outcome to the committed card's live record; award Signal on a win
-    with store.tx() as cc:
-        if res["outcome"] == "win":
-            cc.execute("UPDATE records SET k=k+1, ok=ok+1 WHERE uid=?", (hc["uid"],))
-            ns = cc.execute("SELECT signal FROM users WHERE id=?", (user_id,)).fetchone()["signal"] + 40
-            cc.execute("UPDATE users SET signal=? WHERE id=?", (ns, user_id))
-            store.ledger_add(cc, user_id, "SIGNAL", 40, "Duel won", ns)
-        elif res["outcome"] == "lose":
-            cc.execute("UPDATE records SET d=d+1, od=od+1 WHERE uid=?", (hc["uid"],))
-    # draw: remove committed, pull next from deck; roll a fresh condition
+
+    # apply the duel outcome to the committed card's live record; award Signal on a win.
+    # lobbyMode (Public Server/Sandbox) writes neither -- res["record_duel"] gates it, matching the
+    # client's own "signal pays out, but K/D + Deck Master record never move here" contract.
+    if res["record_duel"]:
+        with store.tx() as cc:
+            if res["outcome"] == "win":
+                cc.execute("UPDATE records SET k=k+1, ok=ok+1 WHERE uid=?", (hc["uid"],))
+                ns = cc.execute("SELECT signal FROM users WHERE id=?", (user_id,)).fetchone()["signal"] + 40
+                cc.execute("UPDATE users SET signal=? WHERE id=?", (ns, user_id))
+                store.ledger_add(cc, user_id, "SIGNAL", 40, "Duel won", ns)
+            elif res["outcome"] == "lose":
+                cc.execute("UPDATE records SET d=d+1, od=od+1 WHERE uid=?", (hc["uid"],))
+
+    # 8/5/26 Milestone A: real card-lifecycle routing. Previously the committed card was ALWAYS
+    # discarded and a fresh one drawn, regardless of outcome -- "recycles to the bottom of the
+    # deck" / "returns to hand" never actually happened server-side, so a real deck couldn't
+    # meaningfully cycle. engine.resolve()'s `destination` (winners_circle|hand|deck_bottom) now
+    # drives the real move; app.py performs it since it's the one holding the real uid-keyed lists.
     sess["hand_cards"] = [x for x in sess["hand_cards"] if x["uid"] != hc["uid"]]
-    if sess["deck_cards"]: sess["hand_cards"].append(sess["deck_cards"].pop(0))
+    dest = res["destination"]
+    if dest == "winners_circle": sess.setdefault("winners_circle_cards", []).append(hc)
+    elif dest == "hand": sess["hand_cards"].append(hc)
+    else: sess["deck_cards"].append(hc)   # deck_bottom -- deck_cards[0] is the TOP (next draw), so bottom = append
+
+    # TRIGGERS: on a LOST duel, peek the top of the deck for a comeback-aid card (index.html:5997-
+    # 6002 -- Faye Quicksilver/Val Kreigh/Josef/Old Garrick). Needs the real ordered deck_cards
+    # app.py owns; engine.py only sees the bare type-name mirror, so this lives here, not there.
+    if res["outcome"] == "lose" and sess["deck_cards"]:
+        top = sess["deck_cards"][0]
+        trig = rules.TRIGGERS.get(top["type"])
+        if trig:
+            sess["deck_cards"].pop(0); sess["hand_cards"].append(top)
+            for _ in range(trig.get("draw", 0)):
+                if sess["deck_cards"]: sess["hand_cards"].append(sess["deck_cards"].pop(0))
+            for _ in range(trig.get("recur", 0)):
+                if sess.get("banish_cards"): sess["hand_cards"].append(sess["banish_cards"].pop())
+            res["log"].append(f"✨ Trigger — {top['type']}: {trig['text']}")
+
+    for _ in range(res.get("draw_self", 0)):   # e.g. Bone Choirmaster's win-draw
+        if sess["deck_cards"]: sess["hand_cards"].append(sess["deck_cards"].pop(0))
+    # top up to a 4-card hand (only draws if the destination/trigger/draw_self logic above didn't
+    # already refill it -- e.g. a forced-tie hand-return needs no extra draw)
+    while len(sess["hand_cards"]) < 4 and sess["deck_cards"]:
+        sess["hand_cards"].append(sess["deck_cards"].pop(0))
+
     sess["condition"] = engine.pick_condition()
+    _apply_reveal(sess["hand_cards"], sess["deck_cards"], sess.setdefault("banish_cards", []),
+                  engine.condition_reveal_effects(sess["condition"]))
     out = {"result": res, "opponent": oc["name"], "condition": sess["condition"],
            "hand": sess["hand_cards"], "score": sess["m"]["playerScore"], "match_over": res["match_over"],
-           "charge": sess["m"]["charge"], "spellHand": sess["m"]["spellHand"]}
+           "charge": sess["m"]["charge"], "spellHand": sess["m"]["spellHand"],
+           "locked_withdraw": sess["condition"] == "noretreat",
+           "winnersCircleCount": len(sess.get("winners_circle_cards") or []), "deckCount": len(sess["deck_cards"])}
     if res["match_over"]:
         sess["m"]["done"] = True
         won_match = sess["m"]["playerScore"][0] > sess["m"]["playerScore"][1]
@@ -262,7 +326,22 @@ def h_match_state(user_id, body):
     sess = _get_match(user_id, body.get("matchId"))
     if not sess: return 404, {"error": "match not found"}
     return 200, {"score": sess["m"]["playerScore"], "hand": sess["hand_cards"], "condition": sess["condition"],
-                 "done": sess["m"]["done"], "charge": sess["m"]["charge"], "spellHand": sess["m"]["spellHand"]}
+                 "done": sess["m"]["done"], "charge": sess["m"]["charge"], "spellHand": sess["m"]["spellHand"],
+                 "locked_withdraw": sess["condition"] == "noretreat",
+                 "winnersCircleCount": len(sess.get("winners_circle_cards") or []), "deckCount": len(sess["deck_cards"])}
+
+def h_deck_set(user_id, body):
+    uids = body.get("cards")
+    if not isinstance(uids, list) or len(uids) < 4:
+        return 400, {"error": "deck must be a list of at least 4 card uids"}
+    owned = {c["uid"] for c in _owned_cards(user_id)}
+    bad = [u for u in uids if u not in owned]
+    if bad: return 400, {"error": f"you do not own {len(bad)} of those cards"}
+    store.deck_save(user_id, uids)
+    return 200, {"saved": len(uids)}
+
+def h_deck_get(user_id, body):
+    return 200, {"cards": store.deck_load(user_id) or []}
 
 def asc_end(user_id, sess, won):
     run = sess["run"]; run["done"] = True; run["result"] = "won" if won else "lost"; run["phase"] = "done"
@@ -380,7 +459,9 @@ def h_spell_cast(user_id, body):
     cost = max(0, s["cost"] - m.get("spellDiscount", 0))
     if m["charge"] < cost: return 402, {"error": f"not enough Charge (need {cost}, have {m['charge']})"}
     m["charge"] -= cost
-    if sid == "overclock": m["charge"] = min(5, m["charge"] + 2)
+    # 8/5/26: was a flat cap of 5 forever -- the real cap scales with match progress (duel_energy_cap),
+    # same bug class as the 3 flat-5 caps already fixed in engine.py this pass.
+    if sid == "overclock": m["charge"] = min(engine.duel_energy_cap(m.get("matchCommits", 0)), m["charge"] + 2)
     elif sid == "staticpulse": m["spellOppPow"] = m.get("spellOppPow", 0) - 3
     elif sid == "overload": m["spellOppPow"] = m.get("spellOppPow", 0) - 6
     elif sid == "amplify": m["spellSelfPow"] = m.get("spellSelfPow", 0) + 3
@@ -401,6 +482,8 @@ ROUTES = {
     ("POST","/api/match/resolve"): (h_resolve, True),
     ("POST","/api/match/start"):   (h_match_start, True),
     ("POST","/api/match/commit"):  (h_match_commit, True),
+    ("POST","/api/deck/set"):      (h_deck_set, True),
+    ("GET", "/api/deck/get"):      (h_deck_get, True),
     ("POST","/api/spell/cast"):    (h_spell_cast, True),
     ("GET", "/api/match/state"):   (h_match_state, True),
     ("POST","/api/asc/start"):     (h_asc_start, True),
