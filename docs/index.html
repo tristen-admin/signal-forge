@@ -3843,6 +3843,12 @@ let conditionIndex = -1;
 let selectedCard = null;
 let playerScore = [1,0];
 let seasonWins=0, seasonLosses=0, seasonRewardClaimed=false;
+// 8/5/26: win-streak backend (owner: "simple enough to lay bare bones for... build the aesthetic
+// and slot the backend [later]") -- current + best-ever, incremented/reset at the exact same
+// showMatchComplete() site that already computes _seasonWon for seasonWins/seasonLosses. No UI yet,
+// deliberately -- this is the persisted counter only, aesthetic (fire icon, banner, etc.) is a
+// separate follow-up pass.
+let winStreak=0, bestWinStreak=0;
 let charge=3/*energy start (7/15/26: back to 3)*/;         // energy resource, per match
 let oppCharge=3;   // bot-side energy (7/12/26): bots never had this resource before -- mirrors charge exactly, same duelEnergyCap() growth
 let spellHand=[];                               // Stage 2: spells you've drawn (a hand you spend)
@@ -5049,7 +5055,7 @@ function showMatchComplete(mode, amt){
   if(typeof matchPlayed!=='undefined' && matchPlayed.size>=2){ var _bondCrossed=recordFormationBonds([...matchPlayed]); matchPlayed=new Set(); if(_bondCrossed && _bondCrossed.length) setTimeout(function(){ showBondBeat(_bondCrossed[0]); }, 900); }
   wagerDone=true; if(wagerTimer){ clearInterval(wagerTimer); wagerTimer=null; } { const _wo=document.getElementById('wager-overlay'); if(_wo) _wo.classList.remove('show'); }
   const _seasonWon = pvpMode ? (pvpForced ? (pvpForced==='win') : (playerScore[0]>playerScore[1])) : (mode==='retreat-bot' ? true : mode==='retreat-player' ? false : (playerScore[0]>playerScore[1]));
-  if(_seasonWon) seasonWins++; else seasonLosses++;
+  if(_seasonWon){ seasonWins++; winStreak=(winStreak||0)+1; if(winStreak>bestWinStreak) bestWinStreak=winStreak; } else { seasonLosses++; winStreak=0; }
   if(pvpMode){ pvpSettle(); return; }
   const won = (mode==='retreat-bot') ? true : (mode==='retreat-player') ? false : (playerScore[0] > playerScore[1]);
   let swing='';
@@ -9427,7 +9433,7 @@ const SAVE_KEY = 'signalforge_save_v2';
 let _saveFailedOnce = false;   // 7/18/26: throttle the failure toast to once per session -- a quota-exceeded save fails on EVERY subsequent saveState() call otherwise, which would spam a toast on nearly every action
 function saveState(){
   try{
-    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, ascParty, ascPartySel, ascUnitProg, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]}));
+    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, winStreak, bestWinStreak, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, ascParty, ascPartySel, ascUnitProg, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]}));
   }catch(e){
     // Previously silent -- a change could visibly apply in-memory (card updates, a "success" toast
     // already fired from the caller) while the save itself failed underneath, e.g. localStorage
@@ -9454,6 +9460,8 @@ function loadState(){
     if(typeof s.rankRP==='number') rankRP=s.rankRP;
     if(typeof s.seasonWins==='number') seasonWins=s.seasonWins;
     if(typeof s.seasonLosses==='number') seasonLosses=s.seasonLosses;
+    if(typeof s.winStreak==='number') winStreak=s.winStreak;
+    if(typeof s.bestWinStreak==='number') bestWinStreak=s.bestWinStreak;
     if(Array.isArray(s.featuredCards)) featuredCards=s.featuredCards; else if(typeof s.featuredCard==='string') featuredCards=[s.featuredCard];
     if(s.avatarBond && typeof s.avatarBond==='object') avatarBond=s.avatarBond;
     if(s.pairBonds && typeof s.pairBonds==='object') pairBonds=s.pairBonds;
@@ -9510,7 +9518,7 @@ function loadState(){
 }
 function resetProgress(){ if(!confirm('Reset ALL progress? This wipes your vault, records, Signal, RP, and cosmetics back to defaults and cannot be undone.')) return;
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
-  signalPoints=20000; rankRP=1000; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']); supply=defaultSupply(); cardSupply=defaultCardSupply(); ownedCopies={}; freshCopies={}; wonInstances=[]; wonCounter=0; for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); } COLLECTION.forEach(c=>{ ownedCopies[c.uid||c.name]=1; });
+  signalPoints=20000; rankRP=1000; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']); supply=defaultSupply(); cardSupply=defaultCardSupply(); ownedCopies={}; freshCopies={}; wonInstances=[]; wonCounter=0; for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); } COLLECTION.forEach(c=>{ ownedCopies[c.uid||c.name]=1; });
   avatarBond={}; pairBonds={}; ascRun=null; forgeBalance=12000; featuredCards=['Kotei']; featuredShuffle=false; featuredRotIdx=0; equipped={aura:'gold',back:'sealed',emblem:'crest',title:'integrator',sleeves:'standard',summon:'golden'};
   ownedCosmetics.clear(); ['aura:gold','back:sealed','emblem:crest','title:integrator','sleeves:standard','summon:golden'].forEach(k=>ownedCosmetics.add(k));
   applyCosmetics(); updateBalance(); buildShop();
@@ -9521,7 +9529,7 @@ function startFreshSession(){ if(!confirm('Start a fresh session? This clears ev
   for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); }
   wonInstances=[]; wonCounter=0;
   avatarBond={}; pairBonds={}; ascRun=null; forgeBalance=12000;
-  signalPoints=20000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false;
+  signalPoints=20000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false;
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']);
   COLLECTION.forEach(c=>{ const k=c.uid||c.name; ownedCopies[k]=1;
@@ -9544,7 +9552,7 @@ function newPlayerReset(){
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); }
   wonInstances=[]; wonCounter=0;
-  signalPoints=20000; forgeBalance=0; bountyBalance=0; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false;
+  signalPoints=20000; forgeBalance=0; bountyBalance=0; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false;
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFoilMax={}; cardFrames={}; ownedFrames=new Set(['none']);
   avatarBond={}; pairBonds={}; ascRun=null;
@@ -9573,7 +9581,7 @@ function startNewPlayer(){
   for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); }
   wonInstances=[]; wonCounter=0;
   avatarBond={}; pairBonds={}; ascRun=null; forgeBalance=0;   /* new players start with NO Forge — premium currency, earned/bought later */
-  signalPoints=20000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; seasonRewardClaimed=false;
+  signalPoints=20000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false;
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']);
   STARTER_SET.forEach(nm=>{ const c=COLLECTION.find(x=>x.name===nm && !x.uid); if(c){ ownedCopies[nm]=1; cardRecords[nm]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Starter deck'}]}; } });
