@@ -2,70 +2,187 @@
  "cards": {
   "Kotei": {
    "pow": 21,
-   "rarity": "genesis",
-   "cost": 4,
-   "abil": "On commit: +3 if opponent's card has 0 deaths, OR +3 if you lost your last duel. The whole effect repeats if Kotei has already won a duel this match.",
+   "rarity": "apex",
+   "cost": 3,
+   "abil": "On commit: +3 if opponent's card has 0 deaths, and +3 if you lost your last duel. The whole effect repeats for every round this match has completed.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
   "Uso Oso": {
-   "pow": 16,
+   "pow": 14,
    "rarity": "rare",
-   "cost": 3,
-   "abil": "Death Remnant: when Uso dies he stays on field. Your cards here gain +7 power until an opponent's card is killed, then Remnant is removed.",
+   "cost": 2,
+   "abil": "Death Remnant +10; When this card is conjured, call a \"Oso's skeletal summons\" from outside of your deck to an open support circle. On commit: raise a +2 Death Remnant, no death needed. The Bulwark of Bones: while you hold 3+ Remnants, a loss becomes a tie instead.",
    "timing": "resolution",
    "starter": true,
    "opp": false
   },
-  "Tanlorin": {
+  "Tannis": {
    "pow": 10,
-   "rarity": "uncommon",
+   "rarity": "common",
    "cost": 2,
    "abil": "⚡ Instant — Banish Surge: send to banish pile. Next card you commit gains +11 power that duel only.",
    "timing": "instant",
    "starter": false,
    "opp": false
   },
-  "Bixie Bee": {
-   "pow": 18,
+  "Fleeting Cipher": {
+   "pow": 7,
    "rarity": "common",
-   "cost": 3,
-   "abil": "No ability. Starter card. Never hesitate to deploy.",
+   "cost": 1,
+   "abil": "⚡ Instant: return this card to the bottom of your deck. Your next conjured card gains +6 power this duel only.",
+   "timing": "instant",
+   "starter": false,
+   "opp": false
+  },
+  "Warden's Feint": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "⚡ Instant: return this card to the bottom of your deck. Block 1 of your opponent's support zones this duel.",
+   "timing": "instant",
+   "starter": false,
+   "opp": false
+  },
+  "Ashfall Tithe": {
+   "pow": 9,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "⚡ Instant: send this card to the banish pile. Your next conjured card gains +7 power this duel only.",
+   "timing": "instant",
+   "starter": false,
+   "opp": false
+  },
+  "Bixie Bee": {
+   "pow": 13,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: +1 power per card in your banish zone. As a support (Called), your Fighter +3.",
    "timing": "on",
    "starter": true,
    "opp": false
   },
   "Veronica": {
-   "pow": 14,
+   "pow": 8,
    "rarity": "common",
-   "cost": 3,
+   "cost": 1,
    "abil": "On commit: copy opponent's card ability. Veronica gains that effect for this duel only. No effect if opponent has no ability.",
    "timing": "on",
    "starter": true,
    "opp": false
   },
-  "Kaelthar the Ascendant": {
-   "pow": 19,
-   "rarity": "ultra",
-   "cost": 4,
-   "abil": "Ascendant: +6 while you hold the match lead — a finisher for a winning board, dead weight when behind.",
-   "timing": "on",
-   "starter": false,
-   "opp": false
-  },
-  "Voidmaw the Unmaker": {
-   "pow": 18,
+  "The Borrowed Green, Keawe Kel'rua": {
+   "pow": 23,
    "rarity": "ultra",
    "cost": 3,
-   "abil": "Devastation: +4 on commit, and the opponent takes −3 if their card is Pristine (0 deaths).",
+   "abil": "Uncontrolled Flood: on commit, +9 power — and the opponent also gains +5 power. Power without aim; the flood answers no one's call.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Sunforged Colossus": {
-   "pow": 17,
+  "The Kept Blade, Ahdor": {
+   "pow": 22,
    "rarity": "ultra",
+   "cost": 2,
+   "abil": "Earned, not given: on commit, +5 power, +3 more if you have 0 losses this match (disciplined play, the earn-it vow kept).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "The Nightmare's Toll, Hanse Waltz": {
+   "pow": 21,
+   "rarity": "ultra",
+   "cost": 2,
+   "abil": "Blood-Toll: on commit, +8 power, +4 more once this card has taken a death this match (the toll already paid).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "The Claim, Lagertha Waltz": {
+   "pow": 20,
+   "rarity": "ultra",
+   "cost": 2,
+   "abil": "The Claim: on commit, +6 power, +4 more once this card has earned a career kill (dibs collected).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Throne of Bones, Uso Oso": {
+   "pow": 22,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Throne of Bones: on commit, +7 power, +5 more while you command a Death Remnant (Grey-Giant mode).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "The Reliquary, Ruffius Rufeldro": {
+   "pow": 23,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "The Reliquary — a blessing that isn't: on commit, +3 power, and the opponent takes −5 (radiant light, slow execution). The mask holds.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "The Unending Flame, Tange Sazen": {
+   "pow": 22,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Unending Flame: on commit, the opponent takes −6 power. Fire pinned outside of time — cannot be healed, cleansed, or prevented.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "The Between, Kleydson": {
+   "pow": 20,
+   "rarity": "ultra",
+   "cost": 2,
+   "abil": "Contrast to Balance: on commit, +4 power, +6 more once this is your 2nd or later duel this match (chaos and order finding their balance).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Pit Thrall": {
+   "pow": 12,
+   "rarity": "common",
+   "cost": 2,
+   "abil": "No ability — a nameless conscript of the Sorn-Vallis pits. (Placeholder, will be redesigned.)",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Mirror Shade": {
+   "pow": 6,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: your power becomes the opponent's committed power +1.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Kaelthar the Ascendant": {
+   "pow": 23,
+   "rarity": "ultra",
+   "cost": 4,
+   "abil": "Ascendant: on commit, −20 while you hold the match lead, +20 while you are behind. Your Support effects do not fire when he is conjured.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Young Darwin, Predetermined Dictator": {
+   "pow": 10,
+   "rarity": "rare",
+   "cost": 1,
+   "abil": "On commit: +4, and the opponent takes −3 if their card is Pristine (0 deaths).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Courtroom Colossus": {
+   "pow": 15,
+   "rarity": "rare",
    "cost": 3,
    "abil": "Colossus: +3, and +5 more from the 3rd commit onward — a late-game bomb.",
    "timing": "on",
@@ -73,47 +190,47 @@
    "opp": false
   },
   "Kessuae, Tide of Ruin": {
-   "pow": 17,
+   "pow": 15,
    "rarity": "ultra",
    "cost": 3,
-   "abil": "Reckoning: +7 while you are behind in the match — a comeback finisher.",
+   "abil": "On commit: while you are behind, this destroys the active location (nullifies it). +5 if both support slots are full.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
   "Elowen Dawnspear": {
-   "pow": 17,
-   "rarity": "ultra",
-   "cost": 3,
-   "abil": "Purity: +5 while this card is Pristine (0 deaths).",
+   "pow": 13,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Purity: +5 while this card is Pristine (0 deaths, 1+ kill). If this card has over 5 deaths, it gains +2 instead.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
   "Kravyn the Collector": {
-   "pow": 17,
+   "pow": 18,
    "rarity": "ultra",
    "cost": 3,
-   "abil": "Kill Escalation: +5 at 20+ career kills.",
+   "abil": "On commit: +3. At 10+ career kills this unit gains Kill Escalation: +5. At 25+ career kills this unit gains Kill Escalation +7 instead. When this unit kills its enemy unit, you may choose to return this unit to the hand instead of placing it in the winners circle.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Veyra Stormcaller": {
+  "Fifth Frequency Stormcaller": {
    "pow": 16,
    "rarity": "ultra",
    "cost": 3,
-   "abil": "Elemental Flurry: +3, and +4 more under a chaos condition.",
+   "abil": "Elemental Flurry: +3, +4 more with 5+ cards in hand, +7 more with 4+ cards in your banish zone.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Ghorruk Skullbrand": {
+  "Ghorruk \"Gnarly\" Judarr": {
    "pow": 16,
    "rarity": "ultra",
    "cost": 3,
-   "abil": "Death Remnant: when he falls he holds the field, +6 to your committed cards until an enemy is killed.",
-   "timing": "resolution",
+   "abil": "On commit: +1 power for every 2 cards remaining in your deck. Death Remnant +8",
+   "timing": "on",
    "starter": false,
    "opp": false
   },
@@ -136,9 +253,9 @@
    "opp": false
   },
   "Faye Quicksilver": {
-   "pow": 14,
+   "pow": 13,
    "rarity": "rare",
-   "cost": 3,
+   "cost": 2,
    "abil": "Snowball: +2 for every round you have already won this match.",
    "timing": "on",
    "starter": false,
@@ -155,9 +272,9 @@
   },
   "Conduit Adept": {
    "pow": 6,
-   "rarity": "uncommon",
+   "rarity": "common",
    "cost": 1,
-   "abil": "On commit: gain 1 Charge.",
+   "abil": "On commit: gain 1 Charge. As a support (Called), gain 2 Charge and draw a card.",
    "timing": "on",
    "starter": false,
    "opp": false
@@ -175,51 +292,267 @@
    "pow": 12,
    "rarity": "rare",
    "cost": 2,
-   "abil": "On win: next turn gain 2 max Charge.",
+   "abil": "On win: next turn gain 2 max Charge. As a support (Called), gain 3 Charge.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Ahdor": {
-   "pow": 17,
-   "rarity": "rare",
+  "Ahdorah Khaan, Determined Soul": {
+   "pow": 15,
+   "rarity": "apex",
+   "cost": 2,
+   "abil": "Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. When Ahdor returns to your hand from the effect of \"Record Guard\", two random hand cards gain +3.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ahdorah Khaan, Circle Unbroken": {
+   "pow": 20,
+   "rarity": "ultra",
+   "cost": 4,
+   "abil": "Cannot be conjured from your hand — only from your banish pile. On commit: +4 power for every card in your banish pile.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Kynaht, Ashen Return": {
+   "pow": 16,
+   "rarity": "ultra",
    "cost": 3,
-   "abil": "Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. Ahdor returns to your hand and a random hand card gains +4.",
+   "abil": "Cannot be conjured from your hand — only from your banish pile. On commit: your opponent's Called supports contribute nothing this duel.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ridgeline Scout": {
+   "pow": 12,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: this duel's location effect applies only to you — your opponent's power is untouched by it, for better or worse.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ridgeline Warden": {
+   "pow": 18,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "On commit: this duel's location effect applies only to you — your opponent's power is untouched by it, for better or worse.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ahdorah Khaan, Squad 19 Recruit": {
+   "pow": 10,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "An earlier printing — before the Determined Soul, just a recruit finding her footing. On commit: +3 power if you lost your last duel.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Squad 16 Veteran": {
+   "pow": 10,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "The last of a squad disbanded before Ahdorah's time — reassigned, scattered, mostly forgotten. On commit: +3 power once you've played 2 or more duels this match.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Squad 19 Vanguard": {
+   "pow": 9,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), give your Fighter +3 — the squad holds the line.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Squad 19 Medic": {
+   "pow": 7,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), give your Fighter +2 and draw a card.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Squad 19 Quartermaster": {
+   "pow": 5,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: +4 power while your hand has 3 or fewer cards — keeping the squad supplied.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Squad 19 Scout": {
+   "pow": 4,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), draw a card.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Barracks Drill Sergeant": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), give your Fighter +2. [Tosa Pact]",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Cadet Corps Recruit": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: +3 power on the 1st or 2nd duel of the match. [Tosa Pact]",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Writ-Sergeant's Ledger": {
+   "pow": 7,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), gain 1 Charge. [Tosa Pact]",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Squad 19 Signalman": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: gain 1 Charge. [Tosa Pact]",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Squad 19 Chronicler": {
+   "pow": 5,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), gain 1 Charge once you've played 2 or more duels this match. [Tosa Pact]",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Fenrik Vench": {
+   "pow": 10,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "A causeway-lord's son, first to prove himself against you in the yard. On commit: +3 power if you have lost a duel this match — the rivalry sharpens him.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Yard Sparring Partner": {
+   "pow": 5,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), give your Fighter +3.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Pyre-Keeper's Apprentice": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), gain 1 Charge.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Court Cipher": {
+   "pow": 7,
+   "rarity": "rare",
+   "cost": 1,
+   "abil": "As a support (Called), gain 1 Charge if the active condition is locked this turn.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Lumen Acolyte": {
+   "pow": 7,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: gain 1 Charge.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Oathlit Attendant": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), gain 1 Charge.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Trophy Runner": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), gain 1 Charge if you've earned a kill this match.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Trilogy Ward": {
+   "pow": 15,
+   "rarity": "ultra",
+   "cost": 2,
+   "abil": "On commit: +5 power if your card's camp beats the opponent's on the Skyward Trilogy wheel (Amageras>Omitsuki>Kitanoo>Amageras). Same camp on both sides: no bonus.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Oathlit Vanguard": {
+   "pow": 12,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: +5 power while you remain undefeated this match — gone the moment you take your first loss.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
   "Darwin": {
    "pow": 19,
-   "rarity": "ultra",
-   "cost": 4,
-   "abil": "On commit: if 3rd+ commit this match, +3 power. Returns from Winners Circle: banish from hand to curse opponent's next committed card −5 power.",
+   "rarity": "apex",
+   "cost": 2,
+   "abil": "On commit: if 3rd+ commit this match, +5 power. Returns from Winners Circle: banish from hand to curse opponent's next committed card −10 power.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
   "Hanse Waltz": {
-   "pow": 9,
+   "pow": 15,
    "rarity": "rare",
-   "cost": 1,
+   "cost": 2,
    "abil": "Last Stand: if this card loses by 3 or less power, the duel ties instead — no death recorded.",
    "timing": "resolution",
    "starter": true,
    "opp": false
   },
   "Arch-Grim Korrin": {
-   "pow": 14,
-   "rarity": "rare",
+   "pow": 17,
+   "rarity": "ultra",
    "cost": 3,
-   "abil": "On commit: if opponent's card has fewer career kills than this card, +6 power.",
+   "abil": "On commit: look at the top 2 cards of your deck, place 1 in the support zone and 1 as a Death Remnant. If opponent's card has fewer career kills than this card, +6 power.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Valcarion": {
-   "pow": 15,
+  "Cletus Gwyndull": {
+   "pow": 10,
    "rarity": "rare",
-   "cost": 3,
+   "cost": 1,
    "abil": "Pre-commit: lock the active condition this turn — opponent cannot shift it.",
    "timing": "pre",
    "starter": false,
@@ -228,53 +561,71 @@
   "Val Kreigh": {
    "pow": 15,
    "rarity": "rare",
-   "cost": 3,
-   "abil": "On commit: if this is the 1st duel of the match, +6 power.",
+   "cost": 2,
+   "abil": "On commit: if this is the 1st duel of the match, +6 power. If it is the second duel of the match or later, +2 instead.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
   "Tange Sazen": {
-   "pow": 18,
-   "rarity": "ultra",
-   "cost": 3,
+   "pow": 17,
+   "rarity": "apex",
+   "cost": 2,
    "abil": "Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.",
    "timing": "resolution",
    "starter": false,
    "opp": false
   },
-  "Lagertha Waltz": {
-   "pow": 15,
+  "Unbanked Victory": {
+   "pow": 9,
    "rarity": "rare",
-   "cost": 3,
-   "abil": "On commit: +2 if you lost your last duel. -2 if you won your last duel.",
-   "timing": "on",
-   "starter": true,
-   "opp": false
-  },
-  "Alucard The Damned": {
-   "pow": 17,
-   "rarity": "rare",
-   "cost": 3,
-   "abil": "On commit: the opponent's card loses 4 power — or if it is Pristine (0 deaths), Alucard drains its purity for +4 instead.",
+   "cost": 2,
+   "abil": "On commit: +3 power if your Winners Circle is empty — an unclaimed victory is worth more than a banked one.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Ella Ballora": {
-   "pow": 14,
-   "rarity": "ultra",
+  "Reclaim the Colors": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: +1 power for every card in your Winners Circle.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Lagertha Waltz": {
+   "pow": 8,
+   "rarity": "rare",
+   "cost": 1,
+   "abil": "On commit: +6 if you lost your last duel. -2 if you won your last duel.",
+   "timing": "on",
+   "starter": true,
+   "opp": false
+  },
+  "Valcarion": {
+   "pow": 17,
+   "rarity": "rare",
    "cost": 3,
-   "abil": "Bloodrage: on commit +3 power, and +3 more if you have already lost a duel this match — she fights harder wounded.",
+   "abil": "On commit: if there is a card in your banish zone, add it to your hand — or call it to an open support circle.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Envoy of Tyrants, Ella Ballora": {
+   "pow": 14,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Bloodrage: on commit +3 with 3+ cards in hand, and +3 more if you have already lost a duel this match — she fights harder wounded.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
   "Kiana": {
-   "pow": 19,
-   "rarity": "uncommon",
-   "cost": 4,
-   "abil": "Elemental Flurry: on commit +3 power, and +4 more if the active condition is a chaos condition (Force Swap, Energy Surge, or Mirror).",
+   "pow": 14,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Elemental Flurry: on commit +3 power, and +4 more if you have 4 or more cards in your hand",
    "timing": "on",
    "starter": false,
    "opp": false
@@ -283,7 +634,7 @@
    "pow": 1,
    "rarity": "common",
    "cost": 1,
-   "abil": "No ability. Keawe's mother — a civilian, not a fighter. At 1 power she quietly wins under Lowest Wins.",
+   "abil": "As a support (Called), your Fighter +5 and draw a card. Keawe's mother — a civilian, not a fighter, but she still knows how to help. At 1 power she quietly wins under Lowest Wins.",
    "timing": "on",
    "starter": true,
    "opp": false
@@ -292,7 +643,7 @@
    "pow": 5,
    "rarity": "common",
    "cost": 1,
-   "abil": "Death Remnant: these bones don't stay down — when the summons falls it lingers on the field, your committed cards gaining its power until an opponent's card is killed.",
+   "abil": "Death Remnant: these bones don't stay down — when the summons falls it lingers on the field, +5 to your committed cards until an opponent's card is killed.",
    "timing": "resolution",
    "starter": false,
    "opp": false
@@ -308,7 +659,7 @@
   },
   "The Regenerating Horror": {
    "pow": 11,
-   "rarity": "uncommon",
+   "rarity": "common",
    "cost": 2,
    "abil": "Regeneration (one use per match): the first time this card would lose, it regrows instead — the duel ties, no death is recorded, and it returns to your hand. Only a finisher truly ends it.",
    "timing": "resolution",
@@ -317,16 +668,34 @@
   },
   "Broodmother": {
    "pow": 13,
-   "rarity": "uncommon",
+   "rarity": "rare",
    "cost": 2,
-   "abil": "Spiderling Swarm: on commit, +2 power for every card in your hand — the brood answers her call.",
+   "abil": "Spiderling Swarm: on commit, +1 power for every card in your hand — the brood answers her call.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Fledgling Broodmother": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Lesser Swarm: on commit, +1 power for every card in your hand.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Web-Weaver's Return": {
+   "pow": 11,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: shuffle your banish pile back into your deck, then draw a card — the web is rewoven.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
   "Chieftain Reyva Vosh": {
    "pow": 14,
-   "rarity": "uncommon",
+   "rarity": "rare",
    "cost": 3,
    "abil": "Warriors in Reserve: on commit, +2 power for each card in your Winners Circle — she commits her hold's warriors once the stakes are undeniable.",
    "timing": "on",
@@ -336,71 +705,314 @@
   "Forgemask": {
    "pow": 14,
    "rarity": "rare",
-   "cost": 3,
+   "cost": 2,
    "abil": "Reforged: on commit, +3 power, and +4 more if you lost your last duel — the forge tempers what breaks.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Lagertha Waltz — Werewolf Form": {
-   "pow": 16,
-   "rarity": "ultra",
-   "cost": 3,
+  "Lagertha Waltz, Wrathful Transformation": {
+   "pow": 14,
+   "rarity": "rare",
+   "cost": 2,
    "abil": "Alpha's Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack's fury peaks in mourning.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Hanse Waltz — Werewolf Form": {
-   "pow": 18,
+  "The Bronzed Beast, Hanse Waltz": {
+   "pow": 20,
    "rarity": "ultra",
    "cost": 3,
-   "abil": "Blood Moon: on commit, +5 power while you are behind in the match — rage completes the transformation.",
+   "abil": "Blood Moon: on commit, +5 while behind — if you were behind when you kill an opponent fighter, this returns to your hand at its original power.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Ella Ballora — True Form": {
-   "pow": 17,
-   "rarity": "ultra",
-   "cost": 3,
-   "abil": "Devour: on commit, +3 power, and +4 more if you have already won a duel this match — the Spider-Queen grows with every kill she feeds on.",
+  "Hanse, Rogue Fangs": {
+   "pow": 12,
+   "rarity": "rare",
+   "cost": 1,
+   "abil": "Rogue Fangs: on commit, +2 power, +2 more on your 1st or 2nd duel this match — quick, vicious, not yet the Beast. Māyā (2⚡, from hand): pay the cost to become \"The Bronzed Beast, Hanse Waltz.\"",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Akatosh, the Golden Dragon": {
-   "pow": 24,
-   "rarity": "genesis",
+  "La \"La\" Ballora, the Broodqueen": {
+   "pow": 16,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Broodqueen: on commit, +2 power for every card in your hand, and draw 2 cards — her brood is her hand.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ourevos, the Golden Dragon": {
+   "pow": 30,
+   "rarity": "apex",
    "cost": 4,
-   "abil": "Unmaking: when Akatosh is committed he shrugs off the arena — the active condition's power effects don't touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.",
+   "abil": "Unmaking: when Ourevos is committed he shrugs off the arena — the active condition's power effects don't touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Keawe Kil'lua": {
+  "Keawe Kel'rua": {
    "pow": 16,
    "rarity": "rare",
-   "cost": 3,
-   "abil": "Rising Talent: on commit, +3 power if you lost your last duel — his base form — the resilience he carries before ascending into Kotei.",
+   "cost": 2,
+   "abil": "Rising Talent: on commit, +3 power if you lost your last duel. Repeat this effect if you have 1 or fewer support units this battle.",
    "timing": "on",
    "starter": true,
    "opp": false
   },
-  "Rhaess Korvain": {
+  "Legend Reborn, Keawe Kel'rua": {
    "pow": 13,
-   "rarity": "uncommon",
-   "cost": 2,
-   "abil": "Assassin's Mark: on commit, +6 power if the opponent's card has more career kills than this one — Rhaess hunts the notable.",
+   "rarity": "ultra",
+   "cost": 1,
+   "abil": "A Legend Reborn — Conjure (1⚡): add a card of power 15 or higher from your deck to your hand, and reduce its cost by 1.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Ossian Drell": {
+  "Rhaess Korvain": {
    "pow": 13,
-   "rarity": "uncommon",
+   "rarity": "rare",
+   "cost": 1,
+   "abil": "On commit: banish the top card of your deck, then +2 power for every card in your banish zone.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Black Wings, Ossian Drell": {
+   "pow": 16,
+   "rarity": "ultra",
    "cost": 2,
-   "abil": "Field Command: on commit, +3 power, and +3 more if you are ahead in the match — a veteran presses the advantage.",
+   "abil": "Wing Commander: on commit, +2 power for every card in your banish zone. If you banished a card from your hand this turn, also +2 power for every card in your hand.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Corvus": {
+   "pow": 17,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Raven's Feast: on commit, banish the top 2 cards of your deck, then +2 power for every card in your banish zone.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Wren": {
+   "pow": 9,
+   "rarity": "rare",
+   "cost": 1,
+   "abil": "Wingmate: on commit, return a banished card to your hand, then +4 power — Wren never leaves one behind.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Rook": {
+   "pow": 7,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Scout: on commit, banish the top card of your deck, then +1 power for every card in your banish zone.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Falk": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Dive: on commit, +2 power for every card in your banish zone.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Sable": {
+   "pow": 9,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Quartermaster: as a support (Called), banish a card from your hand and give your Fighter +5.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Bannerlord Cassian": {
+   "pow": 13,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "Muster 5: on commit, +5 power for each 1-cost ally — your 1-cost supports this duel plus every 1-cost card in your Winners Circle. The banner of the cheap and the many.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ironsworn Vanguard": {
+   "pow": 11,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Muster 3: +3 power per 1-cost ally (1-cost supports this duel + 1-cost cards in your Winners Circle).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Warden of the Wall": {
+   "pow": 12,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Muster 3: +3 per 1-cost ally. A wall is only as strong as the line beside it.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Oathkeeper Sena": {
+   "pow": 10,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Muster-Sergeant Bryn": {
+   "pow": 9,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "As a support (Called), give your Fighter +1 for every card in your Winners Circle.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Oathbound Shield": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Last Stand: if this card loses by 3 power or less, the duel ties instead — no death recorded.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Sworn Duelist": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Kill Escalation: +2 power at 5+ career kills, +2 more at 15+ career kills.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Standard-Bearer Halden": {
+   "pow": 7,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), give your Fighter +3 — the banner lifts the whole line.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Rank-Sworn Levy": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), give your Fighter +2.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Shieldwall Recruit": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Muster 3: +3 per 1-cost ally. Weak alone, unbroken together.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Skittering Drone": {
+   "pow": 5,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Swarm: on commit, +1 power for each card in your hand.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Hatchling Tide": {
+   "pow": 7,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Swarm: +4 power while your hand is full (4+ cards).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Silk-Spinner Drone": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), draw a card to feed the brood.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Web-Tender Matron": {
+   "pow": 9,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "As a support (Called), draw 2 cards.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Venombrood Queen": {
+   "pow": 10,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Broodswarm: on commit, +2 power for each card in your hand.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Wingblade Scout": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Wingblade: on commit, +1 power for every card in your banish zone.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Feather-Marked Skirmisher": {
+   "pow": 6,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "As a support (Called), banish a card from your hand and give your Fighter +4.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Squad-Captain Vesk": {
+   "pow": 11,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Wing Commander: on commit, +2 power for every card in your banish zone.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Grave-Warden": {
+   "pow": 7,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Death Remnant: when it falls, +3 to your cards until an enemy dies.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Bone-Stitcher": {
+   "pow": 9,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "As a support (Called), your Fighter +3; if a Remnant is on the field, draw a card.",
    "timing": "on",
    "starter": false,
    "opp": false
@@ -433,28 +1045,28 @@
    "opp": false
   },
   "Moro": {
-   "pow": 14,
-   "rarity": "common",
-   "cost": 3,
-   "abil": "On commit: if opponent's card has 6+ career kills, gain +3 power.",
+   "pow": 15,
+   "rarity": "ultra",
+   "cost": 2,
+   "abil": "Royal Bearing: on commit, if your Deck Master's printed power is higher than Moro's current total, borrow it. Then +3 power — the crown's power is always present.",
    "timing": "on",
    "starter": true,
    "opp": false
   },
   "Zerith Var": {
    "pow": 19,
-   "rarity": "uncommon",
-   "cost": 4,
-   "abil": "On commit: if you are losing this duel (opponent's base power is higher), +4 power.",
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "On commit: +2; if your opponent's base power is higher, +4 power.",
    "timing": "on",
    "starter": true,
    "opp": false
   },
   "Anorith Keeling": {
-   "pow": 12,
-   "rarity": "common",
-   "cost": 2,
-   "abil": "On commit: if opponent's base power is higher than this card, gain +2 power for every card in your hand.",
+   "pow": 1,
+   "rarity": "apex",
+   "cost": 4,
+   "abil": "Chaos Deity — its base power is a question mark, determined by the number of duels completed prior to Anorith being conjured multiplied by the number of cards in hand. On commit, warp every spell in your deck into the Chaos Trinity: Draw Surge (2⚡ draw 3, banish 1), Godhand (1⚡ your card +10), and Sorn-Vallis Shift (3⚡ warp the location to Sorn-Vallis — lowest power wins).",
    "timing": "on",
    "starter": false,
    "opp": false
@@ -481,301 +1093,338 @@
    "pow": 8,
    "rarity": "common",
    "cost": 1,
-   "abil": "Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, your committed cards gaining her power until an opponent's card is killed.",
+   "abil": "Death Remnant: ash returns to root, roots drink deep — when Sister Mire dies she stays on the field, +6 to your committed cards until an opponent's card is killed.",
    "timing": "resolution",
    "starter": true,
    "opp": false
   },
-  "Kleydson": {
-   "pow": 11,
+  "Sister Mire, Wailing Nightmare": {
+   "pow": 12,
    "rarity": "ultra",
-   "cost": 2,
-   "abil": "Blackened Order Boss — Conjure: +2 power per card in your banish zone. Feed the Order, ride harder.",
+   "cost": 1,
+   "abil": "On commit: draw 2, return 1 to the bottom of your deck, then +2 power per card in your hand (+3 per card at 20+ career kills). Support: draw 2, banish 1 from hand, your Fighter +1 per card in your hand.",
    "timing": "on",
    "starter": false,
    "opp": false
   },
-  "Vharos, the Iron Crown": {
-   "pow": 20,
-   "rarity": "genesis",
-   "cost": 4,
-   "abil": "Record Guard. On commit: +5 against a Pristine opponent (0 deaths).",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Nyx, Devourer of Legends": {
-   "pow": 18,
-   "rarity": "genesis",
-   "cost": 3,
-   "abil": "On commit: +4; +4 more if you lost your last duel.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Aurelion Prime": {
-   "pow": 21,
-   "rarity": "genesis",
-   "cost": 4,
-   "abil": "Kill Escalation: +6 at 30+ career kills, +3 at 15+.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "The Hollow King": {
-   "pow": 16,
-   "rarity": "genesis",
-   "cost": 3,
-   "abil": "Bloodrage: +7 while you are behind in the match.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Sirefax the Warden": {
-   "pow": 16,
-   "rarity": "ultra",
-   "cost": 3,
-   "abil": "Record Guard. On commit: +3 vs a Pristine opponent.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Mordezh, Blood Prophet": {
-   "pow": 15,
-   "rarity": "ultra",
-   "cost": 3,
-   "abil": "Bloodrage: +5 while behind; +2 if you lost last.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Sable the Unseen": {
-   "pow": 14,
-   "rarity": "ultra",
-   "cost": 3,
-   "abil": "On commit: a Pristine opponent is drained — opponent −4.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Torvald Ninefingers": {
-   "pow": 15,
-   "rarity": "ultra",
-   "cost": 3,
-   "abil": "Last Stand. On commit: +3 with 2 or fewer cards in hand.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Kessa Brightblade": {
-   "pow": 13,
-   "rarity": "rare",
-   "cost": 2,
-   "abil": "On commit: +4 vs a Pristine opponent.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Ruven Ashwalker": {
-   "pow": 12,
-   "rarity": "rare",
-   "cost": 2,
-   "abil": "Bloodrage: +5 while behind in the match.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Dragan Korr": {
-   "pow": 14,
-   "rarity": "rare",
-   "cost": 3,
-   "abil": "Kill Escalation: +4 at 18+ career kills.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Sythe Marrow": {
-   "pow": 10,
-   "rarity": "rare",
-   "cost": 2,
-   "abil": "Death Remnant: +5 to your cards until an enemy is killed.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Wren of the Vigil": {
-   "pow": 12,
-   "rarity": "rare",
-   "cost": 2,
-   "abil": "Record Guard — once per match a loss becomes a tie, no death recorded.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Halbrecht the Sure": {
-   "pow": 13,
-   "rarity": "rare",
-   "cost": 2,
-   "abil": "On commit: +3; +3 more if the opponent has fewer career kills.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Nissa Emberfen": {
+  "Conduit of Chaos, Kleydson": {
    "pow": 11,
+   "rarity": "ultra",
+   "cost": 1,
+   "abil": "Lesser Chaos (once per match): warp every spell in your deck into Draw Surge (2⚡ draw 3, banish 1) and Godhand (1⚡ your card +10).",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Grave-Tithe Acolyte": {
+   "pow": 9,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: banish the top card of your deck, then +5 power.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Ashen Reclaimer": {
+   "pow": 14,
    "rarity": "rare",
    "cost": 2,
-   "abil": "Elemental Flurry: +2, +4 under a chaos condition.",
+   "abil": "On commit: return a banished card to your hand with +3 power.",
    "timing": "on",
    "starter": false,
-   "opp": true
+   "opp": false
   },
-  "Vessa Coil": {
-   "pow": 9,
-   "rarity": "rare",
-   "cost": 1,
-   "abil": "Comeback: +6 if you lost your last duel.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Tobin Reed": {
+  "Cinder-Marked Hound": {
    "pow": 8,
    "rarity": "common",
    "cost": 1,
-   "abil": "On commit: +3 vs a Pristine opponent.",
+   "abil": "On commit: +1 power for every card in your banish zone.",
    "timing": "on",
    "starter": false,
-   "opp": true
+   "opp": false
   },
-  "Marn the Digger": {
+  "The Black Ledger": {
+   "pow": 11,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: banish 2 random cards from your hand, then draw 1.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Pyre-Keeper Vayle": {
+   "pow": 13,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "On commit: +5 power while 2 or more cards are banished.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Hollow Mendicant": {
+   "pow": 7,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Support: banish a card from your hand; your Fighter +4.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Bone Choirmaster": {
+   "pow": 12,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Death Remnant: when it falls, +5 to your cards until an enemy dies. On a win, draw a card.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Grave-Fed Ghoul": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Death Remnant: when it falls, +4 to your cards until an enemy dies.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Marrow Priest": {
+   "pow": 11,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Support: your Fighter +3; if a Remnant is on the field, draw a card.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Summoned Skull Soldiers": {
+   "pow": 14,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "Death Remnant: when it falls, +7 to your cards until an enemy dies. On commit: +3 power for each Remnant you hold.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Pale Gravedigger": {
+   "pow": 9,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: raise a +3 Death Remnant, then draw a card while you hold a Remnant.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Gravecaller Voss": {
+   "pow": 9,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: banish a card from your hand to raise a Death Remnant worth +5 — no death required. Called as a support: lingers as a +5 Remnant.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Widow of the Vigil": {
+   "pow": 12,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: if you have a Remnant, draw 2; otherwise +3 power.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Bloodwake Duelist": {
+   "pow": 11,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Kill Escalation: on commit, +2 power for every kill you have earned this match.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Warpath Vanguard": {
+   "pow": 14,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: +5 power on the 1st or 2nd duel of the match.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Skullchain Reaver": {
+   "pow": 18,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "On commit: +2 power per kill earned this match; when it wins, it returns to your hand instead of the Winners Circle.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Trophy-Hunter Kessa": {
+   "pow": 17,
+   "rarity": "rare",
+   "cost": 3,
+   "abil": "On commit: +2 power for every card in BOTH players Winners Circle.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "First-Blood Squire": {
+   "pow": 12,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: +4 power on the 1st duel of the match only.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "The Undefeated": {
+   "pow": 14,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: +2 power for every duel you have already won this match.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Kravyn's Protege": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: +3 power once this card has earned 6 or more career kills.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Web-Spinner Acolyte": {
+   "pow": 8,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "On commit: +1 power for every card in your hand.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Hoarder's Gambit": {
+   "pow": 12,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: draw 2, then +1 power for every card in your hand.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "The Gathering Swarm": {
+   "pow": 14,
+   "rarity": "rare",
+   "cost": 2,
+   "abil": "On commit: +4 power while you hold 3 or more cards; the opponent −4 power while you hold 5 or more.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Silkbound Sentinel": {
+   "pow": 7,
+   "rarity": "common",
+   "cost": 1,
+   "abil": "Support: draw a card; your Fighter +2.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Silk-Fed Hatchling": {
    "pow": 6,
    "rarity": "common",
    "cost": 1,
-   "abil": "Bloodrage: +4 while behind.",
+   "abil": "On commit: gain 1 Charge.",
    "timing": "on",
    "starter": false,
-   "opp": true
+   "opp": false
   },
-  "Little Pox": {
-   "pow": 4,
-   "rarity": "common",
-   "cost": 1,
-   "abil": "Death Remnant: +4 to your cards until an enemy is killed.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Gilda Fenn": {
-   "pow": 9,
-   "rarity": "common",
-   "cost": 1,
-   "abil": "Purity: +3 while this card is Pristine.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Rusk": {
-   "pow": 7,
-   "rarity": "common",
-   "cost": 1,
-   "abil": "On commit: +3; +2 more from the 3rd commit onward.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Two-Coin Tilly": {
+  "Broodweb Keeper": {
    "pow": 5,
    "rarity": "common",
    "cost": 1,
-   "abil": "Elemental Flurry: +5 under a chaos condition.",
+   "abil": "As a support (Called), gain 1 Charge if you have 4 or more cards in hand.",
    "timing": "on",
    "starter": false,
-   "opp": true
+   "opp": false
   },
-  "Bonnick": {
-   "pow": 10,
-   "rarity": "common",
-   "cost": 2,
-   "abil": "Comeback: +4 if you lost your last duel.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Sedge the Meek": {
-   "pow": 3,
-   "rarity": "common",
-   "cost": 1,
-   "abil": "Underdog: +6 if the opponent's base power is higher.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Harrow Vane": {
-   "pow": 8,
-   "rarity": "common",
-   "cost": 1,
-   "abil": "Veteran: +3 at 6+ career kills.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Mip": {
-   "pow": 2,
-   "rarity": "common",
-   "cost": 1,
-   "abil": "No ability. Cheap fodder — a Lowest-Wins darling.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Doru Blacktooth": {
+  "Widow's Patience": {
    "pow": 9,
    "rarity": "common",
    "cost": 1,
-   "abil": "On commit: a Pristine opponent is unnerved — opponent −3.",
+   "abil": "On commit: +5 power if your hand is full (6 cards).",
    "timing": "on",
    "starter": false,
-   "opp": true
+   "opp": false
   },
-  "Wisp": {
-   "pow": 1,
-   "rarity": "common",
-   "cost": 1,
-   "abil": "No ability. A whisper of power — thrives under Lowest Wins.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Calla Thorn": {
-   "pow": 7,
-   "rarity": "common",
-   "cost": 1,
-   "abil": "Last Stand — a narrow loss becomes a tie.",
-   "timing": "on",
-   "starter": false,
-   "opp": true
-  },
-  "Grum the Steady": {
-   "pow": 11,
-   "rarity": "common",
+  "Tosa Envoy": {
+   "pow": 13,
+   "rarity": "rare",
    "cost": 2,
-   "abil": "Giant-Killer: +4 if the opponent has more career kills.",
+   "abil": "On commit: +3 power and lock the active condition. [Tosa Pact]",
    "timing": "on",
    "starter": false,
-   "opp": true
+   "opp": false
   }
  },
  "called": {
+  "Squad 19 Vanguard": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Squad 19 Medic": {
+   "text": "your Fighter +2, draw 1",
+   "add": 2,
+   "draw": 1
+  },
+  "Squad 19 Scout": {
+   "text": "draw 1",
+   "draw": 1
+  },
+  "Barracks Drill Sergeant": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Writ-Sergeant's Ledger": {
+   "text": "gain 1 Charge",
+   "chargeGain": 1
+  },
+  "Yard Sparring Partner": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Pyre-Keeper's Apprentice": {
+   "text": "gain 1 Charge",
+   "chargeGain": 1
+  },
+  "Court Cipher": {
+   "text": "gain 1 Charge if condition locked",
+   "chargeGainIfLocked": 1
+  },
+  "Oathlit Attendant": {
+   "text": "gain 1 Charge",
+   "chargeGain": 1
+  },
+  "Trophy Runner": {
+   "text": "gain 1 Charge if you've won a duel this match",
+   "chargeGainIfWon": 1
+  },
+  "Legend Reborn, Keawe Kel'rua": {
+   "text": "destroy and nullify the opposing support in the mirrored slot, if there is no card to destroy, give your fighter +3 instead.",
+   "snipeSupport": true,
+   "snipeFailAdd": 3
+  },
   "Kaelthar the Ascendant": {
    "text": "your Fighter +2",
    "add": 2
   },
-  "Voidmaw the Unmaker": {
+  "Young Darwin, Predetermined Dictator": {
    "text": "your Fighter +3",
    "add": 3
   },
-  "Sunforged Colossus": {
+  "Courtroom Colossus": {
    "text": "your Fighter +3",
    "add": 3
   },
@@ -784,24 +1433,28 @@
    "add": 3
   },
   "Kotei": {
-   "text": "your Fighter +2",
+   "text": "your Fighter +2; if your fighter wins the battle with this unit supporting, gain +2 charge and instead of going to the winners circle the card returns to the player's hand.",
    "add": 2
   },
-  "Kleydson": {
-   "text": "Blackened Order — return 2 banished cards to hand, +2 power each",
-   "recurBuff": 2
+  "Conduit of Chaos, Kleydson": {
+   "text": "your Fighter +3 · gain 1 Charge",
+   "add": 3,
+   "chargeGain": 1
   },
   "Lagertha Waltz": {
-   "text": "your Fighter +3",
-   "add": 3
+   "text": "your Fighter +3, +5 more if fielded alongside its Waltz Twins partner",
+   "add": 3,
+   "twinBuff": 5
   },
   "Hanse Waltz": {
-   "text": "your Fighter +5",
-   "add": 5
+   "text": "your Fighter +5, +5 more if fielded alongside its Waltz Twins partner",
+   "add": 5,
+   "twinBuff": 5
   },
   "Kiana": {
-   "text": "your Fighter +2",
-   "add": 2
+   "text": "banish a card from your hand; your Fighter +4",
+   "banishOwn": 1,
+   "add": 4
   },
   "Heir of Kaiga": {
    "text": "your Fighter +5 · draw 1",
@@ -814,34 +1467,42 @@
    "draw": 1
   },
   "Darwin": {
-   "text": "your Fighter +2",
-   "add": 2
+   "text": "your Fighter +2, and play the top card of your deck into your open support circle",
+   "add": 2,
+   "conjureTopToSupport": true
   },
-  "Ella Ballora — True Form": {
+  "La \"La\" Ballora, the Broodqueen": {
    "text": "your Fighter +3",
    "add": 3
   },
-  "Ella Ballora": {
+  "Envoy of Tyrants, Ella Ballora": {
    "text": "your Fighter +3",
    "add": 3
   },
-  "Arch-Grim Korrin": {
-   "text": "your Fighter +3",
-   "add": 3
-  },
-  "Alucard The Damned": {
+  "Valcarion": {
    "text": "banish 1 card from your hand to fuel the Order",
    "banishOwn": 1
   },
   "Zerith Var": {
-   "text": "your Fighter +2",
-   "add": 2
+   "text": "your Fighter +2, draw 2 cards and banish 1",
+   "add": 2,
+   "draw": 2,
+   "banishOwn": 1
   },
   "Ruffius Rufeldro": {
    "text": "your Fighter +3",
    "add": 3
   },
-  "Ahdor": {
+  "Ahdorah Khaan, Determined Soul": {
+   "text": "your Fighter +2; destroy and nullify the opposing support in the mirrored slot",
+   "add": 2,
+   "snipeSupport": true
+  },
+  "Ahdorah Khaan, Circle Unbroken": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Kynaht, Ashen Return": {
    "text": "your Fighter +3",
    "add": 3
   },
@@ -859,37 +1520,54 @@
    "add": 4
   },
   "Moro": {
-   "text": "return 1 banished card to hand",
-   "recurPlain": 1
+   "text": "return 1 banished card to hand, or banish 1 card from the top of your deck to give +4 to your conjured unit.",
+   "recurPlain": 1,
+   "deckBanishIfEmpty": 1,
+   "deckBanishAdd": 4
   },
-  "Akatosh, the Golden Dragon": {
-   "text": "your Fighter +2",
-   "add": 2
+  "Ourevos, the Golden Dragon": {
+   "text": "your Fighter +5, fill the other support slot with a copy of this card, then draw a card",
+   "add": 5,
+   "draw": 1,
+   "duplicateSelfToSupport": true
   },
   "Tange Sazen": {
-   "text": "your Fighter +3",
+   "text": "your Fighter +3, and your conjured unit returns to your hand instead of going to the winners circle",
    "add": 3
   },
   "Kiba": {
    "text": "your Fighter +5",
    "add": 5
   },
-  "Hanse Waltz — Werewolf Form": {
-   "text": "your Fighter +3",
-   "add": 3
+  "The Bronzed Beast, Hanse Waltz": {
+   "text": "your Fighter +3, +5 more if fielded alongside its Waltz Twins partner",
+   "add": 3,
+   "twinBuff": 5
   },
-  "Lagertha Waltz — Werewolf Form": {
-   "text": "your Fighter +3",
-   "add": 3
+  "Lagertha Waltz, Wrathful Transformation": {
+   "text": "your Fighter +3, +5 more if fielded alongside its Waltz Twins partner",
+   "add": 3,
+   "twinBuff": 5
   },
   "Anorith Keeling": {
-   "text": "banish 1 card from your hand to fuel the Order",
-   "banishOwn": 1
+   "text": "return this unit from the support circle to your deck, banish 1 card from your hand, draw 2 and gain 1 charge",
+   "banishOwn": 1,
+   "draw": 2,
+   "chargeGain": 1,
+   "returnSelfToDeck": true
   },
   "Conduit Adept": {
    "text": "gain 2 Charge + draw 1",
    "chargeGain": 2,
    "draw": 1
+  },
+  "Broodweb Keeper": {
+   "text": "gain 1 Charge if you have 4 or more cards in hand",
+   "chargeGainIfHandFull": 1
+  },
+  "Squad 19 Chronicler": {
+   "text": "gain 1 Charge once you've played 2 or more duels this match",
+   "chargeGainIfVeteran": 1
   },
   "Signal Diviner": {
    "text": "gain 3 Charge",
@@ -933,46 +1611,233 @@
    "text": "your Fighter +4",
    "add": 4
   },
-  "Keawe Kil'lua": {
+  "Keawe Kel'rua": {
    "text": "your Fighter +3",
    "add": 3
   },
-  "Rhaess Korvain": {
-   "text": "return 1 banished card to hand",
-   "recurPlain": 1
+  "Black Wings, Ossian Drell": {
+   "text": "your Fighter +1 for every card in your banish zone",
+   "addPerBanish": 1
   },
-  "Ossian Drell": {
-   "text": "your Fighter +4 · draw 1",
+  "Corvus": {
+   "text": "your Fighter +4, scry 1",
    "add": 4,
+   "scry": 1
+  },
+  "Wren": {
+   "text": "return a banished card to your hand, your Fighter +3",
+   "recurPlain": 1,
+   "add": 3
+  },
+  "Rook": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Falk": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Sable": {
+   "text": "banish a card from your hand, your Fighter +5",
+   "banishOwn": 1,
+   "add": 5
+  },
+  "Rhaess Korvain": {
+   "text": "banish 1 from your hand; your Fighter +3",
+   "banishOwn": 1,
+   "add": 3
+  },
+  "Grave-Tithe Acolyte": {
+   "text": "banish 1 from your hand; your Fighter +3",
+   "banishOwn": 1,
+   "add": 3
+  },
+  "Ashen Reclaimer": {
+   "text": "return a banished card to your hand; your Fighter +2",
+   "recurPlain": 1,
+   "add": 2
+  },
+  "Cinder-Marked Hound": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "The Black Ledger": {
+   "text": "draw 1; your Fighter +2",
+   "draw": 1,
+   "add": 2
+  },
+  "Pyre-Keeper Vayle": {
+   "text": "your Fighter +4",
+   "add": 4
+  },
+  "Hollow Mendicant": {
+   "text": "banish a card from your hand; your Fighter +4",
+   "banishOwn": 1,
+   "add": 4
+  },
+  "Arch-Grim Korrin": {
+   "text": "your Fighter +4; if you hold a Remnant, draw 1",
+   "add": 4,
+   "drawIfRemnant": true
+  },
+  "Bone Choirmaster": {
+   "text": "your Fighter +3 · draw 1",
+   "add": 3,
    "draw": 1
+  },
+  "Grave-Fed Ghoul": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Silk-Spinner Drone": {
+   "text": "draw a card",
+   "draw": 1
+  },
+  "Web-Tender Matron": {
+   "text": "draw 2 cards",
+   "draw": 2
+  },
+  "Feather-Marked Skirmisher": {
+   "text": "banish 1 from hand · your Fighter +4",
+   "banishOwn": 1,
+   "add": 4
+  },
+  "Bone-Stitcher": {
+   "text": "your Fighter +3; draw if a Remnant is out",
+   "add": 3,
+   "drawIfRemnant": true
+  },
+  "Rank-Sworn Levy": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Standard-Bearer Halden": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Oathkeeper Sena": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Muster-Sergeant Bryn": {
+   "text": "your Fighter +1 per Winners Circle card, capped at +8",
+   "perWC": 1,
+   "perWCcap": 8
+  },
+  "Marrow Priest": {
+   "text": "your Fighter +3; if a Remnant is on the field, draw 1",
+   "add": 3,
+   "drawIfRemnant": true
+  },
+  "Summoned Skull Soldiers": {
+   "text": "your Fighter +5",
+   "add": 5
+  },
+  "Pale Gravedigger": {
+   "text": "your Fighter +2; if you hold a Remnant, draw 1",
+   "add": 2,
+   "drawIfRemnant": true
+  },
+  "Widow of the Vigil": {
+   "text": "your Fighter +3 · draw 1",
+   "add": 3,
+   "draw": 1
+  },
+  "Bloodwake Duelist": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Warpath Vanguard": {
+   "text": "your Fighter +4",
+   "add": 4
+  },
+  "Skullchain Reaver": {
+   "text": "your Fighter +4",
+   "add": 4
+  },
+  "Trophy-Hunter Kessa": {
+   "text": "your Fighter +4",
+   "add": 4
+  },
+  "First-Blood Squire": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "The Undefeated": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Kravyn's Protege": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Web-Spinner Acolyte": {
+   "text": "draw 1; your Fighter +1",
+   "draw": 1,
+   "add": 1
+  },
+  "Hoarder's Gambit": {
+   "text": "draw 1; your Fighter +2",
+   "draw": 1,
+   "add": 2
+  },
+  "The Gathering Swarm": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Silkbound Sentinel": {
+   "text": "draw a card; your Fighter +2",
+   "draw": 1,
+   "add": 2
+  },
+  "Widow's Patience": {
+   "text": "your Fighter +3",
+   "add": 3
+  },
+  "Mirror Shade": {
+   "text": "your Fighter +2",
+   "add": 2
+  },
+  "Tosa Envoy": {
+   "text": "your Fighter +3",
+   "add": 3
   },
   "Bram the Bulwark": {
    "text": "your Fighter +3",
    "add": 3
   },
-  "Valcarion": {
+  "Cletus Gwyndull": {
    "text": "your Fighter +3",
    "add": 3
   },
   "Chieftain Reyva Vosh": {
-   "text": "draw 2 cards",
-   "draw": 2
+   "text": "draw 1 card, and double this unit's Shield value",
+   "draw": 1,
+   "doubleShield": true
   },
   "Kravyn the Collector": {
-   "text": "both players banish 1 from hand; opponent −2",
-   "bothBanish": 1
+   "text": "draw 1; your Fighter +2 for every time it's returned to hand via a card effect this match",
+   "draw": 1
+  },
+  "Sister Mire, Wailing Nightmare": {
+   "text": "draw 2, banish 1 from hand; your Fighter +1 per card in your hand",
+   "draw": 2,
+   "banishOwn": 1,
+   "addPerHand": 1
   },
   "Forgemask": {
    "text": "your Fighter +3",
    "add": 3
   },
-  "Veyra Stormcaller": {
+  "Fifth Frequency Stormcaller": {
    "text": "your Fighter +3",
    "add": 3
   },
-  "Ghorruk Skullbrand": {
-   "text": "return 1 banished card to hand, +2 power",
-   "recurBuff": 1
+  "Ghorruk \"Gnarly\" Judarr": {
+   "text": "return 1 banished card to the bottom of the deck, scry 1, then +2 power",
+   "recurBuff": 1,
+   "recurDest": "deck",
+   "scry": 1
   },
   "Elowen Dawnspear": {
    "text": "your Fighter +3",
@@ -983,23 +1848,238 @@
    "add": 3
   },
   "Uso Oso": {
-   "text": "your Fighter +3",
-   "add": 3
+   "text": "your Fighter +3; the lowest power card in your hand is automatically played as a death remnant.",
+   "add": 3,
+   "autoRemnantLowest": true
+  },
+  "Veronica": {
+   "text": "your fighter gains +2, then scry 1.",
+   "add": 2,
+   "scry": 1
+  },
+  "Unbanked Victory": {
+   "text": "your next win returns to your hand instead of banking to the Winners Circle",
+   "unbankNextWin": true
+  },
+  "Reclaim the Colors": {
+   "text": "return 1 card from your Winners Circle to the bottom of your deck",
+   "reclaimWC": 1
   }
  },
  "rules": {
-  "Kaelthar the Ascendant": [
+  "Squad 19 Quartermaster": [
    {
     "if": {
-     "v": "player_wins",
-     "op": ">",
-     "v2": "player_losses"
+     "v": "hand_len",
+     "op": "<",
+     "n": 4
     },
-    "add": 6,
-    "log": "🐉 Ascendant: +6 (holding the lead)"
+    "add": 4,
+    "log": "📦 Quartermaster: +4 (hand ≤3)"
    }
   ],
-  "Voidmaw the Unmaker": [
+  "Ahdorah Khaan, Squad 19 Recruit": [
+   {
+    "if": {
+     "v": "last_result",
+     "op": "==",
+     "s": "lose"
+    },
+    "add": 3,
+    "log": "🛡 Squad 19 Recruit: +3 (lost last)"
+   }
+  ],
+  "Squad 16 Veteran": [
+   {
+    "if": {
+     "v": "match_commits",
+     "op": ">=",
+     "n": 2
+    },
+    "add": 3,
+    "log": "⚔ Squad 16 Veteran: +3 (2+ duels played)"
+   }
+  ],
+  "Silk-Fed Hatchling": [
+   {
+    "chargeGain": 1,
+    "log": "🕷 Silk-Fed Hatchling: gain 1 Charge"
+   }
+  ],
+  "Squad 19 Signalman": [
+   {
+    "chargeGain": 1,
+    "log": "📡 Squad 19 Signalman: gain 1 Charge"
+   }
+  ],
+  "Cadet Corps Recruit": [
+   {
+    "if": {
+     "or": [
+      {
+       "v": "match_commits",
+       "op": "==",
+       "n": 1
+      },
+      {
+       "v": "match_commits",
+       "op": "==",
+       "n": 2
+      }
+     ]
+    },
+    "add": 3,
+    "log": "⚔ Cadet Recruit: +3 (early duel)"
+   }
+  ],
+  "Fenrik Vench": [
+   {
+    "if": {
+     "v": "player_losses",
+     "op": ">",
+     "n": 0
+    },
+    "add": 3,
+    "log": "⚔ Fenrik Vench: +3 (rivalry sharpens him)"
+   }
+  ],
+  "Lumen Acolyte": [
+   {
+    "chargeGain": 1,
+    "log": "✨ Lumen Acolyte: gain 1 Charge"
+   }
+  ],
+  "Oathlit Vanguard": [
+   {
+    "if": {
+     "v": "player_losses",
+     "op": "==",
+     "n": 0
+    },
+    "add": 5,
+    "log": "🛡 Oathlit Vanguard: +5 (undefeated this match)"
+   }
+  ],
+  "Silk-Spinner Drone": [
+   {
+    "if": {
+     "v": "hand_len",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "hand_len",
+    "x": 1,
+    "log": "🕷 Swarm: +1×hand"
+   }
+  ],
+  "Web-Tender Matron": [
+   {
+    "if": {
+     "v": "hand_len",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "hand_len",
+    "x": 1,
+    "log": "🕸 Swarm: +1×hand"
+   }
+  ],
+  "Brood-Tender": [
+   {
+    "if": {
+     "v": "hand_len",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "hand_len",
+    "x": 1,
+    "log": "🕷 Swarm: +1×hand"
+   }
+  ],
+  "Skittering Drone": [
+   {
+    "if": {
+     "v": "hand_len",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "hand_len",
+    "x": 1,
+    "log": "🕷 Swarm: +1×hand"
+   }
+  ],
+  "Hatchling Tide": [
+   {
+    "if": {
+     "v": "hand_len",
+     "op": ">=",
+     "n": 4
+    },
+    "add": 4,
+    "log": "🕸 Swarm: +4 (full hand)"
+   }
+  ],
+  "Venombrood Queen": [
+   {
+    "if": {
+     "v": "hand_len",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "hand_len",
+    "x": 2,
+    "log": "🕸 Broodswarm: +2×hand"
+   }
+  ],
+  "Talon-Trooper": [
+   {
+    "if": {
+     "v": "banish_len",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "banish_len",
+    "x": 1,
+    "log": "🖤 Wingblade: +1×banish"
+   }
+  ],
+  "Wingblade Scout": [
+   {
+    "if": {
+     "v": "banish_len",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "banish_len",
+    "x": 1,
+    "log": "🖤 Wingblade: +1×banish"
+   }
+  ],
+  "Squad-Captain Vesk": [
+   {
+    "if": {
+     "v": "banish_len",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "banish_len",
+    "x": 2,
+    "log": "🖤 Wing Commander: +2×banish"
+   }
+  ],
+  "Bixie Bee": [
+   {
+    "if": {
+     "v": "banish_len",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "banish_len",
+    "x": 1,
+    "log": "🐝 Swarm: +1 per banished card"
+   }
+  ],
+  "Young Darwin, Predetermined Dictator": [
    {
     "add": 4,
     "log": "🌑 Voidmaw: +4"
@@ -1014,7 +2094,7 @@
     "log": "🌑 Voidmaw: opponent −3 (Pristine prey)"
    }
   ],
-  "Sunforged Colossus": [
+  "Courtroom Colossus": [
    {
     "add": 3,
     "log": "☀️ Colossus: +3"
@@ -1029,23 +2109,21 @@
     "log": "☀️ Colossus: +5 (late game)"
    }
   ],
-  "Kessuae, Tide of Ruin": [
-   {
-    "if": {
-     "v": "player_losses",
-     "op": ">",
-     "v2": "player_wins"
-    },
-    "add": 7,
-    "log": "🌊 Kessuae: +7 (behind)"
-   }
-  ],
   "Vharos, the Iron Crown": [
    {
     "if": {
-     "v": "opp_deaths",
-     "op": "==",
-     "n": 0
+     "and": [
+      {
+       "v": "opp_deaths",
+       "op": "==",
+       "n": 0
+      },
+      {
+       "v": "opp_kills",
+       "op": ">=",
+       "n": 1
+      }
+     ]
     },
     "add": 5,
     "log": "👑 Vharos: +5 vs Pristine"
@@ -1109,9 +2187,18 @@
   "Sirefax the Warden": [
    {
     "if": {
-     "v": "opp_deaths",
-     "op": "==",
-     "n": 0
+     "and": [
+      {
+       "v": "opp_deaths",
+       "op": "==",
+       "n": 0
+      },
+      {
+       "v": "opp_kills",
+       "op": ">=",
+       "n": 1
+      }
+     ]
     },
     "add": 3,
     "log": "🛡 Sirefax: +3 vs Pristine"
@@ -1140,36 +2227,30 @@
   "Elowen Dawnspear": [
    {
     "if": {
-     "v": "pc_deaths",
-     "op": "==",
-     "n": 0
+     "and": [
+      {
+       "v": "pc_deaths",
+       "op": "==",
+       "n": 0
+      },
+      {
+       "v": "pc_kills",
+       "op": ">=",
+       "n": 1
+      }
+     ]
     },
     "add": 5,
     "log": "✨ Elowen: +5 (Pristine)"
-   }
-  ],
-  "Kravyn the Collector": [
-   {
-    "if": {
-     "v": "pc_kills",
-     "op": ">=",
-     "n": 20
-    },
-    "add": 5,
-    "log": "⚔️ Kravyn: +5 (20+ kills)"
-   }
-  ],
-  "Veyra Stormcaller": [
-   {
-    "add": 3,
-    "log": "🌪️ Veyra: +3"
    },
    {
     "if": {
-     "chaos": true
+     "v": "pc_deaths",
+     "op": ">",
+     "n": 5
     },
-    "add": 4,
-    "log": "🌪️ Veyra: +4 (chaos)"
+    "add": 2,
+    "log": "✨ Elowen: +2 (over 5 deaths)"
    }
   ],
   "Sable the Unseen": [
@@ -1197,9 +2278,18 @@
   "Kessa Brightblade": [
    {
     "if": {
-     "v": "opp_deaths",
-     "op": "==",
-     "n": 0
+     "and": [
+      {
+       "v": "opp_deaths",
+       "op": "==",
+       "n": 0
+      },
+      {
+       "v": "opp_kills",
+       "op": ">=",
+       "n": 1
+      }
+     ]
     },
     "add": 4,
     "log": "⚔️ Kessa: +4 vs Pristine"
@@ -1312,9 +2402,18 @@
   "Tobin Reed": [
    {
     "if": {
-     "v": "opp_deaths",
-     "op": "==",
-     "n": 0
+     "and": [
+      {
+       "v": "opp_deaths",
+       "op": "==",
+       "n": 0
+      },
+      {
+       "v": "opp_kills",
+       "op": ">=",
+       "n": 1
+      }
+     ]
     },
     "add": 3,
     "log": "⚔️ Tobin: +3 vs Pristine"
@@ -1334,9 +2433,18 @@
   "Gilda Fenn": [
    {
     "if": {
-     "v": "pc_deaths",
-     "op": "==",
-     "n": 0
+     "and": [
+      {
+       "v": "pc_deaths",
+       "op": "==",
+       "n": 0
+      },
+      {
+       "v": "pc_kills",
+       "op": ">=",
+       "n": 1
+      }
+     ]
     },
     "add": 3,
     "log": "✨ Gilda: +3 (Pristine)"
@@ -1442,30 +2550,22 @@
    },
    {
     "if": {
-     "and": [
+     "or": [
       {
-       "or": [
-        {
-         "v": "opp_deaths",
-         "op": "==",
-         "n": 0
-        },
-        {
-         "v": "last_result",
-         "op": "==",
-         "s": "lose"
-        }
-       ]
+       "v": "opp_deaths",
+       "op": "==",
+       "n": 0
       },
       {
-       "v": "ragwing",
-       "op": ">",
-       "n": 0
+       "v": "last_result",
+       "op": "==",
+       "s": "lose"
       }
      ]
     },
-    "add": 3,
-    "log": "🔥 Kotei: repeat +3"
+    "addvar": "match_commits",
+    "x": 3,
+    "log": "🔥 Kotei: +3 per round completed (repeat)"
    }
   ],
   "Lagertha Waltz": [
@@ -1475,8 +2575,8 @@
      "op": "==",
      "s": "lose"
     },
-    "add": 2,
-    "log": "🔥 Lagertha: +2 (lost last)"
+    "add": 6,
+    "log": "🔥 Lagertha: +6 (lost last)"
    },
    {
     "if": {
@@ -1499,33 +2599,11 @@
     "log": "🧬 Darwin: +3 (3rd+ commit)"
    }
   ],
-  "Anorith Keeling": [
-   {
-    "if": {
-     "v": "opp_pow",
-     "op": ">",
-     "v2": "pc_pow"
-    },
-    "addvar": "hand_len",
-    "x": 2,
-    "log": "✨ Anorith: +2×hand"
-   }
-  ],
+  "Anorith Keeling": [],
   "Malia": [
    {
     "set": "opp_pow",
     "log": "🔄 Malia: power mirrors opponent"
-   }
-  ],
-  "Moro": [
-   {
-    "if": {
-     "v": "opp_kills",
-     "op": ">=",
-     "n": 6
-    },
-    "add": 3,
-    "log": "💀 Moro: +3"
    }
   ],
   "Zerith Var": [
@@ -1559,6 +2637,38 @@
     },
     "add": 6,
     "log": "⚔️ Val Kreigh: +6 (first duel)"
+   },
+   {
+    "if": {
+     "v": "match_commits",
+     "op": ">=",
+     "n": 2
+    },
+    "add": 2,
+    "log": "⚔️ Val Kreigh: +2 (second duel or later)"
+   }
+  ],
+  "Unbanked Victory": [
+   {
+    "if": {
+     "v": "wc_len",
+     "op": "==",
+     "n": 0
+    },
+    "add": 3,
+    "log": "🏳 Unbanked Victory: your Winners Circle is empty — +3"
+   }
+  ],
+  "Reclaim the Colors": [
+   {
+    "if": {
+     "v": "wc_len",
+     "op": ">",
+     "n": 0
+    },
+    "addvar": "wc_len",
+    "x": 1,
+    "log": "↩ Reclaim the Colors: +1×WC"
    }
   ],
   "Tange Sazen": [
@@ -1584,52 +2694,20 @@
     "log": "👻 Korrin: +6"
    }
   ],
-  "Alucard The Damned": [
-   {
-    "if": {
-     "v": "opp_deaths",
-     "op": "==",
-     "n": 0
-    },
-    "add": 4,
-    "log": "🩸 Alucard: +4 (drained Pristine)"
-   },
-   {
-    "if": {
-     "v": "opp_deaths",
-     "op": ">",
-     "n": 0
-    },
-    "oppadd": -4,
-    "log": "🩸 Alucard: opponent −4"
-   }
-  ],
-  "Ella Ballora": [
-   {
-    "add": 3,
-    "log": "⚔️ Bloodrage: +3"
-   },
-   {
-    "if": {
-     "v": "player_losses",
-     "op": ">",
-     "n": 0
-    },
-    "add": 3,
-    "log": "⚔️ Bloodrage: +3 (wounded)"
-   }
-  ],
+  "Valcarion": [],
   "Kiana": [
    {
     "add": 3,
-    "log": "🔥 Flurry: +3"
+    "log": "🪶 Elemental Flurry: +3"
    },
    {
     "if": {
-     "chaos": true
+     "v": "hand_len",
+     "op": ">=",
+     "n": 4
     },
     "add": 4,
-    "log": "🔥 chaos surge: +4"
+    "log": "🪶 Elemental Flurry: +4 more (4+ hand)"
    }
   ],
   "King Joris": [
@@ -1659,8 +2737,15 @@
   "Broodmother": [
    {
     "addvar": "hand_len",
-    "x": 2,
-    "log": "🕷 Swarm: +2×hand"
+    "x": 1,
+    "log": "🕷 Swarm: +1×hand"
+   }
+  ],
+  "Fledgling Broodmother": [
+   {
+    "addvar": "hand_len",
+    "x": 1,
+    "log": "🕷 Lesser Swarm: +1×hand"
    }
   ],
   "Forgemask": [
@@ -1700,19 +2785,11 @@
     "log": "🧵 Master Tailor: +4"
    }
   ],
-  "Ella Ballora — True Form": [
+  "La \"La\" Ballora, the Broodqueen": [
    {
-    "add": 3,
-    "log": "🕸 Devour: +3"
-   },
-   {
-    "if": {
-     "v": "wc_len",
-     "op": ">",
-     "n": 0
-    },
-    "add": 4,
-    "log": "🕸 fed: +4"
+    "addvar": "hand_len",
+    "x": 2,
+    "log": "🕸 Broodswarm: +2×hand"
    }
   ],
   "Korrin's Possessed Legion": [
@@ -1724,18 +2801,7 @@
     "log": "🪖 Thrall Swarm: +5"
    }
   ],
-  "Hanse Waltz — Werewolf Form": [
-   {
-    "if": {
-     "v": "player_losses",
-     "op": ">",
-     "v2": "player_wins"
-    },
-    "add": 5,
-    "log": "🐺 Blood Moon: +5"
-   }
-  ],
-  "Lagertha Waltz — Werewolf Form": [
+  "Lagertha Waltz, Wrathful Transformation": [
    {
     "add": 3,
     "log": "🌕 Alpha's Grief: +3"
@@ -1750,7 +2816,7 @@
     "log": "🌕 Mourning: +4"
    }
   ],
-  "Keawe Kil'lua": [
+  "Keawe Kel'rua": [
    {
     "if": {
      "v": "last_result",
@@ -1759,32 +2825,265 @@
     },
     "add": 3,
     "log": "⚡ Rising Talent: +3"
+   },
+   {
+    "if": {
+     "and": [
+      {
+       "v": "last_result",
+       "op": "==",
+       "s": "lose"
+      },
+      {
+       "v": "rear_count",
+       "op": "<=",
+       "n": 1
+      }
+     ]
+    },
+    "add": 3,
+    "log": "⚡ Rising Talent: +3 more (repeat, 1 or fewer supports)"
    }
   ],
   "Rhaess Korvain": [
    {
-    "if": {
-     "v": "opp_kills",
-     "op": ">",
-     "v2": "pc_kills"
-    },
-    "add": 6,
-    "log": "🗡 Assassin's Mark: +6"
+    "addvar": "banish_len",
+    "x": 2,
+    "log": "🪶 Rhaess: +2×banish"
    }
   ],
-  "Ossian Drell": [
+  "Black Wings, Ossian Drell": [
    {
-    "add": 3,
-    "log": "🎖 Field Command: +3"
+    "addvar": "banish_len",
+    "x": 2,
+    "log": "🪶 Wing Command: +2×banish"
    },
    {
     "if": {
-     "v": "player_wins",
-     "op": ">",
-     "v2": "player_losses"
+     "v": "hand_banished",
+     "op": "==",
+     "n": true
+    },
+    "addvar": "hand_len",
+    "x": 2,
+    "log": "🪶 Wing Command: +2×hand (banished from hand this turn)"
+   }
+  ],
+  "Sister Mire, Wailing Nightmare": [
+   {
+    "addvar": "hand_len",
+    "x": 2,
+    "log": "🌫️ Wailing Nightmare: +2×hand"
+   },
+   {
+    "if": {
+     "v": "pc_kills",
+     "op": ">=",
+     "n": 20
+    },
+    "addvar": "hand_len",
+    "x": 1,
+    "log": "🌫️ Wailing Nightmare: +1×hand (20+ kills)"
+   }
+  ],
+  "Corvus": [
+   {
+    "addvar": "banish_len",
+    "x": 2,
+    "log": "🪶 Raven's Feast: +2×banish"
+   }
+  ],
+  "Rook": [
+   {
+    "addvar": "banish_len",
+    "x": 1,
+    "log": "🪶 Scout: +1×banish"
+   }
+  ],
+  "Falk": [
+   {
+    "addvar": "banish_len",
+    "x": 2,
+    "log": "🪶 Dive: +2×banish"
+   },
+   {
+    "if": {
+     "v": "banish_len",
+     "op": ">=",
+     "n": 3
+    },
+    "chargeGain": 1,
+    "log": "⚡ Dive: banish zone 3+ — gain 1 Charge"
+   }
+  ],
+  "Wren": [
+   {
+    "add": 4,
+    "log": "🪶 Wingmate: +4"
+   }
+  ],
+  "Grave-Tithe Acolyte": [
+   {
+    "add": 5,
+    "log": "☠ Grave-Tithe: +5"
+   }
+  ],
+  "Cinder-Marked Hound": [
+   {
+    "addvar": "banish_len",
+    "x": 1,
+    "log": "☠ Cinder: +1×banish"
+   }
+  ],
+  "Ahdorah Khaan, Circle Unbroken": [
+   {
+    "addvar": "banish_len",
+    "x": 4,
+    "log": "☠ Circle Unbroken: +4×banish"
+   }
+  ],
+  "Pyre-Keeper Vayle": [
+   {
+    "if": {
+     "v": "banish_len",
+     "op": ">=",
+     "n": 2
+    },
+    "add": 5,
+    "log": "☠ Pyre-Keeper: +5"
+   }
+  ],
+  "Summoned Skull Soldiers": [
+   {
+    "addvar": "remnant_count",
+    "x": 3,
+    "log": "⚰ Ossuary: +3×remnant"
+   }
+  ],
+  "Widow of the Vigil": [
+   {
+    "if": {
+     "v": "remnant_count",
+     "op": "==",
+     "n": 0
     },
     "add": 3,
-    "log": "🎖 Advantage: +3"
+    "log": "⚰ Vigil: +3 (no remnant)"
+   }
+  ],
+  "Bloodwake Duelist": [
+   {
+    "addvar": "skullchain",
+    "x": 2,
+    "log": "💀 Bloodwake: +2×kill"
+   }
+  ],
+  "Warpath Vanguard": [
+   {
+    "if": {
+     "v": "match_commits",
+     "op": "<=",
+     "n": 2
+    },
+    "add": 5,
+    "log": "⚔ Vanguard: +5 (early)"
+   }
+  ],
+  "Skullchain Reaver": [
+   {
+    "addvar": "skullchain",
+    "x": 2,
+    "log": "💀 Reaver: +2×kill"
+   }
+  ],
+  "First-Blood Squire": [
+   {
+    "if": {
+     "v": "match_commits",
+     "op": "==",
+     "n": 1
+    },
+    "add": 4,
+    "log": "⚔ First Blood: +4"
+   }
+  ],
+  "The Undefeated": [
+   {
+    "addvar": "player_wins",
+    "x": 2,
+    "log": "⚔ Undefeated: +2×win"
+   }
+  ],
+  "Kravyn's Protege": [
+   {
+    "if": {
+     "v": "pc_kills",
+     "op": ">=",
+     "n": 6
+    },
+    "add": 3,
+    "log": "💀 Protege: +3"
+   }
+  ],
+  "Web-Spinner Acolyte": [
+   {
+    "addvar": "hand_len",
+    "x": 1,
+    "log": "🕷 Web-Spinner: +1×hand"
+   }
+  ],
+  "Hoarder's Gambit": [
+   {
+    "addvar": "hand_len",
+    "x": 1,
+    "log": "🕷 Hoarder: +1×hand"
+   }
+  ],
+  "The Gathering Swarm": [
+   {
+    "if": {
+     "v": "hand_len",
+     "op": ">=",
+     "n": 3
+    },
+    "add": 4,
+    "log": "🕷 Swarm: +4"
+   },
+   {
+    "if": {
+     "v": "hand_len",
+     "op": ">=",
+     "n": 5
+    },
+    "oppadd": -4,
+    "log": "🕷 Swarm: opp −4"
+   }
+  ],
+  "Widow's Patience": [
+   {
+    "if": {
+     "v": "hand_len",
+     "op": ">=",
+     "n": 6
+    },
+    "add": 5,
+    "log": "🕷 Patience: +5 (full hand)"
+   }
+  ],
+  "Mirror Shade": [
+   {
+    "set": "opp_pow",
+    "log": "🔄 Mirror: copy opp"
+   },
+   {
+    "add": 1,
+    "log": "🔄 Mirror: +1"
+   }
+  ],
+  "Tosa Envoy": [
+   {
+    "add": 3,
+    "log": "🤝 Tosa Envoy: +3"
    }
   ]
  },
@@ -1798,11 +3097,19 @@
     "Lagertha Waltz",
     "Hanse Waltz",
     "Uso Oso",
-    "Kianna",
-    "Kiana",
     "Bixie Bee",
     "Melanie",
     "Heir of Kaiga"
+   ]
+  },
+  "kelrua": {
+   "name": "Kel'rua Blood",
+   "icon": "👪",
+   "pow": 1,
+   "members": [
+    "Kiana",
+    "Keawe Kel'rua",
+    "Legend Reborn, Keawe Kel'rua"
    ]
   },
   "squad19": {
@@ -1810,7 +3117,7 @@
    "icon": "🛡",
    "pow": 1,
    "members": [
-    "Ahdor",
+    "Ahdorah Khaan, Determined Soul",
     "Val Kreigh",
     "Ruffius Rufeldro"
    ]
@@ -1821,15 +3128,15 @@
    "pow": 1,
    "members": [
     "Darwin",
-    "Alucard The Damned",
+    "Valcarion",
     "Zerith Var",
     "Veronica",
-    "Ella Ballora",
-    "Ella Ballora — True Form",
+    "Envoy of Tyrants, Ella Ballora",
+    "La \"La\" Ballora, the Broodqueen",
     "Arch-Grim Korrin",
     "Grim Korrin",
     "Ruffius Rufeldro",
-    "Voidmaw the Unmaker"
+    "Young Darwin, Predetermined Dictator"
    ]
   },
   "royalty": {
@@ -1848,9 +3155,9 @@
    "pow": 1,
    "members": [
     "Tange Sazen",
-    "Akatosh, the Golden Dragon",
+    "Ourevos, the Golden Dragon",
     "Kiba",
-    "Kleydson",
+    "Conduit of Chaos, Kleydson",
     "Kaelthar the Ascendant"
    ]
   },
@@ -1861,9 +3168,56 @@
    "members": [
     "Lagertha Waltz",
     "Hanse Waltz",
-    "Lagertha Waltz — Werewolf Form",
-    "Hanse Waltz — Werewolf Form",
+    "Lagertha Waltz, Wrathful Transformation",
+    "The Bronzed Beast, Hanse Waltz",
     "Kessuae, Tide of Ruin"
+   ]
+  },
+  "tosa": {
+   "name": "Tosa Pact",
+   "icon": "🤝",
+   "pow": 1,
+   "members": [
+    "Cletus Gwyndull"
+   ]
+  },
+  "blackwings": {
+   "name": "The Black Wings",
+   "icon": "🖤",
+   "pow": 1,
+   "members": [
+    "Black Wings, Ossian Drell",
+    "Kiana",
+    "Corvus",
+    "Wren",
+    "Rook",
+    "Falk",
+    "Sable",
+    "Rhaess Korvain",
+    "The Black Ledger",
+    "Tannis",
+    "Wingblade Scout",
+    "Feather-Marked Skirmisher",
+    "Squad-Captain Vesk",
+    "Pyre-Keeper's Apprentice"
+   ]
+  },
+  "ironsworn": {
+   "name": "The Ironsworn",
+   "icon": "✊",
+   "pow": 2,
+   "members": [
+    "Bannerlord Cassian",
+    "Ironsworn Vanguard",
+    "Warden of the Wall",
+    "Oathkeeper Sena",
+    "Muster-Sergeant Bryn",
+    "Oathbound Shield",
+    "Sworn Duelist",
+    "Standard-Bearer Halden",
+    "Rank-Sworn Levy",
+    "Shieldwall Recruit",
+    "Chieftain Reyva Vosh"
    ]
   },
   "legend": {
@@ -1872,16 +3226,16 @@
    "pow": 1,
    "members": [
     "Kotei",
-    "Ahdor",
-    "Kleydson",
+    "Ahdorah Khaan, Determined Soul",
+    "Conduit of Chaos, Kleydson",
     "Anorith Keeling",
     "Anorith Prime",
-    "Sunforged Colossus"
+    "Courtroom Colossus"
    ]
   }
  },
  "starter": [
-  "Keawe Kil'lua",
+  "Keawe Kel'rua",
   "Lagertha Waltz",
   "Hanse Waltz",
   "Uso Oso",
@@ -1901,6 +3255,310 @@
  "costOverride": {
   "Signal Diviner": 2,
   "Voltcaller": 2,
-  "Ahdor": 3
- }
+  "Ahdorah Khaan, Determined Soul": 2,
+  "Tange Sazen": 2,
+  "Kotei": 3,
+  "Darwin": 2,
+  "Lagertha Waltz": 1,
+  "The Bronzed Beast, Hanse Waltz": 3,
+  "Hanse Waltz": 2,
+  "Uso Oso": 2,
+  "Zerith Var": 3,
+  "Lagertha Waltz, Wrathful Transformation": 2,
+  "Bixie Bee": 1,
+  "Keawe Kel'rua": 2,
+  "Veronica": 1,
+  "Sister Mire, Wailing Nightmare": 1,
+  "Moro": 2,
+  "Elowen Dawnspear": 2,
+  "Cletus Gwyndull": 1,
+  "Val Kreigh": 2,
+  "Faye Quicksilver": 2,
+  "Envoy of Tyrants, Ella Ballora": 2,
+  "Forgemask": 2
+ },
+ "conditions": [
+  {
+   "id": "lowest",
+   "mech": "Lowest Wins",
+   "tag": "flip",
+   "prob": "15%",
+   "rule": "In the slaver-city's pits the lowest are made to rise — lowest base power wins the duel. Abilities that add power are traps."
+  },
+  {
+   "id": "noretreat",
+   "mech": "No Retreat",
+   "tag": "lock",
+   "prob": "13%",
+   "rule": "Darwin's fortress permits no escape — Withdraw is locked. Once you confirm your selection you must commit. The only exit is losing."
+  },
+  {
+   "id": "abilitylock",
+   "mech": "Ability Lock",
+   "tag": "lock",
+   "prob": "11%",
+   "rule": "On the homeland's hard ground tricks fail and only strength counts — no card abilities activate this turn. Raw power only, no on-commit or resolution effects."
+  },
+  {
+   "id": "forceswap",
+   "mech": "Force Swap",
+   "tag": "chaos",
+   "prob": "10%",
+   "rule": "In Darwin's menagerie specimens are shuffled on a whim — after commit, each player's card is replaced by a random card from their hand. You commit a sacrifice, not a fighter."
+  },
+  {
+   "id": "surge",
+   "mech": "Energy Surge",
+   "tag": "chaos",
+   "prob": "10%",
+   "rule": "Storms break over the peaks without warning — +6 power strikes one randomly selected committed card after both are locked in."
+  },
+  {
+   "id": "openbook",
+   "mech": "Open Book",
+   "tag": "info",
+   "prob": "10%",
+   "rule": "Nothing stays hidden in the capital's open court — the opponent's card identity is revealed before you commit. They see yours in turn."
+  },
+  {
+   "id": "recordties",
+   "mech": "Record Breaks Ties",
+   "tag": "boost",
+   "prob": "9%",
+   "rule": "Where two legends once destroyed each other, legacy decides — if power is tied after all effects, the card with more career kills wins. Zero-kill cards lose all ties."
+  },
+  {
+   "id": "provingground",
+   "mech": "Proving Ground",
+   "tag": "flip",
+   "prob": "8%",
+   "rule": "Skarrow Hold tests restraint, not strength — the higher-base-power card takes −5 power (to a minimum of 1). The mountain humbles the mighty."
+  },
+  {
+   "id": "mirror",
+   "mech": "Mirror",
+   "tag": "chaos",
+   "prob": "7%",
+   "rule": "In the illusion-warped village nothing is itself — each committed card's power becomes equal to the opponent's committed base power."
+  },
+  {
+   "id": "hollowreckoning",
+   "mech": "Hollow Reckoning",
+   "tag": "chaos",
+   "prob": "7%",
+   "rule": "In the void identity falls away — if a unit's base power is lower than its kill count, that card's power becomes its career kills."
+  },
+  {
+   "id": "veteranedge",
+   "mech": "Veteran's Edge",
+   "tag": "boost",
+   "prob": "3%",
+   "rule": "Experience favors the underdog — the weaker card gains +1 power for every 5 kills on its record, capped at +15."
+  },
+  {
+   "id": "freshblood",
+   "mech": "Fresh Blood",
+   "tag": "flip",
+   "prob": "3%",
+   "rule": "Cards with zero kills fight with everything to prove — 0-kill cards gain +10."
+  },
+  {
+   "id": "puritytrial",
+   "mech": "Purity Trial",
+   "tag": "boost",
+   "prob": "3%",
+   "rule": "Flawless records are exalted — Pristine (0 deaths, 1+ kill) cards gain +5."
+  },
+  {
+   "id": "puritydrain",
+   "mech": "Purity Drain",
+   "tag": "flip",
+   "prob": "3%",
+   "rule": "The spotless are hunted — Pristine (0 deaths, 1+ kill) cards suffer −5."
+  },
+  {
+   "id": "bloodreckoning",
+   "mech": "Blood Reckoning",
+   "tag": "flip",
+   "prob": "3%",
+   "rule": "Every scar is a weakness — each card loses 1 power per 2 deaths on its record."
+  },
+  {
+   "id": "deathwish",
+   "mech": "Deathwish",
+   "tag": "boost",
+   "prob": "3%",
+   "rule": "Scars fuel fury — each card gains +1 power per death on its record, capped at +15."
+  },
+  {
+   "id": "underdog",
+   "mech": "Underdog Rising",
+   "tag": "flip",
+   "prob": "3%",
+   "rule": "The lesser rises — the lower base-power card gains +3."
+  },
+  {
+   "id": "rarityreckoning",
+   "mech": "Rarity Reckoning",
+   "tag": "boost",
+   "prob": "3%",
+   "rule": "Pedigree wins — the rarer card gains +3."
+  },
+  {
+   "id": "commonsrevolt",
+   "mech": "Commons' Revolt",
+   "tag": "flip",
+   "prob": "3%",
+   "rule": "The low-born rise up — the lower-rarity card gains +5."
+  },
+  {
+   "id": "giantslayer",
+   "mech": "Giant Slayer",
+   "tag": "flip",
+   "prob": "3%",
+   "rule": "When base powers differ by 10 or more, the weaker card fells the giant outright."
+  },
+  {
+   "id": "highroller",
+   "mech": "High Roller",
+   "tag": "chaos",
+   "prob": "5%",
+   "rule": "Fortune tips the scales — each card gains a random +5 to +10."
+  },
+  {
+   "id": "momentumtide",
+   "mech": "Momentum's Tide",
+   "tag": "boost",
+   "prob": "8%",
+   "rule": "The trailing side surges — whoever is behind in the match gains +3."
+  },
+  {
+   "id": "eldersreach",
+   "mech": "Elder's Reach",
+   "tag": "boost",
+   "prob": "3%",
+   "rule": "Experience tells — +1 power per 4 duels fought (kills + deaths), capped at +15."
+  },
+  {
+   "id": "doubleedged",
+   "mech": "Twin Surge",
+   "tag": "boost",
+   "prob": "8%",
+   "rule": "Both blades cut true — both players' conjured units gain +5 power."
+  },
+  {
+   "id": "legendsclash",
+   "mech": "Legends' Clash",
+   "tag": "boost",
+   "prob": "2%",
+   "rule": "A stage for the great — Apex cards gain +2, all others suffer −2."
+  },
+  {
+   "id": "woundedbeast",
+   "mech": "Wounded Beast",
+   "tag": "boost",
+   "prob": "3%",
+   "rule": "The grizzled fight hardest — cards with 3 or more deaths gain +2."
+  },
+  {
+   "id": "survivorsground",
+   "mech": "Survivor's Ground",
+   "tag": "neutral",
+   "prob": "3%",
+   "rule": "Endurance is rewarded — the card with fewer deaths gains +3."
+  },
+  {
+   "id": "purereflection",
+   "mech": "Pure Reflection",
+   "tag": "flip",
+   "prob": "3%",
+   "rule": "The deep reflects only what a card is worth — each card's power becomes its own Charge cost ×10."
+  },
+  {
+   "id": "reinforce",
+   "mech": "Reinforcements",
+   "tag": "boost",
+   "prob": "6%",
+   "rule": "The banners call fresh blood to the line — both players draw 1 card when this ground is revealed."
+  },
+  {
+   "id": "dredge",
+   "mech": "Dredge",
+   "tag": "chaos",
+   "prob": "3%",
+   "rule": "The tide gives and takes — both players draw 2 cards, then discard 2 to the banish pile."
+  },
+  {
+   "id": "wildpit",
+   "mech": "Wild Pit",
+   "tag": "chaos",
+   "prob": "5%",
+   "rule": "The beasts tolerate no aid — both players draw 1 card, then both players' support zones are locked for the duel."
+  },
+  {
+   "id": "bloodlinesclash",
+   "mech": "Bloodlines Clash",
+   "tag": "boost",
+   "prob": "4%",
+   "rule": "Every bloodline answers to another — Amageras's Blessing overwhelms Omitsuki's Path, Omitsuki's Path overwhelms Kitanoo's Hunt, and Kitanoo's Hunt overwhelms Amageras's Blessing in turn. Whoever's camp beats the other's gets +6 power. Same camp on both sides means no swing."
+  }
+ ],
+ "traits": [
+  {
+   "id": "ascendant",
+   "name": "Ascendant",
+   "pow": 1,
+   "cond": "when even or ahead",
+   "desc": "+1 power while even or ahead — the composure of the ascended"
+  },
+  {
+   "id": "scarred",
+   "name": "Scarred",
+   "pow": 1,
+   "cond": "when behind",
+   "desc": "+1 power when behind — hardened by past deaths"
+  },
+  {
+   "id": "honed",
+   "name": "Honed",
+   "pow": 1,
+   "cond": "vs an unmarked opponent",
+   "desc": "+1 power vs an unmarked (0-death) opponent — precision punishes the untested"
+  },
+  {
+   "id": "loyal",
+   "name": "Loyal",
+   "pow": 1,
+   "cond": "while ahead",
+   "desc": "+1 power while ahead — fights hardest to protect the win"
+  },
+  {
+   "id": "veteran",
+   "name": "Veteran",
+   "pow": 1,
+   "cond": "from round 3 on",
+   "desc": "+1 power from round 3 on — closes strong"
+  },
+  {
+   "id": "feared",
+   "name": "Feared",
+   "pow": 0,
+   "cond": "vs a less-proven foe",
+   "desc": "opponent −1 power vs a less-proven foe — its reputation precedes it"
+  },
+  {
+   "id": "untouchable",
+   "name": "Untouchable",
+   "pow": 0,
+   "cond": null,
+   "desc": "first would-be loss each match becomes a tie"
+  },
+  {
+   "id": "bloodthirsty",
+   "name": "Bloodthirsty",
+   "pow": 0,
+   "cond": null,
+   "desc": "draws a card each duel it wins this match — card advantage, not raw power"
+  }
+ ]
 }

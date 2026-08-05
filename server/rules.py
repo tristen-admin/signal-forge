@@ -10,8 +10,16 @@ import hashlib, secrets, json, os
 _CAT = json.load(open(os.path.join(os.path.dirname(__file__), "catalog.json"), encoding="utf-8"))
 CARD_CATALOG = {n: {"pow": c["pow"], "rarity": c["rarity"]} for n, c in _CAT["cards"].items() if not c.get("opp")}
 CARD_FULL = _CAT["cards"]   # every card incl. opponent-only (for the engine)
-EDITIONS = {"genesis": 100, "ultra": 1000, "rare": 2500, "uncommon": 4000, "common": 5000}
-RARITY_BASE = {"genesis": 100, "ultra": 60, "rare": 30, "uncommon": 12, "common": 4}
+
+# 8/5/26: client consolidated its 5-tier rarity scheme down to 4 (genesis -> apex, uncommon folded
+# into common) some time ago -- confirmed via a fresh extract_catalog.py run against the real
+# client: {'rare','apex','ultra','common'} are the only rarities in play, zero cards anywhere carry
+# genesis/uncommon. Mapped 1:1 onto the new tier that inherited each old tier's role: apex takes
+# genesis's numbers (it's now the rarest/most-exclusive tier), ultra/rare/common keep their own
+# original numbers unchanged, uncommon is simply gone (dropped, not merged into common's number --
+# common's own number is unchanged from before the consolidation).
+EDITIONS = {"apex": 100, "ultra": 1000, "rare": 2500, "common": 5000}
+RARITY_BASE = {"apex": 100, "ultra": 60, "rare": 30, "common": 4}
 
 # STARTER SET — the fixed 10 cards every player begins with. Because everyone owns them,
 # they are excluded from the market entirely (never listed, never sellable). Final list TBD by design.
