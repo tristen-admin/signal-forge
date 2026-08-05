@@ -9671,6 +9671,13 @@ function openPackN(id, n){
     }
   }
   var results=rarities.filter(function(r){ return supply[r] && supply[r].left>0; }).map(function(r){ return _mintRarity(r, p); });
+  // 8/5/26: reveal worst-to-best (commons first, rarest last) instead of roll order -- anticipation
+  // building toward the best pull is what makes a multi-pack opening land, not the pull itself.
+  // Minting/supply/pity already happened above in roll order (irreversible side effects, order-
+  // independent), so re-sorting just the REVEAL sequence here is safe -- nothing upstream depends
+  // on display order. Stable sort: RARITY_ORDER is lower=rarer (apex:0...common:4), so descending
+  // puts common(4) first, apex(0) last.
+  results.sort(function(a,b){ return RARITY_ORDER[b.rar]-RARITY_ORDER[a.rar]; });
   saveState(); updateBalance(); buildShop();
   (function revealNext(k){
     if(k>=results.length){
