@@ -3865,6 +3865,7 @@ let deckSize = 12;
 let winnersCircle = [];
 let banishPile = [];
 let banishSurge = 0;
+let oppBanishSurge = 0;   // 8/5/26: bot-side mirror of banishSurge -- see pickOppCard()'s instant-usage roll
 // Deck Master activated ability (7/15/26): a new, player-*activated* identity ability, separate
 // from the passive Tier-1/2/3 DM_EXCLUSIVE system -- usable any pre-commit phase (not gated to
 // the Instant Window), once per MATCH (7/18/26: was wrongly resetting every duel -- only
@@ -8503,6 +8504,11 @@ function resolve(pc, oc, cond, playerCommittedPow){
   { let _rp = playerPow, _ro = oppPow; const _natPush = abilLog.push.bind(abilLog);
     abilLog.push = function(m){ if(!RS._inRules){ RS.push({m:m, dp:playerPow-_rp, dop:oppPow-_ro, pp:playerPow, op:oppPow}); _rp=playerPow; _ro=oppPow; } return _natPush(m); };
     RS._resync = function(){ _rp = playerPow; _ro = oppPow; }; }
+  // 8/5/26: opponent instant-surge consumption (one-shot, mirrors banishSurge -- see pickOppCard()).
+  // Shown as a real step here, unlike the player's own Surge (already announced at selection time
+  // via the select-hint/commit-hint toast) -- this is the ONLY moment the player could ever learn
+  // the opponent used an instant, since bot hand activity has no other UI surface.
+  if(oppBanishSurge){ oppPow += oppBanishSurge; abilLog.push('⚡ Opponent Surge: banished an instant card, +'+oppBanishSurge+' power'); oppBanishSurge=0; }
   // ── ENERGY SPELL / BODY EFFECTS (Stage 1) ──
   if(spellJam){ cond = {id:'jammed', mech:'Jammed', name:'Signal Jammed', icon:'\ud83d\udce1', rule:'Condition negated by an Interrupt.', strat:''}; abilLog.push('\ud83d\udce1 Jammer: active condition negated'); }
   if(typeof condNeutralized!=='undefined' && condNeutralized){ var _cnb=condNeutralizedBy||'An effect'; cond = {id:'neutral', mech:'Neutral Ground', name:'Renegotiated Ground', icon:'🤝', rule:_cnb+' neutralized the location.', strat:''}; abilLog.push('🤝 '+_cnb+': the location is neutralized — its effect is nullified this duel'); }
@@ -14058,7 +14064,7 @@ function resetMatchState(){
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[];
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
-  banishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0;
+  banishSurge=0; oppBanishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0;
   // Oath (KOTEI §2.3): sworn automatically at match start if the current Deck Master has a real
   // DM_OATH entry — "on game start / when the Deck Master is set, you swear an Oath." condition()
   // is evaluated once, at match end (showMatchComplete()), never here — this just marks the vow
@@ -15008,9 +15014,21 @@ function oppEvalPow(card){
   if(!card) return 0;
   try{
     var rec=(typeof kdOf==='function')?kdOf(card):{k:card.kills||0,d:card.deaths||0};
+    // 8/5/26: real condition lookup -- the old `typeof cond!=='undefined'` check below read a
+    // global that's never actually declared (cond only ever exists as a LOCAL inside resolve()
+    // and a few other functions), so the chaos flag was silent dead code, always false. Also now
+    // powers the Open Book case just below: its own rule text is "the opponent's card identity is
+    // revealed before you commit -- they see yours in turn" -- i.e. BOTH sides are meant to read
+    // each other here, not just the human. hand[preSelectedCard] is already a real, concrete value
+    // in scope by the time pickOppCard() runs (stageFighter() sets preSelectedCard immediately
+    // before calling it), so this is reading something that already legitimately exists under this
+    // condition's own stated rule -- not a new information leak. Every other condition leaves
+    // opp_deaths/opp_kills/opp_pow at 0, same non-cheating default as always.
+    var _cond=(typeof conditionIndex!=='undefined' && conditionIndex>=0 && typeof CONDITIONS!=='undefined' && CONDITIONS[conditionIndex])?CONDITIONS[conditionIndex]:null;
+    var _oppSeen=(_cond && _cond.id==='openbook' && typeof preSelectedCard==='number' && preSelectedCard!=null && typeof hand!=='undefined' && hand[preSelectedCard]) ? hand[preSelectedCard] : null;
     var ctx={
       pc_kills:rec.k, pc_deaths:rec.d, pc_pow:card.pow||0,
-      opp_deaths:0, opp_kills:0, opp_pow:0,   // unknown before commit -- neutral, non-cheating default
+      opp_deaths:_oppSeen?(_oppSeen.deaths||0):0, opp_kills:_oppSeen?(_oppSeen.kills||0):0, opp_pow:_oppSeen?(_oppSeen.pow||0):0,
       last_result:(typeof lastResult!=='undefined')?(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)):null,
       match_commits:(typeof matchCommits!=='undefined')?matchCommits:0,
       player_wins:(typeof playerScore!=='undefined')?playerScore[1]:0,
@@ -15021,7 +15039,7 @@ function oppEvalPow(card){
       banish_len:(typeof oppBanishBot!=='undefined')?oppBanishBot.length:0,
       remnant_count:(typeof oppDeathRemnants!=='undefined'?oppDeathRemnants.length:0), rear_count:0, skullchain:0, ragwing:0,
       deck_len:(typeof oppDeckBot!=='undefined')?oppDeckBot.length:0,
-      chaos:(typeof cond!=='undefined'&&cond&&cond.tag==='chaos')
+      chaos:(_cond && _cond.tag==='chaos')
     };
     var estimated = applyCardRules(card.name, ctx, card.pow||0, 0, [], null)[0];
     // 7/22/26: also estimate the bot's own Deck-Master tier-1/2 bonus for this candidate --
@@ -15051,8 +15069,14 @@ function pickOppCard(){
   // stageFighter()). Found and fixed only by testing pickOppCard() directly — an earlier edit to
   // the OTHER pickOppCard definition (the one before this monkey-patch) silently never ran, since
   // this reassignment always overwrites it at load.
-  var _afford = oppHandBot.filter(function(c){ return conjureCost(c) <= oppCharge; });
-  var _pool = _afford.length ? _afford : [oppHandBot.reduce(function(a,c){ return conjureCost(a)<=conjureCost(c) ? a : c; })];
+  // timing:'instant' cards are Surge/utility-only -- stageFighter() already refuses to conjure one
+  // as the player's Fighter (`if(!c || c.timing==='instant') return;`), but nothing here ever
+  // applied the same rule bot-side, so a cheap instant card sitting in oppHandBot could get picked
+  // and committed as if it were a real Fighter. Filtered out below; still eligible for the new
+  // instant-surge roll further down instead.
+  var _fighterEligible = oppHandBot.filter(function(c){ return c.timing !== 'instant'; });
+  var _afford = _fighterEligible.filter(function(c){ return conjureCost(c) <= oppCharge; });
+  var _pool = _afford.length ? _afford : (_fighterEligible.length ? [_fighterEligible.reduce(function(a,c){ return conjureCost(a)<=conjureCost(c) ? a : c; })] : [oppHandBot.reduce(function(a,c){ return conjureCost(a)<=conjureCost(c) ? a : c; })]);
   var bias=(typeof activeBot!=='undefined'&&activeBot)?(activeBot.bias||0):0;
   var bi=Math.floor(Math.random()*_pool.length);
   for(var b=0;b<bias;b++){ var a=Math.floor(Math.random()*_pool.length); if(oppEvalPow(_pool[a])>oppEvalPow(_pool[bi])) bi=a; }   // difficulty bias: keep the higher ESTIMATED power (ability-aware, not just the printed stat)
@@ -15060,6 +15084,21 @@ function pickOppCard(){
   var realIdx=oppHandBot.indexOf(chosen);
   var card=oppHandBot.splice(realIdx,1)[0]; _oppInPlay=[card];   // COMMIT from the bot's hand
   oppCharge=Math.max(0, oppCharge-conjureCost(card));
+  // 8/5/26: bot-side instant-card usage -- previously the bot never activated an instant at all
+  // (activateInstant() has no bot-side equivalent). Lite pass covers just the plain default-Surge
+  // shape (banish an instant-timing card, bank its power for this commit) since that's what all 7
+  // real timing:'instant' cards use; the 3 data-driven INSTANT_EFFECTS overrides (draw/chargeGain/
+  // oppSupportBlock/returnToDeck) are NOT covered here -- a real gap, not a silent one, see the
+  // scoping note in memory. Chance scales with difficulty bias same as pickOppRears' skip-chance.
+  if(!oppBanishSurge){
+    var _instants=oppHandBot.filter(function(c){ return c.timing==='instant'; });
+    if(_instants.length && Math.random() < Math.min(0.85, 0.2 + 0.2*bias)){
+      var _best=_instants.reduce(function(a,c){ return (c.pow||0)>(a.pow||0) ? c : a; });
+      var _ii=oppHandBot.indexOf(_best);
+      oppBanishBot.push(oppHandBot.splice(_ii,1)[0]);
+      oppBanishSurge=_best.pow||0;
+    }
+  }
   var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null;
   var _out=Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{});
   if(typeof activeBot!=='undefined'&&activeBot&&activeBot.maxed){ _out.kills=99;_out.deaths=5;_out.pow=(_out.pow||8)+6; }
