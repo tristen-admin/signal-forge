@@ -61,6 +61,147 @@ def card(name):
     c = CATALOG.get(name, {"pow": 8, "kills": 0, "deaths": 0, "rarity": "common", "abil": ""})
     return {"name": name, **c}
 
+# ══════════════════════════════════════════════════════════════════════════════════════════
+# MILESTONE B — rear-guard depth: staged support cards (Called/Shield/Link/Bond/Muster).
+# Deck-Master ambient-flag plumbing (dmSupportBonusThisDuel, dmNullifyOppSupportsThisDuel, the
+# fighter-vs-Deck-Master Bond, Kravyn's handReturnCount rear-guard bonus) stays deferred: none of
+# it can exist until the server has a "who is my Deck Master for this match" concept at all,
+# which is a bigger, separate piece (Milestone B.2) than rear-guard slots themselves.
+# The OPPONENT never fields rear-guards here -- the server's opponent is a fresh random card per
+# duel (see opponent_pool()), not a persistent bot session with its own hand/support choices.
+# That's the same simplification Milestone A already made for on-commit abilities; it means any
+# rear-guard's snipeSupport always "fails to find a target" (hits snipeFailAdd if present) below.
+# ══════════════════════════════════════════════════════════════════════════════════════════
+LINK_GROUPS = rules._CAT["links"]   # {id: {name,icon,pow,members}}
+LINK_POW_CAP = 4                     # index.html:7472
+CALLED = rules._CAT["called"]        # {cardName: {text, add/oppadd/draw/chargeGain/... }}
+# index.html:4213 -- MUSTER: +N power per 1-cost ally (rear-guards this duel + Winners Circle).
+RALLY = {"Bannerlord Cassian": 5, "Ironsworn Vanguard": 3, "Warden of the Wall": 3, "Oathkeeper Sena": 3, "Shieldwall Recruit": 3}
+# index.html:4214 -- a spent rear-guard becomes a Death Remnant instead of recycling to the deck.
+LINGERING_SUPPORTS = ["Uso Oso", 'Ghorruk "Gnarly" Judarr', "Sister Mire", "Kiba", "Grave-Fed Ghoul", "Bone Choirmaster", "Gravecaller Voss", "Uso Oso's Skeletal Summons"]
+
+def rg_slots(match_commits):
+    """index.html:5328 RG_SLOTS(): 2 support slots normally, 3 from the 4th duel on."""
+    return 3 if (match_commits or 0) >= 4 else 2
+
+def shield(name):
+    """index.html:5857 shield(): SHIELD_OVERRIDE[name] || max(2, 10-2*cost). SHIELD_OVERRIDE is
+    confirmed EMPTY by design (0 entries) -- a per-card hand-tuning table with nothing in it yet."""
+    return max(2, 10 - 2*rules.card_cost(name))
+
+def card_link_groups(name):
+    return [dict(g, id=gid) for gid, g in LINK_GROUPS.items() if name in g.get("members", [])]
+
+def active_links(fighter_name, hand_names):
+    """index.html:7488 activeLinks(): HAND-based Link -- fighter + a same-group ally still sitting
+    in hand (not committed, not fielded as rear-guard). Fires every duel unconditionally, separate
+    from field_link() below. This was a genuine Milestone A gap: it doesn't depend on rear-guard at
+    all, so it should have shipped there -- fixed now that it surfaced during this deeper pass."""
+    out = []
+    for g in card_link_groups(fighter_name):
+        partner = next((h for h in hand_names if h != fighter_name and h in g["members"]), None)
+        if partner: out.append({"id": g["id"], "name": g["name"], "pow": g["pow"], "partner": partner})
+    return out
+
+def field_link(fighter_name, support_name):
+    """index.html:6334 fieldLink(): REAR-GUARD-based Link -- fighter + a same-group support
+    actually fielded this duel. Distinct mechanic from active_links() above, not a duplicate --
+    same LINK_GROUPS table, two different membership checks (hand vs fielded)."""
+    fg, sg = card_link_groups(fighter_name), card_link_groups(support_name)
+    for f in fg:
+        for s in sg:
+            if f["id"] == s["id"]: return f
+    return None
+
+def field_bond(fighter_name, support_name, bonds):
+    """index.html:6344 fieldBond(): the same Ascension-earned pairBonds/formation-tier system as
+    best_formation(), just checked against ONE specific fielded rear-guard instead of scanned
+    across the whole deck."""
+    if not fighter_name or not support_name or fighter_name == support_name: return None
+    count = bonds.get("|".join(sorted([fighter_name, support_name])), 0)
+    t = formation_tier(count)
+    return {"name": t[0], "bonus": t[1], "count": count} if t else None
+
+def _project_called(e, ctx):
+    """index.html:6003 projectCalled(): the pure power-math layer EVERY Called entry runs through
+    (14 op-codes). Covers `add` alone in 83 of the 111 real entries -- by far the most common case."""
+    dp = dop = 0
+    mc = ctx.get("match_commits", 0)
+    if e.get("add"): dp += e["add"]
+    if e.get("oppadd"): dop += e["oppadd"]
+    if e.get("add1st") and mc <= 1: dp += e["add1st"]
+    if e.get("addLate") and mc >= 2: dp += e["addLate"]
+    if e.get("addLate3") and mc >= 3: dp += e["addLate3"]
+    if e.get("addIfLost") and ctx.get("last_result") == "lose": dp += e["addIfLost"]
+    if e.get("addIfWon") and ctx.get("last_result") == "win": dp += e["addIfWon"]
+    if e.get("addIfBehind") and ctx.get("wins", 0) < ctx.get("losses", 0): dp += e["addIfBehind"]
+    if e.get("addIfAhead") and ctx.get("wins", 0) > ctx.get("losses", 0): dp += e["addIfAhead"]
+    if e.get("addChaos") and ctx.get("chaos"): dp += e["addChaos"]
+    if e.get("perHand"): dp += min(e.get("perHandCap", 99), e["perHand"] * ctx.get("hand_len", 0))
+    if e.get("perOppDeath"): dp += e["perOppDeath"] * ctx.get("opp_deaths", 0)
+    if e.get("perWC"): dp += min(e.get("perWCcap", 99), e["perWC"] * ctx.get("wc_len", 0))
+    if e.get("perWin"): dp += e["perWin"] * ctx.get("wins", 0)
+    return dp, dop
+
+# Ops this pass implements, beyond _project_called's 14. Anything else on a fielded rear-guard's
+# CALLED entry is named explicitly in the log (not silently dropped, not a crash -- see the
+# apply_called docstring for why this differs from CARD_RULES' loud-raise-on-unknown-op pattern).
+KNOWN_CALLED_EXTRA_OPS = {"energyCost", "chargeGain", "chargeGainIfWon", "chargeGainIfHandFull",
+    "chargeGainIfVeteran", "draw", "drawIfRemnant", "banishOwn", "addPerHand", "addPerBanish",
+    "bothBanish", "doubleShield", "twinBuff", "text",
+    "add", "oppadd", "add1st", "addLate", "addLate3", "addIfLost", "addIfWon", "addIfBehind",
+    "addIfAhead", "addChaos", "perHand", "perHandCap", "perOppDeath", "perWC", "perWCcap", "perWin"}
+
+def apply_called(support_name, ctx, playerPow, oppPow, log, m, hand_ops):
+    """index.html:6100 applyCalled(), player-side only (see the module docstring on why). Ops NOT
+    yet ported here (recurBuff/recurPlain/scry/conjureTopToSupport/duplicateSelfToSupport/
+    returnSelfToDeck/autoRemnantLowest/unbankNextWin/reclaimWC/spellDiscountGain/
+    chargeGainIfLocked) are each individually rare (1-3 of 111 real entries) and need either
+    interactive choice, rear-guard-slot-filling mid-resolution, or WC-reclaim/spell-economy hooks
+    this pass doesn't build -- CARD_RULES' "raise loudly on any unknown op" doesn't fit here: that
+    interpreter was already ~complete and stable, so an unknown op meant real drift. This one is
+    being built for the first time against a 20+-op vocabulary; treating "not yet ported" as a
+    crash would take down a match every time ANY of those dozen rarer ops appears on a fielded
+    rear-guard, on day one. So: implement the common ops for real, and for anything else NAME it
+    in the log (visible, not silently faked) rather than pretend the card did nothing at all."""
+    e = CALLED.get(support_name)
+    if not e:
+        return playerPow, oppPow
+    if "energyCost" in e:
+        if m.get("charge", 0) < e["energyCost"]:
+            log.append(f"📣 {support_name} called — not enough energy, support fizzles")
+            return playerPow, oppPow
+        m["charge"] -= e["energyCost"]
+    dp, dop = _project_called(e, ctx)
+    playerPow += dp; oppPow += dop
+    cap = duel_energy_cap(m.get("matchCommits", 0))
+    if e.get("chargeGain"): m["charge"] = min(cap, m.get("charge", 0) + e["chargeGain"])
+    if e.get("chargeGainIfWon") and ctx.get("wins", 0) > 0: m["charge"] = min(cap, m.get("charge", 0) + e["chargeGainIfWon"])
+    if e.get("chargeGainIfHandFull") and ctx.get("hand_len", 0) >= 4: m["charge"] = min(cap, m.get("charge", 0) + e["chargeGainIfHandFull"])
+    if e.get("chargeGainIfVeteran") and ctx.get("match_commits", 0) >= 2: m["charge"] = min(cap, m.get("charge", 0) + e["chargeGainIfVeteran"])
+    if e.get("draw"): hand_ops.append({"op": "draw", "n": e["draw"]})
+    if e.get("drawIfRemnant") and m.get("deathRemnants"):
+        hand_ops.append({"op": "draw", "n": 1}); log.append(f"☠ {support_name} — a Remnant stirs: draw a card")
+    if e.get("banishOwn"):
+        hand_ops.append({"op": "banish_random", "n": e["banishOwn"]}); log.append(f"☠ Banished {e['banishOwn']} from your hand — into the Order")
+    if e.get("addPerHand"):
+        bonus = ctx.get("hand_len", 0) * e["addPerHand"]
+        if bonus: playerPow += bonus; log.append(f"🎴 {support_name}: +{bonus} ({ctx.get('hand_len',0)} in hand)")
+    if e.get("addPerBanish"):
+        bl = ctx.get("banish_len", 0); bonus = bl * e["addPerBanish"]
+        if bonus: playerPow += bonus; log.append(f"🪶 {support_name}: +{bonus} ({bl} banished)")
+    if e.get("bothBanish"):
+        n = e["bothBanish"]; hand_ops.append({"op": "banish_random", "n": n}); oppPow -= 2*n
+        log.append(f"☠ Both discard — you banish {n}, opponent −{2*n}")
+    if e.get("doubleShield"):
+        sv = shield(support_name)
+        if sv: playerPow += sv; log.append(f"🛡️ {support_name} — Called doubles its own Shield: +{sv}")
+    unknown = set(e.keys()) - KNOWN_CALLED_EXTRA_OPS
+    if unknown:
+        log.append(f"📣 {support_name} — Called effect partially supported server-side (not yet ported: {', '.join(sorted(unknown))})")
+    log.append(f"📣 Called — {support_name}: {e.get('text','')}")
+    return playerPow, oppPow
+
 def new_match(deck_names, best_of=7, lobby_mode=False):
     # 8/5/26: dual match-length (Milestone A) -- Public/Draft is Best-of-7-win-4, Ranked is
     # Best-of-3-win-2 (was hardcoded >=4 forever, no way to run the Ranked format at all).
@@ -162,11 +303,15 @@ def _apply_rules(name, ctx, playerPow, oppPow, log, m=None):
     return playerPow, oppPow
 
 # ── the faithful resolve() port ──
-def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None):
+def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None, rear_guards=None):
     """pc, oc: card dicts. pc_record: the player card's live DB record {k,d,ok,od} (drives traits +
-    the pc.kills used by conditions). Returns dict with outcome/powers/log/destination; mutates
-    match state m. `destination` (winners_circle|hand|deck_bottom) and `draw_self` tell the caller
-    (app.py, which owns the real uid-keyed hand/deck lists) what list-move to perform."""
+    the pc.kills used by conditions). rear_guards: list of card dicts staged alongside pc this duel
+    (Milestone B — RG_SLOTS()-capped, validated by the caller). Returns dict with outcome/powers/
+    log/destination/hand_ops/rear_guard_fates; mutates match state m. `destination` (winners_circle|
+    hand|deck_bottom) and `draw_self`/`hand_ops` tell the caller (app.py, which owns the real
+    uid-keyed hand/deck lists) what list-moves to perform."""
+    rear_guards = rear_guards or []
+    hand_ops = []
     playerPow = committed_pow if committed_pow is not None else pc["pow"]
     oppPow = oc["pow"]
     log = []
@@ -175,27 +320,16 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None):
     ocK, ocD = oc["kills"], oc["deaths"]              # opponent card's record
     wc = m["winnersCircle"]
 
+    # 8/5/26 Milestone B: conjuring spends Charge equal to the fighter's own cost (index.html:6855,
+    # `charge=Math.max(0,charge-conjureCost(pc))`) -- a genuine Milestone A miss, found while
+    # re-deriving the exact client pipeline order for the rear-guard stage below. Without this,
+    # Charge only ever goes UP from normal play, which makes the whole resource meaningless.
+    m["charge"] = max(0, m.get("charge", 0) - rules.card_cost(pc["name"]))
+
     # ── ENERGY SPELL EFFECTS (armed by the client Charge system; inert unless set) ──
     if m.get("spellJam"): cond_id = "jammed"; log.append("📡 Jammer: active condition negated")
     if m.get("spellOppPow"): oppPow += m["spellOppPow"]; log.append(f"⚡ Interrupt: opponent {m['spellOppPow']} power")
     if m.get("spellSelfPow"): playerPow += m["spellSelfPow"]; log.append(f"⚡ Amplify: +{m['spellSelfPow']} power")
-
-    # ── LIVING-CARD TRAITS — ONE conditional trait per card (fires only in-context; mirrors client) ──
-    _tctx = {"wins": m["playerScore"][0], "losses": m["playerScore"][1], "lastLose": (m["lastResult"] == "lose"),
-             "oppDeaths": oc["deaths"], "oppKills": oc["kills"], "myKills": pc.get("kills", 0)}
-    at = rules.active_trait(rec, pc.get("equippedTrait"), _tctx)
-    bloodthirsty = False; untouchable = False
-    if at and at.get("active"):
-        if at["pow"]:                        playerPow += at["pow"]; log.append(f"🎖 {at['id'].capitalize()}: +{at['pow']} power")
-        elif at["id"] == "feared":           oppPow -= 1; log.append("😤 Feared: opponent −1 power")
-        elif at["id"] == "untouchable":      untouchable = True; log.append("🛡 Untouchable: first loss becomes a tie")
-        elif at["id"] == "bloodthirsty":     bloodthirsty = True; log.append("⚔️ Bloodthirsty: +1 power per win this match")
-    elif at:                                 log.append(f"🎖 {at['id'].capitalize()} — dormant")
-    key = pc.get("uid") or pc["name"]
-    if bloodthirsty and m["matchTraitPow"].get(key): playerPow += m["matchTraitPow"][key]; log.append(f"⚔️ Bloodthirsty momentum: +{m['matchTraitPow'][key]}")
-    m["matchPlayed"].add(pc["name"])
-    bf = best_formation(pc["name"], m.get("deck", []), m.get("bonds", {}))
-    if bf: playerPow += bf[1]; log.append(f"🤝 {bf[0]} with {bf[2]}: +{bf[1]}")
 
     abilityLocked = (cond_id == "abilitylock")
     if abilityLocked: log.append("⚡ Ability Lock — all card effects suppressed")
@@ -242,6 +376,64 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None):
                     "banish_len": 0, "rear_count": 0, "remnant_count": 0, "hand_banished": 0,
                     "chaos": cond_id in CHAOS_CONDS, "wc_names": []}
             oppPow, playerPow = _apply_rules(oc["name"], octx, oppPow, playerPow, log, None)
+
+    # ── REAR-GUARD (Milestone B): Called + Shield + Link + Bond per staged support, then Muster.
+    # Exact client stage position (index.html:8586-8619) — AFTER on-commit abilities, BEFORE Living
+    # Traits, so a card with a `mult`/`set` CARD_RULES op (Ruffius Rufeldro / Malia / Mirror Shade —
+    # rare, but real) sees the same accumulated total the client does. No opposing rear-guard exists
+    # (see the module-level Milestone B docstring), so snipeSupport always "fails to find a target".
+    rear_guard_fates = []
+    if pc["name"] != "Kaelthar the Ascendant":
+        rgc = {"match_commits": m["matchCommits"], "last_result": m["lastResult"], "hand_len": len(m["hand"]),
+               "opp_deaths": ocD, "opp_kills": ocK, "wins": m["playerScore"][0], "losses": m["playerScore"][1],
+               "wc_len": len(wc), "chaos": cond_id in CHAOS_CONDS, "banish_len": len(m.get("banishPile") or [])}
+        for rg in rear_guards:
+            kc = CALLED.get(rg["name"])
+            if kc and kc.get("snipeSupport") and kc.get("snipeFailAdd"):
+                playerPow += kc["snipeFailAdd"]; log.append(f"🎯 {rg['name']}: no opposing support to snipe — +{kc['snipeFailAdd']} instead")
+            playerPow, oppPow = apply_called(rg["name"], rgc, playerPow, oppPow, log, m, hand_ops)
+            sv = shield(rg["name"])
+            if sv: playerPow += sv; log.append(f"🛡️ {rg['name']} called — +{sv} (Shield)")
+            lk = field_link(pc["name"], rg["name"])
+            if lk:
+                playerPow += lk["pow"]; log.append(f"🔗 {lk['name']} Link — {pc['name']} + {rg['name']}: +{lk['pow']}")
+                tb = (CALLED.get(rg["name"]) or {}).get("twinBuff", 0)
+                if tb: playerPow += tb; log.append(f"🐺 {rg['name']} rallies the twins — {pc['name']} +{tb}")
+            bd = field_bond(pc["name"], rg["name"], m.get("bonds", {}))
+            if bd: playerPow += bd["bonus"]; log.append(f"🤝 {bd['name']} Bond — {pc['name']} + {rg['name']}: +{bd['bonus']} ({bd['count']} fought together)")
+        if pc["name"] in RALLY:
+            allies = len([rg for rg in rear_guards if rules.card_cost(rg["name"]) == 1]) + len([c for c in wc if rules.card_cost(c["name"]) == 1])
+            bonus = RALLY[pc["name"]] * allies
+            if bonus > 0: playerPow += bonus; log.append(f"🤝 Muster — {pc['name']}: +{bonus} ({allies} one-cost all{'y' if allies==1 else 'ies'} × {RALLY[pc['name']]})")
+    elif rear_guards:
+        log.append("🐉 Kaelthar the Ascendant fights alone — support effects don't apply this duel")
+
+    # ── LIVING-CARD TRAITS — ONE conditional trait per card (fires only in-context; mirrors client).
+    # Moved here (was before on-commit abilities in the initial Milestone A port) to match the
+    # client's real order once the rear-guard stage between them made the gap concrete. ──
+    _tctx = {"wins": m["playerScore"][0], "losses": m["playerScore"][1], "lastLose": (m["lastResult"] == "lose"),
+             "oppDeaths": oc["deaths"], "oppKills": oc["kills"], "myKills": pc.get("kills", 0)}
+    at = rules.active_trait(rec, pc.get("equippedTrait"), _tctx)
+    bloodthirsty = False; untouchable = False
+    if at and at.get("active"):
+        if at["pow"]:                        playerPow += at["pow"]; log.append(f"🎖 {at['id'].capitalize()}: +{at['pow']} power")
+        elif at["id"] == "feared":           oppPow -= 1; log.append("😤 Feared: opponent −1 power")
+        elif at["id"] == "untouchable":      untouchable = True; log.append("🛡 Untouchable: first loss becomes a tie")
+        elif at["id"] == "bloodthirsty":     bloodthirsty = True; log.append("⚔️ Bloodthirsty: +1 power per win this match")
+    elif at:                                 log.append(f"🎖 {at['id'].capitalize()} — dormant")
+    key = pc.get("uid") or pc["name"]
+    if bloodthirsty and m["matchTraitPow"].get(key): playerPow += m["matchTraitPow"][key]; log.append(f"⚔️ Bloodthirsty momentum: +{m['matchTraitPow'][key]}")
+    m["matchPlayed"].add(pc["name"])
+    bf = best_formation(pc["name"], m.get("deck", []), m.get("bonds", {}))
+    if bf: playerPow += bf[1]; log.append(f"🤝 {bf[0]} with {bf[2]}: +{bf[1]}")
+    # 8/5/26 Milestone B: activeLinks() -- HAND-based Link (fighter + a same-group ally still in
+    # hand), unconditional, no rear-guard dependency at all. A genuine Milestone A gap: this should
+    # have shipped there since it doesn't need anything rear-guard-specific; fixed now.
+    _lp = 0
+    for l in active_links(pc["name"], m["hand"]):
+        if _lp >= LINK_POW_CAP: break
+        add = min(l["pow"], LINK_POW_CAP - _lp)
+        if add > 0: playerPow += add; _lp += add; log.append(f"🔗 {l['name']} (with {l['partner']}): +{add}")
 
     # ── APPLY CONDITION — all 26 power/tiebreak conditions (the other 6 — noretreat/openbook/
     # reinforce/dredge/wildpit's lock/abilitylock — don't touch power; see condition_reveal_effects
@@ -436,6 +628,26 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None):
         else:
             destination = "deck_bottom"; log.append(f"↩ {pc['name']} — tie, recycles to the bottom of your deck")
 
+    # 8/5/26 Milestone B: post-duel rear-guard fate, parallel array to the `rear_guards` input
+    # (index.html:8900-8916) -- default recycle to deck bottom; LINGERING_SUPPORTS become a Death
+    # Remnant instead; Kotei/Tange Sazen specifically return to hand on a WIN (+2 Charge for Kotei).
+    for rg in rear_guards:
+        if rg["name"] in ("Kotei", "Tange Sazen") and won == "win":
+            rear_guard_fates.append("hand")
+            if rg["name"] == "Kotei":
+                m["charge"] = min(duel_energy_cap(m.get("matchCommits", 0)), m.get("charge", 0) + 2)
+                log.append("👑 Kotei — the sovereign returns: +2 Charge, back to your hand instead of the deck")
+            else:
+                log.append("⚔ Tange Sazen — returns to your hand instead of the deck")
+        elif rg["name"] in LINGERING_SUPPORTS:
+            rp = rules.REMNANT_POW.get(rg["name"], rg["pow"])
+            m.setdefault("deathRemnants", []).append({"name": rg["name"], "pow": rp})
+            rear_guard_fates.append("remnant")
+            log.append(f"☠ {rg['name']} lingers as a Remnant (+{rp} to your commits until an enemy dies)")
+        else:
+            rear_guard_fates.append("deck_bottom")
+            log.append(f"↩ {rg['name']} (support) → deck bottom")
+
     # ── STATE UPDATE ──
     if won == "win":
         m["playerScore"][0] += 1; m["lastResult"] = "win"; wc.append({"name": pc["name"]})
@@ -462,4 +674,5 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None):
     win_threshold = m.get("winThreshold", 4)
     return {"outcome": won, "player_pow": playerPow, "opp_pow": oppPow, "log": log,
             "score": list(m["playerScore"]), "match_over": m["playerScore"][0] >= win_threshold or m["playerScore"][1] >= win_threshold,
-            "destination": destination, "draw_self": draw_self, "record_duel": not m.get("lobbyMode", False)}
+            "destination": destination, "draw_self": draw_self, "record_duel": not m.get("lobbyMode", False),
+            "hand_ops": hand_ops, "rear_guard_fates": rear_guard_fates}

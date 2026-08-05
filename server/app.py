@@ -240,18 +240,49 @@ def h_match_start(user_id, body):
     return 200, {"matchId": mid, "hand": hand_cards, "condition": cond, "score": m["playerScore"],
                  "charge": m["charge"], "bestOf": best_of, "locked_withdraw": cond == "noretreat"}
 
+def _exec_hand_ops(sess, ops):
+    """Execute the draw/banish instructions engine.resolve() returns (Called effects, e.g.
+    Squad 19 Medic's `draw:1`) against the real uid-keyed lists engine.py never sees."""
+    for op in ops:
+        if op["op"] == "draw":
+            for _ in range(op.get("n", 0)):
+                if sess["deck_cards"]: sess["hand_cards"].append(sess["deck_cards"].pop(0))
+        elif op["op"] == "banish_random":
+            for _ in range(op.get("n", 0)):
+                if sess["hand_cards"]: sess.setdefault("banish_cards", []).append(sess["hand_cards"].pop(random.randrange(len(sess["hand_cards"]))))
+
 def h_match_commit(user_id, body):
     sess = _get_match(user_id, body.get("matchId"))
     if not sess: return 404, {"error": "match not found"}
     if sess["m"]["done"]: return 400, {"error": "match already complete"}
     hc = next((c for c in sess["hand_cards"] if c["uid"] == body.get("cardUid")), None)
     if not hc: return 400, {"error": "that card is not in your hand"}
+    # 8/5/26 Milestone B: rear-guard staging. Up to rg_slots(matchCommits) OTHER hand cards, staged
+    # alongside the fighter (index.html:6850 rearGuards, RG_SLOTS() 2->3 at the 4th duel).
+    rg_uids = [u for u in (body.get("rearGuardUids") or []) if u != hc["uid"]]
+    slots = engine.rg_slots(sess["m"].get("matchCommits", 0))
+    if len(rg_uids) > slots: return 400, {"error": f"only {slots} support slot(s) available this duel"}
+    rg_cards = []
+    for u in rg_uids:
+        rgc = next((c for c in sess["hand_cards"] if c["uid"] == u), None)
+        if not rgc: return 400, {"error": f"rear-guard card {u} is not in your hand"}
+        rg_cards.append(rgc)
     c = store.conn()
     r = c.execute("SELECT k,d,ok,od FROM records WHERE uid=?", (hc["uid"],)).fetchone()
     rec = dict(r) if r else {"k": 0, "d": 0, "ok": 0, "od": 0}
     pc = engine.card(hc["type"]); oc = engine.card(random.choice(engine.opponent_pool()))
+    rear_guards = [engine.card(rgc["type"]) for rgc in rg_cards]
+
+    # 8/5/26 Milestone B: fighter + rear-guards leave the hand BEFORE resolve() runs (matches the
+    # client's real order, index.html:6868 -- the splice happens before resolve() ever reads
+    # hand.length) -- Milestone A synced m["hand"] with the committed card still counted, an
+    # off-by-however-many-rear-guards error in every hand_len-dependent CARD_RULES/Called check.
+    staged_uids = {hc["uid"]} | set(rg_uids)
+    sess["hand_cards"] = [x for x in sess["hand_cards"] if x["uid"] not in staged_uids]
     sess["m"]["hand"] = [x["type"] for x in sess["hand_cards"]]
-    res = engine.resolve(sess["m"], pc, oc, sess["condition"], pc_record=rec)
+    sess["m"]["banishPile"] = sess.get("banish_cards") or []   # real count now that rear-guard/Called can reference it
+
+    res = engine.resolve(sess["m"], pc, oc, sess["condition"], pc_record=rec, rear_guards=rear_guards)
 
     # apply the duel outcome to the committed card's live record; award Signal on a win.
     # lobbyMode (Public Server/Sandbox) writes neither -- res["record_duel"] gates it, matching the
@@ -266,16 +297,23 @@ def h_match_commit(user_id, body):
             elif res["outcome"] == "lose":
                 cc.execute("UPDATE records SET d=d+1, od=od+1 WHERE uid=?", (hc["uid"],))
 
-    # 8/5/26 Milestone A: real card-lifecycle routing. Previously the committed card was ALWAYS
-    # discarded and a fresh one drawn, regardless of outcome -- "recycles to the bottom of the
-    # deck" / "returns to hand" never actually happened server-side, so a real deck couldn't
-    # meaningfully cycle. engine.resolve()'s `destination` (winners_circle|hand|deck_bottom) now
-    # drives the real move; app.py performs it since it's the one holding the real uid-keyed lists.
-    sess["hand_cards"] = [x for x in sess["hand_cards"] if x["uid"] != hc["uid"]]
+    # 8/5/26 Milestone A: real card-lifecycle routing. engine.resolve()'s `destination`
+    # (winners_circle|hand|deck_bottom) drives the real move; app.py performs it since it's the one
+    # holding the real uid-keyed lists. (Fighter + rear-guards already left hand_cards above.)
     dest = res["destination"]
     if dest == "winners_circle": sess.setdefault("winners_circle_cards", []).append(hc)
     elif dest == "hand": sess["hand_cards"].append(hc)
     else: sess["deck_cards"].append(hc)   # deck_bottom -- deck_cards[0] is the TOP (next draw), so bottom = append
+
+    # 8/5/26 Milestone B: rear-guard post-duel fate, parallel to rear_guards/rg_cards. "remnant"
+    # means the card was converted into an m["deathRemnants"] entry inside resolve() already -- the
+    # physical card is consumed, it does NOT also go to hand or deck.
+    for rgc, fate in zip(rg_cards, res.get("rear_guard_fates", [])):
+        if fate == "hand": sess["hand_cards"].append(rgc)
+        elif fate == "deck_bottom": sess["deck_cards"].append(rgc)
+        # fate == "remnant": consumed, no list move
+
+    _exec_hand_ops(sess, res.get("hand_ops", []))
 
     # TRIGGERS: on a LOST duel, peek the top of the deck for a comeback-aid card (index.html:5997-
     # 6002 -- Faye Quicksilver/Val Kreigh/Josef/Old Garrick). Needs the real ordered deck_cards
@@ -293,8 +331,8 @@ def h_match_commit(user_id, body):
 
     for _ in range(res.get("draw_self", 0)):   # e.g. Bone Choirmaster's win-draw
         if sess["deck_cards"]: sess["hand_cards"].append(sess["deck_cards"].pop(0))
-    # top up to a 4-card hand (only draws if the destination/trigger/draw_self logic above didn't
-    # already refill it -- e.g. a forced-tie hand-return needs no extra draw)
+    # top up to a 4-card hand (only draws if the destination/trigger/draw_self/hand_ops logic above
+    # didn't already refill it -- e.g. a forced-tie hand-return needs no extra draw)
     while len(sess["hand_cards"]) < 4 and sess["deck_cards"]:
         sess["hand_cards"].append(sess["deck_cards"].pop(0))
 
