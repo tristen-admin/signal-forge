@@ -108,23 +108,12 @@ def h_login(uid_none, body):
 def h_state(user_id, body):
     return 200, {"state": user_state(user_id)}
 
-def h_resolve(user_id, body):
-    c = store.conn()
-    card = c.execute("SELECT * FROM cards WHERE uid=? AND owner_id=?", (body.get("cardUid"), user_id)).fetchone()
-    if not card: return 404, {"error": "you do not own that card"}
-    rec = dict(c.execute("SELECT k,d,ok,od FROM records WHERE uid=?", (card["uid"],)).fetchone())
-    opp_pow = 8 + secrets.randbelow(17)   # SERVER always picks the opponent — client-supplied oppPow is IGNORED (was an authority hole: a client could send a low value to farm guaranteed wins)
-    res = rules.resolve_duel(rules.card_pow(card["type"]), rec, opp_pow)
-    with store.tx() as cc:
-        if res["outcome"] == "win":
-            cc.execute("UPDATE records SET k=k+1, ok=ok+1 WHERE uid=?", (card["uid"],))
-            u = cc.execute("SELECT signal,rp FROM users WHERE id=?", (user_id,)).fetchone()
-            ns, nr = u["signal"] + res["reward"]["signal"], u["rp"] + res["reward"]["rp"]
-            cc.execute("UPDATE users SET signal=?, rp=? WHERE id=?", (ns, nr, user_id))
-            store.ledger_add(cc, user_id, "SIGNAL", res["reward"]["signal"], "Duel won", ns)
-        elif res["outcome"] == "lose":
-            cc.execute("UPDATE records SET d=d+1, od=od+1 WHERE uid=?", (card["uid"],))
-    return 200, {"result": res, "state": user_state(user_id)}
+# 8/5/26 Phase 3: h_resolve (POST /api/match/resolve, a single-card duel predating match/start+
+# commit) removed. Confirmed dead: the real game (index.html) calls no /api/ endpoint at all yet
+# (client and server are still unwired -- separate systems); the ONLY caller anywhere in the tree
+# was server/client.html's throwaway duel() button, which is removed in the same change. Fully
+# superseded by h_match_start/h_match_commit's real best-of-N flow (abilities/conditions/traits/
+# rear-guard/spells, real hand+deck, real match length) -- nothing lost, only a legacy stub gone.
 
 def h_listings(user_id, body):
     rows = store.conn().execute("SELECT id,type,seller_addr,price,k,d FROM listings WHERE sold=0 ORDER BY price DESC").fetchall()
@@ -195,6 +184,127 @@ def h_convert(user_id, body):     # one-way Forge -> Signal (no cash-out anywher
         store.ledger_add(cc, user_id, "FORGE", -amt, "Converted to Signal", nf)
         store.ledger_add(cc, user_id, "SIGNAL", gain, f"Converted from {amt} Forge", ns)
     return 200, {"converted": amt, "signal_gained": gain, "state": user_state(user_id)}
+
+# ── Phase 3: packs (server-authoritative RNG against the real finite mint + real per-account pity) ──
+def _rarity_has_room(c, rarity):
+    names = rules.CARDS_BY_RARITY.get(rarity) or []
+    if not names: return False
+    rows = c.execute(f"SELECT minted,supply FROM mint WHERE type IN ({','.join('?'*len(names))})", names).fetchall()
+    return any(r["minted"] < r["supply"] for r in rows)
+
+def _pick_mintable_card(c, rarity):
+    names = rules.CARDS_BY_RARITY.get(rarity) or []
+    if not names: return None
+    rows = c.execute(f"SELECT type FROM mint WHERE type IN ({','.join('?'*len(names))}) AND minted<supply", names).fetchall()
+    avail = [r["type"] for r in rows]
+    return random.choice(avail) if avail else None
+
+def h_pack_open(user_id, body):
+    pack = rules.ALL_PACKS.get(body.get("packId"))
+    if not pack: return 400, {"error": "unknown pack"}
+    n = int(body.get("n") or 1)
+    if n not in (1, 5, 10) or (n == 10 and not pack.get("tenX")):
+        return 400, {"error": "invalid bundle size for this pack"}
+    c = store.conn()
+    u = c.execute("SELECT signal FROM users WHERE id=?", (user_id,)).fetchone()
+    cost = pack["price"] * n
+    if u["signal"] < cost: return 402, {"error": f"insufficient Signal (need {cost}, have {u['signal']})"}
+    pr = store.pity_load(user_id)
+    pity_ultra, pity_apex = pr["pack_ultra"], pr["pack_apex"]
+    is_premium = pack["id"] != "std"   # matches the client's basic(std/elite)-vs-premium(f*) bundle-floor split
+    drawn = []
+    for _ in range(n):
+        avail = [r for r in pack["odds"] if _rarity_has_room(c, r)]
+        if not avail: break   # every rarity this pack offers is fully minted out server-wide
+        rar, pity_ultra, pity_apex = rules.roll_pack_rarity(pack, avail, pity_ultra, pity_apex)
+        drawn.append(rar)
+    drawn = rules.apply_bundle_floor(drawn, pack, is_premium, lambda r: _rarity_has_room(c, r))
+    minted = []
+    with store.tx() as cc:
+        ns = u["signal"] - cost
+        cc.execute("UPDATE users SET signal=? WHERE id=?", (ns, user_id))
+        store.ledger_add(cc, user_id, "SIGNAL", -cost, f"Opened {pack['name']} x{n}", ns)
+        for rar in drawn:
+            name = _pick_mintable_card(cc, rar)
+            if not name: continue   # exhausted mid-batch (rare: pre-batch room checks were per-rarity, not reserved)
+            uid = mint_card(cc, user_id, name, via=f"{pack['name']} pull")
+            minted.append({"uid": uid, "type": name, "rarity": rar, "pow": rules.card_pow(name)})
+        store.pity_save(cc, user_id, pity_ultra, pity_apex)
+    return 200, {"pack": pack["id"], "n": n, "cost": cost, "cards": minted,
+                 "pity": {"ultra": pity_ultra, "apex": pity_apex}, "state": user_state(user_id)}
+
+def h_pack_catalog(user_id, body):
+    pr = store.pity_load(user_id)
+    return 200, {"packs": rules.PACKS, "premiumPacks": rules.PREMIUM_PACKS,
+                 "pity": {"ultra": pr["pack_ultra"], "apex": pr["pack_apex"],
+                          "ultraFloor": rules.PITY_ULTRA, "apexFloor": rules.PITY_APEX}}
+
+# ── Phase 3: real P2P trades. The client's own trade UI (index.html:12817 TRADE_PARTNERS) is
+# confirmed-simulated against fake partner names with no second-party state at all ("Partners are
+# simulated until online play launches" — the client's own words) — not a spec to port, since the
+# whole point of this server is to BE the real online-play backend. Fresh design: propose/accept/
+# decline between two real accounts, same starter-exemption + provenance-chain (transferToMe
+# equivalent: reset owner-only K/D, append a real ownership_chain entry) as the client intended.
+def h_trade_propose(user_id, body):
+    c = store.conn()
+    offer = c.execute("SELECT * FROM cards WHERE uid=? AND owner_id=?", (body.get("offerUid"), user_id)).fetchone()
+    if not offer: return 404, {"error": "you do not own that card"}
+    if rules.is_starter(offer["type"]): return 400, {"error": "starter cards are owned by every player — not tradeable"}
+    want = c.execute("SELECT * FROM cards WHERE uid=?", (body.get("wantUid"),)).fetchone()
+    if not want: return 404, {"error": "target card not found"}
+    if want["owner_id"] == user_id: return 400, {"error": "you already own that card"}
+    if rules.is_starter(want["type"]): return 400, {"error": "starter cards are owned by every player — not tradeable"}
+    with store.tx() as cc:
+        cur = cc.execute("INSERT INTO trades(from_user,to_user,offer_uid,want_uid,status,created) VALUES(?,?,?,?,'pending',?)",
+                          (user_id, want["owner_id"], offer["uid"], want["uid"], store.now()))
+        tid = cur.lastrowid
+    return 200, {"tradeId": tid}
+
+def h_trade_list(user_id, body):
+    c = store.conn()
+    rows = c.execute("SELECT * FROM trades WHERE (from_user=? OR to_user=?) AND status='pending' ORDER BY id DESC", (user_id, user_id)).fetchall()
+    out = []
+    for r in rows:
+        offer = c.execute("SELECT type FROM cards WHERE uid=?", (r["offer_uid"],)).fetchone()
+        want = c.execute("SELECT type FROM cards WHERE uid=?", (r["want_uid"],)).fetchone()
+        out.append({"id": r["id"], "fromMe": r["from_user"] == user_id,
+                    "offerType": offer["type"] if offer else None, "wantType": want["type"] if want else None})
+    return 200, {"trades": out}
+
+def h_trade_accept(user_id, body):
+    c = store.conn()
+    t = c.execute("SELECT * FROM trades WHERE id=? AND status='pending'", (body.get("tradeId"),)).fetchone()
+    if not t: return 404, {"error": "trade not found or already resolved"}
+    if t["to_user"] != user_id: return 403, {"error": "only the recipient can accept this trade"}
+    offer = c.execute("SELECT * FROM cards WHERE uid=? AND owner_id=?", (t["offer_uid"], t["from_user"])).fetchone()
+    want = c.execute("SELECT * FROM cards WHERE uid=? AND owner_id=?", (t["want_uid"], user_id)).fetchone()
+    if not offer or not want:
+        with store.tx() as cc: cc.execute("UPDATE trades SET status='cancelled' WHERE id=?", (t["id"],))
+        return 400, {"error": "one of the traded cards has moved since this trade was proposed"}
+    with store.tx() as cc:
+        cc.execute("UPDATE cards SET owner_id=? WHERE uid=?", (user_id, offer["uid"]))
+        cc.execute("UPDATE cards SET owner_id=? WHERE uid=?", (t["from_user"], want["uid"]))
+        cc.execute("UPDATE records SET ok=0, od=0 WHERE uid=?", (offer["uid"],))
+        cc.execute("UPDATE records SET ok=0, od=0 WHERE uid=?", (want["uid"],))
+        store.chain_add(cc, offer["uid"], addr_of(cc, t["from_user"]), addr_of(cc, user_id), "Traded")
+        store.chain_add(cc, want["uid"], addr_of(cc, user_id), addr_of(cc, t["from_user"]), "Traded")
+        cc.execute("UPDATE trades SET status='accepted' WHERE id=?", (t["id"],))
+    return 200, {"traded": True, "state": user_state(user_id)}
+
+def h_trade_decline(user_id, body):
+    t = store.conn().execute("SELECT * FROM trades WHERE id=? AND status='pending'", (body.get("tradeId"),)).fetchone()
+    if not t: return 404, {"error": "trade not found or already resolved"}
+    if user_id not in (t["from_user"], t["to_user"]): return 403, {"error": "not your trade"}
+    with store.tx() as cc: cc.execute("UPDATE trades SET status='declined' WHERE id=?", (t["id"],))
+    return 200, {"declined": True}
+
+def h_user_tradeables(user_id, body):
+    """Lets a proposer discover a target account's tradeable (non-starter) cards by handle --
+    without this, trade/propose has no way to learn a real wantUid to request."""
+    row = store.conn().execute("SELECT id FROM users WHERE handle=?", (body.get("handle") or "",)).fetchone()
+    if not row: return 404, {"error": "no such account"}
+    cards = store.conn().execute("SELECT uid,type FROM cards WHERE owner_id=? ORDER BY type", (row["id"],)).fetchall()
+    return 200, {"cards": [dict(c) for c in cards if not rules.is_starter(c["type"])]}
 
 def _load_bonds(user_id):
     return {r["pair"]: r["count"] for r in store.conn().execute("SELECT pair,count FROM bonds WHERE user_id=?", (user_id,)).fetchall()}
@@ -517,7 +627,6 @@ ROUTES = {
     ("POST","/api/auth/register"): (h_register, False),
     ("POST","/api/auth/login"):    (h_login, False),
     ("GET", "/api/state"):         (h_state, True),
-    ("POST","/api/match/resolve"): (h_resolve, True),
     ("POST","/api/match/start"):   (h_match_start, True),
     ("POST","/api/match/commit"):  (h_match_commit, True),
     ("POST","/api/deck/set"):      (h_deck_set, True),
@@ -536,6 +645,13 @@ ROUTES = {
     ("GET", "/api/shop/forge-tiers"):(h_forge_tiers, True),
     ("POST","/api/shop/buy-forge"): (h_buy_forge, True),
     ("POST","/api/forge/convert"): (h_convert, True),
+    ("GET", "/api/pack/catalog"):  (h_pack_catalog, True),
+    ("POST","/api/pack/open"):     (h_pack_open, True),
+    ("POST","/api/trade/propose"): (h_trade_propose, True),
+    ("POST","/api/trade/accept"):  (h_trade_accept, True),
+    ("POST","/api/trade/decline"): (h_trade_decline, True),
+    ("GET", "/api/trade/list"):    (h_trade_list, True),
+    ("POST","/api/trade/tradeables"): (h_user_tradeables, True),
 }
 
 def auth_user(headers):
@@ -605,7 +721,7 @@ def main():
     print(f"  listening on http://{HOST}:{PORT}  (local-only)")
     print(f"  DB: {store.DB_PATH}")
     print(f"  currency: Signal ◈ = cards (earn/play + market) · Forge ❖ = premium (buy + convert 1:100, no cash-out)")
-    print(f"  endpoints: /api/auth/register|login  /api/state  /api/match/resolve  /api/market/listings|buy|sell")
+    print(f"  endpoints: /api/auth/register|login  /api/state  /api/pack/open  /api/trade/propose|accept|decline|list  /api/market/listings|buy|sell")
     print(f"             /api/shop/forge-tiers|buy-forge  /api/forge/convert  /api/ledger  /api/health")
     ThreadingHTTPServer((HOST, PORT), Handler).serve_forever()
 

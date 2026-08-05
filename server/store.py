@@ -47,6 +47,19 @@ CREATE TABLE IF NOT EXISTS game_sessions(id TEXT PRIMARY KEY, kind TEXT NOT NULL
 -- (new accounts, or anyone who played before this table existed) so nothing breaks for them.
 CREATE TABLE IF NOT EXISTS decks(user_id TEXT PRIMARY KEY, card_uids TEXT NOT NULL, updated TEXT NOT NULL);
 
+-- 8/5/26 Phase 3: per-account pack pity (index.html:9649-9659 packPityUltra/packPityApex -- GLOBAL
+-- on the client's single localStorage save, but each server account needs its own, same reasoning
+-- as decks above).
+CREATE TABLE IF NOT EXISTS pity(user_id TEXT PRIMARY KEY, pack_ultra INTEGER NOT NULL DEFAULT 0, pack_apex INTEGER NOT NULL DEFAULT 0);
+
+-- 8/5/26 Phase 3: real P2P trades (client's own trade UI is confirmed-simulated against fake
+-- partners, index.html:12817 TRADE_PARTNERS -- not a spec for real P2P, so this is a fresh design:
+-- propose/accept/decline between two real accounts, not a port).
+CREATE TABLE IF NOT EXISTS trades(
+  id INTEGER PRIMARY KEY AUTOINCREMENT, from_user TEXT NOT NULL, to_user TEXT NOT NULL,
+  offer_uid TEXT NOT NULL, want_uid TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending',
+  created TEXT NOT NULL);
+
 -- secondary market
 CREATE TABLE IF NOT EXISTS listings(
   id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, seller_id TEXT,
@@ -134,3 +147,10 @@ def deck_save(user_id, uids):
 def deck_load(user_id):
     r = conn().execute("SELECT card_uids FROM decks WHERE user_id=?", (user_id,)).fetchone()
     return json.loads(r["card_uids"]) if r else None
+
+def pity_load(user_id):
+    r = conn().execute("SELECT pack_ultra, pack_apex FROM pity WHERE user_id=?", (user_id,)).fetchone()
+    return {"pack_ultra": r["pack_ultra"], "pack_apex": r["pack_apex"]} if r else {"pack_ultra": 0, "pack_apex": 0}
+def pity_save(c, user_id, pack_ultra, pack_apex):
+    c.execute("INSERT INTO pity(user_id,pack_ultra,pack_apex) VALUES(?,?,?) "
+              "ON CONFLICT(user_id) DO UPDATE SET pack_ultra=?,pack_apex=?", (user_id, pack_ultra, pack_apex, pack_ultra, pack_apex))

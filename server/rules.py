@@ -4,7 +4,7 @@ The SERVER owns outcomes, rewards, traits, and appraisals. A subset of the clien
 rule-set, deliberately; bringing it to full parity with the client resolve() is a
 tracked follow-up. Pure functions + catalog only (no I/O).
 """
-import hashlib, secrets, json, os
+import hashlib, secrets, json, os, random
 
 # ── card catalog — LOADED from catalog.json (canonical; regen via extract_catalog.py) ──
 _CAT = json.load(open(os.path.join(os.path.dirname(__file__), "catalog.json"), encoding="utf-8"))
@@ -167,3 +167,63 @@ def legend_tier(score):
     for m, n in LEGEND_TIERS:
         if score >= m: return n
     return "Unproven"
+
+# ── Phase 3: card packs (index.html:9619-9627) — hand-maintained here, not extracted, because
+# these are shop-config constants (price/odds), not per-card game data. All Signal-priced (the
+# client's "Premium" tier is still Signal, not Forge -- Forge-priced summons are the cosmetic
+# gacha/variant system, a separate mechanic not built server-side yet, deliberately: it mints
+# skins of existing cards via its own serial-numbered variant system, not new base cards, and has
+# its own independent pity (gachaPity, per-banner, cap 60) -- conflating it with card packs here
+# would be the "don't conflate two similar-looking mechanics" mistake).
+PACKS = [
+    {"id": "std", "name": "Legends Reborn Booster", "price": 150, "tenX": True, "odds": {"common": 91.6, "rare": 7.6, "ultra": 0.8}},
+    {"id": "elite", "name": "Legends Reborn Elite Cache", "price": 1500, "odds": {"rare": 78, "ultra": 20, "apex": 2}},
+]
+PREMIUM_PACKS = [
+    {"id": "fkindle", "name": "Kindled Cache", "price": 2000, "odds": {"rare": 91.2, "ultra": 7, "apex": 1.8}},
+    {"id": "fforge", "name": "Forgemaster Vault", "price": 5000, "odds": {"rare": 91.2, "ultra": 7, "apex": 1.8}},
+    {"id": "fmythic", "name": "Mythic Rite", "price": 6000, "odds": {"rare": 91.2, "ultra": 7, "apex": 1.8}},
+]
+ALL_PACKS = {p["id"]: p for p in PACKS + PREMIUM_PACKS}
+# index.html:9649: guaranteed Ultra+ within 20 pulls, guaranteed Apex within 80 -- both counters
+# GLOBAL per account (not per-pack-id), exactly mirroring the client's single pair of module vars.
+PITY_ULTRA, PITY_APEX = 20, 80
+_RARITY_ORDER_FLOOR = {"apex": 0, "ultra": 1, "rare": 2, "common": 3}
+
+CARDS_BY_RARITY = {}
+for _n, _c in CARD_CATALOG.items():
+    CARDS_BY_RARITY.setdefault(_c["rarity"], []).append(_n)
+
+def roll_pack_rarity(pack, avail, pity_ultra, pity_apex):
+    """Exact port of index.html:9649-9659 rollPackRarity(). avail: the subset of pack['odds']
+    rarities that still have at least one mintable card (caller-computed, since only the server
+    knows real mint state). Returns (rarity, new_pity_ultra, new_pity_apex)."""
+    pity_ultra += 1; pity_apex += 1
+    has_apex = "apex" in avail
+    has_ultra = "ultra" in avail
+    if has_apex and pity_apex >= PITY_APEX:
+        rar = "apex"
+    elif (has_ultra or has_apex) and pity_ultra >= PITY_ULTRA:
+        rar = "apex" if (has_apex and random.random() < 0.08) else ("ultra" if has_ultra else "apex")
+    else:
+        total = sum(pack["odds"].get(r, 0) for r in avail)
+        roll = random.random() * total
+        rar = avail[-1] if avail else "common"
+        for r in avail:
+            roll -= pack["odds"].get(r, 0)
+            if roll <= 0: rar = r; break
+    if rar == "apex": pity_apex = 0; pity_ultra = 0
+    elif rar == "ultra": pity_ultra = 0
+    return rar, pity_ultra, pity_apex
+
+def apply_bundle_floor(drawn, pack, is_premium, room_fn):
+    """index.html:9679-9691 -- any multi-pack open guarantees >=1 Rare+ (basic) or >=1 Ultra+
+    (premium), upgrading the single weakest roll in the batch if none met the floor. No-ops for a
+    single pull (n==1) or a pack whose odds don't include the floor rarity at all."""
+    if len(drawn) <= 1: return drawn
+    floor = "ultra" if is_premium else "rare"
+    if floor not in pack["odds"] or not room_fn(floor): return drawn
+    if any(_RARITY_ORDER_FLOOR.get(r, 9) <= _RARITY_ORDER_FLOOR.get(floor, 9) for r in drawn): return drawn
+    weakest = max(range(len(drawn)), key=lambda i: _RARITY_ORDER_FLOOR.get(drawn[i], 9))
+    drawn[weakest] = floor
+    return drawn

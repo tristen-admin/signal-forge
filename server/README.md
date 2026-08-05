@@ -34,8 +34,7 @@ Requires Python 3 (uses only the standard library: `http.server`, `sqlite3`, `ha
 | POST | `/api/auth/register` | – | create account, seed starter vault, return token + state |
 | POST | `/api/auth/login` | – | return token + state |
 | GET | `/api/state` | ✓ | authoritative state (balances, cards+records, legend) |
-| POST | `/api/match/resolve` | ✓ | single-duel resolve (legacy stub) |
-| POST | `/api/match/start` | ✓ | begin a best-of-7 match (deals hand + condition) |
+| POST | `/api/match/start` | ✓ | begin a match (Public/Draft Best-of-7, `{"mode":"ranked"}` Best-of-3) — deals hand + condition |
 | POST | `/api/match/commit` | ✓ | commit a card → **server** resolves the full duel (abilities/conditions/traits/guards), updates records, awards Signal |
 | GET | `/api/match/state` | ✓ | current match score / hand / condition |
 | POST | `/api/asc/start` | ✓ | begin an Ascension Rite on an owned card (avatar) |
@@ -50,6 +49,13 @@ Requires Python 3 (uses only the standard library: `http.server`, `sqlite3`, `ha
 | POST | `/api/shop/buy-forge` | ✓ | **simulated** real-money Forge purchase |
 | POST | `/api/forge/convert` | ✓ | one-way **Forge → Signal** (no cash-out) |
 | GET | `/api/ledger` | ✓ | append-only ledger + ownership chain |
+| GET | `/api/pack/catalog` | ✓ | pack prices/odds + this account's pity counters |
+| POST | `/api/pack/open` | ✓ | open a pack (`packId`, `n`: 1/5/10) — server-rolled rarity + pity, mints against the real finite supply |
+| POST | `/api/trade/propose` | ✓ | offer one of your cards for another account's card |
+| POST | `/api/trade/accept` | ✓ | accept a pending trade proposed to you — atomic swap |
+| POST | `/api/trade/decline` | ✓ | decline a pending trade |
+| GET | `/api/trade/list` | ✓ | your pending trades (sent + received) |
+| POST | `/api/trade/tradeables` | ✓ | another account's tradeable (non-starter) cards, by handle |
 | GET | `/api/health` | – | liveness |
 
 **Currency model (matches the finalized client economy):** **Signal (◈)** is the card currency —

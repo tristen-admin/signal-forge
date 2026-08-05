@@ -94,7 +94,6 @@ function render(st){
     return `<div class="u ${c.rarity}"><div class="nm">${c.type}</div>
       <div class="meta">⚔${c.pow} · ${c.k}-${c.d} · #${c.mint_index}/${c.edition}</div>
       <div class="lg">💎 Legend ${c.legend_score} · ${c.legend_tier}</div>
-      <div class="row"><button class="sm" onclick="duel('${c.uid}')">⚔ Duel</button></div>
       <div style="margin-top:7px">${sell}</div></div>`;}).join("");
   loadMarket();
 }
@@ -104,9 +103,6 @@ async function loadMarket(){
       <span class="lpr">◈ ${l.price.toLocaleString()}</span><button class="sm" onclick="buy(${l.id})">Buy</button></div>`).join("");
   }catch(e){ log("market load failed: "+e.message,"err"); }
 }
-async function duel(uid){ try{ const j=await api("POST","/api/match/resolve",{cardUid:uid});
-  const r=j.result; log(`duel: ${r.outcome.toUpperCase()} (you ${r.player_pow} vs ${r.opp_pow}) +${r.reward.signal}◈`, r.outcome==="win"?"ok":"");
-  render(j.state);}catch(e){log("duel failed: "+e.message,"err");}}
 async function buy(id){ try{ const j=await api("POST","/api/market/buy",{listingId:id});
   log(`bought ${j.bought} for ${j.price.toLocaleString()}◈`,"ok"); render(j.state);}catch(e){log("buy failed: "+e.message,"err");}}
 async function sell(uid){ const p=parseInt($("p_"+uid).value||0); try{ const j=await api("POST","/api/market/sell",{cardUid:uid,price:p});
