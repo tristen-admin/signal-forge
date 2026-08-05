@@ -9058,6 +9058,11 @@ function show(id, btn){
 // ── MARKETPLACE ──
 let signalPoints = 20000;
 let lastDailyBonusDate = '';   // daily-return bonus (7/15/26): todayISO()-format, granted once per calendar day on Hub visit
+// 8/5/26: FOMO backend (owner: "seems simple enough to lay bare bones for... build the aesthetic and
+// slot the backend later") -- current + best consecutive daily-login streak, same "current + best"
+// shape as winStreak/bestWinStreak. Not reset at any of the profile-reset sites, matching
+// lastDailyBonusDate's own existing precedent (calendar-based state, not progress state).
+let dailyLoginStreak=0, bestDailyLoginStreak=0;
 // Expeditions -- card-acquisition idle-claim (7/17/26): send a charge to a map location for a chance
 // at a Common/Uncommon card or a flat Signal reward. Charges regen over real time (Date.now()-anchored,
 // same idle-accrual shape as any mobile energy system), capped, so "check back every couple hours" is
@@ -9433,7 +9438,7 @@ const SAVE_KEY = 'signalforge_save_v2';
 let _saveFailedOnce = false;   // 7/18/26: throttle the failure toast to once per session -- a quota-exceeded save fails on EVERY subsequent saveState() call otherwise, which would spam a toast on nearly every action
 function saveState(){
   try{
-    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, winStreak, bestWinStreak, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, ascParty, ascPartySel, ascUnitProg, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]}));
+    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, dailyLoginStreak, bestDailyLoginStreak, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, winStreak, bestWinStreak, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, ascParty, ascPartySel, ascUnitProg, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]}));
   }catch(e){
     // Previously silent -- a change could visibly apply in-memory (card updates, a "success" toast
     // already fired from the caller) while the save itself failed underneath, e.g. localStorage
@@ -9450,6 +9455,8 @@ function loadState(){
     const s=JSON.parse(raw);
     if(typeof s.signalPoints==='number') signalPoints=s.signalPoints;
     if(typeof s.lastDailyBonusDate==='string') lastDailyBonusDate=s.lastDailyBonusDate;
+    if(typeof s.dailyLoginStreak==='number') dailyLoginStreak=s.dailyLoginStreak;
+    if(typeof s.bestDailyLoginStreak==='number') bestDailyLoginStreak=s.bestDailyLoginStreak;
     if(typeof s.expeditionCharges==='number') expeditionCharges=s.expeditionCharges;
     if(typeof s.expeditionLastRegen==='number') expeditionLastRegen=s.expeditionLastRegen;
     if(s.expeditionsActive && typeof s.expeditionsActive==='object') expeditionsActive=s.expeditionsActive;
@@ -11551,10 +11558,19 @@ function sigilFor(name){ return CARD_ART[name] ? '' : `<span class="vc-sigil">${
 function grantDailyBonusIfDue(){
   var today = todayISO();
   if(lastDailyBonusDate === today) return;
+  // 8/5/26: FOMO backend -- a missed day breaks the streak back to 1 (the actual loss-aversion
+  // mechanic that makes daily-login streaks work), consecutive days climb it. bestDailyLoginStreak
+  // is the peak, same "current + best" shape as winStreak/bestWinStreak. Reward scales transparently
+  // with the streak and caps at Day 6+ (+150/day, capped +750) rather than growing unbounded --
+  // same never-hide-the-math, always-show-the-cap discipline as CONDITION_VETERAN_CAP earlier.
+  var yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
+  dailyLoginStreak = (lastDailyBonusDate === yesterday) ? (dailyLoginStreak||0)+1 : 1;
+  if(dailyLoginStreak > bestDailyLoginStreak) bestDailyLoginStreak = dailyLoginStreak;
   lastDailyBonusDate = today;
-  signalPoints += 600;
+  var bonus = 600 + Math.min(5, dailyLoginStreak-1)*150;
+  signalPoints += bonus;
   if(typeof updateBalance==='function') updateBalance();
-  if(typeof toast==='function') toast('◈ Daily Bonus — +600 Signal, welcome back!', true);
+  if(typeof toast==='function') toast('◈ Daily Bonus — Day '+dailyLoginStreak+' streak, +'+bonus+' Signal, welcome back!', true);
   if(typeof saveState==='function') saveState();
 }
 // ══ EXPEDITIONS — card-acquisition idle-claim (7/17/26; rarity+duration 7/17/26) ══
