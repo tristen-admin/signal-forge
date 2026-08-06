@@ -529,7 +529,8 @@ def _asc_public(run, user_id):
                        "moves": [{"name": m["name"], "kind": m["kind"], "left": m["left"], "uses": m.get("uses", 0)} for m in u["moves"]]}
                       for u in run["party"]],
             "node": ({"type": node["type"], "title": node.get("title"), "loc": node.get("loc"), "beat": node.get("beat")} if node else None),
-            "battle": _battle_public(run["battle"]) if run["battle"] else None}
+            "battle": _battle_public(run["battle"]) if run["battle"] else None,
+            "inv": run.get("inv", {}), "gear": run.get("gear", []), "equip": run.get("equip", {})}
 
 def _battle_public(battle):
     return {"gauge": battle.get("gauge", 0), "gaugeMax": asc.GAUGE_MAX, "round": battle.get("round", 0),
@@ -537,6 +538,12 @@ def _battle_public(battle):
             "party": [{"name": u["name"], "avatar": u["avatar"], "hp": u["hp"], "maxhp": u["maxhp"],
                        "moves": [{"name": m["name"], "kind": m["kind"], "left": m["left"]} for m in u["moves"]]} for u in battle["party"]],
             "foes": [{"name": f["name"], "hp": f["hp"], "maxhp": f["maxhp"], "rank": f["rank"]} for f in battle["foes"]]}
+
+def h_asc_shop(user_id, body):
+    """Phase 4.2: what asc/start's buyItems/buyGear/equip params can spend Signal on -- the real
+    Merchant's items/gear/prices, surfaced before the Rite since Story mode has no Merchant node
+    to browse them at mid-run (see asc.py module docstring)."""
+    return 200, {"items": asc.ASC_ITEMS, "gear": asc.ASC_GEAR}
 
 def h_asc_start(user_id, body):
     champion = body.get("championName")
@@ -548,11 +555,48 @@ def h_asc_start(user_id, body):
         if not asc.resolve_unit(name): return 400, {"error": f"unknown unit: {name}"}
     prog = store.asc_prog_load(user_id)
     if not asc.chapter_unlocked(chapter_idx, prog): return 400, {"error": "that chapter isn't unlocked yet"}
-    party = asc.instantiate_party(champion, companions, prog)
+
+    # Phase 4.2: pre-Rite provisioning -- real Merchant prices, spent before the Rite starts rather
+    # than at a mid-run shop node Story mode doesn't have (see asc.py module docstring). Optional;
+    # omitting all three params behaves exactly like the pre-4.2 endpoint.
+    buy_items = dict(body.get("buyItems") or {})
+    buy_gear = list(body.get("buyGear") or [])
+    equip = dict(body.get("equip") or {})
+    cost = 0
+    for item_id, qty in buy_items.items():
+        it = asc._ITEMS_BY_ID.get(item_id)
+        if not it: return 400, {"error": f"unknown item: {item_id}"}
+        qty = int(qty)
+        if qty < 0: return 400, {"error": "item quantity cannot be negative"}
+        cost += it["price"] * qty
+    seen_gear = set()
+    for gear_id in buy_gear:
+        g = asc._GEAR_BY_ID.get(gear_id)
+        if not g: return 400, {"error": f"unknown gear: {gear_id}"}
+        if gear_id in seen_gear: return 400, {"error": f"{gear_id} listed twice in buyGear"}
+        seen_gear.add(gear_id); cost += g["price"]
+    for name, gear_id in equip.items():
+        if name not in companions: return 400, {"error": f"cannot equip gear on {name} -- not a companion in this party"}
+        if gear_id not in seen_gear: return 400, {"error": f"must include {gear_id} in buyGear before equipping it"}
+    if len(set(equip.values())) != len(equip): return 400, {"error": "the same gear piece cannot be equipped on two companions"}
+
+    c = store.conn()
+    u = c.execute("SELECT signal FROM users WHERE id=?", (user_id,)).fetchone()
+    if u["signal"] < cost: return 402, {"error": f"insufficient Signal (need {cost}, have {u['signal']})"}
+
+    party = asc.instantiate_party(champion, companions, prog, equip)
     if not party: return 400, {"error": "could not build a party"}
+    inv = {"potion": 0, "elixir": 0, "revive": 0}
+    for item_id, qty in buy_items.items(): inv[item_id] += int(qty)
+
     rid = "r_" + secrets.token_hex(8)
+    with store.tx() as cc:
+        ns = u["signal"] - cost
+        cc.execute("UPDATE users SET signal=? WHERE id=?", (ns, user_id))
+        if cost: store.ledger_add(cc, user_id, "SIGNAL", -cost, "Ascension: pre-Rite provisioning", ns)
     run = {"chapterIdx": chapter_idx, "map": asc.story_map(chapter_idx), "tier": 0,
            "avatarName": champion, "companionNames": companions, "party": party, "prog": prog,
+           "inv": inv, "gear": list(seen_gear), "equip": equip,
            "battle": None, "flawless": True, "done": False, "phase": "pick", "result": None}
     ASC_RUNS[rid] = {"user_id": user_id, "run": run}
     return 200, {"runId": rid, "run": _asc_public(run, user_id)}
@@ -602,6 +646,8 @@ def h_asc_act(user_id, body):
         ok, err = asc.basic_attack(battle, actor_i, body.get("targetIdx"), log)
     elif action == "move":
         ok, err = asc.use_move(battle, actor_i, int(body.get("moveIdx", 0)), body.get("targetIdx"), log)
+    elif action == "item":
+        ok, err = asc.use_item(battle, run["inv"], actor_i, body.get("itemId"), body.get("targetIdx"), log)
     elif action == "ultimate":
         # Doesn't consume the actor's turn slot (no gauge add, no queue advance) -- BUT it can still
         # be the killing blow, so battle_over() must be checked here too. A real bug this pass:
@@ -735,6 +781,7 @@ ROUTES = {
     ("GET", "/api/deck/get"):      (h_deck_get, True),
     ("POST","/api/spell/cast"):    (h_spell_cast, True),
     ("GET", "/api/match/state"):   (h_match_state, True),
+    ("GET", "/api/asc/shop"):      (h_asc_shop, True),
     ("POST","/api/asc/start"):     (h_asc_start, True),
     ("POST","/api/asc/pick"):      (h_asc_pick, True),
     ("POST","/api/asc/enter"):     (h_asc_enter, True),

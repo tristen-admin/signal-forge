@@ -4820,5 +4820,89 @@
    "sub": "A slaver city's baroness, a mercy in the arena, and the Broodqueen's throne.",
    "beatsLen": 3
   }
+ ],
+ "ascItems": [
+  {
+   "id": "potion",
+   "name": "Potion",
+   "icon": "🧪",
+   "kind": "heal",
+   "power": 50,
+   "target": "ally",
+   "price": 120,
+   "desc": "Restore 50 HP to one ally."
+  },
+  {
+   "id": "elixir",
+   "name": "Elixir",
+   "icon": "⚗️",
+   "kind": "healall",
+   "power": 60,
+   "target": "allies",
+   "price": 320,
+   "desc": "Restore 60 HP to the whole party."
+  },
+  {
+   "id": "revive",
+   "name": "Revive",
+   "icon": "🕊️",
+   "kind": "revive",
+   "power": 0.5,
+   "target": "downed",
+   "price": 400,
+   "desc": "Bring a downed ally back at 50% HP."
+  }
+ ],
+ "ascGear": [
+  {
+   "id": "blade",
+   "name": "Iron Blade",
+   "icon": "🗡",
+   "atk": 7,
+   "hp": 0,
+   "spd": 0,
+   "price": 200,
+   "desc": "A keen edge — raw offense."
+  },
+  {
+   "id": "plate",
+   "name": "Warplate",
+   "icon": "🛡",
+   "atk": 0,
+   "hp": 35,
+   "spd": 0,
+   "price": 220,
+   "desc": "Heavy protection for a front-liner."
+  },
+  {
+   "id": "boots",
+   "name": "Swift Boots",
+   "icon": "🥾",
+   "atk": 0,
+   "hp": 0,
+   "spd": 5,
+   "price": 160,
+   "desc": "Act sooner in the turn order."
+  },
+  {
+   "id": "amulet",
+   "name": "Vigor Amulet",
+   "icon": "📿",
+   "atk": 3,
+   "hp": 20,
+   "spd": 0,
+   "price": 300,
+   "desc": "A balanced boost to power and vitality."
+  },
+  {
+   "id": "crown",
+   "name": "Ascendant Crown",
+   "icon": "👑",
+   "atk": 8,
+   "hp": 30,
+   "spd": 3,
+   "price": 600,
+   "desc": "A relic of allies — power, vitality, speed."
+  }
  ]
 }

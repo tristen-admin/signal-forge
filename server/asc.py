@@ -7,19 +7,33 @@ This is a faithful port of the client's REAL system: a JRPG-style party of 1 Cha
 never fights directly) + 2-3 companions, a speed-sorted turn queue, HP/ATK/SPD stats, a 4-slot
 move loadout gated by level, a 100-point Ultimate gauge, and a 2-chapter linear story mode.
 
-Scope of this pass (Phase 4.1 — see the memory file for the full deferred list, all documented
-inline at the relevant spot, not silently dropped):
+Scope of Phase 4.1 (see the memory file for the full history):
   IN:  unified roster (11 bespoke + every other base card via a generic-stats formula), champion
        eligibility (a real Deck-Master ability), full turn-queue combat (damage/heal/status/move-
        kind execution, foe AI incl. boss enrage+signature AoE), the Ultimate, per-unit level/xp
-       progression + move-loadout selection, the 2 real chapters' 7 story nodes (with their real
-       prose) resolved via duel/elite/boss/sanctum, real Signal/XP rewards, and a real mastery
-       write (fixing a client-side bug where mastery is currently dead code — see below).
-  OUT: gear, consumables, Crossroads offers, the Merchant shop, Trial modifier nodes, bounties,
-       skins, Might/Cunning/Grit spec points, Arena mode, Endless Rite mode, Ascension-specific
-       "lore link" party auras (gaugeMult/linkLifesteal/linkUlt/linkReward/linkDef/waltzRally --
-       always neutral defaults here), and DM abilities firing during a Rite (task #382, an open
-       design question, not a build gap).
+       progression, the 2 real chapters' 7 story nodes (with their real prose) resolved via
+       duel/elite/boss/sanctum, real Signal/XP rewards, and a real mastery write (fixing a
+       client-side bug where mastery is currently dead code).
+  OUT (at the time): gear, consumables, Crossroads, Merchant, Trial nodes, bounties, skins, spec
+       points, Arena mode, Endless Rite mode, Ascension-specific "lore link" party auras (always
+       neutral here), DM abilities firing in a Rite (task #382, an open design question).
+
+Phase 4.2 (this pass) adds items + gear, per owner request, plus a deliberate design change:
+  - Items (ASC_ITEMS: potion/elixir/revive) and Gear (ASC_GEAR: 5 pieces, flat hp/atk/spd bonuses)
+    are real now. BUT the client's own acquisition path for both is the Merchant node + Crossroads
+    "gear"/"provision" offers -- and neither node type appears ANYWHERE in the real Chapter 1/2
+    story data (confirmed: all 7 real nodes are duel/elite/boss/sanctum only). Rather than invent
+    Merchant-as-a-story-node the client itself never uses there, items/gear are bought as PART OF
+    `asc/start` (a pre-Rite provisioning step, spending account Signal) -- same prices, same
+    run-scoped-not-persistent-across-runs model as the client's `ascRun.inv`/`ascRun.gear`, just
+    moved to before the Rite instead of at a mid-run shop node Story mode doesn't have.
+  - Companions are now BASIC-ATTACK-ONLY (their unlockable move trees are still fully modeled and
+    computed -- unit_move_list()/unit_loadout() are unchanged and still exist -- but combat no
+    longer surfaces or allows using anything beyond the base "attack" action for a non-avatar
+    party member). This is an explicit owner design call, not a client-fidelity port: the real
+    client DOES let companions use their signature/unlocked moves. Kept as a single, cheap,
+    reversible gate (see `refresh_for_battle`) specifically so it can be flipped back in one line
+    if this reading of "move selections... limited to just basic attacks" turns out wrong.
 
 Mastery fix: the client's own `ascEndRun()` (the only writer of `avatarBond`, the client-side
 mastery ledger) is reachable ONLY via Abandon-run, always with won=False, and reads a field
@@ -41,6 +55,8 @@ ASC_MOVE_UNLOCK = _CAT["ascMoveUnlock"]         # [1,3,6,9,12]
 ASC_MOVES_CAP = _CAT["ascMovesCap"]             # Lv-12 capstone move, keyed by unit id
 ASC_MOVES = _CAT["ascMoves"]                    # 3 unlockable extras per unit, keyed by unit id
 ASC_BOSS_SIGS = _CAT["ascBossSigs"]
+ASC_ITEMS = _CAT["ascItems"]                    # potion/elixir/revive -- Signal-priced consumables
+ASC_GEAR = _CAT["ascGear"]                      # 5 flat hp/atk/spd-boost pieces -- Signal-priced
 ASC_FOES = _CAT["ascFoes"]                      # global fallback pool
 _STORY_CH = [_CAT["ascStory"], _CAT["ascStoryCh2"]]
 ASC_CHAPTERS = [
@@ -50,6 +66,8 @@ ASC_CHAPTERS = [
 
 _UNITS_BY_ID = {u["id"]: u for u in ASC_UNITS}
 _UNITS_BY_NAME = {u["name"]: u for u in ASC_UNITS}
+_ITEMS_BY_ID = {it["id"]: it for it in ASC_ITEMS}
+_GEAR_BY_ID = {g["id"]: g for g in ASC_GEAR}
 
 # ── roster resolution (index.html:13038-13056 ascResolveUnit/ascUnifiedRoster) ──
 def resolve_unit(key):
@@ -97,40 +115,59 @@ def unit_stats(base, prog):
     lv = unit_level(prog, base["name"])
     return {"hp": round(base["hp"]*(1+(lv-1)*0.12)), "atk": round(base["atk"]*(1+(lv-1)*0.10)), "lv": lv}
 
-def _mk_combatant(base, is_avatar, hp_bonus, atk_bonus, prog):
+# ── owner design gate, Phase 4.2: companions ("supports") are basic-attack-only in combat -- see
+# module docstring. unit_move_list()/unit_loadout() stay fully computed and correct (nothing about
+# the move-tree DATA model is regressed); this is the single choke point that hides those moves
+# from actual play. Flip to False to restore full special-move access in one line.
+COMPANIONS_BASIC_ATTACK_ONLY = True
+
+def _move_list_for_combat(base, prog):
+    """Applying the gate uniformly (not just to companions) is harmless: the avatar's own moves
+    list was already dead data before this change too -- the avatar never takes a battle turn at
+    all (see build_queue), so nothing has ever read it."""
+    if COMPANIONS_BASIC_ATTACK_ONLY: return []
+    full = unit_move_list(base)
+    load = unit_loadout(base, prog)
+    return [dict(full[i], left=full[i].get("uses", 0)) for i in load]
+
+def _mk_combatant(base, is_avatar, hp_bonus, atk_bonus, spd_bonus, prog):
     st = unit_stats(base, prog)
     maxhp = st["hp"] + hp_bonus
     atk = st["atk"] + atk_bonus
-    full = unit_move_list(base)
-    load = unit_loadout(base, prog)
-    moves = []
-    for i in load:
-        mv = dict(full[i]); mv["left"] = mv.get("uses", 0)
-        moves.append(mv)
+    spd = base["spd"] + spd_bonus
+    moves = _move_list_for_combat(base, prog)
     return {"id": base["id"], "name": base["name"], "art": base.get("art", base["name"]), "avatar": bool(is_avatar),
-            "maxhp": maxhp, "hp": maxhp, "atk": atk, "spd": base["spd"], "lv": st["lv"],
+            "maxhp": maxhp, "hp": maxhp, "atk": atk, "spd": spd, "lv": st["lv"],
             "moves": moves, "abilLeft": (moves[0]["left"] if moves else 2),
             "st": {"atk": 0, "atkT": 0, "def": 0, "defT": 0, "vuln": 0, "vulnT": 0, "dot": 0, "dotT": 0}}
 
-def instantiate_party(champion_key, companion_keys, prog):
+def instantiate_party(champion_key, companion_keys, prog, equip=None):
     """index.html:13132-13134 mkA/mkC -- HP persists across the whole run once instantiated;
-    moves/uses/statuses refresh per battle (see refresh_for_battle)."""
+    moves/uses/statuses refresh per battle (see refresh_for_battle).
+
+    `equip`: optional {unit_name: gear_id} map, gear bonuses stack additively onto the passive
+    bonus exactly like index.html:13627 ascRecomputeAll() -- both are skipped for the avatar
+    (`if(u.avatar) return;` in the client), since the Champion never fights and the bonus would be
+    inert. spd bonus applies on top of BASE spd, unscaled by level -- matching ascUnitStats(), which
+    never scales SPD, and ascRecomputeAll(), which adds `g.spd` straight onto `base.spd`."""
+    equip = equip or {}
     champ_base = resolve_unit(champion_key)
     if not champ_base: return None
     pas = ASC_PASSIVES.get(champ_base["id"], {})
-    party = [_mk_combatant(champ_base, True, 0, 0, prog)]
+    party = [_mk_combatant(champ_base, True, 0, 0, 0, prog)]
     for key in companion_keys:
         base = resolve_unit(key)
-        if base: party.append(_mk_combatant(base, False, pas.get("hp", 0), pas.get("atk", 0), prog))
+        if not base: continue
+        g = _GEAR_BY_ID.get(equip.get(base["name"]), {})
+        party.append(_mk_combatant(base, False, pas.get("hp", 0) + g.get("hp", 0),
+                                    pas.get("atk", 0) + g.get("atk", 0), g.get("spd", 0), prog))
     return party
 
 def refresh_for_battle(party, prog):
     """New battle: moves/uses/statuses reset, HP/maxHP carried over from the run-persistent party."""
     for u in party:
         base = resolve_unit(u["id"])
-        full = unit_move_list(base)
-        load = unit_loadout(base, prog)
-        u["moves"] = [dict(full[i], left=full[i].get("uses", 0)) for i in load]
+        u["moves"] = _move_list_for_combat(base, prog)
         u["abilLeft"] = u["moves"][0]["left"] if u["moves"] else 2
         u["st"] = {"atk": 0, "atkT": 0, "def": 0, "defT": 0, "vuln": 0, "vulnT": 0, "dot": 0, "dotT": 0}
 
@@ -324,6 +361,35 @@ def use_move(battle, actor_i, move_i, target_i, log):
         log.append(f"{actor['name']} uses {mv['name']} on {al['name']}")
     else:
         return False, "unknown move kind"
+    return True, None
+
+def use_item(battle, inv, actor_i, item_id, target_i, log):
+    """index.html:13606-13608/13773-13775 ascPickItem()/ascTarget()'s item branch. `inv` is the
+    run's {item_id: count} dict -- mutated in place on a successful use, same as the client
+    decrementing `ascRun.inv[id]` directly. healall (Elixir) has no target -- it hits every living
+    non-avatar party member in one call, matching the client's separate no-target-selection branch."""
+    it = _ITEMS_BY_ID.get(item_id)
+    if not it: return False, "unknown item"
+    if inv.get(item_id, 0) <= 0: return False, "none left"
+    actor = battle["party"][actor_i]
+    if it["kind"] == "healall":
+        for u in battle["party"]:
+            if u["hp"] > 0 and not u.get("avatar"): heal_amt(u, it["power"])
+        log.append(f"{it['icon']} {it['name']} restores the party (+{it['power']} HP each)")
+        inv[item_id] -= 1
+        return True, None
+    if target_i is None or target_i >= len(battle["party"]): return False, "invalid target"
+    al = battle["party"][target_i]
+    if al.get("avatar"): return False, "invalid target"
+    if it["kind"] == "revive":
+        if al["hp"] > 0: return False, "target is not downed"
+        al["hp"] = round(al["maxhp"] * it["power"])
+        log.append(f"{actor['name']} revives {al['name']} (+{al['hp']} HP)")
+    else:
+        if al["hp"] <= 0: return False, "target is downed"
+        heal_amt(al, it["power"])
+        log.append(f"{actor['name']} uses {it['name']} on {al['name']} (+{it['power']} HP)")
+    inv[item_id] -= 1
     return True, None
 
 def basic_attack(battle, actor_i, target_i, log):

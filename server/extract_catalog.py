@@ -71,7 +71,8 @@ blocks=["var %s = %s;"%(n, find_literal(html,n)) for n in names]
 _asc_names = ['ROOF_MAP','DM_ACTIVATED_ABILITY','DM_EXCLUSIVE','ASC_UNITS','ASC_PASSIVES',
               'ASC_MOVE_UNLOCK','ASC_MOVES_CAP','ASC_MOVES','ASC_BOSS_SIGS',
               'ASC_FOES','ASC_FOES_CADETS','ASC_FOES_WRIT','ASC_FOES_SORNVALLIS',
-              'ASC_STORY','ASC_STORY_CH2','ASC_CHAPTERS']
+              'ASC_STORY','ASC_STORY_CH2','ASC_CHAPTERS',
+              'ASC_ITEMS','ASC_GEAR']   # 8/5/26 Phase 4.2: consumables + gear
 blocks += ["var %s = %s;"%(n, find_literal(html,n)) for n in _asc_names]
 # hashStr(): the deterministic per-card-name hash ascGenericBaseStats() uses for its stat jitter --
 # a real function (h=(h*31+charCode)>>>0), not data, but harmless/cheap to carry through JSC here
@@ -110,16 +111,18 @@ print(JSON.stringify({cards:cards, called:CALLED, rules:CARD_RULES, links:links,
   roofMap:ROOF_MAP, dmNames:dmNames,
   ascUnits:ASC_UNITS, ascPassives:ASC_PASSIVES, ascMoveUnlock:ASC_MOVE_UNLOCK, ascMovesCap:ASC_MOVES_CAP, ascMoves:ASC_MOVES,
   ascBossSigs:ASC_BOSS_SIGS, ascFoes:ASC_FOES, ascFoesCadets:ASC_FOES_CADETS, ascFoesWrit:ASC_FOES_WRIT, ascFoesSornvallis:ASC_FOES_SORNVALLIS,
-  ascStory:ASC_STORY, ascStoryCh2:ASC_STORY_CH2, ascChapters:ASC_CHAPTERS.map(function(c){return {id:c.id,title:c.title,sub:c.sub,beatsLen:c.beats.length};})}));
+  ascStory:ASC_STORY, ascStoryCh2:ASC_STORY_CH2, ascChapters:ASC_CHAPTERS.map(function(c){return {id:c.id,title:c.title,sub:c.sub,beatsLen:c.beats.length};}),
+  ascItems:ASC_ITEMS, ascGear:ASC_GEAR}));
 """
 tf=tempfile.NamedTemporaryFile('w',suffix='.js',delete=False,encoding='utf-8'); tf.write(prog); tf.close()
 r=subprocess.run([JSC,tf.name],capture_output=True,text=True); os.unlink(tf.name)
 if r.returncode!=0: print("JSC ERR rc",r.returncode,"\nOUT:",r.stdout[:800],"\nERR:",r.stderr[:800]); sys.exit(1)
 data=json.loads(r.stdout)
 json.dump(data, open(OUT,'w',encoding='utf-8'), ensure_ascii=False, indent=1)
-print("OK -> catalog.json | cards:%d starter:%d links:%d rules:%d called:%d conditions:%d traits:%d cardRace:%d remnantPow:%d triggers:%d optionalHandReturn:%d roofMap:%d dmNames:%d ascUnits:%d ascMoves:%d ascFoes:%d+%d+%d+%d ascStory:%d+%d chapters:%d"%(
+print("OK -> catalog.json | cards:%d starter:%d links:%d rules:%d called:%d conditions:%d traits:%d cardRace:%d remnantPow:%d triggers:%d optionalHandReturn:%d roofMap:%d dmNames:%d ascUnits:%d ascMoves:%d ascFoes:%d+%d+%d+%d ascStory:%d+%d chapters:%d ascItems:%d ascGear:%d"%(
     len(data['cards']), len(data['starter']), len(data['links']), len(data['rules']), len(data['called']),
     len(data['conditions']), len(data['traits']), len(data['cardRace']), len(data['remnantPow']),
     len(data['triggers']), len(data['optionalHandReturn']), len(data['roofMap']), len(data['dmNames']),
     len(data['ascUnits']), len(data['ascMoves']), len(data['ascFoes']), len(data['ascFoesCadets']),
-    len(data['ascFoesWrit']), len(data['ascFoesSornvallis']), len(data['ascStory']), len(data['ascStoryCh2']), len(data['ascChapters'])))
+    len(data['ascFoesWrit']), len(data['ascFoesSornvallis']), len(data['ascStory']), len(data['ascStoryCh2']), len(data['ascChapters']),
+    len(data['ascItems']), len(data['ascGear'])))
