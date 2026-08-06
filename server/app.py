@@ -9,7 +9,7 @@ own balances, records, or outcomes — every mutation is computed and applied he
 import json, secrets, os, time, calendar, random
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs
-import store, rules, engine, asc
+import store, rules, engine, asc, pvp
 
 MATCHES = {}   # in-memory match sessions: match_id -> {user_id, m, hand_cards, deck_cards, condition}
 _SESSION_TTL_DAYS = 30
@@ -479,6 +479,28 @@ def h_match_state(user_id, body):
                  "locked_withdraw": sess["condition"] == "noretreat",
                  "winnersCircleCount": len(sess.get("winners_circle_cards") or []), "deckCount": len(sess["deck_cards"])}
 
+# ── PvP (Phase 5.1, 8/6/26) — real two-player matches. app.py builds each side's deck using the
+# helpers it already owns (deck_load + the uid->card mapping); pvp.py owns pairing, the joint duel
+# resolution and the per-player state views. See pvp.py's docstring for the resolution design.
+def _pvp_deck(user_id):
+    saved = store.deck_load(user_id)
+    all_owned = _owned_cards(user_id)
+    if not saved: return all_owned
+    by_uid = {c["uid"]: c for c in all_owned}
+    return [by_uid[u] for u in saved if u in by_uid]
+
+def h_pvp_queue(user_id, body):
+    owned = _pvp_deck(user_id)
+    if len(owned) < 4: return 400, {"error": "need at least 4 cards in your deck to queue"}
+    handle = store.conn().execute("SELECT handle FROM users WHERE id=?", (user_id,)).fetchone()["handle"]
+    return pvp.join(user_id, handle, owned, 3 if body.get("mode") == "ranked" else 7)
+
+def h_pvp_leave(user_id, body):   return pvp.leave(user_id)
+def h_pvp_state(user_id, body):   return pvp.state(user_id, body.get("pvpId"))
+def h_pvp_forfeit(user_id, body): return pvp.forfeit(user_id, body.get("pvpId"))
+def h_pvp_commit(user_id, body):
+    return pvp.commit(user_id, body.get("pvpId"), body.get("cardUid"), body.get("rearGuardUids"))
+
 def h_deck_set(user_id, body):
     uids = body.get("cards")
     if not isinstance(uids, list) or len(uids) < 4:
@@ -907,6 +929,11 @@ ROUTES = {
     ("GET", "/api/deck/get"):      (h_deck_get, True),
     ("POST","/api/spell/cast"):    (h_spell_cast, True),
     ("GET", "/api/match/state"):   (h_match_state, True),
+    ("POST","/api/pvp/queue"):     (h_pvp_queue, True),
+    ("POST","/api/pvp/leave"):     (h_pvp_leave, True),
+    ("GET", "/api/pvp/state"):     (h_pvp_state, True),
+    ("POST","/api/pvp/commit"):    (h_pvp_commit, True),
+    ("POST","/api/pvp/forfeit"):   (h_pvp_forfeit, True),
     ("GET", "/api/asc/shop"):      (h_asc_shop, True),
     ("POST","/api/asc/loadout"):   (h_asc_loadout, True),
     ("GET", "/api/asc/ally-pool"): (h_asc_ally_pool, True),

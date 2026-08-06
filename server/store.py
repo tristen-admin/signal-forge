@@ -5,7 +5,11 @@ card ownership chain are APPEND-ONLY, enforced by SQL triggers (real immutabilit
 """
 import sqlite3, os, threading, time, json
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "data", "signalforge.db")
+# SF_DB points the whole server at a different database file. Same env-override pattern as app.py's
+# HOST/PORT, and the reason it exists: an end-to-end test that registers accounts and plays matches
+# must be structurally incapable of writing into the real database, not merely careful about it.
+# Default is unchanged, so nothing about a normal run differs.
+DB_PATH = os.environ.get("SF_DB") or os.path.join(os.path.dirname(__file__), "data", "signalforge.db")
 _lock = threading.Lock()
 _conn = None
 

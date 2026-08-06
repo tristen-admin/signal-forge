@@ -303,13 +303,27 @@ def _apply_rules(name, ctx, playerPow, oppPow, log, m=None):
     return playerPow, oppPow
 
 # ── the faithful resolve() port ──
-def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None, rear_guards=None):
+def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None, rear_guards=None,
+            opp_pow_override=None, forced_outcome=None):
     """pc, oc: card dicts. pc_record: the player card's live DB record {k,d,ok,od} (drives traits +
     the pc.kills used by conditions). rear_guards: list of card dicts staged alongside pc this duel
     (Milestone B — RG_SLOTS()-capped, validated by the caller). Returns dict with outcome/powers/
     log/destination/hand_ops/rear_guard_fates; mutates match state m. `destination` (winners_circle|
     hand|deck_bottom) and `draw_self`/`hand_ops` tell the caller (app.py, which owns the real
-    uid-keyed hand/deck lists) what list-moves to perform."""
+    uid-keyed hand/deck lists) what list-moves to perform.
+
+    8/6/26 Phase 5.1 — the two PvP hooks. This function is structurally one-sided: it owns ONE
+    player's match state and treats `oc` as a bare card with no state of its own, which is correct
+    for the bot but not for a real opponent who has their own Charge, rear-guards and Remnants.
+    Rather than fork a parallel two-sided resolver (and re-introduce exactly the drift this whole
+    resync existed to kill), PvP runs this same function once per side and joins the two with:
+      opp_pow_override — force `oppPow` to the value the OTHER side's own pass computed, so each
+        player's power is derived from their own complete state and the comparison is symmetric.
+      forced_outcome   — overwrite the outcome after the resolution guards have run. Guards only
+        ever convert a loss into a tie, never into a win, so when the two passes disagree (A wins
+        while B's Last Stand ties) the tie is the truthful joint result; pvp.py reconciles and
+        replays with this set. Applied AFTER the guards on purpose: the guards must still fire
+        naturally so their once-per-match flags are spent by the side they actually saved."""
     rear_guards = rear_guards or []
     hand_ops = []
     playerPow = committed_pow if committed_pow is not None else pc["pow"]
@@ -545,6 +559,9 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None, rear_guards=
             if (pc["pow"] or 0) >= pcK and (oc["pow"] or 0) >= ocK: log.append("🌫️ Hollow Reckoning: both already outpace their kills — no swing")
 
     # ── DETERMINE WINNER ──
+    # PvP: the opponent is a real player whose power was computed by their own pass over their own
+    # state. Substitute it here — after every opponent-ability adjustment above, before the compare.
+    if opp_pow_override is not None: oppPow = opp_pow_override
     if playerPow > oppPow: won = "win"
     elif playerPow < oppPow: won = "lose"
     else: won = "tie"
@@ -593,6 +610,14 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None, rear_guards=
     # Remnants are fighter-level, not rear-guard-dependent, so this fires correctly here already)
     if won == "lose" and pc["name"] == "Uso Oso" and len(m.get("deathRemnants") or []) >= 3:
         forced_tie = True; won = "tie"; log.append("🦴 The Bulwark of Bones: 3+ Remnants held — the loss is denied, duel ties instead")
+
+    # PvP reconciliation (see docstring). Deliberately placed after every guard so their
+    # once-per-match flags are already spent, and before the Remnant/destination/state blocks so
+    # every downstream consequence follows the joint outcome rather than this side's local view.
+    if forced_outcome is not None and forced_outcome != won:
+        if won == "win": log.append("🤝 the opposing card survived the clash — duel tied")
+        won = forced_outcome
+        if won == "tie": forced_tie = True
 
     # ── DEATH REMNANTS (fighter-level: a card with "Death Remnant" in its own ability text becomes
     # a boosted-power echo on loss; any win disperses whatever remnants you're currently holding) ──
