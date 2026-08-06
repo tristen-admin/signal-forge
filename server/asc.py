@@ -178,8 +178,14 @@ def refresh_for_battle(party, prog):
         u["st"] = {"atk": 0, "atkT": 0, "def": 0, "defT": 0, "vuln": 0, "vulnT": 0, "dot": 0, "dotT": 0}
 
 # ── XP / progression (index.html:13187-13189 ascGrantXP) ──
+def new_prog_entry():
+    """The full asc_prog row shape -- one place so every construction site (grant_xp, and app.py's
+    handful of .setdefault() call sites) stays in sync as fields get added (kills/poolBonusGranted,
+    Phase 4.4)."""
+    return {"level": 1, "xp": 0, "rites": 0, "bosses": 0, "kills": 0, "poolBonusGranted": False, "load": []}
+
 def grant_xp(prog, name, amount):
-    p = prog.setdefault(name, {"level": 1, "xp": 0, "rites": 0, "bosses": 0, "load": []})
+    p = prog.setdefault(name, new_prog_entry())
     p["xp"] += amount
     need = p["level"] * 60
     while p["xp"] >= need:

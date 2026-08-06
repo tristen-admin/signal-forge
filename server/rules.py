@@ -275,6 +275,45 @@ ASC_ROOF_CAPSTONE = {
 }
 ASC_ROOFLESS_CAPSTONE = {"kind": "aoe", "power": 30, "uses": 1, "name": "Last Stand", "desc": "A powerful blow to every foe."}
 
+# ── Phase 4.4 (owner, 8/6/26): Ascension companions are no longer "any owned card" -- a separate,
+# persistent per-account pool, starting fixed and growing via summon or per-unit progression.
+# "only deckmasters appearing as playable avatars" is already true (asc_champion_eligible above) --
+# this table/pricing is companion-only, deliberately "separate yet intertwined" per the owner.
+#
+# Starting 5, owner-confirmed "fixed curated list": all 5 are bespoke ASC_UNITS (full hand-authored
+# move kits, not the generic Roof-kit fallback) AND all 5 are in STARTER_SET (guaranteed-owned by
+# every account) -- so a fresh account always has a real, working, ownership-luck-free companion
+# pool from turn one.
+ASC_ALLY_POOL_STARTERS = ["Hanse Waltz", "Uso Oso", "Veronica", "Lagertha Waltz", "King Joris"]
+# Deliberately NOT set equal to len(ASC_ALLY_POOL_STARTERS) -- that would leave zero headroom to
+# ever summon anything until a unit first grinds to the progression threshold below, a dead-on-
+# arrival chicken-and-egg gap the owner's framing doesn't intend ("starting 5" + "summon for
+# ascension allies" reads as summoning being immediately usable, not locked behind progression
+# first). 10 leaves exactly 5 summonable slots open from day one; flagged as my own number, not
+# owner-specified, since only the starting-pool-size and the growth-threshold CONCEPT were confirmed.
+ASC_ALLY_POOL_BASE_CAP = 10
+
+# Pricing, owner-confirmed "signal and forge": two Signal paths (a cheap random pull from your own
+# not-yet-pooled owned cards, and a pricier targeted pick -- but ONLY for a card you own that's
+# ALSO Deck-Master-eligible, matching the owner's "you can still summon a [DM] character... you
+# don't have in your pool yet" carve-out) plus one Forge path (targeted, ANY owned not-yet-pooled
+# unit, no DM requirement -- the harder currency buys the guarantee). None of these mint a tradeable
+# asset (owner: "ascension units dont have secondary market tradeability... anything bought with
+# forge needs to be variant rules") -- pool membership is just a row in asc_ally_pool, nothing to
+# trade in the first place, on either currency path.
+ASC_SUMMON_SIGNAL_RANDOM_PRICE = 500
+ASC_SUMMON_SIGNAL_DM_TARGETED_PRICE = 800
+ASC_SUMMON_FORGE_TARGETED_PRICE = 150
+
+# Per-unit progression unlock, owner-confirmed "per unit as your own growth system implies": ONE
+# extra pool-cap slot, granted once, the first time a SPECIFIC pooled unit crosses either threshold
+# (asc_prog's existing level field, or its new kills counter -- see asc.py's kill-tally comment for
+# how kills are counted). This is the vaguest clause in the owner's request ("unlock certain
+# progression things when you need them") -- flagged explicitly in the report back, since a pool-cap
+# reading is my best interpretation, not a confirmed spec.
+ASC_POOL_GROWTH_LEVEL = 5
+ASC_POOL_GROWTH_KILLS = 20
+
 def asc_generic_moves(name):
     """The 3 extra moves + 1 capstone a generic unit can unlock at level 3/6/9/12 -- mirrors the
     bespoke ASC_MOVES/ASC_MOVES_CAP shape exactly, named after the unit like asc_generic_ability()."""

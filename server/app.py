@@ -550,6 +550,77 @@ def _battle_public(battle):
                        "moves": [{"name": m["name"], "kind": m["kind"], "left": m["left"]} for m in u["moves"]]} for u in battle["party"]],
             "foes": [{"name": f["name"], "hp": f["hp"], "maxhp": f["maxhp"], "rank": f["rank"]} for f in battle["foes"]]}
 
+def _ensure_ally_pool(user_id):
+    """Phase 4.4: lazily seeds the fixed starting 5 (rules.ASC_ALLY_POOL_STARTERS) on first access,
+    so every account has a working companion pool with zero ownership-luck dependency (all 5 are
+    starter-set cards, guaranteed-owned)."""
+    pool = store.ally_pool_load(user_id)
+    if not pool:
+        with store.tx() as cc:
+            for name in rules.ASC_ALLY_POOL_STARTERS:
+                store.ally_pool_add(cc, user_id, name, "starter")
+        pool = store.ally_pool_load(user_id)
+    return pool
+
+def _ally_pool_cap(prog):
+    return rules.ASC_ALLY_POOL_BASE_CAP + sum(1 for p in prog.values() if p.get("poolBonusGranted"))
+
+def h_asc_ally_pool(user_id, body):
+    """What's in your Ascension companion pool, its current cap, and what you could summon into it
+    next (a random Signal pull, a targeted Signal pick IF the target is Deck-Master-eligible -- the
+    owner's 'you can still summon a [DM] character... you don't have in your pool yet' carve-out --
+    or a targeted Forge pick for anything else you own)."""
+    pool = _ensure_ally_pool(user_id)
+    prog = store.asc_prog_load(user_id)
+    cap = _ally_pool_cap(prog)
+    owned = _owned_type_names(user_id)
+    not_pooled_owned = sorted(n for n in owned if n not in pool and asc.resolve_unit(n))
+    dm_targets = [n for n in not_pooled_owned if rules.asc_champion_eligible(n)]
+    return 200, {"pool": sorted(pool), "cap": cap, "size": len(pool),
+                 "summon": {
+                     "signalRandom": {"price": rules.ASC_SUMMON_SIGNAL_RANDOM_PRICE, "available": len(not_pooled_owned)},
+                     "signalDmTargeted": {"price": rules.ASC_SUMMON_SIGNAL_DM_TARGETED_PRICE, "options": dm_targets},
+                     "forgeTargeted": {"price": rules.ASC_SUMMON_FORGE_TARGETED_PRICE, "options": not_pooled_owned},
+                 }}
+
+def h_asc_ally_summon(user_id, body):
+    pool = _ensure_ally_pool(user_id)
+    prog = store.asc_prog_load(user_id)
+    cap = _ally_pool_cap(prog)
+    if len(pool) >= cap:
+        return 400, {"error": f"ally pool is full ({len(pool)}/{cap}) -- grow it by leveling a pooled unit to "
+                               f"{rules.ASC_POOL_GROWTH_LEVEL} or {rules.ASC_POOL_GROWTH_KILLS} kills"}
+    method = body.get("method")
+    owned = _owned_type_names(user_id)
+    not_pooled_owned = [n for n in owned if n not in pool and asc.resolve_unit(n)]
+    target = None
+    if method == "signal_random":
+        if not not_pooled_owned: return 400, {"error": "every eligible owned unit is already in your pool"}
+        price, cur = rules.ASC_SUMMON_SIGNAL_RANDOM_PRICE, "signal"
+        target = random.choice(not_pooled_owned)
+    elif method == "signal_dm":
+        target = body.get("unitName")
+        if target not in not_pooled_owned: return 400, {"error": f"{target} isn't an owned, not-yet-pooled unit"}
+        if not rules.asc_champion_eligible(target): return 400, {"error": f"{target} has no Deck Master ability -- use forge_targeted instead"}
+        price, cur = rules.ASC_SUMMON_SIGNAL_DM_TARGETED_PRICE, "signal"
+    elif method == "forge_targeted":
+        target = body.get("unitName")
+        if target not in not_pooled_owned: return 400, {"error": f"{target} isn't an owned, not-yet-pooled unit"}
+        price, cur = rules.ASC_SUMMON_FORGE_TARGETED_PRICE, "forge"
+    else:
+        return 400, {"error": "unknown summon method -- use signal_random, signal_dm, or forge_targeted"}
+    row = store.conn().execute("SELECT signal, forge FROM users WHERE id=?", (user_id,)).fetchone()
+    balance = row[cur]
+    if balance < price: return 402, {"error": f"insufficient {cur.capitalize()} (need {price}, have {balance})"}
+    with store.tx() as cc:
+        new_balance = balance - price
+        if cur == "signal": cc.execute("UPDATE users SET signal=? WHERE id=?", (new_balance, user_id))
+        else: cc.execute("UPDATE users SET forge=? WHERE id=?", (new_balance, user_id))
+        store.ledger_add(cc, user_id, cur.upper(), -price, f"Ascension ally summon: {target} ({method})", new_balance)
+        store.ally_pool_add(cc, user_id, target, method)
+    pool2 = store.ally_pool_load(user_id)
+    return 200, {"summoned": target, "method": method, "cost": price, "currency": cur, "pool": sorted(pool2), "cap": cap}
+
 def h_asc_shop(user_id, body):
     """Phase 4.2: what asc/start's buyItems/buyGear/equip params can spend Signal on -- the real
     Merchant's items/gear/prices, surfaced before the Rite since Story mode has no Merchant node
@@ -580,7 +651,7 @@ def h_asc_loadout(user_id, body):
     for i in move_idxs:
         if not isinstance(i, int) or i not in unlocked:
             return 400, {"error": f"move index {i} isn't unlocked yet for {unit_name} (level {lvl})"}
-    p = run["prog"].setdefault(unit_name, {"level": 1, "xp": 0, "rites": 0, "bosses": 0, "load": []})
+    p = run["prog"].setdefault(unit_name, asc.new_prog_entry())
     p["load"] = move_idxs
     with store.tx() as cc:
         store.asc_prog_save(cc, user_id, run["prog"])
@@ -595,6 +666,11 @@ def h_asc_start(user_id, body):
     if not asc.champion_eligible(champion): return 400, {"error": "that unit has no Deck Master ability -- not eligible as Champion"}
     for name in [champion] + companions:
         if not asc.resolve_unit(name): return 400, {"error": f"unknown unit: {name}"}
+    # Phase 4.4: companions must be in the account's Ascension ally pool -- no longer "any owned
+    # card." Avatars are untouched (still gated by champion_eligible above, not the pool).
+    pool = _ensure_ally_pool(user_id)
+    for name in companions:
+        if name not in pool: return 400, {"error": f"{name} is not in your ascension ally pool yet -- summon them first via /api/asc/ally-summon"}
     prog = store.asc_prog_load(user_id)
     if not asc.chapter_unlocked(chapter_idx, prog): return 400, {"error": "that chapter isn't unlocked yet"}
 
@@ -721,12 +797,19 @@ def _resolve_node_outcome(user_id, sess, outcome):
         run["flawless"] = False
         return _end_run(user_id, sess, won=False)
     xp = asc._NODE_XP.get(node["type"], 45); sig = asc._NODE_SIGNAL.get(node["type"], 40)
+    # Phase 4.4: kill tally (a per-node proxy, not per-kill attribution -- every surviving owned
+    # party member gets credit for the whole node's foe count) feeds the per-unit pool-growth
+    # threshold below (rules.ASC_POOL_GROWTH_KILLS), alongside the existing level threshold.
+    n_foes = len(run["battle"]["foes"]) if run["battle"] else 0
     for u in run["party"]:
         if u["hp"] > 0 and u["name"] in owned:
             asc.grant_xp(run["prog"], u["name"], xp)
+            p = run["prog"].setdefault(u["name"], asc.new_prog_entry())
+            p["kills"] = p.get("kills", 0) + n_foes
             if node["type"] == "boss":
-                p = run["prog"].setdefault(u["name"], {"level": 1, "xp": 0, "rites": 0, "bosses": 0, "load": []})
                 p["bosses"] = p.get("bosses", 0) + 1
+            if not p.get("poolBonusGranted") and (p.get("level", 1) >= rules.ASC_POOL_GROWTH_LEVEL or p["kills"] >= rules.ASC_POOL_GROWTH_KILLS):
+                p["poolBonusGranted"] = True
     with store.tx() as cc:
         u = cc.execute("SELECT signal FROM users WHERE id=?", (user_id,)).fetchone()
         ns = u["signal"] + sig
@@ -753,7 +836,7 @@ def _end_run(user_id, sess, won):
     if won:
         for u in run["party"]:
             if not u.get("avatar") and u["hp"] > 0 and u["name"] in _owned_type_names(user_id):
-                p = run["prog"].setdefault(u["name"], {"level": 1, "xp": 0, "rites": 0, "bosses": 0, "load": []})
+                p = run["prog"].setdefault(u["name"], asc.new_prog_entry())
                 p["rites"] = p.get("rites", 0) + 1
     with store.tx() as cc:
         row = cc.execute("SELECT wins,flawless,best_level FROM mastery WHERE owner_id=? AND card_key=?", (user_id, champion)).fetchone()
@@ -825,6 +908,8 @@ ROUTES = {
     ("GET", "/api/match/state"):   (h_match_state, True),
     ("GET", "/api/asc/shop"):      (h_asc_shop, True),
     ("POST","/api/asc/loadout"):   (h_asc_loadout, True),
+    ("GET", "/api/asc/ally-pool"): (h_asc_ally_pool, True),
+    ("POST","/api/asc/ally-summon"):(h_asc_ally_summon, True),
     ("POST","/api/asc/start"):     (h_asc_start, True),
     ("POST","/api/asc/pick"):      (h_asc_pick, True),
     ("POST","/api/asc/enter"):     (h_asc_enter, True),

@@ -63,7 +63,17 @@ CREATE TABLE IF NOT EXISTS pity(user_id TEXT PRIMARY KEY, pack_ultra INTEGER NOT
 CREATE TABLE IF NOT EXISTS asc_prog(
   user_id TEXT NOT NULL, unit_name TEXT NOT NULL, level INTEGER NOT NULL DEFAULT 1,
   xp INTEGER NOT NULL DEFAULT 0, rites INTEGER NOT NULL DEFAULT 0, bosses INTEGER NOT NULL DEFAULT 0,
+  kills INTEGER NOT NULL DEFAULT 0, pool_bonus_granted INTEGER NOT NULL DEFAULT 0,
   load_json TEXT NOT NULL DEFAULT '[]', PRIMARY KEY(user_id, unit_name));
+
+-- 8/6/26 Phase 4.4: the Ascension companion roster is no longer "every owned card" -- it's a
+-- separately-unlocked pool, starting at a fixed 5 (rules.ASC_ALLY_POOL_STARTERS) and growing via
+-- summon (spend Signal/Forge) or per-unit progression (see asc_prog.kills/pool_bonus_granted
+-- above). Avatars stay gated by the existing Deck-Master-ability check, untouched by this table --
+-- this is a companion-only restriction, "separate yet intertwined" per the owner's own framing.
+CREATE TABLE IF NOT EXISTS asc_ally_pool(
+  user_id TEXT NOT NULL, unit_name TEXT NOT NULL, source TEXT NOT NULL, unlocked_at TEXT NOT NULL,
+  PRIMARY KEY(user_id, unit_name));
 
 CREATE TABLE IF NOT EXISTS trades(
   id INTEGER PRIMARY KEY AUTOINCREMENT, from_user TEXT NOT NULL, to_user TEXT NOT NULL,
@@ -101,8 +111,21 @@ def conn():
         _conn.row_factory = sqlite3.Row
         _conn.execute("PRAGMA journal_mode=WAL")
         _conn.executescript(SCHEMA)
+        _migrate(_conn)
         _conn.commit()
     return _conn
+
+def _migrate(c):
+    """CREATE TABLE IF NOT EXISTS can't add a column to a table that already exists on disk (this
+    server's DB predates asc_prog.kills/pool_bonus_granted, added 8/6/26) -- ALTER TABLE ADD COLUMN,
+    idempotent via a duplicate-column-error catch since SQLite has no ADD COLUMN IF NOT EXISTS."""
+    for stmt in [
+        "ALTER TABLE asc_prog ADD COLUMN kills INTEGER NOT NULL DEFAULT 0",
+        "ALTER TABLE asc_prog ADD COLUMN pool_bonus_granted INTEGER NOT NULL DEFAULT 0",
+    ]:
+        try: c.execute(stmt)
+        except sqlite3.OperationalError as e:
+            if "duplicate column" not in str(e): raise
 
 def tx():
     """Context: acquire the write lock; commit on success, rollback on error."""
@@ -167,13 +190,24 @@ def pity_save(c, user_id, pack_ultra, pack_apex):
 
 # ── Ascension per-unit progression (persists across runs; see asc_prog schema above) ──
 def asc_prog_load(user_id):
-    rows = conn().execute("SELECT unit_name,level,xp,rites,bosses,load_json FROM asc_prog WHERE user_id=?", (user_id,)).fetchall()
+    rows = conn().execute("SELECT unit_name,level,xp,rites,bosses,kills,pool_bonus_granted,load_json FROM asc_prog WHERE user_id=?", (user_id,)).fetchall()
     return {r["unit_name"]: {"level": r["level"], "xp": r["xp"], "rites": r["rites"], "bosses": r["bosses"],
+                             "kills": r["kills"], "poolBonusGranted": bool(r["pool_bonus_granted"]),
                              "load": json.loads(r["load_json"])} for r in rows}
 def asc_prog_save(c, user_id, prog):
     for name, p in prog.items():
         lj = json.dumps(p.get("load") or [])
-        c.execute("INSERT INTO asc_prog(user_id,unit_name,level,xp,rites,bosses,load_json) VALUES(?,?,?,?,?,?,?) "
-                  "ON CONFLICT(user_id,unit_name) DO UPDATE SET level=?,xp=?,rites=?,bosses=?,load_json=?",
-                  (user_id, name, p.get("level",1), p.get("xp",0), p.get("rites",0), p.get("bosses",0), lj,
-                   p.get("level",1), p.get("xp",0), p.get("rites",0), p.get("bosses",0), lj))
+        pbg = 1 if p.get("poolBonusGranted") else 0
+        c.execute("INSERT INTO asc_prog(user_id,unit_name,level,xp,rites,bosses,kills,pool_bonus_granted,load_json) VALUES(?,?,?,?,?,?,?,?,?) "
+                  "ON CONFLICT(user_id,unit_name) DO UPDATE SET level=?,xp=?,rites=?,bosses=?,kills=?,pool_bonus_granted=?,load_json=?",
+                  (user_id, name, p.get("level",1), p.get("xp",0), p.get("rites",0), p.get("bosses",0), p.get("kills",0), pbg, lj,
+                   p.get("level",1), p.get("xp",0), p.get("rites",0), p.get("bosses",0), p.get("kills",0), pbg, lj))
+
+# ── Ascension ally pool (persists across runs; see asc_ally_pool schema above) -- pure read/write,
+# no seeding logic here (that's app.py's job, same layering as everything else in this module) ──
+def ally_pool_load(user_id):
+    rows = conn().execute("SELECT unit_name FROM asc_ally_pool WHERE user_id=?", (user_id,)).fetchall()
+    return {r["unit_name"] for r in rows}
+def ally_pool_add(c, user_id, unit_name, source):
+    c.execute("INSERT OR IGNORE INTO asc_ally_pool(user_id,unit_name,source,unlocked_at) VALUES(?,?,?,?)",
+              (user_id, unit_name, source, now()))
