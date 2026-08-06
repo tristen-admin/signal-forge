@@ -21,7 +21,7 @@ def _rate_ok(key, limit=300, window=60):
 ASC_RUNS = {}  # in-memory Ascension runs: run_id -> {user_id, run, avatarUid}
 _SPELLS = {s['id']: s for s in engine.SPELLS}
 
-HOST, PORT = "127.0.0.1", int(os.environ.get("PORT") or 8787)
+HOST, PORT = os.environ.get("HOST") or "127.0.0.1", int(os.environ.get("PORT") or 8787)
 MARKET_ADDR = "@market"
 CLIENT_PATH = os.path.join(os.path.dirname(__file__), "client.html")
 
