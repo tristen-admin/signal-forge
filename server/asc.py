@@ -44,6 +44,11 @@ loadout around. Loadout swapping (h_asc_loadout in app.py) lets the player choos
 moves occupy the 4 active slots -- the data model (`prog[name]["load"]`) already supported this;
 only the endpoint to actually set it was missing.
 
+CORRECTION same day: the generic-move-pool fix above shipped hand-invented server-side ONLY at
+first, with no client counterpart -- see rules.py's ASC_ROOF_EXTRA comment for the full note. Fixed
+by authoring the identical data for real in index.html (`ascGenericMoves()`); rules.py's copy is
+now a verified manual port of real client data, not an invention.
+
 Mastery fix: the client's own `ascEndRun()` (the only writer of `avatarBond`, the client-side
 mastery ledger) is reachable ONLY via Abandon-run, always with won=False, and reads a field
 (`ascRun.avatarKey`) no run constructor ever sets -- confirmed by direct research this mastery

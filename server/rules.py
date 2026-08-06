@@ -234,6 +234,16 @@ def asc_generic_ability(name):
 # One extra 3-move kit + a capstone per Roof (mirrors ASC_MOVE_UNLOCK's 3/6/9/12 gates exactly like
 # the bespoke units), deliberately mixing kinds so every generic unit gets real buff/debuff variety
 # to build a loadout around, not just more damage.
+#
+# CORRECTION, same day: this was first shipped hand-invented server-side ONLY, with no client
+# counterpart -- a real violation of "the client is truth" (confirmed: extract_catalog.py never
+# had a source to pull these from, because index.html had nothing but the single-move ASC_ROOF_KIT).
+# Fixed by authoring the identical values for real in index.html (ascGenericMoves(), right after
+# ASC_ROOFLESS_KIT) and wiring them into the client's own ascUnitMoveList() as a generic-unit
+# fallback -- these Python dicts are now a genuine, verified, byte-identical manual port of real
+# client constants, following the SAME documented "small fixed design constant, no extraction
+# pipeline needed" precedent already established for ASC_ROOF_KIT/ASC_ROOFLESS_KIT themselves
+# (and RALLY/LINGERING_SUPPORTS in engine.py) -- not an invention anymore.
 ASC_ROOF_EXTRA = {
     "Vajra": [
         {"kind": "dmg", "power": 40, "uses": 2, "name": "Overwhelm", "desc": "A forceful strike on one foe."},

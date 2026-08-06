@@ -12930,8 +12930,10 @@ const ASC_MOVES={
 };
 function ascUnitMoveList(u){
   var sig=Object.assign({unlock:1}, u.ability||{});
-  var extra=(ASC_MOVES[u.id]||[]).map(function(m,i){ return Object.assign({unlock:ASC_MOVE_UNLOCK[i+1]||10}, m); });
-  var cap=ASC_MOVES_CAP[u.id]?[Object.assign({unlock:ASC_MOVE_UNLOCK[4]||12}, ASC_MOVES_CAP[u.id])]:[];
+  var extraRaw=ASC_MOVES[u.id], capRaw=ASC_MOVES_CAP[u.id];
+  if(!extraRaw && u.generic){ var gm=ascGenericMoves(u); extraRaw=gm.extra; capRaw=gm.cap; }
+  var extra=(extraRaw||[]).map(function(m,i){ return Object.assign({unlock:ASC_MOVE_UNLOCK[i+1]||10}, m); });
+  var cap=capRaw?[Object.assign({unlock:ASC_MOVE_UNLOCK[4]||12}, capRaw)]:[];
   return [sig].concat(extra).concat(cap);
 }
 function ascUnitUnlockedMoves(u){ var lv=ascUnitLevel(u.name); return ascUnitMoveList(u).filter(function(m){ return lv>=(m.unlock||1); }); }
@@ -13031,6 +13033,61 @@ function ascGenericAbility(card){
   var kit = (roofs.length && ASC_ROOF_KIT[roofs[0]]) || ASC_ROOFLESS_KIT;
   var first=(card.name||'').split(',')[0].split(' ')[0]||card.name;
   return Object.assign({}, kit, {name:first+"'s "+kit.name});
+}
+// A generic unit's unlockable moves (lvl 3/6/9 extras + lvl 12 capstone), mirroring the hand-
+// authored ASC_MOVES/ASC_MOVES_CAP shape so ascUnitMoveList() treats bespoke and generic units
+// identically once resolved. Every non-bespoke unit used to get exactly ONE move forever (the
+// ASC_ROOF_KIT signature above, no unlock tree) -- this gives the other ~140 of ~152 cards the
+// same real progression bespoke units have, Roof-themed and deliberately mixing dmg/buff/debuff
+// kinds so there's a real kit to build a loadout around, not just more damage.
+const ASC_ROOF_EXTRA = {
+  'Vajra': [
+    {kind:'dmg', power:40, uses:2, name:'Overwhelm', desc:'A forceful strike on one foe.'},
+    {kind:'vuln', power:0.3, dur:2, uses:2, name:'Expose', desc:'A foe takes +30% damage for 2 turns.'},
+    {kind:'guard', power:0.25, dur:2, uses:2, name:'Brace', desc:'The party takes 25% less damage for 2 turns.'}
+  ],
+  'Astra': [
+    {kind:'buff', power:0.3, dur:2, uses:2, name:'Focus', desc:'An ally strikes with +30% ATK for 2 turns.'},
+    {kind:'dot', power:10, dur:3, uses:2, name:'Rend', desc:'A foe bleeds 10/turn for 3 turns.'},
+    {kind:'execute', power:46, uses:2, name:'Finish', desc:'A heavy strike, devastating against a weakened foe.'}
+  ],
+  'Nirmāṇa': [
+    {kind:'guard', power:0.3, dur:2, uses:2, name:'Aegis', desc:'The party takes 30% less damage for 2 turns.'},
+    {kind:'buff', power:0.25, dur:2, uses:2, name:'Rally', desc:'An ally strikes with +25% ATK for 2 turns.'},
+    {kind:'vuln', power:0.25, dur:2, uses:2, name:'Unveil', desc:'A foe takes +25% damage for 2 turns.'}
+  ],
+  'Bandha': [
+    {kind:'dot', power:12, dur:3, uses:2, name:'Shackle', desc:'A foe bleeds 12/turn for 3 turns.'},
+    {kind:'dmg', power:38, uses:2, name:'Crush', desc:'A heavy strike on one foe.'},
+    {kind:'buff', power:0.3, dur:2, uses:2, name:'Fortify', desc:'An ally strikes with +30% ATK for 2 turns.'}
+  ],
+  'Māyā': [
+    {kind:'buff', power:0.3, dur:2, uses:2, name:'Warp Strike', desc:'An ally strikes with +30% ATK for 2 turns.'},
+    {kind:'vuln', power:0.3, dur:2, uses:2, name:'Unmake', desc:'A foe takes +30% damage for 2 turns.'},
+    {kind:'dmg', power:40, uses:2, name:'Mirror Blow', desc:'A forceful strike on one foe.'}
+  ]
+};
+const ASC_ROOFLESS_EXTRA = [
+  {kind:'buff', power:0.25, dur:2, uses:2, name:'Grit', desc:'An ally strikes with +25% ATK for 2 turns.'},
+  {kind:'vuln', power:0.25, dur:2, uses:2, name:'Weaken', desc:'A foe takes +25% damage for 2 turns.'},
+  {kind:'dmg', power:36, uses:2, name:'Heavy Strike', desc:'A forceful strike on one foe.'}
+];
+const ASC_ROOF_CAPSTONE = {
+  'Vajra':   {kind:'aoe', power:34, uses:1, name:'Ascendant Surge', desc:'A powerful blow to every foe.'},
+  'Astra':   {kind:'execute', power:60, uses:1, name:'Killing Blow', desc:'A devastating strike, lethal to a weakened foe.'},
+  'Nirmāṇa': {kind:'heal', power:55, uses:1, name:'Sanctuary', desc:'A powerful restoration for one ally.'},
+  'Bandha':  {kind:'dot', power:20, dur:3, uses:1, name:'Unbreakable Bind', desc:'A foe bleeds heavily for 3 turns.'},
+  'Māyā':    {kind:'guard', power:0.4, dur:3, uses:1, name:'Reality Shift', desc:'The party takes 40% less damage for 3 turns.'}
+};
+const ASC_ROOFLESS_CAPSTONE = {kind:'aoe', power:30, uses:1, name:'Last Stand', desc:'A powerful blow to every foe.'};
+function ascGenericMoves(card){
+  var roofs=(typeof roofOf==='function')?roofOf(card):[];
+  var roof=roofs.length?roofs[0]:null;
+  var extra=(roof && ASC_ROOF_EXTRA[roof]) || ASC_ROOFLESS_EXTRA;
+  var cap=(roof && ASC_ROOF_CAPSTONE[roof]) || ASC_ROOFLESS_CAPSTONE;
+  var first=(card.name||'').split(',')[0].split(' ')[0]||card.name;
+  return { extra: extra.map(function(m){ return Object.assign({}, m, {name:first+"'s "+m.name}); }),
+           cap: Object.assign({}, cap, {name:first+"'s "+cap.name}) };
 }
 // The single replacement for every ASC_UNITS.find(id===/name===) lookup. Checks the 11 hand-
 // authored units FIRST (by id or name -- they keep their exact original ids forever, e.g.
@@ -14524,10 +14581,11 @@ body::before{background:
     <button class="dev-t" data-v="flags">⚑ Flags</button>
     <button class="dev-t" data-v="effects">⚡ Abilities</button>
     <button class="dev-t" data-v="locations">📍 Locations</button>
+    <button class="dev-t" data-v="ascension">🗡 Ascension</button>
   </div>
   <div class="dev-body" id="dev-body"></div>
   <div class="dev-exp" id="dev-expbox" hidden></div>
-  <div class="dev-note">Power edits take effect in your <b>next match</b> and across the app. <b>Cost</b> edits are live instantly, from either tab. The <b>⚡ Abilities</b> tab additionally edits Called and CARD_RULES behavior — also instantly. (The Edit-table's ability field is display text only.) <b>DM Passive</b> (ongoing effects, always on while this card is Deck Master)/<b>DM Activated</b> (a once-per-match ability you press to use) only apply when this card is set as your Deck Master, and accept either real JSON (applies live) or plain English (gold text — saved as a note for Claude to build, nothing breaks if it's not valid JSON). A greyed-out DM Activated cell means that card's ability runs custom code and isn't editable here, source only. <b>📍 Locations</b> tab edits conditions the same way — all display fields (name/icon/mechanic/tag/prob/rule/strategy) apply live instantly, the note row under each location is for describing an actual mechanic change in plain English for Claude to build (the real per-location logic is hand-coded, no live JSON editor for it yet).</div>
+  <div class="dev-note">Power edits take effect in your <b>next match</b> and across the app. <b>Cost</b> edits are live instantly, from either tab. The <b>⚡ Abilities</b> tab additionally edits Called and CARD_RULES behavior — also instantly. (The Edit-table's ability field is display text only.) <b>DM Passive</b> (ongoing effects, always on while this card is Deck Master)/<b>DM Activated</b> (a once-per-match ability you press to use) only apply when this card is set as your Deck Master, and accept either real JSON (applies live) or plain English (gold text — saved as a note for Claude to build, nothing breaks if it's not valid JSON). A greyed-out DM Activated cell means that card's ability runs custom code and isn't editable here, source only. <b>📍 Locations</b> tab edits conditions the same way — all display fields (name/icon/mechanic/tag/prob/rule/strategy) apply live instantly, the note row under each location is for describing an actual mechanic change in plain English for Claude to build (the real per-location logic is hand-coded, no live JSON editor for it yet). <b>🗡 Ascension</b> tab edits Rite combat directly — bespoke unit HP/ATK/SPD/role/passive apply the moment you hit Apply on that card; move kits (signature/extra/capstone, and the per-Roof kits every other card uses) are raw JSON, since a bespoke input per move field would be a huge surface for a rare edit — invalid JSON shows an error and changes nothing.</div>
 </div>
 <script>
 (function(){
@@ -14580,7 +14638,7 @@ body::before{background:
     function ceil(c){return c.p+swing(c.a);}
     function med(a){a=a.slice().sort(function(x,y){return x-y;});var m=Math.floor(a.length/2);return a.length?(a.length%2?a[m]:(a[m-1]+a[m])/2):0;}
     function esc(s){return (''+s).replace(/[&<>"]/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m];});}
-    function chg(){document.getElementById('dev-chg').textContent=(Object.keys(OV).length+Object.keys(LOC_OV).length)+' edits';}
+    function chg(){document.getElementById('dev-chg').textContent=(Object.keys(OV).length+Object.keys(LOC_OV).length+Object.keys(ASC_OV).length)+' edits';}
     function record(n,f,v){var map={p:'pow',r:'rarity',t:'timing',a:'abil'};setProp(n,map[f],v);var o=ORIG[n];if(!OV[n])OV[n]={};var og=o?o[f]:undefined;if((''+v)===(''+og))delete OV[n][f];else OV[n][f]=v;if(OV[n]&&!Object.keys(OV[n]).length)delete OV[n];saveOV();chg();schedVault();}
     var cur='table', sortK='p', sortD=-1, devRar='', devArch='';
     function renderTable(){EXP.hidden=true;var q=(Q.value||'').toLowerCase();var rf=devRar;var af=devArch;var d=model().filter(function(c){return (!q||c.n.toLowerCase().indexOf(q)>=0)&&(!rf||c.r===rf)&&(!af||(typeof cardArchetypes==='function'&&cardArchetypes(c.n).some(function(a){return a.id===af;})));});
@@ -14746,15 +14804,164 @@ body::before{background:
         inp.addEventListener('change',function(){recordLocFx(id,'note',inp.value.trim());});
       });
     }
-    var R={table:renderTable,curve:renderCurve,flags:renderFlags,effects:renderEffects,locations:renderLocations};
+    // ── Ascension editor (owner request 8/6/26): moves/effects/stats for bespoke units, the
+    // generic per-Roof movesets every OTHER owned card gets, and consumables/gear. Same
+    // override+persist shape as Locations (direct-mutate the live consts + a parallel diff-log
+    // object + an ORIG snapshot) -- this is the same "small fixed design constant" class of data
+    // ASC_ROOF_KIT itself already is, not per-card growing data, so no new architecture needed.
+    // Move-kit fields (kind/power/dur/uses/name/desc) are edited as raw JSON rather than one input
+    // per field -- this app already trusts JSON editing for nested structures (CALLED/CARD_RULES/
+    // DM Passive/DM Activated above), and a bespoke input per move sub-field ×5 moves ×17 units+
+    // kits would be a huge surface for what's a rare edit.
+    var ASC_KEY='sf_dev_asc_overrides_v1';
+    function loadAscOV(){try{return JSON.parse(localStorage.getItem(ASC_KEY)||'{}');}catch(e){return {};}}
+    var ASC_OV=loadAscOV();
+    function saveAscOV(){try{localStorage.setItem(ASC_KEY,JSON.stringify(ASC_OV));}catch(e){}}
+    var ASC_ROOFS=['Vajra','Astra','Nirmāṇa','Bandha','Māyā'];
+    var ASC_ORIG={};
+    (typeof ASC_UNITS!=='undefined'?ASC_UNITS:[]).forEach(function(u){
+      ASC_ORIG['unit:'+u.id]=JSON.stringify({hp:u.hp,atk:u.atk,spd:u.spd,role:u.role});
+      ASC_ORIG['sig:'+u.id]=JSON.stringify(u.ability||{});
+      ASC_ORIG['extra:'+u.id]=JSON.stringify((typeof ASC_MOVES!=='undefined'&&ASC_MOVES[u.id])||[]);
+      ASC_ORIG['cap:'+u.id]=JSON.stringify((typeof ASC_MOVES_CAP!=='undefined'&&ASC_MOVES_CAP[u.id])||null);
+      ASC_ORIG['passive:'+u.id]=JSON.stringify((typeof ASC_PASSIVES!=='undefined'&&ASC_PASSIVES[u.id])||null);
+    });
+    ASC_ROOFS.concat(['roofless']).forEach(function(r){
+      var isRl=(r==='roofless');
+      ASC_ORIG['roofsig:'+r]=JSON.stringify(isRl?ASC_ROOFLESS_KIT:ASC_ROOF_KIT[r]);
+      ASC_ORIG['roofextra:'+r]=JSON.stringify(isRl?ASC_ROOFLESS_EXTRA:ASC_ROOF_EXTRA[r]);
+      ASC_ORIG['roofcap:'+r]=JSON.stringify(isRl?ASC_ROOFLESS_CAPSTONE:ASC_ROOF_CAPSTONE[r]);
+    });
+    (typeof ASC_ITEMS!=='undefined'?ASC_ITEMS:[]).forEach(function(it){ASC_ORIG['item:'+it.id]=JSON.stringify({name:it.name,icon:it.icon,kind:it.kind,power:it.power,target:it.target,price:it.price,desc:it.desc});});
+    (typeof ASC_GEAR!=='undefined'?ASC_GEAR:[]).forEach(function(g){ASC_ORIG['gear:'+g.id]=JSON.stringify({name:g.name,icon:g.icon,atk:g.atk,hp:g.hp,spd:g.spd,price:g.price,desc:g.desc});});
+    function ascJsonOr(v,fallback){try{return JSON.parse(v);}catch(e){return fallback;}}
+    function _ascApplyOne(key,v){
+      var i=key.indexOf(':'),kind=key.slice(0,i),id=key.slice(i+1);
+      if(kind==='unit'){var u=ASC_UNITS.find(function(x){return x.id===id;});if(u&&v){u.hp=v.hp;u.atk=v.atk;u.spd=v.spd;u.role=v.role;}}
+      else if(kind==='sig'){var u2=ASC_UNITS.find(function(x){return x.id===id;});if(u2&&v)u2.ability=v;}
+      else if(kind==='extra'){if(Array.isArray(v))ASC_MOVES[id]=v;}
+      else if(kind==='cap'){if(v==null)delete ASC_MOVES_CAP[id];else ASC_MOVES_CAP[id]=v;}
+      else if(kind==='passive'){if(v==null)delete ASC_PASSIVES[id];else ASC_PASSIVES[id]=v;}
+      else if(kind==='roofsig'){if(v){if(id==='roofless'){Object.keys(ASC_ROOFLESS_KIT).forEach(function(k){delete ASC_ROOFLESS_KIT[k];});Object.assign(ASC_ROOFLESS_KIT,v);}else ASC_ROOF_KIT[id]=v;}}
+      else if(kind==='roofextra'){if(Array.isArray(v)){if(id==='roofless'){ASC_ROOFLESS_EXTRA.length=0;Array.prototype.push.apply(ASC_ROOFLESS_EXTRA,v);}else ASC_ROOF_EXTRA[id]=v;}}
+      else if(kind==='roofcap'){if(v){if(id==='roofless'){Object.keys(ASC_ROOFLESS_CAPSTONE).forEach(function(k){delete ASC_ROOFLESS_CAPSTONE[k];});Object.assign(ASC_ROOFLESS_CAPSTONE,v);}else ASC_ROOF_CAPSTONE[id]=v;}}
+      else if(kind==='item'){var it=ASC_ITEMS.find(function(x){return x.id===id;});if(it&&v)Object.assign(it,v);}
+      else if(kind==='gear'){var g=ASC_GEAR.find(function(x){return x.id===id;});if(g&&v)Object.assign(g,v);}
+    }
+    function applyAscOV(){Object.keys(ASC_OV).forEach(function(key){_ascApplyOne(key,ascJsonOr(ASC_OV[key],null));});}
+    function resetAscOV(){Object.keys(ASC_OV).forEach(function(key){_ascApplyOne(key,ascJsonOr(ASC_ORIG[key],null));});ASC_OV={};saveAscOV();}
+    applyAscOV();
+    function recordAscFx(key,curSerialized){if(curSerialized==null||curSerialized===ASC_ORIG[key]){delete ASC_OV[key];}else{ASC_OV[key]=curSerialized;}saveAscOV();chg();}
+    function ascUnitCard(u){
+      var sig=JSON.stringify(u.ability||{}),extra=JSON.stringify(ASC_MOVES[u.id]||[]),cap=JSON.stringify(ASC_MOVES_CAP[u.id]||null),passive=JSON.stringify(ASC_PASSIVES[u.id]||null);
+      var oSig=ASC_ORIG['sig:'+u.id],oExtra=ASC_ORIG['extra:'+u.id],oCap=ASC_ORIG['cap:'+u.id],oPass=ASC_ORIG['passive:'+u.id];
+      return '<div class="dfx-card" data-kind="unit" data-id="'+esc(u.id)+'"><div class="dfx-h"><input class="dfx-name" value="'+esc(u.name)+'" readonly title="Unit id/name — the lookup key, not editable here">'+(u.avatar?'<span class="dfx-cost" title="Avatar-eligible (can be a Champion)">👑</span>':'')+'</div>'
+        +'<div class="dfx-pr"><span class="dfx-q"><i>HP</i><input type="number" data-af="hp" class="dfx-qin" value="'+u.hp+'" min="1"></span><span class="dfx-q"><i>ATK</i><input type="number" data-af="atk" class="dfx-qin" value="'+u.atk+'" min="1"></span><span class="dfx-q"><i>SPD</i><input type="number" data-af="spd" class="dfx-qin" value="'+u.spd+'" min="1"></span><span class="dfx-q"><i>Role</i><input type="text" data-af="role" class="dfx-qin" value="'+esc(u.role)+'"></span></div>'
+        +'<label class="dfx-l">Champion passive (JSON, blank = none — only applies when this unit is a Champion)</label><textarea data-af="passive" class="dfx-ta mono'+(passive!==oPass?' ed':'')+'" placeholder="null">'+esc(passive==='null'?'':passive)+'</textarea>'
+        +'<label class="dfx-l">Signature move (Lv1, JSON object)</label><textarea data-af="sig" class="dfx-ta mono'+(sig!==oSig?' ed':'')+'">'+esc(sig)+'</textarea>'
+        +'<label class="dfx-l">Extra moves (Lv3/6/9, JSON array of 3)</label><textarea data-af="extra" class="dfx-ta mono'+(extra!==oExtra?' ed':'')+'">'+esc(extra)+'</textarea>'
+        +'<label class="dfx-l">Capstone (Lv12, JSON object, blank = none)</label><textarea data-af="cap" class="dfx-ta mono'+(cap!==oCap?' ed':'')+'" placeholder="null">'+esc(cap==='null'?'':cap)+'</textarea>'
+        +'<div class="dfx-foot"><button class="dfx-apply">Apply</button><span class="dfx-msg"></span></div></div>';
+    }
+    function ascRoofCard(r){
+      var isRl=(r==='roofless'),sig=JSON.stringify(isRl?ASC_ROOFLESS_KIT:ASC_ROOF_KIT[r]),extra=JSON.stringify(isRl?ASC_ROOFLESS_EXTRA:ASC_ROOF_EXTRA[r]),cap=JSON.stringify(isRl?ASC_ROOFLESS_CAPSTONE:ASC_ROOF_CAPSTONE[r]);
+      var oSig=ASC_ORIG['roofsig:'+r],oExtra=ASC_ORIG['roofextra:'+r],oCap=ASC_ORIG['roofcap:'+r];
+      return '<div class="dfx-card" data-kind="roof" data-id="'+esc(r)+'"><div class="dfx-h"><input class="dfx-name" value="'+esc(isRl?'No Roof (fallback)':r)+'" readonly></div>'
+        +'<label class="dfx-l">Signature move — every generic (non-bespoke) unit with this Roof gets this at Lv1 (JSON object)</label><textarea data-af="sig" class="dfx-ta mono'+(sig!==oSig?' ed':'')+'">'+esc(sig)+'</textarea>'
+        +'<label class="dfx-l">Extra moves (Lv3/6/9, JSON array of 3)</label><textarea data-af="extra" class="dfx-ta mono'+(extra!==oExtra?' ed':'')+'">'+esc(extra)+'</textarea>'
+        +'<label class="dfx-l">Capstone (Lv12, JSON object)</label><textarea data-af="cap" class="dfx-ta mono'+(cap!==oCap?' ed':'')+'">'+esc(cap)+'</textarea>'
+        +'<div class="dfx-foot"><button class="dfx-apply">Apply</button><span class="dfx-msg"></span></div></div>';
+    }
+    function renderAscension(){
+      EXP.hidden=true;var q=(Q.value||'').toLowerCase();
+      var units=(typeof ASC_UNITS!=='undefined'?ASC_UNITS:[]).filter(function(u){return !q||u.name.toLowerCase().indexOf(q)>=0||u.id.toLowerCase().indexOf(q)>=0;});
+      var h='<div class="dev-fxnote"><b>🗡 Ascension</b> — bespoke unit stats/moves, the generic Roof-kit movesets every other owned card gets, and consumables/gear. Move fields are raw JSON (kind/power/dur/uses/name/desc) — leave a box as-is if you don\'t want to touch it, hit <b>Apply</b> to go live. Unit id/name are the lookup key, not editable here.</div>';
+      h+='<div class="dfx-section-h">Bespoke units ('+units.length+')</div>'+units.map(ascUnitCard).join('');
+      if(!q){
+        h+='<div class="dfx-section-h">Generic Roof kits — every other owned card\'s moveset</div>'+ASC_ROOFS.concat(['roofless']).map(ascRoofCard).join('');
+        h+='<div class="dfx-section-h">Items</div><table class="dev-tbl"><thead><tr><th>Icon</th><th>Name</th><th>Kind</th><th class="num">Power</th><th>Target</th><th class="num">Price</th><th>Desc</th></tr></thead><tbody>'
+          +(typeof ASC_ITEMS!=='undefined'?ASC_ITEMS:[]).map(function(it){var o=ASC_ORIG['item:'+it.id],cur=JSON.stringify({name:it.name,icon:it.icon,kind:it.kind,power:it.power,target:it.target,price:it.price,desc:it.desc});
+            return '<tr data-kind="item" data-id="'+esc(it.id)+'"><td><input data-if="icon" type="text" class="dev-in dev-in-icon" value="'+esc(it.icon)+'"></td>'
+              +'<td class="nm"><input data-if="name" type="text" class="dev-in dev-in-name'+(cur!==o?' ed':'')+'" value="'+esc(it.name)+'"></td>'
+              +'<td><select data-if="kind" class="dev-sel">'+['heal','healall','revive'].map(function(k){return '<option'+(it.kind===k?' selected':'')+'>'+k+'</option>';}).join('')+'</select></td>'
+              +'<td class="num"><input data-if="power" type="number" class="dev-in" value="'+it.power+'" step="0.05"></td>'
+              +'<td><input data-if="target" type="text" class="dev-in" value="'+esc(it.target)+'"></td>'
+              +'<td class="num"><input data-if="price" type="number" class="dev-in" value="'+it.price+'" min="0"></td>'
+              +'<td><input data-if="desc" type="text" class="dev-in dev-in-wide" value="'+esc(it.desc)+'"></td></tr>';}).join('')
+          +'</tbody></table>';
+        h+='<div class="dfx-section-h">Gear</div><table class="dev-tbl"><thead><tr><th>Icon</th><th>Name</th><th class="num">ATK</th><th class="num">HP</th><th class="num">SPD</th><th class="num">Price</th><th>Desc</th></tr></thead><tbody>'
+          +(typeof ASC_GEAR!=='undefined'?ASC_GEAR:[]).map(function(g){var o=ASC_ORIG['gear:'+g.id],cur=JSON.stringify({name:g.name,icon:g.icon,atk:g.atk,hp:g.hp,spd:g.spd,price:g.price,desc:g.desc});
+            return '<tr data-kind="gear" data-id="'+esc(g.id)+'"><td><input data-gf="icon" type="text" class="dev-in dev-in-icon" value="'+esc(g.icon)+'"></td>'
+              +'<td class="nm"><input data-gf="name" type="text" class="dev-in dev-in-name'+(cur!==o?' ed':'')+'" value="'+esc(g.name)+'"></td>'
+              +'<td class="num"><input data-gf="atk" type="number" class="dev-in" value="'+g.atk+'" min="0"></td>'
+              +'<td class="num"><input data-gf="hp" type="number" class="dev-in" value="'+g.hp+'" min="0"></td>'
+              +'<td class="num"><input data-gf="spd" type="number" class="dev-in" value="'+g.spd+'" min="0"></td>'
+              +'<td class="num"><input data-gf="price" type="number" class="dev-in" value="'+g.price+'" min="0"></td>'
+              +'<td><input data-gf="desc" type="text" class="dev-in dev-in-wide" value="'+esc(g.desc)+'"></td></tr>';}).join('')
+          +'</tbody></table>';
+      }
+      BODY.innerHTML=h;
+      BODY.querySelectorAll('.dfx-card[data-kind=unit],.dfx-card[data-kind=roof]').forEach(function(card){
+        var kind=card.getAttribute('data-kind'),id=card.getAttribute('data-id');
+        card.querySelector('.dfx-apply').onclick=function(){
+          var msg=card.querySelector('.dfx-msg');
+          try{
+            if(kind==='unit'){
+              var u=ASC_UNITS.find(function(x){return x.id===id;});
+              var hp=parseInt(card.querySelector('[data-af=hp]').value,10),atk=parseInt(card.querySelector('[data-af=atk]').value,10),spd=parseInt(card.querySelector('[data-af=spd]').value,10),role=card.querySelector('[data-af=role]').value.trim();
+              if(!isNaN(hp))u.hp=Math.max(1,hp); if(!isNaN(atk))u.atk=Math.max(1,atk); if(!isNaN(spd))u.spd=Math.max(1,spd); if(role)u.role=role;
+              recordAscFx('unit:'+id,JSON.stringify({hp:u.hp,atk:u.atk,spd:u.spd,role:u.role}));
+              var passRaw=card.querySelector('[data-af=passive]').value.trim(),passVal=passRaw?JSON.parse(passRaw):null;
+              if(passVal)ASC_PASSIVES[id]=passVal; else delete ASC_PASSIVES[id];
+              recordAscFx('passive:'+id,JSON.stringify(passVal));
+              var sigVal=JSON.parse(card.querySelector('[data-af=sig]').value.trim()||'{}'); u.ability=sigVal;
+              recordAscFx('sig:'+id,JSON.stringify(sigVal));
+              var extraVal=JSON.parse(card.querySelector('[data-af=extra]').value.trim()||'[]'); if(Array.isArray(extraVal))ASC_MOVES[id]=extraVal;
+              recordAscFx('extra:'+id,JSON.stringify(extraVal));
+              var capRaw=card.querySelector('[data-af=cap]').value.trim(),capVal=capRaw?JSON.parse(capRaw):null;
+              if(capVal)ASC_MOVES_CAP[id]=capVal; else delete ASC_MOVES_CAP[id];
+              recordAscFx('cap:'+id,JSON.stringify(capVal));
+            } else {
+              var isRl=(id==='roofless');
+              var sigVal2=JSON.parse(card.querySelector('[data-af=sig]').value.trim());
+              if(isRl){Object.keys(ASC_ROOFLESS_KIT).forEach(function(k){delete ASC_ROOFLESS_KIT[k];});Object.assign(ASC_ROOFLESS_KIT,sigVal2);} else ASC_ROOF_KIT[id]=sigVal2;
+              recordAscFx('roofsig:'+id,JSON.stringify(sigVal2));
+              var extraVal2=JSON.parse(card.querySelector('[data-af=extra]').value.trim());
+              if(Array.isArray(extraVal2)){if(isRl){ASC_ROOFLESS_EXTRA.length=0;Array.prototype.push.apply(ASC_ROOFLESS_EXTRA,extraVal2);}else ASC_ROOF_EXTRA[id]=extraVal2;}
+              recordAscFx('roofextra:'+id,JSON.stringify(extraVal2));
+              var capVal2=JSON.parse(card.querySelector('[data-af=cap]').value.trim());
+              if(isRl){Object.keys(ASC_ROOFLESS_CAPSTONE).forEach(function(k){delete ASC_ROOFLESS_CAPSTONE[k];});Object.assign(ASC_ROOFLESS_CAPSTONE,capVal2);} else ASC_ROOF_CAPSTONE[id]=capVal2;
+              recordAscFx('roofcap:'+id,JSON.stringify(capVal2));
+            }
+            msg.textContent='✓ applied live';msg.style.color='#46CC8A';
+          }catch(e){msg.textContent='✗ '+e.message;msg.style.color='#F0625F';}
+        };
+      });
+      BODY.querySelectorAll('tr[data-kind=item]').forEach(function(tr){var id=tr.getAttribute('data-id'),it=ASC_ITEMS.find(function(x){return x.id===id;});
+        tr.querySelectorAll('[data-if]').forEach(function(inp){inp.addEventListener('change',function(){
+          var f=inp.getAttribute('data-if'),v=inp.value; if(f==='power'||f==='price'){v=parseFloat(v);if(isNaN(v))return;}
+          it[f]=v; var cur=JSON.stringify({name:it.name,icon:it.icon,kind:it.kind,power:it.power,target:it.target,price:it.price,desc:it.desc});
+          recordAscFx('item:'+id,cur); inp.classList.toggle('ed',cur!==ASC_ORIG['item:'+id]);
+        });});
+      });
+      BODY.querySelectorAll('tr[data-kind=gear]').forEach(function(tr){var id=tr.getAttribute('data-id'),g=ASC_GEAR.find(function(x){return x.id===id;});
+        tr.querySelectorAll('[data-gf]').forEach(function(inp){inp.addEventListener('change',function(){
+          var f=inp.getAttribute('data-gf'),v=inp.value; if(f==='atk'||f==='hp'||f==='spd'||f==='price'){v=parseInt(v,10);if(isNaN(v))return;}
+          g[f]=v; var cur=JSON.stringify({name:g.name,icon:g.icon,atk:g.atk,hp:g.hp,spd:g.spd,price:g.price,desc:g.desc});
+          recordAscFx('gear:'+id,cur); inp.classList.toggle('ed',cur!==ASC_ORIG['gear:'+id]);
+        });});
+      });
+    }
+    var R={table:renderTable,curve:renderCurve,flags:renderFlags,effects:renderEffects,locations:renderLocations,ascension:renderAscension};
     function render(){R[cur]();}
     document.getElementById('dev-tabs').addEventListener('click',function(e){var b=e.target.closest('.dev-t');if(!b)return;document.querySelectorAll('.dev-t').forEach(function(t){t.classList.remove('on');});b.classList.add('on');cur=b.getAttribute('data-v');render();});
-    Q.addEventListener('input',function(){if(cur==='table')renderTable();else if(cur==='effects')renderEffects();});
+    Q.addEventListener('input',function(){if(cur==='table')renderTable();else if(cur==='effects')renderEffects();else if(cur==='ascension')renderAscension();});
     if(RARF)RARF.addEventListener('click',function(e){var b=e.target.closest('.dev-rc');if(!b)return;devRar=b.getAttribute('data-rar')||'';RARF.querySelectorAll('.dev-rc').forEach(function(x){x.classList.toggle('on',x===b);});render();});
     if(ARCHF)ARCHF.addEventListener('click',function(e){var b=e.target.closest('.dev-rc');if(!b)return;devArch=b.getAttribute('data-arch')||'';ARCHF.querySelectorAll('.dev-rc').forEach(function(x){x.classList.toggle('on',x===b);});render();});
     document.getElementById('dev-exp').onclick=function(){var lines=Object.keys(OV).map(function(n){var o=OV[n],g=ORIG[n]||{},c=[];if(o.p!=null&&(''+o.p)!==(''+g.p))c.push('pow '+(g.p==null?'?':g.p)+'→'+o.p);if(o.r!=null&&o.r!==g.r)c.push('rarity '+(g.r||'?')+'→'+o.r);if(o.t!=null&&o.t!==g.t)c.push('timing '+(g.t||'?')+'→'+o.t);if(o.a!=null&&o.a!==g.a)c.push('ability → "'+o.a+'"');if(o.cost!=null&&(''+o.cost)!==(''+g.cost))c.push('cost →'+o.cost);if(o.rename!=null)c.push('RENAME → "'+o.rename+'" (canonical rename — Claude to apply)');if(o.links!=null&&!_sameSet(o.links,g.links))c.push('links → ['+o.links.join(', ')+']');if(o.arch!=null&&!_sameSet(o.arch,g.arch))c.push('archetypes → ['+o.arch.join(', ')+']');if(o.called!=null&&o.called!==g.called)c.push('CALLED →'+o.called);if(o.rules!=null&&o.rules!==g.rules)c.push('CARD_RULES →'+o.rules);if(o.dmx!=null&&o.dmx!==g.dmx)c.push('DM_EXCLUSIVE →'+o.dmx);if(o.dma!=null&&o.dma!==g.dma)c.push('DM_ACTIVATED_ABILITY →'+o.dma);if(o.dmxNote!=null)c.push('DM Passive (plain-language, needs building) → "'+o.dmxNote+'"');if(o.dmaNote!=null)c.push('DM Activated (plain-language, needs building) → "'+o.dmaNote+'"');if(o.note!=null)c.push('note: "'+o.note+'"');return c.length?(n+': '+c.join(', ')):null;}).filter(Boolean);
       var locLines=Object.keys(LOC_OV).map(function(id){var o=LOC_OV[id],g=LOC_ORIG[id]||{},c=[];if(o.name!=null&&o.name!==g.name)c.push('name '+(g.name||'?')+'→"'+o.name+'"');if(o.mech!=null&&o.mech!==g.mech)c.push('mechanic label →"'+o.mech+'"');if(o.icon!=null&&o.icon!==g.icon)c.push('icon →'+o.icon);if(o.tag!=null&&o.tag!==g.tag)c.push('tag '+(g.tag||'?')+'→'+o.tag);if(o.prob!=null&&o.prob!==g.prob)c.push('prob (display only) →'+o.prob);if(o.rule!=null&&o.rule!==g.rule)c.push('rule →"'+o.rule+'"');if(o.strat!=null&&o.strat!==g.strat)c.push('strategy →"'+o.strat+'"');if(o.note!=null)c.push('MECHANIC CHANGE (plain-language, needs building) → "'+o.note+'"');return c.length?('[Location] '+(g.name||id)+': '+c.join(', ')):null;}).filter(Boolean);
-      var allLines=lines.concat(locLines);
+      var ascLines=Object.keys(ASC_OV).map(function(key){var i=key.indexOf(':'),kind=key.slice(0,i),id=key.slice(i+1);return '[Ascension] '+kind+':'+id+' → '+ASC_OV[key];});
+      var allLines=lines.concat(locLines).concat(ascLines);
       EXP.hidden=false;EXP.innerHTML='<textarea readonly>'+esc(allLines.length?allLines.join('\n'):'No changes yet.')+'</textarea>';try{EXP.querySelector('textarea').select();}catch(_){}};
     var _rq=document.getElementById('dev-req'); if(_rq) _rq.onclick=function(){ var lines=Object.keys(OV).filter(function(n){return OV[n]&&OV[n].note;}).map(function(n){ var cur=(typeof CALLED!=='undefined'&&CALLED[n])?JSON.stringify(CALLED[n]):'(none yet)'; var cst=(typeof COST_OVERRIDE!=='undefined'&&COST_OVERRIDE[n]!=null)?(' [⚡'+COST_OVERRIDE[n]+']'):''; return n+cst+': '+OV[n].note+'   (current: '+cur+')'; }); EXP.hidden=false; EXP.innerHTML='<textarea readonly>'+esc(lines.length?('CALLED-EFFECT REQUESTS — paste to Claude:\n\n'+lines.join('\n\n')):'No descriptions yet — open ⚡ Abilities and describe a card in the plain-words box.')+'</textarea>'; try{EXP.querySelector('textarea').select();}catch(_){} };
     document.getElementById('dev-rst').onclick=function(){if(!confirm('Reset ALL dev edits back to original values?'))return;Object.keys(OV).forEach(function(n){var o=ORIG[n];if(!o)return;
@@ -14769,6 +14976,7 @@ body::before{background:
     });OV={};saveOV();
       Object.keys(LOC_OV).forEach(function(id){var o=LOC_ORIG[id],c=(typeof CONDITIONS!=='undefined'?CONDITIONS:[]).find(function(x){return x.id===id;});if(!o||!c)return;c.name=o.name;c.mech=o.mech;c.icon=o.icon;c.rule=o.rule;c.strat=o.strat;c.tag=o.tag;c.prob=o.prob;});
       LOC_OV={};saveLocOV();
+      resetAscOV();
       chg();try{if(typeof buildVault==='function')buildVault();}catch(e){}render();};
     var _np=document.getElementById('dev-newplayer'); if(_np) _np.onclick=function(){ if(typeof newPlayerReset==='function'){ closeDev(); newPlayerReset(); } };
     function openDev(){OVL.classList.add('on');chg();render();}
@@ -14784,6 +14992,7 @@ body::before{background:
 <style>
 /* ═══ WEEKEND TOURNAMENT ═══ */
 .dfx-name{flex:1;min-width:0;background:rgba(255,255,255,.05);border:1px solid var(--border2);color:var(--gold);font-weight:800;font-size:13px;border-radius:6px;padding:4px 8px;margin-right:8px}.dfx-name:focus{border-color:var(--gold);outline:none}.dfx-pr{display:flex;gap:12px;margin:6px 0 2px}.dfx-links{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 4px}.dfx-lk{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;color:var(--text3);background:var(--surface2);border:1px solid var(--border2);border-radius:14px;padding:3px 10px;cursor:pointer;user-select:none}.dfx-lk.on{color:var(--electric);border-color:var(--electric);background:rgba(91,192,235,.12)}.dfx-lk input{margin:0;width:12px;height:12px}.dfx-newgrp{font-size:11px;font-weight:700;color:var(--gold);background:none;border:1px dashed var(--gold);border-radius:14px;padding:3px 10px;cursor:pointer}.dfx-newgrp:hover{background:rgba(245,194,77,.12)}
+.dfx-section-h{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin:22px 4px 8px;padding-top:14px;border-top:1px solid var(--border)}.dfx-section-h:first-child{margin-top:4px;padding-top:0;border-top:none}
 .tourney-wrap{max-width:820px;margin:0 auto;padding:16px}
 .tourney-status{display:flex;align-items:center;gap:9px;padding:12px 16px;border-radius:12px;margin:14px 0;font-weight:700;font-size:13px}
 .tourney-status.open{background:linear-gradient(135deg,rgba(70,204,138,.15),rgba(70,204,138,.04));border:1px solid rgba(70,204,138,.4);color:var(--win)}
