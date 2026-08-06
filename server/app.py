@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Signal Forge — Tier 0 authoritative server (stdlib only, local-only).
-Run:  python3 server/app.py         → binds 127.0.0.1:8787
+Signal Forge — Tier 0 authoritative server (stdlib only).
+Run:  python3 server/app.py                    → binds 127.0.0.1:8787 (local dev default)
+      HOST=0.0.0.0 python3 server/app.py       → binds all interfaces (real deployment)
 The client may only READ state and REQUEST validated actions. It can never set its
 own balances, records, or outcomes — every mutation is computed and applied here.
 """
@@ -995,7 +996,7 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     store.conn(); seed()
     print(f"⬢ Signal Forge — Tier 0 authoritative server")
-    print(f"  listening on http://{HOST}:{PORT}  (local-only)")
+    print(f"  listening on http://{HOST}:{PORT}  ({'local-only' if HOST == '127.0.0.1' else 'network-accessible'})")
     print(f"  DB: {store.DB_PATH}")
     print(f"  currency: Signal ◈ = cards (earn/play + market) · Forge ❖ = premium (buy + convert 1:100, no cash-out)")
     print(f"  endpoints: /api/auth/register|login  /api/state  /api/pack/open  /api/trade/propose|accept|decline|list  /api/market/listings|buy|sell")
