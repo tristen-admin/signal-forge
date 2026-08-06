@@ -491,28 +491,8 @@ def h_deck_set(user_id, body):
 def h_deck_get(user_id, body):
     return 200, {"cards": store.deck_load(user_id) or []}
 
-def asc_end(user_id, sess, won):
-    run = sess["run"]; run["done"] = True; run["result"] = "won" if won else "lost"; run["phase"] = "done"
-    atype, lvl, flawless = run["avatar"], run["level"], run["flawless"]
-    with store.tx() as cc:
-        row = cc.execute("SELECT wins,flawless,best_level FROM mastery WHERE owner_id=? AND card_key=?", (user_id, atype)).fetchone()
-        wins = row["wins"] if row else 0; fl = row["flawless"] if row else 0; best = row["best_level"] if row else 1
-        if won:
-            wins += 1
-            if flawless: wins += 1; fl += 1
-        if lvl > best: best = lvl
-        cc.execute("INSERT INTO mastery(owner_id,card_key,wins,flawless,best_level) VALUES(?,?,?,?,?) "
-                   "ON CONFLICT(owner_id,card_key) DO UPDATE SET wins=?,flawless=?,best_level=?",
-                   (user_id, atype, wins, fl, best, wins, fl, best))
-        sig = 0
-        if won:
-            sig = 300 + lvl * 25 + (150 if flawless else 0)
-            ns = cc.execute("SELECT signal FROM users WHERE id=?", (user_id,)).fetchone()["signal"] + sig
-            cc.execute("UPDATE users SET signal=? WHERE id=?", (ns, user_id))
-            store.ledger_add(cc, user_id, "SIGNAL", sig, "Rite won", ns)
-        else:
-            cc.execute("UPDATE records SET d=d+1, od=od+1 WHERE uid=?", (sess["avatarUid"],))
-    return {"won": won, "signal": sig, "mastery": {"wins": wins, "flawless": fl, "best_level": best}}
+def _owned_type_names(user_id):
+    return {r["type"] for r in store.conn().execute("SELECT DISTINCT type FROM cards WHERE owner_id=?", (user_id,)).fetchall()}
 
 def _get_match(user_id, mid):
     s = MATCHES.get(mid)
@@ -539,61 +519,183 @@ def _persist_session(path, body, out):
             if rid in ASC_RUNS: store.session_save(rid, "asc", ASC_RUNS[rid])
     except Exception: pass
 
+def _asc_public(run, user_id):
+    owned = _owned_type_names(user_id)
+    node = run["map"][run["tier"]] if run["tier"] < len(run["map"]) else None
+    return {"chapterIdx": run["chapterIdx"], "tier": run["tier"], "totalNodes": len(run["map"]),
+            "phase": run["phase"], "done": run["done"], "result": run["result"], "flawless": run["flawless"],
+            "party": [{"name": u["name"], "art": u["art"], "avatar": u["avatar"], "hp": u["hp"], "maxhp": u["maxhp"],
+                       "atk": u["atk"], "spd": u["spd"], "lv": u["lv"], "owned": u["name"] in owned,
+                       "moves": [{"name": m["name"], "kind": m["kind"], "left": m["left"], "uses": m.get("uses", 0)} for m in u["moves"]]}
+                      for u in run["party"]],
+            "node": ({"type": node["type"], "title": node.get("title"), "loc": node.get("loc"), "beat": node.get("beat")} if node else None),
+            "battle": _battle_public(run["battle"]) if run["battle"] else None}
+
+def _battle_public(battle):
+    return {"gauge": battle.get("gauge", 0), "gaugeMax": asc.GAUGE_MAX, "round": battle.get("round", 0),
+            "actor": battle.get("actor"), "log": battle.get("log", [])[-30:],
+            "party": [{"name": u["name"], "avatar": u["avatar"], "hp": u["hp"], "maxhp": u["maxhp"],
+                       "moves": [{"name": m["name"], "kind": m["kind"], "left": m["left"]} for m in u["moves"]]} for u in battle["party"]],
+            "foes": [{"name": f["name"], "hp": f["hp"], "maxhp": f["maxhp"], "rank": f["rank"]} for f in battle["foes"]]}
+
 def h_asc_start(user_id, body):
-    card = store.conn().execute("SELECT * FROM cards WHERE uid=? AND owner_id=?", (body.get("avatarUid"), user_id)).fetchone()
-    if not card: return 404, {"error": "you do not own that card"}
-    run = asc.new_run(card["type"], engine.card(card["type"])["pow"])
+    champion = body.get("championName")
+    companions = list(body.get("companionNames") or [])
+    chapter_idx = int(body.get("chapterIdx") or 0)
+    if not (2 <= len(companions) <= 3): return 400, {"error": "choose 2-3 companions"}
+    if not asc.champion_eligible(champion): return 400, {"error": "that unit has no Deck Master ability -- not eligible as Champion"}
+    for name in [champion] + companions:
+        if not asc.resolve_unit(name): return 400, {"error": f"unknown unit: {name}"}
+    prog = store.asc_prog_load(user_id)
+    if not asc.chapter_unlocked(chapter_idx, prog): return 400, {"error": "that chapter isn't unlocked yet"}
+    party = asc.instantiate_party(champion, companions, prog)
+    if not party: return 400, {"error": "could not build a party"}
     rid = "r_" + secrets.token_hex(8)
-    ASC_RUNS[rid] = {"user_id": user_id, "run": run, "avatarUid": card["uid"]}
-    return 200, {"runId": rid, "run": asc.public(run)}
+    run = {"chapterIdx": chapter_idx, "map": asc.story_map(chapter_idx), "tier": 0,
+           "avatarName": champion, "companionNames": companions, "party": party, "prog": prog,
+           "battle": None, "flawless": True, "done": False, "phase": "pick", "result": None}
+    ASC_RUNS[rid] = {"user_id": user_id, "run": run}
+    return 200, {"runId": rid, "run": _asc_public(run, user_id)}
 
 def h_asc_pick(user_id, body):
     sess = _asc_sess(user_id, body)
     if not sess: return 404, {"error": "run not found"}
     run = sess["run"]
     if run["done"] or run["phase"] != "pick": return 400, {"error": "not choosing a node"}
-    tier, idx = int(body.get("tier", -1)), int(body.get("node", -1))
-    if tier != run["tier"] or not (0 <= idx < len(run["map"][tier])): return 400, {"error": "invalid node"}
-    node = run["map"][tier][idx]
-    if node["type"] == "boon":
-        run["phase"] = "boon"; return 200, {"run": asc.public(run), "boons": asc.boon_choices(run)}
+    tier = int(body.get("tier", -1))
+    if tier != run["tier"] or tier >= len(run["map"]): return 400, {"error": "invalid node"}
+    node = run["map"][tier]
     if node["type"] == "sanctum":
-        before = run["vit"]; run["vit"] = min(run["maxVit"], run["vit"] + 2); run["tier"] += 1
-        return 200, {"run": asc.public(run), "healed": run["vit"] - before}
-    run["node"] = node; run["champVit"] = node["vit"]; run["aegisUsed"] = False; run["phase"] = "channel"
-    return 200, {"run": asc.public(run)}
+        # index.html:13913-13918 ascSanctum() -- downed companions revive at 40% max HP, living ones heal 50%.
+        for u in run["party"]:
+            if u.get("avatar"): continue
+            u["hp"] = min(u["maxhp"], u["hp"] + round(u["maxhp"] * 0.5)) if u["hp"] > 0 else round(u["maxhp"] * 0.4)
+        run["tier"] += 1
+        if run["tier"] >= len(run["map"]): run["phase"] = "done"; run["done"] = True; run["result"] = "won"
+        return 200, {"run": _asc_public(run, user_id)}
+    run["phase"] = "beat"   # story-beat interstitial -- client shows the node's prose; asc/enter actually starts combat
+    return 200, {"run": _asc_public(run, user_id)}
 
-def h_asc_channel(user_id, body):
+def h_asc_enter(user_id, body):
     sess = _asc_sess(user_id, body)
     if not sess: return 404, {"error": "run not found"}
     run = sess["run"]
-    if run["done"] or run["phase"] != "channel": return 400, {"error": "no active encounter"}
-    cp = engine.card(body.get("cardType", ""))["pow"]
-    res = asc.channel(run, cp)
-    out = {"round": res}
-    if run["champVit"] <= 0:
-        run["cleared"] += 1
-        if "ferocity" in run["boons"]: run["level"] += 1
-        if run["node"]["type"] == "boss":
-            out["end"] = asc_end(user_id, sess, True); out["run"] = asc.public(run); out["state"] = user_state(user_id); return 200, out
-        run["node"] = None; run["tier"] += 1; run["phase"] = "pick"
-    elif run["vit"] <= 0:
-        out["end"] = asc_end(user_id, sess, False); out["run"] = asc.public(run); out["state"] = user_state(user_id); return 200, out
-    out["run"] = asc.public(run)
-    return 200, out
+    if run["done"] or run["phase"] != "beat": return 400, {"error": "no node ready to enter"}
+    node = run["map"][run["tier"]]
+    foes = asc.foe_stats(node)
+    asc.refresh_for_battle(run["party"], run["prog"])
+    battle = {"party": run["party"], "foes": foes, "gauge": 0, "queue": None, "qptr": 0, "round": 0, "actor": None, "log": []}
+    run["battle"] = battle; run["phase"] = "battle"
+    outcome = asc.advance_to_party_turn(battle, battle["log"])
+    if outcome: return 200, _resolve_node_outcome(user_id, sess, outcome)
+    return 200, {"run": _asc_public(run, user_id)}
 
-def h_asc_boon(user_id, body):
+def h_asc_act(user_id, body):
     sess = _asc_sess(user_id, body)
     if not sess: return 404, {"error": "run not found"}
     run = sess["run"]
-    if run["done"] or run["phase"] != "boon": return 400, {"error": "not at a shrine"}
-    asc.apply_boon(run, body.get("boonId", "")); run["tier"] += 1; run["phase"] = "pick"
-    return 200, {"run": asc.public(run)}
+    if run["done"] or run["phase"] != "battle" or not run["battle"]: return 400, {"error": "no active battle"}
+    battle = run["battle"]
+    if battle.get("actor") is None: return 400, {"error": "not your turn"}
+    action = body.get("action"); log = battle["log"]; actor_i = battle["actor"]
+    if action == "attack":
+        ok, err = asc.basic_attack(battle, actor_i, body.get("targetIdx"), log)
+    elif action == "move":
+        ok, err = asc.use_move(battle, actor_i, int(body.get("moveIdx", 0)), body.get("targetIdx"), log)
+    elif action == "ultimate":
+        # Doesn't consume the actor's turn slot (no gauge add, no queue advance) -- BUT it can still
+        # be the killing blow, so battle_over() must be checked here too. A real bug this pass:
+        # returning immediately on `ok` without that check left a won/lost battle reporting phase
+        # 'battle' forever, since neither gauge_add nor advance_to_party_turn ran to notice it --
+        # confirmed via a seeded repro (Keawe's Ultimate finishing the last foe, then the client's
+        # next action failing with "invalid target" against an already-dead battle).
+        ok, err = asc.ultimate(battle, log)
+        if ok:
+            outcome = asc.battle_over(battle)
+            if outcome: return 200, _resolve_node_outcome(user_id, sess, outcome)
+            return 200, {"run": _asc_public(run, user_id)}
+    elif action == "flee":
+        if random.random() < 0.7:
+            run["phase"] = "pick"; run["battle"] = None
+            return 200, {"run": _asc_public(run, user_id), "fled": True}
+        ok, err = True, None; log.append("The escape attempt fails!")
+    else:
+        return 400, {"error": "unknown action"}
+    if not ok: return 400, {"error": err}
+    asc.gauge_add(battle, 16)
+    outcome = asc.battle_over(battle) or asc.advance_to_party_turn(battle, log)
+    if outcome: return 200, _resolve_node_outcome(user_id, sess, outcome)
+    return 200, {"run": _asc_public(run, user_id)}
+
+def _resolve_node_outcome(user_id, sess, outcome):
+    run = sess["run"]; node = run["map"][run["tier"]]; owned = _owned_type_names(user_id)
+    if outcome == "lose":
+        run["flawless"] = False
+        return _end_run(user_id, sess, won=False)
+    xp = asc._NODE_XP.get(node["type"], 45); sig = asc._NODE_SIGNAL.get(node["type"], 40)
+    for u in run["party"]:
+        if u["hp"] > 0 and u["name"] in owned:
+            asc.grant_xp(run["prog"], u["name"], xp)
+            if node["type"] == "boss":
+                p = run["prog"].setdefault(u["name"], {"level": 1, "xp": 0, "rites": 0, "bosses": 0, "load": []})
+                p["bosses"] = p.get("bosses", 0) + 1
+    with store.tx() as cc:
+        u = cc.execute("SELECT signal FROM users WHERE id=?", (user_id,)).fetchone()
+        ns = u["signal"] + sig
+        cc.execute("UPDATE users SET signal=? WHERE id=?", (ns, user_id))
+        store.ledger_add(cc, user_id, "SIGNAL", sig, f"Ascension: cleared {node.get('title') or node['type']}", ns)
+        store.asc_prog_save(cc, user_id, run["prog"])
+    run["battle"] = None
+    is_last = (run["tier"] >= len(run["map"]) - 1)
+    if node["type"] == "boss" and is_last:
+        return _end_run(user_id, sess, won=True)
+    run["tier"] += 1; run["phase"] = "pick"
+    return {"run": _asc_public(run, user_id), "outcome": "win", "xpAwarded": xp, "signalAwarded": sig}
+
+def _end_run(user_id, sess, won):
+    """index.html's ascEndRun()/ascBattleRunEnd() intent, fixed and unified: the client's real
+    mastery write is dead code (only reachable via Abandon, always won=False, keyed off a field no
+    run ever sets -- confirmed by research) even though its formulas are clearly the intended
+    design. This writes them for real, at true run end, and grants FORGE (not Signal) as the base
+    Rite-completion reward -- matching the client's own 7/28/26 fix comment ("forgeGain was being
+    added to signalPoints") rather than the pre-fix behavor the OLD server code here still had."""
+    run = sess["run"]; champion = run["avatarName"]
+    lvl = asc.unit_level(run["prog"], champion)
+    flawless = won and run["flawless"]
+    if won:
+        for u in run["party"]:
+            if not u.get("avatar") and u["hp"] > 0 and u["name"] in _owned_type_names(user_id):
+                p = run["prog"].setdefault(u["name"], {"level": 1, "xp": 0, "rites": 0, "bosses": 0, "load": []})
+                p["rites"] = p.get("rites", 0) + 1
+    with store.tx() as cc:
+        row = cc.execute("SELECT wins,flawless,best_level FROM mastery WHERE owner_id=? AND card_key=?", (user_id, champion)).fetchone()
+        wins = row["wins"] if row else 0; fl = row["flawless"] if row else 0; best = row["best_level"] if row else 1
+        if won:
+            wins += 1
+            if flawless: wins += 1; fl += 1
+        if lvl > best: best = lvl
+        cc.execute("INSERT INTO mastery(owner_id,card_key,wins,flawless,best_level) VALUES(?,?,?,?,?) "
+                   "ON CONFLICT(owner_id,card_key) DO UPDATE SET wins=?,flawless=?,best_level=?",
+                   (user_id, champion, wins, fl, best, wins, fl, best))
+        forge_gain = 0
+        if won:
+            forge_gain = 300 + lvl * 80 + (600 if flawless else 0)
+            uu = cc.execute("SELECT forge FROM users WHERE id=?", (user_id,)).fetchone()
+            nf = uu["forge"] + forge_gain
+            cc.execute("UPDATE users SET forge=? WHERE id=?", (nf, user_id))
+            store.ledger_add(cc, user_id, "FORGE", forge_gain, "Rite completed", nf)
+        else:
+            crow = cc.execute("SELECT uid FROM cards WHERE owner_id=? AND type=? LIMIT 1", (user_id, champion)).fetchone()
+            if crow: cc.execute("UPDATE records SET d=d+1, od=od+1 WHERE uid=?", (crow["uid"],))
+        store.asc_prog_save(cc, user_id, run["prog"])
+    run["done"] = True; run["result"] = "won" if won else "lost"; run["phase"] = "done"; run["battle"] = None
+    return {"run": _asc_public(run, user_id), "outcome": run["result"],
+            "mastery": {"wins": wins, "flawless": fl, "best_level": best}, "forgeGained": forge_gain, "state": user_state(user_id)}
 
 def h_asc_state(user_id, body):
     sess = _asc_sess(user_id, body)
     if not sess: return 404, {"error": "run not found"}
-    return 200, {"run": asc.public(sess["run"])}
+    return 200, {"run": _asc_public(sess["run"], user_id)}
 
 def h_spell_cast(user_id, body):
     sess = _get_match(user_id, body.get("matchId"))
@@ -635,8 +737,8 @@ ROUTES = {
     ("GET", "/api/match/state"):   (h_match_state, True),
     ("POST","/api/asc/start"):     (h_asc_start, True),
     ("POST","/api/asc/pick"):      (h_asc_pick, True),
-    ("POST","/api/asc/channel"):   (h_asc_channel, True),
-    ("POST","/api/asc/boon"):      (h_asc_boon, True),
+    ("POST","/api/asc/enter"):     (h_asc_enter, True),
+    ("POST","/api/asc/act"):       (h_asc_act, True),
     ("GET", "/api/asc/state"):     (h_asc_state, True),
     ("GET", "/api/market/listings"):(h_listings, True),
     ("POST","/api/market/buy"):    (h_buy, True),

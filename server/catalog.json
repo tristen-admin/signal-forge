@@ -3673,5 +3673,1152 @@
    "onWin": true,
    "onCloseLoss": 3
   }
- }
+ },
+ "roofMap": {
+  "The Borrowed Green, Keawe Kel'rua": [
+   "Vajra"
+  ],
+  "The Kept Blade, Ahdor": [
+   "Vajra"
+  ],
+  "The Nightmare's Toll, Hanse Waltz": [
+   "Vajra"
+  ],
+  "The Claim, Lagertha Waltz": [
+   "Vajra",
+   "Astra"
+  ],
+  "Throne of Bones, Uso Oso": [
+   "Vajra"
+  ],
+  "The Reliquary, Ruffius Rufeldro": [
+   "Vajra"
+  ],
+  "The Unending Flame, Tange Sazen": [
+   "Vajra"
+  ],
+  "The Between, Kleydson": [
+   "Vajra"
+  ],
+  "Ahdorah Khaan, Circle Unbroken": [
+   "Vajra"
+  ],
+  "Ahdorah Khaan, Squad 19 Recruit": [
+   "Vajra"
+  ],
+  "Anorith Keeling": [
+   "Nirmāṇa"
+  ],
+  "Arch-Grim Korrin": [
+   "Vajra",
+   "Astra",
+   "Nirmāṇa"
+  ],
+  "Ashen Reclaimer": [
+   "Vajra",
+   "Nirmāṇa"
+  ],
+  "Bannerlord Cassian": [
+   "Vajra"
+  ],
+  "Black Wings, Ossian Drell": [
+   "Vajra"
+  ],
+  "Bloodwake Duelist": [
+   "Vajra",
+   "Astra"
+  ],
+  "Bone Choirmaster": [
+   "Nirmāṇa"
+  ],
+  "Broodmother": [
+   "Vajra"
+  ],
+  "Cadet Corps Recruit": [
+   "Vajra"
+  ],
+  "Chieftain Reyva Vosh": [
+   "Vajra"
+  ],
+  "Cinder-Marked Hound": [
+   "Vajra"
+  ],
+  "Cletus Gwyndull": [
+   "Bandha"
+  ],
+  "Conduit of Chaos, Kleydson": [
+   "Nirmāṇa"
+  ],
+  "Corvus": [
+   "Vajra"
+  ],
+  "Courtroom Colossus": [
+   "Vajra"
+  ],
+  "Darwin": [
+   "Vajra"
+  ],
+  "Elowen Dawnspear": [
+   "Vajra"
+  ],
+  "Envoy of Tyrants, Ella Ballora": [
+   "Vajra"
+  ],
+  "Falk": [
+   "Vajra"
+  ],
+  "Faye Quicksilver": [
+   "Vajra"
+  ],
+  "Fenrik Vench": [
+   "Vajra"
+  ],
+  "Fifth Frequency Stormcaller": [
+   "Vajra"
+  ],
+  "First-Blood Squire": [
+   "Vajra"
+  ],
+  "Fledgling Broodmother": [
+   "Vajra"
+  ],
+  "Forgemask": [
+   "Vajra"
+  ],
+  "Ghorruk \"Gnarly\" Judarr": [
+   "Vajra",
+   "Nirmāṇa"
+  ],
+  "Grave-Fed Ghoul": [
+   "Nirmāṇa"
+  ],
+  "Grave-Tithe Acolyte": [
+   "Vajra"
+  ],
+  "Grave-Warden": [
+   "Nirmāṇa"
+  ],
+  "Gravecaller Voss": [
+   "Nirmāṇa"
+  ],
+  "Hanse, Rogue Fangs": [
+   "Vajra",
+   "Māyā"
+  ],
+  "Hatchling Tide": [
+   "Vajra"
+  ],
+  "Heir of Kaiga": [
+   "Vajra"
+  ],
+  "Hoarder's Gambit": [
+   "Vajra",
+   "Nirmāṇa"
+  ],
+  "Ilma the Patient": [
+   "Vajra"
+  ],
+  "Ironsworn Vanguard": [
+   "Vajra"
+  ],
+  "Josef": [
+   "Vajra",
+   "Astra"
+  ],
+  "Kaelthar the Ascendant": [
+   "Vajra",
+   "Bandha"
+  ],
+  "Keawe Kel'rua": [
+   "Vajra"
+  ],
+  "Kessuae, Tide of Ruin": [
+   "Vajra",
+   "Bandha"
+  ],
+  "Kiana": [
+   "Vajra"
+  ],
+  "Kiba": [
+   "Nirmāṇa"
+  ],
+  "King Joris": [
+   "Vajra"
+  ],
+  "Kotei": [
+   "Vajra"
+  ],
+  "Kravyn the Collector": [
+   "Vajra",
+   "Astra"
+  ],
+  "Kravyn's Protege": [
+   "Vajra",
+   "Astra"
+  ],
+  "Kynaht, Ashen Return": [
+   "Bandha"
+  ],
+  "La \"La\" Ballora, the Broodqueen": [
+   "Vajra",
+   "Nirmāṇa"
+  ],
+  "Lagertha Waltz": [
+   "Vajra"
+  ],
+  "Lagertha Waltz, Wrathful Transformation": [
+   "Vajra"
+  ],
+  "Legend Reborn, Keawe Kel'rua": [
+   "Nirmāṇa"
+  ],
+  "Malia": [
+   "Vajra"
+  ],
+  "Mirror Shade": [
+   "Vajra"
+  ],
+  "Moro": [
+   "Vajra"
+  ],
+  "Oathkeeper Sena": [
+   "Vajra"
+  ],
+  "Oathlit Vanguard": [
+   "Vajra"
+  ],
+  "Old Garrick": [
+   "Vajra"
+  ],
+  "Ourevos, the Golden Dragon": [
+   "Vajra",
+   "Bandha"
+  ],
+  "Pale Gravedigger": [
+   "Nirmāṇa"
+  ],
+  "Pyre-Keeper Vayle": [
+   "Vajra"
+  ],
+  "Reclaim the Colors": [
+   "Vajra"
+  ],
+  "Rhaess Korvain": [
+   "Vajra"
+  ],
+  "Ridgeline Scout": [
+   "Bandha"
+  ],
+  "Ridgeline Warden": [
+   "Bandha"
+  ],
+  "Rook": [
+   "Vajra"
+  ],
+  "Ruffius Rufeldro": [
+   "Vajra"
+  ],
+  "Shieldwall Recruit": [
+   "Vajra"
+  ],
+  "Silk-Spinner Drone": [
+   "Vajra"
+  ],
+  "Sister Mire": [
+   "Nirmāṇa"
+  ],
+  "Sister Mire, Wailing Nightmare": [
+   "Vajra",
+   "Astra",
+   "Nirmāṇa"
+  ],
+  "Skittering Drone": [
+   "Vajra"
+  ],
+  "Skullchain Reaver": [
+   "Vajra",
+   "Astra"
+  ],
+  "Squad 16 Veteran": [
+   "Vajra"
+  ],
+  "Squad 19 Quartermaster": [
+   "Vajra"
+  ],
+  "Squad-Captain Vesk": [
+   "Vajra"
+  ],
+  "Summoned Skull Soldiers": [
+   "Vajra",
+   "Nirmāṇa"
+  ],
+  "Sworn Duelist": [
+   "Vajra",
+   "Astra"
+  ],
+  "Tange Sazen": [
+   "Vajra",
+   "Astra"
+  ],
+  "The Black Ledger": [
+   "Nirmāṇa"
+  ],
+  "The Bronzed Beast, Hanse Waltz": [
+   "Vajra"
+  ],
+  "The Gathering Swarm": [
+   "Vajra"
+  ],
+  "The Undefeated": [
+   "Vajra",
+   "Astra"
+  ],
+  "Tosa Envoy": [
+   "Vajra",
+   "Bandha"
+  ],
+  "Trilogy Ward": [
+   "Vajra"
+  ],
+  "Trophy-Hunter Kessa": [
+   "Vajra"
+  ],
+  "Unbanked Victory": [
+   "Vajra"
+  ],
+  "Uso Oso's Skeletal Summons": [
+   "Nirmāṇa"
+  ],
+  "Val Kreigh": [
+   "Vajra"
+  ],
+  "Valcarion": [
+   "Nirmāṇa"
+  ],
+  "Venombrood Queen": [
+   "Vajra"
+  ],
+  "Warden of the Wall": [
+   "Vajra"
+  ],
+  "Warpath Vanguard": [
+   "Vajra"
+  ],
+  "Web-Spinner Acolyte": [
+   "Vajra"
+  ],
+  "Web-Tender Matron": [
+   "Vajra"
+  ],
+  "Web-Weaver's Return": [
+   "Nirmāṇa"
+  ],
+  "Widow of the Vigil": [
+   "Vajra",
+   "Nirmāṇa"
+  ],
+  "Widow's Patience": [
+   "Vajra"
+  ],
+  "Wingblade Scout": [
+   "Vajra"
+  ],
+  "Wren": [
+   "Vajra",
+   "Nirmāṇa"
+  ],
+  "Young Darwin, Predetermined Dictator": [
+   "Vajra"
+  ],
+  "Zerith Var": [
+   "Vajra"
+  ]
+ },
+ "dmNames": {
+  "Broodmother": true,
+  "Kiana": true,
+  "Kravyn the Collector": true,
+  "Keawe Kel'rua": true,
+  "Kotei": true,
+  "The Bronzed Beast, Hanse Waltz": true,
+  "Ghorruk \"Gnarly\" Judarr": true,
+  "Conduit of Chaos, Kleydson": true,
+  "Sister Mire, Wailing Nightmare": true,
+  "Black Wings, Ossian Drell": true,
+  "Corvus": true,
+  "Darwin": true,
+  "Ourevos, the Golden Dragon": true,
+  "Anorith Keeling": true,
+  "Ahdorah Khaan, Determined Soul": true,
+  "Tange Sazen": true,
+  "The Borrowed Green, Keawe Kel'rua": true,
+  "The Kept Blade, Ahdor": true,
+  "The Nightmare's Toll, Hanse Waltz": true,
+  "The Claim, Lagertha Waltz": true,
+  "Throne of Bones, Uso Oso": true,
+  "The Reliquary, Ruffius Rufeldro": true,
+  "The Unending Flame, Tange Sazen": true,
+  "The Between, Kleydson": true,
+  "Arch-Grim Korrin": true,
+  "Bannerlord Cassian": true,
+  "La \"La\" Ballora, the Broodqueen": true,
+  "Chieftain Reyva Vosh": true,
+  "Web-Weaver's Return": true,
+  "Rhaess Korvain": true
+ },
+ "ascUnits": [
+  {
+   "id": "kotei",
+   "name": "Kotei",
+   "art": "Kotei",
+   "role": "Sovereign",
+   "avatar": true,
+   "hp": 120,
+   "atk": 26,
+   "spd": 12,
+   "ability": {
+    "name": "Sovereign's Edict",
+    "kind": "aoe",
+    "power": 30,
+    "uses": 2,
+    "desc": "Signature — heavy damage to every foe."
+   }
+  },
+  {
+   "id": "akatosh",
+   "name": "Ourevos, the Golden Dragon",
+   "art": "Ourevos, the Golden Dragon",
+   "role": "Dragon",
+   "avatar": true,
+   "hp": 112,
+   "atk": 30,
+   "spd": 10,
+   "ability": {
+    "name": "Dragonfire",
+    "kind": "dmg",
+    "power": 54,
+    "uses": 2,
+    "desc": "Signature — devastating single-target flame."
+   }
+  },
+  {
+   "id": "forgemask",
+   "name": "Forgemask",
+   "art": "Forgemask",
+   "role": "Guardian",
+   "avatar": false,
+   "hp": 158,
+   "atk": 18,
+   "spd": 7,
+   "ability": {
+    "name": "Reforge",
+    "kind": "heal",
+    "power": 50,
+    "uses": 2,
+    "desc": "Restore a large chunk of an ally's HP."
+   }
+  },
+  {
+   "id": "tange",
+   "name": "Tange Sazen",
+   "art": "Tange Sazen",
+   "role": "Blademaster",
+   "avatar": false,
+   "hp": 94,
+   "atk": 33,
+   "spd": 14,
+   "ability": {
+    "name": "Skullchain Strike",
+    "kind": "dmg",
+    "power": 44,
+    "uses": 2,
+    "desc": "A brutal single-target cut."
+   }
+  },
+  {
+   "id": "veronica",
+   "name": "Veronica",
+   "art": "Veronica",
+   "role": "Support",
+   "avatar": false,
+   "hp": 100,
+   "atk": 19,
+   "spd": 11,
+   "ability": {
+    "name": "Echo Ward",
+    "kind": "heal",
+    "power": 34,
+    "uses": 3,
+    "desc": "Steady healing for an ally."
+   }
+  },
+  {
+   "id": "joris",
+   "name": "King Joris",
+   "art": "King Joris",
+   "role": "Vanguard",
+   "avatar": false,
+   "hp": 134,
+   "atk": 24,
+   "spd": 9,
+   "ability": {
+    "name": "Rallying Cry",
+    "kind": "aoe",
+    "power": 22,
+    "uses": 2,
+    "desc": "Damage every foe at once."
+   }
+  },
+  {
+   "id": "lagertha",
+   "name": "Lagertha Waltz",
+   "art": "Lagertha Waltz",
+   "role": "Shieldmaiden",
+   "avatar": true,
+   "hp": 126,
+   "atk": 28,
+   "spd": 11,
+   "ability": {
+    "name": "Valkyrie Rush",
+    "kind": "aoe",
+    "power": 26,
+    "uses": 2,
+    "desc": "Signature — a sweeping strike on every foe."
+   }
+  },
+  {
+   "id": "hanse",
+   "name": "Hanse Waltz",
+   "art": "Hanse Waltz",
+   "role": "Warden",
+   "avatar": false,
+   "hp": 146,
+   "atk": 20,
+   "spd": 8,
+   "ability": {
+    "name": "Last Stand",
+    "kind": "heal",
+    "power": 44,
+    "uses": 2,
+    "desc": "Shore up an ally's HP when it matters most."
+   }
+  },
+  {
+   "id": "uso",
+   "name": "Uso Oso",
+   "art": "Uso Oso",
+   "role": "Revenant",
+   "avatar": false,
+   "hp": 104,
+   "atk": 29,
+   "spd": 12,
+   "ability": {
+    "name": "Death Remnant",
+    "kind": "dmg",
+    "power": 40,
+    "uses": 2,
+    "desc": "A haunting single-target strike."
+   }
+  },
+  {
+   "id": "ahdor",
+   "name": "Ahdorah Khaan, Determined Soul",
+   "art": "Ahdorah Khaan, Determined Soul",
+   "role": "Keeper",
+   "avatar": false,
+   "hp": 150,
+   "atk": 19,
+   "spd": 8,
+   "ability": {
+    "name": "Record Guard",
+    "kind": "heal",
+    "power": 38,
+    "uses": 2,
+    "desc": "Guard an ally with a protective ward."
+   }
+  },
+  {
+   "id": "keawe",
+   "name": "Keawe Kel'rua",
+   "art": "Keawe Kel'rua",
+   "role": "Heir",
+   "avatar": true,
+   "hp": 116,
+   "atk": 27,
+   "spd": 13,
+   "ability": {
+    "name": "Kel'rua Gambit",
+    "kind": "dmg",
+    "power": 48,
+    "uses": 2,
+    "desc": "Signature — a precise, lethal strike on one foe."
+   }
+  }
+ ],
+ "ascPassives": {
+  "kotei": {
+   "name": "Sovereign's Aura",
+   "atk": 4,
+   "desc": "Your units strike with +4 ATK."
+  },
+  "akatosh": {
+   "name": "Dragon's Blessing",
+   "atk": 3,
+   "hp": 12,
+   "desc": "Your units gain +3 ATK and +12 max HP."
+  },
+  "lagertha": {
+   "name": "Shieldwall",
+   "hp": 30,
+   "desc": "Your units gain +30 max HP."
+  },
+  "keawe": {
+   "name": "Bloodline Momentum",
+   "gauge": 1.4,
+   "desc": "Your Ultimate charges 40% faster."
+  }
+ },
+ "ascMoveUnlock": [
+  1,
+  3,
+  6,
+  9,
+  12
+ ],
+ "ascMovesCap": {
+  "forgemask": {
+   "name": "Aegis Protocol",
+   "kind": "guard",
+   "power": 0.5,
+   "dur": 3,
+   "uses": 1,
+   "desc": "The whole party takes 50% less damage for 3 turns."
+  },
+  "tange": {
+   "name": "Thousand Cuts",
+   "kind": "aoe",
+   "power": 46,
+   "uses": 1,
+   "desc": "A blur of steel — heavy damage to every foe."
+  },
+  "veronica": {
+   "name": "Full Restoration",
+   "kind": "heal",
+   "power": 95,
+   "uses": 1,
+   "desc": "Restore an ally to near-full HP."
+  },
+  "joris": {
+   "name": "Kingsmourne",
+   "kind": "dmg",
+   "power": 66,
+   "uses": 1,
+   "desc": "A crown-splitting blow to a single foe."
+  },
+  "hanse": {
+   "name": "Werewolf Fury",
+   "kind": "buff",
+   "power": 0.6,
+   "dur": 3,
+   "uses": 1,
+   "desc": "An ally rages with +60% ATK for 3 turns."
+  },
+  "uso": {
+   "name": "Soul Harvest",
+   "kind": "aoe",
+   "power": 44,
+   "uses": 1,
+   "desc": "Reap every foe at once with grave-cold."
+  },
+  "ahdor": {
+   "name": "Sealing Ward",
+   "kind": "guard",
+   "power": 0.45,
+   "dur": 3,
+   "uses": 1,
+   "desc": "The party takes 45% less damage for 3 turns."
+  }
+ },
+ "ascMoves": {
+  "forgemask": [
+   {
+    "name": "Bulwark",
+    "kind": "guard",
+    "power": 0.35,
+    "dur": 2,
+    "uses": 2,
+    "desc": "Party takes 35% less damage for 2 turns."
+   },
+   {
+    "name": "Molten Riposte",
+    "kind": "dmg",
+    "power": 46,
+    "uses": 2,
+    "desc": "A heavy retaliatory blow."
+   },
+   {
+    "name": "Anvil's Blessing",
+    "kind": "heal",
+    "power": 72,
+    "uses": 1,
+    "desc": "Restore a huge chunk of an ally's HP."
+   }
+  ],
+  "tange": [
+   {
+    "name": "Crosscut Bleed",
+    "kind": "dot",
+    "power": 14,
+    "dur": 3,
+    "uses": 2,
+    "desc": "Bleed — 14 damage/turn for 3 turns."
+   },
+   {
+    "name": "Iai Draw",
+    "kind": "execute",
+    "power": 42,
+    "uses": 2,
+    "desc": "+60% damage vs foes under 35% HP."
+   },
+   {
+    "name": "Zero Stance",
+    "kind": "buff",
+    "power": 0.4,
+    "dur": 2,
+    "uses": 2,
+    "desc": "An ally strikes with +40% ATK for 2 turns."
+   }
+  ],
+  "veronica": [
+   {
+    "name": "Hex Ward",
+    "kind": "vuln",
+    "power": 0.3,
+    "dur": 3,
+    "uses": 2,
+    "desc": "A foe takes +30% damage for 3 turns."
+   },
+   {
+    "name": "Veil of Echoes",
+    "kind": "guard",
+    "power": 0.25,
+    "dur": 2,
+    "uses": 2,
+    "desc": "Party takes 25% less damage for 2 turns."
+   },
+   {
+    "name": "Revenant Mercy",
+    "kind": "heal",
+    "power": 60,
+    "uses": 2,
+    "desc": "A powerful restorative ward."
+   }
+  ],
+  "joris": [
+   {
+    "name": "Shield Wall",
+    "kind": "guard",
+    "power": 0.3,
+    "dur": 2,
+    "uses": 2,
+    "desc": "Party takes 30% less damage for 2 turns."
+   },
+   {
+    "name": "King's Wrath",
+    "kind": "dmg",
+    "power": 50,
+    "uses": 2,
+    "desc": "A crushing single-target blow."
+   },
+   {
+    "name": "Sovereign Charge",
+    "kind": "aoe",
+    "power": 42,
+    "uses": 1,
+    "desc": "Damage every foe at once."
+   }
+  ],
+  "hanse": [
+   {
+    "name": "Wolfsblood Guard",
+    "kind": "guard",
+    "power": 0.35,
+    "dur": 2,
+    "uses": 2,
+    "desc": "Party takes 35% less damage for 2 turns."
+   },
+   {
+    "name": "Feral Lunge",
+    "kind": "dmg",
+    "power": 48,
+    "uses": 2,
+    "desc": "A savage single-target strike."
+   },
+   {
+    "name": "Blood Moon",
+    "kind": "buff",
+    "power": 0.45,
+    "dur": 2,
+    "uses": 1,
+    "desc": "An ally rages with +45% ATK for 2 turns."
+   }
+  ],
+  "uso": [
+   {
+    "name": "Grave Chill",
+    "kind": "vuln",
+    "power": 0.3,
+    "dur": 3,
+    "uses": 2,
+    "desc": "A foe takes +30% damage for 3 turns."
+   },
+   {
+    "name": "Soul Reave",
+    "kind": "dmg",
+    "power": 46,
+    "uses": 2,
+    "desc": "A haunting soul-rending strike."
+   },
+   {
+    "name": "Revenant's Toll",
+    "kind": "dot",
+    "power": 16,
+    "dur": 3,
+    "uses": 2,
+    "desc": "Burn — 16 damage/turn for 3 turns."
+   }
+  ],
+  "ahdor": [
+   {
+    "name": "Bind the Record",
+    "kind": "vuln",
+    "power": 0.35,
+    "dur": 3,
+    "uses": 2,
+    "desc": "A foe takes +35% damage for 3 turns."
+   },
+   {
+    "name": "Ward of Record",
+    "kind": "guard",
+    "power": 0.3,
+    "dur": 2,
+    "uses": 2,
+    "desc": "Party takes 30% less damage for 2 turns."
+   },
+   {
+    "name": "Erase",
+    "kind": "execute",
+    "power": 44,
+    "uses": 2,
+    "desc": "+60% damage vs foes under 35% HP."
+   }
+  ],
+  "kotei": [
+   {
+    "name": "Crownfall",
+    "kind": "execute",
+    "power": 40,
+    "uses": 2,
+    "desc": "+60% damage vs foes under 35% HP."
+   },
+   {
+    "name": "Sovereign's Ward",
+    "kind": "guard",
+    "power": 0.35,
+    "dur": 2,
+    "uses": 2,
+    "desc": "Party takes 35% less damage for 2 turns."
+   },
+   {
+    "name": "Edict of Ruin",
+    "kind": "aoe",
+    "power": 44,
+    "uses": 1,
+    "desc": "Heavy damage to every foe."
+   }
+  ],
+  "akatosh": [
+   {
+    "name": "Wing Buffet",
+    "kind": "aoe",
+    "power": 34,
+    "uses": 2,
+    "desc": "Sweep every foe with a wing."
+   },
+   {
+    "name": "Scale Guard",
+    "kind": "guard",
+    "power": 0.4,
+    "dur": 2,
+    "uses": 2,
+    "desc": "Party takes 40% less damage for 2 turns."
+   },
+   {
+    "name": "Golden Maw",
+    "kind": "execute",
+    "power": 52,
+    "uses": 2,
+    "desc": "+60% damage vs foes under 35% HP."
+   }
+  ],
+  "lagertha": [
+   {
+    "name": "Shield Break",
+    "kind": "dmg",
+    "power": 44,
+    "uses": 2,
+    "desc": "Shatter a foe's guard."
+   },
+   {
+    "name": "Valkyrie's Ward",
+    "kind": "guard",
+    "power": 0.35,
+    "dur": 2,
+    "uses": 2,
+    "desc": "Party takes 35% less damage for 2 turns."
+   },
+   {
+    "name": "Ragefire",
+    "kind": "buff",
+    "power": 0.4,
+    "dur": 2,
+    "uses": 2,
+    "desc": "An ally strikes with +40% ATK for 2 turns."
+   }
+  ],
+  "keawe": [
+   {
+    "name": "Phantom Cut",
+    "kind": "dot",
+    "power": 14,
+    "dur": 3,
+    "uses": 2,
+    "desc": "Bleed — 14 damage/turn for 3 turns."
+   },
+   {
+    "name": "Bloodline Surge",
+    "kind": "buff",
+    "power": 0.45,
+    "dur": 2,
+    "uses": 2,
+    "desc": "An ally strikes with +45% ATK for 2 turns."
+   },
+   {
+    "name": "Killing Intent",
+    "kind": "execute",
+    "power": 50,
+    "uses": 2,
+    "desc": "+60% damage vs foes under 35% HP."
+   }
+  ]
+ },
+ "ascBossSigs": [
+  "Cataclysm",
+  "Ruin Wave",
+  "Dread Nova",
+  "Worldbreaker",
+  "Doomtide"
+ ],
+ "ascFoes": [
+  {
+   "name": "Hollow Ravager",
+   "art": "The Regenerating Horror",
+   "hp": 76,
+   "atk": 15,
+   "spd": 8
+  },
+  {
+   "name": "Sister Mire",
+   "art": "Sister Mire",
+   "hp": 98,
+   "atk": 19,
+   "spd": 9
+  },
+  {
+   "name": "Twisted Specimen",
+   "art": "The Regenerating Horror",
+   "hp": 124,
+   "atk": 23,
+   "spd": 6
+  },
+  {
+   "name": "Zerith Var",
+   "art": "Zerith Var",
+   "hp": 86,
+   "atk": 22,
+   "spd": 12
+  }
+ ],
+ "ascFoesCadets": [
+  {
+   "name": "Corps Trainee",
+   "art": "Corps Trainee",
+   "hp": 52,
+   "atk": 11,
+   "spd": 9
+  }
+ ],
+ "ascFoesWrit": [
+  {
+   "name": "Writ-Sergeant",
+   "art": "Writ-Sergeant",
+   "hp": 70,
+   "atk": 16,
+   "spd": 8
+  },
+  {
+   "name": "Writ-Officer",
+   "art": "Writ-Officer",
+   "hp": 60,
+   "atk": 14,
+   "spd": 9
+  }
+ ],
+ "ascFoesSornvallis": [
+  {
+   "name": "City Guard",
+   "art": "City Guard",
+   "hp": 60,
+   "atk": 15,
+   "spd": 8
+  },
+  {
+   "name": "Slaver's Enforcer",
+   "art": "Slaver's Enforcer",
+   "hp": 68,
+   "atk": 17,
+   "spd": 7
+  }
+ ],
+ "ascStory": [
+  {
+   "loc": "Tosa",
+   "title": "Placement",
+   "champ": "Fenrik Vench",
+   "art": "Fenrik Vench",
+   "type": "duel",
+   "foes": [
+    {
+     "name": "Corps Trainee",
+     "art": "Corps Trainee",
+     "hp": 52,
+     "atk": 11,
+     "spd": 9
+    }
+   ],
+   "beat": "The corps yard sorts you before you've thrown a punch — high-family boys on one side, levy sons like you on the other. Sergeant Ossian Drell has broken cadets in this yard for thirty years; his right hand ends at the wrist in a fitted iron cap, and he doesn't raise it to call the pairings. \"Kel'rua,\" he says. \"Vench.\" Fenrik Vench is a causeway-lord's son who has never once been paired against someone beneath him — and he intends to keep it that way."
+  },
+  {
+   "loc": "Tosa",
+   "title": "The Instructor's Test",
+   "champ": "Ossian Drell",
+   "art": "Black Wings, Ossian Drell",
+   "type": "boss",
+   "beat": "You lost the spar the whole yard saw. Drell watched a different fight — the one in your head, where you'd already won three moves before your body caught up. \"Being clever is a locked door with your name filed off,\" he told you after, quiet enough that only you heard it. Today he doesn't send another cadet. Thirty years breaking recruits in this yard, and Sergeant Ossian Drell steps onto the sand himself — to find out exactly how far that locked door goes."
+  },
+  {
+   "loc": "Tosa",
+   "title": "What the Corps Won't Forgive",
+   "champ": "The Writ-Captain",
+   "art": "The Writ-Captain",
+   "type": "elite",
+   "foes": [
+    {
+     "name": "Writ-Sergeant",
+     "art": "Writ-Sergeant",
+     "hp": 70,
+     "atk": 16,
+     "spd": 8
+    },
+    {
+     "name": "Writ-Officer",
+     "art": "Writ-Officer",
+     "hp": 60,
+     "atk": 14,
+     "spd": 9
+    }
+   ],
+   "beat": "Word travels faster than any of you did. Something cracked loose in you during the Measure — a green pulse the whole city felt — and Darwin's Writ-officers don't need to understand what it was to know it's worth a body brought in alive. They find you at the gate, lacquered black and unhurried, the way men move when they've never once lost a chase. Whatever Tosa was to you, it isn't safe to be from here anymore."
+  },
+  {
+   "loc": "Gnulför",
+   "title": "Animal Shelter",
+   "champ": "Uso Oso",
+   "art": "Uso Oso",
+   "type": "boss",
+   "beat": "The fire is barely embers when he steps out of the dark like he was always standing there. Darwin sent him with two words and a name — bring me his head, or his hope — and Uso Oso has never once come back empty-handed. Steel finds him and doesn't seem to mind. \"Sharp,\" he says, almost gentle. \"But not deep.\" He isn't here to talk. He isn't sure, yet, that he wants to win."
+  }
+ ],
+ "ascStoryCh2": [
+  {
+   "loc": "Sorn-Vallis",
+   "title": "Sorn-Vallis",
+   "champ": "Veronica",
+   "art": "Veronica",
+   "type": "elite",
+   "foes": [
+    {
+     "name": "City Guard",
+     "art": "City Guard",
+     "hp": 60,
+     "atk": 15,
+     "spd": 8
+    },
+    {
+     "name": "Slaver's Enforcer",
+     "art": "Slaver's Enforcer",
+     "hp": 68,
+     "atk": 17,
+     "spd": 7
+    }
+   ],
+   "beat": "The gates close behind you before you understand you've walked through them. Sorn-Vallis flies no banner you'd recognize, but every corner of it answers to one woman. Veronica doesn't ask what you are — she takes one look and already knows exactly what's useful about you, the same way she takes everything else that crosses her city: quietly, completely, and as if it were always hers to begin with."
+  },
+  {
+   "loc": "Sorn-Vallis",
+   "title": "Smokescreen",
+   "champ": "The Arena Master",
+   "art": "The Arena Master",
+   "type": "elite",
+   "foes": [
+    {
+     "name": "City Guard",
+     "art": "City Guard",
+     "hp": 60,
+     "atk": 15,
+     "spd": 8
+    },
+    {
+     "name": "Slaver's Enforcer",
+     "art": "Slaver's Enforcer",
+     "hp": 68,
+     "atk": 17,
+     "spd": 7
+    }
+   ],
+   "beat": "The festival crowd doesn't know it's watching a punishment. Somewhere below the stands they've dragged Uso Oso into the sand against a boy who can't be older than thirteen, and told him to make it a show. He won't. \"Don't let them carve you hollow,\" he tells the boy instead, low enough that only the boy hears it. \"Stay you. That's the fight they can't win.\" On the balcony above, something in a woman's smile stops being a woman's smile at all — and on the rooftop over all of it, Lagertha is already changing shape. You have to reach them before either finishes what it started."
+  },
+  {
+   "loc": "Sorn-Vallis",
+   "title": "Queen Crimson",
+   "champ": "La \"La\" Ballora, the Broodqueen",
+   "art": "La \"La\" Ballora, the Broodqueen",
+   "type": "boss",
+   "beat": "Whatever wore Ella Ballora's smile a moment ago doesn't bother wearing it now. What unfolds in the throne room beneath the arena is what she always was underneath — and it takes everything you have just to find the seam in her, a single ruby weak point Uso finally rips free with his bare hands. Dying, she offers you exactly what you came for: Darwin's stronghold, named aloud, yours for the taking if you let her live one minute longer. Lagertha, still wearing the wolf, doesn't wait for you to decide. The intel dies with her. Somewhere behind you, word is already reaching Keawe's sister — Kianna has just enlisted, fast-tracked into an elite unit they're calling the Black Wings."
+  }
+ ],
+ "ascChapters": [
+  {
+   "id": "ch1",
+   "title": "Chapter 1: The Ceiling",
+   "sub": "A cadet who cheated the coffin — from the corps yard to the ally waiting in ambush.",
+   "beatsLen": 4
+  },
+  {
+   "id": "ch2",
+   "title": "Chapter 2: Queen Crimson",
+   "sub": "A slaver city's baroness, a mercy in the arena, and the Broodqueen's throne.",
+   "beatsLen": 3
+  }
+ ]
 }

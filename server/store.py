@@ -55,6 +55,16 @@ CREATE TABLE IF NOT EXISTS pity(user_id TEXT PRIMARY KEY, pack_ultra INTEGER NOT
 -- 8/5/26 Phase 3: real P2P trades (client's own trade UI is confirmed-simulated against fake
 -- partners, index.html:12817 TRADE_PARTNERS -- not a spec for real P2P, so this is a fresh design:
 -- propose/accept/decline between two real accounts, not a port).
+-- 8/5/26 Phase 4: Ascension per-unit progression (index.html's ascUnitProg, client-localStorage-
+-- only there). Persists ACROSS runs (a unit's level/xp/rites/bosses/loadout survive between Rites)
+-- -- distinct from the in-progress run state itself, which rides the existing game_sessions/
+-- ASC_RUNS persistence already wired for match sessions. Keyed by unit NAME (matches the client's
+-- own ascUnitProg[u.name] keying), not uid -- Ascension doesn't care which specific owned copy.
+CREATE TABLE IF NOT EXISTS asc_prog(
+  user_id TEXT NOT NULL, unit_name TEXT NOT NULL, level INTEGER NOT NULL DEFAULT 1,
+  xp INTEGER NOT NULL DEFAULT 0, rites INTEGER NOT NULL DEFAULT 0, bosses INTEGER NOT NULL DEFAULT 0,
+  load_json TEXT NOT NULL DEFAULT '[]', PRIMARY KEY(user_id, unit_name));
+
 CREATE TABLE IF NOT EXISTS trades(
   id INTEGER PRIMARY KEY AUTOINCREMENT, from_user TEXT NOT NULL, to_user TEXT NOT NULL,
   offer_uid TEXT NOT NULL, want_uid TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending',
@@ -154,3 +164,16 @@ def pity_load(user_id):
 def pity_save(c, user_id, pack_ultra, pack_apex):
     c.execute("INSERT INTO pity(user_id,pack_ultra,pack_apex) VALUES(?,?,?) "
               "ON CONFLICT(user_id) DO UPDATE SET pack_ultra=?,pack_apex=?", (user_id, pack_ultra, pack_apex, pack_ultra, pack_apex))
+
+# ── Ascension per-unit progression (persists across runs; see asc_prog schema above) ──
+def asc_prog_load(user_id):
+    rows = conn().execute("SELECT unit_name,level,xp,rites,bosses,load_json FROM asc_prog WHERE user_id=?", (user_id,)).fetchall()
+    return {r["unit_name"]: {"level": r["level"], "xp": r["xp"], "rites": r["rites"], "bosses": r["bosses"],
+                             "load": json.loads(r["load_json"])} for r in rows}
+def asc_prog_save(c, user_id, prog):
+    for name, p in prog.items():
+        lj = json.dumps(p.get("load") or [])
+        c.execute("INSERT INTO asc_prog(user_id,unit_name,level,xp,rites,bosses,load_json) VALUES(?,?,?,?,?,?,?) "
+                  "ON CONFLICT(user_id,unit_name) DO UPDATE SET level=?,xp=?,rites=?,bosses=?,load_json=?",
+                  (user_id, name, p.get("level",1), p.get("xp",0), p.get("rites",0), p.get("bosses",0), lj,
+                   p.get("level",1), p.get("xp",0), p.get("rites",0), p.get("bosses",0), lj))

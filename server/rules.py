@@ -168,6 +168,64 @@ def legend_tier(score):
         if score >= m: return n
     return "Unproven"
 
+# ── Phase 4: Ascension roster helpers ──
+ROOF_MAP = _CAT.get("roofMap", {})
+# index.html:12990-12993 ascHasDMAbility()/ascChampionEligible() -- the union of both DM tables'
+# KEYS is all that's needed for eligibility (whether a card HAS a DM ability, not what it does --
+# actually invoking a DM ability during a Rite is task #382, an open design question, still not built).
+DM_NAMES = set(_CAT.get("dmNames", {}).keys())
+def roof_of(name): return ROOF_MAP.get(name) or []
+def asc_champion_eligible(name, is_avatar_bespoke=False):
+    return bool(is_avatar_bespoke or name in DM_NAMES)
+
+def hash_str(s):
+    """Exact port of the client's hashStr() (index.html:10603): h=(h*31+charCode)>>>0, i.e.
+    unsigned 32-bit wraparound every step. NOT the same algorithm as _name_hash() above (that one
+    is signed-then-abs, `|0` + Math.abs) despite sharing the *31 core -- confirmed by reading both
+    real client functions side by side, not assumed from the shared multiplier. Used by
+    ascGenericBaseStats() for deterministic (non-random) per-card stat jitter."""
+    h = 0
+    for ch in str(s or ""):
+        h = (h * 31 + ord(ch)) & 0xFFFFFFFF
+    return h
+
+_ASC_RARITY_HP = {"common": 100, "rare": 112, "ultra": 122, "apex": 132}
+_ASC_RARITY_SPD = {"common": 9, "rare": 10, "ultra": 10, "apex": 11}
+def asc_generic_base_stats(name):
+    """index.html:13000-13009 ascGenericBaseStats(), exact."""
+    pow_ = card_pow(name)
+    rarity = card_rarity(name)
+    atk = max(14, min(40, round(16 + pow_ * 0.55)))
+    h = hash_str(name)
+    hp = max(60, _ASC_RARITY_HP.get(rarity, 108) + (h % 13) - 6)
+    spd = max(6, _ASC_RARITY_SPD.get(rarity, 9) + ((h // 13) % 5) - 2)
+    return {"hp": hp, "atk": atk, "spd": spd}
+
+# index.html:13020-13027 ASC_ROOF_KIT/ASC_ROOFLESS_KIT -- one signature move per Roof keyword for
+# generic units (never learns more; hand-maintained here like RALLY/LINGERING_SUPPORTS, small fixed
+# design constants, not per-card data that needs extract_catalog.py).
+ASC_ROOF_KIT = {
+    "Vajra":   {"kind": "buff",  "power": 0.35, "dur": 2, "uses": 2, "name": "Surge",     "desc": "An ally strikes with +35% ATK for 2 turns."},
+    "Astra":   {"kind": "dmg",   "power": 42,             "uses": 2, "name": "Reckoning", "desc": "A heavy strike on one foe."},
+    "Nirmāṇa": {"kind": "heal",  "power": 36,             "uses": 2, "name": "Ward",      "desc": "Restore an ally's HP."},
+    "Bandha":  {"kind": "vuln",  "power": 0.3,  "dur": 3, "uses": 2, "name": "Bind",      "desc": "A foe takes +30% damage for 3 turns."},
+    "Māyā":    {"kind": "guard", "power": 0.3,  "dur": 2, "uses": 2, "name": "Shift",     "desc": "The party takes 30% less damage for 2 turns."},
+}
+ASC_ROOFLESS_KIT = {"kind": "dmg", "power": 32, "uses": 2, "name": "Strike", "desc": "A plain, dependable strike."}
+_ASC_ROOF_ROLE = {"Vajra": "Empowered", "Astra": "Striker", "Nirmāṇa": "Warden", "Bandha": "Binder", "Māyā": "Shifter"}
+
+def asc_generic_role(name):
+    roofs = roof_of(name)
+    return _ASC_ROOF_ROLE.get(roofs[0], "Wanderer") if roofs else "Wanderer"
+
+def asc_generic_ability(name):
+    roofs = roof_of(name)
+    kit = ASC_ROOF_KIT.get(roofs[0], ASC_ROOFLESS_KIT) if roofs else ASC_ROOFLESS_KIT
+    first = (name or "").split(",")[0].split(" ")[0] or name
+    out = dict(kit)
+    out["name"] = f"{first}'s {kit['name']}"
+    return out
+
 # ── Phase 3: card packs (index.html:9619-9627) — hand-maintained here, not extracted, because
 # these are shop-config constants (price/odds), not per-card game data. All Signal-priced (the
 # client's "Premium" tier is still Signal, not Forge -- Forge-priced summons are the cosmetic
