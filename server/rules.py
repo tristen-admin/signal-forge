@@ -226,6 +226,65 @@ def asc_generic_ability(name):
     out["name"] = f"{first}'s {kit['name']}"
     return out
 
+# ── Phase 4.3 (owner, 8/6/26): "more attack options... ideally status giving buff or debuffs
+# moves... a way to swap attacks out per unit". Before this, EVERY non-bespoke unit (140+ of ~152
+# cards) was permanently stuck at 1 move (ASC_ROOF_KIT's signature) forever, at any level --
+# ASC_MOVES/ASC_MOVES_CAP only ever covered the 11 hand-authored ASC_UNITS, so "basic attack + one
+# special move" wasn't a slow-leveling artifact, it was a hard ceiling for almost the whole roster.
+# One extra 3-move kit + a capstone per Roof (mirrors ASC_MOVE_UNLOCK's 3/6/9/12 gates exactly like
+# the bespoke units), deliberately mixing kinds so every generic unit gets real buff/debuff variety
+# to build a loadout around, not just more damage.
+ASC_ROOF_EXTRA = {
+    "Vajra": [
+        {"kind": "dmg", "power": 40, "uses": 2, "name": "Overwhelm", "desc": "A forceful strike on one foe."},
+        {"kind": "vuln", "power": 0.3, "dur": 2, "uses": 2, "name": "Expose", "desc": "A foe takes +30% damage for 2 turns."},
+        {"kind": "guard", "power": 0.25, "dur": 2, "uses": 2, "name": "Brace", "desc": "The party takes 25% less damage for 2 turns."},
+    ],
+    "Astra": [
+        {"kind": "buff", "power": 0.3, "dur": 2, "uses": 2, "name": "Focus", "desc": "An ally strikes with +30% ATK for 2 turns."},
+        {"kind": "dot", "power": 10, "dur": 3, "uses": 2, "name": "Rend", "desc": "A foe bleeds 10/turn for 3 turns."},
+        {"kind": "execute", "power": 46, "uses": 2, "name": "Finish", "desc": "A heavy strike, devastating against a weakened foe."},
+    ],
+    "Nirmāṇa": [
+        {"kind": "guard", "power": 0.3, "dur": 2, "uses": 2, "name": "Aegis", "desc": "The party takes 30% less damage for 2 turns."},
+        {"kind": "buff", "power": 0.25, "dur": 2, "uses": 2, "name": "Rally", "desc": "An ally strikes with +25% ATK for 2 turns."},
+        {"kind": "vuln", "power": 0.25, "dur": 2, "uses": 2, "name": "Unveil", "desc": "A foe takes +25% damage for 2 turns."},
+    ],
+    "Bandha": [
+        {"kind": "dot", "power": 12, "dur": 3, "uses": 2, "name": "Shackle", "desc": "A foe bleeds 12/turn for 3 turns."},
+        {"kind": "dmg", "power": 38, "uses": 2, "name": "Crush", "desc": "A heavy strike on one foe."},
+        {"kind": "buff", "power": 0.3, "dur": 2, "uses": 2, "name": "Fortify", "desc": "An ally strikes with +30% ATK for 2 turns."},
+    ],
+    "Māyā": [
+        {"kind": "buff", "power": 0.3, "dur": 2, "uses": 2, "name": "Warp Strike", "desc": "An ally strikes with +30% ATK for 2 turns."},
+        {"kind": "vuln", "power": 0.3, "dur": 2, "uses": 2, "name": "Unmake", "desc": "A foe takes +30% damage for 2 turns."},
+        {"kind": "dmg", "power": 40, "uses": 2, "name": "Mirror Blow", "desc": "A forceful strike on one foe."},
+    ],
+}
+ASC_ROOFLESS_EXTRA = [
+    {"kind": "buff", "power": 0.25, "dur": 2, "uses": 2, "name": "Grit", "desc": "An ally strikes with +25% ATK for 2 turns."},
+    {"kind": "vuln", "power": 0.25, "dur": 2, "uses": 2, "name": "Weaken", "desc": "A foe takes +25% damage for 2 turns."},
+    {"kind": "dmg", "power": 36, "uses": 2, "name": "Heavy Strike", "desc": "A forceful strike on one foe."},
+]
+ASC_ROOF_CAPSTONE = {
+    "Vajra": {"kind": "aoe", "power": 34, "uses": 1, "name": "Ascendant Surge", "desc": "A powerful blow to every foe."},
+    "Astra": {"kind": "execute", "power": 60, "uses": 1, "name": "Killing Blow", "desc": "A devastating strike, lethal to a weakened foe."},
+    "Nirmāṇa": {"kind": "heal", "power": 55, "uses": 1, "name": "Sanctuary", "desc": "A powerful restoration for one ally."},
+    "Bandha": {"kind": "dot", "power": 20, "dur": 3, "uses": 1, "name": "Unbreakable Bind", "desc": "A foe bleeds heavily for 3 turns."},
+    "Māyā": {"kind": "guard", "power": 0.4, "dur": 3, "uses": 1, "name": "Reality Shift", "desc": "The party takes 40% less damage for 3 turns."},
+}
+ASC_ROOFLESS_CAPSTONE = {"kind": "aoe", "power": 30, "uses": 1, "name": "Last Stand", "desc": "A powerful blow to every foe."}
+
+def asc_generic_moves(name):
+    """The 3 extra moves + 1 capstone a generic unit can unlock at level 3/6/9/12 -- mirrors the
+    bespoke ASC_MOVES/ASC_MOVES_CAP shape exactly, named after the unit like asc_generic_ability()."""
+    roofs = roof_of(name)
+    roof = roofs[0] if roofs else None
+    extra = ASC_ROOF_EXTRA.get(roof, ASC_ROOFLESS_EXTRA)
+    cap = ASC_ROOF_CAPSTONE.get(roof, ASC_ROOFLESS_CAPSTONE)
+    first = (name or "").split(",")[0].split(" ")[0] or name
+    return ([dict(m, name=f"{first}'s {m['name']}") for m in extra], dict(cap, name=f"{first}'s {cap['name']}"))
+
 # ── Phase 3: card packs (index.html:9619-9627) — hand-maintained here, not extracted, because
 # these are shop-config constants (price/odds), not per-card game data. All Signal-priced (the
 # client's "Premium" tier is still Signal, not Forge -- Forge-priced summons are the cosmetic

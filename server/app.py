@@ -519,15 +519,26 @@ def _persist_session(path, body, out):
             if rid in ASC_RUNS: store.session_save(rid, "asc", ASC_RUNS[rid])
     except Exception: pass
 
+def _asc_unit_public(u, run, owned):
+    d = {"name": u["name"], "art": u["art"], "avatar": u["avatar"], "hp": u["hp"], "maxhp": u["maxhp"],
+         "atk": u["atk"], "spd": u["spd"], "lv": u["lv"], "owned": u["name"] in owned,
+         "moves": [{"name": m["name"], "kind": m["kind"], "left": m["left"], "uses": m.get("uses", 0)} for m in u["moves"]]}
+    if not u["avatar"]:
+        # Phase 4.3: everything a companion has UNLOCKED (not just their active 4), so a client can
+        # render a real swap-your-loadout UI without extra round-trips -- see h_asc_loadout.
+        base = asc.resolve_unit(u["id"])
+        full = asc.unit_move_list(base)
+        lvl = asc.unit_level(run["prog"], u["name"])
+        d["unlocked"] = [{"idx": i, "name": m["name"], "kind": m["kind"], "unlock": m.get("unlock", 1)}
+                          for i, m in enumerate(full) if lvl >= m.get("unlock", 1)]
+    return d
+
 def _asc_public(run, user_id):
     owned = _owned_type_names(user_id)
     node = run["map"][run["tier"]] if run["tier"] < len(run["map"]) else None
     return {"chapterIdx": run["chapterIdx"], "tier": run["tier"], "totalNodes": len(run["map"]),
             "phase": run["phase"], "done": run["done"], "result": run["result"], "flawless": run["flawless"],
-            "party": [{"name": u["name"], "art": u["art"], "avatar": u["avatar"], "hp": u["hp"], "maxhp": u["maxhp"],
-                       "atk": u["atk"], "spd": u["spd"], "lv": u["lv"], "owned": u["name"] in owned,
-                       "moves": [{"name": m["name"], "kind": m["kind"], "left": m["left"], "uses": m.get("uses", 0)} for m in u["moves"]]}
-                      for u in run["party"]],
+            "party": [_asc_unit_public(u, run, owned) for u in run["party"]],
             "node": ({"type": node["type"], "title": node.get("title"), "loc": node.get("loc"), "beat": node.get("beat")} if node else None),
             "battle": _battle_public(run["battle"]) if run["battle"] else None,
             "inv": run.get("inv", {}), "gear": run.get("gear", []), "equip": run.get("equip", {})}
@@ -544,6 +555,37 @@ def h_asc_shop(user_id, body):
     Merchant's items/gear/prices, surfaced before the Rite since Story mode has no Merchant node
     to browse them at mid-run (see asc.py module docstring)."""
     return 200, {"items": asc.ASC_ITEMS, "gear": asc.ASC_GEAR}
+
+def h_asc_loadout(user_id, body):
+    """Phase 4.3: choose which of a companion's UNLOCKED moves occupy their 4 active slots. The
+    data model (prog[name]["load"], read by asc.unit_loadout()) already supported this -- only the
+    endpoint to actually set it was missing. Scoped to between fights (not mid-battle) so combat
+    state (uses-left counters, current moves list) never has to be reconciled mid-turn; a change
+    here takes effect starting the run's next asc/enter (which calls refresh_for_battle)."""
+    sess = _asc_sess(user_id, body)
+    if not sess: return 404, {"error": "run not found"}
+    run = sess["run"]
+    if run["done"]: return 400, {"error": "this run has ended"}
+    if run["phase"] == "battle": return 400, {"error": "can't change loadouts mid-battle -- wait until between fights"}
+    unit_name = body.get("unitName")
+    move_idxs = list(body.get("moveIdxs") or [])
+    party_unit = next((u for u in run["party"] if u["name"] == unit_name and not u["avatar"]), None)
+    if not party_unit: return 400, {"error": f"{unit_name} is not a companion in this party"}
+    base = asc.resolve_unit(unit_name)
+    full = asc.unit_move_list(base)
+    lvl = asc.unit_level(run["prog"], unit_name)
+    unlocked = [i for i, m in enumerate(full) if lvl >= m.get("unlock", 1)]
+    if not (1 <= len(move_idxs) <= 4): return 400, {"error": "choose 1-4 moves"}
+    if len(set(move_idxs)) != len(move_idxs): return 400, {"error": "duplicate move index"}
+    for i in move_idxs:
+        if not isinstance(i, int) or i not in unlocked:
+            return 400, {"error": f"move index {i} isn't unlocked yet for {unit_name} (level {lvl})"}
+    p = run["prog"].setdefault(unit_name, {"level": 1, "xp": 0, "rites": 0, "bosses": 0, "load": []})
+    p["load"] = move_idxs
+    with store.tx() as cc:
+        store.asc_prog_save(cc, user_id, run["prog"])
+    return 200, {"unitName": unit_name, "load": move_idxs,
+                 "available": [{"idx": i, "name": full[i]["name"], "kind": full[i]["kind"], "unlock": full[i].get("unlock", 1)} for i in unlocked]}
 
 def h_asc_start(user_id, body):
     champion = body.get("championName")
@@ -782,6 +824,7 @@ ROUTES = {
     ("POST","/api/spell/cast"):    (h_spell_cast, True),
     ("GET", "/api/match/state"):   (h_match_state, True),
     ("GET", "/api/asc/shop"):      (h_asc_shop, True),
+    ("POST","/api/asc/loadout"):   (h_asc_loadout, True),
     ("POST","/api/asc/start"):     (h_asc_start, True),
     ("POST","/api/asc/pick"):      (h_asc_pick, True),
     ("POST","/api/asc/enter"):     (h_asc_enter, True),

@@ -18,7 +18,7 @@ Scope of Phase 4.1 (see the memory file for the full history):
        points, Arena mode, Endless Rite mode, Ascension-specific "lore link" party auras (always
        neutral here), DM abilities firing in a Rite (task #382, an open design question).
 
-Phase 4.2 (this pass) adds items + gear, per owner request, plus a deliberate design change:
+Phase 4.2 adds items + gear, per owner request:
   - Items (ASC_ITEMS: potion/elixir/revive) and Gear (ASC_GEAR: 5 pieces, flat hp/atk/spd bonuses)
     are real now. BUT the client's own acquisition path for both is the Merchant node + Crossroads
     "gear"/"provision" offers -- and neither node type appears ANYWHERE in the real Chapter 1/2
@@ -27,13 +27,22 @@ Phase 4.2 (this pass) adds items + gear, per owner request, plus a deliberate de
     `asc/start` (a pre-Rite provisioning step, spending account Signal) -- same prices, same
     run-scoped-not-persistent-across-runs model as the client's `ascRun.inv`/`ascRun.gear`, just
     moved to before the Rite instead of at a mid-run shop node Story mode doesn't have.
-  - Companions are now BASIC-ATTACK-ONLY (their unlockable move trees are still fully modeled and
-    computed -- unit_move_list()/unit_loadout() are unchanged and still exist -- but combat no
-    longer surfaces or allows using anything beyond the base "attack" action for a non-avatar
-    party member). This is an explicit owner design call, not a client-fidelity port: the real
-    client DOES let companions use their signature/unlocked moves. Kept as a single, cheap,
-    reversible gate (see `refresh_for_battle`) specifically so it can be flipped back in one line
-    if this reading of "move selections... limited to just basic attacks" turns out wrong.
+  - Phase 4.2 also shipped a companions-basic-attack-only gate here, per an initial misreading of
+    the owner's next request -- corrected immediately in Phase 4.3 below once the owner clarified
+    they wanted the OPPOSITE (more attack options, not fewer). Removed entirely; no trace left
+    beyond this note, since a stale toggle for a rejected design would just mislead the next read.
+
+Phase 4.3 (owner correction, 8/6/26): "i want more attack options... an ability [to] gain another
+attack option (ideally status giving buff or debuffs moves)... a way to swap attacks out per unit
+to create your ideal combo." Root cause of "only ever a basic attack and one special move": NOT a
+slow-leveling artifact -- ASC_MOVES/ASC_MOVES_CAP only ever covered the 11 hand-authored ASC_UNITS,
+so every other unit (140+ of ~152 cards) was permanently ceilinged at 1 move (their Roof-kit
+signature) at ANY level. Fixed via rules.asc_generic_moves(): every generic unit now gets the same
+real 3-extra+capstone shape as the bespoke units (unlock levels 3/6/9/12, mirroring ASC_MOVE_UNLOCK
+exactly), Roof-themed and deliberately mixing dmg/buff/debuff kinds so there's a real kit to build a
+loadout around. Loadout swapping (h_asc_loadout in app.py) lets the player choose which unlocked
+moves occupy the 4 active slots -- the data model (`prog[name]["load"]`) already supported this;
+only the endpoint to actually set it was missing.
 
 Mastery fix: the client's own `ascEndRun()` (the only writer of `avatarBond`, the client-side
 mastery ledger) is reachable ONLY via Abandon-run, always with won=False, and reads a field
@@ -86,6 +95,10 @@ def champion_eligible(key):
 
 # ── move list / loadout (index.html:12930-12938 ascUnitMoveList/ascUnitLoadout) ──
 def unit_move_list(base):
+    """Phase 4.3: generic (non-bespoke) units used to dead-end here -- ASC_MOVES/ASC_MOVES_CAP only
+    ever covered the 11 hand-authored ASC_UNITS, so every other unit (140+ of ~152 cards) was
+    permanently stuck at 1 move regardless of level. rules.asc_generic_moves() now gives every
+    generic unit the same real 3-extra+capstone shape, Roof-themed and buff/debuff-varied."""
     sig = dict(base.get("ability") or {}); sig.setdefault("unlock", 1)
     extra = []
     for i, m in enumerate(ASC_MOVES.get(base["id"], [])):
@@ -95,6 +108,10 @@ def unit_move_list(base):
     if base["id"] in ASC_MOVES_CAP:
         mm = dict(ASC_MOVES_CAP[base["id"]]); mm["unlock"] = ASC_MOVE_UNLOCK[4] if len(ASC_MOVE_UNLOCK) > 4 else 12
         cap.append(mm)
+    if not extra and base.get("generic"):
+        gen_extra, gen_cap = rules.asc_generic_moves(base["name"])
+        extra = [dict(m, unlock=ASC_MOVE_UNLOCK[i+1] if i+1 < len(ASC_MOVE_UNLOCK) else 10) for i, m in enumerate(gen_extra)]
+        cap = [dict(gen_cap, unlock=ASC_MOVE_UNLOCK[4] if len(ASC_MOVE_UNLOCK) > 4 else 12)]
     return [sig] + extra + cap
 
 def unit_level(prog, name):
@@ -115,27 +132,14 @@ def unit_stats(base, prog):
     lv = unit_level(prog, base["name"])
     return {"hp": round(base["hp"]*(1+(lv-1)*0.12)), "atk": round(base["atk"]*(1+(lv-1)*0.10)), "lv": lv}
 
-# ── owner design gate, Phase 4.2: companions ("supports") are basic-attack-only in combat -- see
-# module docstring. unit_move_list()/unit_loadout() stay fully computed and correct (nothing about
-# the move-tree DATA model is regressed); this is the single choke point that hides those moves
-# from actual play. Flip to False to restore full special-move access in one line.
-COMPANIONS_BASIC_ATTACK_ONLY = True
-
-def _move_list_for_combat(base, prog):
-    """Applying the gate uniformly (not just to companions) is harmless: the avatar's own moves
-    list was already dead data before this change too -- the avatar never takes a battle turn at
-    all (see build_queue), so nothing has ever read it."""
-    if COMPANIONS_BASIC_ATTACK_ONLY: return []
-    full = unit_move_list(base)
-    load = unit_loadout(base, prog)
-    return [dict(full[i], left=full[i].get("uses", 0)) for i in load]
-
 def _mk_combatant(base, is_avatar, hp_bonus, atk_bonus, spd_bonus, prog):
     st = unit_stats(base, prog)
     maxhp = st["hp"] + hp_bonus
     atk = st["atk"] + atk_bonus
     spd = base["spd"] + spd_bonus
-    moves = _move_list_for_combat(base, prog)
+    full = unit_move_list(base)
+    load = unit_loadout(base, prog)
+    moves = [dict(full[i], left=full[i].get("uses", 0)) for i in load]
     return {"id": base["id"], "name": base["name"], "art": base.get("art", base["name"]), "avatar": bool(is_avatar),
             "maxhp": maxhp, "hp": maxhp, "atk": atk, "spd": spd, "lv": st["lv"],
             "moves": moves, "abilLeft": (moves[0]["left"] if moves else 2),
@@ -167,7 +171,9 @@ def refresh_for_battle(party, prog):
     """New battle: moves/uses/statuses reset, HP/maxHP carried over from the run-persistent party."""
     for u in party:
         base = resolve_unit(u["id"])
-        u["moves"] = _move_list_for_combat(base, prog)
+        full = unit_move_list(base)
+        load = unit_loadout(base, prog)
+        u["moves"] = [dict(full[i], left=full[i].get("uses", 0)) for i in load]
         u["abilLeft"] = u["moves"][0]["left"] if u["moves"] else 2
         u["st"] = {"atk": 0, "atkT": 0, "def": 0, "defT": 0, "vuln": 0, "vulnT": 0, "dot": 0, "dotT": 0}
 
