@@ -2558,8 +2558,8 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="nav-group open" id="grp-play">
       <button class="nav-grp-head" onclick="toggleNavGroup('grp-play')"><span class="ni-icon">🎮</span><span class="brand-text">Play</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
-        <button class="navitem" id="nav-lobby" onclick="show('lobby',this)"><span class="ni-icon">⚔</span><span class="brand-text">Public Server</span></button>
-        <button class="navitem" id="nav-ranked" onclick="show('ranked',this)"><span class="ni-icon">🪜</span><span class="brand-text">Ranked Ladder</span></button>
+        <button class="navitem" id="nav-lobby" onclick="show('lobby',this)"><span class="ni-icon">⚔</span><span class="brand-text">Offline Play</span></button>
+        <button class="navitem" id="nav-ranked" onclick="pvpSetMode(3);show('online',this)"><span class="ni-icon">🪜</span><span class="brand-text">Ranked Ladder</span></button>
         <button class="navitem" id="nav-pvp" onclick="show('pvp',this)"><span class="ni-icon">🩸</span><span class="brand-text">Staked PvP</span></button>
         <button class="navitem" id="nav-online" onclick="show('online',this)"><span class="ni-icon">🌐</span><span class="brand-text">Online</span></button>
       </div>
@@ -2657,8 +2657,8 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="hub-modes">
         <div class="hc-label">Play — choose your mode</div>
         <div class="hub-actions">
-          <button class="hub-action ha-hero" style="--accent:#F5C24D" onclick="show('ranked', document.getElementById('nav-ranked'))"><span class="ha-icon">🪜</span><span class="ha-txt"><span class="ha-eyebrow">Featured</span><span class="ha-title">Ranked Ladder</span><span class="ha-sub">Matchmade duels — ascend the ranks and claim your standing</span></span><span class="ha-arrow">→</span></button>
-          <button class="hub-action" style="--accent:#5BC0EB" onclick="show('lobby', document.getElementById('nav-lobby'))"><span class="ha-icon">⚔</span><span class="ha-txt"><span class="ha-title">Public Server</span><span class="ha-sub">All cards · casual · zero consequence</span></span><span class="ha-arrow">→</span></button>
+          <button class="hub-action ha-hero" style="--accent:#F5C24D" onclick="pvpSetMode(3);show('online', document.getElementById('nav-ranked'))"><span class="ha-icon">🪜</span><span class="ha-txt"><span class="ha-eyebrow">Featured</span><span class="ha-title">Ranked Ladder</span><span class="ha-sub">Real PvP, matchmade — ascend the ranks and claim your standing</span></span><span class="ha-arrow">→</span></button>
+          <button class="hub-action" style="--accent:#5BC0EB" onclick="show('lobby', document.getElementById('nav-lobby'))"><span class="ha-icon">⚔</span><span class="ha-txt"><span class="ha-title">Offline Play</span><span class="ha-sub">All cards · casual · zero consequence</span></span><span class="ha-arrow">→</span></button>
           <button class="hub-action" style="--accent:#E0503C" onclick="show('pvp', document.getElementById('nav-pvp'))"><span class="ha-icon">🩸</span><span class="ha-txt"><span class="ha-title">Staked PvP</span><span class="ha-sub">Wager cards · winner takes them</span></span><span class="ha-arrow">→</span></button>
           <button class="hub-action" style="--accent:#7C8CF8" onclick="show('draft', document.getElementById('nav-draft')); buildDraft()"><span class="ha-icon">🌀</span><span class="ha-txt"><span class="ha-title">Draft</span><span class="ha-sub">Pull twenty from the vortex — keep every card</span></span><span class="ha-arrow">→</span></button>
           <button class="hub-action" style="--accent:#C88CF5" onclick="show('asc', document.getElementById('nav-asc'))"><span class="ha-icon">👑</span><span class="ha-txt"><span class="ha-title">Ascension · The Rite</span><span class="ha-sub">Forge one card through a gauntlet of duels</span></span><span class="ha-arrow">→</span></button>
@@ -2968,7 +2968,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   <div class="view" id="v-lobby">
     <div class="lobby">
       <div class="lobby-head">
-        <div class="lh-eyebrow">Public Server · Free Testing</div>
+        <div class="lh-eyebrow">Offline Play · Free Testing</div>
         <h1>Choose your opponent</h1>
         <p><strong>Test any deck, consequence-free.</strong> This is the <strong style="color:var(--electric)">only</strong> place a card can lose a duel with <strong>no mark on its record or chain history</strong> — the safe ground to try builds and learn matchups. Play your own deck, or hit <strong style="color:var(--gold)">Sandbox</strong> for a random all-card deck. Histories are forged in <strong>Ranked</strong>; value is earned in <strong>Ranked &amp; Staked</strong>.</p>
       </div>
@@ -9071,7 +9071,7 @@ function nextTurn(){
   openTurn();
 }
 
-const SCREEN_TITLES = {hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Public Server',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'Signal Forge Online',draft:'Draft',asc:'Ascension · The Rite',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile'};
+const SCREEN_TITLES = {hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Offline Play',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'Signal Forge Online',draft:'Draft',asc:'Ascension · The Rite',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile'};
 function toggleSidebar(){ document.body.classList.toggle('nav-collapsed'); }
 function toggleNavGroup(id){ var g=document.getElementById(id); if(!g) return; var wasOpen=g.classList.contains('open'); document.querySelectorAll('.nav-group').forEach(function(x){ x.classList.remove('open'); }); if(!wasOpen) g.classList.add('open'); }
 function show(id, btn){
@@ -11261,6 +11261,7 @@ function _renderAccountPanel(){
         '<button class="on-tab'+(PVP.bestOf===7?' sel':'')+'" onclick="pvpSetMode(7)">Public · Best of 7</button>'+
         '<button class="on-tab'+(PVP.bestOf===3?' sel':'')+'" onclick="pvpSetMode(3)">Ranked · Best of 3</button>'+
       '</div>'+
+      (PVP.bestOf===3 ? '<p class="on-sub" style="margin:10px 0 0">🏅 <b style="color:var(--gold)">'+rankTier(rankRP)+'</b> · '+fmtPts(rankRP)+' RP — your Ladder Rank</p>' : '')+
       (PVP.queueTimer
         ? '<p class="on-sub" style="margin:12px 0 0">🔎 Searching for an opponent…</p>'+
           '<button class="on-btn ghost" onclick="pvpLeaveQueue()">Cancel</button>'
@@ -11285,7 +11286,40 @@ function _renderAccountPanel(){
 }
 
 // ── PvP match state (Phase 5.0b, 8/6/26) ──────────────────────────────────────────────────────
-const PVP = {pvpId:null, opponent:null, bestOf:7, queueTimer:null, stateTimer:null, view:null, selectedUid:null, selectedRgUids:[], challengeCode:null, challengeTimer:null};
+const PVP = {pvpId:null, opponent:null, bestOf:7, queueTimer:null, stateTimer:null, view:null, selectedUid:null, selectedRgUids:[], challengeCode:null, challengeTimer:null, rankAwardedFor:null};
+
+// Ranked Ladder (8/6/26): owner's explicit call ("port it onto real PvP results") -- keeps the
+// existing Bronze->Master tier/Bounty/season-reward economy exactly as it was (rankRP, rankTier(),
+// bountyRankMult(), seasonWins/winStreak), just feeds it from a real Online match instead of the
+// old bot ladder. A real match counts as ranked when its own bestOf===3, matching the "Ranked ·
+// Best of 3" toggle Online already had -- no new server state needed to know which mode it was.
+// The old bot ladder's RP/Signal/Bounty swing scaled with a player-chosen wager stake
+// (matchWager*stakeMult, index.html:5115-5118) that has no equivalent against a real opponent --
+// building a whole stake-picker for Online was not what "port the economy" asked for, so this uses
+// a flat per-match RP swing instead and re-uses the OLD formulas' exact ratios against it (Signal:
+// 3000/100RP on a win, 30% consolation on a loss; Bounty: 5/100RP × the same bountyRankMult()).
+// Guarded by rankAwardedFor since _renderPvpMatch repaints the same done:true view on every poll
+// tick after the match already ended -- must fire exactly once.
+function _pvpAwardRankedIfDone(v){
+  if(!v.done || v.bestOf!==3 || v.youWon==null) return;
+  if(PVP.rankAwardedFor===v.pvpId) return;
+  PVP.rankAwardedFor=v.pvpId;
+  var won=v.youWon, dRP=25;
+  rankRP=Math.max(0, rankRP+(won?dRP:-dRP));
+  var sigGain=Math.round(dRP/100*3000*(won?1:0.3));
+  if(sigGain>0) signalPoints+=sigGain;
+  if(won){ seasonWins++; winStreak=(winStreak||0)+1; if(winStreak>bestWinStreak) bestWinStreak=winStreak; }
+  else { seasonLosses++; winStreak=0; }
+  var swing=(won?'+':'−')+fmtPts(dRP)+' RP';
+  if(won){
+    var _mult=bountyRankMult(rankRP);
+    var _bg=Math.max(1,Math.round(dRP/100*5*_mult));
+    bountyBalance+=_bg;
+    if(typeof toast==='function') toast('⭐ '+swing+' · +'+fmtPts(_bg)+' Bounty — '+rankTier(rankRP)+' win (×'+_mult+')', true);
+  } else if(typeof toast==='function') toast('⭐ '+swing+' — '+rankTier(rankRP), false);
+  if(typeof updateBalance==='function') updateBalance();
+  if(typeof saveState==='function') saveState();
+}
 
 function _pvpMsg(text, cls){ var el=document.getElementById('on-pvp-msg'); if(el){ el.textContent=text||''; el.className='on-msg '+(cls||''); } }
 function _pvpOnlineViewShowing(){ var v=document.getElementById('v-online'); return !!(v && v.classList.contains('on')); }
@@ -11352,7 +11386,7 @@ function pvpJoinChallenge(){
 function pvpEnterMatch(pvpId, opponent){
   clearInterval(PVP.queueTimer); PVP.queueTimer=null;
   clearInterval(PVP.challengeTimer); PVP.challengeTimer=null; PVP.challengeCode=null;
-  PVP.pvpId=pvpId; PVP.opponent=opponent; PVP.selectedUid=null; PVP.selectedRgUids=[]; PVP.view=null;
+  PVP.pvpId=pvpId; PVP.opponent=opponent; PVP.selectedUid=null; PVP.selectedRgUids=[]; PVP.view=null; PVP.rankAwardedFor=null;
   if(typeof toast==='function') toast('Matched vs '+opponent+'!', true);
   buildOnline();   // re-enters through the dispatch above, which starts the poll loop + fetches
 }
@@ -11427,6 +11461,7 @@ function _renderPvpMatch(){
   var el = document.getElementById('online-body'); if(!el) return;
   var v = PVP.view;
   if(!v){ el.innerHTML = '<div class="on-panel"><p class="on-sub" style="margin:0">Loading match…</p></div>'; return; }
+  _pvpAwardRankedIfDone(v);
   var need = Math.floor(v.bestOf/2) + 1;
   var cond = pvpCondInfo(v.condition);
 
@@ -11622,8 +11657,8 @@ const GUIDE_TIPS = {
   trade: "Trade lets you send and receive cards with other players. Starters and variants don't leave your hands — everything else can move.",
   shop: "The Shop sells packs for Signal, and cosmetics for Forge. Forge never buys power — only look.",
   market: "The Marketplace is where players list cards for Signal. Prices track a card's real record, so a proven veteran costs more than a fresh mint.",
-  lobby: "Public Server is casual, zero-consequence play — the best place to test a new deck before it matters.",
-  ranked: "Ranked wagers RP on every match and pays real Signal for wins. Best-2-of-3, so every duel counts more than it does elsewhere.",
+  lobby: "Offline Play is casual, zero-consequence practice against the AI — the best place to test a new deck before it matters.",
+  ranked: "Ranked is real PvP against another online account. RP and Signal move on every match, win or lose — Best-2-of-3, so every duel counts more than it does elsewhere.",
   pvp: "Staked PvP wagers actual cards — winner takes them. Only stake what you're really willing to lose.",
   draft: "Draft pulls twenty cards from a shared pool — you keep everything you take, win or lose.",
   asc: "Ascension is a solo run with one card as your Deck Master. Squad choices here can earn real Bonds that follow those cards everywhere else.",
