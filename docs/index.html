@@ -2163,6 +2163,53 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .pvp-floor-btn{font-size:11px;font-weight:700;padding:6px 13px;border-radius:7px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer;transition:border-color .12s,color .12s}
 .pvp-floor-btn:hover{border-color:var(--text3);color:var(--text)}
 .pvp-floor-btn.sel{border-color:var(--lose);color:#f2b8b8;background:rgba(208,106,106,0.12)}
+.on-panel{background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:18px 20px;max-width:440px;margin-bottom:14px}
+.on-panel h3{font-size:14px;color:var(--gold);margin:0 0 3px;letter-spacing:.02em}
+.on-panel .on-sub{font-size:11.5px;color:var(--text3);line-height:1.55;margin:0 0 14px}
+.on-l{display:block;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin:10px 0 3px}
+.on-in{width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:8px 10px;font-size:12.5px;font-family:inherit}
+.on-in:focus{border-color:var(--electric);outline:none}
+.on-btn{background:linear-gradient(180deg,#1a4a54,#0e2833);border:1px solid var(--electric);color:#cfe;font-size:12px;font-weight:700;padding:9px 20px;border-radius:7px;cursor:pointer;margin-top:14px}
+.on-btn:disabled{opacity:.5;cursor:default}
+.on-btn.ghost{background:none;border-color:var(--border2);color:var(--text3);margin-left:8px}
+.on-msg{font-size:11.5px;font-weight:700;margin-top:10px;min-height:15px}
+.on-msg.err{color:var(--lose)}.on-msg.ok{color:var(--win)}
+.on-row{display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border2)}
+.on-row:last-child{border-bottom:none}
+.on-row b{color:var(--gold);font-variant-numeric:tabular-nums}
+.on-tabs{display:flex;gap:7px;margin-bottom:4px}
+.on-tab{font-size:11px;font-weight:700;padding:6px 15px;border-radius:7px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer}
+.on-tab.sel{border-color:var(--electric);color:#cfe;background:rgba(91,192,235,.12)}
+/* Phase 5.0b (8/6/26) — real PvP match screen */
+.on-panel.on-match,.on-panel.on-lastduel,.on-panel.on-final{max-width:640px}
+.on-mhud{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}
+.on-mside{text-align:center;flex:1;min-width:0}
+.on-mname{font-size:12px;font-weight:700;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.on-mscore{font-size:26px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1.2}
+.on-mchg{font-size:11px;color:var(--electric);font-weight:700}
+.on-mvs{font-size:10px;color:var(--text3);text-align:center;flex-shrink:0;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
+.on-cond{display:flex;gap:10px;align-items:flex-start;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px}
+.on-cond-ic{font-size:20px;flex-shrink:0}
+.on-cond b{color:var(--gold)}
+.on-cond-rule{font-size:11px;color:var(--text3);line-height:1.45;margin-top:2px}
+.on-hand{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:4px 0 14px;max-width:560px}
+.on-hc{width:100%;cursor:pointer;border-radius:12px;transition:transform .15s ease;padding-top:6px}
+.on-hc .bigcard.tframe{width:100%}
+.on-hc:hover{transform:translateY(-5px)}
+.on-hc.sel{outline:3px solid var(--gold);outline-offset:3px;transform:translateY(-5px)}
+.on-mfoot{display:flex;gap:8px;margin-top:4px}
+.on-note{font-size:10.5px;color:var(--text3);margin:10px 0 0;font-style:italic}
+.on-lastduel{border-left:3px solid var(--border2)}
+.on-lastduel.win{border-left-color:var(--win)}
+.on-lastduel.lose{border-left-color:var(--lose)}
+.on-lastduel.tie{border-left-color:var(--gold)}
+.on-ld-head{font-size:13px;font-weight:800;color:var(--text);margin-bottom:4px}
+.on-ld-pow{font-size:12px;color:var(--text2);margin-bottom:6px;font-variant-numeric:tabular-nums}
+.on-ld-pow b{color:var(--gold)}
+.on-ld-log{font-size:10.5px;color:var(--text3);line-height:1.6;border-top:1px dashed var(--border2);padding-top:6px;max-height:120px;overflow-y:auto}
+.on-final.win h3{color:var(--win)}
+.on-final.lose h3{color:var(--lose)}
+.on-final.tie h3{color:var(--gold)}
 .approve-overlay{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;background:rgba(5,7,12,0.85);backdrop-filter:blur(3px)}
 .approve-overlay.show{display:flex;animation:wf-in .25s ease}
 .approve-panel{background:linear-gradient(180deg,var(--panel),var(--void));border:1px solid rgba(208,106,106,0.5);border-radius:14px;padding:24px 28px;max-width:460px;width:92%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
@@ -2535,6 +2582,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <button class="navitem" id="nav-lobby" onclick="show('lobby',this)"><span class="ni-icon">⚔</span><span class="brand-text">Public Server</span></button>
         <button class="navitem" id="nav-ranked" onclick="show('ranked',this)"><span class="ni-icon">🪜</span><span class="brand-text">Ranked Ladder</span></button>
         <button class="navitem" id="nav-pvp" onclick="show('pvp',this)"><span class="ni-icon">🩸</span><span class="brand-text">Staked PvP</span></button>
+        <button class="navitem" id="nav-online" onclick="show('online',this)"><span class="ni-icon">🌐</span><span class="brand-text">Online</span></button>
       </div>
     </div>
     <div class="nav-group" id="grp-limited">
@@ -2922,6 +2970,17 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="approve-terms" id="approve-terms"></div>
     <div class="approve-checks"><div class="approve-check" id="approve-you">◯ You</div><div class="approve-check" id="approve-them">◯ Rival</div></div>
     <div class="approve-btns" id="approve-btns"></div>
+  </div>
+</div>
+
+<div class="view" id="v-online" style="flex-direction:column;overflow-y:auto">
+  <div class="lobby">
+    <div class="lobby-head">
+      <div class="lh-eyebrow">Online · Live Server</div>
+      <h1>Signal Forge Online</h1>
+      <p>Your online account lives <strong>on the server</strong>, separate from this device's local progress. Everything on this machine — your Vault, decks, Ascension run — stays exactly as it is and is never uploaded.</p>
+    </div>
+    <div id="online-body"></div>
   </div>
 </div>
 
@@ -9025,7 +9084,7 @@ function nextTurn(){
   openTurn();
 }
 
-const SCREEN_TITLES = {hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Public Server',ranked:'Ranked Ladder',pvp:'Staked PvP',draft:'Draft',asc:'Ascension · The Rite',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile'};
+const SCREEN_TITLES = {hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Public Server',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'Signal Forge Online',draft:'Draft',asc:'Ascension · The Rite',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile'};
 function toggleSidebar(){ document.body.classList.toggle('nav-collapsed'); }
 function toggleNavGroup(id){ var g=document.getElementById(id); if(!g) return; var wasOpen=g.classList.contains('open'); document.querySelectorAll('.nav-group').forEach(function(x){ x.classList.remove('open'); }); if(!wasOpen) g.classList.add('open'); }
 function show(id, btn){
@@ -9047,6 +9106,7 @@ function show(id, btn){
   if(id==='hub'){ buildHub(); grantDailyBonusIfDue(); expeditionRegen(); hubBgReveal(); }
   if(id==='lobby') buildLobby();
   if(id==='pvp') buildPvP();
+  if(id==='online') buildOnline();
   if(id==='asc') buildAscension();
   if(id==='ranked') buildRanked();
   if(id==='dna') buildDNA();
@@ -11008,6 +11068,299 @@ function fillDeckToCap(){ if(typeof activeDeck==='undefined'||activeDeck.size>=D
 const LS = (() => { try { const k='__sf__'; localStorage.setItem(k,'1'); localStorage.removeItem(k); return localStorage; } catch(e){ const m={}; return {getItem:k=>k in m?m[k]:null, setItem:(k,v)=>{m[k]=String(v);}, removeItem:k=>{delete m[k];}}; } })();
 function lsGet(k, def){ try { const v = LS.getItem(k); return v==null ? def : JSON.parse(v); } catch(e){ return def; } }
 function lsSet(k, v){ try { LS.setItem(k, JSON.stringify(v)); } catch(e){} }
+
+// ══ ONLINE (Phase 5.0a, 8/6/26) — the client's first real call to the server, ever ══════════
+// The online account is deliberately SEPARATE from this device's local save. Nothing under
+// SAVE_KEY (Vault, decks, Ascension, currencies) is read or uploaded here, and nothing the
+// server returns is written back into it. The server grants each new account its own fresh
+// starter deck, so online is additive — single-player keeps working offline, untouched.
+// 8/6/26: was the bare droplet IP over plain http:// -- switched to the Cloudflare Tunnel
+// hostname once it was live, since a page served over https:// (GitHub Pages) cannot call an
+// http:// origin at all (mixed content, blocked unconditionally by every browser). This tunnel
+// gives the droplet a real HTTPS certificate without terminating TLS on the box itself.
+const SF_SERVER_DEFAULT = 'https://play.koteitcg.com';
+function sfServer(){ return lsGet('sf_server_url', SF_SERVER_DEFAULT); }
+
+let SF_ONLINE = lsGet('sf_online', null);   // {token,handle} only — server state is always re-fetched, never trusted from disk
+function sfToken(){ return SF_ONLINE && SF_ONLINE.token; }
+function sfSaveSession(o){ SF_ONLINE = o; lsSet('sf_online', o); }
+
+// Callback-style on purpose. Every call site in this file is synchronous; a promise-returning
+// API would force async/await up through callers that have no other reason to change.
+function sfApi(method, path, body, cb){
+  var opt = {method:method, headers:{}};
+  if(body){ opt.headers['Content-Type']='application/json'; opt.body=JSON.stringify(body); }
+  var t = sfToken(); if(t) opt.headers['Authorization'] = 'Bearer ' + t;
+  fetch(sfServer()+path, opt).then(function(r){
+    return r.text().then(function(txt){
+      var data=null; try{ data=JSON.parse(txt); }catch(e){}
+      if(r.status===401 && sfToken()){ sfSaveSession(null); return cb('your session expired — sign in again', null); }
+      if(!r.ok) return cb((data && data.error) || ('server error '+r.status), null);
+      cb(null, data);
+    });
+  }).catch(function(){
+    cb('cannot reach the server at '+sfServer()+' — check that it is running', null);
+  });
+}
+
+// The page's other esc() lives inside a dev-tools IIFE and isn't reachable here.
+function sfEsc(s){ return (''+s).replace(/[&<>"]/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]; }); }
+
+let _onTab = 'login';   // which auth form the Online view is showing
+function onTab(t){ _onTab = t; buildOnline(); }
+function _onMsg(text, cls){ var el=document.getElementById('on-msg'); if(el){ el.textContent=text||''; el.className='on-msg '+(cls||''); } }
+
+function sfAuth(isRegister){
+  var h = (document.getElementById('on-handle')||{}).value || '';
+  var p = (document.getElementById('on-pass')||{}).value || '';
+  h = h.trim();
+  if(h.length < 2 || p.length < 4){ _onMsg('Handle needs 2+ characters, password 4+.', 'err'); return; }
+  var btn = document.getElementById('on-submit'); if(btn) btn.disabled = true;
+  _onMsg(isRegister ? 'Creating account…' : 'Signing in…', '');
+  sfApi('POST', isRegister ? '/api/auth/register' : '/api/auth/login', {handle:h, password:p}, function(err, data){
+    if(btn) btn.disabled = false;
+    if(err){ _onMsg(err, 'err'); return; }
+    sfSaveSession({token:data.token, handle:h});
+    SF_STATE = data.state;
+    buildOnline();
+    toast(isRegister ? 'Account created — you are online' : 'Signed in as '+h, true);
+  });
+}
+
+let SF_STATE = null;   // last /api/state response; in-memory only, refetched on demand
+function sfLogout(){ sfSaveSession(null); SF_STATE=null; buildOnline(); toast('Signed out of online', true); }
+function sfRefresh(){
+  _onMsg('Refreshing…', '');
+  sfApi('GET', '/api/state', null, function(err, data){
+    if(err){ _onMsg(err, 'err'); buildOnline(); return; }
+    SF_STATE = data.state; buildOnline(); _onMsg('Up to date.', 'ok');
+  });
+}
+
+function buildOnline(){
+  var el = document.getElementById('online-body'); if(!el) return;
+  if(!sfToken()){
+    var reg = _onTab === 'register';
+    el.innerHTML =
+      '<div class="on-panel">'+
+        '<div class="on-tabs">'+
+          '<button class="on-tab'+(reg?'':' sel')+'" onclick="onTab(\'login\')">Sign in</button>'+
+          '<button class="on-tab'+(reg?' sel':'')+'" onclick="onTab(\'register\')">Create account</button>'+
+        '</div>'+
+        '<h3 style="margin-top:14px">'+(reg?'Create an online account':'Sign in to your online account')+'</h3>'+
+        '<p class="on-sub">'+(reg
+          ? 'New accounts start fresh on the server with their own Signal grant and starter deck. This does not touch your local collection.'
+          : 'Signing in does not import or overwrite anything on this device.')+'</p>'+
+        '<label class="on-l" for="on-handle">Handle</label>'+
+        '<input class="on-in" id="on-handle" autocomplete="username" spellcheck="false">'+
+        '<label class="on-l" for="on-pass">Password</label>'+
+        '<input class="on-in" id="on-pass" type="password" autocomplete="'+(reg?'new-password':'current-password')+'">'+
+        '<button class="on-btn" id="on-submit" onclick="sfAuth('+(reg?'true':'false')+')">'+(reg?'Create account':'Sign in')+'</button>'+
+        '<div class="on-msg" id="on-msg"></div>'+
+      '</div>'+
+      '<div class="on-panel"><h3>Server</h3><p class="on-sub" style="margin-bottom:0">'+sfServer()+'</p></div>';
+    var f = document.getElementById('on-pass');
+    if(f) f.onkeydown = function(e){ if(e.key==='Enter') sfAuth(reg); };
+    return;
+  }
+  // Phase 5.1 shipped a real two-player match session server-side; a live match takes over this
+  // whole panel until it ends. PVP.pvpId is the dispatch: set -> render/resume the match screen
+  // (and make sure its poll loop is alive, since navigating away from this view is what stops it
+  // -- see pvpStateTick's own self-cleanup below). Unset -> the normal account panel.
+  if(PVP.pvpId){
+    if(!PVP.stateTimer) PVP.stateTimer = setInterval(pvpStateTick, 1500);
+    if(PVP.view) _renderPvpMatch();   // paint the cached view immediately, no loading flash on nav-back
+    pvpFetchState();                  // then always confirm against the server -- state may have moved on while away
+    return;
+  }
+  _renderAccountPanel();
+}
+
+function _renderAccountPanel(){
+  var el = document.getElementById('online-body'); if(!el) return;
+  var u = SF_STATE && SF_STATE.user, n = SF_STATE ? SF_STATE.cards.length : null;
+  el.innerHTML =
+    '<div class="on-panel">'+
+      '<h3>Signed in as '+sfEsc(SF_ONLINE.handle)+'</h3>'+
+      '<p class="on-sub">This account is stored on the server. Your local collection on this device is separate and unaffected.</p>'+
+      (u ? '<div class="on-row"><span>Signal</span><b>'+u.signal.toLocaleString()+'</b></div>'+
+           '<div class="on-row"><span>Forge</span><b>'+u.forge.toLocaleString()+'</b></div>'+
+           '<div class="on-row"><span>Rank Points</span><b>'+u.rp.toLocaleString()+'</b></div>'+
+           '<div class="on-row"><span>Cards on server</span><b>'+n+'</b></div>'
+         : '<p class="on-sub" style="color:var(--text3)">Account details not loaded yet — hit Refresh.</p>')+
+      '<button class="on-btn" onclick="sfRefresh()">Refresh</button>'+
+      '<button class="on-btn ghost" onclick="sfLogout()">Sign out</button>'+
+      '<div class="on-msg" id="on-msg"></div>'+
+    '</div>'+
+    '<div class="on-panel">'+
+      '<h3>Find a match</h3>'+
+      '<p class="on-sub">Real two-player PvP against another online account. <b>Fighter-only for now</b> — rear-guard supports aren\'t wired into Online yet, so every duel is a straight power clash.</p>'+
+      '<div class="on-tabs">'+
+        '<button class="on-tab'+(PVP.bestOf===7?' sel':'')+'" onclick="pvpSetMode(7)">Public · Best of 7</button>'+
+        '<button class="on-tab'+(PVP.bestOf===3?' sel':'')+'" onclick="pvpSetMode(3)">Ranked · Best of 3</button>'+
+      '</div>'+
+      (PVP.queueTimer
+        ? '<p class="on-sub" style="margin:12px 0 0">🔎 Searching for an opponent…</p>'+
+          '<button class="on-btn ghost" onclick="pvpLeaveQueue()">Cancel</button>'
+        : '<button class="on-btn" onclick="pvpFindMatch()">Find Match</button>')+
+      '<div class="on-msg" id="on-pvp-msg"></div>'+
+    '</div>';
+  if(!SF_STATE) sfRefresh();
+}
+
+// ── PvP match state (Phase 5.0b, 8/6/26) ──────────────────────────────────────────────────────
+const PVP = {pvpId:null, opponent:null, bestOf:7, queueTimer:null, stateTimer:null, view:null, selectedUid:null};
+
+function _pvpMsg(text, cls){ var el=document.getElementById('on-pvp-msg'); if(el){ el.textContent=text||''; el.className='on-msg '+(cls||''); } }
+function _pvpOnlineViewShowing(){ var v=document.getElementById('v-online'); return !!(v && v.classList.contains('on')); }
+
+function pvpSetMode(n){ if(PVP.queueTimer||PVP.pvpId) return; PVP.bestOf=n; buildOnline(); }
+
+function pvpFindMatch(){
+  _pvpMsg('Searching…', '');
+  sfApi('POST', '/api/pvp/queue', {mode: PVP.bestOf===3?'ranked':undefined}, function(err, data){
+    if(err){ _pvpMsg(err, 'err'); return; }
+    if(data.matched){ pvpEnterMatch(data.pvpId, data.opponent); return; }
+    if(!PVP.queueTimer) PVP.queueTimer = setInterval(pvpQueueTick, 2000);
+    buildOnline();
+  });
+}
+function pvpQueueTick(){
+  if(!_pvpOnlineViewShowing()){ clearInterval(PVP.queueTimer); PVP.queueTimer=null; return; }
+  sfApi('POST', '/api/pvp/queue', {mode: PVP.bestOf===3?'ranked':undefined}, function(err, data){
+    if(err) return;   // a transient miss on a background poll tick isn't worth interrupting the user over -- the next tick recovers
+    if(data.matched){ clearInterval(PVP.queueTimer); PVP.queueTimer=null; pvpEnterMatch(data.pvpId, data.opponent); }
+  });
+}
+function pvpLeaveQueue(){
+  clearInterval(PVP.queueTimer); PVP.queueTimer=null;
+  sfApi('POST', '/api/pvp/leave', {}, function(){ buildOnline(); });
+}
+
+function pvpEnterMatch(pvpId, opponent){
+  PVP.pvpId=pvpId; PVP.opponent=opponent; PVP.selectedUid=null; PVP.view=null;
+  if(typeof toast==='function') toast('Matched vs '+opponent+'!', true);
+  buildOnline();   // re-enters through the dispatch above, which starts the poll loop + fetches
+}
+function pvpStateTick(){
+  if(!_pvpOnlineViewShowing() || !PVP.pvpId){ clearInterval(PVP.stateTimer); PVP.stateTimer=null; return; }
+  pvpFetchState();
+}
+function pvpFetchState(){
+  if(!PVP.pvpId) return;
+  sfApi('GET', '/api/pvp/state?pvpId='+encodeURIComponent(PVP.pvpId), null, function(err, data){
+    if(err) return;   // one missed tick isn't worth surfacing -- the next tick recovers
+    if(!PVP.pvpId) return;   // the user forfeited/exited while this request was in flight
+    if(data.seq !== (PVP.view ? PVP.view.seq : -1)) PVP.selectedUid=null;   // a new duel started -- any stale selection no longer applies
+    PVP.view = data;
+    _renderPvpMatch();
+  });
+}
+function pvpSelectCard(uid){ PVP.selectedUid = uid; _renderPvpMatch(); }
+function pvpCommit(){
+  if(!PVP.selectedUid || !PVP.pvpId) return;
+  sfApi('POST', '/api/pvp/commit', {pvpId:PVP.pvpId, cardUid:PVP.selectedUid}, function(err, data){
+    if(err){ _pvpMsg(err, 'err'); return; }
+    PVP.selectedUid=null; PVP.view=data; _renderPvpMatch();
+  });
+}
+function pvpForfeit(){
+  if(!PVP.pvpId) return;
+  if(!confirm('Forfeit this match? Your opponent will be credited the win.')) return;
+  sfApi('POST', '/api/pvp/forfeit', {pvpId:PVP.pvpId}, function(err, data){
+    if(err){ _pvpMsg(err, 'err'); return; }
+    PVP.view=data; _renderPvpMatch();
+  });
+}
+function pvpExitMatch(){
+  clearInterval(PVP.stateTimer); PVP.stateTimer=null;
+  PVP.pvpId=null; PVP.opponent=null; PVP.view=null; PVP.selectedUid=null;
+  sfRefresh();   // the match likely paid out Signal/RP -- refetch before the account panel shows again
+}
+
+// Builds a real card object for bigCardHTML() from a server hand entry ({uid,type,k,d}) by
+// looking up the base printing the same way the rest of this file already does (COLLECTION.find
+// ...&& !x.uid), then layering the uid + this account's REAL per-card k/d on top. Note the field
+// names: kdOf()'s fallback path (index.html ~10661) reads c.kills/c.deaths, not c.k/c.d -- easy to
+// get backwards since the server payload itself uses k/d.
+function pvpCardObj(handEntry){
+  var base = (typeof COLLECTION!=='undefined') ? COLLECTION.find(function(x){ return x.name===handEntry.type && !x.uid; }) : null;
+  var c = base ? Object.assign({}, base) : {name:handEntry.type, pow:0, rarity:'common'};
+  c.uid = handEntry.uid; c.kills = handEntry.k||0; c.deaths = handEntry.d||0;
+  return c;
+}
+function pvpCondInfo(id){
+  var c = (typeof CONDITIONS!=='undefined') ? CONDITIONS.find(function(x){ return x.id===id; }) : null;
+  return c || {name:id, rule:'', icon:'❔'};
+}
+
+function _renderPvpMatch(){
+  var el = document.getElementById('online-body'); if(!el) return;
+  var v = PVP.view;
+  if(!v){ el.innerHTML = '<div class="on-panel"><p class="on-sub" style="margin:0">Loading match…</p></div>'; return; }
+  var need = Math.floor(v.bestOf/2) + 1;
+  var cond = pvpCondInfo(v.condition);
+
+  var head =
+    '<div class="on-panel on-match">'+
+      '<div class="on-mhud">'+
+        '<div class="on-mside"><div class="on-mname">'+sfEsc(SF_ONLINE.handle)+' (you)</div><div class="on-mscore">'+v.you.score+'</div><div class="on-mchg">⚡'+v.you.charge+'</div></div>'+
+        '<div class="on-mvs">Best of '+v.bestOf+'<br>first to '+need+'</div>'+
+        '<div class="on-mside"><div class="on-mname">'+sfEsc(v.opponent)+'</div><div class="on-mscore">'+v.them.score+'</div><div class="on-mchg">⚡'+v.them.charge+'</div></div>'+
+      '</div>'+
+      '<div class="on-cond"><span class="on-cond-ic">'+(cond.icon||'❔')+'</span><div><b>'+sfEsc(cond.name||v.condition)+'</b><div class="on-cond-rule">'+sfEsc(cond.rule||'')+'</div></div></div>'+
+    '</div>';
+
+  var lastHtml = '';
+  if(v.lastDuel){
+    var ld = v.lastDuel;
+    var cls = ld.outcome==='win' ? 'win' : (ld.outcome==='lose' ? 'lose' : (ld.outcome==='opponent_forfeit' ? 'win' : (ld.outcome==='forfeit' ? 'lose' : 'tie')));
+    var verdict = ld.outcome==='win' ? '✅ You won the duel'
+                : ld.outcome==='lose' ? '❌ You lost the duel'
+                : ld.outcome==='forfeit' ? '🏳 You withdrew'
+                : ld.outcome==='opponent_forfeit' ? '🏳 Opponent withdrew — the match is yours'
+                : '🤝 Duel tied';
+    lastHtml =
+      '<div class="on-panel on-lastduel '+cls+'">'+
+        '<div class="on-ld-head">'+verdict+'</div>'+
+        (ld.yourPow!=null ? '<div class="on-ld-pow">'+sfEsc(ld.yourCard||'')+' <b>'+ld.yourPow+'</b> vs <b>'+ld.theirPow+'</b> '+sfEsc(ld.opponent||'')+'</div>' : '')+
+        (ld.log && ld.log.length ? '<div class="on-ld-log">'+ld.log.map(function(l){ return '<div>'+sfEsc(l)+'</div>'; }).join('')+'</div>' : '')+
+      '</div>';
+  }
+
+  var body = '';
+  if(v.done){
+    var wonCls = v.youWon===true ? 'win' : (v.youWon===false ? 'lose' : 'tie');
+    var wonText = v.youWon===true ? 'You won the match!' : (v.youWon===false ? 'You lost the match.' : 'The match ended in a draw.');
+    body =
+      '<div class="on-panel on-final '+wonCls+'">'+
+        '<h3>'+wonText+'</h3>'+
+        '<p class="on-sub">Final score '+v.you.score+' – '+v.them.score+' vs '+sfEsc(v.opponent)+'.</p>'+
+        '<button class="on-btn" onclick="pvpExitMatch()">Back to Online</button>'+
+      '</div>';
+  } else if(v.you.committed && !v.them.committed){
+    body =
+      '<div class="on-panel"><p class="on-sub" style="margin:0 0 10px">⏳ Waiting for '+sfEsc(v.opponent)+' to commit…</p>'+
+        '<button class="on-btn ghost" onclick="pvpForfeit()">Forfeit match</button></div>';
+  } else if(!v.you.committed){
+    body =
+      '<div class="on-panel">'+
+        '<h3 style="margin-bottom:10px">Choose your fighter</h3>'+
+        '<div class="on-hand">'+v.you.hand.map(function(hc){
+          var c = pvpCardObj(hc);
+          var sel = PVP.selectedUid===hc.uid ? ' sel' : '';
+          return '<div class="on-hc'+sel+'" onclick="pvpSelectCard(\''+hc.uid+'\')">'+bigCardHTML(c)+'</div>';
+        }).join('')+'</div>'+
+        '<div class="on-mfoot">'+
+          '<button class="on-btn"'+(PVP.selectedUid?'':' disabled')+' onclick="pvpCommit()">Commit</button>'+
+          '<button class="on-btn ghost" onclick="pvpForfeit()">Forfeit match</button>'+
+        '</div>'+
+        '<div class="on-msg" id="on-pvp-msg"></div>'+
+        '<p class="on-note">Fighter-only for now — rear-guard supports aren\'t wired into Online yet.</p>'+
+      '</div>';
+  }
+  el.innerHTML = head + lastHtml + body;
+}
 
 // ══ DECK MASTER (Phase B, 7/11/26) — one standalone persisted pick, same idiom as selectedCardBack below.
 // Deliberately NOT nested inside deckPresets' flat {name:[cardKeys]} shape — reshaping that would mean
