@@ -4892,13 +4892,13 @@ function stakeChipsHTML(mult){
   return '<span class="ms-chips">'+rungs.map(function(r){ return '<span class="ms-chip'+(r===mult?' on':'')+'">'+(r===MAX_MULT?'MAX':'×'+r)+'</span>'; }).join('')+'</span>';
 }
 function updateStake(){
-  const _hud=document.querySelector('.wager-hud'); const _free=!pvpMode && !rankedMode;
+  const _hud=document.querySelector('.wager-hud'); const _free=!pvpMode && !rankedMode && !lobbyMode;
   if(_hud) _hud.style.display = _free ? 'none' : 'flex';
-  if(_free) return;   // Play vs Bot is casual — no rank stake, no snap
+  if(_free) return;   // no other mode (e.g. Staked PvP's own separate screen) stakes anything here
   const el=document.getElementById('match-stake');
   if(el){
     if(pvpMode){ el.innerHTML='<span class="ms-label">Pot</span><span class="ms-pot" style="color:#f2b8b8">🩸 '+(pvpPotMine||[]).length+' v '+(pvpPotTheirs||[]).length+'</span>'; }
-    else { const stake=matchWager*stakeMult; el.innerHTML='<span class="ms-label">Rank</span><span class="ms-pot">±'+fmtPts(stake)+' RP</span>'+stakeChipsHTML(stakeMult); }
+    else { el.innerHTML='<span class="ms-label">'+(rankedMode?'Rank':'Stake')+'</span><span class="ms-pot">±'+fmtPts(_stakeDisplayAmt(stakeMult))+' '+_stakeUnit()+'</span>'+stakeChipsHTML(stakeMult); }
   }
   const rb=document.getElementById('hud-raise-btn');
   if(rb){
@@ -4919,8 +4919,17 @@ function afterResult(){
   if(window._afterResultBusy) return; window._afterResultBusy=true; setTimeout(function(){ window._afterResultBusy=false; }, 500);
   if(matchComplete){ matchComplete=false; resetMatchState(); return; }
   if(matchOver()){ matchComplete=true; showMatchComplete(); return; }
-  if((rankedMode||pvpMode) && typeof enterWagerPhase==='function'){ enterWagerPhase(); } else { nextTurn(); }
+  if((rankedMode||pvpMode||lobbyMode) && typeof enterWagerPhase==='function'){ enterWagerPhase(); } else { nextTurn(); }
 }
+// Offline Play stakes (8/6/26, owner ask): the raise/stake mechanic was ranked+pvpMode only --
+// wired lobbyMode into the same wager phase below so casual matches get the same raise/counter-
+// raise interaction, but its Signal payout is 20% of the ranked rate (showMatchComplete() below),
+// never RP (Offline Play has no ladder standing to move) and never Bounty (stays ranked-skill-only,
+// per its own existing comment there). These three helpers keep every "stake amount + unit" spot in
+// the wager UI consistent across both modes instead of repeating the branch at each call site.
+function _stakeUnit(){ return rankedMode ? 'RP' : 'Signal'; }
+function _lobbySignalStake(mult){ return Math.round((matchWager*mult)/100*3000*0.2); }   // win-case preview, 20% of the ranked Signal-per-100-RP-stake rate
+function _stakeDisplayAmt(mult){ return rankedMode ? (matchWager*mult) : _lobbySignalStake(mult); }
 let wagerTimer=null, wagerLeft=15, playerReady=false, botReady=false, wagerDone=false, raisedThisPhase=false;
 let pendingBotRaise=0;   // a rival raise proposal awaiting YOUR agreement (0 = none)
 const MAX_MULT=8;   // rank stake caps at x8 (max 160 RP/match) — prevents tier-skipping exploits
@@ -4933,21 +4942,20 @@ function enterWagerPhase(){
   const ov=document.getElementById('wager-overlay'); if(ov) ov.classList.add('show');
   const rg=document.getElementById('wager-ring'); if(rg){ rg.textContent='15'; rg.classList.remove('low'); }
   if(pvpMode) enterWagerPvP();
-  else renderWager('The rank wager stands. <b>Raise</b> to escalate — or continue to the next duel.');
+  else renderWager((rankedMode ? 'The rank wager stands.' : 'The Signal stake stands.')+' <b>Raise</b> to escalate — or continue to the next duel.');
   if(wagerTimer) clearInterval(wagerTimer);
   wagerTimer=setInterval(()=>{ wagerLeft--; const r=document.getElementById('wager-ring'); if(r){ r.textContent=Math.max(0,wagerLeft); if(wagerLeft<=5) r.classList.add('low'); } if(wagerLeft<=0) proceedFromWager(); }, 1000);
   setTimeout(botWagerDecision, 1300 + (hashStr(((activeBot&&activeBot.id)||'x'))%1400));
 }
 function renderWager(statusMsg){
-  const stake=matchWager*stakeMult;
   const botName=(activeBot&&activeBot.name)||'Rival';
   const lockedOut = raiseLock==='bot' && !isTiebreakerDuel();
-  const st=document.getElementById('wager-stake'); if(st) st.innerHTML='Rank on the line · <b>'+fmtPts(stake)+' RP</b> · ×'+stakeMult+(stakeMult>=MAX_MULT?' · <span style="color:var(--text3)">max stake</span>':(raisedThisPhase?' · <span style="color:var(--text3)">raised this turn</span>':(lockedOut?' · <span style="color:var(--text3)">'+botName+'’s turn to raise</span>':'')));
+  const st=document.getElementById('wager-stake'); if(st) st.innerHTML=(rankedMode?'Rank':'Signal')+' on the line · <b>'+fmtPts(_stakeDisplayAmt(stakeMult))+' '+_stakeUnit()+'</b> · ×'+stakeMult+(stakeMult>=MAX_MULT?' · <span style="color:var(--text3)">max stake</span>':(raisedThisPhase?' · <span style="color:var(--text3)">raised this turn</span>':(lockedOut?' · <span style="color:var(--text3)">'+botName+'’s turn to raise</span>':'')));
   const status=document.getElementById('wager-status'); if(status) status.innerHTML=statusMsg||'';
   const btns=document.getElementById('wager-btns'); if(!btns) return;
   const canRaise = !raisedThisPhase && stakeMult<MAX_MULT && !playerReady && !lockedOut;
   btns.innerHTML =
-    (canRaise ? '<button class="wager-btn raise" onclick="playerRaise()">⚡ Raise → ×'+(stakeMult*2)+' · '+fmtPts(matchWager*stakeMult*2)+' RP</button>' : '')+
+    (canRaise ? '<button class="wager-btn raise" onclick="playerRaise()">⚡ Raise → ×'+(stakeMult*2)+' · '+fmtPts(_stakeDisplayAmt(stakeMult*2))+' '+_stakeUnit()+'</button>' : '')+
     '<button class="wager-btn ready '+(playerReady?'on':'')+'" onclick="playerReadyUp()" '+(playerReady?'disabled':'')+'>'+(playerReady?'✓ Ready — waiting on '+botName+'…':'Continue →')+'</button>';
 }
 function playerReadyUp(){ if(wagerDone) return; playerReady=true; renderWager(botReady?'Both ready — advancing…':'You are ready. Waiting on the rival…'); checkBothReady(); }
@@ -4975,8 +4983,8 @@ function playerRaise(){
   const botLeads=playerScore[1]>=playerScore[0];
   const botAccepts=botLeads||Math.random()<0.55;
   raiseLock='bot';
-  if(botAccepts){ stakeMult=Math.min(MAX_MULT, stakeMult*2); updateStake(); playerReady=false; botReady=true; renderWager(botName+' <b>matched</b> — stake is now ×'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP). Continue when ready. <span style="color:var(--text3)">('+botName+'’s turn to raise next)</span>'); }
-  else { updateStake(); renderWager(botName+' <b>declined</b> — stake stays ×'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP). Continue when ready. <span style="color:var(--text3)">('+botName+'’s turn to raise next)</span>'); }
+  if(botAccepts){ stakeMult=Math.min(MAX_MULT, stakeMult*2); updateStake(); playerReady=false; botReady=true; renderWager(botName+' <b>matched</b> — stake is now ×'+stakeMult+' ('+fmtPts(_stakeDisplayAmt(stakeMult))+' '+_stakeUnit()+'). Continue when ready. <span style="color:var(--text3)">('+botName+'’s turn to raise next)</span>'); }
+  else { updateStake(); renderWager(botName+' <b>declined</b> — stake stays ×'+stakeMult+' ('+fmtPts(_stakeDisplayAmt(stakeMult))+' '+_stakeUnit()+'). Continue when ready. <span style="color:var(--text3)">('+botName+'’s turn to raise next)</span>'); }
 }
 function botRaise(){
   if(wagerDone || raisedThisPhase || stakeMult>=MAX_MULT) return;
@@ -4985,7 +4993,7 @@ function botRaise(){
   stakeMult=Math.min(MAX_MULT, stakeMult*2); updateStake(); botReady=false; playerReady=false;
   raiseLock='player';
   const botName=(activeBot&&activeBot.name)||'Rival';
-  renderWager('⚡ <b>'+botName+' RAISED</b> to ×'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP). Match it or decline.');
+  renderWager('⚡ <b>'+botName+' RAISED</b> to ×'+stakeMult+' ('+fmtPts(_stakeDisplayAmt(stakeMult))+' '+_stakeUnit()+'). Match it or decline.');
   const btns=document.getElementById('wager-btns'); if(!btns) return;
   btns.innerHTML =
     '<button class="wager-btn raise" onclick="matchRaise()">Match ×'+stakeMult+'</button>'+
@@ -4998,7 +5006,7 @@ function declineBotRaise(preMult){
   if(wagerDone) return;
   stakeMult=preMult; updateStake();
   const botName=(activeBot&&activeBot.name)||'Rival';
-  renderWager('You declined — stake stays ×'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP). Continue when ready. <span style="color:var(--text3)">(your turn to raise next)</span>');
+  renderWager('You declined — stake stays ×'+stakeMult+' ('+fmtPts(_stakeDisplayAmt(stakeMult))+' '+_stakeUnit()+'). Continue when ready. <span style="color:var(--text3)">(your turn to raise next)</span>');
 }
 function matchRaise(){ if(wagerDone) return; renderWager('Raise matched at ×'+stakeMult+'. Advancing…'); playerReady=true; botReady=true; setTimeout(proceedFromWager,400); }
 function proceedFromWager(){
@@ -5013,7 +5021,7 @@ function hudFold(){ if(matchComplete||matchOver()) return; if(pvpMode){ pvpEndMa
 function hudRaise(){
   if(matchComplete||matchOver()) return;
   // Agree to a rival's pending raise -> stake scales
-  if(pendingBotRaise){ stakeMult=pendingBotRaise; pendingBotRaise=0; updateStake(); toast('You agreed - stake is now x'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP).', true); return; }
+  if(pendingBotRaise){ stakeMult=pendingBotRaise; pendingBotRaise=0; updateStake(); toast('You agreed - stake is now x'+stakeMult+' ('+fmtPts(_stakeDisplayAmt(stakeMult))+' '+_stakeUnit()+').', true); return; }
   if(raisedThisPhase){ toast('You already proposed a raise this turn.', false); return; }
   if(pvpMode){
     if((pvpPotMine||[]).length>=MAX_POT){ toast('Your pot is full ('+MAX_POT+' cards).', false); return; }
@@ -5034,7 +5042,7 @@ function hudRaise(){
   const botLeads=playerScore[1]>playerScore[0];
   const agrees = botLeads || Math.random()<0.5;
   raiseLock='bot';
-  if(agrees){ stakeMult=proposed; updateStake(); toast('You raised - '+rival+' agreed. Stake is now x'+stakeMult+' ('+fmtPts(matchWager*stakeMult)+' RP).', true); }
+  if(agrees){ stakeMult=proposed; updateStake(); toast('You raised - '+rival+' agreed. Stake is now x'+stakeMult+' ('+fmtPts(_stakeDisplayAmt(stakeMult))+' '+_stakeUnit()+').', true); }
   else { updateStake(); toast(rival+' declined your raise - stake stays x'+stakeMult+'. ('+rival+'’s turn to raise next)', false); }
 }
 function botMaybeRaise(){
@@ -5118,6 +5126,15 @@ function showMatchComplete(mode, amt){
   if(rankedMode){ const rpAtStake = mode ? amt : (matchWager*stakeMult); sigGain=Math.round(rpAtStake/100*3000*(won?1:0.3)); if(sigGain>0){ signalPoints+=sigGain; updateBalance(); } }  // Ranked: win pays 3000 Signal per 100 RP at stake (7/15/26: 25->3000, sized so 25 base-stake wins = one premier summon). 7/17/26: losses now pay a 30% consolation instead of 0 -- a losing/early-game win rate was making ranked feel unrewarding to grind, especially now the summon pool is just 2 packs. RP/rank-tier/Bounty untouched, they read matchWager*stakeMult before this conversion. (not Play-vs-Bot)
   if(won && rankedMode){ const _rpB = mode ? amt : (matchWager*stakeMult); const _mult=bountyRankMult(rankRP); const _bg=Math.max(1,Math.round(_rpB/100*5*_mult)); bountyBalance+=_bg; if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('\u2b25 +'+fmtPts(_bg)+' Bounty \u2014 '+rankTier(rankRP)+' win (\u00d7'+_mult+')', true); }  // Bounty: EARN-ONLY via ranked skill, rank-scaled
   if(!rankedMode && !pvpMode){ signalPoints += (won ? 180 : 30); }
+  // Offline Play stakes (8/6/26, owner ask): 20% of the ranked Signal rate, ADDITIVE on top of the
+  // flat completion reward just above (not a replacement) -- raising stakes is an optional bonus
+  // path here, not a new baseline. No RP (no ladder standing outside Ranked) and no Bounty (stays
+  // ranked-skill-only, see the Bounty award above).
+  if(lobbyMode){
+    const stakeAtEnd = mode ? amt : (matchWager*stakeMult);
+    const sigGainLobby = Math.round(stakeAtEnd/100*3000*0.2*(won?1:0.3));
+    if(sigGainLobby>0){ signalPoints+=sigGainLobby; swing=(won?'+':'−')+fmtPts(sigGainLobby)+' Signal'; }
+  }
   // Oath (KOTEI §2.3) resolution — checked once, here, at match end. Kept -> payoff on top of
   // whatever Signal this match already paid; broken -> penalty, which must land the player BELOW
   // the no-oath baseline (a real cost), not just cancel the bonus. oathResult persists post-match
@@ -5140,7 +5157,7 @@ function showMatchComplete(mode, amt){
   document.getElementById('me-eyebrow').textContent=`Rebirth Season · Best of ${rankedMode?3:7} · vs ${activeBot?activeBot.name:'Bot'}`+(rankedMode?` · Stake ×${stakeMult}`:' · Casual');
   document.getElementById('me-title').textContent = mode==='retreat-bot' ? 'THEY FOLDED' : mode==='retreat-player' ? 'CLEAN FOLD' : (won?'YOU WON':'YOU LOST');
   document.getElementById('me-score').textContent=`${playerScore[0]} – ${playerScore[1]}`;
-  const _rankPart = rankedMode ? `Rank ${won?'gained':'lost'}: <b style="color:${won?'var(--gold)':'var(--lose)'}">${swing}</b> · now ${fmtPts(rankRP)} RP · ${rankTier(rankRP)}` : 'Casual match — no rank staked, records still count.';
+  const _rankPart = rankedMode ? `Rank ${won?'gained':'lost'}: <b style="color:${won?'var(--gold)':'var(--lose)'}">${swing}</b> · now ${fmtPts(rankRP)} RP · ${rankTier(rankRP)}` : lobbyMode ? `Signal stakes: <b style="color:${won?'var(--gold)':'var(--lose)'}">${swing}</b> — Offline Play, no rank at stake` : 'Casual match — no rank staked, records still count.';
   document.getElementById('me-sub').innerHTML = (mode==='retreat-player'?'Smart fold — your card records stay untouched. ':mode==='retreat-bot'?'They folded — the series is yours, clean. ':(won?'Series taken. ':'Series lost. '))+_rankPart+(sigGain>0?` · <b style="color:var(--gold)">+${fmtPts(sigGain)} ◈</b> Signal`:'');
 }
 function matchEndHome(){
@@ -14665,6 +14682,13 @@ function deckMasterReady(){
 function enterPublicMatch(){
   if(deckMasterReady()){ startDeckMasterMatch(); } else { startMatch(); }
   lobbyMode=true;   // set AFTER startMatch()/startDeckMasterMatch() -- both reset it false internally
+  // 8/6/26: startMatch() calls updateStake() itself mid-setup (resetMatchState()), but lobbyMode is
+  // still false at that exact moment (unlike rankedMode/deckMasterMode, which startMatch() sets from
+  // its own mode param BEFORE that call -- this is the same "flag flipped too late" class of bug the
+  // 7/12/26 fix note above already describes for those two, just never extended to lobbyMode since it
+  // never had render-order-sensitive state before). Re-running it now (idempotent, DOM-only) is the
+  // minimal fix -- it's what makes the Offline Play stakes HUD actually appear.
+  updateStake();
 }
 function playSandbox(){
   if(!selectedBot){ selectedBot = BOT_OPPONENTS[Math.floor(Math.random()*BOT_OPPONENTS.length)].id; }
