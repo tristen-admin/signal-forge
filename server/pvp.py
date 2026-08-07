@@ -156,13 +156,25 @@ def state(user_id, pid):
         return 200, _view(g, you, them)
 
 
+def _hand_view(hand_cards):
+    """Real per-card K/D on each hand card, not a display-only 0/0. The client's own kdOf() keys
+    off a card's uid and falls through to 0/0 for any uid it doesn't recognise — which every online
+    uid is, being a disjoint id space from the device's local save — so without this every online
+    card would silently show as a fresh, untested copy regardless of its actual server record."""
+    out = []
+    for c in hand_cards:
+        r = _record(c["uid"])
+        out.append({**c, "k": r["k"], "d": r["d"]})
+    return out
+
+
 def _view(g, you, them):
     return {
         "pvpId": g["id"], "seq": g["seq"], "duel": g["duel"], "done": g["done"],
         "bestOf": g["bestOf"], "condition": g["condition"],
         "opponent": them["handle"],
         "you": {"score": you["m"]["playerScore"][0], "charge": you["m"]["charge"],
-                "hand": you["hand_cards"], "deckCount": len(you["deck_cards"]),
+                "hand": _hand_view(you["hand_cards"]), "deckCount": len(you["deck_cards"]),
                 "winnersCircleCount": len(you["winners_circle_cards"]),
                 "spellHand": you["m"]["spellHand"], "committed": you["commit"] is not None},
         "them": {"score": them["m"]["playerScore"][0], "charge": them["m"]["charge"],
