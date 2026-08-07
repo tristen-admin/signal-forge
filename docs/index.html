@@ -12585,7 +12585,7 @@ function buildHub(){
     {cls:'cards',icon:'🗄',val:_mine.length,label:'Cards in Vault',sub:pristine+' Pristine'},
     {cls:'record',icon:'⚔',val:seasonWins+'–'+seasonLosses,label:'Season Record',sub:'Rebirth · ranked + staked'},
   ];
-  document.getElementById('hub-stats').innerHTML = stats.map(s=>`
+  const _hs=document.getElementById('hub-stats'); if(_hs) _hs.innerHTML = stats.map(s=>`
     <div class="stat-card ${s.cls}">
       <div class="sc-icon">${s.icon}</div>
       <div class="sc-val">${s.val}</div>
@@ -12902,7 +12902,7 @@ function setKeyword(kw,btn){
   if(typeof updateKwToggle==='function') updateKwToggle();
 }
 function buildKeywordChips(){
-  const el=document.getElementById('vh-kw');
+  const el=document.getElementById('vh-kw'); if(!el) return;
   const present=KW_FILTERABLE.filter(kw=>COLLECTION.some(c=>cardHasKeyword(c,kw)));
   el.innerHTML='<span class="vh-label">Keyword</span>'+
     `<button class="filter-chip on" onclick="setKeyword(null,this)">Any</button>`+
@@ -12921,7 +12921,7 @@ function setArchetype(id,btn){
   if(typeof updateArchToggle==='function') updateArchToggle();
 }
 function buildArchetypeChips(){
-  const el=document.getElementById('vh-arch');
+  const el=document.getElementById('vh-arch'); if(!el) return;
   el.innerHTML='<span class="vh-label">Archetype</span>'+
     `<button class="filter-chip on" onclick="setArchetype(null,this)">Any</button>`+
     ARCHETYPE_PRESETS.map(a=>`<button class="filter-chip" data-arch="${a.id}" title="${a.members.length} cards" onclick="setArchetype('${a.id}',this)">${a.name}</button>`).join('');
@@ -12937,7 +12937,7 @@ function setCamp(camp,btn){
   if(typeof updateCampToggle==='function') updateCampToggle();
 }
 function buildCampChips(){
-  const el=document.getElementById('vh-camp');
+  const el=document.getElementById('vh-camp'); if(!el) return;
   el.innerHTML='<span class="vh-label">Camp</span>'+
     `<button class="filter-chip on" onclick="setCamp(null,this)">Any</button>`+
     Object.keys(CAMP_ICON).map(camp=>`<button class="filter-chip" data-camp="${camp}" onclick="setCamp('${camp}',this)">${CAMP_ICON[camp]} ${camp}</button>`).join('');
