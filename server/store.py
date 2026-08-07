@@ -10,7 +10,10 @@ import sqlite3, os, threading, time, json
 # must be structurally incapable of writing into the real database, not merely careful about it.
 # Default is unchanged, so nothing about a normal run differs.
 DB_PATH = os.environ.get("SF_DB") or os.path.join(os.path.dirname(__file__), "data", "signalforge.db")
-_lock = threading.Lock()
+# RLock, not Lock: tx() holds this for its whole `with` block, and conn().execute() (wrapped
+# below) takes it too -- a write inside `with tx() as c: c.execute(...)` must be able to
+# re-acquire on the same thread without deadlocking against the lock tx() itself is holding.
+_lock = threading.RLock()
 _conn = None
 
 SCHEMA = """
@@ -84,6 +87,16 @@ CREATE TABLE IF NOT EXISTS trades(
   offer_uid TEXT NOT NULL, want_uid TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending',
   created TEXT NOT NULL);
 
+-- 8/7/26: friends list. Same shape as trades above (a two-user relationship row with a status
+-- enum) since that precedent already fits perfectly -- a friend request IS a pending two-user
+-- relationship until accepted, same as a trade is. 'pending' means from_user asked, awaiting
+-- to_user; 'accepted' is mutual. Declines/removals are hard-deleted rather than tombstoned --
+-- there's no need to remember a friendship that never happened or that ended, and a fresh request
+-- after a decline should just start clean rather than resurrecting a dead row.
+CREATE TABLE IF NOT EXISTS friendships(
+  id INTEGER PRIMARY KEY AUTOINCREMENT, from_user TEXT NOT NULL, to_user TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending', created TEXT NOT NULL);
+
 -- secondary market
 CREATE TABLE IF NOT EXISTS listings(
   id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, seller_id TEXT,
@@ -107,11 +120,41 @@ CREATE TRIGGER IF NOT EXISTS chain_no_update BEFORE UPDATE ON ownership_chain BE
 CREATE TRIGGER IF NOT EXISTS chain_no_delete BEFORE DELETE ON ownership_chain BEGIN SELECT RAISE(ABORT,'ownership chain is append-only'); END;
 """
 
+class _FetchedRows:
+    """Stand-in for a cursor whose rows are already pulled: lets _LockedConnection override
+    .execute() without touching any of this codebase's ~50 existing `conn().execute(...)
+    .fetchone()/.fetchall()` call sites. Only .fetchone()/.fetchall()/.lastrowid are shimmed
+    because those are the only cursor members app.py/pvp.py actually call afterward (checked via
+    grep -- no .executemany()/.rowcount()/.description/.cursor() use anywhere on this connection)."""
+    def __init__(self, cursor):
+        self._rows = cursor.fetchall()
+        self.lastrowid = cursor.lastrowid
+    def fetchall(self): return self._rows
+    def fetchone(self): return self._rows[0] if self._rows else None
+
+class _LockedConnection(sqlite3.Connection):
+    """ThreadingHTTPServer hands every request its own thread, and every one of them shares this
+    one connection (check_same_thread=False only turns off Python's same-thread assertion -- the
+    underlying C-level sqlite3 handle still isn't safe for concurrent use by two threads at once).
+    tx() already serializes writes through _lock; overriding .execute() here closes the matching
+    hole on the read side, which every authenticated request hits via app.py's auth_user(). Two
+    concurrent reads/writes racing on the unguarded connection were confirmed (8/7/26) to produce
+    either a dropped connection (client sees net::ERR_EMPTY_RESPONSE) or a spurious no-row 401 on
+    a token that store.py still has on file -- reproduced live via a friends-panel poll firing two
+    parallel GETs, differential-confirmed with curl (same token, 200 OK) seconds after the
+    browser's 401. A plain instance-attribute monkeypatch (`conn.execute = ...`) can't do this --
+    sqlite3.Connection has no instance __dict__ -- so this subclasses via connect()'s factory=
+    instead, the mechanism sqlite3 actually provides for it. Applied once at connect() time, not
+    per-callsite, so it covers every existing read (and any future one) without a 50-site sweep."""
+    def execute(self, sql, params=()):
+        with _lock:
+            return _FetchedRows(super().execute(sql, params))
+
 def conn():
     global _conn
     if _conn is None:
         os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
-        _conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+        _conn = sqlite3.connect(DB_PATH, check_same_thread=False, factory=_LockedConnection)
         _conn.row_factory = sqlite3.Row
         _conn.execute("PRAGMA journal_mode=WAL")
         _conn.executescript(SCHEMA)
