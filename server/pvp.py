@@ -114,17 +114,30 @@ def _sides(g, user_id):
 
 # ── queue ────────────────────────────────────────────────────────────────────────────────────
 def join(user_id, handle, owned, best_of):
-    """Pair with anyone already waiting, else take a place in the queue. Returns (status, body)."""
+    """Pair with anyone already waiting, else take a place in the queue. Returns (status, body).
+
+    8/7/26: Ranked (best_of==3) now prefers the closest-RP candidate already queued instead of pure
+    FIFO -- at this population size there's usually 0-1 other person waiting anyway, so this mostly
+    matters once it matters (multiple ranked queuers at once), and costs nothing when it doesn't
+    (falls straight through to the only candidate). Casual (best_of==7) stays pure FIFO on purpose --
+    it has no rank identity to honor, and speed-of-pairing is the whole point of "casual"."""
     with _LOCK:
         _sweep()
         for g in GAMES.values():
             if not g["done"] and (g["a"]["user_id"] == user_id or g["b"]["user_id"] == user_id):
                 return 200, {"matched": True, "pvpId": g["id"], "already": True}
         QUEUE[:] = [q for q in QUEUE if q["user_id"] != user_id]
-        opp = next((q for q in QUEUE if q["best_of"] == best_of), None)
+        my_rp = 1000
+        if best_of == 3:
+            row = store.conn().execute("SELECT rp FROM users WHERE id=?", (user_id,)).fetchone()
+            if row: my_rp = row["rp"]
+        candidates = [q for q in QUEUE if q["best_of"] == best_of]
+        opp = None
+        if candidates:
+            opp = min(candidates, key=lambda q: abs(q.get("rp", 1000) - my_rp)) if best_of == 3 else candidates[0]
         if not opp:
             QUEUE.append({"user_id": user_id, "handle": handle, "owned": owned,
-                          "best_of": best_of, "joined": time.time()})
+                          "best_of": best_of, "joined": time.time(), "rp": my_rp})
             return 200, {"matched": False, "queued": True, "waiting": len(QUEUE)}
         QUEUE.remove(opp)
         # the player who waited is side A, so seating is by arrival and not by who called last
@@ -168,7 +181,7 @@ def _new_code():
 
 
 # ── private challenges (direct invite by code, bypasses the random queue entirely) ─────────────
-def create_challenge(user_id, handle, owned, best_of):
+def create_challenge(user_id, handle, owned, best_of, target_user_id=None):
     with _LOCK:
         _sweep()
         g = _active_game_for(user_id)
@@ -178,8 +191,20 @@ def create_challenge(user_id, handle, owned, best_of):
         for code in [k for k, ch in CHALLENGES.items() if ch["user_id"] == user_id]:
             del CHALLENGES[code]   # one active challenge per user -- a new one replaces a forgotten stale one
         code = _new_code()
-        CHALLENGES[code] = {"user_id": user_id, "handle": handle, "owned": owned, "best_of": best_of, "created": time.time()}
+        CHALLENGES[code] = {"user_id": user_id, "handle": handle, "owned": owned, "best_of": best_of,
+                             "created": time.time(), "target_user_id": target_user_id}
         return 200, {"code": code}
+
+
+def incoming_challenge(user_id):
+    """-> the pending challenge (if any) a friend has aimed directly at this user, so their client
+    can surface it without them ever typing a code (see h_pvp_challenge_direct in app.py)."""
+    with _LOCK:
+        _sweep()
+        for code, ch in CHALLENGES.items():
+            if ch.get("target_user_id") == user_id:
+                return 200, {"code": code, "fromHandle": ch["handle"]}
+        return 200, {"code": None}
 
 
 def challenge_status(user_id, code):
@@ -216,6 +241,8 @@ def join_challenge(user_id, handle, owned, code):
         ch = CHALLENGES.get(key)
         if not ch: return 404, {"error": "no match found for that code"}
         if ch["user_id"] == user_id: return 400, {"error": "you can't join your own match"}
+        if ch.get("target_user_id") and ch["target_user_id"] != user_id:
+            return 404, {"error": "no match found for that code"}
         del CHALLENGES[key]
         g = _new_game(_new_side(ch["user_id"], ch["handle"], ch["owned"], ch["best_of"]),
                       _new_side(user_id, handle, owned, ch["best_of"]), ch["best_of"])

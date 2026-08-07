@@ -12,6 +12,13 @@ from urllib.parse import parse_qs
 import store, rules, engine, asc, pvp
 
 MATCHES = {}   # in-memory match sessions: match_id -> {user_id, m, hand_cards, deck_cards, condition}
+# 8/7/26: friends-list presence. In-memory, not persisted -- same call as QUEUE/GAMES/CHALLENGES in
+# pvp.py (all ephemeral, all in-memory): "was this account seen recently" doesn't need to survive a
+# restart, and writing it to SQLite on every single request would be real, pointless write load.
+# Refreshed in auth_user() below, so it's free -- every authenticated request already proves the
+# account is active right now, no separate heartbeat endpoint needed.
+PRESENCE = {}      # user_id -> last-seen unix ts
+ONLINE_WINDOW = 45.0   # seconds; comfortably wider than the client's ~20s friends-panel poll
 _SESSION_TTL_DAYS = 30
 _RL = {}   # naive per-key sliding window: key -> (window_start, count)
 def _rate_ok(key, limit=300, window=60):
@@ -307,6 +314,71 @@ def h_user_tradeables(user_id, body):
     cards = store.conn().execute("SELECT uid,type FROM cards WHERE owner_id=? ORDER BY type", (row["id"],)).fetchall()
     return 200, {"cards": [dict(c) for c in cards if not rules.is_starter(c["type"])]}
 
+# ── friends list (8/7/26) ──────────────────────────────────────────────────────────────────────
+def h_friend_request(user_id, body):
+    handle = (body.get("handle") or "").strip()
+    if not handle: return 400, {"error": "enter a handle"}
+    c = store.conn()
+    target = c.execute("SELECT id, handle FROM users WHERE handle=?", (handle,)).fetchone()
+    if not target: return 404, {"error": "no such account"}
+    if target["id"] == user_id: return 400, {"error": "you can't friend yourself"}
+    existing = c.execute(
+        "SELECT * FROM friendships WHERE (from_user=? AND to_user=?) OR (from_user=? AND to_user=?)",
+        (user_id, target["id"], target["id"], user_id)).fetchone()
+    if existing:
+        if existing["status"] == "accepted": return 400, {"error": target["handle"] + " is already your friend"}
+        if existing["from_user"] == user_id: return 400, {"error": "request already sent — waiting on them"}
+        # they'd already sent YOU a pending request -- requesting them back just completes it,
+        # matching how a mutual add works everywhere else (no need to make them click Accept on
+        # a request that's now moot).
+        with store.tx() as cc:
+            cc.execute("UPDATE friendships SET status='accepted' WHERE id=?", (existing["id"],))
+        return 200, {"accepted": True, "handle": target["handle"]}
+    with store.tx() as cc:
+        cc.execute("INSERT INTO friendships(from_user,to_user,status,created) VALUES(?,?,'pending',?)",
+                   (user_id, target["id"], store.now()))
+    return 200, {"requested": True, "handle": target["handle"]}
+
+def h_friend_accept(user_id, body):
+    c = store.conn()
+    f = c.execute("SELECT * FROM friendships WHERE id=? AND status='pending'", (body.get("id"),)).fetchone()
+    if not f: return 404, {"error": "request not found or already resolved"}
+    if f["to_user"] != user_id: return 403, {"error": "only the recipient can accept this request"}
+    with store.tx() as cc:
+        cc.execute("UPDATE friendships SET status='accepted' WHERE id=?", (f["id"],))
+    return 200, {"accepted": True}
+
+def h_friend_decline(user_id, body):
+    """Also used to remove an existing friend -- declining a pending request and ending an accepted
+    friendship are the same action from either side (delete the row), no separate endpoint needed."""
+    c = store.conn()
+    f = c.execute("SELECT * FROM friendships WHERE id=?", (body.get("id"),)).fetchone()
+    if not f: return 404, {"error": "request not found"}
+    if f["to_user"] != user_id and f["from_user"] != user_id: return 403, {"error": "not your request"}
+    with store.tx() as cc:
+        cc.execute("DELETE FROM friendships WHERE id=?", (f["id"],))
+    return 200, {"removed": True}
+
+def h_friend_list(user_id, body):
+    c = store.conn()
+    rows = c.execute("SELECT * FROM friendships WHERE from_user=? OR to_user=?", (user_id, user_id)).fetchall()
+    friends, incoming, outgoing = [], [], []
+    now = time.time()
+    for r in rows:
+        other_id = r["to_user"] if r["from_user"] == user_id else r["from_user"]
+        h = c.execute("SELECT handle FROM users WHERE id=?", (other_id,)).fetchone()
+        handle = h["handle"] if h else "(deleted account)"
+        if r["status"] == "accepted":
+            game = pvp._active_game_for(other_id)
+            online = (now - PRESENCE.get(other_id, 0)) < ONLINE_WINDOW
+            friends.append({"id": r["id"], "handle": handle, "online": online, "inMatch": game is not None})
+        elif r["status"] == "pending" and r["to_user"] == user_id:
+            incoming.append({"id": r["id"], "handle": handle})
+        elif r["status"] == "pending" and r["from_user"] == user_id:
+            outgoing.append({"id": r["id"], "handle": handle})
+    friends.sort(key=lambda f: (not f["online"], f["handle"].lower()))
+    return 200, {"friends": friends, "incoming": incoming, "outgoing": outgoing}
+
 def _load_bonds(user_id):
     return {r["pair"]: r["count"] for r in store.conn().execute("SELECT pair,count FROM bonds WHERE user_id=?", (user_id,)).fetchall()}
 def _owned_cards(user_id):
@@ -517,6 +589,29 @@ def h_pvp_challenge_join(user_id, body):
     if len(owned) < 4: return 400, {"error": "need at least 4 cards in your deck to play"}
     handle = store.conn().execute("SELECT handle FROM users WHERE id=?", (user_id,)).fetchone()["handle"]
     return pvp.join_challenge(user_id, handle, owned, body.get("code"))
+
+# 8/7/26: challenging a friend straight from the Friends panel -- same CHALLENGES mechanism as the
+# code-sharing flow above, just targeted at a specific account instead of handed out as a code to
+# share out-of-band. The challenger still gets a code back (join_challenge's plumbing expects one)
+# but never needs to show it anywhere; the target discovers the challenge by polling
+# h_pvp_challenge_incoming instead of typing a code in.
+def h_pvp_challenge_direct(user_id, body):
+    target_handle = (body.get("handle") or "").strip()
+    if not target_handle: return 400, {"error": "missing target handle"}
+    c = store.conn()
+    target = c.execute("SELECT id FROM users WHERE handle=?", (target_handle,)).fetchone()
+    if not target: return 404, {"error": "no such account"}
+    f = c.execute(
+        "SELECT 1 FROM friendships WHERE status='accepted' AND ((from_user=? AND to_user=?) OR (from_user=? AND to_user=?))",
+        (user_id, target["id"], target["id"], user_id)).fetchone()
+    if not f: return 403, {"error": "you can only direct-challenge a friend"}
+    owned = _pvp_deck(user_id)
+    if len(owned) < 4: return 400, {"error": "need at least 4 cards in your deck to play"}
+    handle = c.execute("SELECT handle FROM users WHERE id=?", (user_id,)).fetchone()["handle"]
+    return pvp.create_challenge(user_id, handle, owned, 3 if body.get("mode") == "ranked" else 7, target_user_id=target["id"])
+
+def h_pvp_challenge_incoming(user_id, body):
+    return pvp.incoming_challenge(user_id)
 def h_pvp_commit(user_id, body):
     return pvp.commit(user_id, body.get("pvpId"), body.get("cardUid"), body.get("rearGuardUids"))
 
@@ -957,6 +1052,12 @@ ROUTES = {
     ("GET", "/api/pvp/challenge/status"): (h_pvp_challenge_status, True),
     ("POST","/api/pvp/challenge/cancel"): (h_pvp_challenge_cancel, True),
     ("POST","/api/pvp/challenge/join"):   (h_pvp_challenge_join, True),
+    ("POST","/api/pvp/challenge/direct"):   (h_pvp_challenge_direct, True),
+    ("GET", "/api/pvp/challenge/incoming"): (h_pvp_challenge_incoming, True),
+    ("POST","/api/friends/request"): (h_friend_request, True),
+    ("POST","/api/friends/accept"):  (h_friend_accept, True),
+    ("POST","/api/friends/decline"): (h_friend_decline, True),
+    ("GET", "/api/friends/list"):    (h_friend_list, True),
     ("GET", "/api/asc/shop"):      (h_asc_shop, True),
     ("POST","/api/asc/loadout"):   (h_asc_loadout, True),
     ("GET", "/api/asc/ally-pool"): (h_asc_ally_pool, True),
@@ -993,6 +1094,7 @@ def auth_user(headers):
             with store.tx() as c: c.execute("DELETE FROM sessions WHERE token=?", (a[7:],))
             return None
     except Exception: pass
+    PRESENCE[row["user_id"]] = time.time()
     return row["user_id"]
 
 class Handler(BaseHTTPRequestHandler):

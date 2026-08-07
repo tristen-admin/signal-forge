@@ -2216,6 +2216,15 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .on-join-row{display:flex;gap:8px;margin-top:10px}
 .on-join-row .on-in{width:auto;flex:1;text-align:center;letter-spacing:.1em}
 .on-join-row .on-btn{margin-top:0;white-space:nowrap}
+/* Friends list + direct challenge (8/7/26) */
+.fr-label{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin:14px 0 3px}
+.fr-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 0;border-bottom:1px solid var(--border2)}
+.fr-row:last-child{border-bottom:none}
+.fr-row .on-btn,.fr-challenge .on-btn{margin-top:0;padding:5px 10px;white-space:nowrap}
+.fr-dot{flex:0 0 auto;font-size:11px}
+.fr-handle{flex:1;color:var(--text)}
+.fr-pending{flex:0 0 auto;font-size:10.5px;color:var(--text3)}
+.fr-challenge{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text);background:rgba(245,194,77,0.08);border:1px solid var(--gold);border-radius:8px;padding:10px 14px;margin-bottom:12px}
 /* Phase 5.0b (8/6/26) — real PvP match screen */
 .on-panel.on-match,.on-panel.on-lastduel,.on-panel.on-final{max-width:640px}
 .on-mhud{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}
@@ -11438,7 +11447,7 @@ function _renderAccountPanel(){
       '</div>'+
       (PVP.bestOf===3 ? '<p class="on-sub" style="margin:10px 0 0">🏅 <b style="color:var(--gold)">'+rankTier(rankRP)+'</b> · '+fmtPts(rankRP)+' RP — your Ladder Rank</p>' : '')+
       (PVP.queueTimer
-        ? '<p class="on-sub" style="margin:12px 0 0">🔎 Searching for an opponent…</p>'+
+        ? '<p class="on-sub" id="on-queue-status" style="margin:12px 0 0">'+_pvpQueueMsg()+'</p>'+
           '<button class="on-btn ghost" onclick="pvpLeaveQueue()">Cancel</button>'
         : '<button class="on-btn" onclick="pvpFindMatch()">Find Match</button>')+
       '<div class="on-msg" id="on-pvp-msg"></div>'+
@@ -11456,12 +11465,124 @@ function _renderAccountPanel(){
             '<input class="on-in" id="on-join-code" placeholder="Friend\'s code" maxlength="6">'+
             '<button class="on-btn" onclick="pvpJoinChallenge()">Join</button>'+
           '</div>')+
+    '</div>'+
+    '<div class="on-panel">'+
+      '<h3>Friends</h3>'+
+      '<p class="on-sub">Add a friend by handle, then challenge them directly — no code to share.</p>'+
+      '<div class="on-join-row">'+
+        '<input class="on-in" id="friend-handle-in" placeholder="Friend\'s handle">'+
+        '<button class="on-btn" onclick="friendRequest()">Add</button>'+
+      '</div>'+
+      '<div id="friends-body"></div>'+
     '</div>';
   if(!SF_STATE) sfRefresh();
+  buildFriendsPanel();
+  if(!_friendsPollTimer) _friendsPollTimer = setInterval(friendsTick, 4000);
+}
+
+// ── Friends list + direct friend-challenge (8/7/26) ──────────────────────────────────────────
+// Deliberately screen-scoped (self-cancels off the Online screen, unlike the queue poller above) --
+// presence/requests aren't as time-critical as a match you're actively waiting on, and every poll
+// here is 2 HTTP calls (list + incoming), not worth keeping alive from every other screen too.
+let _friendsPollTimer = null;
+function friendsTick(){
+  if(!_pvpOnlineViewShowing()){ clearInterval(_friendsPollTimer); _friendsPollTimer=null; return; }
+  if(PVP.pvpId) return;   // an active match owns the panel; resume polling once back at the account view
+  buildFriendsPanel();
+}
+function buildFriendsPanel(){
+  var el = document.getElementById('friends-body'); if(!el) return;
+  var listData=null, incomingData=null, pending=2;
+  function done(){
+    pending--; if(pending>0) return;
+    PVP.incomingChallenge = (incomingData && incomingData.code) ? incomingData : null;
+    el.innerHTML = _friendsPanelHTML(listData || {friends:[], incoming:[], outgoing:[]});
+  }
+  sfApi('GET', '/api/friends/list', null, function(err,data){ if(!err) listData=data; done(); });
+  sfApi('GET', '/api/pvp/challenge/incoming', null, function(err,data){ if(!err) incomingData=data; done(); });
+}
+function _friendsPanelHTML(data){
+  var html = '';
+  if(PVP.incomingChallenge){
+    html += '<div class="fr-challenge">⚔ <b>'+sfEsc(PVP.incomingChallenge.fromHandle)+'</b> challenged you! '+
+            '<button class="on-btn" style="padding:5px 10px" onclick="acceptIncomingChallenge()">Accept</button></div>';
+  }
+  if(PVP.directChallengeCode){
+    html += '<div class="fr-challenge">⏳ Waiting for <b>'+sfEsc(PVP.directChallengeTarget)+'</b> to accept your challenge… '+
+            '<button class="on-btn ghost" style="padding:5px 10px" onclick="cancelDirectChallenge()">Cancel</button></div>';
+  }
+  if(data.incoming && data.incoming.length){
+    html += '<div class="fr-label">Requests</div>' + data.incoming.map(function(r){
+      return '<div class="fr-row"><span class="fr-handle">'+sfEsc(r.handle)+'</span>'+
+             '<button class="on-btn" style="padding:5px 10px" onclick="friendAccept('+r.id+')">Accept</button>'+
+             '<button class="on-btn ghost" style="padding:5px 10px" onclick="friendDecline('+r.id+')">Decline</button></div>';
+    }).join('');
+  }
+  html += '<div class="fr-label">Friends'+(data.friends.length?' ('+data.friends.length+')':'')+'</div>';
+  if(!data.friends.length) html += '<p class="on-sub" style="margin:4px 0">No friends yet — add one by handle above.</p>';
+  else html += data.friends.map(function(f){
+    var busy = f.inMatch || !!PVP.pvpId || !!PVP.queueTimer || !!PVP.directChallengeCode;
+    var status = f.inMatch ? 'In a match' : f.online ? 'Online' : 'Offline';
+    var dot = f.inMatch ? '⚔' : f.online ? '🟢' : '⚫';
+    return '<div class="fr-row"><span class="fr-dot" title="'+status+'">'+dot+'</span><span class="fr-handle">'+sfEsc(f.handle)+'</span>'+
+           (f.online && !busy ? '<button class="on-btn" style="padding:5px 10px" onclick="friendChallenge(\''+f.handle.replace(/'/g,"\\'")+'\')">Challenge</button>' : '<span class="fr-pending">'+status+'</span>')+
+           '<button class="on-btn ghost" style="padding:3px 8px;font-size:10px" onclick="friendDecline('+f.id+')" title="Remove friend">✕</button></div>';
+  }).join('');
+  if(data.outgoing && data.outgoing.length){
+    html += '<div class="fr-label">Sent</div>' + data.outgoing.map(function(r){
+      return '<div class="fr-row"><span class="fr-handle">'+sfEsc(r.handle)+'</span><span class="fr-pending">Pending…</span></div>';
+    }).join('');
+  }
+  return html;
+}
+function friendRequest(){
+  var input = document.getElementById('friend-handle-in');
+  var handle = input ? input.value.trim() : '';
+  if(!handle){ _pvpMsg('Enter a handle first.', 'err'); return; }
+  sfApi('POST', '/api/friends/request', {handle: handle}, function(err, data){
+    if(err){ _pvpMsg(err, 'err'); return; }
+    if(input) input.value='';
+    if(typeof toast==='function') toast(data.accepted ? '🤝 You and '+data.handle+' are now friends!' : '📨 Friend request sent to '+data.handle+'.', true);
+    buildFriendsPanel();
+  });
+}
+function friendAccept(id){ sfApi('POST', '/api/friends/accept', {id:id}, function(err){ if(err){ _pvpMsg(err,'err'); return; } buildFriendsPanel(); }); }
+function friendDecline(id){ sfApi('POST', '/api/friends/decline', {id:id}, function(err){ if(err){ _pvpMsg(err,'err'); return; } buildFriendsPanel(); }); }
+function friendChallenge(handle){
+  sfApi('POST', '/api/pvp/challenge/direct', {handle: handle, mode: PVP.bestOf===3?'ranked':undefined}, function(err, data){
+    if(err){ _pvpMsg(err, 'err'); return; }
+    if(data.matched){ pvpEnterMatch(data.pvpId, data.opponent); return; }
+    PVP.directChallengeCode = data.code; PVP.directChallengeTarget = handle;
+    if(!PVP.directChallengeTimer) PVP.directChallengeTimer = setInterval(_directChallengeTick, 2000);
+    if(typeof toast==='function') toast('⚔ Challenge sent to '+handle+' — waiting for them to accept…', true);
+    buildFriendsPanel();
+  });
+}
+function _directChallengeTick(){
+  if(!_pvpOnlineViewShowing() || !PVP.directChallengeCode){ clearInterval(PVP.directChallengeTimer); PVP.directChallengeTimer=null; return; }
+  sfApi('GET', '/api/pvp/challenge/status?code='+encodeURIComponent(PVP.directChallengeCode), null, function(err, data){
+    if(err) return;
+    if(data.matched){ clearInterval(PVP.directChallengeTimer); PVP.directChallengeTimer=null; PVP.directChallengeCode=null; PVP.directChallengeTarget=null; pvpEnterMatch(data.pvpId, data.opponent); }
+  });
+}
+function cancelDirectChallenge(){
+  clearInterval(PVP.directChallengeTimer); PVP.directChallengeTimer=null; PVP.directChallengeCode=null; PVP.directChallengeTarget=null;
+  sfApi('POST', '/api/pvp/challenge/cancel', {}, function(){ buildFriendsPanel(); });
+}
+function acceptIncomingChallenge(){
+  if(!PVP.incomingChallenge) return;
+  var code = PVP.incomingChallenge.code;
+  _pvpMsg('Joining…', '');
+  sfApi('POST', '/api/pvp/challenge/join', {code: code}, function(err, data){
+    if(err){ _pvpMsg(err, 'err'); return; }
+    PVP.incomingChallenge = null;
+    pvpEnterMatch(data.pvpId, data.opponent);
+  });
 }
 
 // ── PvP match state (Phase 5.0b, 8/6/26) ──────────────────────────────────────────────────────
-const PVP = {pvpId:null, opponent:null, bestOf:7, queueTimer:null, stateTimer:null, view:null, selectedUid:null, selectedRgUids:[], challengeCode:null, challengeTimer:null, rankAwardedFor:null};
+const PVP = {pvpId:null, opponent:null, bestOf:7, queueTimer:null, stateTimer:null, view:null, selectedUid:null, selectedRgUids:[], challengeCode:null, challengeTimer:null, rankAwardedFor:null,
+  lastWaiting:null, incomingChallenge:null, directChallengeCode:null, directChallengeTarget:null, directChallengeTimer:null};
 
 // Ranked Ladder (8/6/26): owner's explicit call ("port it onto real PvP results") -- keeps the
 // existing Bronze->Master tier/Bounty/season-reward economy exactly as it was (rankRP, rankTier(),
@@ -11510,12 +11631,25 @@ function pvpFindMatch(){
     buildOnline();
   });
 }
+// 8/7/26: used to self-cancel via _pvpOnlineViewShowing() the moment you navigated off the Online
+// screen -- meaning a match found while you were, say, checking the Vault produced zero feedback
+// anywhere until you thought to come back and re-poll. pvpStateTick (the IN-match poller) never had
+// this restriction; this brings the queue poller in line with it instead -- keep polling regardless
+// of what's on screen, same as a real matchmaker would, and let pvpEnterMatch's own toast()+PVP.pvpId
+// set do the "seamless" part (you get notified wherever you are, and Online resumes straight into
+// the match next time you look). Only an explicit Cancel (pvpLeaveQueue) or a real match now stops it.
 function pvpQueueTick(){
-  if(!_pvpOnlineViewShowing()){ clearInterval(PVP.queueTimer); PVP.queueTimer=null; return; }
+  if(!PVP.queueTimer) return;
   sfApi('POST', '/api/pvp/queue', {mode: PVP.bestOf===3?'ranked':undefined}, function(err, data){
     if(err) return;   // a transient miss on a background poll tick isn't worth interrupting the user over -- the next tick recovers
-    if(data.matched){ clearInterval(PVP.queueTimer); PVP.queueTimer=null; pvpEnterMatch(data.pvpId, data.opponent); }
+    if(data.matched){ clearInterval(PVP.queueTimer); PVP.queueTimer=null; pvpEnterMatch(data.pvpId, data.opponent); return; }
+    PVP.lastWaiting = data.waiting;
+    if(_pvpOnlineViewShowing() && !PVP.pvpId){ var st=document.getElementById('on-queue-status'); if(st) st.textContent=_pvpQueueMsg(); }
   });
+}
+function _pvpQueueMsg(){
+  var w = PVP.lastWaiting;
+  return '🔎 Searching for an opponent…' + (w!=null && w>0 ? ' ('+w+' other'+(w===1?'':'s')+' waiting)' : '');
 }
 function pvpLeaveQueue(){
   clearInterval(PVP.queueTimer); PVP.queueTimer=null;
@@ -11561,6 +11695,7 @@ function pvpJoinChallenge(){
 function pvpEnterMatch(pvpId, opponent){
   clearInterval(PVP.queueTimer); PVP.queueTimer=null;
   clearInterval(PVP.challengeTimer); PVP.challengeTimer=null; PVP.challengeCode=null;
+  clearInterval(PVP.directChallengeTimer); PVP.directChallengeTimer=null; PVP.directChallengeCode=null; PVP.directChallengeTarget=null;
   PVP.pvpId=pvpId; PVP.opponent=opponent; PVP.selectedUid=null; PVP.selectedRgUids=[]; PVP.view=null; PVP.rankAwardedFor=null;
   if(typeof toast==='function') toast('Matched vs '+opponent+'!', true);
   buildOnline();   // re-enters through the dispatch above, which starts the poll loop + fetches
