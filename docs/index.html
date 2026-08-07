@@ -349,10 +349,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 /* ── HOVER CARD PREVIEW ── */
 #card-preview{position:fixed;z-index:90;width:auto;pointer-events:none;opacity:0;transform:translateX(-50%) scale(0.9);transform-origin:bottom center;transition:opacity 0.13s ease,transform 0.13s ease}
 #card-preview.show{opacity:1;transform:translateX(-50%) scale(1);pointer-events:auto}
-.bigcard{border-radius:12px;border:2px solid;overflow:hidden;position:relative;box-shadow:0 18px 50px rgba(0,0,0,0.75)}
-.bigcard.camp-amageras{border-color:#E8873A;background:linear-gradient(160deg,#3A2408,#1C1002)}
-.bigcard.camp-omitsuki{border-color:#5B2C8F;background:linear-gradient(160deg,#1E1030,#0D0718)}
-.bigcard.camp-kitanoo{border-color:#2D6A4F;background:linear-gradient(160deg,#0D2418,#05140C)}
+.bigcard{border-radius:12px;border:2px solid var(--r-common);overflow:hidden;position:relative;box-shadow:0 18px 50px rgba(0,0,0,0.75);background:linear-gradient(160deg,#1A2232,#0F1620)}
 .bigcard .bc-art{height:158px;background-size:cover;background-position:center top;position:relative;display:flex;align-items:center;justify-content:center}
 .bigcard .bc-art .bc-sigil{font-size:54px;opacity:0.9;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.6))}
 .bigcard .bc-art::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 52%,rgba(7,9,15,0.94))}
@@ -371,16 +368,10 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .tframe .tf-stone{position:absolute;inset:0;z-index:0;pointer-events:none;background-image:var(--frame);background-size:100% 100%;background-position:center;background-repeat:no-repeat;background-blend-mode:hue}
 .tframe .tf-stone.cost{clip-path:circle(6.2% at 13.6% 10.4%)}
 .tframe .tf-stone.pow{clip-path:circle(5.6% at 13.4% 86.6%)}
-.bigcard.tframe.camp-amageras .tf-stone{background-image:linear-gradient(#E8873A,#E8873A),var(--frame)}
-.bigcard.tframe.camp-omitsuki .tf-stone{background-image:linear-gradient(#5B2C8F,#5B2C8F),var(--frame)}
-.bigcard.tframe.camp-kitanoo .tf-stone{background-image:linear-gradient(#2D6A4F,#2D6A4F),var(--frame)}
 .tframe .tf-runes{position:absolute;z-index:0;pointer-events:none;mix-blend-mode:soft-light;opacity:.65}
 .tframe .tf-runes.side-l{left:0;width:16%;top:0;bottom:0}
 .tframe .tf-runes.side-r{right:0;width:16%;top:0;bottom:0}
 .tframe .tf-runes.bottom{left:16%;right:16%;top:79%;bottom:0}
-.bigcard.tframe.camp-amageras .tf-runes{background-color:#E8873A}
-.bigcard.tframe.camp-omitsuki .tf-runes{background-color:#5B2C8F}
-.bigcard.tframe.camp-kitanoo .tf-runes{background-color:#2D6A4F}
 .tframe .tf-art{position:absolute;left:16.2%;right:15.6%;top:16.2%;height:37%;background-size:cover;background-position:center 22%;background-repeat:no-repeat;z-index:1;overflow:hidden;display:flex;align-items:center;justify-content:center}
 .tframe .tf-art::after{content:'';position:absolute;left:0;right:0;bottom:0;height:52%;background:linear-gradient(180deg,transparent,rgba(5,6,11,0.72));pointer-events:none;z-index:2}
 .tframe .tf-art .bc-sigil{font-size:44px;opacity:0.92;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.7))}
@@ -590,7 +581,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 
 /* CARDS */
 .card{
-  flex-shrink:0;border-radius:4px;border:1px solid;
+  flex-shrink:0;border-radius:4px;border:1px solid var(--r-common);
   cursor:pointer;transition:transform 0.12s,box-shadow 0.12s,border-color 0.15s;
   position:relative;overflow:hidden;user-select:none;
 }
@@ -602,9 +593,6 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
   transform:translateY(-6px);
   box-shadow:0 0 0 2px var(--gold),0 8px 24px rgba(212,168,67,0.25);
 }
-.card.camp-amageras{border-color:#E8873A;background:linear-gradient(160deg,#3A2408 0%,#1C1002 100%)}
-.card.camp-omitsuki{border-color:#5B2C8F;background:linear-gradient(160deg,#1E1030 0%,#0D0718 100%)}
-.card.camp-kitanoo{border-color:#2D6A4F;background:linear-gradient(160deg,#0D2418 0%,#05140C 100%)}
 
 /* hand card */
 /* 7/27/26: 120->92px -- hand-row was the single biggest cost in .bottom-hud (163px tall at
@@ -621,7 +609,6 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .hc-called{position:absolute;top:2px;right:3px;font-size:11px;z-index:6;filter:drop-shadow(0 1px 2px #000);pointer-events:none}
 .hc-darwin{position:absolute;bottom:2px;left:2px;font-size:7px;color:#e2c3ff;background:rgba(120,48,184,0.55);border-radius:3px;padding:1px 3px;z-index:6;cursor:pointer;pointer-events:auto}
 .rcard{width:268px;background:linear-gradient(162deg,#17110a,#0b0805);border:1px solid #8a6a2f;border-radius:12px;padding:13px 15px;box-shadow:0 18px 50px rgba(0,0,0,.72);color:var(--text)}
-.rcard.camp-amageras{border-color:#E8873A}.rcard.camp-omitsuki{border-color:#5B2C8F}.rcard.camp-kitanoo{border-color:#2D6A4F}
 .rc-top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
 .rc-cost{background:var(--electric);color:#04141c;font-weight:800;font-size:13px;border-radius:7px;padding:2px 8px;flex-shrink:0}
 .rc-name{flex:1;font-size:15px;font-weight:800;color:#fff;line-height:1.12}
@@ -648,9 +635,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
   position:absolute;top:3px;right:4px;
   font-size:7px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
 }
-.card.camp-amageras .c-rarity{color:#E8873A}
-.card.camp-omitsuki .c-rarity{color:#5B2C8F}
-.card.camp-kitanoo .c-rarity{color:#2D6A4F}
+.card .c-rarity{color:var(--text3)}
 
 /* field card */
 .field-card{width:88px;padding:7px 6px 6px}
@@ -1506,29 +1491,23 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .vault-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:14px}.vault-tracker{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:11px 15px;margin:0 0 14px;background:var(--panel);border:1px solid var(--border);border-radius:11px}.vt-bar-wrap{display:flex;align-items:center;gap:11px;flex:1;min-width:230px}.vt-lbl{font-size:10.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--text2);white-space:nowrap}.vt-bar{flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;min-width:70px}.vt-bar>span{display:block;height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:4px;transition:width .4s ease}.vt-count{font-size:13px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}.vt-count .vt-pct{font-size:11px;color:var(--gold);margin-left:3px}.vt-chips{display:flex;flex-wrap:wrap;gap:6px}.vt-chip{font-size:10px;font-weight:700;padding:2px 9px;border-radius:12px;border:1px solid var(--border2);color:var(--text2);background:var(--surface);white-space:nowrap;font-variant-numeric:tabular-nums}.vt-chip.done{color:var(--gold);border-color:var(--gold);background:var(--gold-glow)}.vt-chip.r-apex{border-left:3px solid var(--r-apex)}.vt-chip.r-ultra{border-left:3px solid var(--r-ultra)}.vt-chip.r-rare{border-left:3px solid var(--r-rare)}.vt-chip.r-common{border-left:3px solid var(--r-common)}
 .vault-empty{grid-column:1/-1;padding:48px 20px;text-align:center;color:var(--text3);font-style:italic;font-size:13px}
 .vault-card{
-  border-radius:10px;border:1px solid;overflow:hidden;cursor:pointer;position:relative;
+  border-radius:10px;border:1px solid var(--r-common);overflow:hidden;cursor:pointer;position:relative;
   transition:transform 0.14s,box-shadow 0.14s;display:flex;flex-direction:column;
   aspect-ratio:3/4.15;
 }
 .vault-card:hover{transform:translateY(-4px)}
-.vault-card.camp-amageras{border-color:#E8873A}
-.vault-card.camp-omitsuki{border-color:#5B2C8F}
-.vault-card.camp-kitanoo{border-color:#2D6A4F}
-.vault-card.camp-amageras:hover{box-shadow:0 10px 26px rgba(232,135,58,0.35)}
-.vault-card.camp-omitsuki:hover{box-shadow:0 10px 26px rgba(91,44,143,0.4)}
-.vault-card.camp-kitanoo:hover{box-shadow:0 10px 26px rgba(45,106,79,0.4)}
 .vc-art{
   flex:1;background-size:cover;background-position:center top;position:relative;
   display:flex;align-items:center;justify-content:center;min-height:0;
 }
 .vc-art .vc-sigil{font-size:44px;opacity:0.9;filter:drop-shadow(0 3px 8px rgba(0,0,0,0.6))}
 .vc-art::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(7,9,15,0.92))}
-.vc-rarity-ribbon{position:absolute;top:7px;left:7px;z-index:2;font-size:7px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;padding:2px 6px;border-radius:3px}
-.vault-card.camp-amageras .vc-rarity-ribbon{background:#E8873A;color:#150E00}
-.vault-card.camp-omitsuki .vc-rarity-ribbon{background:#5B2C8F;color:#fff}
-.vault-card.camp-kitanoo .vc-rarity-ribbon{background:#2D6A4F;color:#fff}
+.vc-rarity-ribbon{position:absolute;top:7px;left:7px;z-index:2;font-size:7px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;padding:2px 6px;border-radius:3px;background:var(--surface2);color:var(--text)}
 .vc-pow{position:absolute;top:6px;right:8px;z-index:2;font-size:19px;font-weight:800;color:#fff;text-shadow:0 2px 6px #000;font-variant-numeric:tabular-nums}
 .vc-pristine{position:absolute;top:30px;right:8px;z-index:2;font-size:8px;font-weight:700;color:var(--gold);text-shadow:0 1px 3px #000}
+.vc-lock{position:absolute;top:46px;right:8px;z-index:6;font-size:11px;line-height:1;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(7,9,15,.78);border:1px solid var(--border2);cursor:pointer;opacity:0;transition:opacity .12s,border-color .12s,background .12s}
+.vault-card:hover .vc-lock{opacity:1}
+.vault-card .vc-lock.on{opacity:1;border-color:var(--gold);background:rgba(245,194,77,.18)}
 .vc-info{padding:0 9px 9px;position:relative;z-index:2;margin-top:-30px}
 .vc-art.vc-frame{background:transparent!important;padding:0;overflow:visible;min-height:0;box-shadow:none!important;flex:none!important}
 .vc-art.vc-frame::after{display:none}
@@ -1569,10 +1548,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .dr-art .dr-sigil{font-size:80px;opacity:0.9;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.7))}
 .dr-art::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,var(--panel))}
 .dr-header{padding:0 16px 14px;margin-top:-56px;position:relative;z-index:2}
-.dr-rarity{font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px}
-.dr-header.camp-amageras .dr-rarity{color:#E8873A}
-.dr-header.camp-omitsuki .dr-rarity{color:#5B2C8F}
-.dr-header.camp-kitanoo .dr-rarity{color:#2D6A4F}
+.dr-rarity{font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;color:var(--text3)}
 .dr-race-row{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11px;color:var(--text3)}.dr-race-lbl{letter-spacing:.04em;text-transform:uppercase;font-weight:700}.dr-race-sel{background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer}.dr-race-sel:hover{border-color:var(--gold)}.dr-disc-stats{font-variant-numeric:tabular-nums;color:var(--text2);letter-spacing:0}
 .dr-name{font-size:22px;font-weight:800;color:#fff;line-height:1.05;margin-bottom:6px;text-shadow:0 2px 8px #000;text-wrap:balance}
 .dr-powline{display:flex;align-items:baseline;gap:8px}
@@ -1712,9 +1688,6 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .deck-slot{display:flex;align-items:center;gap:9px;border-radius:7px;padding:8px 10px;min-height:48px}
 .deck-slot.empty{border:1px dashed var(--border2);background:rgba(255,255,255,0.01)}
 .deck-slot.filled{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--border2)}
-.deck-slot.filled.camp-amageras{border-left-color:#E8873A}
-.deck-slot.filled.camp-omitsuki{border-left-color:#5B2C8F}
-.deck-slot.filled.camp-kitanoo{border-left-color:#2D6A4F}
 .ds-num{font-size:11px;font-weight:800;color:var(--text3);width:16px;text-align:center;flex-shrink:0;font-variant-numeric:tabular-nums}
 .ds-sigil{font-size:16px;flex-shrink:0;width:20px;text-align:center}
 .ds-body{flex:1;min-width:0}
@@ -1798,9 +1771,8 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .pack-buy5:hover{background:var(--gold-dim)!important}
 .pack-buy:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(212,168,67,0.35)}
 .listing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:12px}
-.listing{border-radius:10px;border:1px solid;overflow:hidden;display:flex;flex-direction:column;background:var(--panel);transition:transform 0.14s}
+.listing{border-radius:10px;border:1px solid var(--r-common);overflow:hidden;display:flex;flex-direction:column;background:var(--panel);transition:transform 0.14s}
 .listing:hover{transform:translateY(-3px)}
-.listing.camp-amageras{border-color:#E8873A}.listing.camp-omitsuki{border-color:#5B2C8F}.listing.camp-kitanoo{border-color:#2D6A4F}
 .listing.sold{opacity:0.5}
 .listing.legend{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold-dim),0 8px 30px rgba(212,168,67,0.28)}
 .listing.legend .lst-art::after{background:linear-gradient(180deg,transparent 42%,rgba(30,20,4,0.94))}
@@ -2707,6 +2679,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <button class="filter-chip" onclick="filterVault('common',this)">Common</button>
           <button class="filter-chip" onclick="filterVault('deck',this)">🃏 In Deck</button>
           <button class="filter-chip" onclick="filterVault('variant',this)">🏆 Variants</button>
+          <button class="filter-chip" onclick="filterVault('dup',this)">🗃 Duplicates</button>
           <button class="filter-chip" id="vault-own-toggle" onclick="toggleVaultOwned(this)">🔒 Owned Only</button>
         </div>
       </div>
@@ -2778,6 +2751,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
               <button class="filter-chip own-chip on" onclick="filterDeckOwned('all',this)">All</button>
               <button class="filter-chip own-chip owned" onclick="filterDeckOwned('owned',this)">✓ Owned</button>
               <button class="filter-chip own-chip" onclick="filterDeckOwned('unowned',this)">Unowned</button>
+              <button class="filter-chip own-chip" onclick="filterDeckOwned('dup',this)">🗃 Duplicates</button>
             </div>
             <div class="vh-group dfb-rarity"><span class="vh-label">Rarity</span>
               <button class="filter-chip on" onclick="filterDeck('all',this)">All</button>
@@ -3156,7 +3130,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     </div>
     <!-- /top-hud -->
 
-    <style>.rear-slot{min-height:32px;margin:3px auto;max-width:min(94%,560px);border:1px dashed var(--border2);border-radius:9px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;color:var(--text3);padding:4px 9px;background:rgba(255,255,255,0.02);flex-wrap:wrap}.rear-slot.filled{border-style:solid;border-color:var(--gold);color:var(--text);background:rgba(245,194,77,0.06);flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;text-align:left;flex-wrap:nowrap}.rear-slot .rg-thumb{width:34px;height:44px;border-radius:5px;flex-shrink:0;background-size:cover;background-position:center top;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:var(--surface2)}.rear-slot.enemy .rg-thumb{border-color:var(--lose)}.rear-slot .rg-thumb .rg-sig{font-size:20px;opacity:.65}.rear-slot .rg-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}.rear-slot .rg-line1{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0}.rear-slot .rg-lead{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}.rear-slot .rg-name{font-weight:700;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.rear-slot .rg-called{color:var(--electric);font-size:10px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.rear-slot .rg-hint{opacity:.75}.hand-card.called{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 10px rgba(245,194,77,0.3)}.hand-card .c-cost{position:absolute;top:3px;left:3px;font-size:9px;font-weight:800;color:#0a1a24;background:var(--electric);border-radius:8px;padding:1px 5px;z-index:3;box-shadow:0 1px 3px rgba(0,0,0,.6)}.hand-card .c-abil .ca-fighter{display:block}.hand-card .c-abil .ca-called{display:block;margin-top:3px;padding-top:3px;border-top:1px dashed rgba(245,194,77,.3);color:var(--gold);font-weight:600}.pile-view{position:fixed;inset:0;z-index:130;display:none;align-items:center;justify-content:center}.pile-view.on{display:flex}.pv-scrim{position:absolute;inset:0;background:rgba(4,6,11,0.7)}.pv-panel{position:relative;z-index:1;background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:16px 18px;max-width:min(92vw,640px);max-height:82vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.6)}.pv-head{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}.pv-count{font-size:12px;font-weight:700;color:var(--text3);background:var(--surface2);border-radius:10px;padding:1px 9px}.pv-close{margin-left:auto;background:none;border:1px solid var(--border2);color:var(--text2);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:13px}.pv-sub{font-size:11px;color:var(--text3);margin-bottom:14px}.pv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}.pv-card{aspect-ratio:3/4;border-radius:8px;border:1px solid var(--border2);background-size:cover;background-position:center top;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:6px;overflow:hidden}.pv-card.camp-amageras{border-color:#E8873A}.pv-card.camp-omitsuki{border-color:#5B2C8F}.pv-card.camp-kitanoo{border-color:#2D6A4F}.pv-card .pvc-sig{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;opacity:.5}.pv-card .pvc-pow{position:absolute;top:5px;right:6px;font-size:15px;font-weight:800;color:var(--gold);text-shadow:0 1px 3px #000}.pv-card .pvc-name{position:relative;font-size:9px;font-weight:700;color:#fff;line-height:1.15;text-shadow:0 1px 3px #000;background:linear-gradient(transparent,rgba(7,9,15,.9));margin:0 -6px -6px;padding:8px 6px 6px}.hand-card .c-called-dot{font-size:8px}.hand-card .c-info{position:absolute;bottom:2px;right:4px;font-size:10px;color:var(--text3);z-index:3;cursor:pointer;line-height:1;padding:1px}.hand-card .c-info:hover{color:var(--electric)}#preview-scrim{position:fixed;inset:0;z-index:89;background:rgba(4,6,11,0.55)}#card-preview.pinned{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%) scale(1)!important;z-index:91}.rr-proj{display:none;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:8px;font-size:11px;color:var(--text2);background:rgba(245,194,77,0.06);border:1px solid rgba(245,194,77,0.2);border-radius:6px;padding:6px 10px;margin:2px auto 8px;max-width:480px}.rr-proj .rp-you b{color:var(--gold);font-size:15px}.rr-proj .rp-opp b{color:var(--lose);font-size:15px}.rr-proj .rp-vs{color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:.1em}.rr-proj .rp-parts{color:var(--text3);font-size:9px}.rr-proj .rp-parts i,.rr-proj .rp-opp i{font-style:normal;color:var(--electric)}.rear-slot.linked{border-color:var(--electric);box-shadow:0 0 12px var(--elec-glow)}.rear-slot .rg-link{color:var(--electric);font-weight:700;font-size:10px}.charge-meter.spent{animation:chSpent .55s ease-out}@keyframes chSpent{0%{color:var(--lose);transform:scale(1.18)}100%{transform:scale(1)}}.dr-dropdown{border:1px solid var(--border);border-radius:8px;background:var(--panel);margin:8px 0;overflow:hidden}.dr-dropdown>summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text2);user-select:none}.dr-dropdown>summary::-webkit-details-marker{display:none}.dr-dropdown>summary::after{content:"\25be";color:var(--text3);transition:transform .18s;margin-left:4px}.dr-dropdown[open]>summary::after{transform:rotate(180deg)}.dr-dropdown>summary:hover{color:var(--text)}.dr-dropdown .ddv{margin-left:auto;font-weight:700;color:var(--text)}.dr-dropdown .ddbody{padding:6px 12px 12px;border-top:1px solid var(--border)}.foil-opts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.foil-opt{font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border2);color:var(--text);position:relative;overflow:hidden}.foil-opt.sel{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}.foil-next{font-size:10px;color:var(--text3);display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}.foil-next .fn-lbl{color:var(--text2);font-weight:700}.drag-ghost{position:fixed;pointer-events:none;z-index:200;transform:translate(-50%,-50%);padding:6px 9px;min-width:56px;max-width:88px;background:var(--panel);border:2px solid var(--gold);border-radius:9px;font-size:10px;font-weight:800;color:var(--gold);text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.65);background-size:cover;background-position:center top;opacity:.94}.drop-hot{outline:2px dashed var(--gold)!important;outline-offset:2px;background:rgba(245,194,77,0.14)!important;box-shadow:0 0 16px rgba(245,194,77,0.35)!important}body.sf-dragging{cursor:grabbing;user-select:none}.hand-card{touch-action:none}.mastery-hub{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;max-width:1120px}.mast-char{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--r-common);border-radius:12px;padding:14px}.mast-char.uncommon{border-left-color:var(--r-uncommon)}.mast-char.rare{border-left-color:var(--r-rare)}.mast-char.ultra{border-left-color:var(--r-ultra)}.mast-char.apex{border-left-color:var(--r-apex)}.mc-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}.mc-art{width:52px;height:52px;border-radius:8px;background-size:cover;background-position:center top;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid var(--border2)}.mc-name{font-size:15px;font-weight:800;color:var(--text)}.mc-lvl{font-size:11px;color:var(--text2);margin-top:2px}.mc-lvl b{color:var(--gold)}.mc-nomast{color:var(--text3)}.mt-track{position:relative;height:6px;background:var(--surface2);border-radius:3px;margin:20px 8px 28px}.mt-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:3px}.mt-node{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center}.mt-node .mt-icon{font-size:15px;filter:grayscale(1);opacity:.45}.mt-node.on .mt-icon{filter:none;opacity:1}.mt-node .mt-lv{position:absolute;top:15px;font-size:8px;color:var(--text3);white-space:nowrap}.mt-node.on .mt-lv{color:var(--gold);font-weight:700}.mc-how{font-size:11px;color:var(--text2);background:rgba(111,211,255,0.06);border:1px solid rgba(111,211,255,0.16);border-radius:6px;padding:6px 9px;margin-bottom:10px}.mc-how b{color:var(--electric)}.mc-rewards{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}.mr-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);padding:2px 0}.mr-item.on{color:var(--text)}.mr-item .mr-ic{width:20px;text-align:center;font-size:14px}.mr-item .mr-nm{flex:1}.mr-item .mr-lv{font-size:9px;font-weight:700;color:var(--text3)}.mr-item.on .mr-lv{color:var(--win)}.mc-bonds{font-size:11px;color:var(--text2);border-top:1px solid var(--border);padding-top:9px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.mc-bonds .mb-lbl{font-weight:700}.mb-chip{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:2px 9px;font-size:10px;color:var(--text)}.mb-none{color:var(--text3);font-style:italic;font-size:10px}.mc-traits{border-top:1px solid var(--border);padding-top:9px;margin-bottom:10px}.trait-ladder{display:flex;flex-direction:column;gap:3px;margin-top:5px}.tl-row{display:flex;align-items:center;gap:7px;font-size:10.5px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.025)}.tl-row.earned{background:rgba(245,194,77,.08)}.tl-row.eq{box-shadow:inset 0 0 0 1px var(--gold)}.tl-ic{font-size:13px;width:16px;text-align:center;flex-shrink:0}.tl-ic.locked{filter:grayscale(1);opacity:.55}.tl-nm{font-weight:700;color:var(--text2);flex-shrink:0;min-width:80px}.tl-row.earned .tl-nm{color:var(--gold)}.tl-buff{font-size:9px;font-weight:800;color:var(--gold);flex-shrink:0}.tl-buff.dim{color:var(--text3);opacity:.85}.tl-badge{margin-left:auto;font-size:8.5px;font-weight:800;color:var(--gold);letter-spacing:.04em;flex-shrink:0}.tl-bar{flex:1;height:4px;background:rgba(255,255,255,.09);border-radius:2px;overflow:hidden;min-width:24px;margin-left:4px}.tl-bar>span{display:block;height:100%;background:var(--electric)}.tl-prog{font-size:9px;color:var(--text3);flex-shrink:0;font-variant-numeric:tabular-nums;min-width:66px;text-align:right}.tl-note{font-size:10px;color:var(--text3);background:rgba(255,255,255,.03);border:1px dashed var(--border2);border-radius:6px;padding:5px 8px;margin:5px 0;line-height:1.4}.tl-note b{color:var(--electric)}.tl-row.dormant{opacity:.68}.tl-row.dormant .tl-badge{color:var(--text3)}.mc-sec-lbl{font-size:11px;font-weight:800;color:var(--text2)}.mc-sec-sub{font-weight:500;color:var(--text3);font-size:10px}.trade-tabs{display:flex;gap:8px;margin-bottom:10px}.tt-btn{font-size:12px;font-weight:700;padding:8px 16px;border-radius:8px;border:1px solid var(--border2);background:var(--panel);color:var(--text2);cursor:pointer}.tt-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-glow)}.trade-note{font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:14px;max-width:720px}.trade-note b{color:var(--text2)}.trade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-width:1000px}.trade-offer{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}.to-partner{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:700}.to-swap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.to-give,.to-want{flex:1;min-width:96px;font-size:12px;font-weight:700;padding:7px 9px;border-radius:7px;border:1px solid var(--border2);color:var(--text);display:flex;flex-direction:column;gap:2px}.to-give{border-color:var(--win)}.to-want{border-color:var(--lose);color:var(--text2)}.to-give i,.to-want i{font-style:normal;font-size:9px;color:var(--text3);font-weight:500}.to-give.apex{box-shadow:inset 0 0 0 1px var(--r-apex)}.to-give.ultra{box-shadow:inset 0 0 0 1px var(--r-ultra)}.to-give.rare{box-shadow:inset 0 0 0 1px var(--r-rare)}.to-arrow{font-size:16px;color:var(--gold);flex-shrink:0}.to-accept{background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:7px 0;border-radius:6px;cursor:pointer}.to-accept:hover{background:rgba(212,168,67,0.25)}.trade-refresh{margin-top:14px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:11px;font-weight:700;padding:8px 16px;border-radius:8px;cursor:pointer}</style>
+    <style>.rear-slot{min-height:32px;margin:3px auto;max-width:min(94%,560px);border:1px dashed var(--border2);border-radius:9px;display:flex;align-items:center;justify-content:center;gap:7px;font-size:11px;color:var(--text3);padding:4px 9px;background:rgba(255,255,255,0.02);flex-wrap:wrap}.rear-slot.filled{border-style:solid;border-color:var(--gold);color:var(--text);background:rgba(245,194,77,0.06);flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;text-align:left;flex-wrap:nowrap}.rear-slot .rg-thumb{width:34px;height:44px;border-radius:5px;flex-shrink:0;background-size:cover;background-position:center top;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;overflow:hidden;background-color:var(--surface2)}.rear-slot.enemy .rg-thumb{border-color:var(--lose)}.rear-slot .rg-thumb .rg-sig{font-size:20px;opacity:.65}.rear-slot .rg-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;overflow:hidden}.rear-slot .rg-line1{display:flex;align-items:center;gap:6px;flex-wrap:nowrap;min-width:0}.rear-slot .rg-lead{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);font-weight:700}.rear-slot .rg-name{font-weight:700;color:var(--gold);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}.rear-slot .rg-called{color:var(--electric);font-size:10px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.rear-slot .rg-hint{opacity:.75}.hand-card.called{outline:2px solid var(--gold);outline-offset:1px;box-shadow:0 0 10px rgba(245,194,77,0.3)}.hand-card .c-cost{position:absolute;top:3px;left:3px;font-size:9px;font-weight:800;color:#0a1a24;background:var(--electric);border-radius:8px;padding:1px 5px;z-index:3;box-shadow:0 1px 3px rgba(0,0,0,.6)}.hand-card .c-abil .ca-fighter{display:block}.hand-card .c-abil .ca-called{display:block;margin-top:3px;padding-top:3px;border-top:1px dashed rgba(245,194,77,.3);color:var(--gold);font-weight:600}.pile-view{position:fixed;inset:0;z-index:130;display:none;align-items:center;justify-content:center}.pile-view.on{display:flex}.pv-scrim{position:absolute;inset:0;background:rgba(4,6,11,0.7)}.pv-panel{position:relative;z-index:1;background:var(--panel);border:1px solid var(--border2);border-radius:14px;padding:16px 18px;max-width:min(92vw,640px);max-height:82vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.6)}.pv-head{display:flex;align-items:center;gap:10px;font-size:16px;font-weight:800;color:var(--text);margin-bottom:4px}.pv-count{font-size:12px;font-weight:700;color:var(--text3);background:var(--surface2);border-radius:10px;padding:1px 9px}.pv-close{margin-left:auto;background:none;border:1px solid var(--border2);color:var(--text2);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:13px}.pv-sub{font-size:11px;color:var(--text3);margin-bottom:14px}.pv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:10px}.pv-card{aspect-ratio:3/4;border-radius:8px;border:1px solid var(--border2);background-size:cover;background-position:center top;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:6px;overflow:hidden}.pv-card .pvc-sig{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:30px;opacity:.5}.pv-card .pvc-pow{position:absolute;top:5px;right:6px;font-size:15px;font-weight:800;color:var(--gold);text-shadow:0 1px 3px #000}.pv-card .pvc-name{position:relative;font-size:9px;font-weight:700;color:#fff;line-height:1.15;text-shadow:0 1px 3px #000;background:linear-gradient(transparent,rgba(7,9,15,.9));margin:0 -6px -6px;padding:8px 6px 6px}.hand-card .c-called-dot{font-size:8px}.hand-card .c-info{position:absolute;bottom:2px;right:4px;font-size:10px;color:var(--text3);z-index:3;cursor:pointer;line-height:1;padding:1px}.hand-card .c-info:hover{color:var(--electric)}#preview-scrim{position:fixed;inset:0;z-index:89;background:rgba(4,6,11,0.55)}#card-preview.pinned{position:fixed!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%) scale(1)!important;z-index:91}.rr-proj{display:none;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:8px;font-size:11px;color:var(--text2);background:rgba(245,194,77,0.06);border:1px solid rgba(245,194,77,0.2);border-radius:6px;padding:6px 10px;margin:2px auto 8px;max-width:480px}.rr-proj .rp-you b{color:var(--gold);font-size:15px}.rr-proj .rp-opp b{color:var(--lose);font-size:15px}.rr-proj .rp-vs{color:var(--text3);font-size:9px;text-transform:uppercase;letter-spacing:.1em}.rr-proj .rp-parts{color:var(--text3);font-size:9px}.rr-proj .rp-parts i,.rr-proj .rp-opp i{font-style:normal;color:var(--electric)}.rear-slot.linked{border-color:var(--electric);box-shadow:0 0 12px var(--elec-glow)}.rear-slot .rg-link{color:var(--electric);font-weight:700;font-size:10px}.charge-meter.spent{animation:chSpent .55s ease-out}@keyframes chSpent{0%{color:var(--lose);transform:scale(1.18)}100%{transform:scale(1)}}.dr-dropdown{border:1px solid var(--border);border-radius:8px;background:var(--panel);margin:8px 0;overflow:hidden}.dr-dropdown>summary{list-style:none;cursor:pointer;padding:9px 12px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--text2);user-select:none}.dr-dropdown>summary::-webkit-details-marker{display:none}.dr-dropdown>summary::after{content:"\25be";color:var(--text3);transition:transform .18s;margin-left:4px}.dr-dropdown[open]>summary::after{transform:rotate(180deg)}.dr-dropdown>summary:hover{color:var(--text)}.dr-dropdown .ddv{margin-left:auto;font-weight:700;color:var(--text)}.dr-dropdown .ddbody{padding:6px 12px 12px;border-top:1px solid var(--border)}.foil-opts{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.foil-opt{font-size:11px;font-weight:700;padding:5px 12px;border-radius:20px;cursor:pointer;border:1px solid var(--border2);color:var(--text);position:relative;overflow:hidden}.foil-opt.sel{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold)}.foil-next{font-size:10px;color:var(--text3);display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:6px}.foil-next .fn-lbl{color:var(--text2);font-weight:700}.drag-ghost{position:fixed;pointer-events:none;z-index:200;transform:translate(-50%,-50%);padding:6px 9px;min-width:56px;max-width:88px;background:var(--panel);border:2px solid var(--gold);border-radius:9px;font-size:10px;font-weight:800;color:var(--gold);text-align:center;box-shadow:0 10px 28px rgba(0,0,0,.65);background-size:cover;background-position:center top;opacity:.94}.drop-hot{outline:2px dashed var(--gold)!important;outline-offset:2px;background:rgba(245,194,77,0.14)!important;box-shadow:0 0 16px rgba(245,194,77,0.35)!important}body.sf-dragging{cursor:grabbing;user-select:none}.hand-card{touch-action:none}.mastery-hub{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;max-width:1120px}.mast-char{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--r-common);border-radius:12px;padding:14px}.mast-char.uncommon{border-left-color:var(--r-uncommon)}.mast-char.rare{border-left-color:var(--r-rare)}.mast-char.ultra{border-left-color:var(--r-ultra)}.mast-char.apex{border-left-color:var(--r-apex)}.mc-head{display:flex;gap:12px;align-items:center;margin-bottom:10px}.mc-art{width:52px;height:52px;border-radius:8px;background-size:cover;background-position:center top;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid var(--border2)}.mc-name{font-size:15px;font-weight:800;color:var(--text)}.mc-lvl{font-size:11px;color:var(--text2);margin-top:2px}.mc-lvl b{color:var(--gold)}.mc-nomast{color:var(--text3)}.mt-track{position:relative;height:6px;background:var(--surface2);border-radius:3px;margin:20px 8px 28px}.mt-fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:3px}.mt-node{position:absolute;top:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center}.mt-node .mt-icon{font-size:15px;filter:grayscale(1);opacity:.45}.mt-node.on .mt-icon{filter:none;opacity:1}.mt-node .mt-lv{position:absolute;top:15px;font-size:8px;color:var(--text3);white-space:nowrap}.mt-node.on .mt-lv{color:var(--gold);font-weight:700}.mc-how{font-size:11px;color:var(--text2);background:rgba(111,211,255,0.06);border:1px solid rgba(111,211,255,0.16);border-radius:6px;padding:6px 9px;margin-bottom:10px}.mc-how b{color:var(--electric)}.mc-rewards{display:flex;flex-direction:column;gap:3px;margin-bottom:10px}.mr-item{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text3);padding:2px 0}.mr-item.on{color:var(--text)}.mr-item .mr-ic{width:20px;text-align:center;font-size:14px}.mr-item .mr-nm{flex:1}.mr-item .mr-lv{font-size:9px;font-weight:700;color:var(--text3)}.mr-item.on .mr-lv{color:var(--win)}.mc-bonds{font-size:11px;color:var(--text2);border-top:1px solid var(--border);padding-top:9px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}.mc-bonds .mb-lbl{font-weight:700}.mb-chip{background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:2px 9px;font-size:10px;color:var(--text)}.mb-none{color:var(--text3);font-style:italic;font-size:10px}.mc-traits{border-top:1px solid var(--border);padding-top:9px;margin-bottom:10px}.trait-ladder{display:flex;flex-direction:column;gap:3px;margin-top:5px}.tl-row{display:flex;align-items:center;gap:7px;font-size:10.5px;padding:3px 7px;border-radius:6px;background:rgba(255,255,255,.025)}.tl-row.earned{background:rgba(245,194,77,.08)}.tl-row.eq{box-shadow:inset 0 0 0 1px var(--gold)}.tl-ic{font-size:13px;width:16px;text-align:center;flex-shrink:0}.tl-ic.locked{filter:grayscale(1);opacity:.55}.tl-nm{font-weight:700;color:var(--text2);flex-shrink:0;min-width:80px}.tl-row.earned .tl-nm{color:var(--gold)}.tl-buff{font-size:9px;font-weight:800;color:var(--gold);flex-shrink:0}.tl-buff.dim{color:var(--text3);opacity:.85}.tl-badge{margin-left:auto;font-size:8.5px;font-weight:800;color:var(--gold);letter-spacing:.04em;flex-shrink:0}.tl-bar{flex:1;height:4px;background:rgba(255,255,255,.09);border-radius:2px;overflow:hidden;min-width:24px;margin-left:4px}.tl-bar>span{display:block;height:100%;background:var(--electric)}.tl-prog{font-size:9px;color:var(--text3);flex-shrink:0;font-variant-numeric:tabular-nums;min-width:66px;text-align:right}.tl-note{font-size:10px;color:var(--text3);background:rgba(255,255,255,.03);border:1px dashed var(--border2);border-radius:6px;padding:5px 8px;margin:5px 0;line-height:1.4}.tl-note b{color:var(--electric)}.tl-row.dormant{opacity:.68}.tl-row.dormant .tl-badge{color:var(--text3)}.mc-sec-lbl{font-size:11px;font-weight:800;color:var(--text2)}.mc-sec-sub{font-weight:500;color:var(--text3);font-size:10px}.trade-tabs{display:flex;gap:8px;margin-bottom:10px}.tt-btn{font-size:12px;font-weight:700;padding:8px 16px;border-radius:8px;border:1px solid var(--border2);background:var(--panel);color:var(--text2);cursor:pointer}.tt-btn.on{border-color:var(--gold);color:var(--gold);background:var(--gold-glow)}.trade-note{font-size:11px;color:var(--text3);line-height:1.5;margin-bottom:14px;max-width:720px}.trade-note b{color:var(--text2)}.trade-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-width:1000px}.trade-offer{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:9px}.to-partner{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);font-weight:700}.to-swap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.to-give,.to-want{flex:1;min-width:96px;font-size:12px;font-weight:700;padding:7px 9px;border-radius:7px;border:1px solid var(--border2);color:var(--text);display:flex;flex-direction:column;gap:2px}.to-give{border-color:var(--win)}.to-want{border-color:var(--lose);color:var(--text2)}.to-give i,.to-want i{font-style:normal;font-size:9px;color:var(--text3);font-weight:500}.to-give.apex{box-shadow:inset 0 0 0 1px var(--r-apex)}.to-give.ultra{box-shadow:inset 0 0 0 1px var(--r-ultra)}.to-give.rare{box-shadow:inset 0 0 0 1px var(--r-rare)}.to-arrow{font-size:16px;color:var(--gold);flex-shrink:0}.to-accept{background:var(--gold-dim);border:1px solid var(--gold);color:var(--gold);font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:7px 0;border-radius:6px;cursor:pointer}.to-accept:hover{background:rgba(212,168,67,0.25)}.trade-refresh{margin-top:14px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-size:11px;font-weight:700;padding:8px 16px;border-radius:8px;cursor:pointer}</style>
     <!-- FIELD -->
     <div class="field">
       <div class="rear-slot enemy" id="opp-rear" style="display:none"></div>
@@ -5094,6 +5068,7 @@ function pvpAddRivalCard(){
 }
 function pvpAddStake(key){
   if(raisedThisPhase) return;
+  if(isCardLocked(key)){ if(typeof toast==='function') toast('🔒 '+potName(key)+' is locked — unlock it in the Vault to stake it.', false); return; }
   raisedThisPhase=true;
   pvpPotMine.push(key);
   const rival=(activeBot&&activeBot.name)||'Rival';
@@ -9405,6 +9380,7 @@ function listCard(){
   const inst = COLLECTION.find(function(c){ return c.name===name && c.uid && isTradeable(c) && (ownedCopies[c.uid]||0)>0; });
   if(inst) soldKey=inst.uid; else if((ownedCopies[name]||0)>0) soldKey=name;
   if(!soldKey){ toast('You do not own '+name+' to sell.', false); return; }
+  if(isCardLocked(soldKey)){ toast('🔒 '+name+' is locked — unlock it in the Vault to list it.', false); return; }
   { const _si=COLLECTION.find(function(x){return (x.uid||x.name)===soldKey;}); if(_si && !isTradeable(_si)){ toast('That copy is play-only — bought cards cannot be listed or staked.', false); return; } }
   signalPoints += price;
   if(soldKey===name){ ownedCopies[name]=Math.max(0,(ownedCopies[name]||0)-1); if(freshCopies[name]) freshCopies[name]=Math.max(0,freshCopies[name]-1); }
@@ -9436,6 +9412,37 @@ function defaultSupply(){ const t=rarityTypeCounts(); const s={}; for(const r in
 let supply = null; // built from the live roster at init (COLLECTION is declared later)
 let cardSupply = {}; // per-card finite ledger (name -> {mint,left}); recycles on integration
 let ownedCopies = {};
+// 8/6/26: "duplicates" filter support. Packs mint each pull as its OWN separate uid'd COLLECTION
+// entry (mintPulled()) -- owning 3 "Moro" is 3 distinct tiles sharing a name, not one tile with a
+// count>1 badge (that badge only ever applies to the much rarer base-entry-stacks-directly case,
+// e.g. starter cards). So "does this card have a duplicate" has to sum OWNED entries by name across
+// the whole COLLECTION, not read any single entry's own count.
+function ownedNameCounts(){
+  var m = {};
+  COLLECTION.forEach(function(c){
+    var n = (ownedCopies[c.uid||c.name]||0);
+    if(n>0) m[c.name] = (m[c.name]||0) + n;
+  });
+  return m;
+}
+// 8/6/26: card-lock system -- protects a specific owned copy (keyed the same c.uid||c.name way as
+// ownedCopies/activeDeck) from every disposal path that can destroy or give it away: Trade
+// (acceptTrade), Market (listCard), Ingest (ingestCard/ingestVariant/consumeDuplicates' foil-merge
+// fuel), and Staked PvP (pvpAddStake). A lock does NOT block deck-building, gifting a foil TIER onto
+// the locked card itself, or anything read-only -- only the flows that can make you not own it
+// (or a duplicate you meant to keep) anymore.
+let lockedCards = new Set();
+function isCardLocked(key){ return lockedCards.has(key); }
+function toggleCardLock(key, name){
+  if(lockedCards.has(key)){ lockedCards.delete(key); if(typeof toast==='function') toast('🔓 '+(name||key)+' unlocked.', true); }
+  else { lockedCards.add(key); if(typeof toast==='function') toast('🔒 '+(name||key)+' locked — protected from Trade, Market, Ingest, and Staked PvP.', true); }
+  if(typeof saveState==='function') saveState();
+  if(typeof buildVault==='function') buildVault();
+  if(typeof drawerCard!=='undefined' && drawerCard && (drawerCard.uid||drawerCard.name)===key && typeof openCardDetail==='function'){
+    var _curTabBtn=document.querySelector('.dr-tab.on'); var _curTab=_curTabBtn?_curTabBtn.getAttribute('data-tab'):undefined;
+    openCardDetail(key, drawerFresh, _curTab);
+  }
+}
 let freshCopies = {};   // per card: how many owned copies are fresh 0-0 pulls
 let wonInstances = [];  // PvP-won cards as distinct instances {uid,name}
 let wonCounter = 0;
@@ -9511,7 +9518,7 @@ const SAVE_KEY = 'signalforge_save_v2';
 let _saveFailedOnce = false;   // 7/18/26: throttle the failure toast to once per session -- a quota-exceeded save fails on EVERY subsequent saveState() call otherwise, which would spam a toast on nearly every action
 function saveState(){
   try{
-    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, dailyLoginStreak, bestDailyLoginStreak, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, winStreak, bestWinStreak, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, ascParty, ascPartySel, ascUnitProg, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics]}));
+    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, dailyLoginStreak, bestDailyLoginStreak, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, winStreak, bestWinStreak, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, ascParty, ascPartySel, ascUnitProg, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics], lockedCards:[...lockedCards]}));
   }catch(e){
     // Previously silent -- a change could visibly apply in-memory (card updates, a "success" toast
     // already fired from the caller) while the save itself failed underneath, e.g. localStorage
@@ -9587,6 +9594,7 @@ function loadState(){
       if(s.ownedCopies){ ownedCopies={}; for(const n in s.ownedCopies){ ownedCopies[n]=s.ownedCopies[n]; } }  // REPLACE the boot 1-of-each, don't merge — else onboarding's limited roster reverts to all cards
       if(s.freshCopies){ freshCopies=s.freshCopies; }
       if(Array.isArray(s.activeDeck)) activeDeck=new Set(s.activeDeck.slice(0, (typeof DECK_SIZE!=='undefined'?DECK_SIZE:12)));
+      if(Array.isArray(s.lockedCards)) lockedCards=new Set(s.lockedCards);
       if(Array.isArray(s.energyLoadout)){ var _vl=s.energyLoadout.filter(function(id){return ['sift','empower','hex','collapse','locus'].indexOf(id)>=0;}); energyLoadout = _vl.length ? _vl.slice(0,3) : ['sift','empower','hex']; }
     }
     // pre-v2 saves were name-keyed (a won card wrongly stacked base + variant) — discard those counts for a clean instance-keyed vault
@@ -9689,8 +9697,21 @@ const SEASON = { chapter:'Chapter 1', name:'Rebirth', pack:'Legends Reborn' };
 // and the Pity system (PITY_APEX) still triggers off those same odds, untouched.
 const PACKS = [
   {id:'std', name:'Legends Reborn Booster', icon:'📦', price:150, tenX:true, blurb:'Common through Rare — a whisper of higher.', odds:{common:91.6, rare:7.6, ultra:0.8}},
-  {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & an Apex shot — no commons.', odds:{rare:78, ultra:20, apex:2}},
+  {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & an Apex shot — no commons.', odds:{rare:77.7, ultra:20, apex:2.3}},
 ];
+// 8/6/26: Elite Cache's baseline apex float 2%->2.3%, plus a new Daily Featured Apex lane -- one
+// Apex card rotates in each day (date-seeded, no persistence needed) and gets its OWN independent
+// 3.3% chance per Elite Cache open, checked before the normal tier roll (see rollPackRarity below).
+// That 3.3% is on top of, not carved out of, the 2.3% baseline apex float -- a normal apex pull can
+// still land on the featured card too, by chance, same as any other apex card.
+const DAILY_FEATURED_APEX_CHANCE = 0.033;
+var _forcedFeaturedCard = null;
+function dailyFeaturedApexCard(){
+  var pool = COLLECTION.filter(function(c){ return c.rarity==='apex' && !c.uid; });
+  if(!pool.length) return null;
+  var day = Math.floor(Date.now()/86400000);
+  return pool[day % pool.length];
+}
 // 8/6/26: all 3 tiers had byte-identical odds despite a 2000/5000/6000 price spread -- price bought
 // nothing, and Mythic Rite's own blurb ("highest Apex rate in the game") was false against its own
 // table (1.8%, actually below Elite's 2% at a quarter the price). Re-tuned so price buys real odds
@@ -9707,15 +9728,22 @@ function mintLedgerHTML(){
     const s=supply[r]; const pct=(s.mint<=0||s.left<=0)?0:Math.max(1,Math.round(s.left/s.mint*100)); const circ=s.mint-s.left;
     return `<div class="ml-row"><span class="ml-rar rar-${r}">${rlab(r)}</span><span class="ml-types">${t[r]||0} cards</span><span class="ml-bar"><span class="ml-fill rar-${r}" style="width:${pct}%"></span></span><span class="ml-num">${fmtPts(s.left)}<span class="ml-mint"> / ${fmtPts(s.mint)}</span></span><span class="ml-circ">${fmtPts(circ)} in circulation</span></div>`;
   }).join('');
-  return `<div class="mint-ledger"><div class="ml-head">◈ Global Mint Ledger <span class="ml-sub">${COLLECTION.length} card types · ${COPIES_PER.apex}–${fmtPts(COPIES_PER.common)} copies each by rarity · shared across every pack</span><button class="ml-reset" onclick="startFreshSession()">🌱 New Session (dev)</button><button class="ml-reset" onclick="resetProgress()">↺ Reset (dev)</button></div>${rows}</div>`;
+  // 8/6/26: the two dev-testing buttons that used to sit here (startFreshSession/resetProgress,
+  // "(dev)" labeled but NOT actually dev-gated) were live in the real Shop screen every player
+  // sees -- one click and a normal player owned all ~152 catalog cards ("Vault shows everything
+  // as obtained"). The functions themselves are untouched and still callable from Shift+D/console
+  // for real testing; they're just no longer exposed as a button in production UI.
+  return `<div class="mint-ledger"><div class="ml-head">◈ Global Mint Ledger <span class="ml-sub">${COLLECTION.length} card types · ${COPIES_PER.apex}–${fmtPts(COPIES_PER.common)} copies each by rarity · shared across every pack</span></div>${rows}</div>`;
 }
 function packCardHTML(p){
   const rars=Object.keys(p.odds).sort((a,b)=>RARITY_ORDER[a]-RARITY_ORDER[b]);
   const soldOut=rars.every(r=>!supply[r]||supply[r].left<=0);
   const odds=rars.map(r=>`<div class="po-row"><span class="po-rar rar-${r}">${rlab(r)}</span><span class="po-pct">${p.odds[r]}%</span></div>`).join('');
+  const feat = (p.id==='elite' && typeof dailyFeaturedApexCard==='function') ? dailyFeaturedApexCard() : null;
+  const featHTML = feat ? `<div style="font-size:10.5px;color:var(--gold);background:rgba(245,194,77,0.08);border:1px solid rgba(245,194,77,0.25);border-radius:6px;padding:5px 9px;margin-top:6px">🌟 Today's Featured Apex — <b>${feat.name}</b>, ${(DAILY_FEATURED_APEX_CHANCE*100).toFixed(1)}% own shot</div>` : '';
   return `<div class="pack-card wide">
     <div class="pack-head"><div class="pack-icon">${p.icon}</div><div><div class="pack-name">${p.name}</div><div class="pack-blurb">${p.blurb}</div></div></div>
-    <div class="pack-odds">${odds}</div>
+    <div class="pack-odds">${odds}</div>${featHTML}
     <div class="pack-buy-row"><button class="pack-buy" ${soldOut?'disabled':''} onclick="openPack('${p.id}')">${soldOut?'Minted Out':'Open · ◈ '+fmtPts(p.price)}</button>${soldOut?'':`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',5)" title="Open five at once">5× · ◈ ${fmtPts(p.price*5)}</button>`}${(!soldOut && p.tenX)?`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',10)" title="Open ten at once">10× · ◈ ${fmtPts(p.price*10)}</button>`:''}</div>
   </div>`;
 }
@@ -9725,6 +9753,11 @@ function packsSectionHTML(){
 const PITY_ULTRA = 20, PITY_APEX = 80;   // card-pack pity: guaranteed Ultra (featured) within 20 pulls; guaranteed Apex (the chase) within 80
 let packPityUltra = 0, packPityApex = 0;
 function rollPackRarity(p, avail){
+  _forcedFeaturedCard = null;
+  if(p.id==='elite' && avail.indexOf('apex')>=0){
+    var _feat = dailyFeaturedApexCard();
+    if(_feat && Math.random() < DAILY_FEATURED_APEX_CHANCE){ _forcedFeaturedCard = _feat; packPityApex = 0; packPityUltra = 0; return 'apex'; }
+  }
   packPityUltra++; packPityApex++;
   var hasG = avail.indexOf('apex')>=0, hasU = avail.indexOf('ultra')>=0, rar;
   if(hasG && packPityApex >= PITY_APEX){ rar='apex'; }
@@ -9736,7 +9769,8 @@ function rollPackRarity(p, avail){
 function _mintRarity(rar, p){
   supply[rar].left=Math.max(0,supply[rar].left-1);
   var poolC=COLLECTION.filter(function(c){return c.rarity===rar && !c.uid;});
-  var card=poolC[Math.floor(Math.random()*poolC.length)]||COLLECTION[0];
+  var card=_forcedFeaturedCard || poolC[Math.floor(Math.random()*poolC.length)]||COLLECTION[0];
+  _forcedFeaturedCard = null;
   var _mint=mintPulled(card.name, p.name+' pull', 'forged');
   if(cardSupply[card.name] && cardSupply[card.name].left>0) cardSupply[card.name].left--;
   return {card:card, rar:rar, mint:_mint};
@@ -9793,7 +9827,8 @@ function openPack(id){
   const rar=rollPackRarity(p, avail);
   supply[rar].left=Math.max(0,supply[rar].left-1);
   const poolC=COLLECTION.filter(c=>c.rarity===rar && !c.uid);
-  const card=poolC[Math.floor(Math.random()*poolC.length)]||COLLECTION[0];
+  const card=_forcedFeaturedCard || poolC[Math.floor(Math.random()*poolC.length)]||COLLECTION[0];
+  _forcedFeaturedCard = null;
   const _mint=mintPulled(card.name, p.name+' pull', 'forged');
   if(cardSupply[card.name] && cardSupply[card.name].left>0) cardSupply[card.name].left--;
   saveState(); updateBalance(); buildShop();
@@ -10058,6 +10093,7 @@ function ingestVariant(uid){
   var inst=COLLECTION.find(function(c){ return c.uid===uid && c.gachaVariant; }); if(!inst) return;
   var defId=inst.editionId, copies=ownedVariantCopiesOfDef(defId);
   if(copies.length<=1){ if(typeof toast==='function') toast('That is your only '+inst.variant+' '+inst.name+' \u2014 keep at least one. Ingest only duplicates.', false); return; }
+  if(isCardLocked(uid)){ if(typeof toast==='function') toast('\ud83d\udd12 That '+inst.variant+' '+inst.name+' is locked \u2014 unlock it in the Vault to ingest it.', false); return; }
   if(typeof confirm==='function' && !confirm('Ingest '+inst.variant+' '+inst.name+' #'+inst.serial+'? It is consumed forever \u2014 you gain Essence + cosmetic ascension, and one copy leaves circulation.')) return;
   var def=variantDef(defId)||{tier:inst.rarity}, tierBefore=variantAscTier(defId);
   var ci=COLLECTION.findIndex(function(c){ return c.uid===uid; }); if(ci>=0) COLLECTION.splice(ci,1);
@@ -10081,13 +10117,19 @@ function ingestVariant(uid){
 function ingestCard(name){
   if(!name) return;
   var mintedDupes = COLLECTION.filter(function(c){ return c.name===name && c.uid && !c.gachaVariant && (ownedCopies[c.uid]||0)>0; });
+  var unlockedMinted = mintedDupes.filter(function(c){ return !isCardLocked(c.uid); });
   var baseCount = ownedCopies[name]||0;
-  var total = baseCount + mintedDupes.length;
-  if(total<=1){ if(typeof toast==='function') toast('That is your only '+name+' — keep at least one. Ingest only duplicates.', false); return; }
+  var baseLocked = isCardLocked(name);
+  var rawTotal = baseCount + mintedDupes.length;
+  var total = (baseLocked?0:baseCount) + unlockedMinted.length;
+  if(total<=1){
+    if(rawTotal>1){ if(typeof toast==='function') toast('🔒 Every spare '+name+' is locked — unlock one in the Vault to ingest it.', false); return; }
+    if(typeof toast==='function') toast('That is your only '+name+' — keep at least one. Ingest only duplicates.', false); return;
+  }
   if(typeof confirm==='function' && !confirm('Ingest a duplicate '+name+'? It is consumed forever — your remaining copy gains a free foil tier, recorded in its ledger.')) return;
   var recipientKey;
-  if(mintedDupes.length>0){
-    var victim=mintedDupes[0];
+  if(unlockedMinted.length>0){
+    var victim=unlockedMinted[0];
     delete ownedCopies[victim.uid]; delete cardRecords[victim.uid]; delete cardFoils[victim.uid];
     var ci=COLLECTION.findIndex(function(c){ return c.uid===victim.uid; }); if(ci>=0) COLLECTION.splice(ci,1);
     var wi=wonInstances.findIndex(function(w){ return w.uid===victim.uid; }); if(wi>=0) wonInstances.splice(wi,1);
@@ -10096,7 +10138,7 @@ function ingestCard(name){
     // pool (key = name) when any base copies remain, else the next minted duplicate in line --
     // cardFoilMax/cardRecords are both keyed by uid||name (recKey), so crediting a uid that just
     // got deleted (or one nobody still owns) would silently strand the reward.
-    recipientKey = baseCount>0 ? name : mintedDupes[1].uid;
+    recipientKey = baseCount>0 ? name : unlockedMinted[1].uid;
   } else {
     ownedCopies[name]=Math.max(0,baseCount-1);
     if(freshCopies[name]) freshCopies[name]=Math.min(freshCopies[name], ownedCopies[name]);
@@ -11011,11 +11053,12 @@ function buildDeckSlots(){
   document.getElementById('deck-slots').innerHTML=slots.join('');
 }
 function buildDeckPool(){
+  const _dupCounts2 = ownedNameCounts();
   let cards = COLLECTION.filter(c => {
     const rOk = deckFilter==='all' ? true : (deckFilter==='deck' ? activeDeck.has(c.uid||c.name) : c.rarity===deckFilter);
     const kOk = !deckKeyword || cardHasKeyword(c, deckKeyword);
     const _own = (ownedCopies[c.uid||c.name]||0) > 0;
-    const oOk = deckOwnFilter==='all' ? true : (deckOwnFilter==='owned' ? _own : !_own);
+    const oOk = deckOwnFilter==='all' ? true : deckOwnFilter==='dup' ? (_dupCounts2[c.name]||0)>1 : (deckOwnFilter==='owned' ? _own : !_own);
     const costOk = !deckCostFilter || costBucket(conjureCost(c))===deckCostFilter;
     return rOk && kOk && oOk && costOk;
   });
@@ -11023,7 +11066,7 @@ function buildDeckPool(){
     const rOk = deckFilter==='all' ? true : (deckFilter==='deck' ? activeDeck.has(c.uid||c.name) : c.rarity===deckFilter);
     const kOk = !deckKeyword || cardHasKeyword(c, deckKeyword);
     const _own = (ownedCopies[c.uid||c.name]||0) > 0;
-    const oOk = deckOwnFilter==='all' ? true : (deckOwnFilter==='owned' ? _own : !_own);
+    const oOk = deckOwnFilter==='all' ? true : deckOwnFilter==='dup' ? (_dupCounts2[c.name]||0)>1 : (deckOwnFilter==='owned' ? _own : !_own);
     return rOk && kOk && oOk;   // curve itself always reflects rarity/keyword/owned filters, never the cost filter -- otherwise clicking a bar would erase all the other bars
   }), deckCostFilter, 'filterDeckCost'); }
   if(deckSort==='kills') cards.sort((a,b)=> b.kills-a.kills || (RARITY_ORDER[a.rarity]-RARITY_ORDER[b.rarity]));
@@ -11035,7 +11078,7 @@ function buildDeckPool(){
     const inDeck = activeDeck.has(c.uid||c.name);
     const owned = (ownedCopies[c.uid||c.name]||0) > 0;
     const pristine = ((typeof isPristine==='function')?isPristine(c):(c.deaths===0)) ? `<span class="vc-pristine">◈</span>` : '';
-    return `<div class="vault-card ${c.rarity} ${campCls} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="previewPoolCardReadable('${nm}',this)" onmouseleave="hideCardPreview()">
+    return `<div class="vault-card ${c.rarity} ${campCls} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="cancelHidePreview();previewPoolCardReadable('${nm}',this)" onmouseleave="scheduleHidePreview()">
       <div class="vc-art" style="${artFillStyle(c.artKey||c.name)}">
         ${sigilFor(c.artKey||c.name)}
         <span class="vc-rarity-ribbon">${rlab(c.rarity)}</span>
@@ -12347,8 +12390,8 @@ function consumeDuplicates(name, targetKey, n){
   let consumed=0;
   for(let i=0;i<n;i++){
     const cands=[];
-    for(const k in ownedCopies){ if(k===targetKey || (ownedCopies[k]||0)<=0) continue; const card=COLLECTION.find(function(x){return (x.uid||x.name)===k;}); if(card && card.name===name) cands.push({k:k, card:card, stack:false}); }
-    if((ownedCopies[targetKey]||0)>1){ cands.push({k:targetKey, card:COLLECTION.find(function(x){return (x.uid||x.name)===targetKey;}), stack:true}); }
+    for(const k in ownedCopies){ if(k===targetKey || (ownedCopies[k]||0)<=0 || isCardLocked(k)) continue; const card=COLLECTION.find(function(x){return (x.uid||x.name)===k;}); if(card && card.name===name) cands.push({k:k, card:card, stack:false}); }
+    if((ownedCopies[targetKey]||0)>1 && !isCardLocked(targetKey)){ cands.push({k:targetKey, card:COLLECTION.find(function(x){return (x.uid||x.name)===targetKey;}), stack:true}); }
     if(!cands.length) break;
     cands.sort(function(a,b){ return (kdOf(a.card).k||0) - (kdOf(b.card).k||0); });
     const pick=cands[0];
@@ -12433,15 +12476,16 @@ function filterVaultCost(k,btn){
 }
 function buildVault(){
   const grid=document.getElementById('vault-grid');
+  const _dupCounts = ownedNameCounts();
   const base=COLLECTION.filter(c=>{
-    const rOk = vaultFilter==='all' ? true : vaultFilter==='deck' ? activeDeck.has(c.uid||c.name) : vaultFilter==='variant' ? !!c.variant : c.rarity===vaultFilter;
+    const rOk = vaultFilter==='all' ? true : vaultFilter==='deck' ? activeDeck.has(c.uid||c.name) : vaultFilter==='variant' ? !!c.variant : vaultFilter==='dup' ? (_dupCounts[c.name]||0)>1 : c.rarity===vaultFilter;
     const kOk = !vaultKeyword || cardHasKeyword(c, vaultKeyword);
     const aOk = !vaultArchetype || cardArchetypes(c.name).some(a=>a.id===vaultArchetype);
     const costOk = !vaultCostFilter || costBucket(conjureCost(c))===vaultCostFilter;
     return rOk && kOk && aOk && costOk;
   });
   { var _cvEl=document.getElementById('vault-curve'); if(_cvEl) _cvEl.innerHTML=costCurveHTML(COLLECTION.filter(c=>{
-    const rOk = vaultFilter==='all' ? true : vaultFilter==='deck' ? activeDeck.has(c.uid||c.name) : vaultFilter==='variant' ? !!c.variant : c.rarity===vaultFilter;
+    const rOk = vaultFilter==='all' ? true : vaultFilter==='deck' ? activeDeck.has(c.uid||c.name) : vaultFilter==='variant' ? !!c.variant : vaultFilter==='dup' ? (_dupCounts[c.name]||0)>1 : c.rarity===vaultFilter;
     const kOk = !vaultKeyword || cardHasKeyword(c, vaultKeyword);
     const aOk = !vaultArchetype || cardArchetypes(c.name).some(a=>a.id===vaultArchetype);
     return rOk && kOk && aOk;   // curve itself always reflects rarity/keyword/archetype filters, never the cost filter -- otherwise clicking a bar would erase all the other bars
@@ -12472,7 +12516,7 @@ function buildVault(){
     const c=e.c;
     const pristine=isPristine(c)?`<span class="vc-pristine">◈ Pristine</span>`:'';
     const inDeck=activeDeck.has(c.uid||c.name)?'in-deck':'';
-    return `<div class="vault-card ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()} ${inDeck} ${e.fresh?'is-fresh':''} ${c.won?'is-won':''} ${foilClass(c)} ${frameClass(c)} ${e.locked?'locked-card':(typeof cardStateClasses==='function'?cardStateClasses(c):'')}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}',${e.fresh?'true':'false'})" onmouseenter="previewPoolCardReadable('${(c.uid||c.name).replace(/'/g,"\\'")}',this)" onmouseleave="hideCardPreview()">
+    return `<div class="vault-card ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()} ${inDeck} ${e.fresh?'is-fresh':''} ${c.won?'is-won':''} ${foilClass(c)} ${frameClass(c)} ${e.locked?'locked-card':(typeof cardStateClasses==='function'?cardStateClasses(c):'')}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}',${e.fresh?'true':'false'})" onmouseenter="cancelHidePreview();previewPoolCardReadable('${(c.uid||c.name).replace(/'/g,"\\'")}',this)" onmouseleave="scheduleHidePreview()">
       <div class="vc-art vc-frame">
         ${bigCardHTML(c)}
         ${pristine}
@@ -12480,6 +12524,7 @@ function buildVault(){
         ${e.locked?`<span class="vc-locked">\ud83d\udd12 Not owned</span>`:''}
         ${c.serial?`<span class="vc-serial">\u2726 #${c.serial}${c.firstPrint?' \u00b7 1st':''}</span>`:''}
         ${c.gachaVariant?`<button class="vc-ingest" onclick="event.stopPropagation();ingestVariant('${c.uid}')" title="Feed this duplicate: +Essence, cosmetic ascension, and it leaves circulation">\u2726 Ingest</button>`:(e.count>1?`<button class="vc-ingest" onclick="event.stopPropagation();ingestCard('${c.name.replace(/'/g,"\\'")}')" title="Feed a duplicate copy: free foil tier, recorded in this card's ledger">\u2726 Ingest</button>`:'')}
+        ${e.locked?'':`<button class="vc-lock ${isCardLocked(c.uid||c.name)?'on':''}" onclick="event.stopPropagation();toggleCardLock('${(c.uid||c.name).replace(/'/g,"\\'")}','${c.name.replace(/'/g,"\\'")}')" title="${isCardLocked(c.uid||c.name)?'Locked \u2014 protects it from Trade, Market, Ingest, and Staked PvP. Click to unlock.':'Lock this copy to protect it from Trade, Market, Ingest, and Staked PvP.'}">${isCardLocked(c.uid||c.name)?'\ud83d\udd12':'\ud83d\udd13'}</button>`}
         ${e.fresh?'<span class="vc-fresh">✦ Fresh Mint</span>':(c.ascendant?'<span class="vc-ascendant">⭐ Ascendant</span>':(c.variant?'<span style="position:absolute;top:6px;left:6px;font-size:13px;filter:drop-shadow(0 1px 2px #000)">🏆</span>':''))}
       </div>
       <div class="vc-info">
@@ -12555,6 +12600,7 @@ function openCardDetail(id, fresh, tab){
     <div class="dr-header ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()}">
       <div class="dr-rarity">${rlab(c.rarity)}${pristine?' · ◈ Pristine':''}${fresh?' · ✦ Fresh Mint':''}</div>
       <div class="dr-name">${dispName(c.name)}</div>
+      ${_t>0?`<div class="dr-race-row"><button class="filter-chip ${isCardLocked(id)?'on':''}" style="padding:3px 10px;font-size:10px" onclick="toggleCardLock(${JSON.stringify(id)}, ${JSON.stringify(c.name)})">${isCardLocked(id)?'🔒 Locked':'🔓 Lock this copy'}</button><span class="dr-race-lbl" style="margin-left:6px;color:var(--text3);font-weight:500">Protects it from Trade, Market, Ingest, and Staked PvP</span></div>`:''}
       <div class="dr-race-row">🧬 <span class="dr-race-lbl">Race</span> <select class="dr-race-sel" data-cardname="${(c.name||'').replace(/"/g,'&quot;')}" onchange="setRace(this.dataset.cardname, this.value)">${RACES.map(function(r){return '<option'+(raceOf(c.name)===r?' selected':'')+'>'+r+'</option>';}).join('')}</select></div>
       <div class="dr-race-row">${CAMP_ICON[c.camp||campOf(c.name)]||'🏕'} <span class="dr-race-lbl" style="color:${CAMP_COLOR[c.camp||campOf(c.name)]||'inherit'}">${CAMP_TITLE[c.camp||campOf(c.name)]||c.camp||campOf(c.name)}</span></div>
       ${(function(){
@@ -12796,6 +12842,18 @@ function previewCardEl(c, el, readable){
   pv.innerHTML = readable ? readableCardHTML(c) : bigCardHTML(c);
   const _pvv = pv.querySelector('video'); if(_pvv){ _pvv.muted=true; _pvv.play().catch(()=>{}); }
   pv.classList.add('show');
+  pv.onclick = hideCardPreview;                                      // a hover preview is pointer-events:auto
+                                                                       // (so it's reachable-hoverable, see the
+                                                                       // 8/4/26 note below) and in dense grids
+                                                                       // (Vault/Deck Builder) it's taller than a
+                                                                       // grid row, so it can visually cover an
+                                                                       // adjacent row's tiles -- a stray click
+                                                                       // there used to be silently swallowed by
+                                                                       // the popup instead of reaching the real
+                                                                       // card underneath. Same onclick=hideCardPreview
+                                                                       // the pinned flows already use below, so a
+                                                                       // stray click just closes it and the next
+                                                                       // click reaches the real card.
   const r = el.getBoundingClientRect();
   const left = Math.max(150, Math.min(window.innerWidth - 150, r.left + r.width / 2));
   pv.style.left = left + 'px';
@@ -13229,6 +13287,7 @@ function acceptTrade(i){
   var o=tradeOffers&&tradeOffers[i]; if(!o) return;
   if(o.kind==='unit'){ if(typeof toast==='function') toast('🤝 Reserved: '+o.want+' → '+o.give+' with '+o.partner+' — applies to your Ascension roster when online play is live.', true); tradeOffers.splice(i,1); buildTrade(); return; }
   if((ownedCopies[o.want]||0)<=0){ if(typeof toast==='function') toast('You no longer own '+o.wantName+'.', false); buildTrade(); return; }
+  if(isCardLocked(o.want)){ if(typeof toast==='function') toast('🔒 '+o.wantName+' is locked — unlock it in the Vault to trade it away.', false); buildTrade(); return; }
   ownedCopies[o.want]=ownedCopies[o.want]-1; if(ownedCopies[o.want]<=0) delete ownedCopies[o.want];
   ownedCopies[o.give]=(ownedCopies[o.give]||0)+1;
   // Real bug (7/28/26): transferToMe() -- a complete, already-written function that resets a card's
@@ -14541,7 +14600,7 @@ function buildDraft(){
     return;
   }
   if(!_draftRow) dealDraftRow();
-  s.innerHTML='<div class="draft-prog">Pick '+(draftPool.length+1)+' of '+DRAFT_PICKS+'</div><div class="draft-row">'+_draftRow.map(function(c,i){ return '<div class="draft-card '+c.rarity+'" onclick="draftInspect('+i+')" onmouseenter="draftHover('+i+',this)" onmouseleave="hideCardPreview()"><div class="dc-pow">'+c.pow+'</div><div class="dc-name">'+(typeof dispName==="function"?dispName(c.name):c.name)+'</div><div class="dc-rar">'+c.rarity+'</div><div class="dc-hint" style="font-size:9px;color:var(--text3);margin-top:5px;letter-spacing:.03em">👁 view / draft</div></div>'; }).join('')+'</div>'+(draftPool.length?'<div class="draft-picked">Drafted: '+draftPool.join(' \u00b7 ')+'</div>':'');
+  s.innerHTML='<div class="draft-prog">Pick '+(draftPool.length+1)+' of '+DRAFT_PICKS+'</div><div class="draft-row">'+_draftRow.map(function(c,i){ return '<div class="draft-card '+c.rarity+'" onclick="draftInspect('+i+')" onmouseenter="cancelHidePreview();draftHover('+i+',this)" onmouseleave="scheduleHidePreview()"><div class="dc-pow">'+c.pow+'</div><div class="dc-name">'+(typeof dispName==="function"?dispName(c.name):c.name)+'</div><div class="dc-rar">'+c.rarity+'</div><div class="dc-hint" style="font-size:9px;color:var(--text3);margin-top:5px;letter-spacing:.03em">👁 view / draft</div></div>'; }).join('')+'</div>'+(draftPool.length?'<div class="draft-picked">Drafted: '+draftPool.join(' \u00b7 ')+'</div>':'');
 }
 // Real bug (7/28/26): this used to unconditionally clear timers and jump straight to the lobby --
 // no call into retreat()/pvpEndMatch(), no RP change, no pot forfeiture, no confirmation. Down 1-3

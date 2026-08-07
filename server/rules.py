@@ -343,7 +343,7 @@ def asc_generic_moves(name):
 # would be the "don't conflate two similar-looking mechanics" mistake).
 PACKS = [
     {"id": "std", "name": "Legends Reborn Booster", "price": 150, "tenX": True, "odds": {"common": 91.6, "rare": 7.6, "ultra": 0.8}},
-    {"id": "elite", "name": "Legends Reborn Elite Cache", "price": 1500, "odds": {"rare": 78, "ultra": 20, "apex": 2}},
+    {"id": "elite", "name": "Legends Reborn Elite Cache", "price": 1500, "odds": {"rare": 77.7, "ultra": 20, "apex": 2.3}},
 ]
 # 8/6/26: all 3 tiers were byte-identical odds despite a 2000/5000/6000 price spread -- fixed to
 # match the client (index.html:9683), where price now actually buys better odds and Mythic Rite
