@@ -381,6 +381,10 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .tframe .tf-text{position:absolute;left:19.5%;right:17.5%;top:57%;bottom:12.8%;z-index:2;overflow:hidden;display:flex;flex-direction:column;justify-content:center;gap:2px}
 .tframe .tf-kd{position:absolute;left:56%;width:29%;top:85.8%;height:6.6%;z-index:4;display:flex;align-items:center;justify-content:center;gap:1px;font-size:8px;font-weight:800;font-variant-numeric:tabular-nums;color:#2c1904;text-shadow:0 1px 0 rgba(255,238,200,0.4)}
 .tf-cost{position:absolute;left:5%;width:17.2%;top:4%;height:12.7%;z-index:4;display:flex;align-items:center;justify-content:center;color:#3a2103;font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;text-shadow:0 1px 0 rgba(255,240,205,0.6)}
+.bigcard.tframe.common .tf-cost,.bigcard.tframe.common .tf-pow{color:var(--r-common)}
+.bigcard.tframe.rare .tf-cost,.bigcard.tframe.rare .tf-pow{color:var(--r-rare)}
+.bigcard.tframe.ultra .tf-cost,.bigcard.tframe.ultra .tf-pow{color:var(--r-ultra)}
+.bigcard.tframe.apex .tf-cost,.bigcard.tframe.apex .tf-pow{color:var(--r-apex);text-shadow:0 1px 2px rgba(0,0,0,.55)}
 /* TEMP placement (7/27/26) -- there's no shield slot on the frame art yet, so this just sits in
    the one genuinely free rectangle left on the face (between the power number and the K/D chip,
    same bottom row) so nothing else has to move. Owner is redesigning the card face with a real
@@ -512,7 +516,10 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .dfb-own .own-chip.owned.on{background:rgba(87,196,106,0.20);border-color:#57c46a;color:#93e7a4}
 .filter-chip.kw-chip{border-style:dashed}
 .filter-chip.kw-chip.on{border-style:solid}
-.vh-kw.collapsed,.dfb-kw.collapsed,.vh-arch.collapsed{display:none}
+.vh-kw.collapsed,.dfb-kw.collapsed,.vh-arch.collapsed,.vh-camp.collapsed{display:none}
+.vh-search{font-size:12px;font-weight:500;padding:6px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--border);color:var(--text);width:170px;transition:border-color .12s,width .15s}
+.vh-search::placeholder{color:var(--text3)}
+.vh-search:focus{outline:none;border-color:var(--gold);width:210px}
 .kw-toggle{border-style:dashed;white-space:nowrap}
 .kw-toggle.active{background:var(--gold-glow);border-color:var(--gold);color:var(--gold);border-style:solid}
 
@@ -2673,17 +2680,17 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="vh-row">
         <span class="vh-title">🗄 The Vault</span>
         <span class="vh-count" id="vault-count"></span>
+        <input type="text" class="vh-search" id="vault-search" placeholder="🔍 Search cards…" oninput="setVaultSearch(this.value)">
         <div class="vh-group vh-rarity" style="margin-left:auto">
           <span class="vh-label">Rarity</span>
-          <button class="filter-chip on" onclick="filterVault('all',this)">All</button>
-          <button class="filter-chip" onclick="filterVault('apex',this)">AR</button>
-          <button class="filter-chip" onclick="filterVault('ultra',this)">UR</button>
-          <button class="filter-chip" onclick="filterVault('rare',this)">Rare</button>
-          
-          <button class="filter-chip" onclick="filterVault('common',this)">Common</button>
-          <button class="filter-chip" onclick="filterVault('deck',this)">🃏 In Deck</button>
-          <button class="filter-chip" onclick="filterVault('variant',this)">🏆 Variants</button>
-          <button class="filter-chip" onclick="filterVault('dup',this)">🗃 Duplicates</button>
+          <button class="filter-chip on vf-rarity" id="vf-all" onclick="filterVault('all',this)">All</button>
+          <button class="filter-chip vf-rarity" onclick="filterVault('apex',this)">AR</button>
+          <button class="filter-chip vf-rarity" onclick="filterVault('ultra',this)">UR</button>
+          <button class="filter-chip vf-rarity" onclick="filterVault('rare',this)">Rare</button>
+          <button class="filter-chip vf-rarity" onclick="filterVault('common',this)">Common</button>
+          <button class="filter-chip vf-mode" onclick="filterVault('deck',this)">🃏 In Deck</button>
+          <button class="filter-chip vf-mode" onclick="filterVault('variant',this)">🏆 Variants</button>
+          <button class="filter-chip vf-mode" onclick="filterVault('dup',this)">🗃 Duplicates</button>
           <button class="filter-chip" id="vault-own-toggle" onclick="toggleVaultOwned(this)">🔒 Owned Only</button>
         </div>
       </div>
@@ -2698,6 +2705,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         </div>
         <button class="filter-chip kw-toggle" id="kw-toggle" onclick="toggleVaultKw()">Keywords ▾</button><div class="vh-group vh-kw collapsed" id="vh-kw"></div>
         <button class="filter-chip kw-toggle" id="arch-toggle" onclick="toggleVaultArch()">Archetype ▾</button><div class="vh-group vh-arch collapsed" id="vh-arch"></div>
+        <button class="filter-chip kw-toggle" id="camp-toggle" onclick="toggleVaultCamp()">Camp ▾</button><div class="vh-group vh-camp collapsed" id="vh-camp"></div>
       </div>
     </div>
     <div class="vault-curve" id="vault-curve"></div>
@@ -10937,7 +10945,10 @@ function keywordChipsHTML(c, split){
 let activeDeck = new Set();      // card names selected into deck
 let energyLoadout = ['sift','empower','hex'];  // the 3 spells (pick in deck builder) you draw from on a lost round
 let activeDeckPool = null;       // built from activeDeck when >0
-let vaultFilter = 'all';
+let vaultRaritySet = new Set();   // 8/6/26: multi-select rarity tiers, empty = All (replaces old single-string vaultFilter for tiers)
+let vaultViewMode = null;         // null | 'deck' | 'variant' | 'dup' -- single-select, ANDs with vaultRaritySet
+let vaultCamp = null;             // 8/6/26: Camp/Trinity filter, mirrors vaultArchetype
+let vaultSearch = '';             // 8/6/26: search-by-name, lowercased
 let vaultSort = 'rarity';
 let vaultKeyword = null;
 let vaultArchetype = null;
@@ -12608,17 +12619,23 @@ function buildVault(){
   const grid=document.getElementById('vault-grid');
   const _dupCounts = ownedNameCounts();
   const base=COLLECTION.filter(c=>{
-    const rOk = vaultFilter==='all' ? true : vaultFilter==='deck' ? activeDeck.has(c.uid||c.name) : vaultFilter==='variant' ? !!c.variant : vaultFilter==='dup' ? (_dupCounts[c.name]||0)>1 : c.rarity===vaultFilter;
+    const rarOk = vaultRaritySet.size===0 || vaultRaritySet.has(c.rarity);
+    const modeOk = !vaultViewMode ? true : vaultViewMode==='deck' ? activeDeck.has(c.uid||c.name) : vaultViewMode==='variant' ? !!c.variant : (_dupCounts[c.name]||0)>1;
     const kOk = !vaultKeyword || cardHasKeyword(c, vaultKeyword);
     const aOk = !vaultArchetype || cardArchetypes(c.name).some(a=>a.id===vaultArchetype);
+    const cOk = !vaultCamp || (c.camp||campOf(c))===vaultCamp;
+    const sOk = !vaultSearch || c.name.toLowerCase().includes(vaultSearch);
     const costOk = !vaultCostFilter || costBucket(conjureCost(c))===vaultCostFilter;
-    return rOk && kOk && aOk && costOk;
+    return rarOk && modeOk && kOk && aOk && cOk && sOk && costOk;
   });
   { var _cvEl=document.getElementById('vault-curve'); if(_cvEl) _cvEl.innerHTML=costCurveHTML(COLLECTION.filter(c=>{
-    const rOk = vaultFilter==='all' ? true : vaultFilter==='deck' ? activeDeck.has(c.uid||c.name) : vaultFilter==='variant' ? !!c.variant : vaultFilter==='dup' ? (_dupCounts[c.name]||0)>1 : c.rarity===vaultFilter;
+    const rarOk = vaultRaritySet.size===0 || vaultRaritySet.has(c.rarity);
+    const modeOk = !vaultViewMode ? true : vaultViewMode==='deck' ? activeDeck.has(c.uid||c.name) : vaultViewMode==='variant' ? !!c.variant : (_dupCounts[c.name]||0)>1;
     const kOk = !vaultKeyword || cardHasKeyword(c, vaultKeyword);
     const aOk = !vaultArchetype || cardArchetypes(c.name).some(a=>a.id===vaultArchetype);
-    return rOk && kOk && aOk;   // curve itself always reflects rarity/keyword/archetype filters, never the cost filter -- otherwise clicking a bar would erase all the other bars
+    const cOk = !vaultCamp || (c.camp||campOf(c))===vaultCamp;
+    const sOk = !vaultSearch || c.name.toLowerCase().includes(vaultSearch);
+    return rarOk && modeOk && kOk && aOk && cOk && sOk;   // curve itself always reflects every filter except cost -- otherwise clicking a bar would erase all the other bars
   }), vaultCostFilter, 'filterVaultCost'); }
   let entries=[];
   base.forEach(c=>{
@@ -12639,9 +12656,11 @@ function buildVault(){
   const sortLabel = vaultSort==='kills' ? ' · most kills' : vaultSort==='deaths' ? ' · fewest deaths' : vaultSort==='newest' ? ' · newest' : vaultSort==='cost' ? ' · highest cost' : '';
   const totalCards=entries.reduce((s,e)=>s+(e.locked?0:e.count),0);
   const archLabel = vaultArchetype ? ' · '+(ARCHETYPE_PRESETS.find(a=>a.id===vaultArchetype)||{}).name : '';
-  document.getElementById('vault-count').textContent=`${totalCards} cards${vaultKeyword?' · '+vaultKeyword:''}${archLabel}${sortLabel}`;
+  const campLabel = vaultCamp ? ' · '+vaultCamp : '';
+  const searchLabel = vaultSearch ? ' · "'+vaultSearch+'"' : '';
+  document.getElementById('vault-count').textContent=`${totalCards} cards${vaultKeyword?' · '+vaultKeyword:''}${archLabel}${campLabel}${searchLabel}${sortLabel}`;
   { var _vt=document.getElementById('vault-tracker'); if(_vt) _vt.innerHTML=vaultTrackerHTML(); }
-  if(!entries.length){ var _emsg = vaultFilter==='variant' ? 'No variant cards yet — variants come from Forge summons (paid, play-only copies).' : (vaultKeyword||vaultArchetype||vaultFilter!=='all') ? 'No cards match this filter — try clearing it.' : 'Your vault is empty — open a pack in the Shop or win a duel.'; grid.innerHTML='<div class="vault-empty">'+_emsg+'</div>'; return; }
+  if(!entries.length){ var _emsg = vaultViewMode==='variant' ? 'No variant cards yet — variants come from Forge summons (paid, play-only copies).' : (vaultKeyword||vaultArchetype||vaultViewMode||vaultRaritySet.size||vaultCamp||vaultSearch) ? 'No cards match this filter — try clearing it.' : 'Your vault is empty — open a pack in the Shop or win a duel.'; grid.innerHTML='<div class="vault-empty">'+_emsg+'</div>'; return; }
   grid.innerHTML=entries.map(e=>{
     const c=e.c;
     const pristine=isPristine(c)?`<span class="vc-pristine">◈ Pristine</span>`:'';
@@ -12668,9 +12687,23 @@ function buildVault(){
   }).join('');
 }
 function filterVault(r,btn){
-  vaultFilter=r;
-  document.querySelectorAll('.vh-rarity .filter-chip').forEach(c=>c.classList.remove('on'));
-  btn.classList.add('on');
+  if(r==='all'){
+    vaultRaritySet.clear();
+    document.querySelectorAll('.vh-rarity .vf-rarity').forEach(c=>c.classList.remove('on'));
+    var _allBtn=document.getElementById('vf-all'); if(_allBtn) _allBtn.classList.add('on');
+  } else if(r==='deck'||r==='variant'||r==='dup'){
+    vaultViewMode = (vaultViewMode===r) ? null : r;
+    document.querySelectorAll('.vh-rarity .vf-mode').forEach(c=>c.classList.remove('on'));
+    if(vaultViewMode) btn.classList.add('on');
+  } else {
+    if(vaultRaritySet.has(r)) vaultRaritySet.delete(r); else vaultRaritySet.add(r);
+    btn.classList.toggle('on', vaultRaritySet.has(r));
+    var _allBtn2=document.getElementById('vf-all'); if(_allBtn2) _allBtn2.classList.toggle('on', vaultRaritySet.size===0);
+  }
+  buildVault();
+}
+function setVaultSearch(v){
+  vaultSearch = (v||'').trim().toLowerCase();
   buildVault();
 }
 function setSort(s,btn){
@@ -12712,6 +12745,22 @@ function buildArchetypeChips(){
   el.innerHTML='<span class="vh-label">Archetype</span>'+
     `<button class="filter-chip on" onclick="setArchetype(null,this)">Any</button>`+
     ARCHETYPE_PRESETS.map(a=>`<button class="filter-chip" data-arch="${a.id}" title="${a.members.length} cards" onclick="setArchetype('${a.id}',this)">${a.name}</button>`).join('');
+}
+// Camp/Trinity filter (8/6/26) -- same shape as Keyword/Archetype above
+function updateCampToggle(){ var t=document.getElementById('camp-toggle'), g=document.getElementById('vh-camp'); if(!t||!g) return; var caret=g.classList.contains('collapsed')?' ▾':' ▴'; if(vaultCamp){ t.classList.add('active'); t.textContent='Camp: '+vaultCamp+caret; } else { t.classList.remove('active'); t.textContent='Camp'+caret; } }
+function toggleVaultCamp(){ var g=document.getElementById('vh-camp'); if(g) g.classList.toggle('collapsed'); updateCampToggle(); }
+function setCamp(camp,btn){
+  vaultCamp=camp;
+  document.querySelectorAll('.vh-camp .filter-chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  buildVault();
+  if(typeof updateCampToggle==='function') updateCampToggle();
+}
+function buildCampChips(){
+  const el=document.getElementById('vh-camp');
+  el.innerHTML='<span class="vh-label">Camp</span>'+
+    `<button class="filter-chip on" onclick="setCamp(null,this)">Any</button>`+
+    Object.keys(CAMP_ICON).map(camp=>`<button class="filter-chip" data-camp="${camp}" onclick="setCamp('${camp}',this)">${CAMP_ICON[camp]} ${camp}</button>`).join('');
 }
 
 function openCardDetail(id, fresh, tab){
@@ -14865,6 +14914,7 @@ buildHub();
 updateDeckCount();
 buildKeywordChips();
 buildArchetypeChips();
+buildCampChips();
 document.addEventListener('keydown', function(e){
   if(e.key!=='Escape' && e.key!=='Esc') return;
   var lb=document.getElementById('lightbox'); if(lb && lb.classList.contains('open')){ if(typeof closeLightbox==='function') closeLightbox(); else lb.classList.remove('open'); return; }
