@@ -49,11 +49,14 @@ import engine, rules, store
 
 _LOCK = threading.RLock()
 
-QUEUE = []    # [{"user_id","handle","best_of","joined"}] — FIFO, oldest first
-GAMES = {}    # pid -> game dict (see _new_game)
+QUEUE = []       # [{"user_id","handle","best_of","joined"}] — FIFO, oldest first
+GAMES = {}       # pid -> game dict (see _new_game)
+CHALLENGES = {}  # code -> {"user_id","handle","owned","best_of","created"} — a pending private-match invite
 
-QUEUE_TTL = 120.0    # a queue entry this old is stale (browser closed, tab killed); dropped on touch
-GAME_TTL = 3600.0    # an untouched game is abandoned; dropped so GAMES cannot grow forever
+QUEUE_TTL = 120.0       # a queue entry this old is stale (browser closed, tab killed); dropped on touch
+GAME_TTL = 3600.0       # an untouched game is abandoned; dropped so GAMES cannot grow forever
+CHALLENGE_TTL = 300.0   # longer than QUEUE_TTL -- sharing a code out-of-band (text/Discord) takes longer than auto-matching
+_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"   # no 0/O/1/I/L -- easy to misread when typed from a screen or read aloud
 
 
 def _seeded(seed, fn):
@@ -138,11 +141,85 @@ def leave(user_id):
 
 
 def _sweep():
-    """Drop stale queue entries and abandoned games. Called under _LOCK on every entry point."""
+    """Drop stale queue entries, expired challenges, and abandoned games. Called under _LOCK on
+    every entry point."""
     now = time.time()
     QUEUE[:] = [q for q in QUEUE if now - q["joined"] < QUEUE_TTL]
+    for code in [k for k, ch in CHALLENGES.items() if now - ch["created"] > CHALLENGE_TTL]:
+        del CHALLENGES[code]
     for pid in [k for k, g in GAMES.items() if now - g["touched"] > GAME_TTL]:
         del GAMES[pid]
+
+
+def _active_game_for(user_id):
+    """-> the user's own in-progress game dict, if any, else None. A user already inside a live
+    match can't also open a challenge or the random queue -- same rule join() already enforces."""
+    for g in GAMES.values():
+        if not g["done"] and (g["a"]["user_id"] == user_id or g["b"]["user_id"] == user_id):
+            return g
+    return None
+
+
+def _new_code():
+    while True:
+        code = "".join(secrets.choice(_CODE_ALPHABET) for _ in range(6))
+        if code not in CHALLENGES:
+            return code
+
+
+# ── private challenges (direct invite by code, bypasses the random queue entirely) ─────────────
+def create_challenge(user_id, handle, owned, best_of):
+    with _LOCK:
+        _sweep()
+        g = _active_game_for(user_id)
+        if g:
+            opp = g["b"] if g["a"]["user_id"] == user_id else g["a"]
+            return 200, {"matched": True, "pvpId": g["id"], "opponent": opp["handle"], "already": True}
+        for code in [k for k, ch in CHALLENGES.items() if ch["user_id"] == user_id]:
+            del CHALLENGES[code]   # one active challenge per user -- a new one replaces a forgotten stale one
+        code = _new_code()
+        CHALLENGES[code] = {"user_id": user_id, "handle": handle, "owned": owned, "best_of": best_of, "created": time.time()}
+        return 200, {"code": code}
+
+
+def challenge_status(user_id, code):
+    with _LOCK:
+        _sweep()
+        ch = CHALLENGES.get((code or "").strip().upper())
+        if ch and ch["user_id"] == user_id:
+            return 200, {"matched": False}
+        # not pending any more -- either it was just joined (check for the resulting game) or expired
+        g = _active_game_for(user_id)
+        if g:
+            opp = g["b"] if g["a"]["user_id"] == user_id else g["a"]
+            return 200, {"matched": True, "pvpId": g["id"], "opponent": opp["handle"]}
+        return 404, {"error": "challenge not found or expired"}
+
+
+def cancel_challenge(user_id):
+    with _LOCK:
+        removed = False
+        for code in [k for k, ch in CHALLENGES.items() if ch["user_id"] == user_id]:
+            del CHALLENGES[code]
+            removed = True
+        return 200, {"cancelled": removed}
+
+
+def join_challenge(user_id, handle, owned, code):
+    with _LOCK:
+        _sweep()
+        g = _active_game_for(user_id)
+        if g:
+            opp = g["b"] if g["a"]["user_id"] == user_id else g["a"]
+            return 200, {"matched": True, "pvpId": g["id"], "opponent": opp["handle"], "already": True}
+        key = (code or "").strip().upper()
+        ch = CHALLENGES.get(key)
+        if not ch: return 404, {"error": "no match found for that code"}
+        if ch["user_id"] == user_id: return 400, {"error": "you can't join your own match"}
+        del CHALLENGES[key]
+        g = _new_game(_new_side(ch["user_id"], ch["handle"], ch["owned"], ch["best_of"]),
+                      _new_side(user_id, handle, owned, ch["best_of"]), ch["best_of"])
+        return 200, {"matched": True, "pvpId": g["id"], "opponent": ch["handle"]}
 
 
 # ── state ────────────────────────────────────────────────────────────────────────────────────

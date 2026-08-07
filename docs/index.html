@@ -2155,6 +2155,10 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .on-tabs{display:flex;gap:7px;margin-bottom:4px}
 .on-tab{font-size:11px;font-weight:700;padding:6px 15px;border-radius:7px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);cursor:pointer}
 .on-tab.sel{border-color:var(--electric);color:#cfe;background:rgba(91,192,235,.12)}
+.on-code{font-size:28px;font-weight:800;letter-spacing:.18em;color:var(--gold);background:var(--surface2);border:1px solid var(--gold);border-radius:8px;padding:12px;text-align:center;font-variant-numeric:tabular-nums;margin:4px 0}
+.on-join-row{display:flex;gap:8px;margin-top:10px}
+.on-join-row .on-in{width:auto;flex:1;text-align:center;letter-spacing:.1em}
+.on-join-row .on-btn{margin-top:0;white-space:nowrap}
 /* Phase 5.0b (8/6/26) — real PvP match screen */
 .on-panel.on-match,.on-panel.on-lastduel,.on-panel.on-final{max-width:640px}
 .on-mhud{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}
@@ -11262,12 +11266,26 @@ function _renderAccountPanel(){
           '<button class="on-btn ghost" onclick="pvpLeaveQueue()">Cancel</button>'
         : '<button class="on-btn" onclick="pvpFindMatch()">Find Match</button>')+
       '<div class="on-msg" id="on-pvp-msg"></div>'+
+    '</div>'+
+    '<div class="on-panel">'+
+      '<h3>Play a friend</h3>'+
+      '<p class="on-sub">Skip the random queue — create a private match and share the code, or join one you were given.</p>'+
+      (PVP.challengeCode
+        ? '<p class="on-sub" style="margin:0 0 4px">Share this code with your friend:</p>'+
+          '<div class="on-code">'+PVP.challengeCode+'</div>'+
+          '<p class="on-sub" style="margin:10px 0 0">⏳ Waiting for them to join…</p>'+
+          '<button class="on-btn ghost" style="margin-left:0" onclick="pvpCancelChallenge()">Cancel</button>'
+        : '<button class="on-btn" onclick="pvpCreateChallenge()">Create a private match</button>'+
+          '<div class="on-join-row">'+
+            '<input class="on-in" id="on-join-code" placeholder="Friend\'s code" maxlength="6">'+
+            '<button class="on-btn" onclick="pvpJoinChallenge()">Join</button>'+
+          '</div>')+
     '</div>';
   if(!SF_STATE) sfRefresh();
 }
 
 // ── PvP match state (Phase 5.0b, 8/6/26) ──────────────────────────────────────────────────────
-const PVP = {pvpId:null, opponent:null, bestOf:7, queueTimer:null, stateTimer:null, view:null, selectedUid:null, selectedRgUids:[]};
+const PVP = {pvpId:null, opponent:null, bestOf:7, queueTimer:null, stateTimer:null, view:null, selectedUid:null, selectedRgUids:[], challengeCode:null, challengeTimer:null};
 
 function _pvpMsg(text, cls){ var el=document.getElementById('on-pvp-msg'); if(el){ el.textContent=text||''; el.className='on-msg '+(cls||''); } }
 function _pvpOnlineViewShowing(){ var v=document.getElementById('v-online'); return !!(v && v.classList.contains('on')); }
@@ -11295,7 +11313,45 @@ function pvpLeaveQueue(){
   sfApi('POST', '/api/pvp/leave', {}, function(){ buildOnline(); });
 }
 
+// Direct-invite private matches (8/6/26) -- the random queue needs both friends to hit Find Match
+// at the same moment in the same mode; this lets one side create a short code and the other join
+// on their own schedule. Mirrors the queue functions' own shape (create/tick/cancel), just against
+// the challenge endpoints instead of the random-pairing ones.
+function pvpCreateChallenge(){
+  _pvpMsg('Creating…', '');
+  sfApi('POST', '/api/pvp/challenge/create', {mode: PVP.bestOf===3?'ranked':undefined}, function(err, data){
+    if(err){ _pvpMsg(err, 'err'); return; }
+    if(data.matched){ pvpEnterMatch(data.pvpId, data.opponent); return; }   // already in a live match
+    PVP.challengeCode = data.code;
+    if(!PVP.challengeTimer) PVP.challengeTimer = setInterval(pvpChallengeTick, 2000);
+    buildOnline();
+  });
+}
+function pvpChallengeTick(){
+  if(!_pvpOnlineViewShowing() || !PVP.challengeCode){ clearInterval(PVP.challengeTimer); PVP.challengeTimer=null; return; }
+  sfApi('GET', '/api/pvp/challenge/status?code='+encodeURIComponent(PVP.challengeCode), null, function(err, data){
+    if(err) return;   // a transient miss on a background poll tick isn't worth interrupting the user over -- the next tick recovers
+    if(data.matched){ clearInterval(PVP.challengeTimer); PVP.challengeTimer=null; PVP.challengeCode=null; pvpEnterMatch(data.pvpId, data.opponent); }
+  });
+}
+function pvpCancelChallenge(){
+  clearInterval(PVP.challengeTimer); PVP.challengeTimer=null; PVP.challengeCode=null;
+  sfApi('POST', '/api/pvp/challenge/cancel', {}, function(){ buildOnline(); });
+}
+function pvpJoinChallenge(){
+  var input = document.getElementById('on-join-code');
+  var code = input ? input.value.trim() : '';
+  if(!code){ _pvpMsg('Enter a code first.', 'err'); return; }
+  _pvpMsg('Joining…', '');
+  sfApi('POST', '/api/pvp/challenge/join', {code: code}, function(err, data){
+    if(err){ _pvpMsg(err, 'err'); return; }
+    pvpEnterMatch(data.pvpId, data.opponent);
+  });
+}
+
 function pvpEnterMatch(pvpId, opponent){
+  clearInterval(PVP.queueTimer); PVP.queueTimer=null;
+  clearInterval(PVP.challengeTimer); PVP.challengeTimer=null; PVP.challengeCode=null;
   PVP.pvpId=pvpId; PVP.opponent=opponent; PVP.selectedUid=null; PVP.selectedRgUids=[]; PVP.view=null;
   if(typeof toast==='function') toast('Matched vs '+opponent+'!', true);
   buildOnline();   // re-enters through the dispatch above, which starts the poll loop + fetches

@@ -498,6 +498,25 @@ def h_pvp_queue(user_id, body):
 def h_pvp_leave(user_id, body):   return pvp.leave(user_id)
 def h_pvp_state(user_id, body):   return pvp.state(user_id, body.get("pvpId"))
 def h_pvp_forfeit(user_id, body): return pvp.forfeit(user_id, body.get("pvpId"))
+
+# Direct-invite private matches (8/6/26) -- the random queue needs both friends to hit "Find Match"
+# at the same moment in the same mode; a shareable code lets one side create, the other join, on
+# their own schedule. Fully additive: CHALLENGES is its own dict in pvp.py, untouched QUEUE/join()
+# logic still backs the random-pairing path.
+def h_pvp_challenge_create(user_id, body):
+    owned = _pvp_deck(user_id)
+    if len(owned) < 4: return 400, {"error": "need at least 4 cards in your deck to play"}
+    handle = store.conn().execute("SELECT handle FROM users WHERE id=?", (user_id,)).fetchone()["handle"]
+    return pvp.create_challenge(user_id, handle, owned, 3 if body.get("mode") == "ranked" else 7)
+
+def h_pvp_challenge_status(user_id, body): return pvp.challenge_status(user_id, body.get("code"))
+def h_pvp_challenge_cancel(user_id, body): return pvp.cancel_challenge(user_id)
+
+def h_pvp_challenge_join(user_id, body):
+    owned = _pvp_deck(user_id)
+    if len(owned) < 4: return 400, {"error": "need at least 4 cards in your deck to play"}
+    handle = store.conn().execute("SELECT handle FROM users WHERE id=?", (user_id,)).fetchone()["handle"]
+    return pvp.join_challenge(user_id, handle, owned, body.get("code"))
 def h_pvp_commit(user_id, body):
     return pvp.commit(user_id, body.get("pvpId"), body.get("cardUid"), body.get("rearGuardUids"))
 
@@ -934,6 +953,10 @@ ROUTES = {
     ("GET", "/api/pvp/state"):     (h_pvp_state, True),
     ("POST","/api/pvp/commit"):    (h_pvp_commit, True),
     ("POST","/api/pvp/forfeit"):   (h_pvp_forfeit, True),
+    ("POST","/api/pvp/challenge/create"): (h_pvp_challenge_create, True),
+    ("GET", "/api/pvp/challenge/status"): (h_pvp_challenge_status, True),
+    ("POST","/api/pvp/challenge/cancel"): (h_pvp_challenge_cancel, True),
+    ("POST","/api/pvp/challenge/join"):   (h_pvp_challenge_join, True),
     ("GET", "/api/asc/shop"):      (h_asc_shop, True),
     ("POST","/api/asc/loadout"):   (h_asc_loadout, True),
     ("GET", "/api/asc/ally-pool"): (h_asc_ally_pool, True),
