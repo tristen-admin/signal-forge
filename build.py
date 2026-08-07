@@ -26,7 +26,7 @@ WRAP_HEAD = (
     '<!doctype html><html lang="en"><head>'
     '<meta charset="utf-8">'
     '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">'
-    '<meta name="description" content="Signal Forge — a living-card TCG where every card carries its permanent match history.">'
+    '<meta name="description" content="KOTEI: The Trading Card Game — a living-card TCG where every card carries its permanent match history.">'
     '<meta name="theme-color" content="#0b0e14">'
     '<link rel="manifest" href="manifest.webmanifest">'
     '<link rel="icon" href="icon.svg" type="image/svg+xml">'
@@ -34,7 +34,7 @@ WRAP_HEAD = (
     '<meta name="apple-mobile-web-app-capable" content="yes">'
     '<meta name="mobile-web-app-capable" content="yes">'
     '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">'
-    '<meta name="apple-mobile-web-app-title" content="Signal Forge">'
+    '<meta name="apple-mobile-web-app-title" content="KOTEI">'
     '</head><body>\n'
 )
 
@@ -47,8 +47,8 @@ ICON_SVG = (
 )
 
 MANIFEST = {
-    "name": "Signal Forge",
-    "short_name": "Signal Forge",
+    "name": "KOTEI: The Trading Card Game",
+    "short_name": "KOTEI",
     "description": "A living-card TCG where every card carries its permanent match history.",
     "start_url": "./",
     "scope": "./",
@@ -110,7 +110,7 @@ def main():
         return rel
 
     out_html = DATA_URI.sub(repl, html)
-    out_html = re.sub(r'<title>.*?</title>', '<title>Signal Forge</title>', out_html, count=1, flags=re.S)
+    out_html = re.sub(r'<title>.*?</title>', '<title>KOTEI: The Trading Card Game</title>', out_html, count=1, flags=re.S)
 
     with open(os.path.join(OUT, "index.html"), 'w', encoding='utf-8') as f:
         f.write(out_html)

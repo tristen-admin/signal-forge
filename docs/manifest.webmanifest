@@ -1,6 +1,6 @@
 {
-  "name": "Signal Forge",
-  "short_name": "Signal Forge",
+  "name": "KOTEI: The Trading Card Game",
+  "short_name": "KOTEI",
   "description": "A living-card TCG where every card carries its permanent match history.",
   "start_url": "./",
   "scope": "./",
