@@ -11010,7 +11010,7 @@ function rebuildDeckPool(){
 function updateDeckCount(){
   const n=activeDeck.size;
   document.getElementById('tb-deck').textContent=`${n}/${DECK_SIZE}`;
-  const vb=document.getElementById('vault-badge'); if(vb) vb.textContent=COLLECTION.length;
+  const vb=document.getElementById('vault-badge'); if(vb) vb.textContent=COLLECTION.filter(function(c){ return (ownedCopies[c.uid||c.name]||0)>0; }).length;
   const db=document.getElementById('deck-badge'); if(db) db.textContent=`${n}/${DECK_SIZE}`;
 }
 
