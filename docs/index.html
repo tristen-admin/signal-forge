@@ -1754,6 +1754,15 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .forge-tier .ft-amt{font-size:22px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
 .forge-tier .ft-bonus{font-size:10px;font-weight:700;color:var(--electric);text-transform:uppercase;letter-spacing:0.05em}
 .forge-tier .ft-per{font-size:10px;color:var(--text3)}
+.forge-tier .ft-firstbuy{font-size:9px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--win);background:rgba(91,192,235,0.08)}
+.forge-tier .ft-was{font-size:14px;font-weight:600;color:var(--text3);text-decoration:line-through;font-variant-numeric:tabular-nums}
+.forge-vault-track{margin-top:14px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.forge-vault-track .fv-label{font-size:12px;font-weight:700;color:var(--text2)}
+.forge-vault-track .fv-progress{display:flex;align-items:center;gap:9px;flex:1;min-width:160px}
+.forge-vault-track .fv-bar-track{flex:1;height:7px;background:var(--surface2);border-radius:4px;overflow:hidden;min-width:80px}
+.forge-vault-track .fv-bar-fill{display:block;height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));border-radius:4px;transition:width .3s ease}
+.forge-vault-track .fv-count{font-size:10.5px;color:var(--text3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.forge-vault-track .fv-claimed{font-size:12px;font-weight:700;color:var(--win)}
 .forge-tier .pack-buy{margin-top:6px}
 .banner-head{font-size:15.5px;font-weight:800;color:var(--gold);letter-spacing:0.02em;margin:24px 0 12px;display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
 .banner-head.prem{color:var(--electric)}
@@ -1775,6 +1784,47 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .pack-buy-row{display:flex;gap:6px;margin-top:auto}
 .pack-buy-row .pack-buy{width:auto;flex:1;margin-top:0}
 .pack-buy5{flex:0 0 auto!important;background:var(--surface2)!important;color:var(--gold)!important;border:1px solid var(--gold)!important;box-shadow:none!important;padding:11px 14px!important}
+.pack-save{display:block;font-size:8.5px;font-weight:800;color:var(--win);margin-top:2px;letter-spacing:.03em}
+.pack-badge{display:inline-block;font-size:9px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:2px 8px;border-radius:10px;margin-left:8px;vertical-align:middle}
+.pack-badge.value{background:rgba(91,192,235,0.16);color:var(--electric);border:1px solid rgba(91,192,235,0.4)}
+.pack-badge.odds{background:var(--gold-glow);color:var(--gold);border:1px solid var(--gold)}
+.pity-bar-wrap{display:flex;flex-direction:column;gap:2px;margin-top:5px}
+.pity-bar-row{display:flex;align-items:center;gap:7px;font-size:10px;color:var(--text2)}
+.pity-bar-row .pb-lbl{flex:0 0 auto;white-space:nowrap;font-weight:700}
+.pity-bar-track{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.pity-bar-fill{display:block;height:100%;border-radius:3px;transition:width .3s ease}
+.pity-bar-fill.ultra{background:linear-gradient(90deg,var(--r-ultra),var(--r-ultra))}
+.pity-bar-fill.apex{background:linear-gradient(90deg,var(--r-apex),var(--r-apex))}
+.pity-bar-row .pb-count{flex:0 0 auto;font-variant-numeric:tabular-nums;font-size:9.5px;color:var(--text3)}
+.featured-hero{display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,rgba(245,194,77,0.14),rgba(245,194,77,0.03));border:1px solid var(--gold);border-radius:12px;padding:16px 20px;margin-bottom:14px}
+.featured-hero .fh-icon{font-size:34px;flex:0 0 auto}
+.featured-hero .fh-body{flex:1}
+.featured-hero .fh-eyebrow{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.featured-hero .fh-name{font-size:17px;font-weight:800;color:#fff;margin:2px 0}
+.featured-hero .fh-sub{font-size:11.5px;color:var(--text2)}
+.featured-hero .fh-cta{flex:0 0 auto}
+.featured-hero .fh-refresh{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:none;letter-spacing:0;margin-left:8px}
+.featured-hero .fh-refresh #fh-countdown{color:var(--lose);font-weight:800;font-variant-numeric:tabular-nums}
+.pack-was{color:var(--text3);text-decoration:line-through;font-size:11px;font-weight:600;margin-right:3px}
+#decklists-body{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;align-items:start}
+.dl-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.dl-head{display:flex;flex-direction:column;gap:4px}
+.dl-name-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.dl-title{font-size:16px;font-weight:800;color:#fff}
+.dl-count{font-size:10.5px;font-weight:700;color:var(--text3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dl-count.dl-incomplete{color:var(--lose)}
+.dl-blurb{font-size:12px;color:var(--text2);line-height:1.5}
+.dl-curve{margin:2px 0}
+.dl-list{display:flex;flex-direction:column;gap:1px;max-height:280px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:4px}
+.dl-row{display:flex;align-items:center;gap:8px;padding:4px 6px;font-size:11.5px;border-radius:5px}
+.dl-row.dl-unowned{opacity:.55}
+.dl-cost{flex:0 0 16px;text-align:center;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.dl-rar{flex:0 0 34px;font-size:9px;font-weight:800;text-transform:uppercase}
+.dl-name{flex:1;color:var(--text)}
+.dl-pow{flex:0 0 auto;font-size:10px;color:var(--text3);font-variant-numeric:tabular-nums}
+.dl-lock{flex:0 0 auto;font-size:10px}
+.dl-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:2px}
+.dl-owned-sub{font-size:10.5px;color:var(--text3)}
 .pack-buy5:hover{background:var(--gold-dim)!important}
 .pack-buy:hover{transform:translateY(-1px);box-shadow:0 5px 18px rgba(212,168,67,0.35)}
 .listing-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:12px}
@@ -2602,6 +2652,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <button class="navitem" id="nav-conds" onclick="show('conds',this)"><span class="ni-icon">🎲</span><span class="brand-text">Conditions</span></button>
         <button class="navitem" id="nav-abil" onclick="show('abil',this)"><span class="ni-icon">✦</span><span class="brand-text">Abilities</span></button>
         <button class="navitem" id="nav-growth" onclick="show('growth',this)"><span class="ni-icon">🌱</span><span class="brand-text">Card Growth</span></button>
+        <button class="navitem" id="nav-decklists" onclick="show('decklists',this);buildDecklists()"><span class="ni-icon">📋</span><span class="brand-text">Decklists</span></button>
       </div>
     </div>
     <!-- 7/22/26: split the old single "Codex" group (7 items -- rules reference mixed in with
@@ -2737,6 +2788,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <span class="dh-count" id="deck-count-label">0 / 12</span>
       <span class="dh-status" id="deck-status">Add 10 more</span>
       <span class="dh-power" id="deck-power"></span>
+      <button class="filter-chip" id="playtest-toggle" style="margin-left:auto" onclick="setPlaytestMode(!playtestMode)" title="Unlocks every card for deckbuilding — try any archetype decklist without owning it yet. Offline Play only: Ranked/Online is unaffected either way, and Staked PvP still needs a fully-owned deck.">🔓 Playtest Mode</button>
     </div>
     <div id="deck-build-body">
       <div class="deck-layout">
@@ -3362,6 +3414,14 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     Send a charge to a marked location on the map for a chance at a Common or Uncommon card, or a flat Signal payout. Charges refill on their own over real time.
   </div>
   <div style="overflow-y:auto;flex:1;padding:14px"><div id="expeditions-body"></div></div>
+</div>
+<!-- ── ARCHETYPE DECKLISTS ── -->
+<div class="view" id="v-decklists" style="flex-direction:column">
+  <div class="view-head">
+    <strong>Archetype Decklists</strong>
+    Nine ready-built, 20-card decklists — one per archetype, curated for identity and curve. "Load &amp; Playtest" drops the full list straight into your Deck Builder; if you don't own every card yet, it flips on Playtest Mode so you (or anyone else) can try the deck exactly as designed before ever cracking a pack. Offline Play only — Ranked/Online is unaffected either way, and Staked PvP still needs a fully-owned deck.
+  </div>
+  <div style="overflow-y:auto;flex:1;padding:14px"><div id="decklists-body"></div></div>
 </div>
 <div class="view" id="v-mastery" style="flex-direction:column">
   <div class="view-head">
@@ -9764,6 +9824,20 @@ function mintLedgerHTML(){
   // for real testing; they're just no longer exposed as a button in production UI.
   return `<div class="mint-ledger"><div class="ml-head">◈ Global Mint Ledger <span class="ml-sub">${COLLECTION.length} card types · ${COPIES_PER.apex}–${fmtPts(COPIES_PER.common)} copies each by rarity · shared across every pack</span></div>${rows}</div>`;
 }
+// 8/7/26: data-grounded badges, computed fresh every render rather than hardcoded to a pack id --
+// hardcoding "elite is best value" is exactly the trap that made Mythic Rite's own blurb false
+// against its own odds table before the 8/6 retune (see that comment above PREMIUM_PACKS). If
+// prices/odds move again, these badges move with them instead of quietly going stale.
+function shopBadgesFor(p){
+  var all=PACKS.concat(PREMIUM_PACKS).filter(function(x){ return x.odds.apex!=null; });
+  if(!all.length) return '';
+  var bestValue=all.reduce(function(a,b){ return (b.price/b.odds.apex)<(a.price/a.odds.apex)?b:a; });
+  var bestOdds=all.reduce(function(a,b){ return b.odds.apex>a.odds.apex?b:a; });
+  var out='';
+  if(p===bestValue) out+=`<span class="pack-badge value" title="Lowest Signal spent per 1% Apex odds of any pack in the shop">💎 Best Value</span>`;
+  if(p===bestOdds) out+=`<span class="pack-badge odds" title="Highest raw Apex pull chance of any pack in the shop">👑 Highest Apex Odds</span>`;
+  return out;
+}
 function packCardHTML(p){
   const rars=Object.keys(p.odds).sort((a,b)=>RARITY_ORDER[a]-RARITY_ORDER[b]);
   const soldOut=rars.every(r=>!supply[r]||supply[r].left<=0);
@@ -9771,16 +9845,43 @@ function packCardHTML(p){
   const feat = (p.id==='elite' && typeof dailyFeaturedApexCard==='function') ? dailyFeaturedApexCard() : null;
   const featHTML = feat ? `<div style="font-size:10.5px;color:var(--gold);background:rgba(245,194,77,0.08);border:1px solid rgba(245,194,77,0.25);border-radius:6px;padding:5px 9px;margin-top:6px">🌟 Today's Featured Apex — <b>${feat.name}</b>, ${(DAILY_FEATURED_APEX_CHANCE*100).toFixed(1)}% own shot</div>` : '';
   return `<div class="pack-card wide">
-    <div class="pack-head"><div class="pack-icon">${p.icon}</div><div><div class="pack-name">${p.name}</div><div class="pack-blurb">${p.blurb}</div></div></div>
+    <div class="pack-head"><div class="pack-icon">${p.icon}</div><div><div class="pack-name">${p.name}${shopBadgesFor(p)}</div><div class="pack-blurb">${p.blurb}</div></div></div>
     <div class="pack-odds">${odds}</div>${featHTML}
-    <div class="pack-buy-row"><button class="pack-buy" ${soldOut?'disabled':''} onclick="openPack('${p.id}')">${soldOut?'Minted Out':'Open · ◈ '+fmtPts(p.price)}</button>${soldOut?'':`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',5)" title="Open five at once">5× · ◈ ${fmtPts(p.price*5)}</button>`}${(!soldOut && p.tenX)?`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',10)" title="Open ten at once">10× · ◈ ${fmtPts(p.price*10)}</button>`:''}</div>
+    <div class="pack-buy-row"><button class="pack-buy" ${soldOut?'disabled':''} onclick="openPack('${p.id}')">${soldOut?'Minted Out':'Open · ◈ '+fmtPts(p.price)}</button>${soldOut?'':`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',5)" title="Open five at once — 5% off the single-pack rate">5× · <span class="pack-was">◈${fmtPts(p.price*5)}</span>◈${fmtPts(bundlePrice(p.price,5))}<span class="pack-save">Save 5%</span></button>`}${(!soldOut && p.tenX)?`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',10)" title="Open ten at once — 10% off the single-pack rate">10× · <span class="pack-was">◈${fmtPts(p.price*10)}</span>◈${fmtPts(bundlePrice(p.price,10))}<span class="pack-save">Save 10%</span></button>`:''}</div>
+  </div>`;
+}
+// 8/7/26: was a small note buried inside Elite Cache's own odds panel -- promoted to a real
+// front-and-center hero banner, the standard "today's spotlight" placement modern live-service
+// shops lead with (Hearthstone/Marvel Snap-style). Same underlying daily-featured-card data and
+// math as before, just given the prominence the mechanic actually deserves.
+function featuredHeroHTML(){
+  const feat=(typeof dailyFeaturedApexCard==='function')?dailyFeaturedApexCard():null;
+  if(!feat) return '';
+  return `<div class="featured-hero">
+    <div class="fh-icon">🌟</div>
+    <div class="fh-body">
+      <div class="fh-eyebrow">Today's Featured Apex <span class="fh-refresh">Refreshes in <span id="fh-countdown">${fmtCountdown(msUntilNextFeaturedRotation())}</span></span></div>
+      <div class="fh-name">${feat.name}</div>
+      <div class="fh-sub">An independent ${(DAILY_FEATURED_APEX_CHANCE*100).toFixed(1)}% shot on every Elite Cache you open today — on top of, not instead of, its normal Apex odds.</div>
+    </div>
+    <button class="fh-cta pack-buy" style="width:auto" onclick="openPack('elite')">Open Elite Cache</button>
   </div>`;
 }
 function packsSectionHTML(){
-  return `<div class="season-banner"><div class="sb-chapter">${SEASON.chapter} · ${SEASON.name}</div><div class="sb-name">${SEASON.pack}</div><div class="sb-tag">The inaugural set — every legend re-minted for the first chapter, drawn from the finite shared mint. Once a rarity is gone, it is gone for everyone.</div></div>`+mintLedgerHTML()+`<div class="odds-note">🎲 <b>Published pull odds.</b> Each pack lists its exact rarity chances below — outcomes are random. Every card is obtainable with <b>earned Signal</b> (win it in play) — no purchase is ever required to progress, and nothing here cashes out.</div>`+`<div style="font-size:11.5px;color:var(--text2);background:rgba(245,194,77,0.06);border:1px solid rgba(245,194,77,0.22);border-radius:8px;padding:9px 13px;margin:10px 0;line-height:1.55">◇ <b>Pity</b> — a guaranteed <b class="rar-ultra">Ultra</b> lands within <b>${PITY_ULTRA}</b> pulls (now <b>${packPityUltra}/${PITY_ULTRA}</b>); an <b class="rar-apex">Apex</b> is guaranteed by <b>${PITY_APEX}</b> pulls (<b>${packPityApex}/${PITY_APEX}</b>) — the true chase. Any Ultra+ resets the Ultra counter; an Apex resets both.</div><div class="banner-head">◈ Basic Summon · Signal <span class="banner-sub">Earned currency — pulls are <b>Forged</b> (tradeable + wagerable). Generous odds to build your repertoire.</span></div>`+`<div class="pack-grid">`+PACKS.map(packCardHTML).join('')+`</div>`+`<div class="banner-head">◈ Premium Summon · Signal <span class="banner-sub">Same earned currency, steeper price for better odds. Still <b>Forged</b> (tradeable + wagerable) — this is not a Forge purchase.</span></div>`+`<div class="pack-grid">`+PREMIUM_PACKS.map(packCardHTML).join('')+`</div>`;
+  return `<div class="season-banner"><div class="sb-chapter">${SEASON.chapter} · ${SEASON.name}</div><div class="sb-name">${SEASON.pack}</div><div class="sb-tag">The inaugural set — every legend re-minted for the first chapter, drawn from the finite shared mint. Once a rarity is gone, it is gone for everyone.</div></div>`+featuredHeroHTML()+mintLedgerHTML()+`<div class="odds-note">🎲 <b>Published pull odds.</b> Each pack lists its exact rarity chances below — outcomes are random. Every card is obtainable with <b>earned Signal</b> (win it in play) — no purchase is ever required to progress, and nothing here cashes out.</div>`+`<div style="font-size:11.5px;color:var(--text2);background:rgba(245,194,77,0.06);border:1px solid rgba(245,194,77,0.22);border-radius:8px;padding:9px 13px;margin:10px 0;line-height:1.55">◇ <b>Pity</b> — a guaranteed <b class="rar-ultra">Ultra</b> lands within <b>${PITY_ULTRA}</b> pulls; an <b class="rar-apex">Apex</b> is guaranteed by <b>${PITY_APEX}</b> pulls — the true chase. Any Ultra+ resets the Ultra counter; an Apex resets both.${pityBarHTML()}</div>`+`<div class="banner-head">◈ Basic Summon · Signal <span class="banner-sub">Earned currency — pulls are <b>Forged</b> (tradeable + wagerable). Generous odds to build your repertoire.</span></div>`+`<div class="pack-grid">`+PACKS.map(packCardHTML).join('')+`</div>`+`<div class="banner-head">◈ Premium Summon · Signal <span class="banner-sub">Same earned currency, steeper price for better odds. Still <b>Forged</b> (tradeable + wagerable) — this is not a Forge purchase.</span></div>`+`<div class="pack-grid">`+PREMIUM_PACKS.map(packCardHTML).join('')+`</div>`;
 }
 const PITY_ULTRA = 20, PITY_APEX = 80;   // card-pack pity: guaranteed Ultra (featured) within 20 pulls; guaranteed Apex (the chase) within 80
 let packPityUltra = 0, packPityApex = 0;
+// 8/7/26: pity used to be text-only ("now 7/20") -- every modern gacha/TCG shop shows this as a
+// real progress bar (the visual IS the anticipation mechanic), so the number alone was underselling it.
+function pityBarHTML(){
+  const uPct=Math.min(100, Math.round(packPityUltra/PITY_ULTRA*100));
+  const aPct=Math.min(100, Math.round(packPityApex/PITY_APEX*100));
+  return `<div class="pity-bar-wrap">
+    <div class="pity-bar-row"><span class="pb-lbl rar-ultra">◇ Ultra pity</span><span class="pity-bar-track"><span class="pity-bar-fill ultra" style="width:${uPct}%"></span></span><span class="pb-count">${packPityUltra}/${PITY_ULTRA}</span></div>
+    <div class="pity-bar-row"><span class="pb-lbl rar-apex">◇ Apex pity</span><span class="pity-bar-track"><span class="pity-bar-fill apex" style="width:${aPct}%"></span></span><span class="pb-count">${packPityApex}/${PITY_APEX}</span></div>
+  </div>`;
+}
 function rollPackRarity(p, avail){
   _forcedFeaturedCard = null;
   if(p.id==='elite' && avail.indexOf('apex')>=0){
@@ -9804,12 +9905,18 @@ function _mintRarity(rar, p){
   if(cardSupply[card.name] && cardSupply[card.name].left>0) cardSupply[card.name].left--;
   return {card:card, rar:rar, mint:_mint};
 }
+// 8/7/26: real bulk discount -- 5x/10x bundles used to charge price*n exactly, buying zero value
+// for the larger commitment, which is a real miss against how every modern live-service shop
+// prices multi-buys (bundling always beats buying singles one at a time). openPackN() and the
+// button label in packCardHTML() both call this so the charged price and the displayed price
+// can never drift apart.
+function bundlePrice(price, n){ var disc = n>=10 ? 0.10 : n>=5 ? 0.05 : 0; return Math.round(price*n*(1-disc)); }
 function openPackN(id, n){
   var p=PACKS.find(function(x){return x.id===id;}) || PREMIUM_PACKS.find(function(x){return x.id===id;}); if(!p) return;
   var isPremium = PREMIUM_PACKS.indexOf(p)>=0;
   var avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;});
   if(!avail.length){ toast(p.name+' \u2014 every rarity it offers is minted out',false); return; }
-  var cost=p.price*n;
+  var cost=bundlePrice(p.price, n);
   if(signalPoints<cost){ toast('Not enough Signal for a '+n+'\u00d7 summon (\u25c8 '+fmtPts(cost)+')',false); return; }
   if(!confirm('Open '+n+'\u00d7 '+p.name+' for \u25c8 '+fmtPts(cost)+' Signal?\n\nMints you '+n+' random cards.')) return;
   signalPoints-=cost;
@@ -9941,23 +10048,50 @@ const FORGE_TIERS = [
   {id:'t4', usd:49.99, forge:6500,  bonus:30, tag:'Best rate'},
   {id:'t5', usd:99.99, forge:14000, bonus:40, tag:'Whale'},
 ];
+// 8/7/26: first-buy-doubles-your-Forge + buy-every-tier vault reward, modeled directly off owner-
+// supplied reference screenshots of a live mobile game's currency store (rotating "2X 1ST BUY
+// BONUS" ribbon on every tier, a completion vault for buying each tier at least once). boughtForgeTiers
+// tracks which tiers have ever been bought so the bonus only fires once per tier, same shape as
+// everything else in this file that gates a one-time reward (ownedCosmetics, packPity, etc).
+let boughtForgeTiers = new Set(lsGet('sf_forge_tiers_bought', []));
+let forgeVaultClaimed = lsGet('sf_forge_vault_claimed', false);
+const FORGE_VAULT_BONUS = 3000;
 function forgeSectionHTML(){
+  const boughtCount=FORGE_TIERS.filter(function(t){return boughtForgeTiers.has(t.id);}).length;
+  const vaultReady=boughtCount>=FORGE_TIERS.length && !forgeVaultClaimed;
   return '<div class="forge-note">Forge is the premium currency — spend it on cosmetics and card variants. It never expires, <b>never cashes out</b>, and <b>never buys cards</b> (cards are earned in Signal). <b>Prototype: no real charge is made; each tier credits instantly so you can test the economy.</b> <span class="dev-note">(dev)</span></div>'
     +'<div class="pack-grid">'+FORGE_TIERS.map(function(t,i){
       var per=Math.round(t.forge/t.usd);
+      var firstBuy=!boughtForgeTiers.has(t.id);
+      var amt=firstBuy?t.forge*2:t.forge;
       return '<div class="forge-tier'+(t.tag?' feat':'')+'">'+(t.tag?'<div class="ft-tag">'+t.tag+'</div>':'')
-        +'<div class="ft-amt">❖ '+fmtPts(t.forge)+'</div>'
+        +(firstBuy?'<div class="ft-firstbuy">2× First-Buy Bonus</div>':'')
+        +'<div class="ft-amt">❖ '+(firstBuy?'<span class="ft-was">'+fmtPts(t.forge)+'</span> ':'')+fmtPts(amt)+'</div>'
         +'<div class="ft-bonus">'+(t.bonus?'+'+t.bonus+'% bonus':'base rate')+'</div>'
         +'<div class="ft-per">'+per+' Forge / $</div>'
         +'<button class="pack-buy" onclick="buyForge('+i+')">$'+t.usd.toFixed(2)+'</button>'
         +'</div>';
-    }).join('')+'</div>';
+    }).join('')+'</div>'
+    +'<div class="forge-vault-track"><div class="fv-label">❖ Forge Vault — buy every tier once to unlock</div><div class="fv-progress"><span class="fv-bar-track"><span class="fv-bar-fill" style="width:'+Math.round(boughtCount/FORGE_TIERS.length*100)+'%"></span></span><span class="fv-count">'+boughtCount+'/'+FORGE_TIERS.length+' tiers</span></div>'
+    +(forgeVaultClaimed ? '<div class="fv-claimed">✓ Vault claimed</div>' : '<button class="pack-buy pack-buy5" '+(vaultReady?'':'disabled')+' onclick="claimForgeVault()">'+(vaultReady?'Claim +'+fmtPts(FORGE_VAULT_BONUS)+' Forge':'Locked — '+boughtCount+'/'+FORGE_TIERS.length)+'</button>')
+    +'</div>';
 }
 function buyForge(i){
   var t=FORGE_TIERS[i]; if(!t) return;
-  if(!confirm('Buy ❖ '+fmtPts(t.forge)+' Forge'+(t.usd?' for $'+t.usd:'')+'?')) return;
-  forgeBalance+=t.forge; if(typeof updateBalance==='function') updateBalance(); saveState();
-  toast('❖ +'+fmtPts(t.forge)+' Forge credited (prototype — no real charge).', true);
+  var firstBuy=!boughtForgeTiers.has(t.id);
+  var amt=firstBuy?t.forge*2:t.forge;
+  if(!confirm('Buy ❖ '+fmtPts(amt)+' Forge'+(firstBuy?' (2× first-buy bonus!)':'')+' for $'+t.usd.toFixed(2)+'?')) return;
+  forgeBalance+=amt;
+  if(firstBuy){ boughtForgeTiers.add(t.id); lsSet('sf_forge_tiers_bought', [...boughtForgeTiers]); }
+  if(typeof updateBalance==='function') updateBalance(); saveState(); if(typeof buildShop==='function') buildShop();
+  toast('❖ +'+fmtPts(amt)+' Forge credited'+(firstBuy?' (2× first-buy bonus!)':'')+' (prototype — no real charge).', true);
+}
+function claimForgeVault(){
+  if(forgeVaultClaimed || FORGE_TIERS.some(function(t){return !boughtForgeTiers.has(t.id);})) return;
+  forgeVaultClaimed=true; lsSet('sf_forge_vault_claimed', true);
+  forgeBalance+=FORGE_VAULT_BONUS;
+  if(typeof updateBalance==='function') updateBalance(); saveState(); if(typeof buildShop==='function') buildShop();
+  toast('❖ Forge Vault unlocked — +'+fmtPts(FORGE_VAULT_BONUS)+' Forge!', true);
 }
 let shopTab='cosmetics';
 function setShopTab(t){ shopTab=t; buildShop(); }
@@ -10293,7 +10427,20 @@ function buildShop(){
   }
   if(!packs && !forge && !variants){ html += framesShopHTML(); }
   document.getElementById('shop-catalog').innerHTML=html;
+  _ensureFhTimer();
 }
+// 8/7/26: live countdown on the featured-apex banner, matching the reference screenshot's
+// "Refreshes in 2h" pattern -- self-clearing the same way _expTickTimer already does (see show()),
+// so it never keeps ticking once the packs tab isn't the thing on screen.
+function _shopFeaturedShowing(){ var v=document.getElementById('v-shop'); return !!(v && v.classList.contains('on')) && shopTab==='packs'; }
+function msUntilNextFeaturedRotation(){ var dayMs=86400000; return (Math.floor(Date.now()/dayMs)+1)*dayMs - Date.now(); }
+function fmtCountdown(ms){ if(ms<=0) return '0m'; var h=Math.floor(ms/3600000), m=Math.floor((ms%3600000)/60000); return h>0 ? (h+'h '+m+'m') : (m+'m'); }
+let _fhCountdownTimer=null;
+function _fhTick(){
+  if(!_shopFeaturedShowing()){ if(_fhCountdownTimer){ clearInterval(_fhCountdownTimer); _fhCountdownTimer=null; } return; }
+  var el=document.getElementById('fh-countdown'); if(el) el.textContent=fmtCountdown(msUntilNextFeaturedRotation());
+}
+function _ensureFhTimer(){ if(_fhCountdownTimer) return; _fhTick(); _fhCountdownTimer=setInterval(_fhTick, 30000); }
 function buyCosmetic(cat,id){
   const it=COSMETICS[cat].items.find(x=>x.id===id); if(!it) return;
   const key=cat+':'+id; if(ownedCosmetics.has(key)) return;
@@ -11089,7 +11236,7 @@ function buildDeckPool(){
   let cards = COLLECTION.filter(c => {
     const rOk = deckFilter==='all' ? true : (deckFilter==='deck' ? activeDeck.has(c.uid||c.name) : c.rarity===deckFilter);
     const kOk = !deckKeyword || cardHasKeyword(c, deckKeyword);
-    const _own = (ownedCopies[c.uid||c.name]||0) > 0;
+    const _own = isOwned(c);
     const oOk = deckOwnFilter==='all' ? true : deckOwnFilter==='dup' ? (_dupCounts2[c.name]||0)>1 : (deckOwnFilter==='owned' ? _own : !_own);
     const costOk = !deckCostFilter || costBucket(conjureCost(c))===deckCostFilter;
     return rOk && kOk && oOk && costOk;
@@ -11097,7 +11244,7 @@ function buildDeckPool(){
   { var _dcEl=document.getElementById('deck-curve'); if(_dcEl) _dcEl.innerHTML=costCurveHTML(COLLECTION.filter(c => {
     const rOk = deckFilter==='all' ? true : (deckFilter==='deck' ? activeDeck.has(c.uid||c.name) : c.rarity===deckFilter);
     const kOk = !deckKeyword || cardHasKeyword(c, deckKeyword);
-    const _own = (ownedCopies[c.uid||c.name]||0) > 0;
+    const _own = isOwned(c);
     const oOk = deckOwnFilter==='all' ? true : deckOwnFilter==='dup' ? (_dupCounts2[c.name]||0)>1 : (deckOwnFilter==='owned' ? _own : !_own);
     return rOk && kOk && oOk;   // curve itself always reflects rarity/keyword/owned filters, never the cost filter -- otherwise clicking a bar would erase all the other bars
   }), deckCostFilter, 'filterDeckCost'); }
@@ -11108,7 +11255,7 @@ function buildDeckPool(){
     const nm = (c.uid||c.name).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,"\\'");
     const campCls = 'camp-'+(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase();
     const inDeck = activeDeck.has(c.uid||c.name);
-    const owned = (ownedCopies[c.uid||c.name]||0) > 0;
+    const owned = isOwned(c);
     const pristine = ((typeof isPristine==='function')?isPristine(c):(c.deaths===0)) ? `<span class="vc-pristine">◈</span>` : '';
     return `<div class="vault-card ${c.rarity} ${campCls} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="cancelHidePreview();previewPoolCardReadable('${nm}',this)" onmouseleave="scheduleHidePreview()">
       <div class="vc-art" style="${artFillStyle(c.artKey||c.name)}">
@@ -11131,7 +11278,7 @@ function buildDeckPool(){
 }
 function toggleDeckCard(name){
   const _c=COLLECTION.find(x=>(x.uid||x.name)===name);
-  if(_c && (ownedCopies[_c.name]||0)<=0 && !activeDeck.has(name)){ toast('You no longer own '+_c.name+' — cannot deck it.', false); return; }
+  if(_c && !isOwned(_c) && !activeDeck.has(name)){ toast('You no longer own '+_c.name+' — cannot deck it.', false); return; }
   if(activeDeck.has(name)) activeDeck.delete(name);
   else { if(activeDeck.size>=DECK_SIZE) return; activeDeck.add(name); }
   rebuildDeckPool(); buildDeckBuilder();
@@ -11144,7 +11291,7 @@ function deckDragLeave(e){ if(e.currentTarget.contains(e.relatedTarget)) return;
 function dropDeckCard(e){ e.preventDefault(); e.currentTarget.classList.remove('drag-over'); const key=(e.dataTransfer&&e.dataTransfer.getData('text/plain'))||_dragDeckKey; _dragDeckKey=null; if(key) addToDeck(key); }
 function addToDeck(key){
   const c=COLLECTION.find(x=>(x.uid||x.name)===key); if(!c) return;
-  if((ownedCopies[c.uid||c.name]||0)<=0){ toast('You do not own '+c.name+'.', false); return; }
+  if(!isOwned(c)){ toast('You do not own '+c.name+'.', false); return; }
   if(activeDeck.has(key)){ toast(c.name+' is already in your deck.', false); return; }
   if(activeDeck.size>=DECK_SIZE){ toast('Deck is full — '+DECK_SIZE+' cards.', false); return; }
   activeDeck.add(key); rebuildDeckPool(); buildDeckBuilder(); toast('Added '+c.name+' to your deck.', true);
@@ -11589,6 +11736,39 @@ function validateDeckMaster(){
 
 // ══ DECK-BUILDER FILTER / SORT / KEYWORD ══
 let deckFilter='all', deckSort='rarity', deckKeyword=null, deckOwnFilter='all', deckCostFilter=null;
+// Playtest Mode (8/7/26): unlocks every card for deckbuilding -- owner + other playtesters can try
+// any archetype decklist without owning it yet. Deliberately a client-only overlay: it never
+// touches ownedCopies/activeDeck's real contents, only what the Deck Builder's OWNERSHIP GATES
+// (isOwned() below) report -- so it can't leak into real progression. Scope is enforced at the
+// consequence side, not just this flag: Offline Play deals straight from activeDeck regardless
+// (always has), so playtest decks just work there; Ranked/Online never read local activeDeck at
+// all (the server deals every hand from its own account-side deck, confirmed by reading pvp.py's
+// flow -- so this flag has literally no code path into it); Staked PvP DOES deal from local
+// activeDeck for the duel itself even though it separately gates which single card can be staked,
+// so proposePvpWager() below adds its own explicit fully-owned-deck check rather than relying on
+// this flag's absence.
+let playtestMode = lsGet('sf_playtest_mode', false);
+function isOwned(c){ return playtestMode || (ownedCopies[c.uid||c.name]||0)>0; }
+function setPlaytestMode(on){
+  playtestMode=!!on; lsSet('sf_playtest_mode', playtestMode);
+  var btn=document.getElementById('playtest-toggle');
+  if(btn){ btn.classList.toggle('on', playtestMode); btn.textContent = playtestMode ? '🔓 Playtest Mode: ON' : '🔓 Playtest Mode'; }
+  if(typeof rebuildDeckPool==='function') rebuildDeckPool();
+  if(typeof buildDeckBuilder==='function') buildDeckBuilder();
+  toast(playtestMode
+    ? '🔓 Playtest Mode ON — every card is now available to deck, for Offline Play testing. Ranked/Online is unaffected either way; Staked PvP still needs a fully-owned deck.'
+    : '🔒 Playtest Mode off — back to your real collection.', true);
+}
+function loadArchetypeDeck(archId){
+  var arch=(typeof ARCHETYPE_PRESETS!=='undefined')?ARCHETYPE_PRESETS.find(function(a){return a.id===archId;}):null;
+  if(!arch){ toast('Decklist not found.', false); return; }
+  var names=arch.members.filter(function(n){ return COLLECTION.some(function(c){ return c.name===n && !c.uid; }); });
+  activeDeck=new Set(names);
+  var missing=names.filter(function(n){ return (ownedCopies[n]||0)<=0; });
+  if(missing.length && !playtestMode) setPlaytestMode(true); else { if(typeof rebuildDeckPool==='function') rebuildDeckPool(); buildDeckBuilder(); }
+  if(typeof show==='function') show('deck', document.getElementById('nav-deck'));
+  toast('🃏 Loaded "'+arch.name+'" — '+names.length+' cards'+(missing.length?' ('+missing.length+' unlocked via Playtest Mode)':'')+'.', true);
+}
 function filterDeck(r, btn){ deckFilter=r; document.querySelectorAll('.dfb-rarity .filter-chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); buildDeckPool(); }
 function filterDeckOwned(m, btn){ deckOwnFilter=m; document.querySelectorAll('.dfb-own .filter-chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); buildDeckPool(); }
 function sortDeck(s, btn){ deckSort=s; document.querySelectorAll('.dfb-sort .filter-chip').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); buildDeckPool(); }
@@ -11617,19 +11797,19 @@ function deckTab(t){
 }
 
 // ══ DECK PRESETS (saved decks) ══
-const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Valcarion','Ashfall Tithe'];   // Black Wings — banish/discard. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Bixie Bee moved out 7/19/26 -- narrowed to Warpath/Keawe's Circle only. Ashfall Tithe added 7/28/26 -- a self-banishing instant feeds Ossian Drell/Pyre-Keeper Vayle's banish-count payoffs directly, the owner-flagged synergy for this class of card.
-const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned Skull Soldiers','Uso Oso',"Uso Oso's Skeletal Summons",'Bone Choirmaster','Marrow Priest','Widow of the Vigil','Gravecaller Voss','Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','The Regenerating Horror','Signal Diviner'];   // The Deathless — Death-Remnant stack + draw. Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
-const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Bixie Bee','The Bronzed Beast, Hanse Waltz','Hanse, Rogue Fangs',"Legend Reborn, Keawe Kel'rua",'Trophy Runner'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Ruffius Rufeldro moved out 7/19/26 -- narrowed to Radiance + Ahdor's Pride only.
-const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte','Skittering Drone','Hatchling Tide',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Signal Diviner','Faye Quicksilver','Veronica','Silk-Fed Hatchling','Broodweb Keeper'];   // The Broodswarm — hand-size draw + power. 7/24/26: +2 charge-economy commons (balance audit round 2 §5).
-const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Shieldwall Recruit','Standard-Bearer Halden','Rank-Sworn Levy','Heir of Kaiga','Conduit Adept','Signal Diviner','Chieftain Reyva Vosh','Faye Quicksilver'];   // The Ironsworn — go wide with 1-cost bodies, Cassian scales biggest (Muster: +power per 1-cost ally). Zerith Var moved out 7/19/26 -- narrowed to Black Council only.
+const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Valcarion','Ashfall Tithe','Tannis','Wingblade Scout','Feather-Marked Skirmisher','Squad-Captain Vesk',"Pyre-Keeper's Apprentice"];   // Black Wings — banish/discard. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Bixie Bee moved out 7/19/26 -- narrowed to Warpath/Keawe's Circle only. Ashfall Tithe added 7/28/26 -- a self-banishing instant feeds Ossian Drell/Pyre-Keeper Vayle's banish-count payoffs directly, the owner-flagged synergy for this class of card. 8/7/26: completed 15->20 with the real LINK_GROUPS['blackwings'] cluster members that were never promoted -- see project_signalforge_decklist_completion memory for reasoning per card.
+const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned Skull Soldiers','Uso Oso',"Uso Oso's Skeletal Summons",'Bone Choirmaster','Marrow Priest','Widow of the Vigil','Gravecaller Voss','Grave-Fed Ghoul','Pale Gravedigger','Sister Mire','Kiba','The Regenerating Horror','Signal Diviner','Bone-Stitcher','Grave-Warden','Throne of Bones, Uso Oso','Sister Mire, Wailing Nightmare','Faye Quicksilver'];   // The Deathless — Death-Remnant stack + draw. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. 8/7/26: completed 15->20 -- Bone-Stitcher/Grave-Warden are real Remnant-gated cards never promoted, Throne of Bones + Sister Mire's evolved printing deepen existing members, Faye Quicksilver is the flexible splash.
+const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Bloodwake Duelist','First-Blood Squire',"Kravyn's Protege",'Heir of Kaiga','Old Garrick','Bram the Bulwark','King Joris','Bixie Bee','The Bronzed Beast, Hanse Waltz','Hanse, Rogue Fangs',"Legend Reborn, Keawe Kel'rua",'Trophy Runner','Reclaim the Colors'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Ruffius Rufeldro moved out 7/19/26 -- narrowed to Radiance + Ahdor's Pride only. 8/7/26: completed 19->20 -- Reclaim the Colors echoes The Undefeated's own Winners-Circle-count payoff already in the deck.
+const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother','Fledgling Broodmother','Web-Spinner Acolyte','Skittering Drone','Hatchling Tide',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Silkbound Sentinel',"Widow's Patience",'Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Signal Diviner','Faye Quicksilver','Veronica','Silk-Fed Hatchling','Broodweb Keeper','Silk-Spinner Drone'];   // The Broodswarm — hand-size draw + power. 7/24/26: +2 charge-economy commons (balance audit round 2 §5). 8/7/26: completed 19->20 -- Silk-Spinner Drone is a direct namesake sibling of Web-Spinner Acolyte, never promoted.
+const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Shieldwall Recruit','Standard-Bearer Halden','Rank-Sworn Levy','Heir of Kaiga','Conduit Adept','Signal Diviner','Chieftain Reyva Vosh','Faye Quicksilver','Reclaim the Colors',"Warden's Feint",'Forgemask','Ridgeline Warden','Bixie Bee'];   // The Ironsworn — go wide with 1-cost bodies, Cassian scales biggest (Muster: +power per 1-cost ally). Zerith Var moved out 7/19/26 -- narrowed to Black Council only. 8/7/26: completed 15->20 -- LINK_GROUPS['ironsworn'] and ARCHETYPE_MEMBERS['Muster'] were already fully absorbed, so this batch leans on Reclaim the Colors/Warden's Feint/Forgemask/Ridgeline Warden's own name/flavor fit plus Bixie Bee as the one flexible splash this deck didn't already run.
 // 4 more added 7/19/26 -- lore-driven rather than mechanically uniform like the 5 above. Black
 // Council and Radiance got an explicit playstyle brief; Keawe's Circle and Ahdor's Pride are
 // closer to the existing LINK_GROUPS lore-clusters (Darwin's Court/Exiled Royalty/Squad 19/
 // Keawe's Circle itself) promoted to full archetype status, not a single shared mechanic.
-const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin','Kravyn the Collector','Court Cipher'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members. Veronica + Ruffius Rufeldro moved out 7/19/26.
-const RADIANCE_PRESET = ['Moro','Malia','King Joris','Ruffius Rufeldro','Elowen Dawnspear','Bram the Bulwark','The Regenerating Horror','Kaelthar the Ascendant','Lumen Acolyte','Oathlit Attendant','Oathlit Vanguard'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match.
-const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz','Hanse, Rogue Fangs','Fenrik Vench','Yard Sparring Partner','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Lagertha Waltz, Wrathful Transformation'];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms). 7/23/26: added the cadet-corps/Tosa Pact glue commons (Fenrik Vench is his real Ch.1 rival, per the Ascension storyline).
-const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 19 Quartermaster','Squad 19 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 19 Signalman','Squad 19 Chronicler','Ahdorah Khaan, Circle Unbroken','Kynaht, Ashen Return'];   // Circle of Life (renamed from Ahdor's Pride, 7/28/26) — Ahdorah Khaan + Squad 19, now also the archetype whose signature identity is conjuring very strong banishOnly cards straight from your own banish pile (owner request: gate real power behind needing genuine banish-fill setup first, so it can't just be splashed). 7/23/26: filled out the deckbuilding spine with Squad 19 commons + a Rare sibling printing of Ahdorah herself (mirrors Keawe Kel'rua's base/evolved pattern) + shared Tosa Pact pieces. 7/24/26: +2 charge-economy commons (balance audit round 2 §5). 7/28/26: Kynaht, Ashen Return closes the long-noted gap (no card named Kynaht / tagged Vysh'ra race, Ahdor's people per the KOTEI bible) while also serving as the archetype's disruption-flavored banishOnly signature card.
+const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin','Kravyn the Collector','Court Cipher','La "La" Ballora, the Broodqueen','Mirror Shade','The Unending Flame, Tange Sazen','Ridgeline Scout',"Warden's Feint",'Courtroom Colossus','Signal Diviner','Heir of Kaiga','Faye Quicksilver','Conduit Adept'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members. Veronica + Ruffius Rufeldro moved out 7/19/26 -- deliberately NOT re-added below. 8/7/26: completed 10->20, staying conservative per that same narrowing decision -- La Ballora is a real LINK_GROUPS['court'] member, Mirror Shade/Unending Flame/Ridgeline Scout/Warden's Feint/Courtroom Colossus all fit the stated denial/interference identity by name and text, and the last 4 are the flexible-splash fallback (this archetype ran zero of them before).
+const RADIANCE_PRESET = ['Moro','Malia','King Joris','Ruffius Rufeldro','Elowen Dawnspear','Bram the Bulwark','The Regenerating Horror','Kaelthar the Ascendant','Lumen Acolyte','Oathlit Attendant','Oathlit Vanguard','The Reliquary, Ruffius Rufeldro','Oathbound Shield','Heir of Kaiga','Signal Diviner','Faye Quicksilver','Conduit Adept','Bixie Bee','Ilma the Patient','The Between, Kleydson'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match. 8/7/26: completed 11->20 -- the thinnest real-fit pool of the 9 (LINK_GROUPS['royalty']/ARCHETYPE_MEMBERS['Radiance'] were already fully absorbed). The Reliquary is a 3rd Ruffius printing on-theme, Oathbound Shield shares Bram's own Last Stand text, the 5 flexible splashes fill curve this archetype had none of, Ilma/The Between are honestly the softest fits in any of the 9 decks -- flagged rather than oversold.
+const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz','Hanse, Rogue Fangs','Fenrik Vench','Yard Sparring Partner','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Lagertha Waltz, Wrathful Transformation','Kessuae, Tide of Ruin','Kiana'];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms). 7/23/26: added the cadet-corps/Tosa Pact glue commons (Fenrik Vench is his real Ch.1 rival, per the Ascension storyline). 8/7/26: completed 18->20 -- both real coded Link-group members: Kessuae is LINK_GROUPS['waltz'] alongside Lagertha/Hanse, Kiana is LINK_GROUPS['kelrua'] alongside Keawe himself.
+const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 19 Quartermaster','Squad 19 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 19 Signalman','Squad 19 Chronicler','Ahdorah Khaan, Circle Unbroken','Kynaht, Ashen Return','Cletus Gwyndull','The Kept Blade, Ahdor'];   // Circle of Life (renamed from Ahdor's Pride, 7/28/26) — Ahdorah Khaan + Squad 19, now also the archetype whose signature identity is conjuring very strong banishOnly cards straight from your own banish pile (owner request: gate real power behind needing genuine banish-fill setup first, so it can't just be splashed). 7/23/26: filled out the deckbuilding spine with Squad 19 commons + a Rare sibling printing of Ahdorah herself (mirrors Keawe Kel'rua's base/evolved pattern) + shared Tosa Pact pieces. 7/24/26: +2 charge-economy commons (balance audit round 2 §5). 7/28/26: Kynaht, Ashen Return closes the long-noted gap (no card named Kynaht / tagged Vysh'ra race, Ahdor's people per the KOTEI bible) while also serving as the archetype's disruption-flavored banishOnly signature card. 8/7/26: completed 18->20 -- Cletus Gwyndull is LINK_GROUPS['tosa']'s own namesake (the deck already ran several Tosa Pact-tagged commons but never the group's actual card), The Kept Blade, Ahdor is named directly after the archetype's own namesake.
 // Archetype dev-view (7/18/26, expanded 7/19/26): the meta archetypes' full membership, for the
 // Vault's Archetype filter -- reuses these *_PRESET arrays directly (the actual full-deck lists)
 // rather than ARCHETYPE_MEMBERS (a narrower, Deck-Master-tier-eligibility-only list that excludes
@@ -11639,15 +11819,15 @@ const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruff
 // appear in more than one archetype here -- Zerith Var/Signal Diviner/Heir of Kaiga/Faye
 // Quicksilver/Ruffius Rufeldro are each proven staples in 2+ decks.
 const ARCHETYPE_PRESETS = [
-  {id:'blackwing', name:'Black Wings', members:BLACKWING_PRESET},
-  {id:'deathless', name:'Deathless', members:DEATHLESS_PRESET},
-  {id:'warpath', name:'Warpath', members:WARPATH_PRESET},
-  {id:'broodswarm', name:'Broodswarm', members:BROODSWARM_PRESET},
-  {id:'ironsworn', name:'Ironsworn', members:IRONSWORN_PRESET},
-  {id:'blackcouncil', name:'Black Council', members:BLACK_COUNCIL_PRESET},
-  {id:'radiance', name:'Radiance', members:RADIANCE_PRESET},
-  {id:'keawescircle', name:"Keawe's Circle", members:KEAWES_CIRCLE_PRESET},
-  {id:'ahdorspride', name:"Circle of Life", members:AHDORS_PRIDE_PRESET}
+  {id:'blackwing', name:'Black Wings', members:BLACKWING_PRESET, blurb:"Banish cards from deck and hand to fuel Ossian Drell, Corvus, and the Wingblade/Wing Commander line's per-banished-card scaling, then reclaim the best ones with Ashen Reclaimer and Valcarion. Wins by out-scaling on banish-zone count while the opponent is still building board state; Ashfall Tithe and Tannis are the tempo levers that push a key turn over the top."},
+  {id:'deathless', name:'Deathless', members:DEATHLESS_PRESET, blurb:"Stack Death Remnants (Grave-Fed Ghoul, Bone Choirmaster, Grave-Warden, Uso Oso's own Bulwark of Bones) so every commit inherits a standing buff until the opponent lands a kill, then refill via Widow of the Vigil and Bone-Stitcher's Remnant-gated draw. Win condition is attrition — the Remnant math compounds faster than the opponent's kill rate, with Throne of Bones as the round-ending punch once a Remnant is live."},
+  {id:'warpath', name:'Warpath', members:WARPATH_PRESET, blurb:"Front-load early duels (First-Blood Squire, Heir of Kaiga, Warpath Vanguard) to bank Winners Circle count and kills, then let Trophy-Hunter Kessa, The Undefeated, and Reclaim the Colors convert that count directly into late-game power. Kill Escalation on Tange Sazen and Skullchain Reaver-style pieces means the deck gets stronger the longer it's ahead — punishes anyone who lets an early round slip."},
+  {id:'broodswarm', name:'Broodswarm', members:BROODSWARM_PRESET, blurb:"Draw aggressively (Web-Tender Matron, Hoarder's Gambit, Silk-Spinner Drone) to keep hand size high, then cash that hand size directly into power via Broodmother, Venombrood Queen, and The Gathering Swarm's per-card scaling — the same resource doubles as both engine and payoff. Wins the late-game power race outright, and The Gathering Swarm's opponent-drain clause turns a full hand into a two-sided swing."},
+  {id:'ironsworn', name:'Ironsworn', members:IRONSWORN_PRESET, blurb:"Flood the board with 1-cost bodies (Shieldwall Recruit, Rank-Sworn Levy, Bixie Bee, Heir of Kaiga) purely to fuel Bannerlord Cassian's and Ironsworn Vanguard's Muster bonuses — quantity of cheap allies is the whole win condition. Oathbound Shield's Last Stand keeps the deck from losing tempo while it goes wide, and Warden's Feint buys a turn of support-zone denial when the board state turns close."},
+  {id:'blackcouncil', name:'Black Council', members:BLACK_COUNCIL_PRESET, blurb:"A control shell built on denying the opponent's plan rather than racing them — Cletus Gwyndull, Ridgeline Scout, and Warden's Feint lock down condition, location, and support access while Darwin and The Unending Flame drain the opponent's power directly. Wins by grinding to the 3rd-plus commit, where Darwin, Courtroom Colossus, and Arch-Grim Korrin's kill-count check all get stronger, rather than by an early finish."},
+  {id:'radiance', name:'Radiance', members:RADIANCE_PRESET, blurb:"A durability shell centered on Moro, who borrows the Deck Master's own printed power, plus Purity and Last Stand effects that punish an opponent's own deaths or reward staying Pristine. Wins by outlasting rather than racing — Elowen Dawnspear, Oathlit Vanguard, Bram/Oathbound Shield's Last Stand, and The Regenerating Horror all convert not losing into a slow, compounding power lead."},
+  {id:'keawescircle', name:"Keawe's Circle", members:KEAWES_CIRCLE_PRESET, blurb:"A found-family deck built on real Link Skills — the Waltz Twins (Lagertha, Hanse, Kessuae) and Kel'rua Blood (Keawe, Kiana) both fire in-hand power bonuses when paired. Win condition is comeback power: Keawe Kel'rua, Lagertha Waltz, and Fenrik Vench all spike hardest after a loss, so the deck is built to punish anyone who takes an early lead against it."},
+  {id:'ahdorspride', name:"Circle of Life", members:AHDORS_PRIDE_PRESET, blurb:"Squad 19's cheap support shell (Medic, Quartermaster, Scout, Vanguard, all Called-triggered) keeps hand and Charge flowing while banish fodder accumulates, then Ahdorah Khaan, Circle Unbroken and Kynaht, Ashen Return — cards that can only be conjured from your own banish pile — cash that setup in as oversized, disruption-flavored finishers. The power is explicitly gated behind doing the banish-fill work first, which is what keeps this deck's identity distinct from Black Wings' own banish theme."}
 ];
 function cardArchetypes(name){ return ARCHETYPE_PRESETS.filter(function(a){ return a.members.indexOf(name)>=0; }); }
 let deckPresets = lsGet('sf_presets', {});
@@ -12763,6 +12943,32 @@ function buildCampChips(){
     Object.keys(CAMP_ICON).map(camp=>`<button class="filter-chip" data-camp="${camp}" onclick="setCamp('${camp}',this)">${CAMP_ICON[camp]} ${camp}</button>`).join('');
 }
 
+function noopCurveClick(){}   // decklist reference page's mini cost-curve is read-only, no filter to wire up
+function buildDecklists(){
+  const el=document.getElementById('decklists-body'); if(!el) return;
+  el.innerHTML = ARCHETYPE_PRESETS.map(function(arch){
+    const cards = arch.members.map(function(n){ return COLLECTION.find(function(c){ return c.name===n && !c.uid; }); }).filter(Boolean);
+    const owned = cards.filter(function(c){ return (ownedCopies[c.name]||0)>0; }).length;
+    const sorted = cards.slice().sort(function(a,b){ return conjureCost(a)-conjureCost(b) || (RARITY_ORDER[a.rarity]-RARITY_ORDER[b.rarity]); });
+    const rows = sorted.map(function(c){
+      const own = (ownedCopies[c.name]||0)>0;
+      return `<div class="dl-row ${own?'':'dl-unowned'}"><span class="dl-cost">${conjureCost(c)}</span><span class="dl-rar rar-${c.rarity}">${rlab(c.rarity)}</span><span class="dl-name">${dispName(c.name)}</span><span class="dl-pow">${c.pow}pow</span>${own?'':'<span class="dl-lock">🔒</span>'}</div>`;
+    }).join('');
+    const legal = cards.length===DECK_SIZE;
+    return `<div class="dl-card">
+      <div class="dl-head">
+        <div class="dl-name-row"><span class="dl-title">${arch.name}</span><span class="dl-count ${legal?'':'dl-incomplete'}">${cards.length}/${DECK_SIZE}${legal?'':' — incomplete'}</span></div>
+        <div class="dl-blurb">${arch.blurb||''}</div>
+      </div>
+      <div class="dl-curve">${costCurveHTML(cards, null, 'noopCurveClick')}</div>
+      <div class="dl-list">${rows}</div>
+      <div class="dl-foot">
+        <span class="dl-owned-sub">${owned}/${cards.length} cards already in your Vault</span>
+        <button class="deck-btn" ${legal?'':'disabled title="This decklist isn\'t complete yet — check back once it\'s finished."'} onclick="loadArchetypeDeck('${arch.id}')">🃏 Load &amp; Playtest</button>
+      </div>
+    </div>`;
+  }).join('');
+}
 function openCardDetail(id, fresh, tab){
   const c=COLLECTION.find(x=>(x.uid||x.name)===id);
   if(!c) return;
@@ -13276,6 +13482,11 @@ function setPvpFloor(k){
 }
 function proposePvpWager(){
   if(!pvpRival||!pvpStakeMine) return;
+  // Staked PvP deals the actual duel from local activeDeck (unlike Ranked/Online, which the
+  // server deals independently) -- Playtest Mode's whole point is letting activeDeck hold cards
+  // you don't own, so it can't be trusted here the way it's fine to trust in Offline Play. Check
+  // real ownership directly rather than trusting playtestMode's absence.
+  if(activeDeck.size===DECK_SIZE && ![...activeDeck].every(k=>(ownedCopies[k]||0)>0)){ toast('Your deck has cards you don\'t own — Staked PvP needs a fully-owned deck. Playtest Mode is for Offline Play practice only.', false); return; }
   const mine=COLLECTION.find(c=>(c.uid||c.name)===pvpStakeMine); const b=BOT_OPPONENTS.find(x=>x.id===pvpRival);
   if(!mine||!b) return;
   pvpStakeTheirs=rivalStakeFor(b);
