@@ -11252,7 +11252,7 @@ function _renderAccountPanel(){
     '</div>'+
     '<div class="on-panel">'+
       '<h3>Find a match</h3>'+
-      '<p class="on-sub">Real two-player PvP against another online account. <b>Fighter-only for now</b> — rear-guard supports aren\'t wired into Online yet, so every duel is a straight power clash.</p>'+
+      '<p class="on-sub">Real two-player PvP against another online account. Call a Fighter plus Supports from the rear slots, same as any other duel.</p>'+
       '<div class="on-tabs">'+
         '<button class="on-tab'+(PVP.bestOf===7?' sel':'')+'" onclick="pvpSetMode(7)">Public · Best of 7</button>'+
         '<button class="on-tab'+(PVP.bestOf===3?' sel':'')+'" onclick="pvpSetMode(3)">Ranked · Best of 3</button>'+
@@ -11267,7 +11267,7 @@ function _renderAccountPanel(){
 }
 
 // ── PvP match state (Phase 5.0b, 8/6/26) ──────────────────────────────────────────────────────
-const PVP = {pvpId:null, opponent:null, bestOf:7, queueTimer:null, stateTimer:null, view:null, selectedUid:null};
+const PVP = {pvpId:null, opponent:null, bestOf:7, queueTimer:null, stateTimer:null, view:null, selectedUid:null, selectedRgUids:[]};
 
 function _pvpMsg(text, cls){ var el=document.getElementById('on-pvp-msg'); if(el){ el.textContent=text||''; el.className='on-msg '+(cls||''); } }
 function _pvpOnlineViewShowing(){ var v=document.getElementById('v-online'); return !!(v && v.classList.contains('on')); }
@@ -11296,7 +11296,7 @@ function pvpLeaveQueue(){
 }
 
 function pvpEnterMatch(pvpId, opponent){
-  PVP.pvpId=pvpId; PVP.opponent=opponent; PVP.selectedUid=null; PVP.view=null;
+  PVP.pvpId=pvpId; PVP.opponent=opponent; PVP.selectedUid=null; PVP.selectedRgUids=[]; PVP.view=null;
   if(typeof toast==='function') toast('Matched vs '+opponent+'!', true);
   buildOnline();   // re-enters through the dispatch above, which starts the poll loop + fetches
 }
@@ -11309,17 +11309,32 @@ function pvpFetchState(){
   sfApi('GET', '/api/pvp/state?pvpId='+encodeURIComponent(PVP.pvpId), null, function(err, data){
     if(err) return;   // one missed tick isn't worth surfacing -- the next tick recovers
     if(!PVP.pvpId) return;   // the user forfeited/exited while this request was in flight
-    if(data.seq !== (PVP.view ? PVP.view.seq : -1)) PVP.selectedUid=null;   // a new duel started -- any stale selection no longer applies
+    if(data.seq !== (PVP.view ? PVP.view.seq : -1)){ PVP.selectedUid=null; PVP.selectedRgUids=[]; }   // a new duel started -- any stale selection no longer applies
     PVP.view = data;
     _renderPvpMatch();
   });
 }
-function pvpSelectCard(uid){ PVP.selectedUid = uid; _renderPvpMatch(); }
+function pvpSelectCard(uid){ PVP.selectedUid = uid; PVP.selectedRgUids = PVP.selectedRgUids.filter(function(u){ return u!==uid; }); _renderPvpMatch(); }
+// Mirrors the single-player "call up to RG_SLOTS() supports" step -- a simple click-toggle here
+// rather than single-player's drag-and-drop, since Online's hand grid is already click-to-select
+// (pvpSelectCard) and a second interaction model would fight the first. Server enforces the slot
+// cap independently (app.py:375/pvp.py:205) -- this client-side cap is UX only, not the real gate.
+function pvpToggleRg(uid){
+  if(uid===PVP.selectedUid) return;   // the fighter itself is never also a support
+  var i = PVP.selectedRgUids.indexOf(uid);
+  if(i>=0){ PVP.selectedRgUids.splice(i,1); }
+  else {
+    var slots = (PVP.view && PVP.view.you && PVP.view.you.rgSlots) || 2;
+    if(PVP.selectedRgUids.length>=slots) return;
+    PVP.selectedRgUids.push(uid);
+  }
+  _renderPvpMatch();
+}
 function pvpCommit(){
   if(!PVP.selectedUid || !PVP.pvpId) return;
-  sfApi('POST', '/api/pvp/commit', {pvpId:PVP.pvpId, cardUid:PVP.selectedUid}, function(err, data){
+  sfApi('POST', '/api/pvp/commit', {pvpId:PVP.pvpId, cardUid:PVP.selectedUid, rearGuardUids:PVP.selectedRgUids}, function(err, data){
     if(err){ _pvpMsg(err, 'err'); return; }
-    PVP.selectedUid=null; PVP.view=data; _renderPvpMatch();
+    PVP.selectedUid=null; PVP.selectedRgUids=[]; PVP.view=data; _renderPvpMatch();
   });
 }
 function pvpForfeit(){
@@ -11332,7 +11347,7 @@ function pvpForfeit(){
 }
 function pvpExitMatch(){
   clearInterval(PVP.stateTimer); PVP.stateTimer=null;
-  PVP.pvpId=null; PVP.opponent=null; PVP.view=null; PVP.selectedUid=null;
+  PVP.pvpId=null; PVP.opponent=null; PVP.view=null; PVP.selectedUid=null; PVP.selectedRgUids=[];
   sfRefresh();   // the match likely paid out Signal/RP -- refetch before the account panel shows again
 }
 
@@ -11401,6 +11416,8 @@ function _renderPvpMatch(){
       '<div class="on-panel"><p class="on-sub" style="margin:0 0 10px">⏳ Waiting for '+sfEsc(v.opponent)+' to commit…</p>'+
         '<button class="on-btn ghost" onclick="pvpForfeit()">Forfeit match</button></div>';
   } else if(!v.you.committed){
+    var rgSlots = v.you.rgSlots || 2;
+    var rgHand = v.you.hand.filter(function(hc){ return hc.uid!==PVP.selectedUid; });
     body =
       '<div class="on-panel">'+
         '<h3 style="margin-bottom:10px">Choose your fighter</h3>'+
@@ -11409,12 +11426,17 @@ function _renderPvpMatch(){
           var sel = PVP.selectedUid===hc.uid ? ' sel' : '';
           return '<div class="on-hc'+sel+'" onclick="pvpSelectCard(\''+hc.uid+'\')">'+bigCardHTML(c)+'</div>';
         }).join('')+'</div>'+
+        '<h3 style="margin:16px 0 4px">Call Supports <span class="on-sub" style="font-weight:400">— optional, free, up to '+rgSlots+' ('+PVP.selectedRgUids.length+'/'+rgSlots+' picked)</span></h3>'+
+        '<div class="on-hand">'+rgHand.map(function(hc){
+          var c = pvpCardObj(hc);
+          var sel = PVP.selectedRgUids.indexOf(hc.uid)>=0 ? ' sel' : '';
+          return '<div class="on-hc'+sel+'" onclick="pvpToggleRg(\''+hc.uid+'\')">'+bigCardHTML(c)+'</div>';
+        }).join('')+'</div>'+
         '<div class="on-mfoot">'+
           '<button class="on-btn"'+(PVP.selectedUid?'':' disabled')+' onclick="pvpCommit()">Commit</button>'+
           '<button class="on-btn ghost" onclick="pvpForfeit()">Forfeit match</button>'+
         '</div>'+
         '<div class="on-msg" id="on-pvp-msg"></div>'+
-        '<p class="on-note">Fighter-only for now — rear-guard supports aren\'t wired into Online yet.</p>'+
       '</div>';
   }
   el.innerHTML = head + lastHtml + body;
