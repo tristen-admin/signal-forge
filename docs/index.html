@@ -1073,28 +1073,31 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
    a new element above the existing hero, everything else on the Hub keeps its current styling. */
 .camp-banner{
   --camp-c:#4a4a44; --camp-d:#222220;
-  position:relative;padding:24px 30px 34px;text-align:center;
+  position:relative;padding:12px 16px 18px;text-align:center;
   background:linear-gradient(180deg,var(--camp-c),var(--camp-d));
   clip-path:polygon(0 0,100% 0,100% 82%,50% 100%,0 82%);
-  box-shadow:0 16px 40px -18px rgba(0,0,0,.7);
+  box-shadow:0 10px 24px -14px rgba(0,0,0,.7);
 }
+/* 8/6/26: cut to ~half its original footprint (was padding:24px 30px 34px, title up to 28px) --
+   "the dominant hub moment" framing (see comment above renderCampBanner()) made it too loud for
+   something the owner said doesn't matter as much as the rest of the Hub. */
 .camp-banner.camp-amageras{--camp-c:#E8873A;--camp-d:#6b3d18}
 .camp-banner.camp-omitsuki{--camp-c:#5B2C8F;--camp-d:#271340}
 .camp-banner.camp-kitanoo{--camp-c:#2D6A4F;--camp-d:#143324}
-.camp-banner .cb-sigil{width:42px;height:42px;border-radius:50%;margin:0 auto 10px;background:var(--gold);
-  color:#241d0c;display:flex;align-items:center;justify-content:center;font-size:19px;
-  box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.camp-banner .cb-sigil{width:24px;height:24px;border-radius:50%;margin:0 auto 5px;background:var(--gold);
+  color:#241d0c;display:flex;align-items:center;justify-content:center;font-size:11px;
+  box-shadow:0 3px 9px rgba(0,0,0,.4)}
 .camp-banner.camp-none .cb-sigil{background:var(--surface2);color:var(--text3);box-shadow:none;
   border:1px solid var(--border2)}
 .camp-banner .cb-title{font-family:'Trajan Pro','Cinzel','Hoefler Text',Palatino,Georgia,serif;
-  font-size:clamp(20px,2.6vw,28px);font-weight:700;letter-spacing:.04em;text-transform:uppercase;
-  color:#fbf6e6;text-shadow:0 2px 10px rgba(0,0,0,.5)}
-.camp-banner.camp-none .cb-title{color:var(--text2);font-size:17px;text-shadow:none}
-.camp-banner .cb-sub{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.72);
-  margin-top:7px;font-weight:700}
+  font-size:clamp(13px,1.4vw,16px);font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+  color:#fbf6e6;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.camp-banner.camp-none .cb-title{color:var(--text2);font-size:12px;text-shadow:none}
+.camp-banner .cb-sub{font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.72);
+  margin-top:4px;font-weight:700}
 .camp-banner.camp-none .cb-sub{color:var(--text3);text-transform:none;letter-spacing:normal;font-weight:400;
-  font-size:12px;max-width:40ch;margin:7px auto 0;line-height:1.4}
-@media(max-width:640px){.camp-banner{padding:18px 18px 26px}}
+  font-size:10px;max-width:40ch;margin:4px auto 0;line-height:1.35}
+@media(max-width:640px){.camp-banner{padding:9px 10px 14px}}
 .asc-cond{display:flex;align-items:center;gap:12px;background:linear-gradient(180deg,rgba(245,194,77,0.08),rgba(11,11,14,0.5));border:1px solid rgba(245,194,77,0.28);border-radius:12px;padding:11px 15px;margin-bottom:14px}
 .asc-cond-ico{font-size:24px;flex-shrink:0}
 .asc-cond-txt{font-size:13px;color:var(--text);display:flex;flex-direction:column;gap:2px}
@@ -2646,7 +2649,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="tb-title" id="tb-title">Hub</div>
     <div class="tb-crumb" id="tb-crumb"></div>
     <div class="tb-right">
-      <div class="tb-stat pts"><span class="tbs-icon">◈</span><span class="tbs-val" id="tb-pts">20,000</span><span class="tbs-label">Signal</span></div>
+      <div class="tb-stat pts"><span class="tbs-icon">◈</span><span class="tbs-val" id="tb-pts">5,000</span><span class="tbs-label">Signal</span></div>
       <div class="tb-stat forge"><span class="tbs-icon">❖</span><span class="tbs-val" id="tb-forge">12,000</span><span class="tbs-label">Forge</span></div>
       <div class="tb-stat bounty" onclick="openBountyRedeem()" title="Bounty — earned through ranked skill, redeemable (locked)"><span class="tbs-icon">⬥</span><span class="tbs-val" id="tb-bounty">0</span><span class="tbs-label">Bounty</span></div>
       <div class="tb-stat deck"><span class="tbs-icon">🃏</span><span class="tbs-val" id="tb-deck">0</span><span class="tbs-label">In Deck</span></div>
@@ -2820,7 +2823,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <div>
           <div class="sh-eyebrow">Integrator Profile</div>
           <h1>Keanu · @keanu</h1>
-          <div class="profile-sub">◈ Trusted — Tier IV · 22 cards vaulted · 20,000 Signal Points</div>
+          <div class="profile-sub">◈ Trusted — Tier IV · 22 cards vaulted · 5,000 Signal Points</div>
         </div>
       </div>
       <div class="shop-section-title">Emblem — equip the one you've earned</div>
@@ -2851,8 +2854,8 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <h1>The Signal Shop</h1>
           <p id="shop-intro-desc">Spend Forge on cosmetic flair — accent auras, card backs, emblems, and duelist titles. Everything here is purely aesthetic and never affects play.</p>
         </div>
-        <div class="sh-balance"><span class="shb-icon" id="shop-bal-icon">◈</span><span class="shb-val" id="shop-balance">20,000</span><span class="shb-label" id="shop-bal-label">Signal Points</span></div>
-        <button class="sh-reset" title="Fresh playtest start" style="align-self:flex-start;margin-top:8px;background:none;border:1px solid var(--border2);color:var(--text2);font-size:12px;font-weight:700;padding:8px 14px;border-radius:9px;cursor:pointer" onclick="if(confirm('Reset to a fresh new-player start?\n\n\u2022 15-card starter deck (4 rares + 11 commons)\n\u2022 20,000 Signal\n\u2022 wipes current progress \u2014 for playtesting')){ startNewPlayer(); if(typeof show==='function') show('hub',null); }">🌱 Reset to New Player</button>
+        <div class="sh-balance"><span class="shb-icon" id="shop-bal-icon">◈</span><span class="shb-val" id="shop-balance">5,000</span><span class="shb-label" id="shop-bal-label">Signal Points</span></div>
+        <button class="sh-reset" title="Fresh playtest start" style="align-self:flex-start;margin-top:8px;background:none;border:1px solid var(--border2);color:var(--text2);font-size:12px;font-weight:700;padding:8px 14px;border-radius:9px;cursor:pointer" onclick="if(confirm('Reset to a fresh new-player start?\n\n\u2022 15-card starter deck (4 rares + 11 commons)\n\u2022 5,000 Signal\n\u2022 wipes current progress \u2014 for playtesting')){ startNewPlayer(); if(typeof show==='function') show('hub',null); }">🌱 Reset to New Player</button>
       </div>
       <div class="shop-tabs">
         <button class="shop-tab on" id="stab-cosmetics" onclick="setShopTab('cosmetics')">✦ Cosmetics</button>
@@ -4207,9 +4210,14 @@ function renderDeckMasterAbilityStrip(){
   // No longer a button -- Avatāra fires automatically on conjuring the Deck Master card itself
   // (fireDeckMasterAvatara(), called from applyDeckMasterCommitEffects()). This is now a passive
   // status badge only, same non-clickable style as the DM_EXCLUSIVE case right below.
+  // 8/6/26: Activated and passive-only badges had nearly the same gold, same non-clickable style,
+  // same shape -- both correct (neither is a button anymore, see the Avatāra note above), but
+  // visually indistinguishable at a glance. Electric-blue for Activated now matches the color this
+  // codebase already uses for "Activated" everywhere else (dmAbilitySectionHTML's Vault-drawer
+  // section); gold stays reserved for passive, ambient effects, same convention as Called text.
   if(ab && !dmAbilityUsedThisMatch && eligiblePhase){
     strip.style.display='flex';
-    if(opts) opts.innerHTML = '<span class="instant-card-btn" style="border-color:rgba(212,168,67,0.6);color:var(--gold);cursor:default;opacity:.85">🌙 '+deckMasterCard+' — '+ab.log+' ('+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus))+') — fires when you conjure '+deckMasterCard+'</span>';
+    if(opts) opts.innerHTML = '<span class="instant-card-btn" style="border-color:rgba(111,211,255,0.65);color:var(--electric);cursor:default;opacity:.9">🌙 '+deckMasterCard+' — '+ab.log+' ('+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus))+') — fires when you conjure '+deckMasterCard+'</span>';
     return;
   }
   // Passive-only Deck Masters (DM_EXCLUSIVE but no DM_ACTIVATED_ABILITY, e.g. Korrin) had zero in-duel
@@ -9121,7 +9129,7 @@ function show(id, btn){
 }
 
 // ── MARKETPLACE ──
-let signalPoints = 20000;
+let signalPoints = 5000;
 let lastDailyBonusDate = '';   // daily-return bonus (7/15/26): todayISO()-format, granted once per calendar day on Hub visit
 // 8/5/26: FOMO backend (owner: "seems simple enough to lay bare bones for... build the aesthetic and
 // slot the backend later") -- current + best consecutive daily-login streak, same "current + best"
@@ -9590,7 +9598,7 @@ function loadState(){
 }
 function resetProgress(){ if(!confirm('Reset ALL progress? This wipes your vault, records, Signal, RP, and cosmetics back to defaults and cannot be undone.')) return;
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
-  signalPoints=20000; rankRP=1000; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']); supply=defaultSupply(); cardSupply=defaultCardSupply(); ownedCopies={}; freshCopies={}; wonInstances=[]; wonCounter=0; for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); } COLLECTION.forEach(c=>{ ownedCopies[c.uid||c.name]=1; });
+  signalPoints=5000; rankRP=1000; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']); supply=defaultSupply(); cardSupply=defaultCardSupply(); ownedCopies={}; freshCopies={}; wonInstances=[]; wonCounter=0; for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); } COLLECTION.forEach(c=>{ ownedCopies[c.uid||c.name]=1; });
   avatarBond={}; pairBonds={}; ascRun=null; forgeBalance=12000; featuredCards=['Kotei']; featuredShuffle=false; featuredRotIdx=0; equipped={aura:'gold',back:'sealed',emblem:'crest',title:'integrator',sleeves:'standard',summon:'golden'};
   ownedCosmetics.clear(); ['aura:gold','back:sealed','emblem:crest','title:integrator','sleeves:standard','summon:golden'].forEach(k=>ownedCosmetics.add(k));
   applyCosmetics(); updateBalance(); buildShop();
@@ -9601,7 +9609,7 @@ function startFreshSession(){ if(!confirm('Start a fresh session? This clears ev
   for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); }
   wonInstances=[]; wonCounter=0;
   avatarBond={}; pairBonds={}; ascRun=null; forgeBalance=12000;
-  signalPoints=20000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false;
+  signalPoints=5000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false;
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']);
   COLLECTION.forEach(c=>{ const k=c.uid||c.name; ownedCopies[k]=1;
@@ -9620,11 +9628,11 @@ function startFreshSession(){ if(!confirm('Start a fresh session? This clears ev
 }
 const NEW_PLAYER_DECK = ['Melanie','Heir of Kaiga','Kiana','Hanse Waltz','Moro','King Joris','Malia','Conduit Adept','Broodmother','Old Garrick','Bram the Bulwark','Black Wings, Ossian Drell'];
 function newPlayerReset(){
-  if(!confirm('Wipe to a fresh NEW-PLAYER state?\n\n• 12 starter cards (no ultras)\n• 20,000 Signal · 0 Forge · 0 Bounty\n• all records 0-0, everything else cleared\n\nCannot be undone.')) return;
+  if(!confirm('Wipe to a fresh NEW-PLAYER state?\n\n• 12 starter cards (no ultras)\n• 5,000 Signal · 0 Forge · 0 Bounty\n• all records 0-0, everything else cleared\n\nCannot be undone.')) return;
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); }
   wonInstances=[]; wonCounter=0;
-  signalPoints=20000; forgeBalance=0; bountyBalance=0; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false;
+  signalPoints=5000; forgeBalance=0; bountyBalance=0; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false;
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFoilMax={}; cardFrames={}; ownedFrames=new Set(['none']);
   avatarBond={}; pairBonds={}; ascRun=null;
@@ -9638,7 +9646,7 @@ function newPlayerReset(){
   if(typeof applyCosmetics==='function') applyCosmetics(); if(typeof updateBalance==='function') updateBalance(); if(typeof buildShop==='function') buildShop();
   if(typeof buildVault==='function') buildVault(); if(typeof buildHub==='function') buildHub(); if(typeof renderFeatured==='function') renderFeatured();
   if(typeof show==='function') show('hub');
-  if(typeof toast==='function') toast('🌱 New-player state — 12 starter cards · 20,000 ◈ · 0 ❖ · 0 Bounty · records 0-0.', true);
+  if(typeof toast==='function') toast('🌱 New-player state — 12 starter cards · 5,000 ◈ · 0 ❖ · 0 Bounty · records 0-0.', true);
 }
 // ── STARTER SET — new-player onboarding deck; infinite / always-in-creation, so NOT tradeable ──
 const STARTER_SET = ['Keawe Kel\'rua','Lagertha Waltz','Hanse Waltz','Uso Oso','Melanie','Moro','Malia','King Joris','Bixie Bee','Ruffius Rufeldro','Kiba','Heir of Kaiga','Josef','Sister Mire','Veronica','Zerith Var'];
@@ -9647,13 +9655,15 @@ function isStarter(c){ const n=typeof c==='string'?c:(c&&c.name); return STARTER
 function cardProv(c){ if(!c) return 'forged'; if(c.variant) return 'variant'; if(c.prov) return c.prov; if(isStarter(c)) return 'starter'; return 'forged'; }
 function isTradeable(c){ return !isStarter(c) && !c.variant; }  // all non-starter cards tradeable (no paid/earned firewall)
 function provLabelText(c){ return c.variant?'✦ Variant · play-only, yours forever':isStarter(c)?'🔒 Starter · always in creation':'🏆 Forged · tradeable'; }
-// Real new-player onboarding: 20,000 Signal + the starter deck, fresh 0-0 records. Default for a brand-new vault (no save).
+// Real new-player onboarding: 5,000 Signal + the starter deck, fresh 0-0 records. Default for a
+// brand-new vault (no save). 8/6/26: was 20,000 -- cut to 5,000 (matches the online/server grant,
+// h_register in app.py) plus a separate one-time +5,000 Day 1 login bonus (grantDailyBonusIfDue()).
 function startNewPlayer(){
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
   for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); }
   wonInstances=[]; wonCounter=0;
   avatarBond={}; pairBonds={}; ascRun=null; forgeBalance=0;   /* new players start with NO Forge — premium currency, earned/bought later */
-  signalPoints=20000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false;
+  signalPoints=5000; rankRP=0; playerScore=[0,0]; seasonWins=0; seasonLosses=0; winStreak=0; bestWinStreak=0; seasonRewardClaimed=false;
   supply=defaultSupply(); cardSupply=defaultCardSupply();
   ownedCopies={}; freshCopies={}; cardRecords={}; cardFoils={}; cardFrames={}; ownedFrames=new Set(['none']);
   STARTER_SET.forEach(nm=>{ const c=COLLECTION.find(x=>x.name===nm && !x.uid); if(c){ ownedCopies[nm]=1; cardRecords[nm]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Starter deck'}]}; } });
@@ -9668,7 +9678,7 @@ function startNewPlayer(){
   if(typeof updateDeckCount==='function') updateDeckCount();
   if(typeof renderFeatured==='function') renderFeatured();
   if(typeof startFeaturedRotation==='function') startFeaturedRotation();
-  toast('Welcome to Signal Forge \u2014 20,000 Signal and your starter deck are ready.', true);
+  toast('Welcome to Signal Forge \u2014 5,000 Signal and your starter deck are ready.', true);
   try{ localStorage.removeItem('sf_starter_chosen'); localStorage.removeItem('sf_howto_seen'); }catch(e){} window._needStarterChoice=true;
   if(typeof window.showHowTo==='function'){ setTimeout(function(){ window.showHowTo(); }, 300); }
 }
@@ -9681,10 +9691,15 @@ const PACKS = [
   {id:'std', name:'Legends Reborn Booster', icon:'📦', price:150, tenX:true, blurb:'Common through Rare — a whisper of higher.', odds:{common:91.6, rare:7.6, ultra:0.8}},
   {id:'elite', name:'Legends Reborn Elite Cache', icon:'🎁', price:1500, blurb:'Rare, Ultra & an Apex shot — no commons.', odds:{rare:78, ultra:20, apex:2}},
 ];
+// 8/6/26: all 3 tiers had byte-identical odds despite a 2000/5000/6000 price spread -- price bought
+// nothing, and Mythic Rite's own blurb ("highest Apex rate in the game") was false against its own
+// table (1.8%, actually below Elite's 2% at a quarter the price). Re-tuned so price buys real odds
+// and every blurb is true against its own numbers: Mythic Rite now genuinely has the best apex rate
+// of any pack in the shop, not just within this tier.
 const PREMIUM_PACKS = [
-  {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{rare:91.2, ultra:7, apex:1.8}},
-  {id:'fforge', name:'Forgemaster Vault', icon:'❖', price:5000, blurb:'Rare-dense with a real Apex shot.', odds:{rare:91.2, ultra:7, apex:1.8}},
-  {id:'fmythic', name:'Mythic Rite', icon:'👑', price:6000, blurb:'The top-tier summon — highest Apex rate in the game.', odds:{rare:91.2, ultra:7, apex:1.8}},
+  {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{rare:88, ultra:10, apex:2}},
+  {id:'fforge', name:'Forgemaster Vault', icon:'❖', price:5000, blurb:'Rare-dense with a real Apex shot.', odds:{rare:85, ultra:11.5, apex:3.5}},
+  {id:'fmythic', name:'Mythic Rite', icon:'👑', price:6000, blurb:'The top-tier summon — highest Apex rate in the game.', odds:{rare:80, ultra:15, apex:5}},
 ];
 function mintLedgerHTML(){
   const t=rarityTypeCounts();
@@ -11470,12 +11485,12 @@ var STARTER_DECKS={
 function _pathDeck(key){ return (typeof STARTER_DECKS!=='undefined'&&STARTER_DECKS[key])?STARTER_DECKS[key]:[]; }
 function grantStarterDeck(names){ ownedCopies={}; freshCopies={}; cardRecords={}; if(typeof activeDeck!=='undefined') activeDeck=new Set(); (names||[]).forEach(function(nm){ var c=COLLECTION.find(function(x){return x.name===nm && !x.uid;}); if(!c) return; var k=c.uid||c.name; ownedCopies[k]=1; cardRecords[k]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:'Starter deck'}]}; if(activeDeck&&activeDeck.add) activeDeck.add(k); }); }
 var STARTER_DECKMASTER={ironsworn:'Bannerlord Cassian',broodswarm:'Broodmother',blackwings:'Kiana'};   // each starter path is issued its own Deck Master on pick (7/15/26)
-function chooseStarterPath(key){ var p=STARTER_PATHS.find(function(x){return x.key===key;}); if(!p) return; grantStarterDeck(_pathDeck(key)); if(STARTER_DECKMASTER[key]){ deckMasterCard=STARTER_DECKMASTER[key]; lsSet('sf_deckmaster', deckMasterCard); } featuredCards=[p.rep]; featuredShuffle=false; featuredRotIdx=0; try{ localStorage.setItem('sf_starter_chosen', key); }catch(e){} window._needStarterChoice=false; if(typeof saveState==='function') saveState(); var ov=document.getElementById('path-chooser'); if(ov) ov.classList.remove('on'); if(typeof applyCosmetics==='function') applyCosmetics(); if(typeof buildVault==='function') buildVault(); if(typeof buildHub==='function') buildHub(); if(typeof buildDeckBuilder==='function') buildDeckBuilder(); if(typeof updateDeckCount==='function') updateDeckCount(); if(typeof renderFeatured==='function') renderFeatured(); if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('🃏 '+p.name+' — starter deck forged: '+_pathDeck(key).length+' cards, all yours.', true); if(typeof showGuideDialogue==='function') setTimeout(function(){ showGuideDialogue('That deck is yours to keep — every card in it, permanently. To get you started, here\'s <b>20,000 Signal</b>. Spend it, save it, it\'s yours now.', {okLabel:'Let\'s go'}); }, 550); if(typeof startTutorial==='function'){ var _td=true; try{ _td=!localStorage.getItem('sf_tutorial_done'); }catch(e){} if(_td) setTimeout(startTutorial, 550); } }
+function chooseStarterPath(key){ var p=STARTER_PATHS.find(function(x){return x.key===key;}); if(!p) return; grantStarterDeck(_pathDeck(key)); if(STARTER_DECKMASTER[key]){ deckMasterCard=STARTER_DECKMASTER[key]; lsSet('sf_deckmaster', deckMasterCard); } featuredCards=[p.rep]; featuredShuffle=false; featuredRotIdx=0; try{ localStorage.setItem('sf_starter_chosen', key); }catch(e){} window._needStarterChoice=false; if(typeof saveState==='function') saveState(); var ov=document.getElementById('path-chooser'); if(ov) ov.classList.remove('on'); if(typeof applyCosmetics==='function') applyCosmetics(); if(typeof buildVault==='function') buildVault(); if(typeof buildHub==='function') buildHub(); if(typeof buildDeckBuilder==='function') buildDeckBuilder(); if(typeof updateDeckCount==='function') updateDeckCount(); if(typeof renderFeatured==='function') renderFeatured(); if(typeof updateBalance==='function') updateBalance(); if(typeof toast==='function') toast('🃏 '+p.name+' — starter deck forged: '+_pathDeck(key).length+' cards, all yours.', true); if(typeof showGuideDialogue==='function') setTimeout(function(){ showGuideDialogue('That deck is yours to keep — every card in it, permanently. To get you started, here\'s <b>5,000 Signal</b>. Spend it, save it, it\'s yours now.', {okLabel:'Let\'s go'}); }, 550); if(typeof startTutorial==='function'){ var _td=true; try{ _td=!localStorage.getItem('sf_tutorial_done'); }catch(e){} if(_td) setTimeout(startTutorial, 550); } }
 function _pathChooserCSS(){ if(document.getElementById('pc-style')) return; var st=document.createElement('style'); st.id='pc-style'; st.textContent=`.path-chooser{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center}.path-chooser.on{display:flex}.path-chooser .pc-scrim{position:absolute;inset:0;background:rgba(4,6,11,.87)}.path-chooser .pc-panel{position:relative;z-index:1;max-width:min(96vw,940px);max-height:92vh;overflow-y:auto;padding:26px 22px 30px;text-align:center}.path-chooser .pc-eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;margin-bottom:6px}.path-chooser .pc-title{font-size:34px;font-weight:800;color:#fff;margin-bottom:6px}.path-chooser .pc-sub{font-size:13px;color:var(--text2);max-width:520px;margin:0 auto 22px;line-height:1.5}.path-chooser .pc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.path-chooser .pc-card{background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));border:1px solid var(--border2);border-radius:14px;padding-bottom:16px;cursor:pointer;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,border-color .15s,box-shadow .15s}.path-chooser .pc-card:hover{transform:translateY(-4px);border-color:var(--acc);box-shadow:0 16px 40px rgba(0,0,0,.55)}.path-chooser .pc-art{height:148px;background-size:cover;background-position:center top;position:relative;display:flex;align-items:center;justify-content:center;border-bottom:1px solid var(--border2)}.path-chooser .pc-art::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 40%,rgba(10,12,18,.82))}.path-chooser .pc-body{padding:13px 15px 10px;flex:1;text-align:left}.path-chooser .pc-name{font-size:18px;font-weight:800;color:#fff}.path-chooser .pc-tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--acc);margin:2px 0 9px}.path-chooser .pc-blurb{font-size:12px;color:var(--text2);line-height:1.5}.path-chooser .pc-pick{margin:0 15px;padding:10px 0;border-radius:9px;border:1px solid var(--acc);background:rgba(255,255,255,.06);color:#fff;font-size:13px;font-weight:800;letter-spacing:.04em;cursor:pointer;transition:background .15s,color .15s}.path-chooser .pc-card:hover .pc-pick{background:var(--acc);color:#0a0d14}@media(max-width:720px){.path-chooser .pc-grid{grid-template-columns:1fr}.path-chooser .pc-panel{padding:18px 14px}.path-chooser .pc-title{font-size:26px}.path-chooser .pc-art{height:118px}}`; document.head.appendChild(st); }
 // Guide character (7/15/26): a portrait-above-textbox dialogue, classic VN/JRPG style -- the
 // character PNG is a placeholder slot (assets/guide-character.png) the user supplies later, same
 // pattern as the intro video. Two uses: (1) per-screen orientation tips, shown once ever per
-// screen, non-blocking; (2) the starter-deck onboarding moment (keep this deck + 20,000 Signal),
+// screen, non-blocking; (2) the starter-deck onboarding moment (keep this deck + 5,000 Signal),
 // shown as a bigger one-time beat right after chooseStarterPath().
 const GUIDE_CHAR_SRC = 'assets/guide-character.png';
 const GUIDE_TIPS = {
@@ -11619,17 +11634,38 @@ function _coachSpot(sel){
   var old=document.getElementById('coach-spot'); if(old) old.remove();
   var dim=document.getElementById('coach-fulldim'); if(dim) dim.remove();
   var el=sel?document.querySelector(sel):null;
-  if(el && el.offsetParent!==null){ var r=el.getBoundingClientRect(); var pad=8; var sp=document.createElement('div'); sp.id='coach-spot'; sp.className='coach-spot'; sp.style.left=(r.left-pad)+'px'; sp.style.top=(r.top-pad)+'px'; sp.style.width=(r.width+pad*2)+'px'; sp.style.height=(r.height+pad*2)+'px'; document.body.appendChild(sp); }
-  else { var fd=document.createElement('div'); fd.id='coach-fulldim'; fd.className='coach-fulldim'; document.body.appendChild(fd); }
+  if(el && el.offsetParent!==null){ var r=el.getBoundingClientRect(); var pad=8; var sp=document.createElement('div'); sp.id='coach-spot'; sp.className='coach-spot'; sp.style.left=(r.left-pad)+'px'; sp.style.top=(r.top-pad)+'px'; sp.style.width=(r.width+pad*2)+'px'; sp.style.height=(r.height+pad*2)+'px'; document.body.appendChild(sp); return r; }
+  var fd=document.createElement('div'); fd.id='coach-fulldim'; fd.className='coach-fulldim'; document.body.appendChild(fd);
+  return null;
+}
+// 8/6/26: the box was pinned to a fixed bottom position always, which collides with any
+// spotlighted target that also lives in the duel screen's lower third -- exactly where the hand
+// row, rear-guard slots, and the Confirm/Commit buttons all sit (measured live: box top=746,
+// hand-row top=730 -- the box was rendering directly on top of the very cards a step told the
+// player to tap). Now it steps out of the target's way: sits ABOVE it with a real gap when the
+// target is in the bottom half of the viewport, otherwise keeps the original bottom-center spot
+// (nothing there to collide with).
+function _positionCoachBox(box, targetRect){
+  if(!targetRect){ box.style.top='auto'; box.style.bottom='4.5%'; return; }
+  var vh=window.innerHeight, gap=16;
+  var targetMidY=targetRect.top+targetRect.height/2;
+  if(targetMidY > vh*0.5){
+    var boxH=box.getBoundingClientRect().height||120;   // measure before touching top/bottom -- height depends only on content+width, already set
+    var top=Math.max(12, targetRect.top-gap-boxH);
+    box.style.bottom='auto'; box.style.top=top+'px';
+  } else {
+    box.style.top='auto'; box.style.bottom='4.5%';
+  }
 }
 function showCoachStep(){
   _coachCSS(); var step=TUTORIAL_SCRIPT[tutorialStep]; if(!step){ endTutorial(); return; }
-  _coachSpot(step.spot);
+  var targetRect=_coachSpot(step.spot);
   var box=document.getElementById('coach-box'); if(!box){ box=document.createElement('div'); box.id='coach-box'; box.className='coach-box'; document.body.appendChild(box); }
   var advanceCtl = step.on
     ? '<span class="cb-wait">👉 Do it to continue</span>'
     : '<button class="cb-next" onclick="'+(step.act||'nextCoachStep')+'()">'+(step.btn||'Next')+' →</button>';
   box.innerHTML='<div class="cb-mentor">🃏</div><div class="cb-body"><div class="cb-step">Tutorial · Step '+(tutorialStep+1)+' / '+TUTORIAL_SCRIPT.length+'</div><div class="cb-say">'+step.say+'</div><div class="cb-row"><button class="cb-skip" onclick="endTutorial()">Skip tutorial</button>'+advanceCtl+'</div></div>';
+  _positionCoachBox(box, targetRect);
 }
 function nextCoachStep(){ tutorialStep++; if(tutorialStep>=TUTORIAL_SCRIPT.length){ endTutorial(); return; } showCoachStep(); }
 function tutorialAdvance(trigger){ if(!tutorialMode) return; var step=TUTORIAL_SCRIPT[tutorialStep]; if(step && step.on===trigger) nextCoachStep(); }
@@ -11921,14 +11957,21 @@ function grantDailyBonusIfDue(){
   // is the peak, same "current + best" shape as winStreak/bestWinStreak. Reward scales transparently
   // with the streak and caps at Day 6+ (+150/day, capped +750) rather than growing unbounded --
   // same never-hide-the-math, always-show-the-cap discipline as CONDITION_VETERAN_CAP earlier.
+  // 8/6/26: Day 1 is a separate, larger one-time welcome bonus (+5,000, on top of the 5,000
+  // starting grant in startNewPlayer()), not the regular +600 floor -- gated on
+  // bestDailyLoginStreak (a lifetime peak that only ever grows, never resets on a missed day,
+  // unlike dailyLoginStreak) still being 0, i.e. this account has genuinely never had a streak
+  // before. Read BEFORE it gets updated below, so a returning player whose streak just broke
+  // doesn't get mistaken for a brand-new one.
+  var isFirstEverLogin = (bestDailyLoginStreak === 0);
   var yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
   dailyLoginStreak = (lastDailyBonusDate === yesterday) ? (dailyLoginStreak||0)+1 : 1;
   if(dailyLoginStreak > bestDailyLoginStreak) bestDailyLoginStreak = dailyLoginStreak;
   lastDailyBonusDate = today;
-  var bonus = 600 + Math.min(5, dailyLoginStreak-1)*150;
+  var bonus = isFirstEverLogin ? 5000 : (600 + Math.min(5, dailyLoginStreak-1)*150);
   signalPoints += bonus;
   if(typeof updateBalance==='function') updateBalance();
-  if(typeof toast==='function') toast('◈ Daily Bonus — Day '+dailyLoginStreak+' streak, +'+bonus+' Signal, welcome back!', true);
+  if(typeof toast==='function') toast(isFirstEverLogin ? '◈ Day 1 Bonus — welcome! +5,000 Signal on top of your starting grant.' : ('◈ Daily Bonus — Day '+dailyLoginStreak+' streak, +'+bonus+' Signal, welcome back!'), true);
   if(typeof saveState==='function') saveState();
 }
 // ══ EXPEDITIONS — card-acquisition idle-claim (7/17/26; rarity+duration 7/17/26) ══

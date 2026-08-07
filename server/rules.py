@@ -345,10 +345,13 @@ PACKS = [
     {"id": "std", "name": "Legends Reborn Booster", "price": 150, "tenX": True, "odds": {"common": 91.6, "rare": 7.6, "ultra": 0.8}},
     {"id": "elite", "name": "Legends Reborn Elite Cache", "price": 1500, "odds": {"rare": 78, "ultra": 20, "apex": 2}},
 ]
+# 8/6/26: all 3 tiers were byte-identical odds despite a 2000/5000/6000 price spread -- fixed to
+# match the client (index.html:9683), where price now actually buys better odds and Mythic Rite
+# really does carry the best apex rate in the shop, matching its own printed blurb.
 PREMIUM_PACKS = [
-    {"id": "fkindle", "name": "Kindled Cache", "price": 2000, "odds": {"rare": 91.2, "ultra": 7, "apex": 1.8}},
-    {"id": "fforge", "name": "Forgemaster Vault", "price": 5000, "odds": {"rare": 91.2, "ultra": 7, "apex": 1.8}},
-    {"id": "fmythic", "name": "Mythic Rite", "price": 6000, "odds": {"rare": 91.2, "ultra": 7, "apex": 1.8}},
+    {"id": "fkindle", "name": "Kindled Cache", "price": 2000, "odds": {"rare": 88, "ultra": 10, "apex": 2}},
+    {"id": "fforge", "name": "Forgemaster Vault", "price": 5000, "odds": {"rare": 85, "ultra": 11.5, "apex": 3.5}},
+    {"id": "fmythic", "name": "Mythic Rite", "price": 6000, "odds": {"rare": 80, "ultra": 15, "apex": 5}},
 ]
 ALL_PACKS = {p["id"]: p for p in PACKS + PREMIUM_PACKS}
 # index.html:9649: guaranteed Ultra+ within 20 pulls, guaranteed Apex within 80 -- both counters
