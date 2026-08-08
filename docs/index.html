@@ -942,6 +942,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .navitem .ni-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
 .navitem .ni-badge{margin-left:auto;font-size:9px;font-weight:700;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);padding:1px 6px;border-radius:8px;font-variant-numeric:tabular-nums}
 .navitem.on .ni-badge{background:var(--gold-glow);border-color:var(--gold-dim);color:var(--gold)}
+.navitem .ni-badge.devnotes-pill{background:rgba(91,134,245,0.18);border-color:rgba(91,134,245,0.4);color:var(--electric);font-weight:800}
 .nav-group{display:flex;flex-direction:column}
 .nav-grp-head{display:flex;align-items:center;gap:10px;padding:8px 10px;font-size:11px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--text3);background:none;border:none;border-radius:5px;cursor:pointer;text-align:left;width:100%;transition:background .12s,color .12s}
 .nav-grp-head:hover{background:var(--surface);color:var(--text2)}
@@ -1258,6 +1259,14 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .acd-xpfill{height:100%;background:linear-gradient(90deg,var(--violet),var(--gold))}
 .acd-xptxt{font-size:11px;color:var(--text3);margin-top:3px;display:block;font-variant-numeric:tabular-nums}
 .acd-sec{margin-top:16px}
+/* Player level progression (8/8/26) -- cloned from .acd-xpbar rather than reused directly, so a
+   future Reincarnation-side tweak to that bar can't accidentally reshape this one. */
+.pxp-wrap{margin:10px 0 4px}
+.pxp-toprow{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.pxp-level{font-size:15px;font-weight:800;color:var(--gold)}
+.pxp-bar{height:9px;background:rgba(6,6,9,0.6);border-radius:6px;overflow:hidden;border:1px solid var(--border2)}
+.pxp-fill{height:100%;background:linear-gradient(90deg,var(--electric),var(--gold));transition:width .3s}
+.pxp-txt{font-size:11px;color:var(--text3);margin-top:4px;display:block;font-variant-numeric:tabular-nums}
 .acd-sec-t{font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);font-weight:800;margin-bottom:8px;border-bottom:1px solid var(--border);padding-bottom:5px}
 .acd-move{display:flex;align-items:center;gap:11px;background:rgba(20,20,28,0.55);border:1px solid var(--border);border-radius:10px;padding:9px 13px;margin-bottom:7px;border-left-width:3px}
 .acd-move.locked{opacity:0.5;filter:grayscale(0.5)}
@@ -1940,6 +1949,23 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .cos-btn.locked{background:none;border-color:var(--border);color:var(--text3)}
 .cos-btn.locked:hover{border-color:var(--gold-dim);color:var(--gold)}
 .cos-btn.equipped{background:var(--gold-glow);border-color:var(--gold);color:var(--gold);cursor:default}
+/* Mailbox + Dev Notes (8/8/26) -- own scoped classes rather than a shared list/button component,
+   matching how every other screen in this file (Vault, Expeditions, Mastery) styles itself locally. */
+.mailbox-item,.devnote-item{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+.mailbox-item{display:flex;align-items:center;gap:14px}
+.mailbox-item.claimed{opacity:0.55}
+.mailbox-icon{font-size:26px;flex-shrink:0}
+.mailbox-body{flex:1;min-width:0}
+.mailbox-title,.devnote-title{font-size:13.5px;font-weight:800;color:var(--text)}
+.mailbox-desc,.devnote-body{font-size:11.5px;color:var(--text2);margin-top:3px;line-height:1.4}
+.mailbox-date,.devnote-date{font-size:10px;color:var(--text3);margin-top:5px;font-variant-numeric:tabular-nums}
+.mailbox-reward{font-size:13px;font-weight:800;color:var(--gold);white-space:nowrap;font-variant-numeric:tabular-nums}
+.mailbox-btn{font-size:12px;font-weight:800;border-radius:6px;padding:8px 14px;cursor:pointer;border:1px solid var(--gold-dim);background:var(--surface2);color:var(--gold);white-space:nowrap}
+.mailbox-btn:hover{background:var(--gold-glow)}
+.mailbox-btn.claimed{background:none;border-color:var(--border2);color:var(--text3);cursor:default}
+.mailbox-empty,.devnotes-empty{color:var(--text3);font-size:12.5px;padding:20px 0;text-align:center}
+.devnote-date{margin-top:0;margin-bottom:4px}
+.devnote-title{margin-bottom:4px}
 .pack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:6px}
 .pack-card.wide{align-items:stretch;text-align:left;padding:14px}
 .pack-head{display:flex;align-items:center;gap:12px;margin-bottom:11px}
@@ -2621,6 +2647,8 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   <button class="brand nav-toggle" onclick="toggleSidebar()" title="Collapse / expand the menu"><span class="brand-mark">◈</span><span class="brand-text">KOTEI<span class="brand-sub">TRADING CARD GAME · PROTOTYPE</span></span></button>
   <nav class="nav">
     <button class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon">◈</span><span class="brand-text">Hub</span></button>
+    <button class="navitem" id="nav-mailbox" onclick="show('mailbox',this)"><span class="ni-icon">📬</span><span class="brand-text">Mailbox</span><span class="ni-badge" id="mailbox-badge"></span></button>
+    <button class="navitem" id="nav-devnotes" onclick="show('devnotes',this)"><span class="ni-icon">🛠</span><span class="brand-text">Dev Notes</span><span class="ni-badge devnotes-pill" id="devnotes-badge" style="display:none">NEW</span></button>
     <div class="nav-group open" id="grp-play">
       <button class="nav-grp-head" onclick="toggleNavGroup('grp-play')"><span class="ni-icon">🎮</span><span class="brand-text">Play</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
@@ -2870,8 +2898,14 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <div>
           <div class="sh-eyebrow">Conjurer Profile</div>
           <h1>Keanu · @keanu</h1>
-          <div class="profile-sub">◈ Trusted — Tier IV · 22 cards vaulted · 5,000 Zenni</div>
+          <div class="profile-sub">◈ Lv 1 Conjurer · 22 cards vaulted · 5,000 Zenni</div>
         </div>
+      </div>
+      <div class="shop-section-title">Level Progression</div>
+      <div class="pxp-wrap">
+        <div class="pxp-toprow"><span class="pxp-level" id="pxp-level">Level 1</span></div>
+        <div class="pxp-bar"><div class="pxp-fill" id="pxp-fill" style="width:0%"></div></div>
+        <span class="pxp-txt" id="pxp-txt">0 / 100 XP</span>
       </div>
       <div class="shop-section-title">Emblem — equip the one you've earned</div>
       <div class="emblem-grid" id="emblem-grid"></div>
@@ -2879,6 +2913,22 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="cosmetic-grid" id="title-grid"></div>
       <div class="shop-section-title">Featured Units — the cards shown on your Hub <span class="ssc-count" id="feat-controls"></span></div>
       <div class="feat-grid" id="feat-grid"></div>
+    </div>
+  </div>
+
+  <!-- ── MAILBOX VIEW ── -->
+  <div class="view" id="v-mailbox">
+    <div class="profile">
+      <div class="shop-section-title">Mailbox — gifts sent from the Forge</div>
+      <div id="mailbox-list"></div>
+    </div>
+  </div>
+
+  <!-- ── DEV NOTES VIEW ── -->
+  <div class="view" id="v-devnotes">
+    <div class="profile">
+      <div class="shop-section-title">Dev Notes — what's changed recently</div>
+      <div id="devnotes-list"></div>
     </div>
   </div>
 
@@ -9113,6 +9163,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     // but a card's permanent K/D record and its Deck Master's record must never move here.
     if(!lobbyMode){ recordDuel(pc,'win'); if(deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.k=(deckMasterRecord.k||0)+1; lsSet('sf_dm_record', deckMasterRecord); } }
     signalPoints += 20;
+    if(!lobbyMode && typeof grantPlayerXP==='function') grantPlayerXP(15);
     if(typeof bumpQuestProgress==='function') bumpQuestProgress('win2');
     if(pc.name === 'Signal Diviner'){ divinerBonusNext=2; abilLog.push('Signal Diviner: +2 max Charge next turn'); }
     if(pc.name === 'Tange Sazen') skullchainKills++;
@@ -9127,6 +9178,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     charge=Math.min(duelEnergyCap(),charge+1); if(typeof renderCharge==='function') renderCharge();
     // Public Server/Sandbox (lobbyMode): no mark on the permanent record, win or lose.
     if(!lobbyMode){ recordDuel(pc,'death'); if(deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.d=(deckMasterRecord.d||0)+1; lsSet('sf_dm_record', deckMasterRecord); } }
+    if(!lobbyMode && typeof grantPlayerXP==='function') grantPlayerXP(5);
     { if(typeof drawPile!=='undefined' && drawPile.length){ var _tt=drawPile[drawPile.length-1]; var _tr=_tt&&TRIGGERS[_tt.name]; if(_tr){ drawPile.pop(); hand.push(_tt); if(_tr.draw) drawToHand(_tr.draw); if(_tr.recur){ for(var _tri=0;_tri<_tr.recur;_tri++){ if(banishPile.length) hand.push(banishPile.pop()); } } abilLog.push("✨ Trigger — "+_tt.name+": "+_tr.text); if(typeof toast==='function') toast("✨ Trigger! "+_tt.name+" — "+_tr.text, true); if(typeof buildHand==='function') buildHand(); } } }
     if(isDeathRemnant){
       var _rp=(typeof dmRemnantPowOverride!=='undefined'&&dmRemnantPowOverride!=null)?dmRemnantPowOverride:((typeof REMNANT_POW!=='undefined'&&REMNANT_POW[pc.name]!=null)?REMNANT_POW[pc.name]:pc.pow);
@@ -9296,7 +9348,7 @@ function nextTurn(){
   openTurn();
 }
 
-const SCREEN_TITLES = {hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Offline Play',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'KOTEI Online',draft:'Draft',asc:'Reincarnation · The Saga',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile'};
+const SCREEN_TITLES = {hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Offline Play',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'KOTEI Online',draft:'Draft',asc:'Reincarnation · The Saga',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile',mailbox:'Mailbox',devnotes:'Dev Notes'};
 function toggleSidebar(){ document.body.classList.toggle('nav-collapsed'); }
 function toggleNavGroup(id){ var g=document.getElementById(id); if(!g) return; var wasOpen=g.classList.contains('open'); document.querySelectorAll('.nav-group').forEach(function(x){ x.classList.remove('open'); }); if(!wasOpen) g.classList.add('open'); }
 function show(id, btn){
@@ -9328,6 +9380,8 @@ function show(id, btn){
   if(id==='market'){ buildMarket(); if(typeof bumpQuestProgress==='function') bumpQuestProgress('visitMarket'); }
   if(id==='legend') buildLegendBoard();
   if(id==='profile') buildProfile();
+  if(id==='mailbox') buildMailbox();
+  if(id==='devnotes') buildDevNotes();
   if(typeof MUSIC!=='undefined'){ if(id==='asc') MUSIC.play('ascension'); else if(id==='turn'||id==='draft') MUSIC.stop(); else MUSIC.play('hub'); }   // 7/18/26: real hub track plays everywhere EXCEPT the play features (live duel, Draft, Reincarnation) -- Reincarnation keeps its own untouched procedural theme, turn/draft get silence
   if(typeof showGuideTipIfDue==='function') showGuideTipIfDue(id);
 }
@@ -9473,7 +9527,7 @@ function applyCosmetics(){
   const em=COSMETICS.emblem.items.find(i=>i.id===equipped.emblem) || COSMETICS.emblem.items[0];
   document.querySelectorAll('.up-avatar, .up-avatar-lg').forEach(a=>{ a.textContent=em.glyph; });
   const ti=COSMETICS.title.items.find(i=>i.id===equipped.title);
-  const tl=document.querySelector('.up-tier'); if(tl&&ti) tl.textContent='◈ '+ti.name+' — Tier IV';
+  const tl=document.querySelector('.up-tier'); if(tl&&ti) tl.textContent='◈ '+ti.name+' — Lv '+(typeof playerLevel!=='undefined'?playerLevel:1);
   var _comp=COSMETICS.companion.items.find(function(i){return i.id===equipped.companion;});
   var _pet=document.getElementById('companion-pet');
   if(_pet){ if(_comp&&_comp.glyph&&_comp.id!=='none'){ _pet.textContent=_comp.glyph; _pet.title='Companion — '+_comp.name; _pet.style.display='flex'; } else { _pet.style.display='none'; } }
@@ -11448,6 +11502,100 @@ const LS = (() => { try { const k='__sf__'; localStorage.setItem(k,'1'); localSt
 function lsGet(k, def){ try { const v = LS.getItem(k); return v==null ? def : JSON.parse(v); } catch(e){ return def; } }
 function lsSet(k, v){ try { LS.setItem(k, JSON.stringify(v)); } catch(e){} }
 
+// ══ PLAYER LEVEL, MAILBOX, DEV NOTES (8/8/26, owner request: "player level progression, or at
+// least something to that effect... mailbox for gifts from server... updates for dev notes") ══
+// Three independent systems, each its own sf_ key per the established convention for state added
+// after the big SAVE_KEY blob's shape was locked in — not shoehorned into saveState()/loadState().
+let playerLevel = lsGet('sf_player_level', 1);
+let playerXP = lsGet('sf_player_xp', 0);
+function xpNeededForLevel(lvl){ return lvl*100; }   // linear: Lv1→2 needs 100, Lv2→3 needs 200, etc. -- never-hide-the-math, same house style as grantDailyBonusIfDue()
+function grantPlayerXP(amount){
+  if(!amount) return;
+  playerXP += amount;
+  var startLevel = playerLevel, zenniEarned = 0, need = xpNeededForLevel(playerLevel);
+  while(playerXP >= need){
+    playerXP -= need; playerLevel++;
+    var reward = playerLevel*25; zenniEarned += reward; signalPoints += reward;
+    if(playerLevel%5===0){ zenniEarned += 200; signalPoints += 200; }   // milestone bonus every 5 levels
+    need = xpNeededForLevel(playerLevel);
+  }
+  lsSet('sf_player_level', playerLevel); lsSet('sf_player_xp', playerXP);
+  if(playerLevel > startLevel){
+    if(typeof updateBalance==='function') updateBalance();
+    if(typeof applyCosmetics==='function') applyCosmetics();   // .up-tier's "Lv N" is only ever written here -- must re-run on every level-up, not just on a cosmetic change
+    var _lvlTxt = playerLevel>startLevel+1 ? ('Level '+startLevel+' → '+playerLevel) : ('Level '+playerLevel);
+    if(typeof toast==='function') toast('⬆ '+_lvlTxt+'! +'+fmtPts(zenniEarned)+' Zenni'+(playerLevel%5===0?' (milestone bonus included)':''), true);
+  }
+  if(typeof refreshLevelUI==='function') refreshLevelUI();
+}
+function refreshLevelUI(){
+  var need = xpNeededForLevel(playerLevel);
+  var lv=document.getElementById('pxp-level'), fill=document.getElementById('pxp-fill'), txt=document.getElementById('pxp-txt');
+  if(lv) lv.textContent = 'Level '+playerLevel;
+  if(fill) fill.style.width = Math.min(100, Math.round((playerXP||0)/need*100))+'%';
+  if(txt) txt.textContent = fmtPts(playerXP)+' / '+fmtPts(need)+' XP';
+}
+
+let mailboxClaimed = new Set(lsGet('sf_mailbox_claimed', []));
+// Hand-maintained, like DEV_NOTES below -- append a new entry whenever the Forge (the owner/dev
+// side) has something to send every player, don't build a second parallel "admin tool" for this.
+const SERVER_GIFTS = [
+  {id:'welcome_conjurer', date:'2026-08-08', title:'Welcome, Conjurer', desc:"A gift from the Forge itself — every arena prize-fighter starts somewhere.", zenni:500},
+  {id:'dm_bot_fix_apology', date:'2026-08-08', title:"The Bots Remembered Their Training", desc:"Deck Master abilities were quietly doing nothing when your opponent conjured their own — fixed. A little something for the inconvenience.", zenni:300},
+];
+function unclaimedGifts(){ return SERVER_GIFTS.filter(function(g){ return !mailboxClaimed.has(g.id); }); }
+function claimGift(id){
+  if(mailboxClaimed.has(id)) return;
+  var g = SERVER_GIFTS.find(function(x){ return x.id===id; }); if(!g) return;
+  mailboxClaimed.add(id); lsSet('sf_mailbox_claimed', Array.from(mailboxClaimed));
+  if(g.zenni){ signalPoints += g.zenni; if(typeof updateBalance==='function') updateBalance(); }
+  if(typeof buildMailbox==='function') buildMailbox();
+  if(typeof toast==='function') toast('📬 Claimed — '+g.title+(g.zenni?(': +'+fmtPts(g.zenni)+' Zenni'):''), true);
+}
+function refreshMailboxBadge(){
+  var b=document.getElementById('mailbox-badge'); if(!b) return;
+  var n=unclaimedGifts().length; b.textContent = n>0 ? String(n) : '';
+}
+function buildMailbox(){
+  var host=document.getElementById('mailbox-list');
+  if(host){
+    host.innerHTML = !SERVER_GIFTS.length ? '<div class="mailbox-empty">Nothing in your mailbox yet.</div>'
+      : SERVER_GIFTS.slice().reverse().map(function(g){
+        var claimed = mailboxClaimed.has(g.id);
+        return '<div class="mailbox-item'+(claimed?' claimed':'')+'">'
+          + '<div class="mailbox-icon">'+(claimed?'📭':'📬')+'</div>'
+          + '<div class="mailbox-body"><div class="mailbox-title">'+g.title+'</div><div class="mailbox-desc">'+g.desc+'</div><div class="mailbox-date">'+g.date+'</div></div>'
+          + '<div class="mailbox-reward">'+(g.zenni?('◈ '+fmtPts(g.zenni)):'')+'</div>'
+          + (claimed ? '<button class="mailbox-btn claimed" disabled>✓ Claimed</button>' : '<button class="mailbox-btn" onclick="claimGift(\''+g.id+'\')">🎁 Claim</button>')
+          + '</div>';
+      }).join('');
+  }
+  refreshMailboxBadge();
+}
+
+let lastDevNoteSeen = lsGet('sf_devnotes_seen', null);
+// Hand-maintained changelog, newest first — appended to whenever something real ships, mirroring
+// this file's own M/D/YY comment convention (it already informally changelogs itself in comments).
+const DEV_NOTES = [
+  {date:'2026-08-08', title:'Deck Master Activated Abilities now fire for the bot, not just you', body:"Uso Oso and 15 other Deck Master abilities only ever fired when YOU conjured your Deck Master. When the opponent conjured theirs, nothing happened — a real gap, now closed. All 16 abilities have a full bot-safe mirror."},
+  {date:'2026-08-08', title:'Card wagering, trading, and the Marketplace no longer fake a second player', body:"Staked PvP against practice bots, Marketplace buys/sells, and card trades were all quietly minting or destroying real cards and Zenni with nobody real on the other end. All three are gated until a real opponent, buyer, or trade partner exists."},
+];
+function refreshDevNotesBadge(){
+  var b=document.getElementById('devnotes-badge'); if(!b) return;
+  b.style.display = (DEV_NOTES.length && DEV_NOTES[0].date !== lastDevNoteSeen) ? '' : 'none';
+}
+function buildDevNotes(){
+  var host=document.getElementById('devnotes-list');
+  if(host){
+    host.innerHTML = !DEV_NOTES.length ? '<div class="devnotes-empty">Nothing posted yet.</div>'
+      : DEV_NOTES.map(function(n){
+        return '<div class="devnote-item"><div class="devnote-date">'+n.date+'</div><div class="devnote-title">'+n.title+'</div><div class="devnote-body">'+n.body+'</div></div>';
+      }).join('');
+  }
+  if(DEV_NOTES.length){ lastDevNoteSeen = DEV_NOTES[0].date; lsSet('sf_devnotes_seen', lastDevNoteSeen); }
+  refreshDevNotesBadge();
+}
+
 // ══ ONLINE (Phase 5.0a, 8/6/26) — the client's first real call to the server, ever ══════════
 // The online account is deliberately SEPARATE from this device's local save. Nothing under
 // SAVE_KEY (Vault, decks, Reincarnation, currencies) is read or uploaded here, and nothing the
@@ -12455,7 +12603,8 @@ function buildProfileTitles(){
   const _t=COSMETICS.title.items.find(i=>i.id===equipped.title);
   const _sub=document.querySelector('#v-profile .profile-sub');
   const _essTitle=(typeof essenceCosmeticOwned==='function' && essenceCosmeticOwned('ec-title'))?' · ✦ Ascendant':'';
-  if(_sub) _sub.textContent='◈ '+(_t?_t.name:'Conjurer')+_essTitle+' · '+COLLECTION.filter(c=>(ownedCopies[c.uid||c.name]||0)>0).length+' cards vaulted · '+fmtPts(signalPoints)+' Zenni';
+  if(_sub) _sub.textContent='◈ Lv '+(typeof playerLevel!=='undefined'?playerLevel:1)+' '+(_t?_t.name:'Conjurer')+_essTitle+' · '+COLLECTION.filter(c=>(ownedCopies[c.uid||c.name]||0)>0).length+' cards vaulted · '+fmtPts(signalPoints)+' Zenni';
+  if(typeof refreshLevelUI==='function') refreshLevelUI();
   const _crestEl=document.querySelector('#v-profile .profile-hero');
   if(_crestEl){ var _oldCrest=_crestEl.querySelector('.ess-crest'); if(_oldCrest) _oldCrest.remove();
     if(typeof essenceCosmeticOwned==='function' && essenceCosmeticOwned('ec-emblem')){ var _cr=document.createElement('div'); _cr.className='ess-crest'; _cr.title='Essence Crest Emblem'; _cr.textContent='💎'; _crestEl.appendChild(_cr); } }
@@ -15400,6 +15549,9 @@ refreshPresets();
 applySavedCosmetics();
 updateBalance();
 applyCosmetics();
+if(typeof refreshLevelUI==='function') refreshLevelUI();
+if(typeof refreshMailboxBadge==='function') refreshMailboxBadge();
+if(typeof refreshDevNotesBadge==='function') refreshDevNotesBadge();
 </script>
 
 <!-- ==DEV-MODE== KOTEI developer / balance overlay (self-contained; Shift+D) -->
