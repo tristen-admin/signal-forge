@@ -2993,7 +2993,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="lobby-head">
       <div class="lh-eyebrow" style="color:var(--lose)">Staked PvP · High Stakes</div>
       <h1>Wager Duel — cards on the line</h1>
-      <p>Stake one of your cards against a rival's. Win the best-of-7 and <strong style="color:var(--gold)">their card is yours</strong>. Lose and <strong style="color:var(--lose)">yours is forfeited</strong> — removed from your collection. No rank staked — just the cards, plus a small Zenni payout for the win. <span style="color:var(--text3)">(Rival AI stands in until networked play ships.)</span></p>
+      <p>Stake one of your cards against a real rival's. Win the best-of-7 and <strong style="color:var(--gold)">their card is yours</strong>. Lose and <strong style="color:var(--lose)">yours is forfeited</strong> — removed from your collection. No rank staked — just the cards, plus a small Zenni payout for the win. <span style="color:var(--text3)">Real card stakes only ever happen against a real matched opponent — never a practice bot.</span></p>
       <div class="market-disclaimer">⚖ <strong>Skill-based · no real money in this prototype.</strong> Cards you stake are won and lost for keeps — but never for cash. Real-money-stakes wagering would need qualified legal counsel first and is not enabled here.</div>
     </div>
     <div class="pvp-stakes">
@@ -3003,7 +3003,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     </div>
     <div class="pvp-section-label">Your terms — minimum stake you'll accept from a rival</div>
     <div class="pvp-floor" id="pvp-floor"></div>
-    <div class="pvp-section-label">Available opponents <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">· AI stand-ins until networked matchmaking ships</span></div>
+    <div class="pvp-section-label">Available opponents <span style="color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0">· practice bots — for setting your terms only; card stakes need a real matched rival</span></div>
     <div class="bot-grid" id="pvp-rival-grid"></div>
     <div class="pvp-section-label">Wager one of your cards</div>
     <div class="pvp-card-picker" id="pvp-card-picker"></div>
@@ -9480,27 +9480,25 @@ function listCard(){
   if(!soldKey){ toast('You do not own '+name+' to sell.', false); return; }
   if(isCardLocked(soldKey)){ toast('🔒 '+name+' is locked — unlock it in the Vault to list it.', false); return; }
   { const _si=COLLECTION.find(function(x){return (x.uid||x.name)===soldKey;}); if(_si && !isTradeable(_si)){ toast('That copy is play-only — bought cards cannot be listed or staked.', false); return; } }
-  signalPoints += price;
-  if(soldKey===name){ ownedCopies[name]=Math.max(0,(ownedCopies[name]||0)-1); if(freshCopies[name]) freshCopies[name]=Math.max(0,freshCopies[name]-1); }
-  else if(typeof removeInstance==='function'){ removeInstance(soldKey); }
-  document.getElementById('list-card-price').value = '';
-  if(typeof updateBalance==='function') updateBalance();
-  saveState();
-  toast('Sold '+name+' for ◈ '+fmtPts(price)+' Zenni — the buyer takes its full record.', true);
-  buildMarket();
+  // Integrity fix (owner-mandated): a player must never lose a real card to a sale that has no
+  // real buyer. This used to pay signalPoints and delete the card (ownedCopies / removeInstance)
+  // the instant "List for sale" was clicked -- no listing was ever actually created, no buyer ever
+  // existed, it just fabricated Zenni and destroyed the card in the same breath. Worse than the
+  // buy-side bug: that one only minted a card from nothing, this one minted currency AND deleted
+  // something real. All validation above (ownership/lock/tradeable) still runs; only the fake
+  // sale itself is blocked. Remove this gate once real player-to-player listings exist server-side.
+  toast('Real buyers aren\'t online yet — listing '+name+' won\'t remove it from your Vault or pay out until the Marketplace has real players on the other side.', false);
 }
 function buyMarket(idx){
   const l = marketListings[idx]; if(!l || l.sold) return;
   if(l.mine){ marketListings.splice(idx, 1); toast('Listing withdrawn.', true); buildMarket(); return; }
-  if(signalPoints < l.price){ toast('Not enough ◈ Zenni — need '+fmtPts(l.price)+', you hold '+fmtPts(signalPoints)+'. Earn it in play, packs, or the Marketplace.', false); return; }
-  if(!confirm('Buy '+l.name+' for ◈ '+fmtPts(l.price)+' Zenni?')) return;
-  signalPoints -= l.price; l.sold = true;
-  const uid = (typeof mintWon==='function') ? mintWon(l.name, 'Bought on the Legend market') : null;
-  if(uid && l.k!=null && cardRecords[uid]){ cardRecords[uid].k=l.k; cardRecords[uid].d=l.d||0; }
-  if(typeof updateBalance==='function') updateBalance();
-  saveState();
-  toast('Acquired '+l.name+' for ◈ '+fmtPts(l.price)+' Zenni — its full record is now yours.', true);
-  buildMarket();
+  // Integrity fix (owner-mandated): a player must never receive a card that wasn't truly listed
+  // by another player. Every listing here comes from seedMarket()'s hardcoded name+fake-wallet
+  // array (whales included) -- there is no real seller behind any of it. This used to call
+  // mintWon(), minting a brand-new card out of the finite shared supply for a sale that never
+  // happened with anyone real. Listings stay visible for reference pricing; remove this gate once
+  // listings are sourced from real player inventory server-side.
+  toast('This isn\'t a real seller yet — the Marketplace shows reference pricing only until real player listings are online. No card changes hands here.', false);
 }
 // ══ CARD PACKS · GLOBAL MINT LEDGER (finite, shared, persisted) ══
 const COPIES_PER = {apex:100, ultra:1000, rare:2500, uncommon:4000, common:5000}; // copies minted per individual card of each rarity — AR 100 : UR 1000 (1:10), matches RARITY_SUPPLY, ladder stays rarer=fewer
@@ -13621,22 +13619,13 @@ function setPvpFloor(k){
 }
 function proposePvpWager(){
   if(!pvpRival||!pvpStakeMine) return;
-  // Staked PvP deals the actual duel from local activeDeck (unlike Ranked/Online, which the
-  // server deals independently) -- Playtest Mode's whole point is letting activeDeck hold cards
-  // you don't own, so it can't be trusted here the way it's fine to trust in Offline Play. Check
-  // real ownership directly rather than trusting playtestMode's absence.
-  if(activeDeck.size===DECK_SIZE && ![...activeDeck].every(k=>(ownedCopies[k]||0)>0)){ toast('Your deck has cards you don\'t own — Staked PvP needs a fully-owned deck. Playtest Mode is for Offline Play practice only.', false); return; }
-  const mine=COLLECTION.find(c=>(c.uid||c.name)===pvpStakeMine); const b=BOT_OPPONENTS.find(x=>x.id===pvpRival);
-  if(!mine||!b) return;
-  pvpStakeTheirs=rivalStakeFor(b);
-  const theirs=COLLECTION.find(c=>c.name===pvpStakeTheirs)||{rarity:'rare'};
-  pvpApproveYou=false; pvpApproveThem=false;
-  document.getElementById('approve-terms').innerHTML=
-    '<div class="apt-side"><div class="apt-lbl">You stake</div><div class="apt-card">'+mine.name+'</div><div class="apt-rar">'+mine.rarity+'</div></div>'+
-    '<div class="apt-vs">⚔</div>'+
-    '<div class="apt-side"><div class="apt-lbl">'+b.name+' stakes</div><div class="apt-card">'+pvpStakeTheirs+'</div><div class="apt-rar">'+theirs.rarity+'</div></div>';
-  renderApprove();
-  document.getElementById('approve-overlay').classList.add('show');
+  // Integrity fix (owner-mandated): a real card must never be won or lost against a bot. This
+  // screen's rival picker only ever draws from BOT_OPPONENTS -- there is no real-opponent source
+  // wired to it -- so every stake proposed here would be risked against a fake rival. Real online
+  // PvP shipped this session (see v-online / pvpQueueTick), but real card-stake escrow between two
+  // matched accounts was never built server-side. Block here, not there: remove this gate (and
+  // retire the copy pointing at Online below) once that escrow exists.
+  toast('Card stakes need a real opponent — practice bots can\'t be wagered against. Real Staked PvP opens once matches run through Online, not before.', false);
 }
 function renderApprove(){
   const b=BOT_OPPONENTS.find(x=>x.id===pvpRival); const rn=b?b.name:'Rival';
@@ -13817,17 +13806,14 @@ function acceptTrade(i){
   if(o.kind==='unit'){ if(typeof toast==='function') toast('🤝 Reserved: '+o.want+' → '+o.give+' with '+o.partner+' — applies to your Reincarnation roster when online play is live.', true); tradeOffers.splice(i,1); buildTrade(); return; }
   if((ownedCopies[o.want]||0)<=0){ if(typeof toast==='function') toast('You no longer own '+o.wantName+'.', false); buildTrade(); return; }
   if(isCardLocked(o.want)){ if(typeof toast==='function') toast('🔒 '+o.wantName+' is locked — unlock it in the Vault to trade it away.', false); buildTrade(); return; }
-  ownedCopies[o.want]=ownedCopies[o.want]-1; if(ownedCopies[o.want]<=0) delete ownedCopies[o.want];
-  ownedCopies[o.give]=(ownedCopies[o.give]||0)+1;
-  // Real bug (7/28/26): transferToMe() -- a complete, already-written function that resets a card's
-  // owner-only K/D (ok/od) and appends a real provenance chain entry -- was never called anywhere in
-  // the file. The Growth Codex explicitly promises this reset happens "when the card changes hands";
-  // Trade was the one ownership-changing path that skipped it, so a re-acquired card could silently
-  // carry a stale ok/od from a previous owner, and its Card DNA provenance would fall back to a
-  // generic "Held in vault" reason instead of ever saying "Traded."
-  { var _tc=(typeof COLLECTION!=='undefined'?COLLECTION:[]).find(function(x){ return (x.uid||x.name)===o.give; }); if(_tc && typeof transferToMe==='function') transferToMe(_tc, 'Traded'); }
-  if(typeof saveState==='function') saveState(); if(typeof buildVault==='function') buildVault();
-  if(typeof toast==='function') toast('🤝 Traded '+o.wantName+' → '+o.give+' with '+o.partner+'.', true);
+  // Integrity fix (owner-mandated): a player must never receive a card that wasn't truly given up
+  // by another player. o.partner here is genTradeOffers()'s simulated partner, same as the unit-
+  // kind branch above already (correctly) treats as not-real -- this card-kind branch was the one
+  // exception still mutating ownedCopies and calling transferToMe() for a partner that doesn't
+  // exist. Matching the unit branch's own pattern now: reserve, don't execute. Re-wire
+  // transferToMe(_tc,'Traded') here once trade offers come from a real matched account server-side
+  // -- it's still the right call for that card, it just can't fire against a simulated one.
+  if(typeof toast==='function') toast('🤝 Reserved: '+o.wantName+' → '+o.give+' with '+o.partner+' — real trading opens when online play is live.', true);
   tradeOffers.splice(i,1); buildTrade();
 }
 function buildTrade(){
