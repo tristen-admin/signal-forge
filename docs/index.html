@@ -2712,9 +2712,9 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="hub-hero">
         <div class="hero-left">
           <div class="hero-welcome">
-            <div class="hw-eyebrow">Welcome back, Summoner</div>
+            <div class="hw-eyebrow">Welcome back, Conjurer</div>
             <h1 id="hub-headline">Your vault holds 41 cards. Apex records run deep.</h1>
-            <p>Every card you summon carries its record into the colosseum forever — each win etched deeper into its legend, each loss a scar that never fades. Assemble your roster, then step into the arena and let them fight for glory.</p>
+            <p>You are the Conjurer — an arena prize-fighter calling spirits of legend into the ring, each one blessed by Amagera's light, tempered by Kitanoo's storm, or touched by Omitsuki's shadow. Every card you summon carries its record into the colosseum forever: each win etched deeper into legend, each loss a scar that never fades. Assemble your roster, then step into the arena and let them fight for glory.</p>
           </div>
           <div class="stat-row" id="hub-stats"></div>
           <div class="quest-row" id="hub-quests"></div>
@@ -2868,7 +2868,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="profile-hero">
         <div class="up-avatar-lg">🜲</div>
         <div>
-          <div class="sh-eyebrow">Summoner Profile</div>
+          <div class="sh-eyebrow">Conjurer Profile</div>
           <h1>Keanu · @keanu</h1>
           <div class="profile-sub">◈ Trusted — Tier IV · 22 cards vaulted · 5,000 Zenni</div>
         </div>
@@ -9289,7 +9289,7 @@ const COSMETICS = {
     {id:'void',name:'Void Spiral',price:2000,crest:'🌀',tint:'#B15CF0'},
   ]},
   emblem:{label:'Duelist Emblems',icon:'🛡',desc:'Your avatar sigil in the sidebar and profile.',items:[
-    {id:'crest',name:'Summoner Sigil',price:0,glyph:'🜲'},
+    {id:'crest',name:'Conjurer Sigil',price:0,glyph:'🜲'},
     {id:'diamond',name:'Zenni Diamond',price:0,glyph:'◈'},
     {id:'duelist',name:'Duelist',price:0,glyph:'⚔'},
     {id:'fang',name:'Fang',price:0,glyph:'🐺'},
@@ -9301,7 +9301,7 @@ const COSMETICS = {
     {id:'apexbolt',name:'Genesis Bolt',price:1500,glyph:'⚡'},
   ]},
   title:{label:'Duelist Titles',icon:'✦',desc:'A rank shown beneath your handle.',items:[
-    {id:'integrator',name:'Summoner',price:0},
+    {id:'integrator',name:'Conjurer',price:0},
     {id:'baron',name:'Zenni Baron',price:700},
     {id:'chainbreaker',name:'Chain-Breaker',price:1000},
     {id:'voidt',name:'Void-Touched',price:1200},
@@ -12287,7 +12287,7 @@ function toggleEnergySpell(id){
 
 // ══ PROFILE / EMBLEMS ══
 const EMBLEMS = [
-  {glyph:'🜲', name:'Summoner Sigil', owned:true},
+  {glyph:'🜲', name:'Conjurer Sigil', owned:true},
   {glyph:'◈', name:'Signal Diamond', owned:true},
   {glyph:'⚔', name:'Duelist', owned:true},
   {glyph:'🐺', name:'Fang', owned:true},
@@ -12326,7 +12326,7 @@ function buildProfileTitles(){
   const _t=COSMETICS.title.items.find(i=>i.id===equipped.title);
   const _sub=document.querySelector('#v-profile .profile-sub');
   const _essTitle=(typeof essenceCosmeticOwned==='function' && essenceCosmeticOwned('ec-title'))?' · ✦ Ascendant':'';
-  if(_sub) _sub.textContent='◈ '+(_t?_t.name:'Summoner')+_essTitle+' · '+COLLECTION.filter(c=>(ownedCopies[c.uid||c.name]||0)>0).length+' cards vaulted · '+fmtPts(signalPoints)+' Zenni';
+  if(_sub) _sub.textContent='◈ '+(_t?_t.name:'Conjurer')+_essTitle+' · '+COLLECTION.filter(c=>(ownedCopies[c.uid||c.name]||0)>0).length+' cards vaulted · '+fmtPts(signalPoints)+' Zenni';
   const _crestEl=document.querySelector('#v-profile .profile-hero');
   if(_crestEl){ var _oldCrest=_crestEl.querySelector('.ess-crest'); if(_oldCrest) _oldCrest.remove();
     if(typeof essenceCosmeticOwned==='function' && essenceCosmeticOwned('ec-emblem')){ var _cr=document.createElement('div'); _cr.className='ess-crest'; _cr.title='Essence Crest Emblem'; _cr.textContent='💎'; _crestEl.appendChild(_cr); } }
