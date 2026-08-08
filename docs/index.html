@@ -3805,7 +3805,7 @@ const DECK_POOL = [
   {name:"Courtroom Colossus",pow:15,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Colossus: +3, and +5 more from the 3rd commit onward — a late-game bomb."},
   {name:"Kessuae, Tide of Ruin",pow:15,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: while you are behind, this destroys the active location (nullifies it). +5 if both support slots are full."},
   {name:"Elowen Dawnspear",pow:13,kills:0,deaths:0,rarity:'rare',timing:"on",abil:"Purity: +5 while this card is Pristine (0 deaths, 1+ kill). If this card has over 5 deaths, it gains +2 instead."},
-  {name:"Kravyn the Collector",pow:18,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +3. At 10+ career kills this unit gains Kill Escalation: +5. At 25+ career kills this unit gains Kill Escalation +7 instead. When this unit kills its enemy unit, you may choose to return this unit to the hand instead of placing it in the winners circle."},
+  {name:"Kravyn the Collector",pow:18,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +3. At 10+ career kills, Kill Escalation: +7 more (total +10). At 25+ career kills, +4 more still (total +14). When this unit kills its enemy unit, you may choose to return this unit to the hand instead of placing it in the winners circle."},
   {name:"Fifth Frequency Stormcaller",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Elemental Flurry: +3, +4 more with 5+ cards in hand, +7 more with 4+ cards in your banish zone."},
   {name:"Ghorruk \"Gnarly\" Judarr",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: +1 power for every 2 cards remaining in your deck. Death Remnant +8"},
   {name:"Ilma the Patient",pow:13,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Late Bloomer: +5 from the 3rd commit onward."},
@@ -3864,7 +3864,7 @@ const DECK_POOL = [
   {name:'Arch-Grim Korrin',pow:17,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: look at the top 2 cards of your deck, place 1 in the support zone and 1 as a Death Remnant. If opponent's card has fewer career kills than this card, +6 power."},
   {name:'Cletus Gwyndull',pow:10,kills:0,deaths:0,rarity:'rare',timing:'pre',abil:'Pre-commit: lock the active condition this turn — opponent cannot shift it.'},
   {name:'Val Kreigh',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if this is the 1st duel of the match, +6 power. If it is the second duel of the match or later, +2 instead.'},
-  {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'apex',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
+  {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'apex',timing:'resolution',abil:'Kill Escalation: gains +4 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
   // Warpath combo pieces (7/12/26) — makes the empty-Winners-Circle Deck Master mechanic (Tange/Kravyn)
   // a sustainable loop instead of a one-time front-loaded bonus. Not in WARPATH_PRESET by default —
   // available in the Vault/deck builder for anyone building around the combo.
@@ -3905,7 +3905,7 @@ const DECK_POOL = [
   {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.'},
   {name:'Muster-Sergeant Bryn',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), give your Fighter +1 for every card in your Winners Circle.'},
   {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Last Stand: if this card loses by 3 power or less, the duel ties instead — no death recorded.'},
-  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: +2 power at 5+ career kills, +2 more at 15+ career kills.'},
+  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: +3 power at 5+ career kills, +3 more at 15+ career kills.'},
   {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the banner lifts the whole line.'},
   {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2.'},
   {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 per 1-cost ally. Weak alone, unbroken together.'},
@@ -3952,7 +3952,7 @@ const DECK_POOL = [
   {name:'Gravecaller Voss',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish a card from your hand to raise a Death Remnant worth +5 — no death required. Called as a support: lingers as a +5 Remnant.'},
   {name:'Widow of the Vigil',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if you have a Remnant, draw 2; otherwise +3 power.'},
   // ── THE WARPATH (early champ, Winners-Circle recycle, Kill Escalation) ──
-  {name:'Bloodwake Duelist',pow:11,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: on commit, +2 power for every kill you have earned this match.'},
+  {name:'Bloodwake Duelist',pow:11,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: on commit, +3 power for every kill you have earned this match.'},
   {name:'Warpath Vanguard',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power on the 1st or 2nd duel of the match.'},
   {name:'Skullchain Reaver',pow:18,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power per kill earned this match; when it wins, it returns to your hand instead of the Winners Circle.'},
   {name:'Trophy-Hunter Kessa',pow:17,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every card in BOTH players Winners Circle.'},
@@ -3978,7 +3978,7 @@ const DECK_POOL = [
 const SET2_POOL = [
   {name:"Vharos, the Iron Crown",pow:20,kills:0,deaths:0,rarity:"apex",timing:"on",abil:"Record Guard. On commit: +5 against a Pristine opponent (0 deaths, 1+ kill)."},
   {name:"Nyx, Devourer of Legends",pow:18,kills:0,deaths:0,rarity:"apex",timing:"on",abil:"On commit: +4; +4 more if you lost your last duel."},
-  {name:"Aurelion Prime",pow:21,kills:0,deaths:0,rarity:"apex",timing:"on",abil:"Kill Escalation: +6 at 30+ career kills, +3 at 15+."},
+  {name:"Aurelion Prime",pow:21,kills:0,deaths:0,rarity:"apex",timing:"on",abil:"Kill Escalation: +8 at 30+ career kills, +4 at 15+."},
   {name:"The Hollow King",pow:16,kills:0,deaths:0,rarity:"apex",timing:"on",abil:"Bloodrage: +7 while you are behind in the match."},
   {name:"Sirefax the Warden",pow:16,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Record Guard. On commit: +3 vs a Pristine opponent."},
   {name:"Mordezh, Blood Prophet",pow:15,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Bloodrage: +5 while behind; +2 if you lost last."},
@@ -3986,7 +3986,7 @@ const SET2_POOL = [
   {name:"Torvald Ninefingers",pow:15,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Last Stand. On commit: +3 with 2 or fewer cards in hand."},
   {name:"Kessa Brightblade",pow:13,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"On commit: +4 vs a Pristine opponent."},
   {name:"Ruven Ashwalker",pow:12,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Bloodrage: +5 while behind in the match."},
-  {name:"Dragan Korr",pow:14,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Kill Escalation: +4 at 18+ career kills."},
+  {name:"Dragan Korr",pow:14,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Kill Escalation: +6 at 18+ career kills."},
   {name:"Sythe Marrow",pow:10,kills:0,deaths:0,rarity:"rare",timing:"resolution",abil:"Death Remnant: +5 to your cards until an enemy is killed."},
   {name:"Wren of the Vigil",pow:12,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Record Guard — once per match a loss becomes a tie, no death recorded."},
   {name:"Halbrecht the Sure",pow:13,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"On commit: +3; +3 more if the opponent has fewer career kills."},
@@ -4495,8 +4495,35 @@ const REMNANT_POW = {'Arch-Grim Korrin':8,'Summoned Skull Soldiers':7,'Bone Choi
 const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5,'Uso Oso':2};   // PROACTIVE: raise a Death Remnant on commit — no death needed. Uso Oso added 7/24/26, Stage 1 of "The Bulwark of Bones"
 const RALLY = {'Bannerlord Cassian':5,'Ironsworn Vanguard':3,'Warden of the Wall':3,'Oathkeeper Sena':3,'Shieldwall Recruit':3};   // MUSTER: +N power per 1-COST ally (1-cost called supports this duel + 1-cost cards in Winners Circle). 7/29/26: Oathbound Shield + Sworn Duelist reworked off Muster (see their abil text) -- removed here so the RALLY table stops silently granting them a bonus their printed text no longer describes.
 const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk "Gnarly" Judarr','Sister Mire','Kiba','Grave-Fed Ghoul','Bone Choirmaster','Gravecaller Voss',"Uso Oso's Skeletal Summons"];
+// BOUNCE_ON_WIN (8/8/26, owner: "make bouncing cards back to hand after playing or winning a more
+// universal mechanic that everyone can toolbox into") -- one shared, data-driven table read by
+// BOTH the player win-branch and the bot win-wrapper (resolve()'s monkeypatch near EOF), replacing
+// what used to be a hardcoded pc.name==='Skullchain Reaver'||(pc.name==='Bronzed Beast'&&behind)
+// chain with zero bot-side equivalent at all -- a real, silent, pre-existing gap: the bot's own
+// Skullchain Reaver/Bronzed Beast always banked to its Winners Circle, never bounced. A new card
+// opts in with one table row, no resolve()-touching code required.
+// if: true = unconditional. A {v,op,n|v2} object = conditional, evaluated via the same evalRuleCond()
+// CARD_RULES already uses -- v2 (no literal n/s) compares two ctx fields, which is what "only while
+// behind" needs (Bronzed Beast: your own losses >= your own wins, mirrored for whichever side is
+// asking via bounceOnWinCheck's isOpp swap).
+const BOUNCE_ON_WIN = {
+  'Skullchain Reaver':               {if:true, log:'💀 Skullchain Reaver returns to your hand instead of the Winners Circle'},
+  'The Bronzed Beast, Hanse Waltz':  {if:{v:'player_losses', op:'>=', v2:'player_wins'}, log:'🌑 Bronzed Beast (behind) — Blood Moon returns to your hand instead of the Winners Circle'},
+};
+function bounceOnWinCheck(name, isOpp){
+  var rule = BOUNCE_ON_WIN[name]; if(!rule) return false;
+  if(rule.if===true) return true;
+  var ctx = isOpp ? {player_wins:playerScore[1], player_losses:playerScore[0]} : {player_wins:playerScore[0], player_losses:playerScore[1]};
+  return typeof evalRuleCond==='function' && evalRuleCond(rule.if, ctx);
+}
 let lastResult = null;
 let matchCommits = 0;
+// Kill Escalation infrastructure (8/8/26): Tange Sazen/Bloodwake Duelist's own printed text
+// ("+N power per kill earned THIS MATCH") had zero backing anywhere -- pure flavor text. The
+// keyword's own tooltip definition (KW_DESC['Kill Escalation']) is explicitly this-match-scoped,
+// unlike Kravyn/Sworn Duelist's career-kill-threshold CARD_RULES, which is why this is a new
+// match-only counter rather than reusing kdOf()'s permanent per-card record.
+let matchKillsThisMatch = 0, oppMatchKillsThisMatch = 0;
 let skullchainKills = 0;
 let ragwingWins = 0;
 let glacialGuardUsed = false;
@@ -4575,7 +4602,7 @@ const OPP_CARDS = [
   {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.'},
   {name:'Muster-Sergeant Bryn',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), give your Fighter +1 for every card in your Winners Circle.'},
   {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Last Stand: if this card loses by 3 power or less, the duel ties instead — no death recorded.'},
-  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: +2 power at 5+ career kills, +2 more at 15+ career kills.'},
+  {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: +3 power at 5+ career kills, +3 more at 15+ career kills.'},
   {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 per 1-cost ally. Weak alone, unbroken together.'},
   {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the banner lifts the whole line.'},
   {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2.'},
@@ -4595,13 +4622,13 @@ const OPP_CARDS = [
   {name:'Silkbound Sentinel',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Support: draw a card; your Fighter +2.'},
   {name:"Widow's Patience",pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +5 power if your hand is full (6 cards).'},
   {name:"Web-Weaver's Return",pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: shuffle your banish pile back into your deck, then draw a card — the web is rewoven.'},
-  {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'apex',timing:'resolution',abil:'Kill Escalation: gains +3 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
+  {name:'Tange Sazen',pow:17,kills:0,deaths:0,rarity:'apex',timing:'resolution',abil:'Kill Escalation: gains +4 power per kill Tange has earned this match. Once Tange has a kill this match and your opponent is one win from taking the match, Tange gains Banish Surge — sacrifice him in the Instant Window to grant your next committed card his full power.'},
   {name:'Trophy-Hunter Kessa',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every card in BOTH players Winners Circle.'},
   {name:'Skullchain Reaver',pow:15,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power per kill earned this match; when it wins, it returns to your hand instead of the Winners Circle.'},
   {name:'Warpath Vanguard',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power on the 1st or 2nd duel of the match.'},
   {name:'The Undefeated',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every duel you have already won this match.'},
   {name:'Val Kreigh',pow:15,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if this is the 1st duel of the match, +6 power.'},
-  {name:'Bloodwake Duelist',pow:11,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: on commit, +2 power for every kill you have earned this match.'},
+  {name:'Bloodwake Duelist',pow:11,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: on commit, +3 power for every kill you have earned this match.'},
   {name:'First-Blood Squire',pow:12,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +4 power on the 1st duel of the match only.'},
   {name:"Kravyn's Protege",pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +3 power once this card has earned 6 or more career kills.'},
   {name:'King Joris',pow:12,kills:0,deaths:0,rarity:'common',timing:'on',abil:"Rightful Claim: on commit, +1 power for every death on the opponent's record — the betrayed king judges every usurper's sins."},
@@ -6194,32 +6221,22 @@ const CALLED = {
   "Young Darwin, Predetermined Dictator":           {text:"your Fighter +3", add:3},
   "Courtroom Colossus":            {text:"your Fighter +3", add:3},
   "Kessuae, Tide of Ruin":         {text:"your Fighter +3", add:3},
-  "Kotei":                         {text:"your Fighter +2; if your fighter wins the battle with this unit supporting, gain +2 charge and instead of going to the winners circle the card returns to the player's hand.", add:2},
-  "Conduit of Chaos, Kleydson":                      {text:"your Fighter +3 · gain 1 Charge", add:3, chargeGain:1},
   "Lagertha Waltz":                {text:"your Fighter +3, +5 more if fielded alongside its Waltz Twins partner", add:3, twinBuff:5},
   "Hanse Waltz":                   {text:"your Fighter +5, +5 more if fielded alongside its Waltz Twins partner", add:5, twinBuff:5},
-  "Kiana":                         {text:"banish a card from your hand; your Fighter +4", banishOwn:1, add:4},
   "Heir of Kaiga":                 {text:"your Fighter +5 · draw 1", add:5, draw:1},
   "Melanie":                       {text:"your Fighter +5 · draw 1", add:5, draw:1},
-  "Darwin":                        {text:"your Fighter +2, and play the top card of your deck into your open support circle", add:2, conjureTopToSupport:true},
-  "La \"La\" Ballora, the Broodqueen":      {text:"your Fighter +3", add:3},
   "Envoy of Tyrants, Ella Ballora":                  {text:"your Fighter +3", add:3},
   "Valcarion":            {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
   "Zerith Var":                    {text:"your Fighter +2, draw 2 cards and banish 1", add:2, draw:2, banishOwn:1},
   "Ruffius Rufeldro":              {text:"your Fighter +3", add:3},
-  "Ahdorah Khaan, Determined Soul":                         {text:"your Fighter +2; destroy and nullify the opposing support in the mirrored slot", add:2, snipeSupport:true},
   "Ahdorah Khaan, Circle Unbroken":                         {text:"your Fighter +3", add:3},
   "Kynaht, Ashen Return":                                   {text:"your Fighter +3", add:3},
   "Val Kreigh":                    {text:"your Fighter +3", add:3},
   "King Joris":                    {text:"your Fighter +4 · draw 1", add:4, draw:1},
   "Malia":                         {text:"your Fighter +4", add:4},
   "Moro":                          {text:"return 1 banished card to hand, or banish 1 card from the top of your deck to give +4 to your conjured unit.", recurPlain:1, deckBanishIfEmpty:1, deckBanishAdd:4},
-  "Ourevos, the Golden Dragon":    {text:"your Fighter +5, fill the other support slot with a copy of this card, then draw a card", add:5, draw:1, duplicateSelfToSupport:true},
-  "Tange Sazen":                   {text:"your Fighter +3, and your conjured unit returns to your hand instead of going to the winners circle", add:3},
   "Kiba":                          {text:"your Fighter +5", add:5},
-  "The Bronzed Beast, Hanse Waltz":   {text:"your Fighter +3, +5 more if fielded alongside its Waltz Twins partner", add:3, twinBuff:5},
   "Lagertha Waltz, Wrathful Transformation":{text:"your Fighter +3, +5 more if fielded alongside its Waltz Twins partner", add:3, twinBuff:5},
-  "Anorith Keeling":               {text:"return this unit from the support circle to your deck, banish 1 card from your hand, draw 2 and gain 1 charge", banishOwn:1, draw:2, chargeGain:1, returnSelfToDeck:true},
   // ── Engines — generic utility kept (the neutral engine every deck can splash) ──
   "Conduit Adept":                 {text:"gain 2 Charge + draw 1", chargeGain:2, draw:1},
   // 7/24/26: balance audit round 2 §5 -- Broodswarm/Ahdor's Pride charge economy, Called half.
@@ -6233,23 +6250,17 @@ const CALLED = {
   "Faye Quicksilver":              {text:"your Fighter +3", add:3},
   "The Regenerating Horror":       {text:"return 1 banished card to hand, +2 power", recurBuff:1},
   "Ilma the Patient":              {text:"your Fighter +4", add:4},
-  "Broodmother":                   {text:"your Fighter +3, then draw 1", add:3, draw:1},
   "Old Garrick":                   {text:"your Fighter +4", add:4},
-  "Keawe Kel'rua":                 {text:"your Fighter +3", add:3},
-  "Black Wings, Ossian Drell":                  {text:"your Fighter +1 for every card in your banish zone", addPerBanish:1},
-  "Corvus":                        {text:"your Fighter +4, scry 1", add:4, scry:1},
   "Wren":                          {text:"return a banished card to your hand, your Fighter +3", recurPlain:1, add:3},
   "Rook":                          {text:"your Fighter +2", add:2},
   "Falk":                          {text:"your Fighter +3", add:3},
   "Sable":                         {text:"banish a card from your hand, your Fighter +5", banishOwn:1, add:5},
-  "Rhaess Korvain":                {text:"banish 1 from your hand; your Fighter +3", banishOwn:1, add:3},
   "Grave-Tithe Acolyte":           {text:"banish 1 from your hand; your Fighter +3", banishOwn:1, add:3},
   "Ashen Reclaimer":               {text:"return a banished card to your hand; your Fighter +2", recurPlain:1, add:2},
   "Cinder-Marked Hound":           {text:"your Fighter +3", add:3},
   "The Black Ledger":              {text:"draw 1; your Fighter +2", draw:1, add:2},
   "Pyre-Keeper Vayle":             {text:"your Fighter +4", add:4},
   "Hollow Mendicant":              {text:"banish a card from your hand; your Fighter +4", banishOwn:1, add:4},
-  "Arch-Grim Korrin":              {text:"your Fighter +4; if you hold a Remnant, draw 1", add:4, drawIfRemnant:true},
   "Bone Choirmaster":              {text:"your Fighter +3 · draw 1", add:3, draw:1},
   "Grave-Fed Ghoul":               {text:"your Fighter +3", add:3},
   "Silk-Spinner Drone":            {text:"draw a card", draw:1},
@@ -6280,12 +6291,8 @@ const CALLED = {
   "Tosa Envoy":                    {text:"your Fighter +3", add:3},
   "Bram the Bulwark":              {text:"your Fighter +3", add:3},
   "Cletus Gwyndull":                     {text:"your Fighter +3", add:3},
-  "Chieftain Reyva Vosh":          {text:"draw 1 card, and double this unit's Shield value", draw:1, doubleShield:true},
-  "Kravyn the Collector":          {text:"draw 1; your Fighter +2 for every time it's returned to hand via a card effect this match", draw:1},
-  "Sister Mire, Wailing Nightmare": {text:"draw 2, banish 1 from hand; your Fighter +1 per card in your hand", draw:2, banishOwn:1, addPerHand:1},
   "Forgemask":                     {text:"your Fighter +3", add:3},
   "Fifth Frequency Stormcaller":             {text:"your Fighter +3", add:3},
-  "Ghorruk \"Gnarly\" Judarr":            {text:"return 1 banished card to the bottom of the deck, scry 1, then +2 power", recurBuff:1, recurDest:'deck', scry:1},
   "Elowen Dawnspear":              {text:"your Fighter +3", add:3},
   "Bixie Bee":                     {text:"your Fighter +3", add:3},
   "Uso Oso":                       {text:"your Fighter +3; the lowest power card in your hand is automatically played as a death remnant.", add:3, autoRemnantLowest:true},
@@ -6295,6 +6302,46 @@ const CALLED = {
   // pull a card back OUT of the Winners Circle once it's there.
   "Unbanked Victory":              {text:"your next win returns to your hand instead of banking to the Winners Circle", unbankNextWin:true},
   "Reclaim the Colors":            {text:"return 1 card from your Winners Circle to the bottom of your deck", reclaimWC:1},
+  // 8/8/26, owner directive: Deck Masters shouldn't ALSO be great supports -- stacks a third bonus
+  // vector on top of the passive/activated split (see feedback_deckmaster_one_bonus_mechanism.md's
+  // "only one" rule, extended here to include support-mode). All 20 Deck Masters that had a CALLED
+  // entry had it stripped above; 2 of those retired effects were relocated to the only 2 UR-rarity,
+  // non-Deck-Master cards that were completely support-less (Ridgeline Warden, Trilogy Ward) —
+  // text/numbers carried over unchanged, not rewritten.
+  "Ridgeline Warden":              {text:"your Fighter +4, scry 1", add:4, scry:1},   // ex-Corvus
+  "Trilogy Ward":                  {text:"your Fighter +3", add:3},   // ex-Keawe Kel'rua
+  // Gravecaller Voss deliberately has NO entry here -- its "lingers as a +5 Remnant" support text
+  // was already fully live via LINGERING_SUPPORTS+REMNANT_POW (checked at post-duel cleanup, a
+  // second, separate support-effect mechanism this table's own audit script didn't know to look at).
+  // A CALLED entry here would have double-raised the Remnant -- caught and reverted same session.
+  // Remaining gap sweep (8/8/26) -- every other card in the live 152-card pool that had no support
+  // effect at all. Owner: "generic +3's are fine." Excludes 4 Instant-timing cards (Tannis, Fleeting
+  // Cipher, Warden's Feint, Ashfall Tithe) -- callSupportIdx() hard-blocks timing==='instant' cards
+  // from ever entering a support slot, so a CALLED entry for them would be permanently unreachable.
+  "Pit Thrall":                    {text:"your Fighter +3", add:3},
+  "Ridgeline Scout":               {text:"your Fighter +3", add:3},
+  "Ahdorah Khaan, Squad 19 Recruit": {text:"your Fighter +3", add:3},
+  "Squad 16 Veteran":              {text:"your Fighter +3", add:3},
+  "Squad 19 Quartermaster":        {text:"your Fighter +3", add:3},
+  "Cadet Corps Recruit":           {text:"your Fighter +3", add:3},
+  "Squad 19 Signalman":            {text:"your Fighter +3", add:3},
+  "Fenrik Vench":                  {text:"your Fighter +3", add:3},
+  "Lumen Acolyte":                 {text:"your Fighter +3", add:3},
+  "Oathlit Vanguard":              {text:"your Fighter +3", add:3},
+  "Fledgling Broodmother":         {text:"your Fighter +3", add:3},
+  "Hanse, Rogue Fangs":            {text:"your Fighter +3", add:3},
+  "Ironsworn Vanguard":            {text:"your Fighter +3", add:3},
+  "Warden of the Wall":            {text:"your Fighter +3", add:3},
+  "Oathbound Shield":              {text:"your Fighter +3", add:3},
+  "Sworn Duelist":                 {text:"your Fighter +3", add:3},
+  "Shieldwall Recruit":            {text:"your Fighter +3", add:3},
+  "Skittering Drone":              {text:"your Fighter +3", add:3},
+  "Hatchling Tide":                {text:"your Fighter +3", add:3},
+  "Venombrood Queen":              {text:"your Fighter +3", add:3},
+  "Wingblade Scout":               {text:"your Fighter +3", add:3},
+  "Squad-Captain Vesk":            {text:"your Fighter +3", add:3},
+  "Grave-Warden":                  {text:"your Fighter +3", add:3},
+  "Silk-Fed Hatchling":            {text:"your Fighter +3", add:3},
 };
 const TRIGGERS = {   // fire when revealed off the top of your deck on a LOST duel (comeback aid)
   "Faye Quicksilver":{draw:1, text:"draw a card"},
@@ -8885,7 +8932,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
   const abilityLocked = cond.id === 'abilitylock';
   if(!abilityLocked){
     // Kotei: +3 if opponent is 0-death OR you lost your last duel; whole effect repeats if Keawe already won a duel this match
-    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),banish_len:banishPile.length,remnant_count:(typeof deathRemnants!=='undefined'?deathRemnants.length:0),deck_len:(typeof drawPile!=='undefined'?drawPile.length:0),both_wc:(winnersCircle.length+((typeof oppWonBot!=='undefined'&&oppWonBot&&oppWonBot.size)?oppWonBot.size:0)),rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0),wc_names:winnersCircle.map(function(c){return c.name;}),hand_banished:handBanishedThisTurn};
+    var _ctx={opp_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),pc_kills_match:matchKillsThisMatch,opp_pow:oc.pow,pc_pow:pc.pow,last_result:lastResult,match_commits:matchCommits,player_wins:playerScore[0],player_losses:playerScore[1],hand_len:hand.length,wc_len:winnersCircle.length,skullchain:skullchainKills,ragwing:ragwingWins,chaos:(cond.tag==='chaos'),banish_len:banishPile.length,remnant_count:(typeof deathRemnants!=='undefined'?deathRemnants.length:0),deck_len:(typeof drawPile!=='undefined'?drawPile.length:0),both_wc:(winnersCircle.length+((typeof oppWonBot!=='undefined'&&oppWonBot&&oppWonBot.size)?oppWonBot.size:0)),rear_count:(typeof rearGuards!=='undefined'?rearGuards.filter(Boolean).length:0),wc_names:winnersCircle.map(function(c){return c.name;}),hand_banished:handBanishedThisTurn};
     if(pc.name==='Veronica'){
       var _oa=oc.abil||'';
       if(!_oa||_oa.indexOf('No ability')===0){ abilLog.push('🔄 Veronica: opponent has no ability — no effect'); }
@@ -8896,7 +8943,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     if(typeof applyDeckMasterResolveEffects==='function'){ RS._inRules=true; var _dmr=applyDeckMasterResolveEffects(pc,playerPow,oppPow,abilLog,RS); playerPow=_dmr[0]; oppPow=_dmr[1]; RS._inRules=false; RS._resync(); }
     /* BOT fighter fires its OWN on-commit ability — bot-centric ctx, pow args swapped so its +power lands on the bot */
     if(oc && oc.name && (typeof CARD_RULES!=='undefined') && CARD_RULES[oc.name] && CARD_RULES[oc.name].length){
-      var _octx0={opp_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),opp_pow:pc.pow,pc_pow:oc.pow,last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)),match_commits:matchCommits,player_wins:playerScore[1],player_losses:playerScore[0],hand_len:(typeof oppHandBot!=='undefined'?oppHandBot.length:0),wc_len:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0),skullchain:0,ragwing:0,chaos:(cond.tag==='chaos'),banish_len:(typeof oppBanishBot!=='undefined'?oppBanishBot.length:0),remnant_count:(typeof oppDeathRemnants!=='undefined'?oppDeathRemnants.length:0),deck_len:(typeof oppDeckBot!=='undefined'?oppDeckBot.length:0),both_wc:(((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+winnersCircle.length),rear_count:((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0),wc_names:((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot):[]),hand_banished:oppHandBanishedThisTurn};
+      var _octx0={opp_deaths:(typeof kdOf==='function'?kdOf(pc).d:pc.deaths),opp_kills:(typeof kdOf==='function'?kdOf(pc).k:pc.kills),pc_kills:(typeof kdOf==='function'?kdOf(oc).k:oc.kills),pc_deaths:(typeof kdOf==='function'?kdOf(oc).d:oc.deaths),pc_kills_match:oppMatchKillsThisMatch,opp_pow:pc.pow,pc_pow:oc.pow,last_result:(lastResult==='win'?'lose':(lastResult==='lose'?'win':lastResult)),match_commits:matchCommits,player_wins:playerScore[1],player_losses:playerScore[0],hand_len:(typeof oppHandBot!=='undefined'?oppHandBot.length:0),wc_len:((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0),skullchain:0,ragwing:0,chaos:(cond.tag==='chaos'),banish_len:(typeof oppBanishBot!=='undefined'?oppBanishBot.length:0),remnant_count:(typeof oppDeathRemnants!=='undefined'?oppDeathRemnants.length:0),deck_len:(typeof oppDeckBot!=='undefined'?oppDeckBot.length:0),both_wc:(((typeof oppWonBot!=='undefined'&&oppWonBot)?oppWonBot.size:0)+winnersCircle.length),rear_count:((typeof pendingOppRears!=='undefined'&&pendingOppRears)?pendingOppRears.filter(Boolean).length:0),wc_names:((typeof oppWonBot!=='undefined'&&oppWonBot)?Array.from(oppWonBot):[]),hand_banished:oppHandBanishedThisTurn};
       RS._inRules=true; var _ov0=applyCardRules(oc.name,_octx0,oppPow,playerPow,abilLog,RS,true); oppPow=_ov0[0]; playerPow=_ov0[1]; RS._inRules=false; RS._resync();
     }
     if(typeof applyBotDeckMasterResolveEffects==='function'){ RS._inRules=true; var _bdm0=applyBotDeckMasterResolveEffects(oc,playerPow,oppPow,abilLog,RS); playerPow=_bdm0[0]; oppPow=_bdm0[1]; RS._inRules=false; RS._resync(); }
@@ -9148,7 +9195,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     // for those cards (the small abilLog line underneath it was always correct).
     var _destLabel = 'to Winners Circle';
     pendingHandReturn = null;
-    if(pc.name==='Skullchain Reaver' || (pc.name==='The Bronzed Beast, Hanse Waltz' && playerScore[1]>=playerScore[0])){ hand.push({...pc}); if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1; if(typeof buildHand==='function') buildHand(); abilLog.push((pc.name==='Skullchain Reaver'?'💀 Skullchain Reaver':'🌑 Bronzed Beast (behind) — Blood Moon')+' returns to your hand instead of the Winners Circle'); _destLabel='to your hand'; }
+    if(bounceOnWinCheck(pc.name, false)){ hand.push({...pc}); if(typeof handReturnCount!=='undefined') handReturnCount[pc.name]=(handReturnCount[pc.name]||0)+1; if(typeof buildHand==='function') buildHand(); abilLog.push(BOUNCE_ON_WIN[pc.name].log); _destLabel='to your hand'; }
     else if(unbankNextWin){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); unbankNextWin=false; abilLog.push('🏳 Unbanked Victory — '+pc.name+' returns to your hand instead of banking to the Winners Circle'); _destLabel='to your hand'; }
     else if(typeof dmUnitsReturnToHandThisDuel!=='undefined' && dmUnitsReturnToHandThisDuel){ hand.push({...pc}); if(typeof buildHand==='function') buildHand(); abilLog.push('💰 Kravyn — '+pc.name+' returns to your hand instead of the Winners Circle (Deck Master ability)'); _destLabel='to your hand'; }
     else {
@@ -9164,6 +9211,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     if(!lobbyMode){ recordDuel(pc,'win'); if(deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.k=(deckMasterRecord.k||0)+1; lsSet('sf_dm_record', deckMasterRecord); } }
     signalPoints += 20;
     if(!lobbyMode && typeof grantPlayerXP==='function') grantPlayerXP(15);
+    matchKillsThisMatch++;
     if(typeof bumpQuestProgress==='function') bumpQuestProgress('win2');
     if(pc.name === 'Signal Diviner'){ divinerBonusNext=2; abilLog.push('Signal Diviner: +2 max Charge next turn'); }
     if(pc.name === 'Tange Sazen') skullchainKills++;
@@ -9179,6 +9227,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     // Public Server/Sandbox (lobbyMode): no mark on the permanent record, win or lose.
     if(!lobbyMode){ recordDuel(pc,'death'); if(deckMasterCard && pc.name===deckMasterCard){ deckMasterRecord.d=(deckMasterRecord.d||0)+1; lsSet('sf_dm_record', deckMasterRecord); } }
     if(!lobbyMode && typeof grantPlayerXP==='function') grantPlayerXP(5);
+    oppMatchKillsThisMatch++;
     { if(typeof drawPile!=='undefined' && drawPile.length){ var _tt=drawPile[drawPile.length-1]; var _tr=_tt&&TRIGGERS[_tt.name]; if(_tr){ drawPile.pop(); hand.push(_tt); if(_tr.draw) drawToHand(_tr.draw); if(_tr.recur){ for(var _tri=0;_tri<_tr.recur;_tri++){ if(banishPile.length) hand.push(banishPile.pop()); } } abilLog.push("✨ Trigger — "+_tt.name+": "+_tr.text); if(typeof toast==='function') toast("✨ Trigger! "+_tt.name+" — "+_tr.text, true); if(typeof buildHand==='function') buildHand(); } } }
     if(isDeathRemnant){
       var _rp=(typeof dmRemnantPowOverride!=='undefined'&&dmRemnantPowOverride!=null)?dmRemnantPowOverride:((typeof REMNANT_POW!=='undefined'&&REMNANT_POW[pc.name]!=null)?REMNANT_POW[pc.name]:pc.pow);
@@ -12350,14 +12399,26 @@ function showIntroVideo(){
 function showStarterChooser(){ _pathChooserCSS(); var ov=document.getElementById('path-chooser'); if(!ov){ ov=document.createElement('div'); ov.id='path-chooser'; ov.className='path-chooser'; document.body.appendChild(ov); } ov.innerHTML='<div class="pc-scrim"></div><div class="pc-panel"><div class="pc-eyebrow">New Commander</div><div class="pc-title">Choose Your Path</div><div class="pc-sub">Pick a starter deck — real cards you own and can build on. You can collect the others later.</div><div class="pc-grid">'+STARTER_PATHS.map(function(p){ var repC=COLLECTION.find(function(x){return x.name===p.rep && !x.uid;}); var art=(repC && typeof artFillStyle==='function')?artFillStyle(repC.artKey||repC.name):''; return '<div class="pc-card" style="--acc:'+p.accent+'" onclick="chooseStarterPath(\''+p.key+'\')"><div class="pc-art" style="'+art+'"></div><div class="pc-body"><div class="pc-name">'+p.name+'</div><div class="pc-tag">'+p.tag+'</div><div class="pc-blurb">'+p.blurb+'</div></div><button class="pc-pick">Choose '+p.name.replace('The ','')+'</button></div>'; }).join('')+'</div></div>'; ov.classList.add('on'); }
 window.showStarterChooser=showStarterChooser; window.chooseStarterPath=chooseStarterPath;
 ;/* ── BALANCE PASS 2026-07-07 (owner spec): reworked CARD_RULES + remnant values ── */
-CARD_RULES['Kravyn the Collector']=[{"add":3,"log":"⚔️ Kravyn: +3"},{"if":{"v":"pc_kills","op":">=","n":10},"add":5,"log":"⚔️ Kravyn: +5 (Kill Escalation, 10+ kills)"},{"if":{"v":"pc_kills","op":">=","n":25},"add":2,"log":"⚔️ Kravyn: +2 more (Kill Escalation, 25+ kills — total +7)"}];
+CARD_RULES['Kravyn the Collector']=[{"add":3,"log":"⚔️ Kravyn: +3"},{"if":{"v":"pc_kills","op":">=","n":10},"add":7,"log":"⚔️ Kravyn: +7 (Kill Escalation, 10+ kills)"},{"if":{"v":"pc_kills","op":">=","n":25},"add":4,"log":"⚔️ Kravyn: +4 more (Kill Escalation, 25+ kills — total +14)"}];
 // 7/29/26: Ironsworn 1-cost rework -- Oathbound Shield/Sworn Duelist were identical Muster-3 reskins
 // of Shieldwall Recruit (all 3 paid +0 on the very first 1-cost conjured in a match, since Muster only
 // counts OTHER 1-costs already fielded/won). Shieldwall Recruit keeps Muster; these two get real,
 // board-independent identities instead. Oathbound Shield needs no CARD_RULES entry -- "Last Stand" in
 // its abil text alone triggers the existing generic isShellward text-match in resolve() (see Hanse
 // Waltz/Bram the Bulwark/Torvald/Calla Thorn for the same pattern).
-CARD_RULES['Sworn Duelist']=[{"if":{"v":"pc_kills","op":">=","n":5},"add":2,"log":"⚔️ Sworn Duelist: +2 (Kill Escalation, 5+ kills)"},{"if":{"v":"pc_kills","op":">=","n":15},"add":2,"log":"⚔️ Sworn Duelist: +2 more (Kill Escalation, 15+ kills — total +4)"}];
+CARD_RULES['Sworn Duelist']=[{"if":{"v":"pc_kills","op":">=","n":5},"add":3,"log":"⚔️ Sworn Duelist: +3 (Kill Escalation, 5+ kills)"},{"if":{"v":"pc_kills","op":">=","n":15},"add":3,"log":"⚔️ Sworn Duelist: +3 more (Kill Escalation, 15+ kills — total +6)"}];
+// 8/8/26: Tange Sazen and Bloodwake Duelist's own printed text ("+N power per kill earned THIS
+// MATCH") had zero CARD_RULES backing anywhere -- pure flavor text, same disclosure-mismatch class
+// as Gravecaller Voss's support text turned out NOT to be (that one really did already work via
+// LINGERING_SUPPORTS -- these two really didn't). Built on the new pc_kills_match ctx field
+// (matchKillsThisMatch/oppMatchKillsThisMatch, reset in resetMatchState(), incremented in resolve()'s
+// win/lose branches) via the existing generic addvar+x op-code -- no interpreter change needed.
+// Aurelion Prime/Dragan Korr (SET2_POOL, not live yet) also had zero backing -- built now anyway,
+// matching Kravyn/Sworn Duelist's career-kill-threshold shape, so they're ready when that set ships.
+CARD_RULES['Tange Sazen']=[{"addvar":"pc_kills_match","x":4,"log":"⚔️ Tange Sazen: +4 per kill this match (Kill Escalation)"}];
+CARD_RULES['Bloodwake Duelist']=[{"addvar":"pc_kills_match","x":3,"log":"⚔️ Bloodwake Duelist: +3 per kill this match (Kill Escalation)"}];
+CARD_RULES['Aurelion Prime']=[{"if":{"v":"pc_kills","op":">=","n":15},"add":4,"log":"⚔️ Aurelion Prime: +4 (Kill Escalation, 15+ career kills)"},{"if":{"v":"pc_kills","op":">=","n":30},"add":4,"log":"⚔️ Aurelion Prime: +4 more (Kill Escalation, 30+ career kills — total +8)"}];
+CARD_RULES['Dragan Korr']=[{"if":{"v":"pc_kills","op":">=","n":18},"add":6,"log":"⚔️ Dragan Korr: +6 (Kill Escalation, 18+ career kills)"}];
 // KOTEI signature Legendaries (8/2/26) -- simplified-but-real mechanisms for the 8 new cards
 // above (DECK_POOL), using only context vars that already exist elsewhere in this table.
 CARD_RULES["The Borrowed Green, Keawe Kel'rua"]=[{"add":9,"log":"🌊 Uncontrolled Flood: +9"},{"oppadd":5,"log":"🌊 Uncontrolled Flood: the flood answers no one's call — opponent +5 too"}];
@@ -15433,7 +15494,7 @@ function resetMatchState(){
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[];
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
-  banishSurge=0; oppBanishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; oppDmNextConjureBonus=0; oppDmNextConjureDouble=false; oppDmAhdorahBonusPending=false; dmAbilityUsedThisMatchBot=false; oppDmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0;
+  banishSurge=0; oppBanishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; oppDmNextConjureBonus=0; oppDmNextConjureDouble=false; oppDmAhdorahBonusPending=false; dmAbilityUsedThisMatchBot=false; oppDmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0; matchKillsThisMatch=0; oppMatchKillsThisMatch=0;
   // Oath (KOTEI §2.3): sworn automatically at match start if the current Deck Master has a real
   // DM_OATH entry — "on game start / when the Deck Master is set, you swear an Oath." condition()
   // is evaluated once, at match end (showMatchComplete()), never here — this just marks the vow
@@ -16636,6 +16697,7 @@ if(typeof resolve==='function'){ var _oppRes=resolve; resolve=function(pc,oc,con
   try{ if(oc && oc.name && typeof playerScore!=='undefined' && playerScore[1] > _b1){
     if(typeof oppUnbankNextWin!=='undefined' && oppUnbankNextWin){ oppUnbankNextWin=false; if(typeof oppHandBot!=='undefined') oppHandBot.push(Object.assign({},oc)); }
     else if(typeof oppDmUnitsReturnToHandThisDuel!=='undefined' && oppDmUnitsReturnToHandThisDuel){ if(typeof oppHandBot!=='undefined') oppHandBot.push(Object.assign({},oc)); if(typeof toast==='function') toast('💰 Opp Kravyn — '+oc.name+' returns to the opponent’s hand instead of their Winners Circle (Deck Master ability)', false); }
+    else if(typeof bounceOnWinCheck==='function' && bounceOnWinCheck(oc.name, true)){ if(typeof oppHandBot!=='undefined') oppHandBot.push(Object.assign({},oc)); if(typeof toast==='function') toast('🌑 Opp '+oc.name+' returns to the opponent’s hand instead of their Winners Circle', false); }
     else { if(!oppWonBot) oppWonBot=new Set(); oppWonBot.add(oc.name); if(typeof oppWC!=='undefined') oppWC=oppWonBot.size; }
   } }catch(e){}
   return r;
