@@ -2706,15 +2706,15 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="hub">
       <div class="camp-banner camp-none" id="camp-banner">
         <div class="cb-sigil" id="cb-sigil">◈</div>
-        <div class="cb-title" id="cb-title">No Banner Raised</div>
-        <div class="cb-sub" id="cb-sub">Name a Deck Master in the Deck Builder to raise your Camp's banner</div>
+        <div class="cb-title" id="cb-title">No Camp Sworn</div>
+        <div class="cb-sub" id="cb-sub">Name a Deck Master in the Deck Builder to swear allegiance and raise your Camp's banner</div>
       </div>
       <div class="hub-hero">
         <div class="hero-left">
           <div class="hero-welcome">
-            <div class="hw-eyebrow">Welcome back, Integrator</div>
+            <div class="hw-eyebrow">Welcome back, Summoner</div>
             <h1 id="hub-headline">Your vault holds 41 cards. Apex records run deep.</h1>
-            <p>Every card is a permanent collectible with its own match history. Win duels to grow a card's record — but each loss is written to that record forever. Build a deck, then test it against a bot.</p>
+            <p>Every card you summon carries its record into the colosseum forever — each win etched deeper into its legend, each loss a scar that never fades. Assemble your roster, then step into the arena and let them fight for glory.</p>
           </div>
           <div class="stat-row" id="hub-stats"></div>
           <div class="quest-row" id="hub-quests"></div>
@@ -2722,7 +2722,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <div class="featured-card" id="hub-featured"></div>
       </div>
       <div class="hub-modes">
-        <div class="hc-label">Play — choose your mode</div>
+        <div class="hc-label">The Arena Awaits</div>
         <div class="hub-actions">
           <button class="hub-action ha-hero" style="--accent:#F5C24D" onclick="pvpSetMode(3);show('online', document.getElementById('nav-ranked'))"><span class="ha-icon">🪜</span><span class="ha-txt"><span class="ha-eyebrow">Featured</span><span class="ha-title">Ranked Ladder</span><span class="ha-sub">Real PvP, matchmade — ascend the ranks and claim your standing</span></span><span class="ha-arrow">→</span></button>
           <button class="hub-action" style="--accent:#5BC0EB" onclick="show('lobby', document.getElementById('nav-lobby'))"><span class="ha-icon">⚔</span><span class="ha-txt"><span class="ha-title">Offline Play</span><span class="ha-sub">All cards · casual · zero consequence</span></span><span class="ha-arrow">→</span></button>
@@ -2868,9 +2868,9 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="profile-hero">
         <div class="up-avatar-lg">🜲</div>
         <div>
-          <div class="sh-eyebrow">Integrator Profile</div>
+          <div class="sh-eyebrow">Summoner Profile</div>
           <h1>Keanu · @keanu</h1>
-          <div class="profile-sub">◈ Trusted — Tier IV · 22 cards vaulted · 5,000 Zenni Points</div>
+          <div class="profile-sub">◈ Trusted — Tier IV · 22 cards vaulted · 5,000 Zenni</div>
         </div>
       </div>
       <div class="shop-section-title">Emblem — equip the one you've earned</div>
@@ -9289,8 +9289,8 @@ const COSMETICS = {
     {id:'void',name:'Void Spiral',price:2000,crest:'🌀',tint:'#B15CF0'},
   ]},
   emblem:{label:'Duelist Emblems',icon:'🛡',desc:'Your avatar sigil in the sidebar and profile.',items:[
-    {id:'crest',name:'Integrator Sigil',price:0,glyph:'🜲'},
-    {id:'diamond',name:'Signal Diamond',price:0,glyph:'◈'},
+    {id:'crest',name:'Summoner Sigil',price:0,glyph:'🜲'},
+    {id:'diamond',name:'Zenni Diamond',price:0,glyph:'◈'},
     {id:'duelist',name:'Duelist',price:0,glyph:'⚔'},
     {id:'fang',name:'Fang',price:0,glyph:'🐺'},
     {id:'collector',name:'Collector',price:0,glyph:'🎴'},
@@ -9301,7 +9301,7 @@ const COSMETICS = {
     {id:'apexbolt',name:'Genesis Bolt',price:1500,glyph:'⚡'},
   ]},
   title:{label:'Duelist Titles',icon:'✦',desc:'A rank shown beneath your handle.',items:[
-    {id:'integrator',name:'Integrator',price:0},
+    {id:'integrator',name:'Summoner',price:0},
     {id:'baron',name:'Zenni Baron',price:700},
     {id:'chainbreaker',name:'Chain-Breaker',price:1000},
     {id:'voidt',name:'Void-Touched',price:1200},
@@ -12287,7 +12287,7 @@ function toggleEnergySpell(id){
 
 // ══ PROFILE / EMBLEMS ══
 const EMBLEMS = [
-  {glyph:'🜲', name:'Integrator Sigil', owned:true},
+  {glyph:'🜲', name:'Summoner Sigil', owned:true},
   {glyph:'◈', name:'Signal Diamond', owned:true},
   {glyph:'⚔', name:'Duelist', owned:true},
   {glyph:'🐺', name:'Fang', owned:true},
@@ -12326,7 +12326,7 @@ function buildProfileTitles(){
   const _t=COSMETICS.title.items.find(i=>i.id===equipped.title);
   const _sub=document.querySelector('#v-profile .profile-sub');
   const _essTitle=(typeof essenceCosmeticOwned==='function' && essenceCosmeticOwned('ec-title'))?' · ✦ Ascendant':'';
-  if(_sub) _sub.textContent='◈ '+(_t?_t.name:'Integrator')+_essTitle+' · '+COLLECTION.filter(c=>(ownedCopies[c.uid||c.name]||0)>0).length+' cards vaulted · '+fmtPts(signalPoints)+' Zenni';
+  if(_sub) _sub.textContent='◈ '+(_t?_t.name:'Summoner')+_essTitle+' · '+COLLECTION.filter(c=>(ownedCopies[c.uid||c.name]||0)>0).length+' cards vaulted · '+fmtPts(signalPoints)+' Zenni';
   const _crestEl=document.querySelector('#v-profile .profile-hero');
   if(_crestEl){ var _oldCrest=_crestEl.querySelector('.ess-crest'); if(_oldCrest) _oldCrest.remove();
     if(typeof essenceCosmeticOwned==='function' && essenceCosmeticOwned('ec-emblem')){ var _cr=document.createElement('div'); _cr.className='ess-crest'; _cr.title='Essence Crest Emblem'; _cr.textContent='💎'; _crestEl.appendChild(_cr); } }
@@ -12755,8 +12755,8 @@ function renderCampBanner(){
     if(sub) sub.textContent=(_dmc?_dmc.name:dm)+' — your Deck Master';
   } else {
     if(sigil) sigil.textContent='◈';
-    if(title) title.textContent='No Banner Raised';
-    if(sub) sub.textContent="Name a Deck Master in the Deck Builder to raise your Camp's banner";
+    if(title) title.textContent='No Camp Sworn';
+    if(sub) sub.textContent="Name a Deck Master in the Deck Builder to swear allegiance and raise your Camp's banner";
   }
 }
 function ownedFeaturedList(){ return featuredCards.filter(key=>COLLECTION.find(c=>(c.uid||c.name)===key) && (ownedCopies[key]||0)>0); }
