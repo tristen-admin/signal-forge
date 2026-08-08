@@ -4007,6 +4007,19 @@ let oppBanishSurge = 0;   // 8/5/26: bot-side mirror of banishSurge -- see pickO
 let dmAbilityUsedThisMatch = false, dmNextConjureBonus = 0;
 let dmNextConjureDouble = false;   // Ourevos DM skill: your next conjure's power is doubled
 let dmAhdorahBonusPending = false;   // Ahdorah Khaan DM skill: draw 2 if the opponent calls 0 supports this duel — checked post-resolve since supports aren't known at activation time
+// Bot-side mirrors of the block above (8/8/26): DM_ACTIVATED_ABILITY/Avatāra was player-only since
+// its 8/3/26 build -- fireDeckMasterAvatara() only ever checked the player's own deckMasterCard, and
+// every run() mutated player-only globals (hand/drawPile/banishPile/charge). Confirmed via full grep
+// that zero call site ever read any of these flags for the bot's own activeBot.dmCard conjure --
+// this is the actual cause of "Uso Oso and other cards not activating from the opponent's deck."
+// Naming keeps the "Nullify" one distinct from the player's dmNullifyOppSupportsThisDuel: when the
+// BOT's ability fires, it nullifies the PLAYER's supports, so it's named oppDmNullifyPlayerSupportsThisDuel
+// rather than reusing "Opp" to mean the bot's opponent (which would be the player, not itself).
+let dmAbilityUsedThisMatchBot = false;
+let oppDmNextConjureBonus = 0, oppDmNextConjureDouble = false;
+let oppDmSupportAddPowThisDuel = false, oppDmSupportDoubleCostThisDuel = false, oppDmUnitsReturnToHandThisDuel = false;
+let oppDmZeroCostThisDuel = false, oppDmNullifyPlayerSupportsThisDuel = false, oppDmAhdorahBonusPending = false;
+let oppDmDarwinHandRefillArmed = false;
 
 // ══ OATH (8/2/26, KOTEI magic-system §2.3) — the Deck Master's passive apex mechanic ══
 // Sworn automatically when a match starts with a Deck Master carrying a DM_OATH entry (the
@@ -4103,6 +4116,11 @@ const DM_ACTIVATED_ABILITY = {
     dmNextConjureBonus = (dmNextConjureBonus||0) + 2;
     dmUnitsReturnToHandThisDuel = true;
     if(typeof updatePiles==='function') updatePiles();
+  }, runBot:function(){
+    while(oppBanishBot.length){ oppDeckBot.push(oppBanishBot.pop()); }
+    for(var _ki=oppDeckBot.length-1;_ki>0;_ki--){ var _kj=Math.floor(Math.random()*(_ki+1)); var _kt=oppDeckBot[_ki]; oppDeckBot[_ki]=oppDeckBot[_kj]; oppDeckBot[_kj]=_kt; }
+    oppDmNextConjureBonus = (oppDmNextConjureBonus||0) + 2;
+    oppDmUnitsReturnToHandThisDuel = true;
   }},
   "Keawe Kel'rua": {log:'Rising Talent \u2014 Foresight', desc:'draw 1, scry 1 \u2014 if the scried card costs 2 or more, it costs 1 less the next time you conjure it', run:function(){
     drawToHand(1);
@@ -4111,6 +4129,11 @@ const DM_ACTIVATED_ABILITY = {
         card._costDiscount = 1;
         if(typeof toast==='function') toast('\ud83d\udde1 Keawe \u2014 '+card.name+' costs 1 less next time you conjure it', true);
       }
+    });
+  }, runBot:function(){
+    oppDrawN(1);
+    oppScryOne(function(card){
+      if(card && (typeof conjureCost==='function'?conjureCost(card,true):(card.cost||0)) >= 2){ card._costDiscount = 1; }
     });
   }},
   'Kotei': {log:'A Legend Reborn \u2014 Rally', desc:'draw 2, return your highest-power hand card to the bottom of your deck, called supports add their own power to your Fighter this duel', run:function(){
@@ -4123,6 +4146,13 @@ const DM_ACTIVATED_ABILITY = {
     dmSupportAddPowThisDuel = true;
     if(typeof buildHand==='function') buildHand();
     if(typeof updatePiles==='function') updatePiles();
+  }, runBot:function(){
+    oppDrawN(2);
+    if(oppHandBot.length){
+      var _hi=0; for(var _hk=1;_hk<oppHandBot.length;_hk++){ if((oppHandBot[_hk].pow||0) > (oppHandBot[_hi].pow||0)) _hi=_hk; }
+      oppDeckBot.push(oppHandBot.splice(_hi,1)[0]);
+    }
+    oppDmSupportAddPowThisDuel = true;
   }},
   'The Bronzed Beast, Hanse Waltz': {log:'Blood Moon Rising', desc:'if your hand has 3 or fewer cards, draw 2 and gain 2 Charge', run:function(){
     if(hand.length<=3){
@@ -4131,11 +4161,16 @@ const DM_ACTIVATED_ABILITY = {
       if(typeof renderCharge==='function') renderCharge();
       if(typeof toast==='function') toast('\ud83c\udf11 Blood Moon Rising \u2014 hand was 3 or fewer, drew 2 and gained 2 Charge', true);
     } else if(typeof toast==='function') toast('\ud83c\udf11 Blood Moon Rising \u2014 hand has more than 3 cards, no effect', false);
+  }, runBot:function(){
+    if(oppHandBot.length<=3){ oppDrawN(2); oppCharge += 2; }
   }},
   'Ghorruk "Gnarly" Judarr': {log:'Boneyard Rising', desc:"raise a Death Remnant equal to your hand size plus your banish zone size", run:function(){
     var _gp = hand.length + banishPile.length;
     deathRemnants.push({name:'Ghorruk "Gnarly" Judarr', pow:_gp});
     if(typeof toast==='function') toast('\ud83d\udc80 Ghorruk \u2014 raised a Death Remnant at '+_gp+' power', true);
+  }, runBot:function(){
+    var _gp = oppHandBot.length + oppBanishBot.length;
+    oppDeathRemnants.push({name:'Ghorruk "Gnarly" Judarr', pow:_gp});
   }},
   'Conduit of Chaos, Kleydson': {log:'Greater Chaos', desc:'permanently upgrade to the full Chaos Trinity (Draw Surge, Godhand, Sorn-Vallis Shift) for the rest of the match, gain 2 Charge', run:function(){
     energyLoadoutOverride = ['drawsurge','godhand','sornshift'];
@@ -4143,6 +4178,11 @@ const DM_ACTIVATED_ABILITY = {
     if(typeof buildSpellTray==='function') buildSpellTray();
     if(typeof renderCharge==='function') renderCharge();
     if(typeof toast==='function') toast('\ud83c\udf00 Kleydson \u2014 Greater Chaos: full Chaos Trinity unlocked for the rest of the match', true);
+  }, runBot:function(){
+    // No spell-tray concept exists bot-side (no oppSpellHand) -- energyLoadoutOverride only ever
+    // warps the PLAYER's future spell draws, so there's nothing to mirror for that half. The Charge
+    // gain is real and applies.
+    oppCharge += 2;
   }},
   'Sister Mire, Wailing Nightmare': {log:'Wailing Reclamation', desc:'return your hand to the bottom of your deck, reclaim your Winners Circle to hand, draw 3, your next conjure +5', run:function(){
     while(hand.length){ drawPile.unshift(hand.pop()); }
@@ -4152,6 +4192,15 @@ const DM_ACTIVATED_ABILITY = {
     if(typeof deckSize!=='undefined') deckSize=drawPile.length;
     if(typeof buildHand==='function') buildHand();
     if(typeof updatePiles==='function') updatePiles();
+  }, runBot:function(){
+    while(oppHandBot.length){ oppDeckBot.push(oppHandBot.pop()); }
+    if(typeof oppWonBot!=='undefined' && oppWonBot && oppWonBot.size){
+      var _pool=[].concat(typeof OPP_CARDS!=='undefined'?OPP_CARDS:[], typeof COLLECTION!=='undefined'?COLLECTION:[]);
+      Array.from(oppWonBot).forEach(function(nm){ oppWonBot.delete(nm); var _c=_pool.find(function(x){return x.name===nm;}); if(_c) oppHandBot.push(Object.assign({},_c)); });
+      if(typeof oppWC!=='undefined') oppWC=oppWonBot.size;
+    }
+    oppDrawN(3);
+    oppDmNextConjureBonus = (oppDmNextConjureBonus||0) + 5;
   }},
   'Black Wings, Ossian Drell': {log:"Wing Commander's Purge", desc:'banish your entire hand, draw 5, your next conjure +2 per card in your banish zone', run:function(){
     while(hand.length){ banishPile.push(hand.pop()); }
@@ -4159,6 +4208,10 @@ const DM_ACTIVATED_ABILITY = {
     dmNextConjureBonus = (dmNextConjureBonus||0) + 2*banishPile.length;
     if(typeof buildHand==='function') buildHand();
     if(typeof updatePiles==='function') updatePiles();
+  }, runBot:function(){
+    while(oppHandBot.length){ oppBanishBot.push(oppHandBot.pop()); }
+    oppDrawN(5);
+    oppDmNextConjureBonus = (oppDmNextConjureBonus||0) + 2*oppBanishBot.length;
   }},
   'Corvus': {log:"Raven's Reckoning", desc:'banish the top 2 of your deck, draw 1, then scry 1', run:function(){
     for(var _cb=0;_cb<2;_cb++){ if(drawPile.length) banishPile.push(drawPile.pop()); }
@@ -4166,26 +4219,46 @@ const DM_ACTIVATED_ABILITY = {
     drawToHand(1);
     scryOne();
     if(typeof updatePiles==='function') updatePiles();
+  }, runBot:function(){
+    for(var _cb=0;_cb<2;_cb++){ if(oppDeckBot.length) oppBanishBot.push(oppDeckBot.shift()); }
+    oppDrawN(1);
+    oppScryOne();
   }},
   'Darwin': {log:'Bloodline Ascendant', desc:'called supports add DOUBLE their Shield this duel; whenever your hand is 2 or fewer cards after your draw phase for the rest of the match, draw 2 and banish 1', run:function(){
     dmSupportDoubleCostThisDuel = true;
     dmDarwinHandRefillArmed = true;
+  }, runBot:function(){
+    oppDmSupportDoubleCostThisDuel = true;
+    oppDmDarwinHandRefillArmed = true;
   }},
   'Ourevos, the Golden Dragon': {log:"Shattered Chronoplain", desc:'your next conjure\u2019s power is doubled', run:function(){
     dmNextConjureDouble = true;
+  }, runBot:function(){
+    oppDmNextConjureDouble = true;
   }},
   'Anorith Keeling': {log:'Chaos Unbound', desc:'every card in your hand costs 0 to conjure this duel', run:function(){
     dmZeroCostThisDuel = true;
+  }, runBot:function(){
+    oppDmZeroCostThisDuel = true;
   }},
   'Ahdorah Khaan, Determined Soul': {log:'Record Guard \u2014 Denial', desc:"nullify the opponent's called supports this duel; if they called none at all, draw 2", run:function(){
     dmNullifyOppSupportsThisDuel = true;
     dmAhdorahBonusPending = true;
+  }, runBot:function(){
+    oppDmNullifyPlayerSupportsThisDuel = true;
+    oppDmAhdorahBonusPending = true;
   }},
   'Tange Sazen': {log:'Warpath Ascendant \u2014 Disruption', desc:'draw 1, then send 1 card from the top of your opponent\u2019s deck to the bottom', run:function(){
     drawToHand(1);
     if(typeof oppDeckBot!=='undefined' && oppDeckBot.length){
       oppDeckBot.push(oppDeckBot.shift());
       if(typeof toast==='function') toast('\u2694 Tange Sazen \u2014 sent the opponent\u2019s next draw to the bottom of their deck', true);
+    }
+  }, runBot:function(){
+    oppDrawN(1);
+    if(typeof drawPile!=='undefined' && drawPile.length){
+      drawPile.unshift(drawPile.pop());
+      if(typeof toast==='function') toast('\u2694 Opp Tange Sazen \u2014 sent your next draw to the bottom of your deck', true);
     }
   }},
   // \u2550\u2550 AVAT\u0100RA (8/2/26, KOTEI \u00a72.4) \u2014 all 8 signature Legendaries, keyed to their NEW signature
@@ -4197,28 +4270,42 @@ const DM_ACTIVATED_ABILITY = {
   "The Borrowed Green, Keawe Kel'rua": {log:'Uncontrolled Flood \u2014 unleashed', desc:'your next conjure +10 (barebones \u2014 the fuller "AOE, uncontrolled" sketch needs a both-sides-damage primitive this build doesn\u2019t have yet)', run:function(){
     dmNextConjureBonus = (dmNextConjureBonus||0) + 10;
     if(typeof toast==='function') toast('\ud83c\udf0a The Borrowed Green \u2014 the flood answers, uncontrolled: next conjure +10', true);
+  }, runBot:function(){
+    oppDmNextConjureBonus = (oppDmNextConjureBonus||0) + 10;
   }},
   'The Kept Blade, Ahdor': {log:'Overdrive \u2014 the Kaio-ken', desc:'draw 1, your next conjure +8 (barebones \u2014 "redlined precognition" simplified to a power/draw spike, no recoil-next-turn cost modeled yet)', run:function(){
     drawToHand(1);
     dmNextConjureBonus = (dmNextConjureBonus||0) + 8;
     if(typeof toast==='function') toast('\u2694 The Kept Blade \u2014 Overdrive: draw 1, next conjure +8', true);
+  }, runBot:function(){
+    oppDrawN(1);
+    oppDmNextConjureBonus = (oppDmNextConjureBonus||0) + 8;
   }},
   "The Nightmare's Toll, Hanse Waltz": {log:'Blood-Toll \u2014 the Bronzed Beast', desc:'discard 1 card: your next conjure +8, darkness-strike through claw and fang (barebones numbers)', run:function(){
     if(hand.length){ banishPile.push(hand.splice(Math.floor(Math.random()*hand.length),1)[0]); if(typeof buildHand==='function') buildHand(); if(typeof updatePiles==='function') updatePiles(); }
     dmNextConjureBonus = (dmNextConjureBonus||0) + 8;
     if(typeof toast==='function') toast('\ud83c\udf19 The Nightmare\u2019s Toll \u2014 Blood-Toll paid: the Bronzed Beast rises, next conjure +8', true);
+  }, runBot:function(){
+    banishFromHandBot(1);
+    oppDmNextConjureBonus = (oppDmNextConjureBonus||0) + 8;
   }},
   'The Claim, Lagertha Waltz': {log:'the Claim \u2014 Oath-Beast', desc:'called supports add their own power this duel (barebones \u2014 "stronger together" fused with her kill-vow)', run:function(){
     dmSupportAddPowThisDuel = true;
     if(typeof toast==='function') toast('\ud83d\udc3a The Claim \u2014 Oath-Beast: called supports add their own power this duel', true);
+  }, runBot:function(){
+    oppDmSupportAddPowThisDuel = true;
   }},
   'Throne of Bones, Uso Oso': {log:'Throne of Bones \u2014 Grey Giant', desc:'your next conjure +6 (barebones lesser mode \u2014 the full Throne-of-Bones zone is a bigger build, not attempted here)', run:function(){
     dmNextConjureBonus = (dmNextConjureBonus||0) + 6;
     if(typeof toast==='function') toast('\u2620 Throne of Bones \u2014 Grey Giant: next conjure +6', true);
+  }, runBot:function(){
+    oppDmNextConjureBonus = (oppDmNextConjureBonus||0) + 6;
   }},
   'The Reliquary, Ruffius Rufeldro': {log:'the Mask Drops', desc:'nullify the opponent\u2019s called supports this duel (barebones \u2014 "the Reliquary" removal-disguised-as-blessing, simplified to a straight nullify)', run:function(){
     dmNullifyOppSupportsThisDuel = true;
     if(typeof toast==='function') toast('\ud83c\udfad The Reliquary \u2014 the mask drops: opponent\u2019s called supports nullified this duel', true);
+  }, runBot:function(){
+    oppDmNullifyPlayerSupportsThisDuel = true;
   }},
   'The Unending Flame, Tange Sazen': {log:'Time-Locked Eternal Flame', desc:'draw 1, send 2 cards from the top of your opponent\u2019s deck to the bottom (barebones \u2014 "time control" simplified/doubled from the existing Tange Sazen base-card ability)', run:function(){
     drawToHand(1);
@@ -4226,10 +4313,18 @@ const DM_ACTIVATED_ABILITY = {
       for(var _tf=0;_tf<2 && oppDeckBot.length;_tf++){ oppDeckBot.push(oppDeckBot.shift()); }
       if(typeof toast==='function') toast('\ud83d\udd25 The Unending Flame \u2014 time pinned: sent 2 of the opponent\u2019s next draws to the bottom of their deck', true);
     }
+  }, runBot:function(){
+    oppDrawN(1);
+    if(typeof drawPile!=='undefined'){
+      for(var _tf=0;_tf<2 && drawPile.length;_tf++){ drawPile.unshift(drawPile.pop()); }
+      if(typeof toast==='function') toast('\ud83d\udd25 Opp The Unending Flame \u2014 time pinned: sent 2 of your next draws to the bottom of your deck', true);
+    }
   }},
   'The Between, Kleydson': {log:'the Between', desc:'your next conjure +12 (barebones \u2014 the real "requires a live fire AND ice effect" gate needs a domain-effect tracker this build doesn\u2019t have yet, so it\u2019s unconditional here)', run:function(){
     dmNextConjureBonus = (dmNextConjureBonus||0) + 12;
     if(typeof toast==='function') toast('\u2696 The Between \u2014 chaos and order, balanced: next conjure +12', true);
+  }, runBot:function(){
+    oppDmNextConjureBonus = (oppDmNextConjureBonus||0) + 12;
   }}
 };
 // Avatāra (8/3/26, owner redefine): "the Avatāra keyword and the Deck Master effect are
@@ -4256,6 +4351,21 @@ function fireDeckMasterAvatara(pc){
   if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   if(typeof buildHand==='function') buildHand();
   if(typeof toast==='function') toast('🌙 Avatāra — '+deckMasterCard+' — '+ab.log+': '+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus)), true);
+}
+// Bot-side mirror of fireDeckMasterAvatara() (8/8/26) -- see the note above the oppDm* flag block
+// near this file's top for why this was missing entirely. Keyed off activeBot.dmCard instead of
+// deckMasterCard; calls each ability's runBot() (added alongside run() in DM_ACTIVATED_ABILITY above)
+// instead of run(), so the table stays one source of truth rather than a duplicate shadow table.
+// No UI strip to update -- the bot has no ability-strip element -- surfaced via toast + abilLog only,
+// matching how every other bot-side effect in this file announces itself to the player.
+function fireBotDeckMasterAvatara(oc){
+  if(!activeBot || !activeBot.dmCard || dmAbilityUsedThisMatchBot) return;
+  if(!oc || oc.name !== activeBot.dmCard) return;
+  var ab = DM_ACTIVATED_ABILITY[activeBot.dmCard]; if(!ab) return;
+  dmAbilityUsedThisMatchBot = true;
+  if(ab.runBot){ ab.runBot(); }
+  else { if(ab.draw) oppDrawN(ab.draw); oppDmNextConjureBonus = ab.nextConjureBonus || 0; }
+  if(typeof toast==='function') toast('🌙 Opp Avatāra — '+activeBot.dmCard+' — '+ab.log+': '+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus)), false);
 }
 function renderDeckMasterAbilityStrip(){
   var strip=document.getElementById('dm-ability-strip'); if(!strip) return;
@@ -4771,7 +4881,7 @@ function openTurn(){
   // only energyRegenPerTurn() replenishes each turn, so leftover/spent charge carries across turns
   // and players have to play smaller conjures to bank enough for bigger plays or spells later.
   // oppCharge mirrors charge exactly (bots get the same regen/cap rule as the player).
-  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; condSupportZonesLocked=false; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
+  charge=Math.min(duelEnergyCap(),charge+energyRegenPerTurn()); oppCharge=Math.min(duelEnergyCap(),oppCharge+energyRegenPerTurn()); if(typeof divinerBonusNext!=='undefined'&&divinerBonusNext>0){ charge+=divinerBonusNext; divinerBonusNext=0; } spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; condSupportZonesLocked=false; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; oppDmUnitsReturnToHandThisDuel=false; oppDmSupportAddPowThisDuel=false; oppDmSupportDoubleCostThisDuel=false; oppDmNullifyPlayerSupportsThisDuel=false; oppDmZeroCostThisDuel=false; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge(); { const _sw=document.getElementById('snap-window'); if(_sw) _sw.innerHTML=''; const _nb=document.getElementById('next-btn'); if(_nb) _nb.style.display=''; }
   if(firstTurn){
     firstTurn = false;
     setPhase('drawn');
@@ -5983,9 +6093,10 @@ function baseCardCost(c){
   if(!c) return 1;
   return (c.cost!=null) ? c.cost : ((COST_OVERRIDE[c.name]!=null) ? COST_OVERRIDE[c.name] : (function(){ var p=c.pow||0; return p>=19?4 : p>=14?3 : p>=10?2 : 1; })());
 }
-function conjureCost(c){
+function conjureCost(c, forBot){
   if(!c) return 1;
-  if(typeof dmZeroCostThisDuel!=='undefined' && dmZeroCostThisDuel) return 0;
+  if(forBot){ if(typeof oppDmZeroCostThisDuel!=='undefined' && oppDmZeroCostThisDuel) return 0; }
+  else if(typeof dmZeroCostThisDuel!=='undefined' && dmZeroCostThisDuel) return 0;
   var base = baseCardCost(c);
   return c._costDiscount ? Math.max(0, base-c._costDiscount) : base;
 }
@@ -6228,7 +6339,20 @@ function chooseBanishFromHand(sourceName, onDone){
     if(onDone) onDone(card);
   };
 }
-function oppDrawN(n){ for(var _oi=0;_oi<(n||0);_oi++){ if(typeof oppDeckBot!=='undefined'&&oppDeckBot.length&&oppHandBot.length<MAX_HAND) oppHandBot.push(oppDeckBot.shift()); } }
+function oppDrawN(n){ var _got=0; for(var _oi=0;_oi<(n||0);_oi++){ if(typeof oppDeckBot!=='undefined'&&oppDeckBot.length&&oppHandBot.length<MAX_HAND){ oppHandBot.push(oppDeckBot.shift()); _got++; } } return _got; }
+// Bot-safe mirrors of scryOne()/banishFromHand() for the bot's own DM_ACTIVATED_ABILITY runBot()
+// calls (8/8/26) -- no UI exists for the bot, so the "choice" is a small always-on heuristic instead
+// of a modal. oppDeckBot's convention is the OPPOSITE of the player's drawPile: index 0 = top
+// (oppDrawN/oppDeckBot.shift() draws from the front), so "bury" here is oppDeckBot.push(), not unshift.
+function oppScryOne(onDone){
+  if(!oppDeckBot.length){ if(onDone) onDone(null); return null; }
+  var card = oppDeckBot[0];
+  var keep = !!card.chaosPow || (card.pow||0) >= 8;
+  if(!keep){ oppDeckBot.shift(); oppDeckBot.push(card); }
+  if(onDone) onDone(card);
+  return card;
+}
+function banishFromHandBot(n){ for(var _bi=0;_bi<(n||0);_bi++){ if(oppHandBot.length){ oppBanishBot.push(oppHandBot.splice(Math.floor(Math.random()*oppHandBot.length),1)[0]); oppHandBanishedThisTurn=true; } } }
 function oppBanishN(n){ for(var _oj=0;_oj<(n||0);_oj++){ if(typeof oppHandBot!=='undefined'&&oppHandBot.length>1){ oppBanishBot.push(oppHandBot.splice(Math.floor(Math.random()*oppHandBot.length),1)[0]); } } }   // never drain the bot's last card -- same floor as pickOppRears, or dredge strands it at 0 with no supports for the rest of the match
 // stepSink (7/13/26): same real bug class as applyRuleList's fix — this function has NEVER taken a
 // stepSink, so its abilLog.push calls relied entirely on the outer RS monkeypatch, which reads
@@ -7962,6 +8086,7 @@ function applyBotDeckMasterCommitEffects(oc){
   if(!activeBot || !activeBot.dmCard || !oc) return;
   var tier = conjureTierOf(oc, activeBot.dmCard);
   if(tier===1){
+    if(typeof fireBotDeckMasterAvatara==='function') fireBotDeckMasterAvatara(oc);
     (DM_EXCLUSIVE[oc.name]||[]).forEach(function(r){
       if('raiseRemnant' in r && typeof oppDeathRemnants!=='undefined'){
         var amt = (r.raiseRemnant==='self_pow') ? (oc.pow||0) : (r.raiseRemnant||0);
@@ -8658,7 +8783,9 @@ function applyCardRules(name, ctx, playerPow, oppPow, abilLog, stepSink, isOpp){
 }
 function resolve(pc, oc, cond, playerCommittedPow){
   let playerPow = playerCommittedPow != null ? playerCommittedPow : ((pc.pow||0)+(pc._bo||0)+(pc.name==='Conduit of Chaos, Kleydson'?2*banishPile.length:0));
-  let oppPow = oc.pow + (typeof oppRemnantPowSum==='function' ? oppRemnantPowSum() : 0);
+  let oppPow = oc.pow + (typeof oppRemnantPowSum==='function' ? oppRemnantPowSum() : 0) + (oppDmNextConjureBonus||0);
+  if(oppDmNextConjureDouble){ oppPow *= 2; if(typeof toast==='function') toast("🐉 Opp Ourevos's Shattered Chronoplain — power doubled", false); }
+  oppDmNextConjureBonus = 0; oppDmNextConjureDouble = false;   // one-shot deferred bonus for the bot's own NEXT conjure, same lifecycle as the player's dmNextConjureBonus/Double
   if(typeof applyBotDeckMasterCommitEffects==='function') applyBotDeckMasterCommitEffects(oc);
 
   const abilLog = [];
@@ -8734,6 +8861,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     pendingOppRears.forEach(function(og,_ogi){ if(!og) return; var _okc=(typeof CALLED!=='undefined')?CALLED[og.name]:null; if(_okc && _okc.snipeSupport){ if(rearGuards[_ogi]){ var _osn=rearGuards[_ogi]; rearGuards[_ogi]=null; abilLog.push('🎯 Opp '+og.name+': sniped '+_osn.name+' — your support removed'); } else if(_okc.snipeFailAdd){ oppPow+=_okc.snipeFailAdd; abilLog.push('🎯 Opp '+og.name+': no opposing support to snipe — +'+_okc.snipeFailAdd+' instead'); } } });
 
     rearGuards.forEach(function(rg,_rgi){ if(!rg) return; if(pc&&pc.name==='Kaelthar the Ascendant') return;
+      if(typeof oppDmNullifyPlayerSupportsThisDuel!=='undefined' && oppDmNullifyPlayerSupportsThisDuel){ abilLog.push('🛡 Opp Ahdorah Khaan — your '+rg.name+' nullified, no support effect applied'); return; }
       RS._inRules=true; var _rr=applyCalled(rg, _rgc, playerPow, oppPow, abilLog, false, RS); playerPow=_rr[0]; oppPow=_rr[1]; RS._inRules=false; RS._resync();
       var _rgc2=(typeof shield==='function')?shield(rg):0; if(_rgc2){ playerPow+=_rgc2; abilLog.push('🛡️ '+rg.name+' called — +'+_rgc2+' (Shield)'); }
       var _lk=fieldLink(pc, rg); if(_lk){ playerPow+=_lk.pow; abilLog.push('🔗 '+_lk.name+' Link — '+pc.name+' + '+rg.name+': +'+_lk.pow); var _tb=(typeof CALLED!=='undefined'&&CALLED[rg.name]&&CALLED[rg.name].twinBuff)||0; if(_tb){ playerPow+=_tb; abilLog.push('🐺 '+rg.name+' rallies the twins — '+pc.name+' +'+_tb); } }
@@ -8750,8 +8878,11 @@ function resolve(pc, oc, cond, playerCommittedPow){
       RS._inRules=true; var _or3=applyCalled(og, _orc, oppPow, playerPow, abilLog, true, RS); oppPow=_or3[0]; playerPow=_or3[1]; RS._inRules=false; RS._resync();
       var _ogc2=(typeof shield==='function')?shield(og):0; if(_ogc2){ oppPow+=_ogc2; abilLog.push('🛡️ Opp '+og.name+' called — +'+_ogc2+' (Shield)'); }
       var _lk2=fieldLink(oc, og); if(_lk2){ oppPow+=_lk2.pow; abilLog.push('🔗 Opp '+_lk2.name+' Link — '+oc.name+' + '+og.name+': +'+_lk2.pow); var _tb2=(typeof CALLED!=='undefined'&&CALLED[og.name]&&CALLED[og.name].twinBuff)||0; if(_tb2){ oppPow+=_tb2; } }
+      if(typeof oppDmSupportAddPowThisDuel!=='undefined' && oppDmSupportAddPowThisDuel){ var _odap=(og.chaosPow?0:(og.pow||0)); if(_odap){ oppPow+=_odap; abilLog.push('🔥 Opp Kotei — '+og.name+' adds its own power: +'+_odap); } }
+      if(typeof oppDmSupportDoubleCostThisDuel!=='undefined' && oppDmSupportDoubleCostThisDuel){ var _oddc=(typeof shield==='function')?shield(og):0; if(_oddc){ oppPow+=_oddc*2; abilLog.push('🧬 Opp Darwin — '+og.name+' as support: +'+(_oddc*2)+' (double Shield)'); } }
     });
     if(typeof dmAhdorahBonusPending!=='undefined' && dmAhdorahBonusPending){ dmAhdorahBonusPending=false; if(!pendingOppRears.filter(Boolean).length){ var _dak=drawToHand(2); if(_dak) abilLog.push('🛡 Ahdorah Khaan — opponent called no supports, drew '+_dak); } }
+    if(typeof oppDmAhdorahBonusPending!=='undefined' && oppDmAhdorahBonusPending){ oppDmAhdorahBonusPending=false; if(!rearGuards.filter(Boolean).length){ var _odak=oppDrawN(2); if(_odak) abilLog.push('🛡 Opp Ahdorah Khaan — you called no supports, opponent drew '+_odak); } }
   }
   // ── RALLY: comradery — bonus power per ally (supports this duel + Winners Circle) ──
   if(typeof RALLY!=='undefined'){
@@ -12432,6 +12563,13 @@ function oppEndDuelCycle(){
     else { oppLossStreak=Math.min(3,(oppLossStreak||0)+1);
       try{ if(typeof oppWonBot!=='undefined' && oppWonBot.size){ var _pool=[].concat(typeof OPP_CARDS!=='undefined'?OPP_CARDS:[], typeof COLLECTION!=='undefined'?COLLECTION:[]); var _best=null,_bp=-1; oppWonBot.forEach(function(nm){ var _c=_pool.find(function(x){return x.name===nm;}); var _pw=_c?(_c.pow||0):0; if(_pw>_bp){_bp=_pw;_best=nm;} }); if(_best){ oppWonBot.delete(_best); if(typeof oppWC!=='undefined') oppWC=oppWonBot.size; var _bc=_pool.find(function(x){return x.name===_best;}); if(_bc) oppHandBot.push(Object.assign({},_bc)); } } }catch(e){} } }
   for(var _bd=0;_bd<DRAW_PER_TURN;_bd++){ if(oppDeckBot.length && oppHandBot.length<MAX_HAND) oppHandBot.push(oppDeckBot.shift()); }   // draw DRAW_PER_TURN per turn — same speed as player, same hand cap
+  // Darwin DM skill, 2nd clause, bot mirror (8/8/26) -- see the player-side hook near dealNewDeck()'s
+  // draw phase for the original. Re-checks activeBot.dmCard identity same as the player checks
+  // deckMasterCard, for the same reason (the flag can stay armed after a bot swap).
+  if(oppDmDarwinHandRefillArmed && activeBot && activeBot.dmCard==='Darwin' && oppHandBot.length<=2){
+    var _odgot=oppDrawN(2);
+    if(_odgot){ banishFromHandBot(1); if(typeof toast==='function') toast('🧬 Opp Darwin — opponent’s hand refilled low: drew '+_odgot+', banished 1.', false); }
+  }
 }
 function _oppStamp(card){ var _canon=(typeof COLLECTION!=='undefined')?COLLECTION.find(function(x){return x.name===card.name && !x.uid;}):null; return Object.assign({}, card, (_canon&&_canon.abil)?{abil:_canon.abil}:{}); }
 // 7/22/26: removed a dead, superseded pickOppCard() that used to sit here -- it was fully
@@ -15146,7 +15284,7 @@ function resetMatchState(){
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[];
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
-  banishSurge=0; oppBanishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0;
+  banishSurge=0; oppBanishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; oppDmNextConjureBonus=0; oppDmNextConjureDouble=false; oppDmAhdorahBonusPending=false; dmAbilityUsedThisMatchBot=false; oppDmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0;
   // Oath (KOTEI §2.3): sworn automatically at match start if the current Deck Master has a real
   // DM_OATH entry — "on game start / when the Deck Master is set, you swear an Oath." condition()
   // is evaluated once, at match end (showMatchComplete()), never here — this just marks the vow
@@ -15156,7 +15294,7 @@ function resetMatchState(){
     if(_dmo && deckMasterCard==='The Claim, Lagertha Waltz') oathTargetName=(typeof activeBot!=='undefined' && activeBot && activeBot.dmCard) || (activeBot && activeBot.name) || null; }
   ragwingWins=0; glacialGuardUsed=false; oppGuardUsed=false; horrorRegenUsed=false; matchTraitPow={}; untouchableUsed=false; matchPlayed=new Set(); pendingOppCard=null; preSelectedCard=null; rearGuards=[]; rearGuardIdxs=[]; pendingOppRears=[]; if(typeof _oppInPlay!=='undefined')_oppInPlay=[];
   oppWC=0; flameVeilFromWC=false; oppNextDebuff=0; conditionLocked=false; unbankNextWin=false; oppUnbankNextWin=false;
-  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; condSupportZonesLocked=false; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
+  charge=3/*energy start (7/15/26: back to 3)*/; oppCharge=3; spellHand=[]; spellOppPow=0; spellSelfPow=0; spellJam=false; spellNullOpp=false; spellShield=false; spellHalveField=false; condNeutralized=false; condNeutralizedBy=''; condHiddenFromOpp=false; condSupportZonesLocked=false; energyLoadoutOverride=null; dmSupportBonusThisDuel=0; handBanishedThisTurn=false; oppHandBanishedThisTurn=false; dmUnitsReturnToHandThisDuel=false; dmSupportAddPowThisDuel=false; dmSupportDoubleCostThisDuel=false; dmNullifyOppSupportsThisDuel=false; oppSupportSlotsBlocked=0; dmZeroCostThisDuel=false; oppDmUnitsReturnToHandThisDuel=false; oppDmSupportAddPowThisDuel=false; oppDmSupportDoubleCostThisDuel=false; oppDmNullifyPlayerSupportsThisDuel=false; oppDmZeroCostThisDuel=false; handReturnCount={}; spellDiscount=0; spellsUsedRound=[]; if(typeof renderCharge==='function') renderCharge();
   stakeMult=1; matchWager=20; raisedThisPhase=false; pendingBotRaise=0; raiseLock=null; updateStake();  // base rank-point stake per match
   document.getElementById('result-overlay').classList.remove('show');
   document.getElementById('record-reveal').style.display='none';
@@ -16318,7 +16456,7 @@ function pickOppCard(){
   var chosen=_pool[bi];
   var realIdx=oppHandBot.indexOf(chosen);
   var card=oppHandBot.splice(realIdx,1)[0]; _oppInPlay=[card];   // COMMIT from the bot's hand
-  oppCharge=Math.max(0, oppCharge-conjureCost(card));
+  oppCharge=Math.max(0, oppCharge-conjureCost(card, true));
   // 8/5/26: bot-side instant-card usage -- previously the bot never activated an instant at all
   // (activateInstant() has no bot-side equivalent). Lite pass covers just the plain default-Surge
   // shape (banish an instant-timing card, bank its power for this commit) since that's what all 7
@@ -16345,6 +16483,7 @@ if(typeof resolve==='function'){ var _oppRes=resolve; resolve=function(pc,oc,con
   var r = _oppRes.apply(this, arguments);
   try{ if(oc && oc.name && typeof playerScore!=='undefined' && playerScore[1] > _b1){
     if(typeof oppUnbankNextWin!=='undefined' && oppUnbankNextWin){ oppUnbankNextWin=false; if(typeof oppHandBot!=='undefined') oppHandBot.push(Object.assign({},oc)); }
+    else if(typeof oppDmUnitsReturnToHandThisDuel!=='undefined' && oppDmUnitsReturnToHandThisDuel){ if(typeof oppHandBot!=='undefined') oppHandBot.push(Object.assign({},oc)); if(typeof toast==='function') toast('💰 Opp Kravyn — '+oc.name+' returns to the opponent’s hand instead of their Winners Circle (Deck Master ability)', false); }
     else { if(!oppWonBot) oppWonBot=new Set(); oppWonBot.add(oc.name); if(typeof oppWC!=='undefined') oppWC=oppWonBot.size; }
   } }catch(e){}
   return r;
