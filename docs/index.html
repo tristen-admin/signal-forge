@@ -11030,7 +11030,10 @@ const KEYWORDS = {
   'Nirmāṇa': 'Summoning — calls a support into your rear guard, raises a Death Remnant from nothing, or generates cards from your deck (draw, tutor, banish-pile retrieval).',
   'Bandha': 'Restricts a hand or field, or binds/locks/nullifies a card or the active condition — for either player, self-locks included.',
   'Māyā': 'A paid transform into a different printing of this card — a real identity change, not a stat buff.',
-  'Shield': 'Power your Fighter gains if this card is Called as a support instead of conjured as your Fighter. Cheaper cards give more Shield — it rewards playing a card for its support value, not just its raw power.'
+  'Shield': 'Power your Fighter gains if this card is Called as a support instead of conjured as your Fighter. Cheaper cards give more Shield — it rewards playing a card for its support value, not just its raw power.',
+  'Power': 'This card\'s fighting strength for the duel. Both sides\' fielded power is totaled and the higher total wins. A gold highlight means this instance is currently buffed above its printed value.',
+  'Record': 'This exact card\'s permanent match history — Kills (wins) and Deaths (losses), recorded on this copy forever. It feeds the card\'s Legend score and market value; zero deaths with at least one win makes it Pristine.',
+  'Rarity': 'This card\'s rarity tier — common, rare, ultra, or apex. Rarity tracks ability strength, not raw power — a common can still hit hard.'
 };
 const KW_FILTERABLE = ['Instant','Death Remnant','Record Guard','Kill Escalation','Last Stand','Pre-commit','Bloodrage','Elemental Flurry','Vajra','Astra','Nirmāṇa','Bandha','Māyā'];
 const KW_KEYS = Object.keys(KEYWORDS).sort((a,b) => b.length - a.length);
@@ -11266,12 +11269,12 @@ function buildDeckPool(){
     const campCls = 'camp-'+(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase();
     const inDeck = activeDeck.has(c.uid||c.name);
     const owned = isOwned(c);
-    const pristine = ((typeof isPristine==='function')?isPristine(c):(c.deaths===0)) ? `<span class="vc-pristine">◈</span>` : '';
+    const pristine = ((typeof isPristine==='function')?isPristine(c):(c.deaths===0)) ? `<span class="vc-pristine" data-kw="Pristine">◈</span>` : '';
     return `<div class="vault-card ${c.rarity} ${campCls} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="cancelHidePreview();previewPoolCardReadable('${nm}',this)" onmouseleave="scheduleHidePreview()">
       <div class="vc-art" style="${artFillStyle(c.artKey||c.name)}">
         ${sigilFor(c.artKey||c.name)}
-        <span class="vc-rarity-ribbon">${rlab(c.rarity)}</span>
-        <span class="vc-pow">${c.pow}</span>
+        <span class="vc-rarity-ribbon" data-kw="Rarity">${rlab(c.rarity)}</span>
+        <span class="vc-pow" data-kw="Power">${c.pow}</span>
         ${pristine}
         ${(ownedCopies[c.uid||c.name]||1)>1?`<span class="vc-copies">×${ownedCopies[c.uid||c.name]}</span>`:''}
         ${c.variant?'<span style="position:absolute;top:6px;left:6px;font-size:13px;filter:drop-shadow(0 1px 2px #000)">🏆</span>':''}
@@ -11279,7 +11282,7 @@ function buildDeckPool(){
       </div>
       <div class="vc-info">
         <div class="vc-name">${dispName(c.name)}</div>
-        <div class="vc-kd"><span class="k">${kdOf(c).k}K</span><span class="d">${kdOf(c).d}D</span></div>
+        <div class="vc-kd" data-kw="Record"><span class="k">${kdOf(c).k}K</span><span class="d">${kdOf(c).d}D</span></div>
       </div>
       <span class="vc-deck-tag">✓ In Deck</span>
     </div>`;
@@ -12979,7 +12982,7 @@ function buildVault(){
   if(!entries.length){ var _emsg = vaultViewMode==='variant' ? 'No skin cards yet — skins come from Kinzo summons (paid, play-only copies).' : (vaultKeyword||vaultArchetype||vaultViewMode||vaultRaritySet.size||vaultCamp||vaultSearch) ? 'No cards match this filter — try clearing it.' : 'Your vault is empty — open a pack in the Shop or win a duel.'; grid.innerHTML='<div class="vault-empty">'+_emsg+'</div>'; return; }
   grid.innerHTML=entries.map(e=>{
     const c=e.c;
-    const pristine=isPristine(c)?`<span class="vc-pristine">◈ Pristine</span>`:'';
+    const pristine=isPristine(c)?`<span class="vc-pristine" data-kw="Pristine">◈ Pristine</span>`:'';
     const inDeck=activeDeck.has(c.uid||c.name)?'in-deck':'';
     return `<div class="vault-card ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()} ${inDeck} ${e.fresh?'is-fresh':''} ${c.won?'is-won':''} ${foilClass(c)} ${frameClass(c)} ${e.locked?'locked-card':(typeof cardStateClasses==='function'?cardStateClasses(c):'')}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}',${e.fresh?'true':'false'})" onmouseenter="cancelHidePreview();previewPoolCardReadable('${(c.uid||c.name).replace(/'/g,"\\'")}',this)" onmouseleave="scheduleHidePreview()">
       <div class="vc-art vc-frame">
@@ -12994,7 +12997,7 @@ function buildVault(){
       </div>
       <div class="vc-info">
         <div class="vc-name">${dispName(c.name)}</div>
-        <div class="vc-kd"><span class="k">${e.k}K</span><span class="d">${e.d}D</span></div>
+        <div class="vc-kd" data-kw="Record"><span class="k">${e.k}K</span><span class="d">${e.d}D</span></div>
         ${traitIconsHTML(c)}
         ${legendMiniHTML(c)}
       </div>
@@ -13332,9 +13335,9 @@ function bigCardHTML(c, opts){
     <div class="tf-art" style="${artStyle}">${artInner}</div>
     <div class="tf-cost" data-kw="Conjure">${typeof conjureCost==='function'?conjureCost(c):(c.cost||'')}</div>
     <div class="tf-name">${dispName(c.name)}</div>
-    <div class="tf-pow"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${c.chaosPow?'?':((c.pow||0)+(c._bo||0))}</div>
+    <div class="tf-pow" data-kw="Power"${c._bo?' style="color:#ffd76a;text-shadow:0 0 8px rgba(255,207,90,.6)"':''}>${c.chaosPow?'?':((c.pow||0)+(c._bo||0))}</div>
     <div class="tf-shield" data-kw="Shield">🛡${typeof shield==='function'?shield(c):''}</div>
-    <div class="tf-kd"><span class="k">${_kd.k}K</span>/<span class="d">${_kd.d}D</span>${isPristine(c)?' ◈':''}</div>
+    <div class="tf-kd" data-kw="Record"><span class="k">${_kd.k}K</span>/<span class="d">${_kd.d}D</span>${isPristine(c)?' <span data-kw="Pristine">◈</span>':''}</div>
     <div class="tf-text">${typeof keywordChipsHTML==='function'?keywordChipsHTML(c,true):''}</div>
     ${(typeof stateIcon==='function'&&stateIcon(c))?`<div class="sf-pip" title="${stateTitle(c)}">${stateIcon(c)}</div>`:``}
   </div>`;
@@ -13342,7 +13345,7 @@ function bigCardHTML(c, opts){
 function readableCardHTML(c){
   var kd=(typeof kdOf==='function')?kdOf(c):{k:c.kills,d:c.deaths};
   var cost=(typeof conjureCost==='function')?conjureCost(c):(c.cost||0);
-  var pristine=isPristine(c)?' · ◈ Pristine':'';
+  var pristine=isPristine(c)?' · <span data-kw="Pristine">◈ Pristine</span>':'';
   var called=CALLED[c.name];
   var gl=(typeof glossify==='function')?glossify:function(x){return x;};
   var art=(typeof artFillStyle==='function')?artFillStyle(c.name):'';
@@ -13350,8 +13353,8 @@ function readableCardHTML(c){
   var sig=hasArt?'':('<span class="rc-sig">'+(((typeof CARD_SIGIL!=='undefined')&&CARD_SIGIL[c.name])||'◈')+'</span>');
   return '<div class="rcard '+c.rarity+' camp-'+(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()+' '+(typeof cardStateClasses==='function'?cardStateClasses(c):'')+'">'
     + '<div class="rc-art"'+(art?' style="'+art+'"':'')+'>'+sig+'</div>'
-    + '<div class="rc-top"><span class="rc-cost" data-kw="Conjure">⚡'+cost+'</span><span class="rc-name">'+dispName(c.name)+'</span><span class="rc-pow">'+(c.chaosPow?'?':((c.pow||0)+(c._bo||0)))+'</span><span class="rc-shield" data-kw="Shield">🛡'+(typeof shield==='function'?shield(c):'')+'</span></div>'
-    + '<div class="rc-meta">'+String(c.rarity).toUpperCase()+' · <span class="k">'+kd.k+'K</span> / <span class="d">'+kd.d+'D</span>'+pristine+'</div>'
+    + '<div class="rc-top"><span class="rc-cost" data-kw="Conjure">⚡'+cost+'</span><span class="rc-name">'+dispName(c.name)+'</span><span class="rc-pow" data-kw="Power">'+(c.chaosPow?'?':((c.pow||0)+(c._bo||0)))+'</span><span class="rc-shield" data-kw="Shield">🛡'+(typeof shield==='function'?shield(c):'')+'</span></div>'
+    + '<div class="rc-meta"><span data-kw="Rarity">'+String(c.rarity).toUpperCase()+'</span> · <span data-kw="Record"><span class="k">'+kd.k+'K</span> / <span class="d">'+kd.d+'D</span></span>'+pristine+'</div>'
     + (typeof keywordChipsHTML==='function'?keywordChipsHTML(c):'')
     + '<div class="rc-sec"><span class="rc-lbl">⚔ Conjured — Fighter</span>'+gl(c.abil)+'</div>'
     + (called?'<div class="rc-sec rc-called"><span class="rc-lbl">📣 Called — Support</span>'+gl(called.text)+'</div>':'')
