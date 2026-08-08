@@ -3887,7 +3887,7 @@ const DECK_POOL = [
   {name:'Forgemask',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Reforged: on commit, +3 power, and +4 more if you lost your last duel — the forge tempers what breaks.'},
   {name:'Lagertha Waltz, Wrathful Transformation',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Alpha\'s Grief: on commit, +3 power, and +4 more if you have lost a duel this match — the pack\'s fury peaks in mourning.'},
   {name:'The Bronzed Beast, Hanse Waltz',pow:20,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Moon: on commit, +5 while behind — if you were behind when you kill an opponent fighter, this returns to your hand at its original power.'},
-  {name:'Hanse, Rogue Fangs',pow:12,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rogue Fangs: on commit, +2 power, +2 more on your 1st or 2nd duel this match — quick, vicious, not yet the Beast. Māyā (2⚡, from hand): pay the cost to become "The Bronzed Beast, Hanse Waltz."'},
+  {name:'Hanse, Rogue Fangs',pow:12,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rogue Fangs: on commit, +2 power, +2 more on your 1st or 2nd duel this match — quick, vicious, not yet the Beast. Māyā, from hand: pay 2⚡ to become "The Bronzed Beast, Hanse Waltz" early, or summon him twice in one match and the transformation is free.'},
   {name:'La "La" Ballora, the Broodqueen',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw 2 cards — her brood is her hand.'},
   {name:'Ourevos, the Golden Dragon',pow:30,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Unmaking: when Ourevos is committed he shrugs off the arena — the active condition\'s power effects don\'t touch him. Only Ability Lock can bind the god. Each time he is returned from the Winners Circle to your hand, he permanently loses 3 power.'},
   {name:'Keawe Kel\'rua',pow:16,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Rising Talent: on commit, +3 power if you lost your last duel. Repeat this effect if you have 1 or fewer support units this battle.'},
@@ -4204,15 +4204,17 @@ const DM_ACTIVATED_ABILITY = {
     }
     oppDmSupportAddPowThisDuel = true;
   }},
-  'The Bronzed Beast, Hanse Waltz': {log:'Blood Moon Rising', desc:'if your hand has 3 or fewer cards, draw 2 and gain 2 Charge', run:function(){
-    if(hand.length<=3){
-      drawToHand(2);
-      charge += 2;
-      if(typeof renderCharge==='function') renderCharge();
-      if(typeof toast==='function') toast('\ud83c\udf11 Blood Moon Rising \u2014 hand was 3 or fewer, drew 2 and gained 2 Charge', true);
-    } else if(typeof toast==='function') toast('\ud83c\udf11 Blood Moon Rising \u2014 hand has more than 3 cards, no effect', false);
+  // 8/8/26 owner replace ("give it a deckmaster effect to gain power and eliminate supports from
+  // opponents field") -- swaps out the old "Blood Moon Rising" hand-size draw/charge effect
+  // entirely (one bonus mechanism per Deck Master; this doesn't stack alongside it).
+  'The Bronzed Beast, Hanse Waltz': {log:'Blood Moon Rising \u2014 the Beast\u2019s Purge', desc:'your next conjure +8, and destroy every card in your opponent\u2019s support zone', run:function(){
+    dmNextConjureBonus = (dmNextConjureBonus||0) + 8;
+    var _cleared=0;
+    for(var _i=0;_i<pendingOppRears.length;_i++){ if(pendingOppRears[_i]){ pendingOppRears[_i]=null; _cleared++; } }
+    if(typeof toast==='function') toast('\ud83c\udf11 Blood Moon Rising \u2014 the Beast\u2019s Purge: next conjure +8'+(_cleared?(', cleared '+_cleared+' opposing support'+(_cleared>1?'s':'')):', opponent had no supports to clear'), true);
   }, runBot:function(){
-    if(oppHandBot.length<=3){ oppDrawN(2); oppCharge += 2; }
+    oppDmNextConjureBonus = (oppDmNextConjureBonus||0) + 8;
+    for(var _i=0;_i<rearGuards.length;_i++){ if(rearGuards[_i]){ rearGuards[_i]=null; } }
   }},
   'Ghorruk "Gnarly" Judarr': {log:'Boneyard Rising', desc:"raise a Death Remnant equal to your hand size plus your banish zone size", run:function(){
     var _gp = hand.length + banishPile.length;
@@ -4460,17 +4462,24 @@ function renderDeckMasterAbilityStrip(){
 const MAYA_TRANSFORM = {
   'Hanse, Rogue Fangs': {into:'The Bronzed Beast, Hanse Waltz', cost:2, log:'Māyā — the Beast awakens'}
 };
+// Māyā's default trigger (8/8/26): conjuring the same card a 2nd+ time this match waives its
+// transform cost entirely -- summoning it twice IS the price, unless a card's own entry says
+// otherwise (none do yet). conjureCountThisMatch is keyed by name, incremented in commitCard().
+function mayaTransformCost(name, baseCost){
+  return (typeof conjureCountThisMatch!=='undefined' && (conjureCountThisMatch[name]||0) >= 1) ? 0 : baseCost;
+}
 function activateMayaTransform(i){
   if(phase==='committed' || phase==='resolved') return;   // any MAIN phase, not after you've locked in
   var c = hand[i]; if(!c) return;
   var t = MAYA_TRANSFORM[c.name]; if(!t) return;
-  if(charge < t.cost){ if(typeof toast==='function') toast(c.name+' needs '+t.cost+' energy to transform.', false); return; }
+  var cost = mayaTransformCost(c.name, t.cost);
+  if(charge < cost){ if(typeof toast==='function') toast(c.name+' needs '+cost+' energy to transform.', false); return; }
   var target = COLLECTION.find(function(d){ return d.name===t.into; }); if(!target) return;
-  charge -= t.cost; if(typeof renderCharge==='function') renderCharge();
+  charge -= cost; if(typeof renderCharge==='function') renderCharge();
   hand[i] = Object.assign({}, target, {kills:0, deaths:0});
   if(typeof renderMayaStrip==='function') renderMayaStrip();
   if(typeof buildHand==='function') buildHand();
-  if(typeof toast==='function') toast('🌙 '+t.log+': '+c.name+' → '+t.into, true);
+  if(typeof toast==='function') toast('🌙 '+t.log+(cost===0?' (earned — summoned twice this match)':'')+': '+c.name+' → '+t.into, true);
 }
 function renderMayaStrip(){
   var strip=document.getElementById('maya-strip'); if(!strip) return;
@@ -4481,8 +4490,10 @@ function renderMayaStrip(){
   strip.style.display='flex';
   if(opts) opts.innerHTML = candidates.map(function(x){
     var t = MAYA_TRANSFORM[x.c.name];
-    var afford = charge >= t.cost;
-    return '<button class="instant-card-btn" style="border-color:rgba(155,109,214,0.6);color:#c9a6f0'+(afford?'':';opacity:.5;cursor:not-allowed')+'" '+(afford?('onclick="activateMayaTransform('+x.i+')"'):'disabled')+'>🌙 '+x.c.name+' — '+t.log+' ('+t.cost+'⚡, from hand)</button>';
+    var cost = mayaTransformCost(x.c.name, t.cost);
+    var afford = charge >= cost;
+    var costLabel = cost===0 ? 'FREE — summoned twice' : (cost+'⚡, from hand');
+    return '<button class="instant-card-btn" style="border-color:rgba(155,109,214,0.6);color:#c9a6f0'+(afford?'':';opacity:.5;cursor:not-allowed')+'" '+(afford?('onclick="activateMayaTransform('+x.i+')"'):'disabled')+'>🌙 '+x.c.name+' — '+t.log+' ('+costLabel+')</button>';
   }).join('');
 }
 let divinerBonusNext = 0;
@@ -4524,6 +4535,12 @@ let matchCommits = 0;
 // unlike Kravyn/Sworn Duelist's career-kill-threshold CARD_RULES, which is why this is a new
 // match-only counter rather than reusing kdOf()'s permanent per-card record.
 let matchKillsThisMatch = 0, oppMatchKillsThisMatch = 0;
+// Māyā's default trigger (8/8/26, owner: "unless otherwise specially stated, the flat cost is to
+// summon that character two times in a match, then it flips over to its stronger version" -- the
+// keyword's standard template going forward). Tracks how many times each specific card name has
+// been conjured as Fighter this match; a MAYA_TRANSFORM card's charge cost waives once it's already
+// been conjured at least once (see mayaTransformCost()) -- conjuring it again is itself the price.
+let conjureCountThisMatch = {};
 let skullchainKills = 0;
 let ragwingWins = 0;
 let glacialGuardUsed = false;
@@ -7210,6 +7227,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   const c = CONDITIONS[conditionIndex];
   const pc = hand[selectedCard];
   rearGuards = rearGuardIdxs.filter(function(ix){return ix!==selectedCard && hand[ix];}).map(function(ix){return hand[ix];});
+  conjureCountThisMatch[pc.name] = (conjureCountThisMatch[pc.name]||0) + 1;
   /* Energy rework (7/12/26, direct spec): every conjure now actually spends Charge equal to its
      conjureCost(), reversing the prior "conjuring doesn't spend Charge, only spells do" model.
      Clamped at 0 (the energy-starved "cheapest conjures free" case in stageFighter() can let a
@@ -15494,7 +15512,7 @@ function resetMatchState(){
   phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[];
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
-  banishSurge=0; oppBanishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; oppDmNextConjureBonus=0; oppDmNextConjureDouble=false; oppDmAhdorahBonusPending=false; dmAbilityUsedThisMatchBot=false; oppDmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0; matchKillsThisMatch=0; oppMatchKillsThisMatch=0;
+  banishSurge=0; oppBanishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; oppDmNextConjureBonus=0; oppDmNextConjureDouble=false; oppDmAhdorahBonusPending=false; dmAbilityUsedThisMatchBot=false; oppDmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0; matchKillsThisMatch=0; oppMatchKillsThisMatch=0; conjureCountThisMatch={};
   // Oath (KOTEI §2.3): sworn automatically at match start if the current Deck Master has a real
   // DM_OATH entry — "on game start / when the Deck Master is set, you swear an Oath." condition()
   // is evaluated once, at match end (showMatchComplete()), never here — this just marks the vow
