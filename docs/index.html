@@ -3869,7 +3869,7 @@ const DECK_POOL = [
   // a sustainable loop instead of a one-time front-loaded bonus. Not in WARPATH_PRESET by default —
   // available in the Vault/deck builder for anyone building around the combo.
   {name:'Unbanked Victory',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +3 power if your Winners Circle is empty — an unclaimed victory is worth more than a banked one.'},
-  {name:'Reclaim the Colors',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your Winners Circle.'},
+  {name:'Reclaim the Colors',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +5 power if your Winners Circle is empty — colors flown before any win is claimed.'},
   // Ultras
   {name:'Lagertha Waltz',pow:8,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +6 if you lost your last duel. -2 if you won your last duel.'},
   {name:'Valcarion',pow:17,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: if there is a card in your banish zone, add it to your hand — or call it to an open support circle.'},
@@ -3955,7 +3955,7 @@ const DECK_POOL = [
   {name:'Bloodwake Duelist',pow:11,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: on commit, +3 power for every kill you have earned this match.'},
   {name:'Warpath Vanguard',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power on the 1st or 2nd duel of the match.'},
   {name:'Skullchain Reaver',pow:18,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power per kill earned this match; when it wins, it returns to your hand instead of the Winners Circle.'},
-  {name:'Trophy-Hunter Kessa',pow:17,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every card in BOTH players Winners Circle.'},
+  {name:'Trophy-Hunter Kessa',pow:17,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +9 power if your Winners Circle is empty — a trophy hunter takes nothing for granted once it\'s already banked.'},
   {name:'First-Blood Squire',pow:12,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +4 power on the 1st duel of the match only.'},
   {name:'The Undefeated',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power for every duel you have already won this match.'},
   {name:"Kravyn's Protege",pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +3 power once this card has earned 6 or more career kills.'},
@@ -12489,7 +12489,7 @@ CARD_RULES['Dragan Korr']=[{"if":{"v":"pc_kills","op":">=","n":18},"add":6,"log"
 // own printed text already promised WC-scaling with zero CARD_RULES behind either one, same
 // disclosure-mismatch class as the 4 broken Kill Escalation cards above. Directly on-topic for
 // this batch (the whole point is making WC scaling real and generic), fixed alongside it.
-CARD_RULES['Reclaim the Colors']=[{"addvar":"wc_len","x":1,"log":"🎗 Reclaim the Colors: +1 per Winners Circle card"}];
+CARD_RULES['Reclaim the Colors']=[{"if":{"v":"wc_len","op":"==","n":0},"add":5,"log":"🎗 Reclaim the Colors: Winners Circle empty — +5"}];
 CARD_RULES['Unbanked Victory']=[{"if":{"v":"wc_len","op":"==","n":0},"add":3,"log":"🏳 Unbanked Victory: Winners Circle empty, +3"}];
 // Winners-Circle / banish-zone generic toolbox (8/8/26, owner: "make more generic toolboxing
 // options for all players/archetypes to utilize winners circle as a means to activate a
@@ -12531,7 +12531,7 @@ CARD_RULES['Fifth Frequency Stormcaller']=[{"add":3,"log":"🌪️ Flurry: +3"},
 CARD_RULES['Envoy of Tyrants, Ella Ballora']=[{"if":{"v":"hand_len","op":">=","n":3},"add":3,"log":"⚔️ Bloodrage: +3 (3+ hand)"},{"if":{"v":"player_losses","op":">","n":0},"add":3,"log":"⚔️ Bloodrage: +3 (wounded)"}];
 CARD_RULES['Kessuae, Tide of Ruin']=[{"if":{"v":"rear_count","op":">=","n":2},"add":5,"log":"🌊 Kessuae: +5 (both supports)"}];
 CARD_RULES['Kaelthar the Ascendant']=[{"if":{"v":"player_wins","op":">","v2":"player_losses"},"add":-20,"log":"🐉 Ascendant: −20 (winning)"},{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":20,"log":"🐉 Ascendant: +20 (losing)"}];
-CARD_RULES['Trophy-Hunter Kessa']=[{"addvar":"both_wc","x":2,"log":"🏆 Kessa: +2 per trophy (both Circles)"}];
+CARD_RULES['Trophy-Hunter Kessa']=[{"if":{"v":"wc_len","op":"==","n":0},"add":9,"log":"🏆 Kessa: Winners Circle empty — +9, nothing taken for granted once it's banked"}];
 CARD_RULES['Ghorruk "Gnarly" Judarr']=[{"if":{"v":"deck_len","op":">","n":0},"addvar":"deck_len","x":0.5,"log":"💀 Ghorruk: +1 per 2 cards left in deck"}];
 CARD_RULES['The Bronzed Beast, Hanse Waltz']=[{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":5,"log":"🌑 Blood Moon: +5 (behind)"}];
 
