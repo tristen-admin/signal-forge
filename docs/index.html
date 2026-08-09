@@ -3972,7 +3972,20 @@ const DECK_POOL = [
   {name:"Widow's Patience",pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +5 power if your hand is full (6 cards).'},
   // ── NOVELTY / TECH (splashes into any deck) ──
   
-  {name:'Tosa Envoy',pow:13,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +3 power and lock the active condition. [Tosa Pact]'},];
+  {name:'Tosa Envoy',pow:13,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +3 power and lock the active condition. [Tosa Pact]'},
+  // Winners-Circle / banish-zone toolbox + Trophy Hall archetype (8/8-8/9/26) -- archetype-neutral
+  // toolbox cards plus a full curated archetype built around Winners Circle / banish zone as a
+  // resource. NOTE (8/9/26): these 7 were originally miswritten into SET2_POOL (anchored on a
+  // duplicate "Reclaim the Colors" line that lives in both pools) and were completely unreachable
+  // in COLLECTION until this fix moved them into the real DECK_POOL.
+  {name:'Hall of Champions',pow:7,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +6 power if your Winners Circle holds 2 or more cards.'},
+  {name:'Victory Lap',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Called as a support: return 1 card from your Winners Circle straight to your hand.'},
+  {name:'Ash Reckoning',pow:7,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +7 power if your banish zone holds 3 or more cards.'},
+  {name:'Twin Ledgers',pow:6,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +1 power for every card in your Winners Circle, and +1 more for every card in your banish zone.'},
+  {name:'Coffer-Keeper',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Called as a support: banish 1 card from your hand; your Fighter +3.'},
+  {name:'Banked Interest',pow:6,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power per card in your Winners Circle, up to 3 (+6 max).'},
+  {name:'The Long Reckoning',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'On commit: +2 power for every card across your Winners Circle and banish zone combined, no cap.'},
+];
 
 // ── SET 2 — held for post-launch release (NOT loaded into COLLECTION) ──
 const SET2_POOL = [
@@ -4651,12 +4664,6 @@ const OPP_CARDS = [
   {name:'King Joris',pow:12,kills:0,deaths:0,rarity:'common',timing:'on',abil:"Rightful Claim: on commit, +1 power for every death on the opponent's record — the betrayed king judges every usurper's sins."},
   {name:'Unbanked Victory',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +3 power if your Winners Circle is empty — an unclaimed victory is worth more than a banked one.'},
   {name:'Reclaim the Colors',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your Winners Circle.'},
-  // Winners-Circle / banish-zone toolbox (8/8/26) -- archetype-neutral by design, not added to
-  // any ARCHETYPE_MEMBERS list. Splashable into anything that's already banking wins or banishing.
-  {name:'Hall of Champions',pow:7,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +6 power if your Winners Circle holds 2 or more cards.'},
-  {name:'Victory Lap',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Called as a support: return 1 card from your Winners Circle straight to your hand.'},
-  {name:'Ash Reckoning',pow:7,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +7 power if your banish zone holds 3 or more cards.'},
-  {name:'Twin Ledgers',pow:6,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +1 power for every card in your Winners Circle, and +1 more for every card in your banish zone.'},
 ];
 
 const PHASE_IDS = ['ph-draw','ph-reveal','ph-instant1','ph-precommit','ph-commit','ph-instant2','ph-resolve'];
@@ -6326,6 +6333,7 @@ const CALLED = {
   "Unbanked Victory":              {text:"your next win returns to your hand instead of banking to the Winners Circle", unbankNextWin:true},
   "Reclaim the Colors":            {text:"return 1 card from your Winners Circle to the bottom of your deck", reclaimWC:1},
   "Victory Lap":                   {text:"return 1 card from your Winners Circle straight to your hand", reclaimWCToHand:1},
+  "Coffer-Keeper":                 {text:"banish 1 card from your hand; your Fighter +3", banishOwn:1, add:3},
   // 8/8/26, owner directive: Deck Masters shouldn't ALSO be great supports -- stacks a third bonus
   // vector on top of the passive/activated split (see feedback_deckmaster_one_bonus_mechanism.md's
   // "only one" rule, extended here to include support-mode). All 20 Deck Masters that had a CALLED
@@ -8027,6 +8035,9 @@ const ARCHETYPE_MEMBERS = {
   // tier 2); Ruffius Rufeldro/Bram the Bulwark are Rare and NOT proven cross-deck generic (only
   // appear in Warpath's own preset), so they belong here instead.
   'Warpath': ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bram the Bulwark'],
+  // Trophy Hall (8/8/26) -- the coherent, uncontradicted answer to Warpath's own empty-WC half:
+  // patient banking instead of front-loaded aggression. Zero member overlap with Warpath on purpose.
+  'Trophy Hall': ['Hall of Champions','Ash Reckoning','Twin Ledgers','Victory Lap','Coffer-Keeper','Banked Interest','The Long Reckoning'],
   // Added 7/24/26 for the Consecrated Reserve charge-economy pass -- non-Common only, excludes
   // King Joris/Ruffius Rufeldro/Bram the Bulwark (cross-deck, already claimed by Warpath above).
   'Radiance': ['Moro','Elowen Dawnspear','Kaelthar the Ascendant','Oathlit Vanguard'],
@@ -8088,6 +8099,11 @@ const DM_EXCLUSIVE = {
   'La "La" Ballora, the Broodqueen': [
     {"addvar":"wc_len","x":1,"log":"🕷 The Broodqueen's Dominion: +1 power per card in your Winners Circle — nothing she's claimed is ever wasted"}
   ],
+  // Trophy Hall's Deck Master anchor (8/8/26) -- passive, kept to a modest rate since the card's
+  // own on-commit ability already scales off the same two piles at a much higher rate.
+  'The Long Reckoning': [
+    {"addvar":"wc_len","x":1,"log":"⚱ The Reckoning Endures: +1 power per card in your Winners Circle"}
+  ],
   // Tange's real printed ability (Kill Escalation) is untouched — this is the NEW exclusive the
   // user asked for 7/12/26: reliant on an EMPTY Winners Circle, to force a real choice between
   // banking a win (safe, but shuts this off for the rest of the match) or finding a way to keep
@@ -8131,6 +8147,7 @@ const ARCHETYPE_VANILLA = {
   'Broodswarm': [{"if":{"v":"hand_len","op":">=","n":4},"add":2,"log":"🕷 Brood Instinct: +2 power with 4 or more cards in hand"}],
   // Kravyn gets the same empty-WC theme as Tange's exclusive, at a smaller vanilla-tier rate.
   'Warpath': [{"if":{"v":"wc_len","op":"==","n":0},"add":4,"log":"⚔ Warpath's Momentum: your Winners Circle is empty — +4 power"}],
+  'Trophy Hall': [{"if":{"v":"wc_len","op":">=","n":1},"add":3,"log":"🏛 Trophy Hall's Due: your Winners Circle isn't empty — +3 power"}],
   // Consecrated Reserve, 7/24/26 -- replaces the withdrawn Pristine-based "Radiant Bearing" spine
   // (see BALANCE_PROPOSALS.md Rev.3). Charge-centric, not Pristine-centric; pairs with this same
   // pass's Lumen Acolyte/Oathlit Attendant charge-generation pieces.
@@ -12307,7 +12324,12 @@ function deckTab(t){
 // ══ DECK PRESETS (saved decks) ══
 const BLACKWING_PRESET = ['Black Wings, Ossian Drell','Corvus','Kiana','Rhaess Korvain','Wren','Rook','Falk','Sable','Grave-Tithe Acolyte','Ashen Reclaimer','Cinder-Marked Hound','The Black Ledger','Pyre-Keeper Vayle','Valcarion','Tannis','Wingblade Scout','Feather-Marked Skirmisher','Squad-Captain Vesk','Ashfall Tithe','Hollow Mendicant'];   // Black Wings — banish/discard. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. Bixie Bee moved out 7/19/26 -- narrowed to Warpath/Keawe's Circle only. 8/7/26 REBUILT (owner: decklists weren't real 20-card builds despite the count): every card here either banishes for value, pays off banish-zone count, or reclaims from it -- the full ARCHETYPE_MEMBERS['Black Wings'] + LINK_GROUPS['blackwings'] union, all 18 real hits, plus Ashfall Tithe (self-banish instant, a named tempo lever in the deck's own blurb) and Hollow Mendicant (banish-from-hand into a strong Called bonus) filling the last 2 slots. Pyre-Keeper's Apprentice dropped -- its Called text is plain Charge, zero banish text, the one card in the old union that didn't actually do the thing. 18/20 cards carry a real Called effect.
 const DEATHLESS_PRESET = ['Arch-Grim Korrin','Ghorruk "Gnarly" Judarr','Summoned Skull Soldiers','Uso Oso','Bone Choirmaster','Marrow Priest','Widow of the Vigil','Gravecaller Voss','Throne of Bones, Uso Oso','Sister Mire','Grave-Fed Ghoul','Kiba',"Uso Oso's Skeletal Summons",'Pale Gravedigger','Bone-Stitcher','Grave-Warden','Signal Diviner','Faye Quicksilver','The Regenerating Horror','The Between, Kleydson'];   // The Deathless — Death-Remnant stack + draw. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. 8/7/26 REBUILT: ARCHETYPE_MEMBERS['Death Remnant'] (8) plus every other card in the pool that actually carries the Death Remnant keyword or a Remnant-gated effect (Sister Mire, Grave-Fed Ghoul, Kiba, Skeletal Summons, Pale Gravedigger, Bone-Stitcher, Grave-Warden, Throne of Bones) -- 17 of 20 slots are genuine Remnant cards, not name-adjacent filler. The Regenerating Horror splashes in on pure mechanical fit (ties a loss and returns to hand -- "doesn't truly die" without the keyword); Signal Diviner/Faye Quicksilver round out curve. 18/20 cards carry a real Called effect.
-const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bram the Bulwark','First-Blood Squire','Heir of Kaiga','Reclaim the Colors','Bloodwake Duelist','Sworn Duelist','Old Garrick',"Kravyn's Protege",'The Bronzed Beast, Hanse Waltz','Hanse, Rogue Fangs','Chieftain Reyva Vosh','Trophy Runner'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. 8/7/26 REBUILT following the archetype's own blurb literally: front-loaders (First-Blood Squire, Heir of Kaiga, Warpath Vanguard, Hanse Rogue Fangs) bank Winners-Circle count and kills; Trophy-Hunter Kessa/The Undefeated/Reclaim the Colors/Chieftain Reyva Vosh convert that count into late power; Tange Sazen/Skullchain Reaver/Bloodwake Duelist/Sworn Duelist/Kravyn's Protege/Kravyn the Collector all scale on kills earned. Hanse Rogue Fangs' Māyā transform pays off directly into Bronzed Beast already in the deck. Curve is deliberately back-loaded (7 at cost 3) -- this is the archetype that wants to still be holding cards turn 5+. 18/20 cards carry a real Called effect.
+const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kessa','Skullchain Reaver','Warpath Vanguard','The Undefeated','Val Kreigh','Ruffius Rufeldro','Bram the Bulwark','First-Blood Squire','Heir of Kaiga','Reclaim the Colors','Bloodwake Duelist','Sworn Duelist','Old Garrick',"Kravyn's Protege",'The Bronzed Beast, Hanse Waltz','Hanse, Rogue Fangs','Chieftain Reyva Vosh','Trophy Runner'];
+// Trophy Hall (8/8/26) -- 7 signature pieces (the WC/banish toolbox batch) + Rook/Falk/Squad-Captain
+// Vesk (already-existing banish-scalers, zero new archetype needed to fit them in) + a charge/curve
+// spine + Reclaim the Colors (shared with Warpath's preset on purpose -- it's a generic WC-scaler,
+// not a signature-exclusive card, same "splash anywhere" status as Conduit Adept).
+const TROPHY_HALL_PRESET = ['Hall of Champions','Ash Reckoning','Twin Ledgers','Victory Lap','Coffer-Keeper','Banked Interest','The Long Reckoning','Rook','Falk','Squad-Captain Vesk','Squad 19 Quartermaster','Cadet Corps Recruit','Squad 19 Signalman','Lumen Acolyte','Silk-Fed Hatchling','Conduit Adept','Signal Diviner','Fenrik Vench','Oathlit Vanguard','Reclaim the Colors'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. 8/7/26 REBUILT following the archetype's own blurb literally: front-loaders (First-Blood Squire, Heir of Kaiga, Warpath Vanguard, Hanse Rogue Fangs) bank Winners-Circle count and kills; Trophy-Hunter Kessa/The Undefeated/Reclaim the Colors/Chieftain Reyva Vosh convert that count into late power; Tange Sazen/Skullchain Reaver/Bloodwake Duelist/Sworn Duelist/Kravyn's Protege/Kravyn the Collector all scale on kills earned. Hanse Rogue Fangs' Māyā transform pays off directly into Bronzed Beast already in the deck. Curve is deliberately back-loaded (7 at cost 3) -- this is the archetype that wants to still be holding cards turn 5+. 18/20 cards carry a real Called effect.
 const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Fledgling Broodmother','Web-Spinner Acolyte','Silk-Spinner Drone','Skittering Drone','Hatchling Tide','Broodweb Keeper','Silkbound Sentinel',"Widow's Patience",'Fifth Frequency Stormcaller','Sister Mire, Wailing Nightmare','Faye Quicksilver','Signal Diviner'];   // The Broodswarm — hand-size draw + power. 7/24/26: +2 charge-economy commons (balance audit round 2 §5). 8/7/26 REBUILT: ARCHETYPE_MEMBERS['Broodswarm'] (8) plus every common that scales on hand size (Fledgling Broodmother/Web-Spinner Acolyte/Skittering Drone/Hatchling Tide/Broodweb Keeper/Silkbound Sentinel/Widow's Patience) -- 15 of 20 literally read "cards in hand." Fifth Frequency Stormcaller is the top-end payoff (+7 at 4+ banish AND +4 at 5+ hand). Sister Mire, Wailing Nightmare moved here from Deathless -- her text is pure draw/hand-size, zero Remnant keyword, so this is the correct home for her, not a name-echo. 15/20 cards carry a real Called effect.
 const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh','Bixie Bee','Heir of Kaiga','Barracks Drill Sergeant','Yard Sparring Partner','Squad 19 Vanguard','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Trophy Runner','Melanie'];   // The Ironsworn — go wide with 1-cost bodies, Cassian scales biggest (Muster: +power per 1-cost ally). Zerith Var moved out 7/19/26 -- narrowed to Black Council only. 8/7/26 REBUILT: the full LINK_GROUPS['ironsworn'] cluster (11, already = ARCHETYPE_MEMBERS['Muster'] plus the non-Muster glue) plus Bixie Bee/Heir of Kaiga -- named directly in this archetype's own blurb as the 1-cost fuel -- plus 7 more 1-cost bodies. Curve: 14 of 20 cards cost 1 (this is the one deck in the whole set where that's correct, not a flaw -- Cassian/Ironsworn Vanguard/Warden of the Wall count every 1-cost ally you field). 14/20 cards carry a real Called effect; the rest (Muster payoffs themselves) are meant to be committed as the big Fighter, not held back as support.
 // 4 more added 7/19/26 -- lore-driven rather than mechanically uniform like the 5 above. Black
@@ -12330,6 +12352,7 @@ const ARCHETYPE_PRESETS = [
   {id:'blackwing', name:'Black Wings', members:BLACKWING_PRESET, blurb:"Banish cards from deck and hand to fuel Ossian Drell, Corvus, and the Wingblade/Wing Commander line's per-banished-card scaling, then reclaim the best ones with Ashen Reclaimer and Valcarion. Wins by out-scaling on banish-zone count while the opponent is still building board state; Ashfall Tithe and Tannis are the tempo levers that push a key turn over the top."},
   {id:'deathless', name:'Deathless', members:DEATHLESS_PRESET, blurb:"Stack Death Remnants (Grave-Fed Ghoul, Bone Choirmaster, Grave-Warden, Uso Oso's own Bulwark of Bones) so every commit inherits a standing buff until the opponent lands a kill, then refill via Widow of the Vigil and Bone-Stitcher's Remnant-gated draw. Win condition is attrition — the Remnant math compounds faster than the opponent's kill rate, with Throne of Bones as the round-ending punch once a Remnant is live."},
   {id:'warpath', name:'Warpath', members:WARPATH_PRESET, blurb:"Front-load early duels (First-Blood Squire, Heir of Kaiga, Warpath Vanguard) to bank Winners Circle count and kills, then let Trophy-Hunter Kessa, The Undefeated, and Reclaim the Colors convert that count directly into late-game power. Kill Escalation on Tange Sazen and Skullchain Reaver-style pieces means the deck gets stronger the longer it's ahead — punishes anyone who lets an early round slip."},
+  {id:'trophyhall', name:'Trophy Hall', members:TROPHY_HALL_PRESET, blurb:"Warpath's mirror: instead of racing to win before your Winners Circle fills up, Trophy Hall wants it full. Coffer-Keeper and the banish-scaling commons (Rook, Falk, Squad-Captain Vesk) feed both piles early; Hall of Champions, Ash Reckoning, and Banked Interest convert a 2-3 card lead into real power by mid-match; Twin Ledgers and The Long Reckoning don't care which pile you've stacked, they eat from both. Victory Lap is the safety valve — pull a banked win back to hand if you need the body more than the trophy. Patient and cumulative, not explosive; the longer the match runs, the further ahead this deck pulls."},
   {id:'broodswarm', name:'Broodswarm', members:BROODSWARM_PRESET, blurb:"Draw aggressively (Web-Tender Matron, Hoarder's Gambit, Silk-Spinner Drone) to keep hand size high, then cash that hand size directly into power via Broodmother, Venombrood Queen, and The Gathering Swarm's per-card scaling — the same resource doubles as both engine and payoff. Wins the late-game power race outright, and The Gathering Swarm's opponent-drain clause turns a full hand into a two-sided swing."},
   {id:'ironsworn', name:'Ironsworn', members:IRONSWORN_PRESET, blurb:"Flood the board with 1-cost bodies (Shieldwall Recruit, Rank-Sworn Levy, Bixie Bee, Heir of Kaiga) purely to fuel Bannerlord Cassian's and Ironsworn Vanguard's Muster bonuses — quantity of cheap allies is the whole win condition. Oathbound Shield's Last Stand keeps the deck from losing tempo while it goes wide, and Warden's Feint buys a turn of support-zone denial when the board state turns close."},
   {id:'blackcouncil', name:'Black Council', members:BLACK_COUNCIL_PRESET, blurb:"A control shell built on denying the opponent's plan rather than racing them — Cletus Gwyndull, Ridgeline Scout, and Warden's Feint lock down condition, location, and support access while Darwin and The Unending Flame drain the opponent's power directly. Wins by grinding to the 3rd-plus commit, where Darwin, Courtroom Colossus, and Arch-Grim Korrin's kill-count check all get stronger, rather than by an early finish."},
@@ -12486,6 +12509,13 @@ CARD_RULES['Unbanked Victory']=[{"if":{"v":"wc_len","op":"==","n":0},"add":3,"lo
 CARD_RULES['Hall of Champions']=[{"if":{"v":"wc_len","op":">=","n":2},"add":6,"log":"🏛 Hall of Champions: Winners Circle holds 2+, +6"}];
 CARD_RULES['Ash Reckoning']=[{"if":{"v":"banish_len","op":">=","n":3},"add":7,"log":"🪶 Ash Reckoning: banish zone holds 3+, +7"}];
 CARD_RULES['Twin Ledgers']=[{"addvar":"wc_len","x":1,"log":"📜 Twin Ledgers: +1 per Winners Circle card"},{"addvar":"banish_len","x":1,"log":"📜 Twin Ledgers: +1 per banished card"}];
+// Trophy Hall's payoff curve -- Banked Interest is a capped step (stacked thresholds, same
+// cumulative-add shape as Kravyn/Sworn Duelist above, since CARD_RULES' addvar has no native cap).
+// The Long Reckoning is deliberately uncapped -- it's the archetype's UR finisher, meant to keep
+// scaling as the whole toolbox (Hall of Champions/Ash Reckoning/Twin Ledgers/Victory Lap/Coffer-
+// Keeper/Banked Interest) does its job of growing both piles across a match.
+CARD_RULES['Banked Interest']=[{"if":{"v":"wc_len","op":">=","n":1},"add":2,"log":"💰 Banked Interest: +2 (1+ in Winners Circle)"},{"if":{"v":"wc_len","op":">=","n":2},"add":2,"log":"💰 Banked Interest: +2 more (2+ — total +4)"},{"if":{"v":"wc_len","op":">=","n":3},"add":2,"log":"💰 Banked Interest: +2 more (3+ — capped at +6)"}];
+CARD_RULES['The Long Reckoning']=[{"addvar":"wc_len","x":2,"log":"⚱ The Long Reckoning: +2 per Winners Circle card"},{"addvar":"banish_len","x":2,"log":"⚱ The Long Reckoning: +2 per banished card"}];
 // KOTEI signature Legendaries (8/2/26) -- simplified-but-real mechanisms for the 8 new cards
 // above (DECK_POOL), using only context vars that already exist elsewhere in this table.
 CARD_RULES["The Borrowed Green, Keawe Kel'rua"]=[{"add":9,"log":"🌊 Uncontrolled Flood: +9"},{"oppadd":5,"log":"🌊 Uncontrolled Flood: the flood answers no one's call — opponent +5 too"}];
