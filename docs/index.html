@@ -4651,6 +4651,12 @@ const OPP_CARDS = [
   {name:'King Joris',pow:12,kills:0,deaths:0,rarity:'common',timing:'on',abil:"Rightful Claim: on commit, +1 power for every death on the opponent's record — the betrayed king judges every usurper's sins."},
   {name:'Unbanked Victory',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +3 power if your Winners Circle is empty — an unclaimed victory is worth more than a banked one.'},
   {name:'Reclaim the Colors',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your Winners Circle.'},
+  // Winners-Circle / banish-zone toolbox (8/8/26) -- archetype-neutral by design, not added to
+  // any ARCHETYPE_MEMBERS list. Splashable into anything that's already banking wins or banishing.
+  {name:'Hall of Champions',pow:7,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +6 power if your Winners Circle holds 2 or more cards.'},
+  {name:'Victory Lap',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Called as a support: return 1 card from your Winners Circle straight to your hand.'},
+  {name:'Ash Reckoning',pow:7,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +7 power if your banish zone holds 3 or more cards.'},
+  {name:'Twin Ledgers',pow:6,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +1 power for every card in your Winners Circle, and +1 more for every card in your banish zone.'},
 ];
 
 const PHASE_IDS = ['ph-draw','ph-reveal','ph-instant1','ph-precommit','ph-commit','ph-instant2','ph-resolve'];
@@ -6319,6 +6325,7 @@ const CALLED = {
   // pull a card back OUT of the Winners Circle once it's there.
   "Unbanked Victory":              {text:"your next win returns to your hand instead of banking to the Winners Circle", unbankNextWin:true},
   "Reclaim the Colors":            {text:"return 1 card from your Winners Circle to the bottom of your deck", reclaimWC:1},
+  "Victory Lap":                   {text:"return 1 card from your Winners Circle straight to your hand", reclaimWCToHand:1},
   // 8/8/26, owner directive: Deck Masters shouldn't ALSO be great supports -- stacks a third bonus
   // vector on top of the passive/activated split (see feedback_deckmaster_one_bonus_mechanism.md's
   // "only one" rule, extended here to include support-mode). All 20 Deck Masters that had a CALLED
@@ -6641,6 +6648,24 @@ function applyCalled(support, ctx, playerPow, oppPow, abilLog, isOpp, stepSink){
         // convention. Mirrors the exact bug class just fixed in the Deck Master win-routing case.
         if(_ocard && typeof oppDeckBot!=='undefined') oppDeckBot.push(Object.assign({},_ocard));
         abilLog.push("↩ Opp "+support.name+" — reclaimed "+_opick+" from their Winners Circle to the bottom of their deck");
+      } else { abilLog.push("↩ Opp "+support.name+" — Winners Circle empty, nothing to reclaim"); }
+    }
+  }
+  // Winners-Circle-as-resource toolbox (8/8/26, owner: "make more generic toolboxing options for
+  // all players/archetypes to utilize winners circle... or an alternate card pool"). reclaimWC
+  // (above) sends a WC card to the bottom of the deck -- slow, random re-draw. This variant is the
+  // fast lane: straight back to hand, immediately playable. Same isOpp branching shape as reclaimWC.
+  if(e.reclaimWCToHand){
+    if(!isOpp){
+      if(typeof winnersCircle!=='undefined' && winnersCircle.length){ var _rc5=winnersCircle.pop(); if(typeof hand!=='undefined') hand.push(_rc5); if(typeof buildHand==='function') buildHand(); abilLog.push("↩ "+support.name+" — reclaimed "+_rc5.name+" from your Winners Circle to your hand"); }
+      else { abilLog.push("↩ "+support.name+" — Winners Circle empty, nothing to reclaim"); }
+    } else {
+      if(typeof oppWonBot!=='undefined' && oppWonBot && oppWonBot.size){
+        var _oarr2=Array.from(oppWonBot); var _opick2=_oarr2[_oarr2.length-1]; oppWonBot.delete(_opick2);
+        if(typeof oppWC!=='undefined') oppWC=oppWonBot.size;
+        var _opool2=(typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]); var _ocard2=_opool2.find(function(x){return x.name===_opick2;});
+        if(_ocard2 && typeof oppHandBot!=='undefined') oppHandBot.push(Object.assign({},_ocard2));
+        abilLog.push("↩ Opp "+support.name+" — reclaimed "+_opick2+" from their Winners Circle to their hand");
       } else { abilLog.push("↩ Opp "+support.name+" — Winners Circle empty, nothing to reclaim"); }
     }
   }
@@ -12437,6 +12462,30 @@ CARD_RULES['Tange Sazen']=[{"addvar":"pc_kills_match","x":4,"log":"⚔️ Tange 
 CARD_RULES['Bloodwake Duelist']=[{"addvar":"pc_kills_match","x":3,"log":"⚔️ Bloodwake Duelist: +3 per kill this match (Kill Escalation)"}];
 CARD_RULES['Aurelion Prime']=[{"if":{"v":"pc_kills","op":">=","n":15},"add":4,"log":"⚔️ Aurelion Prime: +4 (Kill Escalation, 15+ career kills)"},{"if":{"v":"pc_kills","op":">=","n":30},"add":4,"log":"⚔️ Aurelion Prime: +4 more (Kill Escalation, 30+ career kills — total +8)"}];
 CARD_RULES['Dragan Korr']=[{"if":{"v":"pc_kills","op":">=","n":18},"add":6,"log":"⚔️ Dragan Korr: +6 (Kill Escalation, 18+ career kills)"}];
+// 8/8/26: found while building the Winners-Circle toolbox batch below -- these 2 Warpath cards'
+// own printed text already promised WC-scaling with zero CARD_RULES behind either one, same
+// disclosure-mismatch class as the 4 broken Kill Escalation cards above. Directly on-topic for
+// this batch (the whole point is making WC scaling real and generic), fixed alongside it.
+CARD_RULES['Reclaim the Colors']=[{"addvar":"wc_len","x":1,"log":"🎗 Reclaim the Colors: +1 per Winners Circle card"}];
+CARD_RULES['Unbanked Victory']=[{"if":{"v":"wc_len","op":"==","n":0},"add":3,"log":"🏳 Unbanked Victory: Winners Circle empty, +3"}];
+// Winners-Circle / banish-zone generic toolbox (8/8/26, owner: "make more generic toolboxing
+// options for all players/archetypes to utilize winners circle as a means to activate a
+// condition - or an alternate card pool... winners circle, banish zone etc- should all be fair
+// game to create mechanics or archetypes to manipulate- and give people cross deck build
+// opportunities"). 4 new archetype-NEUTRAL, splashable cards (not added to any ARCHETYPE_MEMBERS
+// list on purpose -- the ask was cross-deck toolbox pieces, not a new mono-archetype) demonstrating
+// clean threshold-style WC/banish payoffs using the EXISTING generic if/add and addvar/x op-codes
+// already in applyRuleList -- no interpreter change needed for 3 of the 4. The 4th (Victory Lap)
+// needed exactly one new CALLED key, reclaimWCToHand (added above, mirrors the existing reclaimWC
+// key but targets hand instead of deck bottom -- WC as a fast-access resource, not just a slow
+// recycle). Real, pre-existing, NOT fixed here (out of scope, flagged in the report-back instead):
+// Warpath's own Warpath Vanguard + archetype-vanilla bonus explicitly want wc_len===0, while
+// Trophy-Hunter Kessa (a fellow Warpath member) and the 2 cards just fixed above want it HIGH --
+// a real internal contradiction already baked into that archetype, not something this batch
+// created or resolved.
+CARD_RULES['Hall of Champions']=[{"if":{"v":"wc_len","op":">=","n":2},"add":6,"log":"🏛 Hall of Champions: Winners Circle holds 2+, +6"}];
+CARD_RULES['Ash Reckoning']=[{"if":{"v":"banish_len","op":">=","n":3},"add":7,"log":"🪶 Ash Reckoning: banish zone holds 3+, +7"}];
+CARD_RULES['Twin Ledgers']=[{"addvar":"wc_len","x":1,"log":"📜 Twin Ledgers: +1 per Winners Circle card"},{"addvar":"banish_len","x":1,"log":"📜 Twin Ledgers: +1 per banished card"}];
 // KOTEI signature Legendaries (8/2/26) -- simplified-but-real mechanisms for the 8 new cards
 // above (DECK_POOL), using only context vars that already exist elsewhere in this table.
 CARD_RULES["The Borrowed Green, Keawe Kel'rua"]=[{"add":9,"log":"🌊 Uncontrolled Flood: +9"},{"oppadd":5,"log":"🌊 Uncontrolled Flood: the flood answers no one's call — opponent +5 too"}];
