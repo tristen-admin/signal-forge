@@ -4416,6 +4416,7 @@ function fireDeckMasterAvatara(pc){
   if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   if(typeof buildHand==='function') buildHand();
   if(typeof toast==='function') toast('🌙 Avatāra — '+deckMasterCard+' — '+ab.log+': '+(ab.desc||('draw '+ab.draw+', next conjure +'+ab.nextConjureBonus)), true);
+  if(typeof showAvataraActivation==='function') showAvataraActivation();
 }
 // Bot-side mirror of fireDeckMasterAvatara() (8/8/26) -- see the note above the oppDm* flag block
 // near this file's top for why this was missing entirely. Keyed off activeBot.dmCard instead of
@@ -10944,6 +10945,7 @@ const VIDEO_PREVIEW = {'Ahdorah Khaan, Determined Soul':'assets/video/c10dbd49fc
 const _AKATOSH_VID='assets/video/965a4b0011bb.mp4';VIDEO_ABILITY['Ourevos, the Golden Dragon']=_AKATOSH_VID;VIDEO_PREVIEW['Ourevos, the Golden Dragon']=_AKATOSH_VID;
 const VIDEO_FULL = {'Ahdorah Khaan, Determined Soul':'assets/video/140f98e8b4de.mp4','Kotei':'assets/video/868d1c0552f1.mp4'};
 VIDEO_FULL['Ourevos, the Golden Dragon']=_AKATOSH_VID;
+const _AVATARA_ACTIVATION_VID='assets/video/83a8d0a48de5.mp4';
 const _TANGE_VID='assets/video/1a2dfab9ec4b.mp4';VIDEO_ABILITY['Tange Sazen']=_TANGE_VID;VIDEO_PREVIEW['Tange Sazen']=_TANGE_VID;VIDEO_FULL['Tange Sazen']=_TANGE_VID;
 const VIDEO_FOCUS={'Ahdorah Khaan, Determined Soul':'center 24%'};function vidStyle(k){return VIDEO_FOCUS[k]?' style="object-position:'+VIDEO_FOCUS[k]+'"':'';}
 const ART_FOCUS={'Tange Sazen':'center 45%'};function artFoc(k){return ART_FOCUS[k]?' style="object-position:'+ART_FOCUS[k]+';transform:none"':'';}
@@ -12462,6 +12464,27 @@ function showIntroVideo(){
   if(v){ v.onended=_introVideoDone; v.onerror=_introVideoDone; }
   document.addEventListener('keydown', function _ivEsc(e){ if(e.key==='Escape'){ document.removeEventListener('keydown', _ivEsc); _introVideoDone(); } });
 }
+// Avatara activation overlay (8/10/26) -- the Deck Master system's own "1 apex keyword" had zero
+// dedicated visual before this (toast-only, see fireDeckMasterAvatara() below). Modeled directly on
+// showIntroVideo()'s own overlay pattern (full-screen <video>, click-anywhere-to-skip, Escape,
+// onended auto-dismiss) rather than inventing a second pattern. Player-side only, deliberately --
+// a full-screen takeover for the OPPONENT's own Avatara firing (fireBotDeckMasterAvatara) would
+// hijack the player's attention for something they don't control; that side keeps its existing
+// toast()-only treatment unchanged.
+function _avataraVideoCSS(){ if(document.getElementById('av-style')) return; var st=document.createElement('style'); st.id='av-style'; st.textContent=`.avatara-video-ov{position:fixed;inset:0;z-index:210;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55)}.avatara-video-ov.on{display:flex}.avatara-video-ov video{max-width:100%;max-height:100%}`; document.head.appendChild(st); }
+function _avataraVideoDone(){ var ov=document.getElementById('avatara-video-ov'); if(ov) ov.classList.remove('on'); }
+function showAvataraActivation(){
+  _avataraVideoCSS();
+  var ov=document.getElementById('avatara-video-ov');
+  if(!ov){ ov=document.createElement('div'); ov.id='avatara-video-ov'; ov.className='avatara-video-ov'; document.body.appendChild(ov); }
+  ov.innerHTML='<video id="avatara-video-el" autoplay playsinline src="'+_AVATARA_ACTIVATION_VID+'"></video>';
+  ov.classList.add('on');
+  ov.onclick=_avataraVideoDone;
+  var v=document.getElementById('avatara-video-el');
+  if(v){ v.onended=_avataraVideoDone; v.onerror=_avataraVideoDone; }
+  document.addEventListener('keydown', function _avEsc(e){ if(e.key==='Escape'){ document.removeEventListener('keydown', _avEsc); _avataraVideoDone(); } });
+}
+
 function showStarterChooser(){ _pathChooserCSS(); var ov=document.getElementById('path-chooser'); if(!ov){ ov=document.createElement('div'); ov.id='path-chooser'; ov.className='path-chooser'; document.body.appendChild(ov); } ov.innerHTML='<div class="pc-scrim"></div><div class="pc-panel"><div class="pc-eyebrow">New Commander</div><div class="pc-title">Choose Your Path</div><div class="pc-sub">Pick a starter deck — real cards you own and can build on. You can collect the others later.</div><div class="pc-grid">'+STARTER_PATHS.map(function(p){ var repC=COLLECTION.find(function(x){return x.name===p.rep && !x.uid;}); var art=(repC && typeof artFillStyle==='function')?artFillStyle(repC.artKey||repC.name):''; return '<div class="pc-card" style="--acc:'+p.accent+'" onclick="chooseStarterPath(\''+p.key+'\')"><div class="pc-art" style="'+art+'"></div><div class="pc-body"><div class="pc-name">'+p.name+'</div><div class="pc-tag">'+p.tag+'</div><div class="pc-blurb">'+p.blurb+'</div></div><button class="pc-pick">Choose '+p.name.replace('The ','')+'</button></div>'; }).join('')+'</div></div>'; ov.classList.add('on'); }
 window.showStarterChooser=showStarterChooser; window.chooseStarterPath=chooseStarterPath;
 ;/* ── BALANCE PASS 2026-07-07 (owner spec): reworked CARD_RULES + remnant values ── */
