@@ -13,14 +13,14 @@ Pack-opening summon reveal -- SHIPPED 8/10/26
 Done. Real footage generated, cut from 10s to 8.5s (trimmed the static hold at the end), replaces the old CSS-blob cluster during the roll phase, reveal() now fires on the video's real 'ended' event per this function's own pre-existing comment.
 
 
-Login / create account screen
+Login / create account screen -- SHIPPED 8/10/26
 
-A grand, moody entrance/threshold to the arena -- an ornate gate or archway at dusk, torches lit on either side, mist or light beyond suggesting the arena within. Atmospheric establishing shot, no characters in frame.
+Done. Real footage generated (a closed gate creaking open onto a torchlit arena beyond), used in full as a one-shot backdrop reveal behind the sign-in/create-account panel, holding on its own last frame afterward.
 
 
-Match-end win banner
+Match-end win banner -- SHIPPED 8/10/26
 
-A triumphant upward burst -- banners unfurling, light breaking through clouds, warm gold/white, celebratory, no specific character, darker toward the vertical center so overlaid text stays legible.
+Done. Real footage generated (storm clouds part, two banners unfurl, warm gold light rays break through), played once behind the WON screen then held on its final frame. Wired into both real match-end sites (bot matches and Staked PvP). Loss banner still not generated -- that branch keeps the plain dark gradient it always had.
 
 
 Match-end loss banner
