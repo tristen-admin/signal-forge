@@ -1596,7 +1596,9 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .summon-scrim.open{display:flex;animation:smIn .35s ease}
 @keyframes smIn{from{opacity:0}to{opacity:1}}
 .sm-stage{position:relative;width:320px;height:460px}
-.sm-aura,.sm-ring,.sm-rays,.sm-flash,.sm-core,.sm-card{position:absolute;top:50%;left:50%}
+.sm-aura,.sm-ring,.sm-rays,.sm-flash,.sm-core,.sm-card,.sm-video{position:absolute;top:50%;left:50%}
+.sm-video{width:100%;height:100%;margin:-230px 0 0 -160px;object-fit:cover;border-radius:14px;box-shadow:0 0 40px rgba(0,0,0,.6)}
+.sm-stage.sm-burst .sm-video,.sm-stage.sm-reveal .sm-video{opacity:0;transition:opacity .35s ease}
 .sm-aura{width:300px;height:300px;margin:-150px 0 0 -150px;border-radius:50%;background:radial-gradient(circle,var(--sv),transparent 62%);opacity:.5;filter:blur(7px);animation:smAura 1.3s ease-in-out infinite alternate}
 @keyframes smAura{from{transform:scale(.72);opacity:.32}to{transform:scale(1.04);opacity:.62}}
 .sm-ring{width:120px;height:120px;margin:-60px 0 0 -60px;border-radius:50%;border:2px solid var(--sv);opacity:0;animation:smRing 1.5s ease-out infinite}
@@ -10295,10 +10297,14 @@ function playSummon(card, rar, mint, packName, onDone){
   const sigil=((typeof CARD_SIGIL!=='undefined')&&CARD_SIGIL[ak])||'◈';
   const metaMint=mint?(' · Mint #'+mint.idx+(mint.cap?' / '+fmtPts(mint.cap):'')):'';
   ov.style.setProperty('--sv', colors[order[0]]);
+  // 8/10/26: real summoning-circle footage arrived (owner-generated, cut to 8.5s) -- per the note
+  // this replaced ("when an .mp4 arrives, play it inside the charge phase and call reveal() on its
+  // 'ended' event"), it now drives the roll phase directly instead of the old CSS-blob tick() timer.
+  // Fallback to the old blob/timer system is kept for if the const is ever unset, matching this
+  // file's own hasArt/hasVid-ternary convention everywhere else rather than deleting the old path.
+  const hasPackVid = typeof _PACK_SUMMON_VID !== 'undefined' && _PACK_SUMMON_VID;
   ov.innerHTML=`<div class="sm-stage">
-    <div class="sm-flash"></div><div class="sm-rays"></div><div class="sm-aura"></div>
-    <div class="sm-ring r1"></div><div class="sm-ring r2"></div><div class="sm-ring r3"></div>
-    <div class="sm-core">✦</div>
+    ${hasPackVid ? '<video class="sm-video" id="sm-summon-vid" autoplay playsinline src="'+_PACK_SUMMON_VID+'"></video>' : '<div class="sm-flash"></div><div class="sm-rays"></div><div class="sm-aura"></div><div class="sm-ring r1"></div><div class="sm-ring r2"></div><div class="sm-ring r3"></div><div class="sm-core">✦</div>'}
     <div class="sm-card"><div class="sm-cardart" style="${hasVid?'':artStyle}">${hasVid?'<video class="fc-vid"'+vidStyle(ak)+' src="'+hasVid+'" autoplay muted loop playsinline></video>':(hasArt?'':'<span class="sm-sigil">'+sigil+'</span>')}</div>
       <div class="sm-cardfoot"><div class="sm-cardname">${card.name}</div>
       <div class="sm-cardmeta"><span class="rar-${rar}">${rlab(rar)}</span> · ⚔ ${card.pow} Power${metaMint}</div></div></div>
@@ -10312,6 +10318,7 @@ function playSummon(card, rar, mint, packName, onDone){
   const reveal=function(){
     clearAll(); ov.dataset.phase='reveal';
     ov.style.setProperty('--sv', finalColor);
+    const pv=stage.querySelector('#sm-summon-vid'); if(pv){ try{ pv.pause(); }catch(e){} }
     stage.classList.remove('sm-shake'); stage.classList.add('sm-burst');
     timers.push(setTimeout(function(){
       stage.classList.remove('sm-burst'); stage.classList.add('sm-reveal');
@@ -10320,7 +10327,11 @@ function playSummon(card, rar, mint, packName, onDone){
   };
   _summonReveal=reveal;
   if(reduce){ reveal(); return; }
-  const rollDur=1100 + tier*440;   // common ~1.5s … apex ~3.3s (rarer = longer, tenser build)
+  if(hasPackVid){
+    const pv=stage.querySelector('#sm-summon-vid');
+    if(pv){ pv.onended=reveal; pv.onerror=reveal; return; }
+  }
+  const rollDur=1100 + tier*440;   // common ~1.5s … apex ~3.3s (rarer = longer, tenser build) -- fallback path only
   const t0=performance.now(); let i=0;
   const tick=function(){
     const el=performance.now()-t0, frac=Math.min(1, el/rollDur);
@@ -10945,6 +10956,7 @@ const VIDEO_PREVIEW = {'Ahdorah Khaan, Determined Soul':'assets/video/c10dbd49fc
 const _AKATOSH_VID='assets/video/965a4b0011bb.mp4';VIDEO_ABILITY['Ourevos, the Golden Dragon']=_AKATOSH_VID;VIDEO_PREVIEW['Ourevos, the Golden Dragon']=_AKATOSH_VID;
 const VIDEO_FULL = {'Ahdorah Khaan, Determined Soul':'assets/video/140f98e8b4de.mp4','Kotei':'assets/video/868d1c0552f1.mp4'};
 VIDEO_FULL['Ourevos, the Golden Dragon']=_AKATOSH_VID;
+const _PACK_SUMMON_VID='assets/video/4a8998afa471.mp4';
 const _AVATARA_ACTIVATION_VID='assets/video/83a8d0a48de5.mp4';
 const _TANGE_VID='assets/video/1a2dfab9ec4b.mp4';VIDEO_ABILITY['Tange Sazen']=_TANGE_VID;VIDEO_PREVIEW['Tange Sazen']=_TANGE_VID;VIDEO_FULL['Tange Sazen']=_TANGE_VID;
 const VIDEO_FOCUS={'Ahdorah Khaan, Determined Soul':'center 24%'};function vidStyle(k){return VIDEO_FOCUS[k]?' style="object-position:'+VIDEO_FOCUS[k]+'"':'';}
