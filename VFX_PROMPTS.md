@@ -3,9 +3,9 @@ Location/Condition banner
 No image needed -- this is a code fix. The in-duel banner showing the active location (Tosa, Gnulfor, Sorn-Vallis, etc.) currently shows only an emoji, but real illustrated backdrops for these exact locations already exist in the game's LOCATION_ART table and are just never wired in outside Ascension.
 
 
-Avatara activation
+Avatara activation -- SHIPPED 8/10/26
 
-A full-screen dramatic awakening burst -- a figure's silhouette breaking open with radiant divine light pouring through the cracks, warm gold/white light. Vertical/full-screen composition, painterly, no readable text in the image.
+Done. Real footage generated, cut from 10s to 3.2s (trimmed the static open and the slow fade tail, sped up ~2.3x, audio pitch preserved), wired as a full-screen dismissable overlay firing from the real fireDeckMasterAvatara() trigger.
 
 
 Pack-opening summon reveal
