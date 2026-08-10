@@ -1647,6 +1647,13 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 /* ══ LOBBY (Play vs Bot) ══ */
 #v-lobby{flex-direction:column;overflow-y:auto}
 .lobby{padding:22px;max-width:960px;width:100%;margin:0 auto}
+#v-online{position:relative}
+.login-bg-wrap{position:absolute;inset:0;overflow:hidden;z-index:0}
+.login-bg-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(6,8,14,.30) 0%,rgba(6,8,14,.50) 45%,rgba(6,8,14,.88) 100%);pointer-events:none}
+.login-bg-poster,.login-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%}
+.login-bg-video{opacity:0;transition:opacity 1s ease}
+.login-bg-video.on{opacity:1}
+#v-online .lobby{position:relative;z-index:1}
 .lobby-head{margin-bottom:18px}
 .lobby-head .lh-eyebrow{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--electric);margin-bottom:5px}
 .lobby-head h1{font-size:24px;font-weight:800;color:var(--text);margin-bottom:6px}
@@ -3076,6 +3083,10 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 </div>
 
 <div class="view" id="v-online" style="flex-direction:column;overflow-y:auto">
+  <div class="login-bg-wrap" id="login-bg-wrap" style="display:none">
+    <img class="login-bg-poster" id="login-bg-poster" alt="">
+    <video class="login-bg-video" id="login-bg-video" muted playsinline onerror="this.style.display='none'"></video>
+  </div>
   <div class="lobby">
     <div class="lobby-head">
       <div class="lh-eyebrow">Online · Live Server</div>
@@ -10958,6 +10969,8 @@ const VIDEO_FULL = {'Ahdorah Khaan, Determined Soul':'assets/video/140f98e8b4de.
 VIDEO_FULL['Ourevos, the Golden Dragon']=_AKATOSH_VID;
 const _PACK_SUMMON_VID='assets/video/4a8998afa471.mp4';
 const _AVATARA_ACTIVATION_VID='assets/video/83a8d0a48de5.mp4';
+const _LOGIN_BG_VID='assets/video/2c07aee55b55.mp4';
+const _LOGIN_BG_POSTER='assets/img/717ec2756aa8.jpg';
 const _TANGE_VID='assets/video/1a2dfab9ec4b.mp4';VIDEO_ABILITY['Tange Sazen']=_TANGE_VID;VIDEO_PREVIEW['Tange Sazen']=_TANGE_VID;VIDEO_FULL['Tange Sazen']=_TANGE_VID;
 const VIDEO_FOCUS={'Ahdorah Khaan, Determined Soul':'center 24%'};function vidStyle(k){return VIDEO_FOCUS[k]?' style="object-position:'+VIDEO_FOCUS[k]+'"':'';}
 const ART_FOCUS={'Tange Sazen':'center 45%'};function artFoc(k){return ART_FOCUS[k]?' style="object-position:'+ART_FOCUS[k]+';transform:none"':'';}
@@ -11288,6 +11301,11 @@ CARD_ART['Pyre-Keeper\'s Apprentice']='assets/img/615a5d0e423c.jpg';
 CARD_ART_FULL['Pyre-Keeper\'s Apprentice']='assets/img/d12b6e690f1e.jpg';
 CARD_ART['Court Cipher']='assets/img/1596a4255891.jpg';
 CARD_ART_FULL['Court Cipher']='assets/img/4cc9c82ec05d.jpg';
+
+CARD_ART['Wingblade Scout']='assets/img/0897182e32b4.jpg';
+CARD_ART_FULL['Wingblade Scout']='assets/img/38a4dac7a606.jpg';
+CARD_ART['Writ-Sergeant\'s Ledger']='assets/img/6b21985b2c74.jpg';
+CARD_ART_FULL['Writ-Sergeant\'s Ledger']='assets/img/afbaf84bf638.jpg';
 
 
 const HUB_BG_VIDEO = 'assets/video/692eeea2a812.mp4';
@@ -11896,13 +11914,44 @@ function sfAuth(isRegister){
 }
 
 let SF_STATE = null;   // last /api/state response; in-memory only, refetched on demand
-function sfLogout(){ sfSaveSession(null); SF_STATE=null; buildOnline(); toast('Signed out of online', true); }
+function sfLogout(){
+  sfSaveSession(null); SF_STATE=null;
+  var v=document.getElementById('login-bg-video'); if(v){ v.removeAttribute('src'); v.classList.remove('on'); }
+  buildOnline(); toast('Signed out of online', true);
+}
 function sfRefresh(){
   _onMsg('Refreshing…', '');
   sfApi('GET', '/api/state', null, function(err, data){
     if(err){ _onMsg(err, 'err'); buildOnline(); return; }
     SF_STATE = data.state; buildOnline(); _onMsg('Up to date.', 'ok');
   });
+}
+// Login/create-account screen backdrop: a gate-opens-onto-the-arena clip (10s, no seamless loop --
+// it's a one-shot reveal like hubBgReveal()), plays once per fresh arrival at this screen, then
+// holds on its own last frame (the poster) so the backdrop never goes blank or restarts on an
+// incidental buildOnline() re-render (tab switch between Sign in/Create account, a failed submit).
+function _loginBgStart(){
+  var bgWrap = document.getElementById('login-bg-wrap'); if(!bgWrap) return;
+  bgWrap.style.display = '';
+  var poster = document.getElementById('login-bg-poster');
+  if(poster && typeof _LOGIN_BG_POSTER!=='undefined' && !poster.src) poster.src = _LOGIN_BG_POSTER;
+  var vid = document.getElementById('login-bg-video');
+  if(vid && typeof _LOGIN_BG_VID!=='undefined' && !vid.src){
+    // Autoplay is flaky for large decoded data-URI videos -- browsers cap concurrent video
+    // decoders, same issue documented where the card-drawer video forces its play (search
+    // "guarantee this one gets a decoder"). Pause every other video first so this one holds it.
+    document.querySelectorAll('video').forEach(function(o){ if(o!==vid){ try{ o.pause(); }catch(e){} } });
+    vid.src = _LOGIN_BG_VID;
+    vid.classList.add('on');
+    vid.play().catch(function(){});
+    vid.addEventListener('ended', function(){ vid.classList.remove('on'); }, {once:true});
+    var _bgResumed = false;
+    vid.addEventListener('pause', function(){
+      if(vid.ended || _bgResumed) return;
+      _bgResumed = true;
+      vid.play().catch(function(){});
+    }, {once:true});
+  }
 }
 
 function buildOnline(){
@@ -11929,8 +11978,10 @@ function buildOnline(){
       '<div class="on-panel"><h3>Server</h3><p class="on-sub" style="margin-bottom:0">'+sfServer()+'</p></div>';
     var f = document.getElementById('on-pass');
     if(f) f.onkeydown = function(e){ if(e.key==='Enter') sfAuth(reg); };
+    _loginBgStart();
     return;
   }
+  var bgWrap = document.getElementById('login-bg-wrap'); if(bgWrap) bgWrap.style.display = 'none';
   // Phase 5.1 shipped a real two-player match session server-side; a live match takes over this
   // whole panel until it ends. PVP.pvpId is the dispatch: set -> render/resume the match screen
   // (and make sure its poll loop is alive, since navigating away from this view is what stops it
