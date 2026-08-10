@@ -14395,7 +14395,7 @@ const MASTERY_REWARDS={
   uncommon:[{lvl:3,type:'emote',icon:'😤'},{lvl:25,type:'variant',icon:'⭐'}],
   common:[]
 };
-function qk(s){ return "'"+String(s).replace(/'/g,"\\'")+"'"; }
+function qk(s){ return "'"+String(s).replace(/'/g,"\\'").replace(/"/g,'&quot;')+"'"; }
 function cardMasteryWins(key){ return (avatarBond[key]&&avatarBond[key].wins)||0; }
 function masteryRewardsOf(rarity){ return MASTERY_REWARDS[rarity]||[]; }
 function masteryLevelOf(c){ return Math.min(MASTERY_MAX, cardMasteryWins(c.uid||c.name)); }
@@ -14961,7 +14961,7 @@ function ascMovesBackToTeam(){ _ascMovesReturn=false; buildAscension(); }
 function ascChampions(){
   _ascMovesReturn=false;
   var a=ascShowPane('asc-arena'); if(!a) return; ascSetVista(0);
-  var cells=ascUnifiedRoster().map(function(u){
+  var cells=ascUnifiedRoster().filter(function(u){return ascShowUnowned||ascFieldable(u);}).map(function(u){
     var owned=ascOwnsCharacter(u.name), loaner=!owned&&ascIsLoaner(u.id);
     var P=ascUnitProg[u.name]||{level:1,xp:0,rites:0,bosses:0}, lv=P.level||1;
     var moves=ascUnitMoveList(u), unlocked=moves.filter(function(m){return lv>=(m.unlock||1);}).length;
@@ -14970,7 +14970,8 @@ function ascChampions(){
       +'<div class="acc-name">'+u.name.split(',')[0]+'</div><div class="acc-role">'+(u.avatar?'Champion · '+u.role:u.role)+'</div>'
       +'<div class="acc-meta">'+unlocked+'/'+moves.length+' moves · '+(P.rites||0)+' sagas</div></button>';
   }).join('');
-  a.innerHTML='<div class="asc-panel"><div class="asc-panel-head"><button class="asc-back" onclick="ascHomeAsc()">← Reincarnation</button><div><div class="asc-res-eyebrow">Reincarnation · Allies</div><h2 class="asc-panel-title">Your Allies</h2></div></div><p class="asc-panel-sub">Every unit carries its own legend — level, abilities and standing. Tap an ally for detail.</p><div class="asc-champ-grid">'+cells+'</div></div>';
+  var ownToggle2='<div class="asc-roster-filter"><button class="filter-chip'+(ascShowUnowned?' on':'')+'" onclick="ascToggleOwned();ascChampions();">'+(ascShowUnowned?'👁 Showing All':'🔒 Owned Only')+'</button></div>';
+  a.innerHTML='<div class="asc-panel"><div class="asc-panel-head"><button class="asc-back" onclick="ascHomeAsc()">← Reincarnation</button><div><div class="asc-res-eyebrow">Reincarnation · Allies</div><h2 class="asc-panel-title">Your Allies</h2></div></div><p class="asc-panel-sub">Every unit carries its own legend — level, abilities and standing. Tap an ally for detail.</p>'+ownToggle2+'<div class="asc-champ-grid">'+cells+'</div></div>';
 }
 function ascChampionDetail(id){
   var u=ascResolveUnit(id); if(!u) return; var a=ascShowPane('asc-arena'); if(!a) return; ascSetVista(0);
