@@ -58,22 +58,22 @@ Squad 19 Medic
 A field medic kneeling beside a supply crate, wrapping a bandage with quick efficient hands, satchel of vials and rolled dressings open at her hip, calm focus.
 
 
-Squad 19 Quartermaster
+Squad 13 Quartermaster
 
 A quartermaster at a supply-tent counter, counting out the last few ration packs onto a stretched-thin table, ledger in hand, faint worry at the low stock.
 
 
-Squad 19 Scout
+Squad 13 Scout
 
 A lean scout crouched at the treeline just outside camp at dusk, one hand signaling back, eyes fixed on something offscreen. Quiet, watchful, simple composition.
 
 
-Squad 19 Signalman
+Squad 13 Signalman
 
 A signalman on a low watch-tower raising a lit signal-flare against a dusk sky, the small warm glow of the flare the main light source in an otherwise cool scene.
 
 
-Squad 19 Chronicler
+Squad 16 Chronicler
 
 A young chronicler sitting cross-legged near a campfire, quill in hand, recording the match into a worn field-journal, firelight on the page.
 

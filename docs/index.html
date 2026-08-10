@@ -3836,16 +3836,16 @@ const DECK_POOL = [
   {name:'Squad 16 Veteran',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"The last of a squad disbanded before Ahdorah's time — reassigned, scattered, mostly forgotten. On commit: +3 power once you've played 2 or more duels this match."},
   {name:'Squad 19 Vanguard',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the squad holds the line.'},
   {name:'Squad 19 Medic',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2 and draw a card.'},
-  {name:'Squad 19 Quartermaster',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +4 power while your hand has 3 or fewer cards — keeping the squad supplied.'},
-  {name:'Squad 19 Scout',pow:4,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), draw a card.'},
+  {name:'Squad 13 Quartermaster',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +4 power while your hand has 3 or fewer cards — keeping the squad supplied.'},
+  {name:'Squad 13 Scout',pow:4,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), draw a card.'},
   {name:'Barracks Drill Sergeant',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2. [Tosa Pact]'},
   {name:'Cadet Corps Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +3 power on the 1st or 2nd duel of the match. [Tosa Pact]'},
   {name:"Writ-Sergeant's Ledger",pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), gain 1 Charge. [Tosa Pact]'},
   // 7/24/26: Ahdor's Pride charge economy — the archetype had zero Charge access at all (balance
   // audit round 2, §5). One Fighter + one Support common, matching the round-1 pattern used for
   // Black Wings/Black Council/Radiance/Warpath.
-  {name:'Squad 19 Signalman',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: gain 1 Charge. [Tosa Pact]'},
-  {name:'Squad 19 Chronicler',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:"As a support (Called), gain 1 Charge once you've played 2 or more duels this match. [Tosa Pact]"},
+  {name:'Squad 13 Signalman',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: gain 1 Charge. [Tosa Pact]'},
+  {name:'Squad 16 Chronicler',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:"As a support (Called), gain 1 Charge once you've played 2 or more duels this match. [Tosa Pact]"},
   {name:'Fenrik Vench',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"A causeway-lord's son, first to prove himself against you in the yard. On commit: +3 power if you have lost a duel this match — the rivalry sharpens him."},
   {name:'Yard Sparring Partner',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3.'},
   // Charge economy pass, 7/24/26 -- one on-commit + one support card per starved archetype (Black Wings, Black Council, Radiance, Warpath)
@@ -5901,7 +5901,7 @@ const ROOF_MAP = {
   'Skittering Drone':['Vajra'],
   'Skullchain Reaver':['Vajra','Astra'],
   'Squad 16 Veteran':['Vajra'],
-  'Squad 19 Quartermaster':['Vajra'],
+  'Squad 13 Quartermaster':['Vajra'],
   'Squad-Captain Vesk':['Vajra'],
   'Summoned Skull Soldiers':['Vajra','Nirm\u0101\u1e47a'],
   'Sworn Duelist':['Vajra','Astra'],
@@ -6019,11 +6019,11 @@ const FACTION_MAP = {
   'Sable':'Dark',
   'Skullchain Reaver':'Dark',
   'Squad 16 Veteran':'Light',
-  'Squad 19 Chronicler':'Light',
+  'Squad 16 Chronicler':'Light',
   'Squad 19 Medic':'Light',
-  'Squad 19 Quartermaster':'Light',
-  'Squad 19 Scout':'Light',
-  'Squad 19 Signalman':'Light',
+  'Squad 13 Quartermaster':'Light',
+  'Squad 13 Scout':'Light',
+  'Squad 13 Signalman':'Light',
   'Squad 19 Vanguard':'Light',
   'Summoned Skull Soldiers':'Dark',
   'Tange Sazen':'Light',
@@ -6129,11 +6129,11 @@ const DOMAIN_MAP = {
   'Ruffius Rufeldro':'Amagera',
   'Sable':'Omitsuki',
   'Squad 16 Veteran':'Amagera',
-  'Squad 19 Chronicler':'Amagera',
+  'Squad 16 Chronicler':'Amagera',
   'Squad 19 Medic':'Amagera',
-  'Squad 19 Quartermaster':'Amagera',
-  'Squad 19 Scout':'Amagera',
-  'Squad 19 Signalman':'Amagera',
+  'Squad 13 Quartermaster':'Amagera',
+  'Squad 13 Scout':'Amagera',
+  'Squad 13 Signalman':'Amagera',
   'Squad 19 Vanguard':'Amagera',
   'Summoned Skull Soldiers':'Omitsuki',
   'Tange Sazen':'Kitanoo',
@@ -6237,7 +6237,7 @@ const CALLED = {
   // 7/23/26: Squad 19 / Tosa Pact glue commons — see COLLECTION for the matching printed text.
   "Squad 19 Vanguard":                   {text:"your Fighter +3", add:3},
   "Squad 19 Medic":                      {text:"your Fighter +2, draw 1", add:2, draw:1},
-  "Squad 19 Scout":                      {text:"draw 1", draw:1},
+  "Squad 13 Scout":                      {text:"draw 1", draw:1},
   "Barracks Drill Sergeant":             {text:"your Fighter +2", add:2},
   "Writ-Sergeant's Ledger":              {text:"gain 1 Charge", chargeGain:1},
   "Yard Sparring Partner":               {text:"your Fighter +3", add:3},
@@ -6271,7 +6271,7 @@ const CALLED = {
   "Conduit Adept":                 {text:"gain 2 Charge + draw 1", chargeGain:2, draw:1},
   // 7/24/26: balance audit round 2 §5 -- Broodswarm/Ahdor's Pride charge economy, Called half.
   "Broodweb Keeper":               {text:"gain 1 Charge if you have 4 or more cards in hand", chargeGainIfHandFull:1},
-  "Squad 19 Chronicler":           {text:"gain 1 Charge once you've played 2 or more duels this match", chargeGainIfVeteran:1},
+  "Squad 16 Chronicler":           {text:"gain 1 Charge once you've played 2 or more duels this match", chargeGainIfVeteran:1},
   "Signal Diviner":                {text:"gain 3 Charge", chargeGain:3},
   "Voltcaller":                    {text:"your next Interrupt costs 2 less", spellDiscountGain:2},
   "Uso Oso's Skeletal Summons":    {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
@@ -6354,9 +6354,9 @@ const CALLED = {
   "Ridgeline Scout":               {text:"your Fighter +3", add:3},
   "Ahdorah Khaan, Squad 19 Recruit": {text:"your Fighter +3", add:3},
   "Squad 16 Veteran":              {text:"your Fighter +3", add:3},
-  "Squad 19 Quartermaster":        {text:"your Fighter +3", add:3},
+  "Squad 13 Quartermaster":        {text:"your Fighter +3", add:3},
   "Cadet Corps Recruit":           {text:"your Fighter +3", add:3},
-  "Squad 19 Signalman":            {text:"your Fighter +3", add:3},
+  "Squad 13 Signalman":            {text:"your Fighter +3", add:3},
   "Fenrik Vench":                  {text:"your Fighter +3", add:3},
   "Lumen Acolyte":                 {text:"your Fighter +3", add:3},
   "Oathlit Vanguard":              {text:"your Fighter +3", add:3},
@@ -8048,7 +8048,7 @@ const ARCHETYPE_MEMBERS = {
   // accumulated undocumented gaps over time; starting these two at full coverage avoids repeating
   // that same audit finding a third and fourth time.
   "Keawe's Circle": ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz','Fenrik Vench','Yard Sparring Partner','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger"],
-  "Ahdor's Pride": ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 19 Quartermaster','Squad 19 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 19 Signalman','Squad 19 Chronicler'],
+  "Ahdor's Pride": ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 13 Quartermaster','Squad 13 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 13 Signalman','Squad 16 Chronicler'],
   // Added 7/25/26, archetype balance audit -- Black Wings and Black Council were the last 2 of the
   // game's 9 real archetypes with zero Deck Master coverage (no key here, no ARCHETYPE_VANILLA, no
   // DM_EXCLUSIVE splash-tier card). Full roster, not a curated subset -- same anti-gap-accumulation
@@ -8472,12 +8472,12 @@ function voluntaryForfeit(){
 // Regenerate this const from server/rules.json when the spec changes; the server is canonical.
 const CARD_RULES = {
  // 7/23/26: Squad 19 / Tosa Pact glue commons.
- "Squad 19 Quartermaster": [{"if":{"v":"hand_len","op":"<","n":4},"add":4,"log":"📦 Quartermaster: +4 (hand ≤3)"}],
+ "Squad 13 Quartermaster": [{"if":{"v":"hand_len","op":"<","n":4},"add":4,"log":"📦 Quartermaster: +4 (hand ≤3)"}],
  "Ahdorah Khaan, Squad 19 Recruit": [{"if":{"v":"last_result","op":"==","s":"lose"},"add":3,"log":"🛡 Squad 19 Recruit: +3 (lost last)"}],
  "Squad 16 Veteran": [{"if":{"v":"match_commits","op":">=","n":2},"add":3,"log":"⚔ Squad 16 Veteran: +3 (2+ duels played)"}],
  // 7/24/26: balance audit round 2 §5 -- Broodswarm/Ahdor's Pride charge economy, on-commit Fighter half.
  "Silk-Fed Hatchling": [{"chargeGain":1,"log":"🕷 Silk-Fed Hatchling: gain 1 Charge"}],
- "Squad 19 Signalman": [{"chargeGain":1,"log":"📡 Squad 19 Signalman: gain 1 Charge"}],
+ "Squad 13 Signalman": [{"chargeGain":1,"log":"📡 Squad 13 Signalman: gain 1 Charge"}],
  "Cadet Corps Recruit": [{"if":{"or":[{"v":"match_commits","op":"==","n":1},{"v":"match_commits","op":"==","n":2}]},"add":3,"log":"⚔ Cadet Recruit: +3 (early duel)"}],
  "Fenrik Vench": [{"if":{"v":"player_losses","op":">","n":0},"add":3,"log":"⚔ Fenrik Vench: +3 (rivalry sharpens him)"}],
  "Lumen Acolyte": [{"chargeGain":1,"log":"✨ Lumen Acolyte: gain 1 Charge"}],
@@ -12329,7 +12329,7 @@ const WARPATH_PRESET = ['Tange Sazen','Kravyn the Collector','Trophy-Hunter Kess
 // Vesk (already-existing banish-scalers, zero new archetype needed to fit them in) + a charge/curve
 // spine + Reclaim the Colors (shared with Warpath's preset on purpose -- it's a generic WC-scaler,
 // not a signature-exclusive card, same "splash anywhere" status as Conduit Adept).
-const TROPHY_HALL_PRESET = ['Hall of Champions','Ash Reckoning','Twin Ledgers','Victory Lap','Coffer-Keeper','Banked Interest','The Long Reckoning','Rook','Falk','Squad-Captain Vesk','Squad 19 Quartermaster','Cadet Corps Recruit','Squad 19 Signalman','Lumen Acolyte','Silk-Fed Hatchling','Conduit Adept','Signal Diviner','Fenrik Vench','Oathlit Vanguard','Reclaim the Colors'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. 8/7/26 REBUILT following the archetype's own blurb literally: front-loaders (First-Blood Squire, Heir of Kaiga, Warpath Vanguard, Hanse Rogue Fangs) bank Winners-Circle count and kills; Trophy-Hunter Kessa/The Undefeated/Reclaim the Colors/Chieftain Reyva Vosh convert that count into late power; Tange Sazen/Skullchain Reaver/Bloodwake Duelist/Sworn Duelist/Kravyn's Protege/Kravyn the Collector all scale on kills earned. Hanse Rogue Fangs' Māyā transform pays off directly into Bronzed Beast already in the deck. Curve is deliberately back-loaded (7 at cost 3) -- this is the archetype that wants to still be holding cards turn 5+. 18/20 cards carry a real Called effect.
+const TROPHY_HALL_PRESET = ['Hall of Champions','Ash Reckoning','Twin Ledgers','Victory Lap','Coffer-Keeper','Banked Interest','The Long Reckoning','Rook','Falk','Squad-Captain Vesk','Squad 13 Quartermaster','Cadet Corps Recruit','Squad 13 Signalman','Lumen Acolyte','Silk-Fed Hatchling','Conduit Adept','Signal Diviner','Fenrik Vench','Oathlit Vanguard','Reclaim the Colors'];   // The Warpath — early champ + WC recycle + kill escalation. Zerith Var moved out 7/19/26 -- narrowed to Black Council only. 8/7/26 REBUILT following the archetype's own blurb literally: front-loaders (First-Blood Squire, Heir of Kaiga, Warpath Vanguard, Hanse Rogue Fangs) bank Winners-Circle count and kills; Trophy-Hunter Kessa/The Undefeated/Reclaim the Colors/Chieftain Reyva Vosh convert that count into late power; Tange Sazen/Skullchain Reaver/Bloodwake Duelist/Sworn Duelist/Kravyn's Protege/Kravyn the Collector all scale on kills earned. Hanse Rogue Fangs' Māyā transform pays off directly into Bronzed Beast already in the deck. Curve is deliberately back-loaded (7 at cost 3) -- this is the archetype that wants to still be holding cards turn 5+. 18/20 cards carry a real Called effect.
 const BROODSWARM_PRESET = ['La "La" Ballora, the Broodqueen','Venombrood Queen','Broodmother',"Hoarder's Gambit",'Web-Tender Matron','The Gathering Swarm','Envoy of Tyrants, Ella Ballora',"Web-Weaver's Return",'Fledgling Broodmother','Web-Spinner Acolyte','Silk-Spinner Drone','Skittering Drone','Hatchling Tide','Broodweb Keeper','Silkbound Sentinel',"Widow's Patience",'Fifth Frequency Stormcaller','Sister Mire, Wailing Nightmare','Faye Quicksilver','Signal Diviner'];   // The Broodswarm — hand-size draw + power. 7/24/26: +2 charge-economy commons (balance audit round 2 §5). 8/7/26 REBUILT: ARCHETYPE_MEMBERS['Broodswarm'] (8) plus every common that scales on hand size (Fledgling Broodmother/Web-Spinner Acolyte/Skittering Drone/Hatchling Tide/Broodweb Keeper/Silkbound Sentinel/Widow's Patience) -- 15 of 20 literally read "cards in hand." Fifth Frequency Stormcaller is the top-end payoff (+7 at 4+ banish AND +4 at 5+ hand). Sister Mire, Wailing Nightmare moved here from Deathless -- her text is pure draw/hand-size, zero Remnant keyword, so this is the correct home for her, not a name-echo. 15/20 cards carry a real Called effect.
 const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh','Bixie Bee','Heir of Kaiga','Barracks Drill Sergeant','Yard Sparring Partner','Squad 19 Vanguard','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Trophy Runner','Melanie'];   // The Ironsworn — go wide with 1-cost bodies, Cassian scales biggest (Muster: +power per 1-cost ally). Zerith Var moved out 7/19/26 -- narrowed to Black Council only. 8/7/26 REBUILT: the full LINK_GROUPS['ironsworn'] cluster (11, already = ARCHETYPE_MEMBERS['Muster'] plus the non-Muster glue) plus Bixie Bee/Heir of Kaiga -- named directly in this archetype's own blurb as the 1-cost fuel -- plus 7 more 1-cost bodies. Curve: 14 of 20 cards cost 1 (this is the one deck in the whole set where that's correct, not a flaw -- Cassian/Ironsworn Vanguard/Warden of the Wall count every 1-cost ally you field). 14/20 cards carry a real Called effect; the rest (Muster payoffs themselves) are meant to be committed as the big Fighter, not held back as support.
 // 4 more added 7/19/26 -- lore-driven rather than mechanically uniform like the 5 above. Black
@@ -12339,7 +12339,7 @@ const IRONSWORN_PRESET = ['Bannerlord Cassian','Ironsworn Vanguard','Warden of t
 const BLACK_COUNCIL_PRESET = ['Darwin','Young Darwin, Predetermined Dictator','Zerith Var','Valcarion','Envoy of Tyrants, Ella Ballora','Arch-Grim Korrin','Cletus Gwyndull','Kessuae, Tide of Ruin','Kravyn the Collector','Court Cipher','Ridgeline Scout',"Warden's Feint",'The Unending Flame, Tange Sazen','Courtroom Colossus','Veronica','Mirror Shade','Kynaht, Ashen Return','Ridgeline Warden','Faye Quicksilver','Signal Diviner'];   // Black Council — Darwin's inner court: power-curse denial, condition/location lockdown, opponent-power interference. Cletus Gwyndull + Kessuae are new splashes here for the lock/nullify fit, not pre-existing Darwin's Court members. 8/7/26 REBUILT: full ARCHETYPE_MEMBERS['Black Council'] (10) + every card in the pool that actually locks/denies/mirrors something -- Ridgeline Scout+Warden (location-denial, 2 copies of the effect at different costs on purpose -- redundancy against not drawing it, not padding), Warden's Feint (support-zone denial), Kynaht Ashen Return (nullifies the opponent's Called supports outright), Veronica + Mirror Shade (both literally copy/mirror the opponent), The Unending Flame + Courtroom Colossus (the late-game power-drain finishers the blurb names). Veronica/Ruffius were moved OUT 7/19/26 for being off-fit for the OLD roster; Veronica's actual ability (copy opponent's ability) is a denial/interference card by definition, so she belongs here on mechanics, brought back deliberately. Curve is back-loaded (9 at cost 3) by design -- this is the deck built to still be casting spells on the 3rd-plus commit.
 const RADIANCE_PRESET = ['Moro','Elowen Dawnspear','Kaelthar the Ascendant','Oathlit Vanguard','Malia','King Joris','Bram the Bulwark','Oathbound Shield','The Regenerating Horror','Hanse Waltz','The Kept Blade, Ahdor','Chieftain Reyva Vosh','The Reliquary, Ruffius Rufeldro','Ilma the Patient','Faye Quicksilver','Oathlit Attendant','Signal Diviner','Lumen Acolyte','Josef','Standard-Bearer Halden'];   // Radiance — blessed/orderly power: Purity, Last Stand, and judgment-of-the-wicked effects. Moro/Malia/Ruffius already share the 'holy' CARD_STYLE tag; none of these 3 are yet tagged Thennlar race in CARD_RACE (all still default Human) -- worth setting via the Race dropdown if the race should match. 8/7/26 REBUILT: full ARCHETYPE_MEMBERS['Radiance'] (4) + LINK_GROUPS['royalty'] (Malia/King Joris) + every named Last-Stand/durability card from the archetype's own blurb (Bram, Oathbound Shield, The Regenerating Horror) + Hanse Waltz (his OWN printed keyword is literally Last Stand) + Chieftain Reyva Vosh (her Called doubles Shield, a durability payoff this deck should want). Still honestly the thinnest real-fit pool of the 9 -- Ilma/The Reliquary/the curve-fillers are flagged as softer fits, not oversold as core synergy.
 const KEAWES_CIRCLE_PRESET = ['Kotei','Lagertha Waltz','Hanse Waltz','Uso Oso','Bixie Bee','Melanie','Heir of Kaiga',"Keawe Kel'rua","Legend Reborn, Keawe Kel'rua",'Conduit of Chaos, Kleydson','The Bronzed Beast, Hanse Waltz','Fenrik Vench','Yard Sparring Partner','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Kessuae, Tide of Ruin','Lagertha Waltz, Wrathful Transformation','Kiana','Ruffius Rufeldro'];   // Keawe's Circle — Keawe/Kotei's own found-family and closest allies (promoted from the LINK_GROUPS 'keawe' cluster, plus his own past/reborn forms). 7/23/26: added the cadet-corps/Tosa Pact glue commons (Fenrik Vench is his real Ch.1 rival, per the Reincarnation storyline). 8/7/26 REBUILT to actually complete both Link pairs the deck's own blurb promises: LINK_GROUPS['waltz'] is now fully present (added Lagertha Waltz, Wrathful Transformation), LINK_GROUPS['kelrua'] is now fully present (added Kiana) -- the old list ran only half of each pair, so the in-hand pairing bonus the blurb describes could never actually fire both sides. Ruffius Rufeldro closes the loop on "comeback power, punish an early lead" (his own text doubles when down 2+ duels) -- dropped Hanse Rogue Fangs, who's a Warpath-tempo card by mechanics, not a comeback one.
-const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 19 Quartermaster','Squad 19 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 19 Signalman','Squad 19 Chronicler','Ahdorah Khaan, Circle Unbroken','Kynaht, Ashen Return','The Kept Blade, Ahdor','Cletus Gwyndull'];   // Circle of Life (renamed from Ahdor's Pride, 7/28/26) — Ahdorah Khaan + Squad 19, now also the archetype whose signature identity is conjuring very strong banishOnly cards straight from your own banish pile (owner request: gate real power behind needing genuine banish-fill setup first, so it can't just be splashed). This one was already a correct, tight 20 -- full ARCHETYPE_MEMBERS['Ahdor's Pride'] (16, the whole cheap Squad 19/Tosa Pact support shell) plus the archetype's own 2 banishOnly signature finishers (Ahdorah Circle Unbroken, Kynaht Ashen Return) plus its 2 namesake capstones (The Kept Blade Ahdor, Cletus Gwyndull as LINK_GROUPS['tosa']'s own card) -- kept unchanged in the 8/7/26 pass. 12 of 20 cost 1, matching the "cheap shell, banish-gated payoff" identity exactly.
+const AHDORS_PRIDE_PRESET = ['Ahdorah Khaan, Determined Soul','Val Kreigh','Ruffius Rufeldro','Conduit of Chaos, Kleydson',"Legend Reborn, Keawe Kel'rua",'Ahdorah Khaan, Squad 19 Recruit','Squad 19 Vanguard','Squad 19 Medic','Squad 13 Quartermaster','Squad 13 Scout','Barracks Drill Sergeant','Cadet Corps Recruit',"Writ-Sergeant's Ledger",'Squad 16 Veteran','Squad 13 Signalman','Squad 16 Chronicler','Ahdorah Khaan, Circle Unbroken','Kynaht, Ashen Return','The Kept Blade, Ahdor','Cletus Gwyndull'];   // Circle of Life (renamed from Ahdor's Pride, 7/28/26) — Ahdorah Khaan + Squad 19, now also the archetype whose signature identity is conjuring very strong banishOnly cards straight from your own banish pile (owner request: gate real power behind needing genuine banish-fill setup first, so it can't just be splashed). This one was already a correct, tight 20 -- full ARCHETYPE_MEMBERS['Ahdor's Pride'] (16, the whole cheap Squad 19/Tosa Pact support shell) plus the archetype's own 2 banishOnly signature finishers (Ahdorah Circle Unbroken, Kynaht Ashen Return) plus its 2 namesake capstones (The Kept Blade Ahdor, Cletus Gwyndull as LINK_GROUPS['tosa']'s own card) -- kept unchanged in the 8/7/26 pass. 12 of 20 cost 1, matching the "cheap shell, banish-gated payoff" identity exactly.
 // Archetype dev-view (7/18/26, expanded 7/19/26): the meta archetypes' full membership, for the
 // Vault's Archetype filter -- reuses these *_PRESET arrays directly (the actual full-deck lists)
 // rather than ARCHETYPE_MEMBERS (a narrower, Deck-Master-tier-eligibility-only list that excludes
