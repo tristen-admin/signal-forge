@@ -556,7 +556,12 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .match-end{position:fixed;inset:0;z-index:120;display:none;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 40%,rgba(7,9,15,0.86),rgba(7,9,15,0.97));backdrop-filter:blur(3px)}
 .match-end.show{display:flex;animation:me-fade 0.4s ease-out}
 @keyframes me-fade{from{opacity:0}to{opacity:1}}
-.me-inner{display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px;max-width:520px}
+.me-bg{position:absolute;inset:0;overflow:hidden;z-index:0}
+.me-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 42%,rgba(7,9,15,0.32),rgba(7,9,15,0.88));pointer-events:none}
+.me-bg-poster,.me-bg-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.me-bg-video{opacity:0;transition:opacity .7s ease}
+.me-bg-video.on{opacity:1}
+.me-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:32px;max-width:520px}
 .me-eyebrow{font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--text2);margin-bottom:12px}
 .me-title{font-size:74px;font-weight:800;letter-spacing:0.02em;line-height:1;margin-bottom:14px;text-wrap:balance;animation:me-pop 0.5s cubic-bezier(0.2,0.8,0.3,1)}
 @keyframes me-pop{0%{transform:scale(1.5);opacity:0}30%{opacity:1}100%{transform:scale(1);opacity:1}}
@@ -3633,6 +3638,10 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 
 <!-- ── MATCH-END (WIN / LOSS) SCREEN ── -->
 <div class="match-end" id="match-end">
+  <div class="me-bg" id="me-bg" style="display:none">
+    <img class="me-bg-poster" id="me-bg-poster" alt="">
+    <video class="me-bg-video" id="me-bg-video" muted playsinline onerror="this.style.display='none'"></video>
+  </div>
   <div class="me-inner">
     <div class="me-eyebrow" id="me-eyebrow">Best of 7</div>
     <div class="me-title" id="me-title">YOU WON</div>
@@ -5462,21 +5471,46 @@ function showMatchComplete(mode, amt){
   document.getElementById('result-overlay').classList.remove('show');
   const end=document.getElementById('match-end');
   end.className='match-end show '+(won?'won':'lost');
+  if(won) _matchEndBgStart(); else { const _meBg=document.getElementById('me-bg'); if(_meBg) _meBg.style.display='none'; }
   document.getElementById('me-eyebrow').textContent=`Rebirth Season · Best of ${rankedMode?3:7} · vs ${activeBot?activeBot.name:'Bot'}`+(rankedMode?` · Stake ×${stakeMult}`:' · Casual');
   document.getElementById('me-title').textContent = mode==='retreat-bot' ? 'THEY FOLDED' : mode==='retreat-player' ? 'CLEAN FOLD' : (won?'YOU WON':'YOU LOST');
   document.getElementById('me-score').textContent=`${playerScore[0]} – ${playerScore[1]}`;
   const _rankPart = rankedMode ? `Rank ${won?'gained':'lost'}: <b style="color:${won?'var(--gold)':'var(--lose)'}">${swing}</b> · now ${fmtPts(rankRP)} RP · ${rankTier(rankRP)}` : lobbyMode ? `Zenni stakes: <b style="color:${won?'var(--gold)':'var(--lose)'}">${swing}</b> — Offline Play, no rank at stake` : 'Casual match — no rank staked, records still count.';
   document.getElementById('me-sub').innerHTML = (mode==='retreat-player'?'Smart fold — your card records stay untouched. ':mode==='retreat-bot'?'They folded — the series is yours, clean. ':(won?'Series taken. ':'Series lost. '))+_rankPart+(sigGain>0?` · <b style="color:var(--gold)">+${fmtPts(sigGain)} ◈</b> Zenni`:'');
 }
+// Match-end win banner: unlike the login backdrop (a rare, once-per-arrival reveal), a match win
+// is a frequent recurring event, so this replays fresh from frame 0 every time rather than gating
+// on "already has a src." Same decoder-contention workaround as _loginBgStart() (see there for why).
+function _matchEndBgStart(){
+  const wrap = document.getElementById('me-bg'); if(!wrap) return;
+  wrap.style.display = '';
+  const poster = document.getElementById('me-bg-poster');
+  if(poster && typeof _MATCHEND_WIN_POSTER!=='undefined' && !poster.src) poster.src = _MATCHEND_WIN_POSTER;
+  const vid = document.getElementById('me-bg-video');
+  if(!vid || typeof _MATCHEND_WIN_VID==='undefined') return;
+  document.querySelectorAll('video').forEach(function(o){ if(o!==vid){ try{ o.pause(); }catch(e){} } });
+  if(!vid.src) vid.src = _MATCHEND_WIN_VID;
+  vid.currentTime = 0;
+  vid.classList.add('on');
+  vid.play().catch(function(){});
+  vid.onended = function(){ vid.classList.remove('on'); };
+  // Not a one-shot resume -- the 800ms field/bc/fc-vid stall-watchdog interval (search "guarantee
+  // this one gets a decoder") keeps fighting THIS video for the same decoder budget for as long as
+  // any of those are also stalled nearby, so a single resume attempt isn't enough; keep resuming on
+  // every pause until this video genuinely reaches its own end.
+  vid.onpause = function(){ if(vid.ended) return; vid.play().catch(function(){}); };
+}
 function matchEndHome(){
   document.getElementById('match-end').classList.remove('show');
   matchComplete = false;
   clearTurnTimers();
+  { const v=document.getElementById('me-bg-video'); if(v){ try{ v.pause(); }catch(e){} } }
   show('hub', document.getElementById('nav-hub'));
 }
 function matchEndAgain(){
   document.getElementById('match-end').classList.remove('show');
   matchComplete = false;
+  { const v=document.getElementById('me-bg-video'); if(v){ try{ v.pause(); }catch(e){} } }
   _skipMatchIntro = true;   // real pacing fix (7/12/26) — don't replay the cinematic on every rematch
   // Real gap (7/12/26): this bypasses startDeckMasterMatch()'s guard entirely by calling
   // resetMatchState() directly — if activeDeck or deckMasterCard became invalid since the match
@@ -10971,6 +11005,8 @@ const _PACK_SUMMON_VID='assets/video/4a8998afa471.mp4';
 const _AVATARA_ACTIVATION_VID='assets/video/83a8d0a48de5.mp4';
 const _LOGIN_BG_VID='assets/video/2c07aee55b55.mp4';
 const _LOGIN_BG_POSTER='assets/img/717ec2756aa8.jpg';
+const _MATCHEND_WIN_VID='assets/video/5a3a798a02f3.mp4';
+const _MATCHEND_WIN_POSTER='assets/img/eae7f5c5b788.jpg';
 const _TANGE_VID='assets/video/1a2dfab9ec4b.mp4';VIDEO_ABILITY['Tange Sazen']=_TANGE_VID;VIDEO_PREVIEW['Tange Sazen']=_TANGE_VID;VIDEO_FULL['Tange Sazen']=_TANGE_VID;
 const VIDEO_FOCUS={'Ahdorah Khaan, Determined Soul':'center 24%'};function vidStyle(k){return VIDEO_FOCUS[k]?' style="object-position:'+VIDEO_FOCUS[k]+'"':'';}
 const ART_FOCUS={'Tange Sazen':'center 45%'};function artFoc(k){return ART_FOCUS[k]?' style="object-position:'+ART_FOCUS[k]+';transform:none"':'';}
@@ -11945,12 +11981,10 @@ function _loginBgStart(){
     vid.classList.add('on');
     vid.play().catch(function(){});
     vid.addEventListener('ended', function(){ vid.classList.remove('on'); }, {once:true});
-    var _bgResumed = false;
-    vid.addEventListener('pause', function(){
-      if(vid.ended || _bgResumed) return;
-      _bgResumed = true;
-      vid.play().catch(function(){});
-    }, {once:true});
+    // Not a one-shot resume -- see the matching note in _matchEndBgStart(): the 800ms field/bc/
+    // fc-vid stall-watchdog interval can re-steal the decoder more than once, so keep resuming on
+    // every pause until this video genuinely reaches its own end, not just after the first one.
+    vid.addEventListener('pause', function(){ if(vid.ended) return; vid.play().catch(function(){}); });
   }
 }
 
@@ -14326,6 +14360,7 @@ function pvpSettle(){
   document.getElementById('result-overlay').classList.remove('show');
   const end=document.getElementById('match-end');
   end.className='match-end show '+(won?'won':'lost');
+  if(won) _matchEndBgStart(); else { const _meBg=document.getElementById('me-bg'); if(_meBg) _meBg.style.display='none'; }
   document.getElementById('me-eyebrow').textContent=`Rebirth Season · Staked Duel · vs ${activeBot?activeBot.name:'Rival'}`;
   document.getElementById('me-title').textContent=won?'WAGER WON':'WAGER LOST';
   document.getElementById('me-score').textContent=`${playerScore[0]} – ${playerScore[1]}`;
