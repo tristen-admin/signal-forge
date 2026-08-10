@@ -8,9 +8,9 @@ Avatara activation -- SHIPPED 8/10/26
 Done. Real footage generated, cut from 10s to 3.2s (trimmed the static open and the slow fade tail, sped up ~2.3x, audio pitch preserved), wired as a full-screen dismissable overlay firing from the real fireDeckMasterAvatara() trigger.
 
 
-Pack-opening summon reveal
+Pack-opening summon reveal -- SHIPPED 8/10/26
 
-An ornate arcane summoning circle viewed head-on, concentric rings of runes and sigils glowing from within, radiant energy pouring upward from the center, dark background so the ring itself is the bright focal point.
+Done. Real footage generated, cut from 10s to 8.5s (trimmed the static hold at the end), replaces the old CSS-blob cluster during the roll phase, reveal() now fires on the video's real 'ended' event per this function's own pre-existing comment.
 
 
 Login / create account screen
