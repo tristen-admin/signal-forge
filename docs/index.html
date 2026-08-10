@@ -10364,7 +10364,7 @@ function playSummon(card, rar, mint, packName, onDone){
   const reveal=function(){
     clearAll(); ov.dataset.phase='reveal';
     ov.style.setProperty('--sv', finalColor);
-    const pv=stage.querySelector('#sm-summon-vid'); if(pv){ try{ pv.pause(); }catch(e){} }
+    const pv=stage.querySelector('#sm-summon-vid'); if(pv){ pv.onpause=null; try{ pv.pause(); }catch(e){} }
     stage.classList.remove('sm-shake'); stage.classList.add('sm-burst');
     timers.push(setTimeout(function(){
       stage.classList.remove('sm-burst'); stage.classList.add('sm-reveal');
@@ -10375,7 +10375,27 @@ function playSummon(card, rar, mint, packName, onDone){
   if(reduce){ reveal(); return; }
   if(hasPackVid){
     const pv=stage.querySelector('#sm-summon-vid');
-    if(pv){ pv.onended=reveal; pv.onerror=reveal; return; }
+    if(pv){
+      // Same video-decoder-contention issue documented at _loginBgStart()/_matchEndBgStart() --
+      // found here too while testing: an Apex pull's onended never fired, stuck mid-clip at
+      // paused/2.5s indefinitely. Pause every OTHER video first (but not the card-face .fc-vid
+      // that can be playing inside this SAME stage -- that one's supposed to keep going) and
+      // don't trust the bare autoplay attribute alone; keep resuming on every unexpected pause
+      // until this video genuinely reaches its own end.
+      document.querySelectorAll('video').forEach(function(o){ if(o!==pv && !stage.contains(o)){ try{ o.pause(); }catch(e){} } });
+      pv.play().catch(function(){});
+      pv.onpause=function(){ if(pv.ended) return; pv.play().catch(function(){}); };
+      pv.onerror=reveal;
+      // 8/10/26 (owner): the character silhouette in this clip only resolves into view around
+      // 5.0s (confirmed by frame extraction -- 4.5s is still pure white-flash, no character yet).
+      // Rare-or-below never gets to that point, so a bare glimpse of the reveal can't leak the
+      // rarity early; only Ultra/Apex play the clip through to its own natural 'ended' and the
+      // actual character reveal, matching the owner's rule verbatim ("if the soldier appears,
+      // they pulled a high rarity card").
+      if(tier<=3){ timers.push(setTimeout(reveal, 4500)); }
+      else { pv.onended=reveal; }
+      return;
+    }
   }
   const rollDur=1100 + tier*440;   // common ~1.5s … apex ~3.3s (rarer = longer, tenser build) -- fallback path only
   const t0=performance.now(); let i=0;
