@@ -10157,7 +10157,7 @@ function dailyFeaturedApexCard(){
 // and every blurb is true against its own numbers: Mythic Rite now genuinely has the best apex rate
 // of any pack in the shop, not just within this tier.
 const PREMIUM_PACKS = [
-  {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{rare:88, ultra:10, apex:2}},
+  {id:'fkindle', name:'Kindled Cache', icon:'🔥', price:2000, blurb:'Rare-forward — the premium entry summon.', odds:{rare:88, ultra:10, apex:2}, oneXOnly:true},
   {id:'fforge', name:'Forgemaster Vault', icon:'❖', price:5000, blurb:'Rare-dense with a real Apex shot.', odds:{rare:85, ultra:11.5, apex:3.5}},
   {id:'fmythic', name:'Mythic Rite', icon:'👑', price:6000, blurb:'The top-tier summon — highest Apex rate in the game.', odds:{rare:80, ultra:15, apex:5}},
 ];
@@ -10197,7 +10197,7 @@ function packCardHTML(p){
   return `<div class="pack-card wide">
     <div class="pack-head"><div class="pack-icon">${p.icon}</div><div><div class="pack-name">${p.name}${shopBadgesFor(p)}</div><div class="pack-blurb">${p.blurb}</div></div></div>
     <div class="pack-odds">${odds}</div>${featHTML}
-    <div class="pack-buy-row"><button class="pack-buy" ${soldOut?'disabled':''} onclick="openPack('${p.id}')">${soldOut?'Minted Out':'Open · ◈ '+fmtPts(p.price)}</button>${soldOut?'':`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',5)" title="Open five at once — 5% off the single-pack rate">5× · <span class="pack-was">◈${fmtPts(p.price*5)}</span>◈${fmtPts(bundlePrice(p.price,5))}<span class="pack-save">Save 5%</span></button>`}${(!soldOut && p.tenX)?`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',10)" title="Open ten at once — 10% off the single-pack rate">10× · <span class="pack-was">◈${fmtPts(p.price*10)}</span>◈${fmtPts(bundlePrice(p.price,10))}<span class="pack-save">Save 10%</span></button>`:''}</div>
+    <div class="pack-buy-row"><button class="pack-buy" ${soldOut?'disabled':''} onclick="openPack('${p.id}')">${soldOut?'Minted Out':'Open · ◈ '+fmtPts(p.price)}</button>${(soldOut||p.oneXOnly)?'':`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',5)" title="Open five at once — 5% off the single-pack rate">5× · <span class="pack-was">◈${fmtPts(p.price*5)}</span>◈${fmtPts(bundlePrice(p.price,5))}<span class="pack-save">Save 5%</span></button>`}${(!soldOut && !p.oneXOnly && p.tenX)?`<button class="pack-buy pack-buy5" onclick="openPackN('${p.id}',10)" title="Open ten at once — 10% off the single-pack rate">10× · <span class="pack-was">◈${fmtPts(p.price*10)}</span>◈${fmtPts(bundlePrice(p.price,10))}<span class="pack-save">Save 10%</span></button>`:''}</div>
   </div>`;
 }
 // 8/7/26: was a small note buried inside Elite Cache's own odds panel -- promoted to a real
@@ -10263,6 +10263,7 @@ function _mintRarity(rar, p){
 function bundlePrice(price, n){ var disc = n>=10 ? 0.10 : n>=5 ? 0.05 : 0; return Math.round(price*n*(1-disc)); }
 function openPackN(id, n){
   var p=PACKS.find(function(x){return x.id===id;}) || PREMIUM_PACKS.find(function(x){return x.id===id;}); if(!p) return;
+  if(p.oneXOnly){ toast(p.name+' is 1× only — no bundle summon.', false); return; }
   var isPremium = PREMIUM_PACKS.indexOf(p)>=0;
   var avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;});
   if(!avail.length){ toast(p.name+' \u2014 every rarity it offers is minted out',false); return; }
