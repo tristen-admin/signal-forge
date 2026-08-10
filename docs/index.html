@@ -1107,6 +1107,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .asc-roster-label{font-family:'Trajan Pro','Cinzel',Palatino,serif;color:var(--gold);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;margin:16px 0 8px}
 .asc-roster-label span{font-family:Palatino,Georgia,serif;text-transform:none;letter-spacing:0;color:var(--text3);font-size:11px;font-style:italic}
 .asc-roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:12px}
+.asc-roster-filter{display:flex;justify-content:flex-end;margin-bottom:8px}
 .asc-unit{background:linear-gradient(180deg,rgba(24,24,30,0.8),rgba(8,8,11,0.9));border:1px solid var(--border);border-radius:12px;padding:12px;cursor:pointer;text-align:center;transition:transform .12s,border-color .12s,box-shadow .12s}
 .asc-unit:hover{transform:translateY(-3px);border-color:var(--gold-dim)}
 .asc-unit.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 0 22px var(--gold-glow)}
@@ -14629,6 +14630,8 @@ function ascLoaners(){ var seed=ascMonthSeed(), pool=ascUnifiedRoster();
   var out=[]; for(var i=0;i<5 && i<pool.length;i++) out.push(pool[(seed+i*37)%pool.length].id);
   return out; }
 function ascIsLoaner(id){ return ascLoaners().indexOf(id)>=0; }
+function ascFieldable(u){ return ascOwnsCharacter(u.name) || ascIsLoaner(u.id); }
+function ascToggleOwned(){ ascShowUnowned=!ascShowUnowned; ascRenderSetup(); }
 // ══ REINCARNATION OPEN ROSTER (8/3/26) ══ owner: "we are supposed to have the ability to play with
 // any units you own, and any deckmasters are avatars." ASC_UNITS above stays exactly as authored —
 // these functions layer a full, ownership-driven roster on top of it rather than replacing it, so
@@ -14909,6 +14912,7 @@ function ascSpecChoice(unitId, stat){ var u=ascResolveUnit(unitId); if(!u) retur
   b[stat]+=2;
   P.pendingSpec--; saveState(); ascChampionDetail(unitId); }
 let ascSetupStep='intro'; let ascIntroTimer=null; let _ascMovesReturn=false;
+let ascShowUnowned=false;   // Champion/companion pickers default to owned+loaner only (see ascFieldable)
 // ══ REINCARNATION HUB — the lobby you land in (champions · team · arena · shop) ══
 function ascGoShop(){ if(typeof show==='function') show('shop', document.getElementById('nav-shop')); }
 function ascShowPane(id){ ascHideAll(); var e=document.getElementById(id); if(e) e.style.display=''; return e; }
@@ -15094,6 +15098,7 @@ function ascRenderSetup(){
   var _lp=(function(){ var pl=ascComputeLinks([av].concat(comps).filter(Boolean).map(function(u){return {name:u.name};})); return '<div class="asc-linkprev"><span class="alp-label">Party links</span>'+(pl.length?pl.map(function(l){return '<span class="alp-chip" title="'+l.desc+'">'+l.icon+' '+l.name+'</span>';}).join(''):'<span class="alp-none">none yet — pair lore-linked units for auras</span>')+'</div>'; })();
   var rank=ascRankInfo();
   var rankBar='<div class="asc-rank-banner"><span class="ark-eyebrow">Reincarnation Rank</span><span class="ark-name">'+rank.name+'</span>'+(rank.next?'<span class="ark-next">score '+rank.score+' · next: '+rank.next.name+' at '+rank.next.min+'</span>':'<span class="ark-next">◆ max rank</span>')+'</div>';
+  var ownToggle='<div class="asc-roster-filter"><button class="filter-chip'+(ascShowUnowned?' on':'')+'" onclick="ascToggleOwned()">'+(ascShowUnowned?'👁 Showing All':'🔒 Owned Only')+'</button></div>';
   var h;
   if(ascSetupStep==='avatar'){
     var pas=av?ASC_PASSIVES[av.id]:null;
@@ -15106,12 +15111,12 @@ function ascRenderSetup(){
     // when one actually exists.
     var avSub = av ? ((pas?pas.name+': '+pas.desc+' · ':'')+'Ultimate: '+av.ability.name) : 'Tap a Champion to see its aura and Ultimate.';
     h='<div class="lobby-head"><div class="lh-eyebrow" style="color:var(--violet)">The Saga · Step 1 of 2 · Choose your Champion</div><h1>Summon your Champion</h1><p>The card you pilot the Rift as. It empowers the units that serve you and charges your Ultimate — it never fights directly.</p></div>'+rankBar+
-      '<div class="asc-roster">'+ascUnifiedRoster().filter(function(u){return ascPartySel.companionIds.indexOf(u.id)<0 && ascChampionEligible(u);}).map(ascUnitCell).join('')+'</div>'+
+      ownToggle+'<div class="asc-roster">'+ascUnifiedRoster().filter(function(u){return (ascShowUnowned||ascFieldable(u)) && ascPartySel.companionIds.indexOf(u.id)<0 && ascChampionEligible(u);}).map(ascUnitCell).join('')+'</div>'+
       '<div class="lobby-launch"><button class="asc-edit-team" onclick="ascHomeAsc()">⌂ Hub</button><div class="ll-info"><h3>'+(av?av.name.split(',')[0]+' — your Champion':'No Champion chosen')+'</h3><p class="'+(av?'':'ll-none')+'">'+avSub+'</p></div><button class="enter-btn" onclick="ascSetupToCompanions()"'+(av?'':' disabled')+'>Rally your units →</button></div>';
   } else {
     h='<div class="lobby-head"><div class="lh-eyebrow" style="color:var(--violet)">The Saga · Step 2 of 2 · Rally your units</div><h1>Choose your companions</h1><p>The units that fight for '+(av?av.name.split(',')[0]:'your Champion')+'. Choose 2 to 3.</p></div>'+
       '<div class="asc-party-preview">'+[av].concat(comps).filter(Boolean).map(function(u,i){ var isAv=(i===0); return '<div class="app-unit'+(isAv?' av':'')+'"><div class="app-art" style="'+artFillStyle(u.art)+'">'+(CARD_ART[u.art]?'':sigilFor(u.art))+'</div><div class="app-name">'+u.name.split(',')[0]+(isAv?' ★':'')+'</div>'+(isAv?'<span class="app-ult">★ Ultimate</span>':'<button class="app-moves" onclick="ascEditMoves('+qk(u.id)+')">✎ Moves</button>')+'</div>'; }).join('')+'</div>'+
-      _lp+'<div class="asc-roster">'+ascUnifiedRoster().filter(function(u){return u.avatar!==true && u.id!==ascPartySel.avatarId;}).map(ascUnitCell).join('')+'</div>'+
+      _lp+ownToggle+'<div class="asc-roster">'+ascUnifiedRoster().filter(function(u){return (ascShowUnowned||ascFieldable(u)) && u.avatar!==true && u.id!==ascPartySel.avatarId;}).map(ascUnitCell).join('')+'</div>'+
       ascChapterPicker()+'<div class="lobby-launch"><button class="asc-edit-team" onclick="ascHomeAsc()">⌂ Hub</button><button class="asc-edit-team" onclick="ascSetupToAvatar()">← Champion</button><div class="ll-info"><h3>'+(comps.length>=2?'Party ready':'Choose '+(2-comps.length)+' more')+'</h3><p>'+comps.length+' / 3 companions</p></div><button class="enter-btn"'+((av&&comps.length>=2)?'':' disabled')+' onclick="'+(ascEditing?'ascApplyTeamEdit()':'ascStoryStart()')+'">'+(ascEditing?'✓ Save team':'▶ Begin '+(ASC_CHAPTERS[ascChapterIdx]?ASC_CHAPTERS[ascChapterIdx].title:'Chapter 1: Rebirth'))+'</button></div>'+((!ascEditing)?'<div class="asc-altmodes"><span class="aam-label">Other modes</span><button class="asc-alt"'+((av&&comps.length>=2)?'':' disabled')+' onclick="ascBegin()">⚜ Endless Saga</button><button class="asc-alt"'+((av&&comps.length>=2)?'':' disabled')+' onclick="ascArenaStart()">⚔ The Arena · PvP</button></div>':'');
   }
   setup.innerHTML=h;
