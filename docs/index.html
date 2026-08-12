@@ -509,6 +509,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .vh-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .vh-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .vh-label{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-right:2px}
+.vh-multi{display:inline-block;margin-left:4px;padding:1px 5px;border-radius:7px;background:var(--gold-glow);border:1px solid rgba(245,194,77,0.35);color:var(--gold);font-size:8px;letter-spacing:0.06em;cursor:help}
 .dfb-own{background:linear-gradient(180deg,rgba(245,194,77,0.11),rgba(245,194,77,0.04));border:1px solid rgba(245,194,77,0.34);border-radius:10px;padding:6px 10px}
 .dfb-own .vh-label{color:var(--gold)}
 .dfb-own .own-chip{font-weight:800}
@@ -956,6 +957,9 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .grp-chev{margin-left:auto;font-size:9px;color:var(--text3);transition:transform .2s}
 .nav-group.open .grp-chev{transform:rotate(180deg)}
 .nav-sub{display:flex;flex-direction:column;gap:1px;overflow:hidden;max-height:0;opacity:0;transition:max-height .22s ease,opacity .16s}
+/* nav items go inert while the accordion reflows — see toggleNavGroup(). Scoped to .navitem only:
+   the group HEADS stay live, so rapidly toggling between two groups still works as expected. */
+.sidebar.nav-settling .navitem{pointer-events:none}
 .nav-group.open .nav-sub{max-height:360px;opacity:1;margin:1px 0 4px}
 .nav-sub .navitem{padding-left:22px;font-size:11.5px}
 .user-pod{
@@ -1310,7 +1314,11 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .ala-row.cur{border-color:var(--gold);color:var(--gold);font-weight:700}
 .asc-linkprev{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;margin:6px 0 14px}
 .alp-label{font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3)}
-.alp-chip{background:rgba(245,194,77,0.1);border:1px solid rgba(245,194,77,0.3);border-radius:20px;padding:3px 11px;font-size:11.5px;color:var(--gold);cursor:help}
+/* now a real <button> (see the party-links strip) — cursor:help became cursor:pointer, and the
+   padding grew to a proper tap target. font/family are set explicitly because a <button> does not
+   inherit them the way the old <span> did, so the chip renders identically to before. */
+.alp-chip{background:rgba(245,194,77,0.1);border:1px solid rgba(245,194,77,0.3);border-radius:20px;padding:6px 13px;font-size:11.5px;font-family:inherit;font-weight:inherit;line-height:1.2;color:var(--gold);cursor:pointer;transition:background .12s,border-color .12s}
+.alp-chip:hover{background:rgba(245,194,77,0.2);border-color:var(--gold)}
 .alp-none{font-size:11.5px;color:var(--text3);font-style:italic}
 .asc-crossroads{max-width:760px;margin:0 auto;padding:20px 4px}
 .asc-offer-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
@@ -2296,6 +2304,17 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .on-final.win h3{color:var(--win)}
 .on-final.lose h3{color:var(--lose)}
 .on-final.tie h3{color:var(--gold)}
+/* series recap rows in the match-end panel (8/11/26) — one per duel, see PVP.duelLog */
+.on-series{margin:12px 0 14px;text-align:left;border:1px solid var(--border);border-radius:9px;overflow:hidden}
+.on-series-head{font-size:9.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);padding:7px 10px;background:var(--surface);border-bottom:1px solid var(--border)}
+.on-sr-row{display:flex;align-items:center;gap:10px;padding:7px 10px;font-size:11.5px;border-bottom:1px solid var(--border);border-left:3px solid transparent}
+.on-sr-row:last-child{border-bottom:none}
+.on-sr-row.win{border-left-color:var(--win)}
+.on-sr-row.lose{border-left-color:var(--lose)}
+.on-sr-row.tie{border-left-color:var(--gold)}
+.on-sr-n{flex:0 0 auto;font-weight:800;color:var(--text3);font-size:10px;letter-spacing:.06em}
+.on-sr-cards{flex:1;min-width:0;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.on-sr-res{flex:0 0 auto;font-weight:700;color:var(--text);font-variant-numeric:tabular-nums}
 .approve-overlay{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;background:rgba(5,7,12,0.85);backdrop-filter:blur(3px)}
 .approve-overlay.show{display:flex;animation:wf-in .25s ease}
 .approve-panel{background:linear-gradient(180deg,var(--panel),var(--void));border:1px solid rgba(208,106,106,0.5);border-radius:14px;padding:24px 28px;max-width:460px;width:92%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
@@ -2768,7 +2787,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <div class="hc-label">The Arena Awaits</div>
         <div class="hub-actions">
           <button class="hub-action ha-hero" style="--accent:#F5C24D" onclick="pvpSetMode(3);show('online', document.getElementById('nav-ranked'))"><span class="ha-icon">🪜</span><span class="ha-txt"><span class="ha-eyebrow">Featured</span><span class="ha-title">Ranked Ladder</span><span class="ha-sub">Real PvP, matchmade — ascend the ranks and claim your standing</span></span><span class="ha-arrow">→</span></button>
-          <button class="hub-action" style="--accent:#5BC0EB" onclick="show('lobby', document.getElementById('nav-lobby'))"><span class="ha-icon">⚔</span><span class="ha-txt"><span class="ha-title">Offline Play</span><span class="ha-sub">All cards · casual · zero consequence</span></span><span class="ha-arrow">→</span></button>
+          <button class="hub-action" style="--accent:#5BC0EB" onclick="show('lobby', document.getElementById('nav-lobby'))"><span class="ha-icon">⚔</span><span class="ha-txt"><span class="ha-title">Offline Play</span><span class="ha-sub">All cards · casual · light stakes, no rank risk</span></span><span class="ha-arrow">→</span></button>
           <button class="hub-action" style="--accent:#E0503C" onclick="show('pvp', document.getElementById('nav-pvp'))"><span class="ha-icon">🩸</span><span class="ha-txt"><span class="ha-title">Staked PvP</span><span class="ha-sub">Wager cards · winner takes them</span></span><span class="ha-arrow">→</span></button>
           <button class="hub-action" style="--accent:#7C8CF8" onclick="show('draft', document.getElementById('nav-draft')); buildDraft()"><span class="ha-icon">🌀</span><span class="ha-txt"><span class="ha-title">Draft</span><span class="ha-sub">Pull twenty from the vortex — keep every card</span></span><span class="ha-arrow">→</span></button>
           <button class="hub-action" style="--accent:#C88CF5" onclick="show('asc', document.getElementById('nav-asc'))"><span class="ha-icon">👑</span><span class="ha-txt"><span class="ha-title">Reincarnation · The Saga</span><span class="ha-sub">Reincarnate one card through a gauntlet of duels</span></span><span class="ha-arrow">→</span></button>
@@ -2785,15 +2804,20 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <span class="vh-count" id="vault-count"></span>
         <input type="text" class="vh-search" id="vault-search" placeholder="🔍 Search cards…" oninput="setVaultSearch(this.value)">
         <div class="vh-group vh-rarity" style="margin-left:auto">
-          <span class="vh-label">Rarity</span>
-          <button class="filter-chip on vf-rarity" id="vf-all" onclick="filterVault('all',this)">All</button>
-          <button class="filter-chip vf-rarity" onclick="filterVault('apex',this)">AR</button>
-          <button class="filter-chip vf-rarity" onclick="filterVault('ultra',this)">UR</button>
-          <button class="filter-chip vf-rarity" onclick="filterVault('rare',this)">Rare</button>
-          <button class="filter-chip vf-rarity" onclick="filterVault('common',this)">Common</button>
-          <button class="filter-chip vf-mode" onclick="filterVault('deck',this)">🃏 In Deck</button>
-          <button class="filter-chip vf-mode" onclick="filterVault('variant',this)">🏆 Skins</button>
-          <button class="filter-chip vf-mode" onclick="filterVault('dup',this)">🗃 Duplicates</button>
+          <!-- 8/11/26: the rarity chips are multi-select and the mode chips beside them are
+               single-select, but every one of them rendered as an identical .filter-chip with no
+               hint either way -- a cold playtest never discovered it could stack tiers. The
+               "stack any" tag plus per-chip titles state the two behaviours outright; the
+               .vf-rarity/.vf-mode classes that actually drive the difference already existed. -->
+          <span class="vh-label">Rarity <span class="vh-multi" title="Rarity chips stack — combine as many tiers as you like">stack any</span></span>
+          <button class="filter-chip on vf-rarity" id="vf-all" onclick="filterVault('all',this)" title="Clear the rarity filter — show every tier">All</button>
+          <button class="filter-chip vf-rarity" onclick="filterVault('apex',this)" title="Apex — stacks with the other rarity chips">AR</button>
+          <button class="filter-chip vf-rarity" onclick="filterVault('ultra',this)" title="Ultra — stacks with the other rarity chips">UR</button>
+          <button class="filter-chip vf-rarity" onclick="filterVault('rare',this)" title="Rare — stacks with the other rarity chips">Rare</button>
+          <button class="filter-chip vf-rarity" onclick="filterVault('common',this)" title="Common — stacks with the other rarity chips">Common</button>
+          <button class="filter-chip vf-mode" onclick="filterVault('deck',this)" title="One view at a time — narrows whatever rarities are selected">🃏 In Deck</button>
+          <button class="filter-chip vf-mode" onclick="filterVault('variant',this)" title="One view at a time — narrows whatever rarities are selected">🏆 Skins</button>
+          <button class="filter-chip vf-mode" onclick="filterVault('dup',this)" title="One view at a time — narrows whatever rarities are selected">🗃 Duplicates</button>
           <button class="filter-chip" id="vault-own-toggle" onclick="toggleVaultOwned(this)">🔒 Owned Only</button>
         </div>
       </div>
@@ -2835,7 +2859,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <span class="dh-title">🃏 Deck Builder</span>
       <div class="deck-subtabs">
         <button class="dst on" id="dst-deck" onclick="deckTab('deck')">Deck</button>
-        <button class="dst" id="dst-backs" onclick="deckTab('backs')">🎴 Card Backs</button><button class="dst" id="dst-sleeves" onclick="deckTab('sleeves')">🃏 Sleeves</button><button class="dst" id="dst-energy" onclick="deckTab('energy')">&#x26a1; Energy</button>
+        <button class="dst" id="dst-backs" onclick="deckTab('backs')">🎴 Card Backs</button><button class="dst" id="dst-sleeves" onclick="deckTab('sleeves')">🃏 Sleeves</button><button class="dst" id="dst-energy" onclick="deckTab('energy')">&#x26a1; Interrupts</button>
       </div>
       <span class="dh-count" id="deck-count-label">0 / 12</span>
       <span class="dh-status" id="deck-status">Add 10 more</span>
@@ -2899,7 +2923,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="backs-grid" id="sleeves-grid"></div>
     </div>
     <div id="deck-energy-body" style="display:none">
-      <div class="dlc-title" style="margin-top:4px">&#x26a1; Energy Loadout &mdash; pick up to 5 Interrupts &middot; the spells you draw from on a lost round <span id="energy-count" class="en-count"></span></div>
+      <div class="dlc-title" style="margin-top:4px">&#x26a1; Interrupt Loadout &mdash; pick up to 5 Interrupts &middot; the spells you draw from on a lost round <span id="energy-count" class="en-count"></span></div>
       <div class="energy-note">Interrupts are a shared, free toolkit &mdash; every player draws from the same pool, so matches stay about your character cards. Curate the 5 that fit your style; the rest ride the bench.</div>
       <div class="energy-grid" id="energy-grid"></div>
     </div>
@@ -3108,7 +3132,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="lobby-head">
         <div class="lh-eyebrow">Offline Play · Free Testing</div>
         <h1>Choose your opponent</h1>
-        <p><strong>Test any deck, consequence-free.</strong> This is the <strong style="color:var(--electric)">only</strong> place a card can lose a duel with <strong>no mark on its record or chain history</strong> — the safe ground to try builds and learn matchups. Play your own deck, or hit <strong style="color:var(--gold)">Sandbox</strong> for a random all-card deck. Histories are forged in <strong>Ranked</strong>; value is earned in <strong>Ranked &amp; Staked</strong>.</p>
+        <p><strong>Test any deck at light stakes.</strong> This is the <strong style="color:var(--electric)">only</strong> place a card can lose a duel with <strong>no mark on its record or chain history</strong> — the safe ground to try builds and learn matchups, with real Zenni on the line (at a reduced rate) to keep it honest. Play your own deck, or hit <strong style="color:var(--gold)">Sandbox</strong> for a random all-card deck. Histories are forged in <strong>Ranked</strong>; value is earned in <strong>Ranked &amp; Staked</strong>.</p>
       </div>
       <div class="bot-grid" id="bot-grid"></div>
       <div class="lobby-launch">
@@ -3823,7 +3847,7 @@ const DECK_POOL = [
   {name:"The Between, Kleydson",pow:20,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"Contrast to Balance: on commit, +4 power, +6 more once this is your 2nd or later duel this match (chaos and order finding their balance)."},
   {name:'Pit Thrall',pow:12,kills:0,deaths:0,rarity:'common',timing:null,abil:'No ability — a nameless conscript of the Sorn-Vallis pits. (Placeholder, will be redesigned.)'},
   {name:'Mirror Shade',pow:6,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"On commit: your power becomes the opponent's committed power +1."},
-  {name:"Kaelthar the Ascendant",pow:23,cost:4,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Ascendant: on commit, −20 while you hold the match lead, +20 while you are behind. Your Support effects do not fire when he is conjured."},
+  {name:"Kaelthar the Ascendant",pow:23,cost:4,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"Crucible: on commit, −20 while you hold the match lead, +20 while you are behind. Your Support effects do not fire when he is conjured."},
   {name:"Young Darwin, Predetermined Dictator",pow:10,cost:1,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"On commit: +4, and the opponent takes −3 if their card is Pristine (0 deaths)."},
   {name:"Courtroom Colossus",pow:15,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Colossus: +3, and +5 more from the 3rd commit onward — a late-game bomb."},
   {name:"Kessuae, Tide of Ruin",pow:15,kills:0,deaths:0,rarity:"ultra",timing:"on",abil:"On commit: while you are behind, this destroys the active location (nullifies it). +5 if both support slots are full."},
@@ -5603,7 +5627,12 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   if(typeof renderMayaStrip==='function') renderMayaStrip();
   if(typeof renderBanishConjureStrip==='function') renderBanishConjureStrip();
   if(typeof cheapestFighterCost==='function' && charge < cheapestFighterCost()){ offerEnergyRescue(); return; }   // can't afford ANY fighter in hand — offer Desperate Search (discard+banish to find something affordable) or forfeit (rarity never gates conjure-eligibility — an all-Common hand plays exactly like any other)
-  startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:30, 'choose a card, or the round forfeits');   // casual = 30s round timer; ranked keeps 40
+  // 8/11/26: two independent cold playtests lost an ENTIRE match to forfeits without ever
+  // completing one legal commit -- a first-timer reading an unfamiliar condition plus a full
+  // hand for the first time needs real breathing room. Casual was 30s, actually LESS than
+  // ranked's 40 -- backwards for the mode whose own copy calls it "the best place to test a new
+  // deck," "the safe ground to try builds." Bumped past ranked instead of just matching it.
+  startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:50, 'choose a card, or the round forfeits');   // casual = 50s round timer (first-timer breathing room); ranked keeps 40
 }
 
 // Real bug (7/28/26): hardcoded ">=3" assumed casual's best-of-7 threshold (4) -- "opponent is one
@@ -5751,8 +5780,46 @@ const OPTIONAL_HAND_RETURN = {
   'Kravyn the Collector': {onWin:true, onCloseLoss:3},
 };
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
-const RACES = ['Human','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Marrowen','Dreikan','Dractyl','Thennlar','Xylotes','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
+const RACES = ['Eldrun','Thaldrei','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Dreikan','Dractyl','Nymdrei','Xylotes','Aureth','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
 const CARD_RACE = {
+  // ── Named cast, tagged 8/11/26 from story_lore/RACES.md (the canonical race table, created
+  // 2026-08-10 to replace the two copies that had already drifted apart). Only rows RACES.md marks
+  // ✅ CONFIRMED are applied here; its ⚠️ OPEN rows are deliberately left untagged rather than
+  // guessed at, and are listed at the end of this block so the gap is visible instead of silent.
+  // Before this pass every named protagonist was untagged: 72 CARD_RACE entries existed and all of
+  // them were generic creature types (Revenant/Construct/Beast/…), so the lore races the array had
+  // just gained carried zero cards between them.
+  // Kaldrei — "Ash-grey. Keawe, Meleana, Kianna. Working class — delta tenant farmers."
+  // Lore's Meleana is this file's 'Melanie' (her card text names her as Keawe's mother).
+  'Keawe Kel\'rua':'Kaldrei',"Legend Reborn, Keawe Kel'rua":'Kaldrei',"The Borrowed Green, Keawe Kel'rua":'Kaldrei','Kiana':'Kaldrei','Melanie':'Kaldrei',
+  // Nymdrei — wood-elves, "Ruffius". Renamed from Thennlar 2026-08-10 to carry the -drei elf
+  // morpheme; Thennlar was recycled as a social term and is no longer a race.
+  'Ruffius Rufeldro':'Nymdrei','The Reliquary, Ruffius Rufeldro':'Nymdrei',
+  // Wrothlan — "Uso Oso. Isolationist, wealthy." (The other Wrothlan cards below are generic.)
+  'Uso Oso':'Wrothlan',
+  // Kaidrun — "Redguard-type humans… Tange Sazen."
+  'Tange Sazen':'Kaidrun',
+  // Vysh'ra — "Scaled. Ahdor, Kynaht." The Ahdorah Khaan printings are present-day Ahdor (Squad 19
+  // is his crew), not the legend his name is a fragment of.
+  'The Kept Blade, Ahdor':"Vysh'ra",'Ahdorah Khaan, Determined Soul':"Vysh'ra",'Ahdorah Khaan, Circle Unbroken':"Vysh'ra",'Ahdorah Khaan, Squad 19 Recruit':"Vysh'ra",
+  // Nightclaw — the hunters' vernacular; their own true name is Wyrkita. "Lagertha & Hanse Waltz."
+  // Made by a rite of Kitanoo's oldest followers, so they sit outside the -drei/-run/-kan system.
+  'Lagertha Waltz':'Nightclaw','Hanse Waltz':'Nightclaw','Hanse, Rogue Fangs':'Nightclaw',
+  // N'imkatta — "Kleydson." Indigenous to Tchandro; raised inside the Alik'ite faction.
+  'Conduit of Chaos, Kleydson':"N'imkatta",'The Between, Kleydson':"N'imkatta",
+  // Alternate printings of characters already tagged above — same person, same blood. Missed on
+  // the first pass 8/11/26 because only the base printing was tagged; caught by auditing every
+  // card name containing an already-tagged character's name.
+  'The Claim, Lagertha Waltz':'Nightclaw',"The Nightmare's Toll, Hanse Waltz":'Nightclaw',
+  'The Unending Flame, Tange Sazen':'Kaidrun','Throne of Bones, Uso Oso':'Wrothlan',
+  // ⚠️ LEFT UNTAGGED ON PURPOSE — both are live open questions in RACES.md §9, and picking either
+  // way here would quietly resolve a lore decision the doc explicitly reserves for the owner:
+  //   • Moro / Malia — their royal line descends from an Aureth (§6). §9 Q1 asks whether that line
+  //     is its own named -kan people or just a bloodline claim within Eldrun. 'Aureth' as a race
+  //     tag would answer it.
+  //   • Darwin / Young Darwin — §3 lists Thaldrei as "Darwin & Valcarion's race" AND lists both
+  //     under the Undying. §9 Q6 asks whether Darwin is the only non-human Undying. Valcarion is
+  //     already tagged 'Undying' here, so tagging Darwin either way takes a side.
   // Vysh'ra (Ahdor's people, per the KOTEI bible) — first real card tagged to this race, 7/28/26
   'Kynaht, Ashen Return':"Vysh'ra",
   // Dragonkin
@@ -5773,12 +5840,12 @@ const CARD_RACE = {
   'Bixie Bee':'Beast','Anorith Keeling':'Beast','Little Pox':'Beast','Broodmother':'Beast','Mip':'Beast',
   // Spirit
   'Wisp':'Spirit','Veil of Echoes':'Spirit','Echo Ward':'Spirit','Signal Diviner':'Spirit','Champion':'Spirit'
-  // everything else defaults to 'Human' (see raceOf)
+  // everything else defaults to 'Eldrun' (see raceOf) -- Eldrun replaced the generic 'Human' label 8/11/26 per story_lore/RACES.md
 };
 let raceOverride = {};   // design-time per-card race edits (persisted); wins over CARD_RACE
 let NAME_OVERRIDE = {'Corvus':'Black Wings, Corvus the Raven','Arch-Grim Korrin':'Arch-Grim Korrin, the Unburied','Kiana':'Black Wings Initiate, Kiana'};  // display-name epithets (card FACE only; keys stay short to preserve links/rules/ascension refs)
 function dispName(nm){ return (NAME_OVERRIDE && NAME_OVERRIDE[nm]) || nm; }
-function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Human'; }
+function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Eldrun'; }
 function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.race=r; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83e\uddec Race set: '+name+' \u2192 '+r, true); }
 
 /* Race Camps (7/13/26, renamed 7/17/26) -- a 3-way affinity wheel bucketing the 16 races for the
@@ -5788,21 +5855,40 @@ function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].conca
    kami names. Short forms are the canonical identity used everywhere; CAMP_TITLE holds the fuller
    flavor titles for the one spot (the condition's own rule text) that wants them.
    Placeholder first-pass assignment for races with no established card-lore yet (Kaldrei/Vysh'ra/
-   N'imkatta/Kaidrun/Marrowen/Dreikan/Dractyl/Thennlar/Xylotes) -- rename/reassign freely, this just stands the mechanic up with real,
+   N'imkatta/Kaidrun/Dreikan/Dractyl/Nymdrei/Xylotes -- list refreshed 8/11/26 against
+   story_lore/RACES.md: Marrowen is SHELVED and Thennlar was renamed to Nymdrei (the freed word is
+   now a social term, not a race)) -- rename/reassign freely, this just stands the mechanic up with real,
    working data. */
 const RACE_CAMP = {
-  Human:'Amageras', Kaldrei:'Amageras', Kaidrun:'Amageras', Celestial:'Amageras', Construct:'Amageras', Dreikan:'Amageras',
-  Marrowen:'Omitsuki', Nightclaw:'Omitsuki', Undying:'Omitsuki', Revenant:'Omitsuki',
-  'Vysh\'ra':'Kitanoo', 'N\'imkatta':'Kitanoo', Wrothlan:'Kitanoo', Dragonkin:'Kitanoo', Beast:'Kitanoo', Spirit:'Kitanoo', Fae:'Kitanoo', Dractyl:'Kitanoo', Thennlar:'Kitanoo', Xylotes:'Kitanoo'
+  Eldrun:'Amageras', Kaldrei:'Amageras', Kaidrun:'Amageras', Celestial:'Amageras', Construct:'Amageras', Dreikan:'Amageras',
+  Nightclaw:'Omitsuki', Undying:'Omitsuki', Revenant:'Omitsuki',
+  'Vysh\'ra':'Kitanoo', 'N\'imkatta':'Kitanoo', Wrothlan:'Kitanoo', Dragonkin:'Kitanoo', Beast:'Kitanoo', Spirit:'Kitanoo', Fae:'Kitanoo', Dractyl:'Kitanoo', Nymdrei:'Kitanoo', Xylotes:'Kitanoo'
 };
 const CAMP_BEATS = {Amageras:'Omitsuki', Omitsuki:'Kitanoo', Kitanoo:'Amageras'};
 const CAMP_ICON = {Amageras:'\u2600\ufe0f', Omitsuki:'\ud83c\udf19', Kitanoo:'\ud83c\udf0a'};
 const CAMP_TITLE = {Amageras:"Amageras's Blessing", Omitsuki:"Omitsuki's Path", Kitanoo:"Kitanoo's Hunt"};
 const CAMP_COLOR = {Amageras:'#E8873A', Omitsuki:'#5B2C8F', Kitanoo:'#2D6A4F'};
-let campOverride = {};   // design-time per-card camp edits (persisted); wins over RACE_CAMP
+let campOverride = {};   // design-time per-card camp edits (persisted); wins over everything below
+// ── CANON per-card camp, 8/11/26 ──
+// Sits between campOverride and RACE_CAMP: a character whose ALLEGIANCE differs from what their
+// race would imply. Race stays correct on the card (CARD_RACE is the bloodline); this is the camp
+// they actually stand in. NOT seeded into campOverride, deliberately -- loadState() REPLACES that
+// object wholesale (`campOverride=s.campOverride`), so anything seeded there vanishes for every
+// player who already has a save, and it would also collide with the dev tool's own edits.
+const CARD_CAMP = {
+  // Owner ruling: Kiana is Omitsuki -- she belongs to a STEALTH unit (the Black Wings) and she is
+  // vengeful, which is the moon/shadow pole of the Skyward Trinity, not the Amageras her Kaldrei
+  // blood defaults to. She is still full Kaldrei -- Keawe's half-sister -- and CARD_RACE says so;
+  // only the camp moves. Her card FACE already argues for it: NAME_OVERRIDE displays her as
+  // "Black Wings Initiate, Kiana". This also brings campOf() into agreement with DOMAIN_MAP, which
+  // independently had her at Omitsuki -- the two lenses are documented as usually disagreeing, so
+  // where they DO agree it is worth not breaking.
+  'Kiana':'Omitsuki'
+};
 function campOf(nameOrCard){
   var name=(nameOrCard && typeof nameOrCard==='object')?nameOrCard.name:nameOrCard;
   if(name && campOverride[name]) return campOverride[name];
+  if(name && CARD_CAMP[name]) return CARD_CAMP[name];   // canon allegiance beats the race default
   // Only trust RACE_CAMP when the card actually has explicit race lore (CARD_RACE entry or a
   // player-set raceOverride) — otherwise raceOf() silently falls through to 'Human' for ~90% of
   // the collection, which would make every unassigned card Amageras and Bloodlines Clash a near
@@ -7940,7 +8026,28 @@ const LINK_GROUPS = [
   {id:'royalty', name:'Exiled Royalty',  icon:'👑', pow:1, members:['Moro','Malia','King Joris']},
   {id:'dragon',  name:'Dragon-Pact',     icon:'🐉', pow:1, members:['Tange Sazen','Ourevos, the Golden Dragon','Kiba','Conduit of Chaos, Kleydson','Kaelthar the Ascendant']},
   {id:'waltz',   name:'Waltz Twins',     icon:'🐺', pow:1, members:['Lagertha Waltz','Hanse Waltz','Lagertha Waltz, Wrathful Transformation','The Bronzed Beast, Hanse Waltz','Kessuae, Tide of Ruin']},
-  {id:'tosa',    name:'Tosa Pact',      icon:'🤝', pow:1, members:['Cletus Gwyndull']},
+  // 8/11/26 (owner lore ruling): Tosa Pact shipped with ONE member (Cletus Gwyndull), so it could
+  // never fire -- both link systems require 2+ -- and rendered a bare "Links with " on his card.
+  // Populated to lore: the Tosa cadet corps, Moro and the Aurevanes, and Ahdor's crew. Aurevane is
+  // canonically a Tosa Pact realm (KOTEI_Project/CLAUDE.md: Moro's realm is Aurevane, "a SEPARATE
+  // Tosa Pact realm from Keawe's homeland") -- Moro, his sister Malia, and his father King Joris
+  // are that mage dynasty. Ahdor's crew is Squad 19 in this file's own terms. Keawe's circle is
+  // deliberately EXCLUDED per the same ruling: he operates on a different journey, so no Keawe /
+  // Kotei / Uso Oso / Waltz card appears here even though Chapter 1 opens in the Tosa corps yard.
+  // Squads 13 and 16 are in per the owner's follow-up: the Pact means every Pact squad, not only
+  // Ahdor's own. Ossian Drell is in too, by the owner's later ruling -- he is corps staff rather
+  // than a cadet and his card identity is Black Wings, but the Pact is the allegiance, not the
+  // uniform. He is therefore in BOTH tosa and blackwings, which is supported: cardLinkGroups()
+  // returns every matching group and a card can carry more than one link (Kotei already sits in
+  // keawe + legend, Ruffius in squad19 + court).
+  // 'Corps Trainee' is an Ascension-only foe with no card object, so it can't be a member at all.
+  // Note this group has no ASC_LINK_FX entry, so it stays a TCG-only link -- no Reincarnation aura.
+  {id:'tosa',    name:'Tosa Pact',      icon:'🤝', pow:1, members:[
+    'Cletus Gwyndull','Cadet Corps Recruit','Tosa Envoy','Fenrik Vench',
+    'Moro','Malia','King Joris',
+    'Ahdorah Khaan, Determined Soul','Ahdorah Khaan, Circle Unbroken','Ahdorah Khaan, Squad 19 Recruit','The Kept Blade, Ahdor','Val Kreigh','Ruffius Rufeldro','Squad 19 Vanguard','Squad 19 Medic',
+    'Squad 13 Quartermaster','Squad 13 Scout','Squad 13 Signalman','Squad 16 Chronicler','Squad 16 Veteran',
+    'Black Wings, Ossian Drell']},
   {id:'blackwings', name:'The Black Wings', icon:'🖤', pow:1, members:['Black Wings, Ossian Drell','Kiana','Corvus','Wren','Rook','Falk','Sable','Rhaess Korvain','The Black Ledger','Tannis','Wingblade Scout','Feather-Marked Skirmisher','Squad-Captain Vesk',"Pyre-Keeper's Apprentice"]},
   {id:'ironsworn', name:'The Ironsworn', icon:'✊', pow:2, members:['Bannerlord Cassian','Ironsworn Vanguard','Warden of the Wall','Oathkeeper Sena','Muster-Sergeant Bryn','Oathbound Shield','Sworn Duelist','Standard-Bearer Halden','Rank-Sworn Levy','Shieldwall Recruit','Chieftain Reyva Vosh']},
 {id:'legend',  name:'Split Legend',    icon:'✨', pow:1, members:['Kotei','Ahdorah Khaan, Determined Soul','Conduit of Chaos, Kleydson','Anorith Keeling','Anorith Prime','Courtroom Colossus']},
@@ -7957,7 +8064,7 @@ function activeLinks(pc, handArr){
   });
   return out;
 }
-function linkChipsHTML(c){ if(!c) return ''; const gs=cardLinkGroups(c.name); if(!gs.length) return ''; return '<div class="dr-section"><div class="dr-sec-title">🔗 Link Skills</div><div class="trait-list">'+gs.map(function(g){ const others=g.members.filter(function(m){ return m!==c.name; }).slice(0,6).join(', '); return '<div class="trait-chip"><span class="tc-icon">'+g.icon+'</span><span class="tc-body"><span class="tc-name"><a onclick="event.stopPropagation();showLinkGroup(&#39;'+g.id+'&#39;)" style="color:var(--gold);cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px">'+g.name+'</a> <span style="color:var(--electric);font-size:.7em;letter-spacing:.03em">+'+g.pow+' when an ally is in hand</span></span><span class="tc-desc">Links with '+others+'</span></span></div>'; }).join('')+'<div class="foil-hint" style="margin-top:6px">Lore synergy — commit this card with a linked ally still in your hand and the link fires for bonus power.</div></div></div>'; }
+function linkChipsHTML(c){ if(!c) return ''; const gs=cardLinkGroups(c.name); if(!gs.length) return ''; return '<div class="dr-section"><div class="dr-sec-title">🔗 Link Skills</div><div class="trait-list">'+gs.map(function(g){ const _oth=g.members.filter(function(m){ return m!==c.name; }); const others=_oth.length? ('Links with '+_oth.slice(0,6).join(', ')) : 'No other members — this lore tag has no partner card yet, so the link cannot fire'; return '<div class="trait-chip"><span class="tc-icon">'+g.icon+'</span><span class="tc-body"><span class="tc-name"><a onclick="event.stopPropagation();showLinkGroup(&#39;'+g.id+'&#39;)" style="color:var(--gold);cursor:pointer;text-decoration:underline dotted;text-underline-offset:2px">'+g.name+'</a> <span style="color:var(--electric);font-size:.7em;letter-spacing:.03em">+'+g.pow+' when an ally is in hand</span></span><span class="tc-desc">'+others+'</span></span></div>'; }).join('')+'<div class="foil-hint" style="margin-top:6px">Lore synergy — commit this card with a linked ally still in your hand and the link fires for bonus power.</div></div></div>'; }
 function showLinkGroup(id){
   var g=(typeof LINK_GROUPS!=='undefined')?LINK_GROUPS.find(function(x){return x.id===id;}):null; if(!g) return;
   var ov=document.getElementById('linkgroup-view');
@@ -8409,7 +8516,12 @@ function surrenderRound(placeholderTxt, resultLabel, resultSub, logTxt){
   if(typeof updatePiles==='function') updatePiles();
 }
 function energyForfeit(){
-  surrenderRound('⚡ forfeited', '⚡ ROUND FORFEITED', 'Not enough energy to conjure any card in hand — the round is forfeited.', '⚡ Energy-starved — no affordable fighter, round forfeited');
+  // 8/11/26 copy: player-facing name for this resource is CHARGE everywhere the HUD shows it
+  // (charge pips, "Charge" pile chip, the Charge keyword card). "Energy" survived only in prose
+  // written earlier, so a new player read the lockout screen as a resource the UI never names.
+  // Code identifiers (charge/oppCharge/duelEnergyCap/energyRegenPerTurn) intentionally untouched --
+  // and the "Energy Surge" CONDITION keeps its name, it's a proper noun, not the resource.
+  surrenderRound('⚡ forfeited', '⚡ ROUND FORFEITED', 'Not enough Charge to conjure any card in hand — the round is forfeited.', '⚡ Charge-starved — no affordable fighter, round forfeited');
 }
 // Desperate Search (8/4/26, direct request): the energy-lockout case above used to be an
 // immediate, silent hard forfeit with no player agency at all. Now offers a real choice first --
@@ -8436,8 +8548,8 @@ function renderEnergyRescue(){
     return '<button class="bcm-card" onclick="_rescueDiscardPick('+i+')" title="Discard '+(c.name||'').replace(/"/g,'&quot;')+'">'+bigCardHTML(c, {mini:true})+'</button>';
   }).join('');
   ov.innerHTML = '<div class="bd-scrim"></div><div class="bd-panel" style="text-align:center;max-width:min(94vw,640px)">'
-    + '<div class="bd-head">⚡ Not Enough Energy</div>'
-    + '<div class="bd-why" style="text-align:left">Nothing in hand costs ⚡'+charge+' or less. Discard hand cards below to raise your search budget by +1 Energy each, then banish 2 from your deck to search it for a random card you CAN afford — or forfeit the round instead.</div>'
+    + '<div class="bd-head">⚡ Not Enough Charge</div>'
+    + '<div class="bd-why" style="text-align:left">Nothing in hand costs ⚡'+charge+' or less. Discard hand cards below to raise your search budget by +1 Charge each, then banish 2 from your deck to search it for a random card you CAN afford — or forfeit the round instead.</div>'
     + '<div class="bd-why" style="text-align:left"><b style="color:var(--gold)">Search budget: ⚡'+budget+'</b>'+(_rescueDiscards.length?' (⚡'+charge+' + '+_rescueDiscards.length+' discarded)':'')+' — <b style="color:'+(affordable?'var(--win)':'var(--lose)')+'">'+affordable+' card'+(affordable===1?'':'s')+' in your deck would qualify</b></div>'
     + (hand.length?('<div class="bcm-grid">'+cardsHTML+'</div>'):'<div class="bd-note">No hand cards left to discard.</div>')
     + '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px;justify-content:center">'
@@ -9508,8 +9620,26 @@ function nextTurn(){
 
 const SCREEN_TITLES = {hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Offline Play',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'KOTEI Online',draft:'Draft',asc:'Reincarnation · The Saga',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile',mailbox:'Mailbox',devnotes:'Dev Notes'};
 function toggleSidebar(){ document.body.classList.toggle('nav-collapsed'); }
-function toggleNavGroup(id){ var g=document.getElementById(id); if(!g) return; var wasOpen=g.classList.contains('open'); document.querySelectorAll('.nav-group').forEach(function(x){ x.classList.remove('open'); }); if(!wasOpen) g.classList.add('open'); }
+// 8/11/26: opening a group closes every other one, so the whole nav column reflows for the length
+// of .nav-sub's max-height transition (220ms). A second click landing inside that window hit
+// whatever item had slid under the cursor -- not the one aimed at, which is a wrong-screen
+// navigation, not merely a lost click. Nav items go inert for the duration of the reflow, so a
+// mid-animation click is dropped instead of misrouted. 220ms + a 20ms cushion is below the
+// threshold where a deliberate second click would notice, and .nav-settling is always cleared on a
+// timer that can't be re-entered (the previous one is cancelled), so the nav can't get stuck inert.
+var _navSettleTimer=null;
+function toggleNavGroup(id){ var g=document.getElementById(id); if(!g) return; var wasOpen=g.classList.contains('open'); document.querySelectorAll('.nav-group').forEach(function(x){ x.classList.remove('open'); }); if(!wasOpen) g.classList.add('open');
+  var sb=document.querySelector('.sidebar'); if(sb){ sb.classList.add('nav-settling'); clearTimeout(_navSettleTimer); _navSettleTimer=setTimeout(function(){ sb.classList.remove('nav-settling'); }, 240); }
+}
 function show(id, btn){
+  // 8/11/26: transient card/keyword overlays are anchored to fixed viewport coordinates and have
+  // no idea a screen just changed underneath them, so any one still open survived the transition
+  // and floated over the new screen. Worst case is a PINNED preview: it drops #preview-scrim
+  // (position:fixed, inset:0, z-index:89) across the whole viewport, so the leftover is not just
+  // cosmetic -- it eats clicks on whatever screen you landed on. Same failure shape as the stuck
+  // CALLED tooltip that softlocked turn 1 of a live PvP match. Clear them on every navigation.
+  if(typeof hideCardPreview==='function') hideCardPreview();
+  if(typeof hideKwTip==='function'){ try{ hideKwTip(); }catch(e){} }   // no-ops safely if #kw-tip isn't in the DOM yet
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
   document.querySelectorAll('.navitem').forEach(t => t.classList.remove('on'));
   const view = document.getElementById('v-'+id);
@@ -9600,11 +9730,36 @@ function claimSeasonReward(){
   if(typeof toast==='function') toast('\u2b25 +'+fmtPts(amt)+' Glory \u2014 season payout ('+rankTier(rankRP)+')', true);
   openBountyRedeem();
 }
+// 8/11/26: this was a single-slot overwrite -- t.textContent=msg plus clearTimeout(t._h) -- so any
+// second toast fired before the first's 2400ms elapsed DESTROYED the first with no trace. That is
+// the actual cause of the "unexplained Zenni 5,000 -> 10,000 jump" from the cold playtest: a new
+// player gets startNewPlayer()'s "5,000 Zenni and your starter deck are ready", then lands on the
+// Hub, which immediately calls grantDailyBonusIfDue() -> "Day 1 Bonus — welcome! +5,000 Zenni on
+// top of your starting grant." Both grants are intentional and BOTH were already explained; one
+// explanation was simply being erased by the other, leaving a doubled balance and one message.
+// Queued instead of clobbered, so every message is actually seen. The queue is capped and drops
+// the OLDEST pending entry, never the newest -- a flood (bounties, level-ups) must not delay the
+// message describing whatever just happened most recently.
+var _toastQ = [], _toastBusy = false;
+const TOAST_MS = 2400, TOAST_GAP = 220, TOAST_QMAX = 4;
 function toast(msg, ok){
+  _toastQ.push({msg: msg, ok: ok});
+  while(_toastQ.length > TOAST_QMAX) _toastQ.shift();
+  if(!_toastBusy) _toastNext();
+}
+function _toastNext(){
   const t = document.getElementById('shop-toast');
-  t.textContent = msg;
-  t.className = 'shop-toast show' + (ok === false ? ' bad' : '');
-  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2400);
+  if(!t){ _toastQ = []; _toastBusy = false; return; }   // nothing to render into; don't strand the queue
+  const item = _toastQ.shift();
+  if(!item){ _toastBusy = false; t.classList.remove('show'); return; }
+  _toastBusy = true;
+  t.textContent = item.msg;
+  t.className = 'shop-toast show' + (item.ok === false ? ' bad' : '');
+  clearTimeout(t._h);
+  t._h = setTimeout(function(){
+    t.classList.remove('show');
+    setTimeout(_toastNext, TOAST_GAP);   // brief gap so consecutive messages read as separate, not as one re-render
+  }, TOAST_MS);
 }
 // Shop is cosmetics-only — no card packs or card listings.
 const COSMETICS = {
@@ -10269,7 +10424,7 @@ function openPackN(id, n){
   if(!avail.length){ toast(p.name+' \u2014 every rarity it offers is minted out',false); return; }
   var cost=bundlePrice(p.price, n);
   if(signalPoints<cost){ toast('Not enough Zenni for a '+n+'\u00d7 summon (\u25c8 '+fmtPts(cost)+')',false); return; }
-  if(!confirm('Open '+n+'\u00d7 '+p.name+' for \u25c8 '+fmtPts(cost)+' Zenni?\n\nMints you '+n+' random cards.')) return;
+  if(!_packConfirm('Open '+n+'\u00d7 '+p.name+' for \u25c8 '+fmtPts(cost)+' Zenni?\n\nMints you '+n+' random cards.')) return;
   signalPoints-=cost;
   var rarities=[];
   for(var i=0;i<n;i++){ var _avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;}); if(!_avail.length) break; rarities.push(rollPackRarity(p, _avail)); }
@@ -10306,11 +10461,30 @@ function openPackN(id, n){
     playSummon(r.card, r.rar, r.mint, p.name+' ('+(k+1)+'/'+results.length+')', function(){ revealNext(k+1); });
   })(0);
 }
+// 8/11/26 — the "dead Open Elite Cache button" report. The handler itself is fine end to end
+// (openPack resolves 'elite' out of PACKS, the featured-apex lane in rollPackRarity is wired, the
+// CSS traps nothing), and the only gate that can swallow a click without a single visible pixel of
+// feedback is this native confirm(). Chrome offers "prevent this page from creating additional
+// dialogs" after repeated dialogs from one page -- which is exactly what opening several packs in a
+// row produces -- and once ticked, confirm() returns false instantly, forever, for the rest of the
+// session. Every pack button then looks stone dead with no error anywhere. A human cannot dismiss a
+// real modal in under ~40ms, so a false return that fast means the dialog never rendered; say so
+// instead of failing silently. A false positive costs one extra explanatory toast, nothing more.
+// Scoped to the pack-purchase path (the reported surface) rather than rewriting all 18 confirm()
+// call sites in this file into a bespoke in-page modal.
+function _packConfirm(msg){
+  var t0 = Date.now();
+  var ok = confirm(msg);
+  if(!ok && (Date.now()-t0) < 40){
+    toast('Your browser is blocking this page’s dialogs, so the purchase can’t be confirmed. Reload the page to re-enable them.', false);
+  }
+  return ok;
+}
 function openPack(id){
   const p=PACKS.find(x=>x.id===id) || PREMIUM_PACKS.find(x=>x.id===id); if(!p) return;
   const avail=Object.keys(p.odds).filter(r=>supply[r]&&supply[r].left>0);
   if(!avail.length){ toast(p.name+' — every rarity it offers is minted out',false); return; }
-  if(signalPoints<p.price){ toast('Not enough Zenni Points',false); return; } if(!confirm('Open '+p.name+' for ◈ '+fmtPts(p.price)+' Zenni?\n\nMints you one random card.')) return; signalPoints-=p.price;
+  if(signalPoints<p.price){ toast('Not enough Zenni Points',false); return; } if(!_packConfirm('Open '+p.name+' for ◈ '+fmtPts(p.price)+' Zenni?\n\nMints you one random card.')) return; signalPoints-=p.price;
   const rar=rollPackRarity(p, avail);
   supply[rar].left=Math.max(0,supply[rar].left-1);
   const poolC=COLLECTION.filter(c=>c.rarity===rar && !c.uid);
@@ -11391,7 +11565,18 @@ const CARD_SIGIL = {
   'Valcarion':'🩸','Envoy of Tyrants, Ella Ballora':'⚔️','Kiana':'🔥',
   'King Joris':'👑','Chieftain Reyva Vosh':'🏔','Broodmother':'🕷','Forgemask':'🔨','Sister Mire':'🌱',
   'Heir of Kaiga':'🗡','Melanie':'🌷','Josef':'🧵','Ourevos, the Golden Dragon':'🐉','La "La" Ballora, the Broodqueen':'🕸',
-  "Korrin's Possessed Legion":'🪖','The Bronzed Beast, Hanse Waltz':'🐺','Lagertha Waltz, Wrathful Transformation':'🌕','The Regenerating Horror':'👁','Uso Oso\'s Skeletal Summons':'🦴'
+  "Korrin's Possessed Legion":'🪖','The Bronzed Beast, Hanse Waltz':'🐺','Lagertha Waltz, Wrathful Transformation':'🌕','The Regenerating Horror':'👁','Uso Oso\'s Skeletal Summons':'🦴',
+  // 8/11/26 — Ascension art keys. The sigil fallback for these is DELIBERATE (see the note above
+  // ASC_FOES_CADETS: their art keys intentionally point at no CARD_ART entry), but every one of
+  // them was falling through sigilFor()'s last-resort '◈', so three named story champions and all
+  // seven themed filler foes rendered as the same anonymous diamond -- a cold playtest read that
+  // as missing art. Giving each its own glyph keeps the intended no-art design and still makes
+  // the units distinguishable. Ossian Drell isn't here because his node points at the real card
+  // art key ('Black Wings, Ossian Drell'), which already has both CARD_ART and a sigil.
+  'Fenrik Vench':'⚜','The Writ-Captain':'⚖','The Arena Master':'🏟',
+  'Corps Trainee':'🎓','Writ-Sergeant':'📜','Writ-Officer':'✒',
+  'City Guard':'🏛',"Slaver's Enforcer":'⛓',
+  'Hollow Ravager':'🦇','Twisted Specimen':'🧪'
 };
 const TIMING_LABEL = {on:'On-Commit',instant:'Instant',pre:'Pre-Commit',resolution:'Resolution'};
 
@@ -11517,13 +11702,13 @@ const KEYWORDS = {
   'Winners Circle': 'Cards you win with go here. After a lost round you may recover one at random (re-risking its record) instead of drawing a spell.',
   'Pristine': 'A card with at least one win and zero deaths on its permanent record — a proven, never-beaten history. An unfought card doesn\'t qualify.',
   'Purity': 'The value carried by a Pristine record — a card that has never been beaten. Effects that "drain purity" turn an opponent\'s spotless 0-death history into an advantage against it.',
-  'Charge': 'Your Energy pool. It regenerates +1 a turn through the 4th duel, then about a third of your current cap each turn after that — a cap that keeps climbing as the match goes on. Leftover charge carries between turns, it does not refill to full. Conjuring a Fighter spends Charge equal to its cost; Interrupt spells and some abilities spend whatever is left.',
-  'Called': 'A free Support effect. Drop this card into a rear slot to fire it — it never costs Energy and boosts your fighter.',
+  'Charge': 'Your resource pool. It regenerates +1 a turn through the 4th duel, then about a third of your current cap each turn after that — a cap that keeps climbing as the match goes on. Leftover charge carries between turns, it does not refill to full. Conjuring a Fighter spends Charge equal to its cost; Interrupt spells and some abilities spend whatever is left.',
+  'Called': 'A free Support effect. Drop this card into a rear slot to fire it — it never costs Charge and boosts your fighter.',
   'Link': 'When a support shares a lore group with your fighter, it adds bonus power. Same-family cards fight better together.',
   'Recur': 'Returns cards from your banish pile back to your hand — often stronger than they left.',
   'Banish': 'Sends cards to your banish pile. That pile is the fuel your Recur cards feed on.',
   'Trigger': 'Revealed off the top of your deck after a lost duel, it fires a free comeback reward.',
-  'Conjure': 'The Energy you must have available to deploy this card as your Fighter. Bigger bodies need more Energy, and conjuring spends it — plan your Charge across the turn.',
+  'Conjure': 'The Charge you must have available to deploy this card as your Fighter. Bigger bodies need more Charge, and conjuring spends it — plan your Charge across the turn.',
   'Regeneration': 'The first time it would lose, the duel ties instead and it returns to your hand.',
   'Vajra': 'Power manipulation, either direction — a guaranteed on-commit effect that raises your own power or lowers your opponent’s.',
   'Astra': 'An "on hit" effect, conditioned on kills or duels already won this match — it rewards a card that’s already proven itself, not a guaranteed on-commit effect.',
@@ -12102,6 +12287,7 @@ function _renderAccountPanel(){
         '<input class="on-in" id="friend-handle-in" placeholder="Friend\'s handle">'+
         '<button class="on-btn" onclick="friendRequest()">Add</button>'+
       '</div>'+
+      '<div class="on-msg" id="on-friends-msg"></div>'+
       '<div id="friends-body"></div>'+
     '</div>';
   if(!SF_STATE) sfRefresh();
@@ -12164,22 +12350,27 @@ function _friendsPanelHTML(data){
   }
   return html;
 }
+// Own status slot (8/11/26) -- this used to write into #on-pvp-msg, which visually lives up in
+// the sibling "Find a match" card, not this "Friends" card. A failed Add read as if matchmaking
+// itself had failed. Same getElementById-if-present pattern as _onMsg/_pvpMsg.
+function _friendsMsg(text, cls){ var el=document.getElementById('on-friends-msg'); if(el){ el.textContent=text||''; el.className='on-msg '+(cls||''); } }
 function friendRequest(){
   var input = document.getElementById('friend-handle-in');
   var handle = input ? input.value.trim() : '';
-  if(!handle){ _pvpMsg('Enter a handle first.', 'err'); return; }
+  if(!handle){ _friendsMsg('Enter a handle first.', 'err'); return; }
   sfApi('POST', '/api/friends/request', {handle: handle}, function(err, data){
-    if(err){ _pvpMsg(err, 'err'); return; }
+    if(err){ _friendsMsg(err, 'err'); return; }
+    _friendsMsg('', '');
     if(input) input.value='';
     if(typeof toast==='function') toast(data.accepted ? '🤝 You and '+data.handle+' are now friends!' : '📨 Friend request sent to '+data.handle+'.', true);
     buildFriendsPanel();
   });
 }
-function friendAccept(id){ sfApi('POST', '/api/friends/accept', {id:id}, function(err){ if(err){ _pvpMsg(err,'err'); return; } buildFriendsPanel(); }); }
-function friendDecline(id){ sfApi('POST', '/api/friends/decline', {id:id}, function(err){ if(err){ _pvpMsg(err,'err'); return; } buildFriendsPanel(); }); }
+function friendAccept(id){ sfApi('POST', '/api/friends/accept', {id:id}, function(err){ if(err){ _friendsMsg(err,'err'); return; } buildFriendsPanel(); }); }
+function friendDecline(id){ sfApi('POST', '/api/friends/decline', {id:id}, function(err){ if(err){ _friendsMsg(err,'err'); return; } buildFriendsPanel(); }); }
 function friendChallenge(handle){
   sfApi('POST', '/api/pvp/challenge/direct', {handle: handle, mode: PVP.bestOf===3?'ranked':undefined}, function(err, data){
-    if(err){ _pvpMsg(err, 'err'); return; }
+    if(err){ _friendsMsg(err, 'err'); return; }
     if(data.matched){ pvpEnterMatch(data.pvpId, data.opponent); return; }
     PVP.directChallengeCode = data.code; PVP.directChallengeTarget = handle;
     if(!PVP.directChallengeTimer) PVP.directChallengeTimer = setInterval(_directChallengeTick, 2000);
@@ -12211,7 +12402,13 @@ function acceptIncomingChallenge(){
 
 // ── PvP match state (Phase 5.0b, 8/6/26) ──────────────────────────────────────────────────────
 const PVP = {pvpId:null, opponent:null, bestOf:7, queueTimer:null, stateTimer:null, view:null, selectedUid:null, selectedRgUids:[], challengeCode:null, challengeTimer:null, rankAwardedFor:null,
-  lastWaiting:null, incomingChallenge:null, directChallengeCode:null, directChallengeTarget:null, directChallengeTimer:null};
+  lastWaiting:null, incomingChallenge:null, directChallengeCode:null, directChallengeTarget:null, directChallengeTimer:null,
+  // 8/11/26: the server's /api/pvp/state payload carries only lastDuel -- the single most recent
+  // duel -- so the end-of-match panel could only ever show one row no matter how many duels the
+  // series ran. Single-player has matchRoundLog for exactly this; Online had no equivalent. The
+  // client accumulates one here as the poll advances, which is the only place the full history
+  // exists (nothing persists it server-side), so it is deliberately reset per match, not restored.
+  duelLog:[], _duelSig:null};
 
 // Ranked Ladder (8/6/26): owner's explicit call ("port it onto real PvP results") -- keeps the
 // existing Bronze->Master tier/Glory/season-reward economy exactly as it was (rankRP, rankTier(),
@@ -12326,6 +12523,7 @@ function pvpEnterMatch(pvpId, opponent){
   clearInterval(PVP.challengeTimer); PVP.challengeTimer=null; PVP.challengeCode=null;
   clearInterval(PVP.directChallengeTimer); PVP.directChallengeTimer=null; PVP.directChallengeCode=null; PVP.directChallengeTarget=null;
   PVP.pvpId=pvpId; PVP.opponent=opponent; PVP.selectedUid=null; PVP.selectedRgUids=[]; PVP.view=null; PVP.rankAwardedFor=null;
+  PVP.duelLog=[]; PVP._duelSig=null;
   if(typeof toast==='function') toast('Matched vs '+opponent+'!', true);
   buildOnline();   // re-enters through the dispatch above, which starts the poll loop + fetches
 }
@@ -12339,6 +12537,14 @@ function pvpFetchState(){
     if(err) return;   // one missed tick isn't worth surfacing -- the next tick recovers
     if(!PVP.pvpId) return;   // the user forfeited/exited while this request was in flight
     if(data.seq !== (PVP.view ? PVP.view.seq : -1)){ PVP.selectedUid=null; PVP.selectedRgUids=[]; }   // a new duel started -- any stale selection no longer applies
+    // Accumulate the series history (see PVP.duelLog). The signature is seq + the duel payload,
+    // NOT seq alone: the server can flip done:true on the same seq that already delivered this
+    // duel, which would double-log it. Including the payload also means two genuinely identical
+    // duels at different seqs still both record, since the seq differs.
+    if(data.lastDuel){
+      var _sig = String(data.seq)+'|'+JSON.stringify(data.lastDuel);
+      if(_sig !== PVP._duelSig){ PVP._duelSig = _sig; PVP.duelLog.push(data.lastDuel); }
+    }
     PVP.view = data;
     _renderPvpMatch();
   });
@@ -12377,6 +12583,7 @@ function pvpForfeit(){
 function pvpExitMatch(){
   clearInterval(PVP.stateTimer); PVP.stateTimer=null;
   PVP.pvpId=null; PVP.opponent=null; PVP.view=null; PVP.selectedUid=null; PVP.selectedRgUids=[];
+  PVP.duelLog=[]; PVP._duelSig=null;   // series history is per-match and client-only; pvpEnterMatch clears it too, this just avoids carrying a finished series in memory
   sfRefresh();   // the match likely paid out Zenni/RP -- refetch before the account panel shows again
 }
 
@@ -12435,10 +12642,25 @@ function _renderPvpMatch(){
   if(v.done){
     var wonCls = v.youWon===true ? 'win' : (v.youWon===false ? 'lose' : 'tie');
     var wonText = v.youWon===true ? 'You won the match!' : (v.youWon===false ? 'You lost the match.' : 'The match ended in a draw.');
+    // Full series recap, not just the last duel. Mirrors single-player's Match Recap (showMatchRecap):
+    // one row per duel, outcome + the two totals, so a loss is reviewable instead of being a single
+    // final score with one duel above it.
+    var seriesRows = PVP.duelLog.map(function(d, i){
+      var dc = d.outcome==='win' ? 'win' : (d.outcome==='lose' ? 'lose' : (d.outcome==='opponent_forfeit' ? 'win' : (d.outcome==='forfeit' ? 'lose' : 'tie')));
+      var mark = (dc==='win') ? '✔' : (dc==='lose') ? '✘' : '=';
+      var pow = (d.yourPow!=null) ? (d.yourPow+'–'+d.theirPow) : '—';
+      var cards = (d.yourCard||d.opponent) ? (sfEsc(d.yourCard||'?')+' vs '+sfEsc(d.opponent||'?')) : 'withdrawn';
+      return '<div class="on-sr-row '+dc+'">'+
+               '<span class="on-sr-n">D'+(i+1)+'</span>'+
+               '<span class="on-sr-cards">'+cards+'</span>'+
+               '<span class="on-sr-res">'+mark+' '+pow+'</span>'+
+             '</div>';
+    }).join('');
     body =
       '<div class="on-panel on-final '+wonCls+'">'+
         '<h3>'+wonText+'</h3>'+
         '<p class="on-sub">Final score '+v.you.score+' – '+v.them.score+' vs '+sfEsc(v.opponent)+'.</p>'+
+        (seriesRows ? '<div class="on-series"><div class="on-series-head">Series recap — '+PVP.duelLog.length+' duel'+(PVP.duelLog.length===1?'':'s')+'</div>'+seriesRows+'</div>' : '')+
         '<button class="on-btn" onclick="pvpExitMatch()">Back to Online</button>'+
       '</div>';
   } else if(v.you.committed && !v.them.committed){
@@ -12635,7 +12857,7 @@ const GUIDE_TIPS = {
   trade: "Trade lets you send and receive cards with other players. Starters and skins don't leave your hands — everything else can move.",
   shop: "The Shop sells packs for Zenni, and cosmetics for Kinzo. Kinzo never buys power — only look.",
   market: "The Marketplace is where players list cards for Zenni. Prices track a card's real record, so a proven veteran costs more than a fresh mint.",
-  lobby: "Offline Play is casual, zero-consequence practice against the AI — the best place to test a new deck before it matters.",
+  lobby: "Offline Play is casual practice against the AI at light Zenni stakes — your rank and record stay untouched, so it's still the best place to test a new deck before it matters.",
   ranked: "Ranked is real PvP against another online account. RP and Zenni move on every match, win or lose — Best-2-of-3, so every duel counts more than it does elsewhere.",
   pvp: "Staked PvP wagers actual cards — winner takes them. Only stake what you're really willing to lose.",
   draft: "Draft pulls twenty cards from a shared pool — you keep everything you take, win or lose.",
@@ -12650,8 +12872,13 @@ function _guideCSS(){ if(document.getElementById('gd-style')) return; var st=doc
   .guide-dlg .gd-portrait img{width:100%;height:100%;object-fit:cover;display:block}
   .guide-dlg .gd-box{background:rgba(10,8,16,0.96);border:1px solid rgba(212,168,67,0.4);border-radius:14px;padding:18px 20px 16px 118px;box-shadow:0 10px 32px rgba(0,0,0,0.5);min-height:64px;position:relative}
   .guide-dlg .gd-text{color:#EDE7E0;font-size:14px;line-height:1.5}
-  .guide-dlg .gd-close{position:absolute;top:8px;right:10px;background:none;border:none;color:#7d7490;font-size:16px;cursor:pointer;padding:4px}
-  .guide-dlg .gd-close:hover{color:#EDE7E0}
+  /* 8/11/26: was font-size:16px + padding:4px -- roughly a 24px box, and the glyph itself doesn't
+     fill it, so the real hit area was smaller still. A cold playtest kept missing it. Now a
+     properly sized, centred 34px target (40px under a coarse pointer), which is a pure hit-area
+     change: the ✕ renders at the same visual size and position it always did. */
+  .guide-dlg .gd-close{position:absolute;top:4px;right:5px;background:none;border:none;color:#7d7490;font-size:16px;line-height:1;cursor:pointer;padding:0;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:8px}
+  .guide-dlg .gd-close:hover{color:#EDE7E0;background:rgba(255,255,255,0.06)}
+  @media(pointer:coarse){.guide-dlg .gd-close{width:40px;height:40px;top:2px;right:3px}}
   .guide-dlg .gd-ok{margin-top:10px;padding:6px 16px;border-radius:8px;border:1px solid var(--gold,#D4A843);background:rgba(212,168,67,0.12);color:var(--gold,#D4A843);font-size:12.5px;font-weight:700;cursor:pointer}
   .guide-dlg .gd-ok:hover{background:rgba(212,168,67,0.22)}
   @media(max-width:480px){.guide-dlg .gd-portrait{width:64px;height:64px;left:14px;top:-28px;font-size:26px}.guide-dlg .gd-box{padding-left:90px}}
@@ -12790,7 +13017,17 @@ CARD_RULES['Hanse, Rogue Fangs']=[{"add":2,"log":"🐺 Rogue Fangs: +2"},{"if":{
 CARD_RULES['Fifth Frequency Stormcaller']=[{"add":3,"log":"🌪️ Flurry: +3"},{"if":{"v":"hand_len","op":">=","n":5},"add":4,"log":"🌪️ Flurry: +4 (5+ hand)"},{"if":{"v":"banish_len","op":">=","n":4},"add":7,"log":"🌪️ Flurry: +7 (4+ banish)"}];
 CARD_RULES['Envoy of Tyrants, Ella Ballora']=[{"if":{"v":"hand_len","op":">=","n":3},"add":3,"log":"⚔️ Bloodrage: +3 (3+ hand)"},{"if":{"v":"player_losses","op":">","n":0},"add":3,"log":"⚔️ Bloodrage: +3 (wounded)"}];
 CARD_RULES['Kessuae, Tide of Ruin']=[{"if":{"v":"rear_count","op":">=","n":2},"add":5,"log":"🌊 Kessuae: +5 (both supports)"}];
-CARD_RULES['Kaelthar the Ascendant']=[{"if":{"v":"player_wins","op":">","v2":"player_losses"},"add":-20,"log":"🐉 Ascendant: −20 (winning)"},{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":20,"log":"🐉 Ascendant: +20 (losing)"}];
+/* 8/11/26 (owner): Kaelthar's personal keyword was "Ascendant" — it stays in the Radiance
+   archetype and the rule below is unchanged, only the keyword name. Two reasons it didn't hold:
+   it just restated his own epithet ("Kaelthar the Ascendant"), so it carried no information a
+   reader didn't already have from the card name, and "Ascendant:" was ALREADY taken as a keyword
+   by a different card's Deck Master rule ("Warpath Ascendant", DM_EXCLUSIVE above) — two unrelated
+   cards printing the same keyword. "Crucible" is unused anywhere in this file and describes what
+   the rule actually does: he is weakened by a comfortable lead, forged stronger from behind, and
+   refuses every Support while he burns. Keep this label in sync with the abil text on his card
+   object — _bdLabel() splits these logs on ':' to title the round breakdown, so the log prefix is
+   player-visible text, not an internal tag. */
+CARD_RULES['Kaelthar the Ascendant']=[{"if":{"v":"player_wins","op":">","v2":"player_losses"},"add":-20,"log":"🐉 Crucible: −20 (winning)"},{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":20,"log":"🐉 Crucible: +20 (losing)"}];
 CARD_RULES['Trophy-Hunter Kessa']=[{"if":{"v":"wc_len","op":"==","n":0},"add":9,"log":"🏆 Kessa: Winners Circle empty — +9, nothing taken for granted once it's banked"}];
 CARD_RULES['Ghorruk "Gnarly" Judarr']=[{"if":{"v":"deck_len","op":">","n":0},"addvar":"deck_len","x":0.5,"log":"💀 Ghorruk: +1 per 2 cards left in deck"}];
 CARD_RULES['The Bronzed Beast, Hanse Waltz']=[{"if":{"v":"player_losses","op":">","v2":"player_wins"},"add":5,"log":"🌑 Blood Moon: +5 (behind)"}];
@@ -12820,7 +13057,7 @@ function _coachCSS(){ if(document.getElementById('coach-style'))return; var st=d
 .coach-box .cb-step{font-size:9.5px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;font-weight:700;margin-bottom:3px}
 .coach-box .cb-say{font-size:13.5px;color:var(--text);line-height:1.5}
 .coach-box .cb-row{display:flex;align-items:center;gap:10px;margin-top:11px;justify-content:flex-end}
-.coach-box .cb-skip{background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;margin-right:auto}
+.coach-box .cb-skip{background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;margin-right:auto;padding:9px 10px;margin-left:-10px;border-radius:7px}   /* 8/11/26: bare text with zero padding was a ~60x14 target; negative margin keeps it visually flush left while the hit area grows */
 .coach-box .cb-skip:hover{color:var(--text2)}
 .coach-box .cb-next{background:var(--gold);color:#0a0d14;border:none;border-radius:8px;padding:8px 20px;font-weight:800;font-size:13px;cursor:pointer}
 .coach-box .cb-next:hover{filter:brightness(1.08)}
@@ -14159,6 +14396,7 @@ function pinPreview(i){ showCardPreview(i); var p=document.getElementById('card-
 function pinPoolPreview(name, el){ cancelHidePreview(); previewPoolCard(name, el); var p=document.getElementById('card-preview'); if(!p) return; p.classList.add('pinned'); p.style.pointerEvents='auto'; p.onclick=hideCardPreview; var sc=document.getElementById('preview-scrim'); if(!sc){ sc=document.createElement('div'); sc.id='preview-scrim'; document.body.appendChild(sc); } sc.onclick=hideCardPreview; sc.ontouchstart=function(e){e.preventDefault();hideCardPreview();}; }
 
 // ── KEYWORD DEFINITION TOOLTIP (hover any .kw term) ──
+let _kwTipTimer = null;
 function showKwTip(el){
   const kw = el.dataset.kw;
   const def = KEYWORDS[kw];
@@ -14171,8 +14409,13 @@ function showKwTip(el){
   left = Math.max(140, Math.min(window.innerWidth - 140, left));
   tip.style.left = left + 'px';
   tip.style.top = (r.top - 8) + 'px';
+  // Hover-tracking (mouseover/mouseout) can miss a leave event on touch input or
+  // synthetic/automated pointer dispatch, leaving this pinned open indefinitely with
+  // nothing to dismiss it. Self-clear as a safety net independent of mouseout firing.
+  clearTimeout(_kwTipTimer);
+  _kwTipTimer = setTimeout(hideKwTip, 4000);
 }
-function hideKwTip(){ document.getElementById('kw-tip').classList.remove('show'); }
+function hideKwTip(){ clearTimeout(_kwTipTimer); var t=document.getElementById('kw-tip'); if(t) t.classList.remove('show'); }   // null-guarded 8/11/26: now called from show() on every navigation, which can fire before #kw-tip exists
 function _bdLabel(m){ return String(m||'').split(':')[0].split(' \u2014 ')[0].trim(); }
 /* Synthesized "why" headline (7/13/26, user-requested \u2014 the raw ledger alone made players do
    their own mental math to find the actual decisive factor). Shared by the per-round breakdown
@@ -14623,7 +14866,20 @@ const ASC_LINK_FX={
   court:   {icon:'🩸', lifesteal:0.22, desc:'attacks heal for 22% of damage dealt'},
   legend:  {icon:'✨', ult:1.35,       desc:'Ultimate power +35%'},
   royalty: {icon:'👑', reward:1.25,    desc:'+25% Zenni & XP from battles'},
-  waltz:   {icon:'🐺', rally:0.3,      desc:'while a twin is down, the other gains +30% ATK'}
+  waltz:   {icon:'🐺', rally:0.3,      desc:'while a twin is down, the other gains +30% ATK'},
+  // 8/11/26 (owner): Tosa Pact was the only populated LINK_GROUP with no Reincarnation aura.
+  // Brief was "buffs while shrugging debuffs", so it gets one knob for each half -- but note what
+  // the combat system actually supports, because a naive read of that brief ships a dead effect:
+  // NO foe move applies vuln or dot to the party. ascFoeAct() only ever calls ascApplyDamage(),
+  // and every vuln/dot application in this file targets a foe. So "resist incoming debuffs" alone
+  // would never once fire -- the same never-fires trap this group was just rescued from on the TCG
+  // side. Both knobs below are therefore wired to things that happen in a real fight today:
+  //   buffDur -- party ATK-up and Guard last a turn longer (buffs stick)
+  //   shrug   -- the boss ENRAGE / elite damage multiplier is cut against this party, and any
+  //              vuln/dot that ever DOES land on a party member is halved (penalties slide off)
+  // The vuln/dot half of shrug is forward-looking by design and costs nothing while dormant; the
+  // enrage half is what makes the aura earn its slot right now.
+  tosa:    {icon:'🤝', buffDur:1, shrug:0.5, desc:'party buffs last 1 turn longer; enraged and elite foes hit this party for less'}
 };
 function ascComputeLinks(party){
   var acc={};
@@ -14642,6 +14898,8 @@ function ascApplyLinks(){
   ascRun.linkLifesteal=ascLinkHas('court')?0.22:0;
   ascRun.linkUlt=ascLinkHas('legend')?1.35:1;
   ascRun.linkReward=ascLinkHas('royalty')?1.25:1;
+  ascRun.linkBuffDur=ascLinkHas('tosa')?1:0;     // extra turns on party ATK-up / Guard
+  ascRun.linkShrug=ascLinkHas('tosa')?0.5:0;     // fraction of an enrage/elite bonus (and of any party vuln/dot) that is shrugged off
   if(typeof ascRecomputeAll==='function') ascRecomputeAll();
 }
 function ascPatron(){ return (ascRun&&ascResolveUnit(ascRun.avatarId))||null; }
@@ -15117,7 +15375,11 @@ function ascRenderSetup(){
   var setup=document.getElementById('asc-setup'); if(!setup) return;
   var av=ascResolveUnit(ascPartySel.avatarId);
   var comps=ascPartySel.companionIds.map(function(id){return ascResolveUnit(id);}).filter(Boolean);
-  var _lp=(function(){ var pl=ascComputeLinks([av].concat(comps).filter(Boolean).map(function(u){return {name:u.name};})); return '<div class="asc-linkprev"><span class="alp-label">Party links</span>'+(pl.length?pl.map(function(l){return '<span class="alp-chip" title="'+l.desc+'">'+l.icon+' '+l.name+'</span>';}).join(''):'<span class="alp-none">none yet — pair lore-linked units for auras</span>')+'</div>'; })();
+  var _lp=(function(){ var pl=ascComputeLinks([av].concat(comps).filter(Boolean).map(function(u){return {name:u.name};})); // 8/11/26: these chips were inert <span>s carrying only a native title -- the card-detail Link
+// Skills chips have been tappable (showLinkGroup) the whole time, so the same information was
+// reachable in one place and dead in another. ASC_LINK_FX keys are the LINK_GROUPS ids verbatim
+// (see the "ported from the TCG LINK_GROUPS" note above ASC_LINK_FX), so l.id resolves directly.
+return '<div class="asc-linkprev"><span class="alp-label">Party links</span>'+(pl.length?pl.map(function(l){return '<button type="button" class="alp-chip" title="'+l.desc+' — tap to see every member" onclick="event.stopPropagation();showLinkGroup(\''+l.id+'\')">'+l.icon+' '+l.name+'</button>';}).join(''):'<span class="alp-none">none yet — pair lore-linked units for auras</span>')+'</div>'; })();
   var rank=ascRankInfo();
   var rankBar='<div class="asc-rank-banner"><span class="ark-eyebrow">Reincarnation Rank</span><span class="ark-name">'+rank.name+'</span>'+(rank.next?'<span class="ark-next">score '+rank.score+' · next: '+rank.next.name+' at '+rank.next.min+'</span>':'<span class="ark-next">◆ max rank</span>')+'</div>';
   var ownToggle='<div class="asc-roster-filter"><button class="filter-chip'+(ascShowUnowned?' on':'')+'" onclick="ascToggleOwned()">'+(ascShowUnowned?'👁 Showing All':'🔒 Owned Only')+'</button></div>';
@@ -15396,7 +15658,16 @@ function ascBattleStart(node){
   ascHideAll(); var a=document.getElementById('asc-arena'); if(a) a.style.display='';
   ascBattleNext();
 }
-function ascApplyDamage(t,dmg){ var st=t.st||{}; var mult=(1+(st.vuln||0))*(1-Math.min(0.75,(st.def||0)+(t.linkDef||0))); var d=Math.max(1,Math.round(dmg*mult*(0.85+Math.random()*0.3))); t.hp=Math.max(0,t.hp-d); return d; }
+// ── Tosa Pact link helpers (8/11/26) — see the ASC_LINK_FX 'tosa' entry for why it has these two
+// knobs specifically. Both read ascRun, so they are 0 with no run, no link, or a party that lost
+// the link mid-run; every call site can add them unconditionally.
+function _lbd(){ return (ascRun && ascRun.linkBuffDur) || 0; }                       // extra turns on a party buff
+function _lshrug(){ return (ascRun && ascRun.linkShrug) || 0; }                      // 0..1 of a penalty shrugged off
+function _isPartyEnt(t){ return !!(t && typeof ascParty!=='undefined' && ascParty.indexOf(t)>=0); }
+// vuln on a PARTY member is halved by the Pact. Nothing applies party vuln today (every vuln/dot
+// application in this file targets a foe), so this is inert until a foe debuff move exists -- it
+// costs one multiply and means the aura is already correct when one is added.
+function ascApplyDamage(t,dmg){ var st=t.st||{}; var _v=(st.vuln||0); if(_v && _isPartyEnt(t)) _v*=(1-_lshrug()); var mult=(1+_v)*(1-Math.min(0.75,(st.def||0)+(t.linkDef||0))); var d=Math.max(1,Math.round(dmg*mult*(0.85+Math.random()*0.3))); t.hp=Math.max(0,t.hp-d); return d; }
 function ascHealAmt(t,amt){ var b=t.hp; t.hp=Math.min(t.maxhp,t.hp+amt); return t.hp-b; }
 function ascLog(m){ if(!ascBattle) return; ascBattle.log.unshift(m); if(ascBattle.log.length>6) ascBattle.log.pop(); }
 function ascBattleNext(){
@@ -15425,6 +15696,11 @@ function ascFoeAct(fi){
   fo.t=(fo.t||0)+1;
   var enraged=(fo.rank==='boss' && fo.hp<=fo.maxhp*0.35);
   var mult=enraged?1.5:(fo.rank==='elite'?1.15:1);
+  // Tosa Pact shrugs off a share of the BONUS only, never the base hit: a shrug of 0.5 turns an
+  // enrage 1.5x into 1.25x and an elite 1.15x into 1.075x, and leaves an ordinary foe at exactly
+  // 1x. Scaling `mult` itself would have made the Pact reduce all incoming damage, duplicating
+  // Squad 19's def aura instead of being its own thing.
+  if(mult>1) mult = 1 + (mult-1)*(1-_lshrug());
   var msg;
   if((fo.rank==='boss' && fo.t%3===0) || (fo.siege && fo.t%2===0)){
     var pw=Math.round(fo.atk*0.8*mult); onf.forEach(function(u){ ascApplyDamage(u,pw); });
@@ -15477,7 +15753,7 @@ function ascUseMove(mi){
   if(left<=0){ if(typeof toast==='function') toast(mv.name+' — no uses left', false); return; }
   var k=mv.kind;
   if(k==='aoe'){ if(mv.left!=null)mv.left--; else actor.abilLeft--; var pw=ascOut(actor,mv.power); ascBattle.foes.forEach(function(fo){ if(fo.hp>0) ascApplyDamage(fo,pw); }); ascLog('💥 '+actor.name.split(',')[0]+' — '+mv.name+' scorches all foes!'); ascPostAction(); return; }
-  if(k==='guard'){ if(mv.left!=null)mv.left--; else actor.abilLeft--; ascParty.forEach(function(u){ if(u.hp>0&&(!u.avatar||ascBattle.summoned)){ u.st=u.st||{}; u.st.def=Math.max(u.st.def||0,mv.power); u.st.defT=Math.max(u.st.defT||0,mv.dur); } }); ascLog('🛡 '+actor.name.split(',')[0]+' — '+mv.name+': the party braces (-'+Math.round(mv.power*100)+'% damage)'); ascPostAction(); return; }
+  if(k==='guard'){ if(mv.left!=null)mv.left--; else actor.abilLeft--; ascParty.forEach(function(u){ if(u.hp>0&&(!u.avatar||ascBattle.summoned)){ u.st=u.st||{}; u.st.def=Math.max(u.st.def||0,mv.power); u.st.defT=Math.max(u.st.defT||0,mv.dur+_lbd()); } }); ascLog('🛡 '+actor.name.split(',')[0]+' — '+mv.name+': the party braces (-'+Math.round(mv.power*100)+'% damage)'); ascPostAction(); return; }
   ascBattle.pending={type:'move', mi:mi};
   ascBattle.targetSide=(k==='heal'||k==='buff')?'ally':'foe';
   ascBattle.phase='target'; ascRenderBattle();
@@ -15513,7 +15789,7 @@ function ascTarget(idx){
       if(def.kind==='revive'){ if(al.hp>0) return; ascRun.inv[p.item]--; al.hp=Math.round(al.maxhp*def.power); ascLog(actor.name.split(',')[0]+' revives '+al.name.split(',')[0]+' (+'+al.hp+' HP)'); }
       else { if(al.hp<=0) return; ascRun.inv[p.item]--; var h=ascHealAmt(al,def.power); ascLog(actor.name.split(',')[0]+' uses '+def.name+' on '+al.name.split(',')[0]+' (+'+h+' HP)'); } }
     else if(p.type==='move'){ var _mv=actor.moves&&actor.moves[p.mi]; if(!_mv) return;
-      if(_mv.kind==='buff'){ if(al.hp<=0) return; if(_mv.left!=null)_mv.left--; else actor.abilLeft--; al.st=al.st||{}; al.st.atk=Math.max(al.st.atk||0,_mv.power); al.st.atkT=Math.max(al.st.atkT||0,_mv.dur); ascLog('⤴ '+actor.name.split(',')[0]+' — '+_mv.name+': '+al.name.split(',')[0]+' +'+Math.round(_mv.power*100)+'% ATK'); }
+      if(_mv.kind==='buff'){ if(al.hp<=0) return; if(_mv.left!=null)_mv.left--; else actor.abilLeft--; al.st=al.st||{}; al.st.atk=Math.max(al.st.atk||0,_mv.power); al.st.atkT=Math.max(al.st.atkT||0,_mv.dur+_lbd()); ascLog('⤴ '+actor.name.split(',')[0]+' — '+_mv.name+': '+al.name.split(',')[0]+' +'+Math.round(_mv.power*100)+'% ATK'); }
       else { if(al.hp<=0) return; if(_mv.left!=null)_mv.left--; else actor.abilLeft--; var h2=ascHealAmt(al,_mv.power); ascLog(actor.name.split(',')[0]+' — '+_mv.name+' on '+al.name.split(',')[0]+' (+'+h2+' HP)'); } }
   }
   ascPostAction();
@@ -15534,11 +15810,22 @@ const ASC_GATE_SAVES_TO_BOSS = false;
 function ascBattleWin(){
   if(ascRun&&ascRun.pvp){ return ascArenaEnd(true); }
   ascBattle.phase='over'; ascBusy=true; var node=ascBattle.node;
+  // 8/11/26: everything this win actually pays out is captured as it happens (survivor XP, Zenni,
+  // trial gear, which bounties flipped done) and shown in the node-clear panel below. Before this,
+  // a cleared node auto-advanced to the map on a blind 1900ms timer behind a pointer-events:none
+  // "VICTORY" word -- a cold playtest reported not registering it had won at all, let alone what
+  // it earned. The run-END screen (ascBattleRunEnd) always had a real summary; individual nodes,
+  // which is most of a run, never did.
+  // Snapshot by NAME, not id -- ascBountyProgress() matches on b.id, which is the TRIGGER type
+  // ('clear'/'boss'/'trial'/'links'/'flawless') and is deliberately shared by every bounty that
+  // fires off the same event, so ids are not unique per bounty and would collapse the diff.
+  var _bountiesBefore = (ascRun && ascRun.bounties) ? ascRun.bounties.filter(function(b){return b.done;}).map(function(b){return b.name;}) : [];
+  var _gearWon = null, _survivors = [], _leveled = [];
   var _rw=(ascRun&&ascRun.linkReward)||1; var xp=Math.round((node.type==='boss'?130:node.type==='elite'?75:node.type==='trial'?90:45)*_rw);
-  ascParty.forEach(function(u){ if(u.hp>0 && (ownedCopies[u.name]||0)>0){ ascGrantXP(u,xp); var P=ascUnitProg[u.name]; if(node.type==='boss') P.bosses=(P.bosses||0)+1; } });
+  ascParty.forEach(function(u){ if(u.hp>0 && (ownedCopies[u.name]||0)>0){ if(ascGrantXP(u,xp)) _leveled.push(u.name); _survivors.push(u.name); var P=ascUnitProg[u.name]; if(node.type==='boss') P.bosses=(P.bosses||0)+1; } });
   var sig=Math.round((node.type==='boss'?200:node.type==='elite'?80:node.type==='trial'?120:40)*_rw); signalPoints+=sig; if(typeof updateBalance==='function') updateBalance();
   ascRun.cleared++;
-  if(node.type==='trial'){ var _av=ASC_GEAR.filter(function(g){return (ascRun.gear||[]).indexOf(g.id)<0;}); if(_av.length){ var _gg=_av[Math.floor(Math.random()*_av.length)]; ascRun.gear=ascRun.gear||[]; ascRun.gear.push(_gg.id); ascLog('⚡ Trial cleared — gained '+_gg.name+'!'); } ascBountyProgress('trial'); }
+  if(node.type==='trial'){ var _av=ASC_GEAR.filter(function(g){return (ascRun.gear||[]).indexOf(g.id)<0;}); if(_av.length){ var _gg=_av[Math.floor(Math.random()*_av.length)]; ascRun.gear=ascRun.gear||[]; ascRun.gear.push(_gg.id); _gearWon=_gg; ascLog('⚡ Trial cleared — gained '+_gg.name+'!'); } ascBountyProgress('trial'); }
   if(node.type==='boss') ascBountyProgress('boss');
   ascBountyProgress('clear');
   { var _bk=ascParty.filter(function(u){return !u.avatar && (ownedCopies[u.name]||0)>0;}).map(function(u){ var _c=COLLECTION.find(function(x){return x.name===u.name && !x.variant && !x.ascendant;}); return _c?(_c.uid||_c.name):u.name; }); if(_bk.length>1 && typeof recordFormationBonds==='function'){ var _bondCrossed2=recordFormationBonds(_bk); if(_bondCrossed2 && _bondCrossed2.length) setTimeout(function(){ showBondBeat(_bondCrossed2[0]); }, 2000); } }
@@ -15565,11 +15852,53 @@ function ascBattleWin(){
   // call was, not left unconditional.)
   if(!isRunEnd) ascRun.tier++;
   if(!ASC_GATE_SAVES_TO_BOSS || node.type==='boss') saveState();
+  var _bountiesJustDone = (ascRun && ascRun.bounties) ? ascRun.bounties.filter(function(b){ return b.done && _bountiesBefore.indexOf(b.name)<0; }) : [];
   setTimeout(function(){
     if(isRunEnd){ ascBattleRunEnd(true); return; }
+    // Player-dismissed summary instead of a silent hand-off to the map. ascBusy stays true and
+    // ascBattle stays set until Continue -- ascNodeCleared() owns clearing both, so nothing else
+    // can act on a battle the player is still reading. If the panel can't mount for any reason,
+    // it falls straight through to the old auto-advance rather than stranding the run.
+    if(typeof ascShowNodeCleared==='function' && ascShowNodeCleared(node, xp, sig, _survivors, _leveled, _gearWon, _bountiesJustDone)) return;
     ascBattle=null; ascBusy=false;
     if(typeof toast==='function') toast('Battle won — +'+fmtPts(sig)+' ◈ · party advances', true); ascShowMap();
   }, 1900);
+}
+// ── NODE CLEARED summary (8/11/26) ──
+// Mounts over the still-visible battle (same append point as .asc-victory) rather than replacing
+// the arena the way ascBattleRunEnd does -- the point is to read as "this fight you just watched
+// is won," not as a separate screen. Returns false if it can't mount so the caller keeps its old
+// auto-advance path. Every value shown is passed in from ascBattleWin's own already-applied
+// grants; nothing is recomputed here, so the panel can never disagree with what was banked.
+function ascShowNodeCleared(node, xp, sig, survivors, leveled, gear, bounties){
+  var bt=document.querySelector('.asc-battle'); if(!bt) return false;
+  if(bt.querySelector('.asc-cleared')) return true;
+  var short=function(n){ return String(n||'').split(',')[0]; };
+  var kind = node.type==='boss'?'Boss defeated' : node.type==='elite'?'Elite cleared' : node.type==='trial'?'Trial cleared' : 'Battle won';
+  var rows='';
+  rows += '<div class="ancl-row"><span class="ancl-k">Zenni</span><span class="ancl-v gold">+◈ '+fmtPts(sig)+'</span></div>';
+  rows += '<div class="ancl-row"><span class="ancl-k">XP · each survivor</span><span class="ancl-v">+'+xp+'<span class="ancl-sub">'+(survivors.length?survivors.map(short).join(' · '):'no eligible survivors')+'</span></span></div>';
+  if(leveled && leveled.length) rows += '<div class="ancl-row"><span class="ancl-k">Level up</span><span class="ancl-v gold">'+leveled.map(short).join(' · ')+'</span></div>';
+  if(gear) rows += '<div class="ancl-row"><span class="ancl-k">Gear</span><span class="ancl-v gold">'+(gear.icon?gear.icon+' ':'')+gear.name+'</span></div>';
+  if(bounties && bounties.length) rows += '<div class="ancl-row"><span class="ancl-k">Bounty</span><span class="ancl-v gold">'+bounties.map(function(b){ return (b.icon?b.icon+' ':'')+b.name; }).join(' · ')+'</span></div>';
+  var tierTxt='';
+  if(ascRun && ascRun.map){ var nx=ascRun.map[ascRun.tier]; tierTxt = nx ? ('Next: '+(nx.title||nx.loc||'the road ahead')) : 'The road ahead is clear'; }
+  var el=document.createElement('div');
+  el.className='asc-cleared';
+  el.innerHTML='<div class="ancl-panel">'
+    + '<div class="ancl-eyebrow">'+kind+'</div>'
+    + '<h2 class="ancl-title">'+((node.title||node.loc||'Node')+'')+'</h2>'
+    + '<div class="ancl-rows">'+rows+'</div>'
+    + (tierTxt?'<div class="ancl-next">'+tierTxt+'</div>':'')
+    + '<button class="ancl-go" onclick="ascNodeCleared()">Continue →</button>'
+    + '</div>';
+  bt.appendChild(el);
+  return true;
+}
+function ascNodeCleared(){
+  var p=document.querySelector('.asc-cleared'); if(p&&p.parentNode) p.parentNode.removeChild(p);
+  ascBattle=null; ascBusy=false;
+  if(typeof ascShowMap==='function') ascShowMap();
 }
 function ascBattleLose(reason){
   if(ascRun&&ascRun.pvp){ return ascArenaEnd(false); }
@@ -15617,8 +15946,8 @@ function ascUltimate(){
     // `pw` above -- pw is Math.round()'d, and Math.round(0.35*1.4)===Math.round(0.49)===0, which
     // would silently zero out every percentage-based ultimate. Each branch computes its own
     // unrounded percentage instead.
-    else if(ult.kind==='buff'){ var pct=(ult.power||0.3)*1.4*((ascRun&&ascRun.linkUlt)||1); ascParty.forEach(function(u){ if(!u.avatar&&u.hp>0){ u.st=u.st||{}; u.st.atk=Math.max(u.st.atk||0,pct); u.st.atkT=Math.max(u.st.atkT||0,ult.dur||3);} }); ascLog('✦ '+ult.name+' empowers the whole party — +'+Math.round(pct*100)+'% ATK!'); }
-    else if(ult.kind==='guard'){ var pctG=(ult.power||0.3)*1.4*((ascRun&&ascRun.linkUlt)||1); ascParty.forEach(function(u){ if(!u.avatar&&u.hp>0){ u.st=u.st||{}; u.st.def=Math.max(u.st.def||0,pctG); u.st.defT=Math.max(u.st.defT||0,ult.dur||3);} }); ascLog('✦ '+ult.name+' shields the party — '+Math.round(pctG*100)+'% less damage taken!'); }
+    else if(ult.kind==='buff'){ var pct=(ult.power||0.3)*1.4*((ascRun&&ascRun.linkUlt)||1); ascParty.forEach(function(u){ if(!u.avatar&&u.hp>0){ u.st=u.st||{}; u.st.atk=Math.max(u.st.atk||0,pct); u.st.atkT=Math.max(u.st.atkT||0,(ult.dur||3)+_lbd());} }); ascLog('✦ '+ult.name+' empowers the whole party — +'+Math.round(pct*100)+'% ATK!'); }
+    else if(ult.kind==='guard'){ var pctG=(ult.power||0.3)*1.4*((ascRun&&ascRun.linkUlt)||1); ascParty.forEach(function(u){ if(!u.avatar&&u.hp>0){ u.st=u.st||{}; u.st.def=Math.max(u.st.def||0,pctG); u.st.defT=Math.max(u.st.defT||0,(ult.dur||3)+_lbd());} }); ascLog('✦ '+ult.name+' shields the party — '+Math.round(pctG*100)+'% less damage taken!'); }
     else if(ult.kind==='vuln'){ var pctV=(ult.power||0.3)*1.4*((ascRun&&ascRun.linkUlt)||1); ascBattle.foes.forEach(function(f){ if(f.hp>0){ f.st=f.st||{}; f.st.vuln=Math.max(f.st.vuln||0,pctV); f.st.vulnT=Math.max(f.st.vulnT||0,ult.dur||3);} }); ascLog('✦ '+ult.name+' marks every foe — +'+Math.round(pctV*100)+'% damage taken!'); }
     else { var alv=ascBattle.foes.filter(function(f){return f.hp>0;}); if(alv.length){ var tgt=alv.sort(function(x,y){return y.hp-x.hp;})[0]; var d=ascApplyDamage(tgt,pw); ascLog('✦ '+ult.name+' strikes '+tgt.name+' for '+d+'!'); } }
     saveState(); ascRenderBattle(); if(typeof ascPlayFx==='function')ascPlayFx({skipSpotlight:true});
@@ -15795,7 +16124,7 @@ function playSandbox(){
   // with nothing distinguishing "this hand is random, not your built deck" once you're a few turns in.
   // Deck Master already overrides tb-title the same way; Sandbox never did.
   { var _tb=document.getElementById('tb-title'); if(_tb && activeBot) _tb.textContent='Sandbox — vs '+activeBot.name; }
-  if(typeof toast==='function') toast('🌐 Sandbox — random all-card deck · zero consequence', true);
+  if(typeof toast==='function') toast('🌐 Sandbox — random all-card deck · light stakes, no rank risk', true);
 }
 let draftPool=[], _draftRow=null, drafting=false, draftGranted=false;
 const DRAFT_PICKS=20, DRAFT_ROW=4, DRAFT_ENTRY=5000;   // 7/30/26: 10->20 picks (pool is majority Common/Rare, a bigger haul is justified); entry rescaled 2500->5000 to hold the same 250/card rate. You KEEP every card you draft
@@ -16080,11 +16409,11 @@ body:has(#v-turn.on) .howto-btn{display:none}
     <div class="howto-body">
       <div class="ht-step"><span class="ht-n">1</span><div><b>Draw</b><p>Tap to draw and start the turn.</p></div></div>
       <div class="ht-step"><span class="ht-n">2</span><div><b>Reveal the Condition</b><p>A rule that reshapes this duel, shown up top. Read it — it can flip the whole fight.</p></div></div>
-      <div class="ht-step"><span class="ht-n">3</span><div><b>Conjure a Fighter ⚡</b><p>Drag a card onto the field (or tap it). You need enough Energy (shown on the card) to conjure it — conjuring spends that Energy. This card does the fighting.</p></div></div>
-      <div class="ht-step"><span class="ht-n">4</span><div><b>Call Supports 📣 (free)</b><p>Drag more cards to the rear slots — 2 to start, growing to 3 deep into a long match. Their Called ability fires automatically and boosts your Fighter — no energy cost.</p></div></div>
+      <div class="ht-step"><span class="ht-n">3</span><div><b>Conjure a Fighter ⚡</b><p>Drag a card onto the field (or tap it). You need enough Charge (shown on the card) to conjure it — conjuring spends that Charge. This card does the fighting.</p></div></div>
+      <div class="ht-step"><span class="ht-n">4</span><div><b>Call Supports 📣 (free)</b><p>Drag more cards to the rear slots — 2 to start, growing to 3 deep into a long match. Their Called ability fires automatically and boosts your Fighter — no Charge cost.</p></div></div>
       <div class="ht-step"><span class="ht-n">5</span><div><b>Links 🔗</b><p>When a support shares a lore group with your Fighter, the Link fires for bonus power. Tap a link name to see its members.</p></div></div>
       <div class="ht-step"><span class="ht-n">6</span><div><b>Commit</b><p>Lock it in. Both cards reveal and clash — the higher total power wins the duel.</p></div></div>
-      <div class="ht-note"><b>⚡ Energy</b> only regenerates +1 a turn through the 4th duel — then about a third of your current cap each turn after that — against a cap that keeps climbing as the match goes on (3, 4, 5, 6, then +2 per duel). It does not refill to full. Leftover energy carries over, so play cheap Fighters to bank charge for bigger plays and Spells later. Conjuring a Fighter spends Energy equal to its cost; supports are free.</div>
+      <div class="ht-note"><b>⚡ Charge</b> only regenerates +1 a turn through the 4th duel — then about a third of your current cap each turn after that — against a cap that keeps climbing as the match goes on (3, 4, 5, 6, then +2 per duel). It does not refill to full. Leftover Charge carries over, so play cheap Fighters to bank Charge for bigger plays and Spells later. Conjuring a Fighter spends Charge equal to its cost; supports are free.</div>
       <div class="ht-note"><b>Records</b> — every card keeps a permanent Win/Loss record. Winners join your Winners Circle; deck cards together to forge Bonds.</div>
       <div class="ht-note"><b>Wager</b> — Raise to grow the stakes, or Fold to concede a duel cheaply.</div>
     </div>
@@ -16265,6 +16594,7 @@ body::before{background:
     <button class="dev-b" id="dev-req" title="Copy all your plain-word Called requests to hand off to Claude">📣 Requests</button>
     <button class="dev-b" id="dev-rst">Reset</button>
     <button class="dev-b" id="dev-newplayer" title="Wipe to a fresh new-player state">🌱 New Player</button>
+    <button class="dev-b" id="dev-botvbot" title="Auto-play YOUR side too, so two AIs run a full match against each other. Stays armed across duels — toggle off to take back control at any point.">🤖 Bot vs Bot</button>
     <button class="dev-b dev-x" id="dev-close">✕ Close</button>
   </div>
   <div class="dev-tabs" id="dev-tabs">
@@ -16671,7 +17001,15 @@ body::before{background:
       resetAscOV();
       chg();try{if(typeof buildVault==='function')buildVault();}catch(e){}render();};
     var _np=document.getElementById('dev-newplayer'); if(_np) _np.onclick=function(){ if(typeof newPlayerReset==='function'){ closeDev(); newPlayerReset(); } };
-    function openDev(){OVL.classList.add('on');chg();render();}
+    // 8/11/26: toggleBotVsBot() was console-only. Surfaced here rather than as its own dev tab --
+    // it's a one-switch testing tool with no settings to render, so it belongs beside the other
+    // header actions. Closes the overlay on activation, since the whole point is to watch the
+    // match play itself, and the panel sits on top of the board. The label re-syncs on every open
+    // so it can't drift out of step with a toggle made from the console.
+    var _bvb=document.getElementById('dev-botvbot');
+    function _syncBvb(){ if(!_bvb) return; var on=(typeof botVsBotMode!=='undefined' && botVsBotMode); _bvb.textContent = on ? '🤖 Bot vs Bot · ON' : '🤖 Bot vs Bot'; _bvb.style.borderColor = on ? 'var(--gold)' : ''; _bvb.style.color = on ? 'var(--gold)' : ''; }
+    if(_bvb) _bvb.onclick=function(){ if(typeof toggleBotVsBot!=='function'){ if(typeof toast==='function') toast('Bot vs Bot is unavailable in this build.', false); return; } toggleBotVsBot(); _syncBvb(); if(typeof botVsBotMode!=='undefined' && botVsBotMode) closeDev(); };
+    function openDev(){OVL.classList.add('on');chg();render();_syncBvb();}
     function closeDev(){OVL.classList.remove('on');clearTimeout(vt);try{if(typeof buildVault==='function')buildVault();}catch(e){}}
     FAB.onclick=openDev; document.getElementById('dev-close').onclick=closeDev;
     document.addEventListener('keydown',function(e){var tn=(e.target&&e.target.tagName||'').toLowerCase();if(e.shiftKey&&(e.key==='D'||e.key==='d')&&tn!=='input'&&tn!=='textarea'&&tn!=='select'){e.preventDefault();OVL.classList.contains('on')?closeDev():openDev();}else if(e.key==='Escape'&&OVL.classList.contains('on'))closeDev();});
@@ -16871,6 +17209,25 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
 .asc-victory{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:60;pointer-events:none}
 .asc-victory .vb{font-family:'Trajan Pro','Cinzel',Palatino,serif;font-size:clamp(34px,9vw,52px);font-weight:800;color:#F5C24D;letter-spacing:.06em;text-shadow:0 0 26px rgba(245,194,77,.65),0 4px 10px rgba(0,0,0,.75);animation:ascVic 1.9s cubic-bezier(.2,.8,.2,1) forwards}
 @keyframes ascVic{0%{opacity:0;transform:scale(.55) translateY(12px)}28%{opacity:1;transform:scale(1.08)}72%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.03)}}
+/* node-cleared summary — unlike .asc-victory above this one takes pointer events (it owns a real
+   Continue button) and sits above it in the stack; the VICTORY word has already faded out by the
+   time this mounts at 1900ms, but the z-index is explicit so the ordering never depends on that. */
+.asc-cleared{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:70;background:rgba(4,6,11,.72);backdrop-filter:blur(2px);animation:ancIn .28s ease}
+@keyframes ancIn{from{opacity:0}to{opacity:1}}
+.asc-cleared .ancl-panel{width:min(92%,420px);background:linear-gradient(180deg,#151a28,#0c0f17);border:1px solid var(--gold);border-radius:14px;padding:18px 20px 16px;box-shadow:0 20px 60px rgba(0,0,0,.7);text-align:center;animation:ancPop .32s cubic-bezier(.2,.85,.25,1)}
+@keyframes ancPop{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:none}}
+.asc-cleared .ancl-eyebrow{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.asc-cleared .ancl-title{font-size:20px;font-weight:800;color:#fff;margin:3px 0 12px}
+.asc-cleared .ancl-rows{display:flex;flex-direction:column;gap:7px;text-align:left}
+.asc-cleared .ancl-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;font-size:12.5px;border-bottom:1px solid var(--border2);padding-bottom:6px}
+.asc-cleared .ancl-row:last-child{border-bottom:none}
+.asc-cleared .ancl-k{color:var(--text3);flex:0 0 auto}
+.asc-cleared .ancl-v{color:var(--text);font-weight:700;text-align:right}
+.asc-cleared .ancl-v.gold{color:var(--gold)}
+.asc-cleared .ancl-sub{display:block;font-size:10.5px;font-weight:500;color:var(--text3);margin-top:2px}
+.asc-cleared .ancl-next{font-size:11px;color:var(--text2);margin-top:12px}
+.asc-cleared .ancl-go{margin-top:14px;background:var(--gold);color:#0a0d14;border:none;border-radius:9px;padding:10px 26px;font-weight:800;font-size:13.5px;cursor:pointer}
+.asc-cleared .ancl-go:hover{filter:brightness(1.08)}
 /* spotlight: pulls the attacker + the single target of a clean (non-AOE) hit into a centered
    close-up over a dark scrim, echoing the main card duel's resolution-cinematic clash framing.
    Lives entirely inside .asc-battle (same append point as .asc-victory below) and self-removes
@@ -16894,7 +17251,7 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
 @keyframes ascSpotCard{0%{opacity:0;transform:scale(.5)}20%{opacity:1;transform:scale(1.08)}30%{transform:scale(1)}75%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.86)}}
 .asc-spot-vs{position:absolute;left:50%;top:50%;z-index:52;font-family:'Trajan Pro','Cinzel',Palatino,serif;font-weight:800;font-size:16px;letter-spacing:.08em;color:var(--gold);text-shadow:0 0 16px rgba(245,194,77,.75),0 2px 6px rgba(0,0,0,.8);opacity:0;animation:ascSpotVsA .8s ease forwards}
 @keyframes ascSpotVsA{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}22%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}32%{transform:translate(-50%,-50%) scale(1)}75%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.9)}}
-@media(prefers-reduced-motion:reduce){.asc-lunge-f,.asc-lunge-p,.asc-hit,.asc-impact>.asc-foe-art,.asc-impact .asc-pc-art,.asc-float,.asc-burst,.asc-dying,.asc-battle.asc-quake,.asc-victory .vb,.asc-fxflash,.asc-spot-scrim,.asc-spot-card,.asc-spot-vs{animation-duration:.01ms!important}}
+@media(prefers-reduced-motion:reduce){.asc-lunge-f,.asc-lunge-p,.asc-hit,.asc-impact>.asc-foe-art,.asc-impact .asc-pc-art,.asc-float,.asc-burst,.asc-dying,.asc-battle.asc-quake,.asc-victory .vb,.asc-fxflash,.asc-spot-scrim,.asc-spot-card,.asc-spot-vs,.asc-cleared,.asc-cleared .ancl-panel{animation-duration:.01ms!important}}
 </style>
 <script>
 (function(){
@@ -17053,6 +17410,55 @@ function pickOppCard(){
   if(typeof activeBot!=='undefined'&&activeBot&&activeBot.maxed){ _out.kills=99;_out.deaths=5;_out.pow=(_out.pow||8)+6; }
   return _out;
 }
+// ── Bot vs Bot auto-play (owner-requested testing tool, 8/11/26) ──
+// Drives the PLAYER's side through the exact same functions a real click would call
+// (stageFighter/callSupportIdx/confirmSelection/commitCard), so every on-commit effect, DM
+// ability, and banish queue still runs precisely as it would for a human -- only the card-pick
+// heuristic itself is simplified (affordable + non-instant + highest pow, then fill remaining
+// rear slots) rather than a full mirror of pickOppCard/oppEvalPow's ability-aware estimate.
+// Console-invoked for now (toggleBotVsBot()) -- no dedicated UI button yet.
+let botVsBotMode = false;
+function botAutoPlayTurn(){
+  if(!botVsBotMode) return;
+  // Two more human-gated screens sit between a resolved duel and the next one revealing --
+  // the "DUEL WON/LOST" result overlay (Continue -> afterResult()) and, since lobbyMode still
+  // wagers real (reduced-rate) Zenni by design, the raise/counter-raise prompt afterResult()
+  // itself opens next. enterWagerPhase() never changes `phase` (it stays 'resolved' the whole
+  // time the wager overlay is up), so the wager-overlay check MUST come first -- checking
+  // phase==='resolved' first would re-fire afterResult() forever and never reach playerReadyUp().
+  // Auto-advance both: never raise, just accept the stake as dealt.
+  { var wo=document.getElementById('wager-overlay');
+    if(wo && wo.classList.contains('show')){
+      if(typeof wagerDone!=='undefined' && !wagerDone && !playerReady && typeof playerReadyUp==='function') playerReadyUp();
+      return;
+    }
+  }
+  if(phase==='resolved'){ if(typeof afterResult==='function') afterResult(); return; }
+  if(typeof phase==='undefined' || phase!=='revealed' || !hand || !hand.length) return;
+  var affordable = hand.filter(function(c){ return c && c.timing!=='instant' && conjureCost(c)<=charge; });
+  var pool = affordable.length ? affordable : hand.filter(function(c){ return c && c.timing!=='instant'; });
+  if(!pool.length) return;   // nothing legal to conjure -- let the existing energy-rescue/forfeit path handle it, same as a human would hit
+  var best = pool.reduce(function(a,c){ return (c.pow||0)>(a.pow||0) ? c : a; });
+  var fIdx = hand.indexOf(best);
+  stageFighter(fIdx);
+  if(!condSupportZonesLocked){
+    var slots = (typeof RG_SLOTS==='function') ? RG_SLOTS() : 0;
+    for(var k=0;k<slots;k++){
+      var rIdx = -1;
+      for(var i=0;i<hand.length;i++){ if(i!==preSelectedCard && rearGuardIdxs.indexOf(i)<0 && hand[i] && hand[i].timing!=='instant'){ rIdx=i; break; } }
+      if(rIdx<0) break;
+      callSupportIdx(rIdx);
+    }
+  }
+  if(typeof confirmSelection==='function') confirmSelection();
+  if(typeof commitCard==='function') commitCard();
+}
+function toggleBotVsBot(){
+  botVsBotMode = !botVsBotMode;
+  if(typeof toast==='function') toast(botVsBotMode ? '🤖 Bot vs Bot — both sides now auto-play' : '🤖 Bot vs Bot — off, you’re back in control', true);
+  if(botVsBotMode) botAutoPlayTurn();   // don't wait for the next poll tick if a hand is already sitting revealed right now
+}
+setInterval(function(){ try{ botAutoPlayTurn(); }catch(e){} }, 350);
 /* when the bot wins a duel, its card enters the opponent Winners Circle (never redrawn this match) */
 if(typeof resolve==='function'){ var _oppRes=resolve; resolve=function(pc,oc,cond,pcpow){
   var _b1 = (typeof playerScore!=='undefined') ? playerScore[1] : 0;
