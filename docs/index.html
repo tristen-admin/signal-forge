@@ -5878,21 +5878,19 @@ function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].conca
 const RACE_CAMP = {
   // The three -run human peoples all sit Amageras; they are peer cultures, not a hierarchy.
   // Idrun added 8/13/26 (owner): the Asian-coded human people, the third pole alongside
-  // Eldrun and Kaidrun. Thaldrei (the original elves) sit Omitsuki with the Undying they
-  // became -- Darwin and Valcarion are the race's only named bearers and both are moon-side.
   // Aureth are Amageras: beings of pure energy whose descendants rule the light-coded
   // mage-realm, and the sun pole is the only one that fits a people the world's magic came from.
   // Drun (human) and Drei (elf) are the ROOT words, owner 8/13/26 -- the bare morphemes the
   // §1 system already defines, with the named peoples as their branches rather than their
   // peers. Drun is raceOf()'s fallback, so its camp is what every untagged card inherits.
   // Drun's three peoples are all Amageras, so that root is unambiguous. Drei's are NOT --
-  // Kaldrei Amageras, Thaldrei Omitsuki, Nymdrei Kitanoo, one per camp -- so the root is set
-  // to Amageras after Kaldrei, the most numerous elf people and the protagonists'. Flagging
-  // that as a pick rather than a derivation: an unspecified elf could defensibly sit anywhere.
+  // owner 8/13/26 set Thaldrei Amageras and Kaldrei Omitsuki, with Nymdrei Kitanoo, so they
+  // still land one per camp. The root follows THALDREI, the original elves every other -drei
+  // people descends from, which is a firmer basis than the head-count it used before.
   Drun:'Amageras', Eldrun:'Amageras', Kaidrun:'Amageras', Idrun:'Amageras', Aureth:'Amageras',
   Drei:'Amageras',
-  Kaldrei:'Amageras', Celestial:'Amageras', Construct:'Amageras', Dreikan:'Amageras',
-  Thaldrei:'Omitsuki',
+  Thaldrei:'Amageras', Celestial:'Amageras', Construct:'Amageras', Dreikan:'Amageras',
+  Kaldrei:'Omitsuki',   // owner 8/13/26: Kaldrei moved Amageras->Omitsuki, Thaldrei Omitsuki->Amageras (the two were swapped)
   Nightclaw:'Omitsuki', Undying:'Omitsuki', Revenant:'Omitsuki',
   'Vysh\'ra':'Kitanoo', 'N\'imkatta':'Kitanoo', Wrothlan:'Kitanoo', Dragonkin:'Kitanoo', Beast:'Kitanoo', Spirit:'Kitanoo', Fae:'Kitanoo', Dractyl:'Kitanoo', Nymdrei:'Kitanoo', Xylotes:'Kitanoo'
 };
@@ -14911,7 +14909,22 @@ const ASC_LINK_FX={
   //              vuln/dot that ever DOES land on a party member is halved (penalties slide off)
   // The vuln/dot half of shrug is forward-looking by design and costs nothing while dormant; the
   // enrage half is what makes the aura earn its slot right now.
-  tosa:    {icon:'🤝', buffDur:1, shrug:0.5, desc:'party buffs last 1 turn longer; enraged and elite foes hit this party for less'}
+  tosa:    {icon:'🤝', buffDur:1, shrug:0.5, desc:'party buffs last 1 turn longer; enraged and elite foes hit this party for less'},
+  // 8/13/26 (owner-approved) — the last three link groups with no Reincarnation aura. Each takes a
+  // lever nothing else here uses, so no two auras are a reskin of one another:
+  //   blackwings — SPD. They are a stealth unit, and ascBattleNext() orders the turn queue purely
+  //     on spd, so more of it simply means they act first. Owner framed it as Magic's first strike,
+  //     which is the same idea: your damage lands before the reply.
+  //   ironsworn  — MAX HP. Shieldwall. Deliberately NOT damage reduction, which is Squad 19's
+  //     aura -- a bigger pool to spend, not a smaller hit to take.
+  //   kelrua     — retaliation that grows as the family falls. Owner asked for it "super small",
+  //     so it is 4% per fallen ally: with a full party that caps at +12% and typically sits at +4%.
+  //     Distinct from Waltz Twins, which is twin-specific, larger, and lapses when the twin is
+  //     revived; this is party-wide, tiny, and permanent once earned.
+  // All three scale with bond the same way dragon/squad19 already do.
+  blackwings: {icon:'🖤', spd:4,      desc:'linked members act first — +4 SPD'},
+  ironsworn:  {icon:'✊', hp:0.15,    desc:'linked members have +15% max HP'},
+  kelrua:     {icon:'🩸', avenge:0.04, desc:'+4% ATK to survivors for every ally who has fallen'}
 };
 function ascComputeLinks(party){
   var acc={};
@@ -15651,7 +15664,7 @@ const ASC_GEAR=[
 ];
 function ascGearDef(id){ return ASC_GEAR.find(function(x){return x.id===id;}); }
 function ascGearOn(name){ return (ascRun&&ascRun.equip&&ascRun.equip[name])||null; }
-function ascRecomputeAll(){ var pas=ascPassive(); ascParty.forEach(function(u){ var _dl=ascLinkMemberOf(u.name,'dragon'), _sl=ascLinkMemberOf(u.name,'squad19'); var la=_dl?(6+(_dl.bond||0)*2):0, ld=_sl?(0.15+(_sl.bond||0)*0.03):0; u.linkDef=ld; if(u.avatar) return; var base=ascResolveUnit(u.name); if(!base) return; var st=ascUnitStats(base), g=ascGearDef(ascGearOn(u.name))||{}; var cur=u.hp; u.maxhp=st.hp+(g.hp||0)+(pas.hp||0); u.hp=Math.max(1,Math.min(cur,u.maxhp)); u.atk=st.atk+(g.atk||0)+(pas.atk||0)+la; u.spd=base.spd+(g.spd||0); }); }
+function ascRecomputeAll(){ var pas=ascPassive(); ascParty.forEach(function(u){ var _dl=ascLinkMemberOf(u.name,'dragon'), _sl=ascLinkMemberOf(u.name,'squad19'), _bw=ascLinkMemberOf(u.name,'blackwings'), _is=ascLinkMemberOf(u.name,'ironsworn'); var la=_dl?(6+(_dl.bond||0)*2):0, ld=_sl?(0.15+(_sl.bond||0)*0.03):0; var lsp=_bw?(4+(_bw.bond||0)):0, lhp=_is?(0.15+(_is.bond||0)*0.03):0; u.linkDef=ld; if(u.avatar) return; var base=ascResolveUnit(u.name); if(!base) return; var st=ascUnitStats(base), g=ascGearDef(ascGearOn(u.name))||{}; var cur=u.hp; u.maxhp=Math.round((st.hp+(g.hp||0)+(pas.hp||0))*(1+lhp)); u.hp=Math.max(1,Math.min(cur,u.maxhp)); u.atk=st.atk+(g.atk||0)+(pas.atk||0)+la; u.spd=base.spd+(g.spd||0)+lsp; }); }
 function ascBuyGear(id){ var it=ascGearDef(id); if(!it||!ascRun) return; ascRun.gear=ascRun.gear||[]; if(ascRun.gear.indexOf(id)>=0){ toast('Already owned.', false); return; } if(signalPoints<it.price){ toast('Not enough Zenni', false); return; } signalPoints-=it.price; ascRun.gear.push(id); if(typeof updateBalance==='function') updateBalance(); saveState(); toast('Bought '+it.name+' — equip it in your Bag', true); ascRenderMerchant(); }
 function ascEquipGear(gearId, champName){ if(!ascRun) return; ascRun.equip=ascRun.equip||{}; for(var c in ascRun.equip){ if(ascRun.equip[c]===gearId) delete ascRun.equip[c]; } ascRun.equip[champName]=gearId; ascRecomputeAll(); saveState(); ascRenderBag(); }
 function ascUnequipGear(champName){ if(ascRun&&ascRun.equip){ delete ascRun.equip[champName]; ascRecomputeAll(); saveState(); ascRenderBag(); } }
@@ -15769,7 +15782,15 @@ function ascCmdItem(){ ascCmd('item'); }
 function ascCmdFlee(){ ascCmd('flee'); }
 const ASC_KIND_ICON={dmg:'⚔',aoe:'💥',heal:'❤️',guard:'🛡',buff:'⤴',vuln:'🎯',dot:'🩸',execute:'☠'};
 function ascMoveTag(m){ switch(m.kind){ case 'heal': return 'heal '+m.power; case 'guard': return '-'+Math.round(m.power*100)+'% dmg '+m.dur+'t'; case 'buff': return '+'+Math.round(m.power*100)+'% ATK '+m.dur+'t'; case 'vuln': return '+'+Math.round(m.power*100)+'% taken '+m.dur+'t'; case 'dot': return m.power+'/turn '+m.dur+'t'; case 'aoe': return m.power+' · all foes'; case 'execute': return m.power+' · execute'; default: return m.power+' dmg'; } }
-function ascOut(actor,base){ var b=1+((actor&&actor.st&&actor.st.atk)||0); if(ascWaltzRally(actor)) b+=0.3; return Math.round(base*b); }
+function ascOut(actor,base){ var b=1+((actor&&actor.st&&actor.st.atk)||0); if(ascWaltzRally(actor)) b+=0.3; b+=ascKelruaAvenge(actor); return Math.round(base*b); }
+// Kel'rua Blood: counts EVERY fallen party member, not only fallen Kel'rua -- the family avenges
+// whoever went down beside them. Dead actors get 0 so a downed unit can't feed its own bonus.
+function ascKelruaAvenge(actor){
+  if(!actor||actor.hp<=0||!ascLinkHas('kelrua')) return 0;
+  var l=ascLinkMemberOf(actor.name,'kelrua'); if(!l) return 0;
+  var fallen=ascParty.filter(function(u){ return u && u.hp<=0; }).length;
+  return fallen*(0.04+(l.bond||0)*0.01);
+}
 function ascWaltzRally(actor){ if(!actor||actor.hp<=0||!ascLinkHas('waltz')) return false; var l=ascLinkMemberOf(actor.name,'waltz'); if(!l) return false; return l.members.some(function(n){ var u=ascParty.find(function(x){return x.name===n;}); return u&&u.hp<=0; }); }
 function ascLifesteal(actor,d){ if(ascRun&&ascRun.linkLifesteal>0&&actor&&actor.hp>0){ var h=Math.round(d*ascRun.linkLifesteal); if(h>0){ ascHealAmt(actor,h); } } }
 function ascTickStatuses(ent){ if(!ent||!ent.st) return; var s=ent.st;
