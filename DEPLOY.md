@@ -8,8 +8,22 @@ a persistent marketplace.
 
 ## Build
 
-`index.html` is the hand-edited single-file build (assets inlined as base64).
-`build.py` de-embeds those assets into a clean, deployable folder:
+`index.html` is the hand-edited source. Its assets are **not** inlined: they sit in
+a committed `assets/` tree and are referenced by relative path, so the file is
+~1.5 MB rather than the 54 MB it was when everything was base64.
+
+**Why (2026-08-13):** a 54 MB `index.html` was rewritten in full by every art
+change, so each such commit added ~54 MB to history permanently and GitHub warned
+past its 50 MB file limit on every push. Assets now change as individual binary
+files. Note this fixes growth from here on — the old blobs are still in history.
+
+**Adding new art:** pasting a base64 `data:` URI straight into `index.html` still
+works. `build.py` de-embeds any it finds, so nothing breaks — but the blob lives in
+your source until you rebuild. Prefer dropping the file into `assets/img/` and
+referencing it by path.
+
+`build.py` copies `assets/` through, de-embeds anything still inline, and writes a
+clean deployable folder:
 
 ```sh
 python3 build.py          # reads ./index.html  ->  writes ./dist/

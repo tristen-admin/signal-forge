@@ -85,6 +85,28 @@ def main():
     os.makedirs(os.path.join(OUT, "assets", "video"))
     os.makedirs(os.path.join(OUT, "assets", "audio"))
 
+    # 8/13/26: the source no longer carries base64 payloads -- they were de-embedded into a
+    # committed ./assets tree so index.html stopped being a 54 MB blob that every art commit
+    # rewrote in full (GitHub warned on the 50 MB limit on every push, and history grew by the
+    # whole file each time). The de-embed used THIS script's own hashing, so the filenames are
+    # identical to what it used to generate and dist/index.html comes out byte-for-byte unchanged.
+    # The data-URI substitution below is intentionally KEPT: it is now a no-op for the normal
+    # source, but it still handles any newly-pasted inline asset, so a card art dropped straight
+    # into the HTML is de-embedded on the next build exactly as before, rather than silently
+    # shipping a fresh multi-MB blob. Anything already external is copied through as-is.
+    src_assets = os.path.join(ROOT, "assets")
+    copied = 0
+    if os.path.isdir(src_assets):
+        for sub in ("img", "video", "audio"):
+            d = os.path.join(src_assets, sub)
+            if not os.path.isdir(d):
+                continue
+            for fn in os.listdir(d):
+                sp = os.path.join(d, fn)
+                if os.path.isfile(sp):
+                    shutil.copyfile(sp, os.path.join(OUT, "assets", sub, fn))
+                    copied += 1
+
     seen = {}
     stats = {'img': 0, 'video': 0, 'audio': 0, 'bytes': 0, 'dedup': 0, 'fail': 0}
 
@@ -133,7 +155,8 @@ def main():
     print(f"dist/index.html : {len(out_html)//1024} KB")
     print(f"images extracted: {stats['img']}   videos: {stats['video']}   audio: {stats['audio']}   "
           f"deduped: {stats['dedup']}   failed: {stats['fail']}")
-    print(f"assets on disk  : {stats['bytes']//1024//1024} MB")
+    print(f"assets copied   : {copied} files from ./assets")
+    print(f"assets on disk  : {stats['bytes']//1024//1024} MB newly extracted")
     print(f"leftover data-URIs: {leftover}")
     print(f"pwa: manifest + icon.svg{' + apple-touch-icon.jpg' if apple else ' (no apple icon found)'}")
     print(f"OUTPUT          : {OUT}")
