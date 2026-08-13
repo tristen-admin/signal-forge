@@ -5779,8 +5779,14 @@ const OPTIONAL_HAND_RETURN = {
   'Kravyn the Collector': {onWin:true, onCloseLoss:3},
 };
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
-const RACES = ['Eldrun','Kaidrun','Idrun','Thaldrei','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Dreikan','Dractyl','Nymdrei','Xylotes','Aureth','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
+const RACES = ['Drun','Eldrun','Kaidrun','Idrun','Drei','Thaldrei','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Dreikan','Dractyl','Nymdrei','Xylotes','Aureth','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
 const CARD_RACE = {
+  // 8/13/26: four entries here were keyed to a bare noun ('Dragon', 'Revenant', 'Valkyrie',
+  // 'Anvil') that matches NO card -- the real cards are 'Golden Dragonet', "Revenant's Toll",
+  // "Valkyrie's Ward", "Anvil's Blessing". CARD_RACE is looked up by exact card name, so all
+  // four silently did nothing and their intended cards fell through to raceOf()'s fallback.
+  // Retargeted to the real names rather than deleted; the intent was right, the keys weren't.
+  // Worth remembering the failure mode: a wrong key here fails SILENTLY, it does not throw.
   // ── Named cast, tagged 8/11/26 from story_lore/RACES.md (the canonical race table, created
   // 2026-08-10 to replace the two copies that had already drifted apart). Only rows RACES.md marks
   // ✅ CONFIRMED are applied here; its ⚠️ OPEN rows are deliberately left untagged rather than
@@ -5827,29 +5833,34 @@ const CARD_RACE = {
   // Vysh'ra (Ahdor's people, per the KOTEI bible) — first real card tagged to this race, 7/28/26
   'Kynaht, Ashen Return':"Vysh'ra",
   // Dragonkin
-  'Ourevos, the Golden Dragon':'Dragonkin','Dragan Korr':'Dragonkin','Heir of Kaiga':'Dragonkin','Dragon':'Dragonkin','Scale Guard':'Dragonkin','Dragonfire':'Dragonkin','Wing Buffet':'Dragonkin','Ragefire':'Dragonkin',
+  'Ourevos, the Golden Dragon':'Dragonkin','Dragan Korr':'Dragonkin','Heir of Kaiga':'Dragonkin','Golden Dragonet':'Dragonkin','Dragon-Pact':'Dragonkin','Scale Guard':'Dragonkin','Dragonfire':'Dragonkin','Wing Buffet':'Dragonkin','Ragefire':'Dragonkin',
   // Nightclaw
   'The Bronzed Beast, Hanse Waltz':'Nightclaw','Lagertha Waltz, Wrathful Transformation':'Nightclaw','Wolfsblood Guard':'Nightclaw','Werewolf Fury':'Nightclaw','Feral Lunge':'Nightclaw',
   // Undying
   'Valcarion':'Undying','Mordezh, Blood Prophet':'Undying','Kravyn the Collector':'Undying','Blood Moon':'Undying','Bloodline Surge':'Undying','Bloodline Momentum':'Undying','Crosscut Bleed':'Undying','Soul Reave':'Undying',
   // Revenant (undead)
-  'Revenant':'Revenant','Revenant Mercy':'Revenant','The Regenerating Horror':'Revenant','Hollow Ravager':'Revenant','Twisted Specimen':'Revenant','Nyx, Devourer of Legends':'Revenant','Sythe Marrow':'Revenant','Soul Harvest':'Revenant','Grave Chill':'Revenant','Death Remnant':'Revenant','Phantom Cut':'Revenant','The Hollow King':'Revenant',
+  "Revenant's Toll":'Revenant','Revenant Mercy':'Revenant','The Regenerating Horror':'Revenant','Hollow Ravager':'Revenant','Twisted Specimen':'Revenant','Nyx, Devourer of Legends':'Revenant','Sythe Marrow':'Revenant','Soul Harvest':'Revenant','Grave Chill':'Revenant','Death Remnant':'Revenant','Phantom Cut':'Revenant','The Hollow King':'Revenant',
   // Ork
   'Ghorruk "Gnarly" Judarr':'Wrothlan','Doru Blacktooth':'Wrothlan','Arch-Grim Korrin':'Wrothlan','Ruven Ashwalker':'Wrothlan','Skullchain Strike':'Wrothlan',
   // Celestial
-  'Valkyrie':'Celestial','Valkyrie Rush':'Celestial','Elowen Dawnspear':'Celestial','Kessa Brightblade':'Celestial','Sister Mire':'Celestial','Aurelion Prime':'Celestial','Stormcaller Prime':'Celestial','Fifth Frequency Stormcaller':'Celestial','Rallying Cry':'Celestial','Sovereign':'Celestial','Sovereign Charge':'Celestial','Crownfall':'Celestial',
+  "Valkyrie's Ward":'Celestial','Valkyrie Rush':'Celestial','Elowen Dawnspear':'Celestial','Kessa Brightblade':'Celestial','Sister Mire':'Celestial','Aurelion Prime':'Celestial','Stormcaller Prime':'Celestial','Fifth Frequency Stormcaller':'Celestial','Rallying Cry':'Celestial','Sovereign':'Celestial','Sovereign Charge':'Celestial','Crownfall':'Celestial',
   // Construct
-  'Forgemask':'Construct','Anvil':'Construct','Bulwark':'Construct','Courtroom Colossus':'Construct','Aegis Protocol':'Construct','Reforge':'Construct','Shield Wall':'Construct','Shieldwall':'Construct','Shield Break':'Construct','Golden Maw':'Construct','Kingsmourne':'Construct',
+  'Forgemask':'Construct',"Anvil's Blessing":'Construct','Bulwark':'Construct','Courtroom Colossus':'Construct','Aegis Protocol':'Construct','Reforge':'Construct','Shield Wall':'Construct','Shieldwall':'Construct','Shield Break':'Construct','Golden Maw':'Construct','Kingsmourne':'Construct',
   // Beast
   'Bixie Bee':'Beast','Anorith Keeling':'Beast','Little Pox':'Beast','Broodmother':'Beast','Mip':'Beast',
   // Spirit
   'Wisp':'Spirit','Veil of Echoes':'Spirit','Echo Ward':'Spirit','Signal Diviner':'Spirit','Champion':'Spirit'
-  // everything else defaults to 'Eldrun' (see raceOf) -- Eldrun replaced the generic 'Human' label 8/11/26 per story_lore/RACES.md
+  // everything else defaults to 'Drun' (see raceOf) -- Drun is the species word; Eldrun/Kaidrun/Idrun are its three peoples
 };
 let raceOverride = {};   // design-time per-card race edits (persisted); wins over CARD_RACE
 let NAME_OVERRIDE = {'Corvus':'Black Wings, Corvus the Raven','Arch-Grim Korrin':'Arch-Grim Korrin, the Unburied','Kiana':'Black Wings Initiate, Kiana'};  // display-name epithets (card FACE only; keys stay short to preserve links/rules/ascension refs)
 function dispName(nm){ return (NAME_OVERRIDE && NAME_OVERRIDE[nm]) || nm; }
-function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Eldrun'; }
+// Fallback is Drun -- the species word, owner 8/13/26. It was 'Eldrun' while Eldrun was
+// believed to BE the word for human; once Eldrun was corrected to one people among three
+// (Eldrun/Kaidrun/Idrun), that fallback was asserting a specific ethnicity for all ~423
+// untagged cards. 'Drun' is the bare -run morpheme itself, which the system already defines
+// as human descent, so the three peoples read as its branches rather than its peers.
+function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Drun'; }
 function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.race=r; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83e\uddec Race set: '+name+' \u2192 '+r, true); }
 
 /* Race Camps (7/13/26, renamed 7/17/26) -- a 3-way affinity wheel bucketing the 16 races for the
@@ -5870,7 +5881,15 @@ const RACE_CAMP = {
   // became -- Darwin and Valcarion are the race's only named bearers and both are moon-side.
   // Aureth are Amageras: beings of pure energy whose descendants rule the light-coded
   // mage-realm, and the sun pole is the only one that fits a people the world's magic came from.
-  Eldrun:'Amageras', Kaidrun:'Amageras', Idrun:'Amageras', Aureth:'Amageras',
+  // Drun (human) and Drei (elf) are the ROOT words, owner 8/13/26 -- the bare morphemes the
+  // §1 system already defines, with the named peoples as their branches rather than their
+  // peers. Drun is raceOf()'s fallback, so its camp is what every untagged card inherits.
+  // Drun's three peoples are all Amageras, so that root is unambiguous. Drei's are NOT --
+  // Kaldrei Amageras, Thaldrei Omitsuki, Nymdrei Kitanoo, one per camp -- so the root is set
+  // to Amageras after Kaldrei, the most numerous elf people and the protagonists'. Flagging
+  // that as a pick rather than a derivation: an unspecified elf could defensibly sit anywhere.
+  Drun:'Amageras', Eldrun:'Amageras', Kaidrun:'Amageras', Idrun:'Amageras', Aureth:'Amageras',
+  Drei:'Amageras',
   Kaldrei:'Amageras', Celestial:'Amageras', Construct:'Amageras', Dreikan:'Amageras',
   Thaldrei:'Omitsuki',
   Nightclaw:'Omitsuki', Undying:'Omitsuki', Revenant:'Omitsuki',
