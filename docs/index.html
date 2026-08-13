@@ -1579,7 +1579,7 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .dr-art::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,var(--panel))}
 .dr-header{padding:0 16px 14px;margin-top:-56px;position:relative;z-index:2}
 .dr-rarity{font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;color:var(--text3)}
-.dr-race-row{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11px;color:var(--text3)}.dr-race-lbl{letter-spacing:.04em;text-transform:uppercase;font-weight:700}.dr-race-sel{background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer}.dr-race-sel:hover{border-color:var(--gold)}.dr-disc-stats{font-variant-numeric:tabular-nums;color:var(--text2);letter-spacing:0}
+.dr-race-row{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11px;color:var(--text3)}.dr-race-lbl{letter-spacing:.04em;text-transform:uppercase;font-weight:700}.dr-race-chain{color:var(--gold);font-weight:700}.dr-race-sel{background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer}.dr-race-sel:hover{border-color:var(--gold)}.dr-disc-stats{font-variant-numeric:tabular-nums;color:var(--text2);letter-spacing:0}
 .dr-name{font-size:22px;font-weight:800;color:#fff;line-height:1.05;margin-bottom:6px;text-shadow:0 2px 8px #000;text-wrap:balance}
 .dr-powline{display:flex;align-items:baseline;gap:8px}
 .dr-pow{font-size:28px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums;line-height:1}
@@ -5825,7 +5825,15 @@ const CARD_RACE = {
   // Malia's permanent drain a cause), and Eldrun is well represented while Aureth would otherwise
   // carry no cards at all. Note this tag has NO mechanical consequence either way -- RACE_CAMP puts
   // Eldrun and Aureth both at Amageras -- so it is a label choice, trivially reversible.
-  'Moro':'Aureth','Malia':'Aureth',
+  'Moro':['Eldrun','Aureth'],'Malia':['Eldrun','Aureth'],   // half Eldrun by blood, Aureth is the strain that defines the house (see above)
+  // Thaldrei turned Undying — owner 8/13/26, stated repeatedly: Darwin is BOTH, and the model,
+  // not the tag, was what needed fixing. Order matters: born Thaldrei, Undying now, so the LAST
+  // entry (Undying) is what drives camp — which puts both of them Omitsuki, matching their Dark
+  // duality and vampire CARD_STYLE instead of the Amageras their Thaldrei birth alone would give.
+  // Valcarion is canonically the FIRST Undying and shares the Thaldrei origin (RACES.md §3).
+  'Darwin':['Thaldrei','Undying'],
+  'Young Darwin, Predetermined Dictator':['Thaldrei','Undying'],
+  'Valcarion':['Thaldrei','Undying'],
   // ⚠️ LEFT UNTAGGED ON PURPOSE — a live open question in RACES.md §9, and picking either
   // way here would quietly resolve a lore decision the doc explicitly reserves for the owner:
   //   • Darwin / Young Darwin — §3 lists Thaldrei as "Darwin & Valcarion's race" AND lists both
@@ -5838,7 +5846,7 @@ const CARD_RACE = {
   // Nightclaw
   'The Bronzed Beast, Hanse Waltz':'Nightclaw','Lagertha Waltz, Wrathful Transformation':'Nightclaw','Wolfsblood Guard':'Nightclaw','Werewolf Fury':'Nightclaw','Feral Lunge':'Nightclaw',
   // Undying
-  'Valcarion':'Undying','Mordezh, Blood Prophet':'Undying','Kravyn the Collector':'Undying','Blood Moon':'Undying','Bloodline Surge':'Undying','Bloodline Momentum':'Undying','Crosscut Bleed':'Undying','Soul Reave':'Undying',
+  'Mordezh, Blood Prophet':'Undying','Kravyn the Collector':'Undying','Blood Moon':'Undying','Bloodline Surge':'Undying','Bloodline Momentum':'Undying','Crosscut Bleed':'Undying','Soul Reave':'Undying',
   // Revenant (undead)
   "Revenant's Toll":'Revenant','Revenant Mercy':'Revenant','The Regenerating Horror':'Revenant','Hollow Ravager':'Revenant','Twisted Specimen':'Revenant','Nyx, Devourer of Legends':'Revenant','Sythe Marrow':'Revenant','Soul Harvest':'Revenant','Grave Chill':'Revenant','Death Remnant':'Revenant','Phantom Cut':'Revenant','The Hollow King':'Revenant',
   // Ork
@@ -5856,12 +5864,27 @@ const CARD_RACE = {
 let raceOverride = {};   // design-time per-card race edits (persisted); wins over CARD_RACE
 let NAME_OVERRIDE = {'Corvus':'Black Wings, Corvus the Raven','Arch-Grim Korrin':'Arch-Grim Korrin, the Unburied','Kiana':'Black Wings Initiate, Kiana'};  // display-name epithets (card FACE only; keys stay short to preserve links/rules/ascension refs)
 function dispName(nm){ return (NAME_OVERRIDE && NAME_OVERRIDE[nm]) || nm; }
-// Fallback is Drun -- the species word, owner 8/13/26. It was 'Eldrun' while Eldrun was
-// believed to BE the word for human; once Eldrun was corrected to one people among three
-// (Eldrun/Kaidrun/Idrun), that fallback was asserting a specific ethnicity for all ~423
-// untagged cards. 'Drun' is the bare -run morpheme itself, which the system already defines
-// as human descent, so the three peoples read as its branches rather than its peers.
-function raceOf(name){ return (name && raceOverride[name]) || CARD_RACE[name] || 'Drun'; }
+// ── RACE RESOLUTION ──
+// A card can be MORE THAN ONE race, so a CARD_RACE value may be a string or an array.
+// Owner 8/13/26: "he's a Thaldrei turned Undying -- we have multiple mixed race characters here."
+// Forcing one value per card was the wrong model, not a question that needed answering.
+//
+// Convention for an array: it lists every race the card is, and the LAST entry is the one that
+// defines them NOW. For a transformation that reads origin -> current state ('Thaldrei','Undying'
+// = born Thaldrei, is Undying now); for mixed ancestry it reads as the defining strain last.
+// Everything mechanical keys off that current race, which is why raceOf() returns it.
+//
+// Fallback is Drun -- the species word, owner 8/13/26. It was 'Eldrun' while Eldrun was believed
+// to BE the word for human; once corrected to one people among three, that was asserting a
+// specific ethnicity for all ~423 untagged cards. 'Drun' is the bare -run morpheme, which the
+// system already defines as human descent.
+function racesOf(name){
+  var v = (name && raceOverride[name]) || CARD_RACE[name] || 'Drun';
+  return Array.isArray(v) ? v.slice() : [v];
+}
+function raceOf(name){ var a=racesOf(name); return a[a.length-1]; }          // the defining/current race — drives camp and every rule
+function originRaceOf(name){ return racesOf(name)[0]; }                       // what they were born as
+function raceLabel(name){ return racesOf(name).join(' \u00b7 '); }             // "Thaldrei · Undying" for display
 function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].concat(typeof COLLECTION!=='undefined'?COLLECTION:[], typeof OPP_CARDS!=='undefined'?OPP_CARDS:[]).forEach(function(c){ if(c && c.name===name) c.race=r; }); }catch(e){} if(typeof saveState==='function') saveState(); if(typeof toast==='function') toast('\ud83e\uddec Race set: '+name+' \u2192 '+r, true); }
 
 /* Race Camps (7/13/26, renamed 7/17/26) -- a 3-way affinity wheel bucketing the 16 races for the
@@ -14095,7 +14118,7 @@ function openCardDetail(id, fresh, tab){
       <div class="dr-rarity">${rlab(c.rarity)}${pristine?' · ◈ Pristine':''}${fresh?' · ✦ Fresh Mint':''}</div>
       <div class="dr-name">${dispName(c.name)}</div>
       ${_t>0?`<div class="dr-race-row"><button class="filter-chip ${isCardLocked(id)?'on':''}" style="padding:3px 10px;font-size:10px" onclick="toggleCardLock(${JSON.stringify(id)}, ${JSON.stringify(c.name)})">${isCardLocked(id)?'🔒 Locked':'🔓 Lock this copy'}</button><span class="dr-race-lbl" style="margin-left:6px;color:var(--text3);font-weight:500">Protects it from Trade, Market, Ingest, and Staked PvP</span></div>`:''}
-      <div class="dr-race-row">🧬 <span class="dr-race-lbl">Race</span> <select class="dr-race-sel" data-cardname="${(c.name||'').replace(/"/g,'&quot;')}" onchange="setRace(this.dataset.cardname, this.value)">${RACES.map(function(r){return '<option'+(raceOf(c.name)===r?' selected':'')+'>'+r+'</option>';}).join('')}</select></div>
+      <div class="dr-race-row">🧬 <span class="dr-race-lbl">Race</span> <span class="dr-race-chain">${raceLabel(c.name)}</span> <select class="dr-race-sel" data-cardname="${(c.name||'').replace(/"/g,'&quot;')}" onchange="setRace(this.dataset.cardname, this.value)">${RACES.map(function(r){return '<option'+(raceOf(c.name)===r?' selected':'')+'>'+r+'</option>';}).join('')}</select></div>
       <div class="dr-race-row">${CAMP_ICON[c.camp||campOf(c.name)]||'🏕'} <span class="dr-race-lbl" style="color:${CAMP_COLOR[c.camp||campOf(c.name)]||'inherit'}">${CAMP_TITLE[c.camp||campOf(c.name)]||c.camp||campOf(c.name)}</span></div>
       ${(function(){
         // KOTEI magic-system surfacing (8/3/26) -- roofOf()/factionOf()/domainClassOf() were real,
@@ -16288,7 +16311,7 @@ buildMatchView();
 updateScore();
 rpRender();
 initOwnedCopies();
-(function(){ try{ if(typeof COLLECTION!=='undefined') COLLECTION.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.camp=campOf(c.name);}); if(typeof OPP_CARDS!=='undefined') OPP_CARDS.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.camp=campOf(c.name);}); var _pk=[]; if(typeof PACKS!=='undefined')_pk=_pk.concat(PACKS); if(typeof FORGE_PACKS!=='undefined')_pk=_pk.concat(FORGE_PACKS); _pk.forEach(function(p){ if(p.odds&&p.odds.uncommon!=null){ p.odds.common=(p.odds.common||0)+p.odds.uncommon; delete p.odds.uncommon; } }); }catch(e){} })();
+(function(){ try{ if(typeof COLLECTION!=='undefined') COLLECTION.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.races=racesOf(c.name); c.camp=campOf(c.name);}); if(typeof OPP_CARDS!=='undefined') OPP_CARDS.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.races=racesOf(c.name); c.camp=campOf(c.name);}); var _pk=[]; if(typeof PACKS!=='undefined')_pk=_pk.concat(PACKS); if(typeof FORGE_PACKS!=='undefined')_pk=_pk.concat(FORGE_PACKS); _pk.forEach(function(p){ if(p.odds&&p.odds.uncommon!=null){ p.odds.common=(p.odds.common||0)+p.odds.uncommon; delete p.odds.uncommon; } }); }catch(e){} })();
   supply = defaultSupply(); cardSupply=defaultCardSupply();
 const _hadSave=(function(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}})();
 window._sfReturningSession = _hadSave;   // captured before loadState()/startNewPlayer() can write a fresh save -- Hub's one-time reveal reads this
