@@ -5779,7 +5779,7 @@ const OPTIONAL_HAND_RETURN = {
   'Kravyn the Collector': {onWin:true, onCloseLoss:3},
 };
 // ── RACE: data-only card taxonomy (no mechanic yet — reserved for a future one). Every card gets .race at init. ──
-const RACES = ['Eldrun','Thaldrei','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Kaidrun','Dreikan','Dractyl','Nymdrei','Xylotes','Aureth','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
+const RACES = ['Eldrun','Kaidrun','Idrun','Thaldrei','Kaldrei','Vysh\'ra','N\'imkatta','Wrothlan','Dreikan','Dractyl','Nymdrei','Xylotes','Aureth','Dragonkin','Nightclaw','Undying','Revenant','Celestial','Construct','Beast','Spirit','Fae'];
 const CARD_RACE = {
   // ── Named cast, tagged 8/11/26 from story_lore/RACES.md (the canonical race table, created
   // 2026-08-10 to replace the two copies that had already drifted apart). Only rows RACES.md marks
@@ -5811,11 +5811,16 @@ const CARD_RACE = {
   // card name containing an already-tagged character's name.
   'The Claim, Lagertha Waltz':'Nightclaw',"The Nightmare's Toll, Hanse Waltz":'Nightclaw',
   'The Unending Flame, Tange Sazen':'Kaidrun','Throne of Bones, Uso Oso':'Wrothlan',
-  // ⚠️ LEFT UNTAGGED ON PURPOSE — both are live open questions in RACES.md §9, and picking either
+  // Aureth — owner ruling 8/13/26: Moro is half Aureth, half human, resolving to a quarter elf,
+  // a quarter Aureth ("ascendant"), and half ELDRUN (explicitly not Kaidrun). Tagged by the Aureth
+  // quarter rather than the Eldrun half for two reasons: it is the load-bearing ancestry (it is
+  // what explains Aurevane's prestige, makes the bloodline law literal for that house, and gives
+  // Malia's permanent drain a cause), and Eldrun is well represented while Aureth would otherwise
+  // carry no cards at all. Note this tag has NO mechanical consequence either way -- RACE_CAMP puts
+  // Eldrun and Aureth both at Amageras -- so it is a label choice, trivially reversible.
+  'Moro':'Aureth','Malia':'Aureth',
+  // ⚠️ LEFT UNTAGGED ON PURPOSE — a live open question in RACES.md §9, and picking either
   // way here would quietly resolve a lore decision the doc explicitly reserves for the owner:
-  //   • Moro / Malia — their royal line descends from an Aureth (§6). §9 Q1 asks whether that line
-  //     is its own named -kan people or just a bloodline claim within Eldrun. 'Aureth' as a race
-  //     tag would answer it.
   //   • Darwin / Young Darwin — §3 lists Thaldrei as "Darwin & Valcarion's race" AND lists both
   //     under the Undying. §9 Q6 asks whether Darwin is the only non-human Undying. Valcarion is
   //     already tagged 'Undying' here, so tagging Darwin either way takes a side.
@@ -5859,7 +5864,15 @@ function setRace(name, r){ if(!name) return; raceOverride[name]=r; try{ [].conca
    now a social term, not a race)) -- rename/reassign freely, this just stands the mechanic up with real,
    working data. */
 const RACE_CAMP = {
-  Eldrun:'Amageras', Kaldrei:'Amageras', Kaidrun:'Amageras', Celestial:'Amageras', Construct:'Amageras', Dreikan:'Amageras',
+  // The three -run human peoples all sit Amageras; they are peer cultures, not a hierarchy.
+  // Idrun added 8/13/26 (owner): the Asian-coded human people, the third pole alongside
+  // Eldrun and Kaidrun. Thaldrei (the original elves) sit Omitsuki with the Undying they
+  // became -- Darwin and Valcarion are the race's only named bearers and both are moon-side.
+  // Aureth are Amageras: beings of pure energy whose descendants rule the light-coded
+  // mage-realm, and the sun pole is the only one that fits a people the world's magic came from.
+  Eldrun:'Amageras', Kaidrun:'Amageras', Idrun:'Amageras', Aureth:'Amageras',
+  Kaldrei:'Amageras', Celestial:'Amageras', Construct:'Amageras', Dreikan:'Amageras',
+  Thaldrei:'Omitsuki',
   Nightclaw:'Omitsuki', Undying:'Omitsuki', Revenant:'Omitsuki',
   'Vysh\'ra':'Kitanoo', 'N\'imkatta':'Kitanoo', Wrothlan:'Kitanoo', Dragonkin:'Kitanoo', Beast:'Kitanoo', Spirit:'Kitanoo', Fae:'Kitanoo', Dractyl:'Kitanoo', Nymdrei:'Kitanoo', Xylotes:'Kitanoo'
 };
