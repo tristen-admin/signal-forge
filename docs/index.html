@@ -1007,6 +1007,15 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .hero-welcome h1{font-size:26px;font-weight:800;color:var(--text);letter-spacing:-0.01em;line-height:1.1;margin-bottom:6px;text-wrap:balance}
 .hero-welcome p{font-size:12px;color:var(--text2);line-height:1.5;max-width:52ch}
 .stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px} /* hub-cleanup-v1 */
+.rank-panel{margin-top:12px;padding:12px 14px;background:linear-gradient(180deg,rgba(245,194,77,.08),rgba(245,194,77,.02));border:1px solid rgba(245,194,77,.28);border-radius:11px}
+.rank-panel .rank-head{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin-bottom:9px}
+.rank-panel .rk-n{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.rank-panel .rk-name{font-size:15px;font-weight:800;color:#fff}
+.rank-panel .rk-blurb{font-size:11px;color:var(--text3);flex:1;min-width:0}
+.rank-panel .rk-count{font-size:11px;font-weight:800;color:var(--gold);font-variant-numeric:tabular-nums}
+.rank-panel .rank-missions{display:flex;flex-direction:column;gap:5px}
+.rank-panel .rank-reward{margin-top:9px;font-size:10.5px;color:var(--text2);letter-spacing:.02em}
+@media(max-width:640px){.rank-panel .rk-blurb{flex-basis:100%}}
 .quest-row{display:flex;flex-direction:column;gap:6px;margin-top:10px}
 .quest-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:9px 13px;display:flex;align-items:center;gap:10px}
 .quest-card.done{border-color:rgba(212,168,67,0.5);background:rgba(212,168,67,0.06)}
@@ -2779,6 +2788,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
             <p>You are the Conjurer — an arena prize-fighter calling spirits of legend into the ring, each one blessed by Amagera's light, tempered by Kitanoo's storm, or touched by Omitsuki's shadow. Every card you summon carries its record into the colosseum forever: each win etched deeper into legend, each loss a scar that never fades. Assemble your roster, then step into the arena and let them fight for glory.</p>
           </div>
           <div class="stat-row" id="hub-stats"></div>
+          <div class="rank-panel" id="hub-rank"></div>
           <div class="quest-row" id="hub-quests"></div>
         </div>
         <div class="featured-card" id="hub-featured"></div>
@@ -5455,6 +5465,10 @@ function showMatchComplete(mode, amt){
   clearTurnTimers();
   if(typeof matchPlayed!=='undefined' && matchPlayed.size>=2){ var _bondCrossed=recordFormationBonds([...matchPlayed]); matchPlayed=new Set(); if(_bondCrossed && _bondCrossed.length) setTimeout(function(){ showBondBeat(_bondCrossed[0]); }, 900); }
   wagerDone=true; if(wagerTimer){ clearInterval(wagerTimer); wagerTimer=null; } { const _wo=document.getElementById('wager-overlay'); if(_wo) _wo.classList.remove('show'); }
+  if(typeof rankBump==='function'){
+    if(typeof rankedMode!=='undefined' && rankedMode) rankBump('r5_ranked');
+    if(typeof pvpMode!=='undefined' && pvpMode && playerScore[0]>playerScore[1]) rankBump('r5_staked');
+  }
   const _seasonWon = pvpMode ? (pvpForced ? (pvpForced==='win') : (playerScore[0]>playerScore[1])) : (mode==='retreat-bot' ? true : mode==='retreat-player' ? false : (playerScore[0]>playerScore[1]));
   if(_seasonWon){ seasonWins++; winStreak=(winStreak||0)+1; if(winStreak>bestWinStreak) bestWinStreak=winStreak; } else { seasonLosses++; winStreak=0; }
   if(pvpMode){ pvpSettle(); return; }
@@ -5810,13 +5824,17 @@ const CARD_RACE = {
   'The Kept Blade, Ahdor':"Vysh'ra",'Ahdorah Khaan, Determined Soul':"Vysh'ra",'Ahdorah Khaan, Circle Unbroken':"Vysh'ra",'Ahdorah Khaan, Squad 19 Recruit':"Vysh'ra",
   // Nightclaw — the hunters' vernacular; their own true name is Wyrkita. "Lagertha & Hanse Waltz."
   // Made by a rite of Kitanoo's oldest followers, so they sit outside the -drei/-run/-kan system.
-  'Lagertha Waltz':'Nightclaw','Hanse Waltz':'Nightclaw','Hanse, Rogue Fangs':'Nightclaw',
+  // Wyrkita/Nightclaw were MADE, not born (RACES.md §4: a rite worked by Kitanoo's oldest
+  // followers, the wood-people of Gnulfor), so the twins carry an origin race the way Darwin
+  // does -- owner-confirmed 8/13/26. Born Eldrun, Nightclaw now; the last entry drives camp,
+  // so they still resolve Omitsuki exactly as before this became a chain.
+  'Lagertha Waltz':['Eldrun','Nightclaw'],'Hanse Waltz':['Eldrun','Nightclaw'],'Hanse, Rogue Fangs':['Eldrun','Nightclaw'],
   // N'imkatta — "Kleydson." Indigenous to Tchandro; raised inside the Alik'ite faction.
   'Conduit of Chaos, Kleydson':"N'imkatta",'The Between, Kleydson':"N'imkatta",
   // Alternate printings of characters already tagged above — same person, same blood. Missed on
   // the first pass 8/11/26 because only the base printing was tagged; caught by auditing every
   // card name containing an already-tagged character's name.
-  'The Claim, Lagertha Waltz':'Nightclaw',"The Nightmare's Toll, Hanse Waltz":'Nightclaw',
+  'The Claim, Lagertha Waltz':['Eldrun','Nightclaw'],"The Nightmare's Toll, Hanse Waltz":['Eldrun','Nightclaw'],
   'The Unending Flame, Tange Sazen':'Kaidrun','Throne of Bones, Uso Oso':'Wrothlan',
   // Aureth — owner ruling 8/13/26: Moro is half Aureth, half human, resolving to a quarter elf,
   // a quarter Aureth ("ascendant"), and half ELDRUN (explicitly not Kaidrun). Tagged by the Aureth
@@ -5844,7 +5862,7 @@ const CARD_RACE = {
   // Dragonkin
   'Ourevos, the Golden Dragon':'Dragonkin','Dragan Korr':'Dragonkin','Heir of Kaiga':'Dragonkin','Golden Dragonet':'Dragonkin','Dragon-Pact':'Dragonkin','Scale Guard':'Dragonkin','Dragonfire':'Dragonkin','Wing Buffet':'Dragonkin','Ragefire':'Dragonkin',
   // Nightclaw
-  'The Bronzed Beast, Hanse Waltz':'Nightclaw','Lagertha Waltz, Wrathful Transformation':'Nightclaw','Wolfsblood Guard':'Nightclaw','Werewolf Fury':'Nightclaw','Feral Lunge':'Nightclaw',
+  'The Bronzed Beast, Hanse Waltz':['Eldrun','Nightclaw'],'Lagertha Waltz, Wrathful Transformation':['Eldrun','Nightclaw'],'Wolfsblood Guard':'Nightclaw','Werewolf Fury':'Nightclaw','Feral Lunge':'Nightclaw',
   // Undying
   'Mordezh, Blood Prophet':'Undying','Kravyn the Collector':'Undying','Blood Moon':'Undying','Bloodline Surge':'Undying','Bloodline Momentum':'Undying','Crosscut Bleed':'Undying','Soul Reave':'Undying',
   // Revenant (undead)
@@ -7183,7 +7201,8 @@ function renderBanishConjureStrip(){
     return '<button class="instant-card-btn" style="border-color:rgba(188,114,245,0.6);color:var(--violet)" onclick="stageFighterFromBanish('+idx+')">☠ '+c.name+' — conjure from banish (⚡'+conjureCost(c)+')</button>';
   }).join('');
 }
-function callSupportIdx(i){ if(typeof hideCardPreview==='function')hideCardPreview();
+function callSupportIdx(i){
+  if(typeof rankBump==='function') rankBump('r1_support'); if(typeof hideCardPreview==='function')hideCardPreview();
   if(preSelectedCard===null){ if(typeof toast==='function') toast('Conjure a Fighter first, then Call a support.', false); return; }
   if(i===preSelectedCard) return;
   var c=hand[i]; if(!c || c.timing==='instant') return;
@@ -7456,6 +7475,7 @@ function commitCard(){ if(typeof tutorialAdvance==='function')setTimeout(functio
   charge=Math.max(0, charge-conjureCost(pc)); if(typeof renderCharge==='function') renderCharge();
   matchCommits++;
   if(typeof bumpQuestProgress==='function') bumpQuestProgress('conjure3');
+  if(typeof rankBump==='function'){ rankBump('r1_conjure'); rankBump('r2_conjure'); }
   let _cpBase = (pc.name==='Anorith Keeling' ? Math.max(1,(playerScore[0]+playerScore[1])*Math.max(0,hand.length-1)) : (pc.chaosPow ? (1 + Math.floor(Math.random()*24)) : pc.pow)) + banishSurge + dmNextConjureBonus + remnantPowSum();
   if(typeof dmNextConjureDouble!=='undefined' && dmNextConjureDouble){ _cpBase *= 2; if(typeof toast==='function') toast("🐉 Ourevos's Shattered Chronoplain — power doubled", true); }
   const committedPow = _cpBase;
@@ -9487,6 +9507,7 @@ function resolve(pc, oc, cond, playerCommittedPow){
     if(!lobbyMode && typeof grantPlayerXP==='function') grantPlayerXP(15);
     matchKillsThisMatch++;
     if(typeof bumpQuestProgress==='function') bumpQuestProgress('win2');
+    if(typeof rankBump==='function'){ rankBump('r1_win'); rankBump('r2_win'); }
     if(pc.name === 'Signal Diviner'){ divinerBonusNext=2; abilLog.push('Signal Diviner: +2 max Charge next turn'); }
     if(pc.name === 'Tange Sazen') skullchainKills++;
     if(pc.name === 'Kotei') ragwingWins++;
@@ -9716,7 +9737,7 @@ function show(id, btn){
   if(id==='ranked') buildRanked();
   if(id==='dna') buildDNA();
   if(id==='growth') buildGrowthCodex();
-  if(id==='deck') buildDeckBuilder();
+  if(id==='deck'){ buildDeckBuilder(); if(typeof rankBump==='function') rankBump('r2_deck'); }
   if(id==='shop') buildShop();
   if(id==='market'){ buildMarket(); if(typeof bumpQuestProgress==='function') bumpQuestProgress('visitMarket'); }
   if(id==='legend') buildLegendBoard();
@@ -9745,7 +9766,7 @@ let expeditionsActive = {};   // locId -> {start, dur, reward} -- in-flight/read
 const EXPEDITION_MIN_DUR = 30*60*1000, EXPEDITION_MAX_DUR = 120*60*1000;   // duration rolled per launch, 30min-2hr
 let _expTickTimer = null;   // 30s refresh while the Expeditions screen is open, so countdowns/claim state update live
 function fmtPts(n){ return n.toLocaleString('en-US'); }
-function updateBalance(){
+function updateBalance(){ if(typeof rankCheckZenni==='function') rankCheckZenni();
   const s = fmtPts(signalPoints);
   const tb = document.getElementById('tb-pts'); if(tb) tb.textContent = s;
   const fb = document.getElementById('tb-forge'); if(fb) fb.textContent = fmtPts(forgeBalance);
@@ -10030,6 +10051,7 @@ function listCard(){
   if(inst) soldKey=inst.uid; else if((ownedCopies[name]||0)>0) soldKey=name;
   if(!soldKey){ toast('You do not own '+name+' to sell.', false); return; }
   if(isCardLocked(soldKey)){ toast('🔒 '+name+' is locked — unlock it in the Vault to list it.', false); return; }
+  if(typeof rankBump==='function') rankBump('r3_market');
   { const _si=COLLECTION.find(function(x){return (x.uid||x.name)===soldKey;}); if(_si && !isTradeable(_si)){ toast('That copy is play-only — bought cards cannot be listed or staked.', false); return; } }
   // Integrity fix (owner-mandated): a player must never lose a real card to a sale that has no
   // real buyer. This used to pay signalPoints and delete the card (ownedCopies / removeInstance)
@@ -10165,7 +10187,7 @@ const SAVE_KEY = 'signalforge_save_v2';
 let _saveFailedOnce = false;   // 7/18/26: throttle the failure toast to once per session -- a quota-exceeded save fails on EVERY subsequent saveState() call otherwise, which would spam a toast on nearly every action
 function saveState(){
   try{
-    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, signalPoints, lastDailyBonusDate, dailyLoginStreak, bestDailyLoginStreak, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, winStreak, bestWinStreak, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, ascParty, ascPartySel, ascUnitProg, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics], lockedCards:[...lockedCards]}));
+    localStorage.setItem(SAVE_KEY, JSON.stringify({v:2, profileRank, rankProgress, signalPoints, lastDailyBonusDate, dailyLoginStreak, bestDailyLoginStreak, expeditionCharges, expeditionLastRegen, expeditionsActive, questDate, questProgress, questAwarded, sideStoriesRead, rankRP, seasonWins, seasonLosses, winStreak, bestWinStreak, supply, cardSupply, ownedCopies, freshCopies, cardRecords, cardFoils, cardFoilMax, cardFrames, ownedFrames:[...ownedFrames], activeDeck:[...activeDeck], energyLoadout:[...energyLoadout], wonInstances, wonCounter, avatarBond, pairBonds, ascRun, ascParty, ascPartySel, ascUnitProg, forgeBalance, bountyBalance, variantEditions, variantEssence, variantFed, gachaPity, packPityUltra, packPityApex, essenceCosmetics, raceOverride, campOverride, DISC_OVERRIDE, DISC_ROLLS, ASC_DISC_BONUS, seasonRewardClaimed, featuredCards, featuredShuffle, equipped, owned:[...ownedCosmetics], lockedCards:[...lockedCards]}));
   }catch(e){
     // Previously silent -- a change could visibly apply in-memory (card updates, a "success" toast
     // already fired from the caller) while the save itself failed underneath, e.g. localStorage
@@ -10188,6 +10210,8 @@ function loadState(){
     if(typeof s.expeditionLastRegen==='number') expeditionLastRegen=s.expeditionLastRegen;
     if(s.expeditionsActive && typeof s.expeditionsActive==='object') expeditionsActive=s.expeditionsActive;
     if(typeof s.questDate==='string') questDate=s.questDate;
+    if(typeof s.profileRank==='number' && s.profileRank>=1) profileRank=s.profileRank;
+    if(s.rankProgress && typeof s.rankProgress==='object') rankProgress=s.rankProgress;
     if(s.questProgress && typeof s.questProgress==='object') questProgress=s.questProgress;
     if(s.questAwarded && typeof s.questAwarded==='object') questAwarded=s.questAwarded;
     if(s.sideStoriesRead && typeof s.sideStoriesRead==='object') sideStoriesRead=s.sideStoriesRead;
@@ -10479,6 +10503,7 @@ function openPackN(id, n){
   if(signalPoints<cost){ toast('Not enough Zenni for a '+n+'\u00d7 summon (\u25c8 '+fmtPts(cost)+')',false); return; }
   if(!_packConfirm('Open '+n+'\u00d7 '+p.name+' for \u25c8 '+fmtPts(cost)+' Zenni?\n\nMints you '+n+' random cards.')) return;
   signalPoints-=cost;
+  if(typeof rankBump==='function') rankBump('r3_pack', n);
   var rarities=[];
   for(var i=0;i<n;i++){ var _avail=Object.keys(p.odds).filter(function(r){return supply[r]&&supply[r].left>0;}); if(!_avail.length) break; rarities.push(rollPackRarity(p, _avail)); }
   // 7/29/26: bundle floor -- a basic-tier bundle guarantees at least 1 Rare-or-better, a premium-tier
@@ -10543,6 +10568,7 @@ function openPack(id){
   const poolC=COLLECTION.filter(c=>c.rarity===rar && !c.uid);
   const card=_forcedFeaturedCard || poolC[Math.floor(Math.random()*poolC.length)]||COLLECTION[0];
   _forcedFeaturedCard = null;
+  if(typeof rankBump==='function') rankBump('r3_pack');
   const _mint=mintPulled(card.name, p.name+' pull', 'forged');
   if(cardSupply[card.name] && cardSupply[card.name].left>0) cardSupply[card.name].left--;
   saveState(); updateBalance(); buildShop();
@@ -13634,6 +13660,84 @@ function buildExpeditions(){
 // Daily Quests (7/15/26) -- 3 simple, engine-tracked quests, todayISO()-keyed reset mirroring the
 // Daily Bonus pattern above. The Marketplace quest IS the "reason to check Marketplace daily" ask --
 // one unified system instead of a second, separate rotating-featured-listing mechanic.
+/* ═══ PROFILE RANK — a rubric, not a bar (owner 8/13/26) ═══
+   Deliberately NOT the XP/level system, which stays exactly as it is. XP measures how much you
+   have played; RANK measures whether you have learned the game. Each rank hands you a mission set
+   that spans DIFFERENT game modes, and the next rank's missions do not exist for you until this
+   rank's are all done. That gating is the whole point: it walks a new player through the modes in
+   a deliberate order instead of letting them grind one screen forever and never find Draft.
+
+   Missions are rank-scoped on purpose — rankBump() ignores any id that is not in the CURRENT
+   rank's set, so clearing Rank 1 by accident while chasing Rank 3 is impossible, and a player
+   always has a short, readable list rather than a wall of everything at once. Progress persists
+   (unlike DAILY_QUESTS below, which resets each day) and is capped at target so a burst of events
+   can't overshoot into a false completion count. */
+const PROFILE_RANKS = [
+  {n:1, name:'Recruit',    blurb:'Learn the duel loop.',            zenni:1000,  missions:[
+    {id:'r1_win',     icon:'⚔',  label:'Win 3 duels',                target:3},
+    {id:'r1_conjure', icon:'🎴', label:'Conjure 10 Fighters',        target:10},
+    {id:'r1_support', icon:'📣', label:'Call 5 Supports',            target:5}]},
+  {n:2, name:'Duelist',    blurb:'Make the deck yours.',            zenni:2500,  missions:[
+    {id:'r2_win',     icon:'⚔',  label:'Win 5 more duels',           target:5},
+    {id:'r2_deck',    icon:'🃏', label:'Open the Deck Builder',      target:1},
+    {id:'r2_conjure', icon:'🎴', label:'Conjure 25 Fighters',        target:25}]},
+  {n:3, name:'Collector',  blurb:'Learn the economy.',              zenni:5000,  missions:[
+    {id:'r3_pack',    icon:'📦', label:'Open 3 packs',               target:3},
+    {id:'r3_market',  icon:'⚖',  label:'List a card on the Market',  target:1},
+    {id:'r3_rich',    icon:'◈',  label:'Hold 10,000 Zenni at once',  target:1}]},
+  {n:4, name:'Saga-bound', blurb:'Take a card through a Saga.',     zenni:8000, bounty:25, missions:[
+    {id:'r4_node',    icon:'🗡', label:'Clear 5 Reincarnation nodes', target:5},
+    {id:'r4_saga',    icon:'👑', label:'Finish a Saga run',          target:1}]},
+  {n:5, name:'Contender',  blurb:'Play where it costs something.',  zenni:15000, bounty:100, missions:[
+    {id:'r5_ranked',  icon:'🪜', label:'Finish 3 Ranked matches',    target:3},
+    {id:'r5_draft',   icon:'🌀', label:'Enter a Draft',              target:1},
+    {id:'r5_staked',  icon:'🩸', label:'Win a Staked PvP match',     target:1}]}
+];
+let profileRank = 1, rankProgress = {};
+function currentRankDef(){ return PROFILE_RANKS.find(function(r){ return r.n===profileRank; }) || null; }
+function rankIsMaxed(){ return profileRank > PROFILE_RANKS[PROFILE_RANKS.length-1].n; }
+function rankBump(id, n){
+  var r = currentRankDef(); if(!r) return;                       // maxed out — nothing left to track
+  var m = r.missions.find(function(x){ return x.id===id; }); if(!m) return;   // not this rank's business
+  if((rankProgress[id]||0) >= m.target) return;
+  rankProgress[id] = Math.min(m.target, (rankProgress[id]||0) + (n||1));
+  if(r.missions.every(function(x){ return (rankProgress[x.id]||0) >= x.target; })) _rankUp(r);
+  if(typeof saveState==='function') saveState();
+  if(typeof renderProfileRank==='function') renderProfileRank();
+}
+function _rankUp(r){
+  signalPoints += r.zenni||0;
+  if(r.bounty){ bountyBalance = (bountyBalance||0) + r.bounty; }
+  profileRank = r.n + 1;
+  if(typeof updateBalance==='function') updateBalance();
+  var next = currentRankDef();
+  if(typeof toast==='function'){
+    toast('★ Rank ' + r.n + ' complete — ' + r.name + ' · +◈ ' + fmtPts(r.zenni||0) + (r.bounty ? ' · +⬥ ' + r.bounty + ' Glory' : ''), true);
+    if(next) setTimeout(function(){ toast('☆ Rank ' + next.n + ' — ' + next.name + ': ' + next.blurb, true); }, 400);
+  }
+  // No mailbox entry: SERVER_GIFTS is a hardcoded operator-broadcast list whose entries each carry
+  // their own zenni payload and a claim step. Rank rewards are already paid directly above, so
+  // routing them through there would either double-pay or need a zero-value gift purely for show,
+  // and it would blur "the operator sent you this" with "you earned this". The two toasts are the
+  // notification; the Hub panel is the permanent record.
+}
+// Zenni is a "hold at once" check rather than an event, so it is polled from updateBalance().
+function rankCheckZenni(){ if(typeof signalPoints!=='undefined' && signalPoints>=10000) rankBump('r3_rich'); }
+function renderProfileRank(){
+  var el = document.getElementById('hub-rank'); if(!el) return;
+  var r = currentRankDef();
+  if(!r){ el.innerHTML = '<div class="rank-head"><span class="rk-n">★</span><span class="rk-name">Max rank</span><span class="rk-blurb">Every rubric cleared.</span></div>'; return; }
+  var done = r.missions.filter(function(m){ return (rankProgress[m.id]||0) >= m.target; }).length;
+  el.innerHTML =
+    '<div class="rank-head"><span class="rk-n">Rank ' + r.n + '</span><span class="rk-name">' + r.name + '</span>' +
+    '<span class="rk-blurb">' + r.blurb + '</span><span class="rk-count">' + done + '/' + r.missions.length + '</span></div>' +
+    '<div class="rank-missions">' + r.missions.map(function(m){
+      var p = Math.min(m.target, rankProgress[m.id]||0), ok = p >= m.target;
+      return '<div class="quest-card' + (ok?' done':'') + '"><span class="qc-icon">' + (ok?'✓':m.icon) + '</span>' +
+             '<span class="qc-label">' + m.label + '</span><span class="qc-prog">' + p + '/' + m.target + '</span></div>';
+    }).join('') + '</div>' +
+    '<div class="rank-reward">Clears for ◈ ' + fmtPts(r.zenni||0) + (r.bounty ? ' + ⬥ ' + r.bounty + ' Glory' : '') + '</div>';
+}
 const DAILY_QUESTS = [
   {id:'win2', icon:'⚔', label:'Win 2 duels', target:2, reward:200},
   {id:'conjure3', icon:'🎴', label:'Conjure 3 fighters', target:3, reward:150},
@@ -13657,6 +13761,7 @@ function bumpQuestProgress(id, n){
   }
   if(typeof saveState==='function') saveState();
   if(typeof renderDailyQuests==='function') renderDailyQuests();
+  if(typeof renderProfileRank==='function') renderProfileRank();
 }
 function renderDailyQuests(){
   _questsResetIfNewDay();
@@ -13728,6 +13833,7 @@ function buildHub(){
   renderFeatured();
   startFeaturedRotation();
   if(typeof renderDailyQuests==='function') renderDailyQuests();
+  if(typeof renderProfileRank==='function') renderProfileRank();
   renderCampBanner();
 }
 // Camp Standing banner (7/25/26, owner-picked hub direction): your Camp identity as the dominant
@@ -15901,6 +16007,7 @@ function ascBattleWin(){
   ascParty.forEach(function(u){ if(u.hp>0 && (ownedCopies[u.name]||0)>0){ if(ascGrantXP(u,xp)) _leveled.push(u.name); _survivors.push(u.name); var P=ascUnitProg[u.name]; if(node.type==='boss') P.bosses=(P.bosses||0)+1; } });
   var sig=Math.round((node.type==='boss'?200:node.type==='elite'?80:node.type==='trial'?120:40)*_rw); signalPoints+=sig; if(typeof updateBalance==='function') updateBalance();
   ascRun.cleared++;
+  if(typeof rankBump==='function') rankBump('r4_node');
   if(node.type==='trial'){ var _av=ASC_GEAR.filter(function(g){return (ascRun.gear||[]).indexOf(g.id)<0;}); if(_av.length){ var _gg=_av[Math.floor(Math.random()*_av.length)]; ascRun.gear=ascRun.gear||[]; ascRun.gear.push(_gg.id); _gearWon=_gg; ascLog('⚡ Trial cleared — gained '+_gg.name+'!'); } ascBountyProgress('trial'); }
   if(node.type==='boss') ascBountyProgress('boss');
   ascBountyProgress('clear');
@@ -15988,6 +16095,7 @@ function ascFlee(){
   else { ascLog('Escape failed!'); ascBusy=true; ascRenderBattle(); setTimeout(function(){ ascBusy=false; ascBattleNext(); }, 700); }
 }
 function ascBattleRunEnd(won){
+  if(won && typeof rankBump==='function') rankBump('r4_saga');
   var cleared=ascRun?ascRun.cleared:0;
   ascHideAll(); var a=document.getElementById('asc-arena'); if(a){ a.style.display='';
     a.innerHTML='<div class="asc-result '+(won?'won':'lost')+'"><div class="asc-res-eyebrow">Reincarnation · The Saga</div><h1>'+(won?'THE SAGA IS WON':'THE SAGA ENDS')+'</h1><div class="asc-res-sub">'+(won?'Your party conquered the gauntlet — '+cleared+' battles cleared.':'Cleared '+cleared+' battle'+(cleared===1?'':'s')+' before the fall. Regroup and try again.')+'</div><button class="enter-btn" onclick="ascReturnToSetup()">⚔ Return to setup</button></div>';
@@ -16231,6 +16339,7 @@ function enterDraftMatch(){ if(draftPool.length<DRAFT_PICKS) return; draftDeckNe
 function draftHover(i,el){ if(window.matchMedia&&window.matchMedia('(hover:none)').matches)return; var c=(typeof _draftRow!=='undefined'&&_draftRow)?_draftRow[i]:null; if(c&&typeof previewCardEl==='function') previewCardEl(c, el, true); }
 function draftInspect(i){ var c=(typeof _draftRow!=='undefined'&&_draftRow)?_draftRow[i]:null; if(!c) return; var pv=document.getElementById('card-preview'); if(!pv) return; if(typeof SFX!=='undefined')SFX.play('hover'); pv.innerHTML=(typeof readableCardHTML==='function'?readableCardHTML(c):bigCardHTML(c))+'<div style="display:flex;gap:8px;justify-content:center;margin-top:10px"><button style="background:var(--gold-dim,#3a2f12);border:1px solid var(--gold);color:var(--gold);font-size:12px;font-weight:800;padding:9px 18px;border-radius:8px;cursor:pointer" onclick="event.stopPropagation();hideCardPreview();pickDraftCard('+i+');">⚔ Draft this card</button><button style="background:none;border:1px solid var(--border2);color:var(--text2);font-size:12px;padding:9px 14px;border-radius:8px;cursor:pointer" onclick="event.stopPropagation();hideCardPreview();">← Back</button></div>'; pv.classList.add('show','pinned'); pv.style.pointerEvents='auto'; var sc=document.getElementById('preview-scrim'); if(!sc){ sc=document.createElement('div'); sc.id='preview-scrim'; document.body.appendChild(sc); } sc.onclick=hideCardPreview; sc.ontouchstart=function(e){e.preventDefault();hideCardPreview();}; }
 function buildDraft(){
+  if(typeof rankBump==='function') rankBump('r5_draft');
   const s=document.getElementById('draft-stage'); if(!s) return;
   if(!drafting){ s.innerHTML='<div class="draft-start"><div class="ds-vortex">🌀</div><button class="enter-btn" onclick="startDraft()">Enter the Vortex \u2014 Begin Draft</button></div>'; return; }
   if(draftPool.length>=DRAFT_PICKS){
