@@ -2688,53 +2688,57 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 }
 </style>
 <script>(function(){try{var m=document.querySelector('meta[name="viewport"]');var w='width=device-width,initial-scale=1,viewport-fit=cover';if(m){if(!/viewport-fit/.test(m.getAttribute('content')||''))m.setAttribute('content',w);}else{m=document.createElement('meta');m.name='viewport';m.setAttribute('content',w);(document.head||document.documentElement).appendChild(m);}}catch(e){}})();</script>
+<!-- aria-label on every nav button (8/13/26): the labels live in nested <span class="brand-text">,
+     which the accessibility tree does not surface, so all 33 buttons exposed NO accessible name --
+     a screen reader announced nothing, and automated UI testing could not identify any of them
+     (a cold playtest agent stalled outright on exactly this). Visible text is unchanged. -->
 <aside class="sidebar">
-  <button class="brand nav-toggle" onclick="toggleSidebar()" title="Collapse / expand the menu"><span class="brand-mark">◈</span><span class="brand-text">KOTEI<span class="brand-sub">TRADING CARD GAME · PROTOTYPE</span></span></button>
+  <button aria-label="KOTEI — collapse or expand the menu" class="brand nav-toggle" onclick="toggleSidebar()" title="Collapse / expand the menu"><span class="brand-mark">◈</span><span class="brand-text">KOTEI<span class="brand-sub">TRADING CARD GAME · PROTOTYPE</span></span></button>
   <nav class="nav">
-    <button class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon">◈</span><span class="brand-text">Hub</span></button>
-    <button class="navitem" id="nav-mailbox" onclick="show('mailbox',this)"><span class="ni-icon">📬</span><span class="brand-text">Mailbox</span><span class="ni-badge" id="mailbox-badge"></span></button>
-    <button class="navitem" id="nav-devnotes" onclick="show('devnotes',this)"><span class="ni-icon">🛠</span><span class="brand-text">Dev Notes</span><span class="ni-badge devnotes-pill" id="devnotes-badge" style="display:none">NEW</span></button>
+    <button aria-label="Hub" class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon">◈</span><span class="brand-text">Hub</span></button>
+    <button aria-label="Mailbox" class="navitem" id="nav-mailbox" onclick="show('mailbox',this)"><span class="ni-icon">📬</span><span class="brand-text">Mailbox</span><span class="ni-badge" id="mailbox-badge"></span></button>
+    <button aria-label="Dev Notes" class="navitem" id="nav-devnotes" onclick="show('devnotes',this)"><span class="ni-icon">🛠</span><span class="brand-text">Dev Notes</span><span class="ni-badge devnotes-pill" id="devnotes-badge" style="display:none">NEW</span></button>
     <div class="nav-group open" id="grp-play">
-      <button class="nav-grp-head" onclick="toggleNavGroup('grp-play')"><span class="ni-icon">🎮</span><span class="brand-text">Play</span><span class="grp-chev brand-text">▾</span></button>
+      <button aria-label="Play" class="nav-grp-head" onclick="toggleNavGroup('grp-play')"><span class="ni-icon">🎮</span><span class="brand-text">Play</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
-        <button class="navitem" id="nav-lobby" onclick="show('lobby',this)"><span class="ni-icon">⚔</span><span class="brand-text">Offline Play</span></button>
-        <button class="navitem" id="nav-ranked" onclick="pvpSetMode(3);show('online',this)"><span class="ni-icon">🪜</span><span class="brand-text">Ranked Ladder</span></button>
-        <button class="navitem" id="nav-pvp" onclick="show('pvp',this)"><span class="ni-icon">🩸</span><span class="brand-text">Staked PvP</span></button>
-        <button class="navitem" id="nav-online" onclick="show('online',this)"><span class="ni-icon">🌐</span><span class="brand-text">Online</span></button>
+        <button aria-label="Offline Play" class="navitem" id="nav-lobby" onclick="show('lobby',this)"><span class="ni-icon">⚔</span><span class="brand-text">Offline Play</span></button>
+        <button aria-label="Ranked Ladder" class="navitem" id="nav-ranked" onclick="pvpSetMode(3);show('online',this)"><span class="ni-icon">🪜</span><span class="brand-text">Ranked Ladder</span></button>
+        <button aria-label="Staked PvP" class="navitem" id="nav-pvp" onclick="show('pvp',this)"><span class="ni-icon">🩸</span><span class="brand-text">Staked PvP</span></button>
+        <button aria-label="Online" class="navitem" id="nav-online" onclick="show('online',this)"><span class="ni-icon">🌐</span><span class="brand-text">Online</span></button>
       </div>
     </div>
     <div class="nav-group" id="grp-limited">
-      <button class="nav-grp-head" onclick="toggleNavGroup('grp-limited')"><span class="ni-icon">🎟️</span><span class="brand-text">Limited Events</span><span class="grp-chev brand-text">▾</span></button>
+      <button aria-label="Limited Events" class="nav-grp-head" onclick="toggleNavGroup('grp-limited')"><span class="ni-icon">🎟️</span><span class="brand-text">Limited Events</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
-        <button class="navitem" id="nav-draft" onclick="show('draft',this);buildDraft()"><span class="ni-icon">🌀</span><span class="brand-text">Draft</span></button>
+        <button aria-label="Draft" class="navitem" id="nav-draft" onclick="show('draft',this);buildDraft()"><span class="ni-icon">🌀</span><span class="brand-text">Draft</span></button>
       </div>
     </div>
     <div class="nav-group" id="grp-collection">
-      <button class="nav-grp-head" onclick="toggleNavGroup('grp-collection')"><span class="ni-icon">🗂</span><span class="brand-text">Collection</span><span class="grp-chev brand-text">▾</span></button>
+      <button aria-label="Collection" class="nav-grp-head" onclick="toggleNavGroup('grp-collection')"><span class="ni-icon">🗂</span><span class="brand-text">Collection</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
-        <button class="navitem" id="nav-vault" onclick="show('vault',this)"><span class="ni-icon">🗄</span><span class="brand-text">Vault</span><span class="ni-badge" id="vault-badge">19</span></button>
-        <button class="navitem" id="nav-deck" onclick="show('deck',this)"><span class="ni-icon">🃏</span><span class="brand-text">Deck Builder</span><span class="ni-badge" id="deck-badge">0/12</span></button>
-        <button class="navitem" id="nav-mastery" onclick="show('mastery',this);buildMastery()"><span class="ni-icon">⭐</span><span class="brand-text">Mastery &amp; Bonds</span></button>
-        <button class="navitem" id="nav-trade" onclick="show('trade',this);buildTrade()"><span class="ni-icon">🤝</span><span class="brand-text">Trade</span></button>
-        <button class="navitem" id="nav-stories" onclick="show('stories',this)"><span class="ni-icon">📖</span><span class="brand-text">Side Stories</span></button>
-        <button class="navitem" id="nav-expeditions" onclick="show('expeditions',this)"><span class="ni-icon">🗺</span><span class="brand-text">Expeditions</span><span class="ni-badge" id="expedition-badge"></span></button>
+        <button aria-label="Vault" class="navitem" id="nav-vault" onclick="show('vault',this)"><span class="ni-icon">🗄</span><span class="brand-text">Vault</span><span class="ni-badge" id="vault-badge">19</span></button>
+        <button aria-label="Deck Builder" class="navitem" id="nav-deck" onclick="show('deck',this)"><span class="ni-icon">🃏</span><span class="brand-text">Deck Builder</span><span class="ni-badge" id="deck-badge">0/12</span></button>
+        <button aria-label="Mastery &amp; Bonds" class="navitem" id="nav-mastery" onclick="show('mastery',this);buildMastery()"><span class="ni-icon">⭐</span><span class="brand-text">Mastery &amp; Bonds</span></button>
+        <button aria-label="Trade" class="navitem" id="nav-trade" onclick="show('trade',this);buildTrade()"><span class="ni-icon">🤝</span><span class="brand-text">Trade</span></button>
+        <button aria-label="Side Stories" class="navitem" id="nav-stories" onclick="show('stories',this)"><span class="ni-icon">📖</span><span class="brand-text">Side Stories</span></button>
+        <button aria-label="Expeditions" class="navitem" id="nav-expeditions" onclick="show('expeditions',this)"><span class="ni-icon">🗺</span><span class="brand-text">Expeditions</span><span class="ni-badge" id="expedition-badge"></span></button>
       </div>
     </div>
-    <button class="navitem nav-asc-tab" id="nav-asc" onclick="show('asc',this)"><span class="ni-icon">👑</span><span class="brand-text">Reincarnation</span><span class="ni-asc-tag">SAGA</span></button>
+    <button aria-label="Reincarnation" class="navitem nav-asc-tab" id="nav-asc" onclick="show('asc',this)"><span class="ni-icon">👑</span><span class="brand-text">Reincarnation</span><span class="ni-asc-tag">SAGA</span></button>
     <div class="nav-group" id="grp-market">
-      <button class="nav-grp-head" onclick="toggleNavGroup('grp-market')"><span class="ni-icon">🪙</span><span class="brand-text">Market</span><span class="grp-chev brand-text">▾</span></button>
+      <button aria-label="Market" class="nav-grp-head" onclick="toggleNavGroup('grp-market')"><span class="ni-icon">🪙</span><span class="brand-text">Market</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
-        <button class="navitem" id="nav-shop" onclick="show('shop',this)"><span class="ni-icon">🏪</span><span class="brand-text">Shop</span></button>
-        <button class="navitem" id="nav-market" onclick="show('market',this)"><span class="ni-icon">⚖</span><span class="brand-text">Marketplace</span></button>
+        <button aria-label="Shop" class="navitem" id="nav-shop" onclick="show('shop',this)"><span class="ni-icon">🏪</span><span class="brand-text">Shop</span></button>
+        <button aria-label="Marketplace" class="navitem" id="nav-market" onclick="show('market',this)"><span class="ni-icon">⚖</span><span class="brand-text">Marketplace</span></button>
       </div>
     </div>
     <div class="nav-group" id="grp-reference">
-      <button class="nav-grp-head" onclick="toggleNavGroup('grp-reference')"><span class="ni-icon">📜</span><span class="brand-text">Reference</span><span class="grp-chev brand-text">▾</span></button>
+      <button aria-label="Reference" class="nav-grp-head" onclick="toggleNavGroup('grp-reference')"><span class="ni-icon">📜</span><span class="brand-text">Reference</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
-        <button class="navitem" id="nav-conds" onclick="show('conds',this)"><span class="ni-icon">🎲</span><span class="brand-text">Conditions</span></button>
-        <button class="navitem" id="nav-abil" onclick="show('abil',this)"><span class="ni-icon">✦</span><span class="brand-text">Abilities</span></button>
-        <button class="navitem" id="nav-growth" onclick="show('growth',this)"><span class="ni-icon">🌱</span><span class="brand-text">Card Growth</span></button>
-        <button class="navitem" id="nav-decklists" onclick="show('decklists',this);buildDecklists()"><span class="ni-icon">📋</span><span class="brand-text">Decklists</span></button>
+        <button aria-label="Conditions" class="navitem" id="nav-conds" onclick="show('conds',this)"><span class="ni-icon">🎲</span><span class="brand-text">Conditions</span></button>
+        <button aria-label="Abilities" class="navitem" id="nav-abil" onclick="show('abil',this)"><span class="ni-icon">✦</span><span class="brand-text">Abilities</span></button>
+        <button aria-label="Card Growth" class="navitem" id="nav-growth" onclick="show('growth',this)"><span class="ni-icon">🌱</span><span class="brand-text">Card Growth</span></button>
+        <button aria-label="Decklists" class="navitem" id="nav-decklists" onclick="show('decklists',this);buildDecklists()"><span class="ni-icon">📋</span><span class="brand-text">Decklists</span></button>
       </div>
     </div>
     <!-- 7/22/26: split the old single "Codex" group (7 items -- rules reference mixed in with
@@ -2742,12 +2746,12 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
          rather than a catch-all. Also fixes an icon collision: Codex and Side Stories both used
          📖 before this. -->
     <div class="nav-group" id="grp-records">
-      <button class="nav-grp-head" onclick="toggleNavGroup('grp-records')"><span class="ni-icon">📊</span><span class="brand-text">Records</span><span class="grp-chev brand-text">▾</span></button>
+      <button aria-label="Records" class="nav-grp-head" onclick="toggleNavGroup('grp-records')"><span class="ni-icon">📊</span><span class="brand-text">Records</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
-        <button class="navitem" id="nav-legend" onclick="show('legend',this)"><span class="ni-icon">🏆</span><span class="brand-text">Legend Board</span></button>
-        <button class="navitem" id="nav-match" onclick="show('match',this)"><span class="ni-icon">◷</span><span class="brand-text">Match Arc</span></button>
-        <button class="navitem" id="nav-dna" onclick="show('dna',this)"><span class="ni-icon">🧬</span><span class="brand-text">Card DNA</span></button>
-        <button class="navitem" id="nav-replay" onclick="show('replay',this)"><span class="ni-icon">▶</span><span class="brand-text">Match Replay</span></button>
+        <button aria-label="Legend Board" class="navitem" id="nav-legend" onclick="show('legend',this)"><span class="ni-icon">🏆</span><span class="brand-text">Legend Board</span></button>
+        <button aria-label="Match Arc" class="navitem" id="nav-match" onclick="show('match',this)"><span class="ni-icon">◷</span><span class="brand-text">Match Arc</span></button>
+        <button aria-label="Card DNA" class="navitem" id="nav-dna" onclick="show('dna',this)"><span class="ni-icon">🧬</span><span class="brand-text">Card DNA</span></button>
+        <button aria-label="Match Replay" class="navitem" id="nav-replay" onclick="show('replay',this)"><span class="ni-icon">▶</span><span class="brand-text">Match Replay</span></button>
       </div>
     </div>
   </nav>
