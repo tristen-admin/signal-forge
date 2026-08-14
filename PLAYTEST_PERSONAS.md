@@ -41,6 +41,13 @@ concurrent agents on the same build fight over the browser pane.
 **Update CURRENT FOCUS before each run.** Agents waste most of their budget
 re-confirming things already known to work.
 
+**Expected cost.** A persona run should land around 40–70 tool calls and finish
+in a few minutes. If one is still going well past that, it is re-reading the
+screen between clicks rather than playing — stop it and read the findings file,
+which is already written up to that point. The protocol's MOVEMENT ECONOMY
+section exists specifically to prevent this; run 2 spent 139 calls and most of
+them were probes between actions.
+
 ---
 
 ## CURRENT FOCUS
@@ -91,6 +98,37 @@ TOOL RULES, all of them:
 - If something seems stuck, wait once (computer action:"wait", duration:2),
   then move on and write it down. Never wait on the same thing twice.
 
+MOVEMENT ECONOMY — read this twice. Most of a playtest's cost is not thinking,
+it is re-reading the screen between clicks. Do not do that.
+
+- ONE probe per screen state. Either read_page or get_page_text, never both,
+  and never a screenshot on top. Pick the cheapest one that answers your next
+  question and move.
+- NEVER re-read to confirm a click worked. If the click mattered, the next
+  thing you do will reveal it. Verifying every action doubles the run for no
+  information.
+- Refs stay valid until the screen changes. If a screen has three things you
+  intend to click, take all three refs from ONE read and click them in
+  sequence — do not read again between them.
+- Repeated actions get read ONCE. A best-of-7 match is the same two or three
+  clicks per round. Establish the sequence on round one, then repeat it blind
+  for the remaining rounds and only read again if something visibly diverges.
+- Confirm/Continue/Got it style buttons: click straight through. Do not read
+  the screen to find a button whose position you already know from last time.
+- Do not narrate what you are about to do, and do not summarise what just
+  happened, in between calls. Act, then write the finding once, at the end of
+  the screen.
+- Screenshots are for visual defects only — layout, overlap, clipping. Never to
+  read text and never to confirm state.
+
+BUDGET, as a self-check. A full Offline Play match is about 25 tool calls. Any
+other single mode is about 10 to 15. If you pass 40 calls on one mode you are
+re-reading instead of playing — stop, write up what you have, and move on.
+
+When you genuinely need state and read_page is too heavy, use this one call
+instead of three:
+javascript_tool: JSON.stringify({view:[...document.querySelectorAll('.view.on')].map(v=>v.id),overlay:[...document.querySelectorAll('.show,.on')].filter(e=>/overlay|modal|scrim|drawer/i.test(e.className)).map(e=>e.id).slice(0,5),toast:(document.getElementById('shop-toast')||{}).textContent,phase:(typeof phase!=='undefined'?phase:null)})
+
 WRITE AS YOU GO. This matters more than the final report. After finishing each
 screen, append your findings to FINDINGS FILE using the Write tool. Do not
 save them for the end — if this run is stopped early, the file is the only
@@ -103,6 +141,15 @@ Each finding, in plain prose:
   What happened
   Severity — BLOCKER, BUG, CONFUSING, or POLISH
   Verified by ref — yes or no
+
+FALLBACK MAP — do not read this until you need it. Finding your way around is
+part of what is being tested, so explore first. But if you have read a screen
+once and still cannot find where a mode lives, write down that you could not
+find it (that is a real finding, keep it) and then use this instead of hunting:
+everything is a sidebar button, named exactly — Hub, Offline Play, Ranked
+Ladder, Staked PvP, Online, Draft, Vault, Deck Builder, Trade, Expeditions,
+Reincarnation, Shop, Marketplace, Legend Board. Reincarnation is the roguelike
+run mode. Offline Play is single-player against bots.
 
 Expected and not bugs: the multiplayer backend is deliberately not running, so
 Ranked, Online and Staked PvP cannot connect. Record only how gracefully they
