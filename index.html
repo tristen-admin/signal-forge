@@ -17406,6 +17406,7 @@ if(typeof SCREEN_TITLES!=='undefined'){ try{ SCREEN_TITLES.tourney='Weekend Tour
     var sub=document.querySelector('#grp-limited .nav-sub');
     if(sub && !document.getElementById('nav-tourney')){
       var btn=document.createElement('button'); btn.className='navitem'; btn.id='nav-tourney';
+      btn.setAttribute('aria-label','Tournament');   // 8/13/26: this nav item is built at RUNTIME, so the static aria-label pass over the sidebar markup could not reach it -- it was the one button left with no accessible name
       btn.innerHTML='<span class="ni-icon">🏟️</span><span class="brand-text">Tournament</span>';
       btn.addEventListener('click', function(){ show('tourney', btn); buildTourney(); });
       sub.appendChild(btn);
