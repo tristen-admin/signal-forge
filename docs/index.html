@@ -1544,6 +1544,9 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .vc-rarity-ribbon{position:absolute;top:7px;left:7px;z-index:2;font-size:7px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;padding:2px 6px;border-radius:3px;background:var(--surface2);color:var(--text)}
 .vc-pow{position:absolute;top:6px;right:8px;z-index:2;font-size:19px;font-weight:800;color:#fff;text-shadow:0 2px 6px #000;font-variant-numeric:tabular-nums}
 .vc-pristine{position:absolute;top:30px;right:8px;z-index:2;font-size:8px;font-weight:700;color:var(--gold);text-shadow:0 1px 3px #000}
+.vc-dismantle{position:absolute;top:8px;left:8px;z-index:6;font-size:9.5px;font-weight:800;line-height:1;padding:4px 7px;border-radius:7px;background:rgba(7,9,15,.78);border:1px solid var(--border2);color:var(--text2);cursor:pointer;opacity:0;transition:opacity .12s,border-color .12s,color .12s}
+.vault-card:hover .vc-dismantle{opacity:1}
+.vc-dismantle:hover{border-color:var(--gold);color:var(--gold)}
 .vc-lock{position:absolute;top:46px;right:8px;z-index:6;font-size:11px;line-height:1;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(7,9,15,.78);border:1px solid var(--border2);cursor:pointer;opacity:0;transition:opacity .12s,border-color .12s,background .12s}
 .vault-card:hover .vc-lock{opacity:1}
 .vault-card .vc-lock.on{opacity:1;border-color:var(--gold);background:rgba(245,194,77,.18)}
@@ -10910,6 +10913,71 @@ function ingestVariant(uid){
 // doctrine -- same hard line the original variant-ingestion design drew. Consumes a MINTED
 // duplicate (its own uid) when one exists; otherwise decrements the shared base-copy count --
 // covers both ways a regular card can be owned more than once. Always keeps at least one copy.
+/* Dismantle (8/13/26, owner) — the Zenni sink beside Ingest. Ingest keeps the card's value inside
+   the collection (a duplicate is burned so a surviving copy gains a cosmetic tier); Dismantle takes
+   it out for currency instead. Deliberately the same copy-selection rules as ingestCard below, so
+   the two behave identically about what they will and won't consume: a MINTED duplicate first when
+   one exists, otherwise the fungible base-copy pool, never the last copy, never a locked one.
+
+   Flat rate per rarity, owner's call — not market value, which would make dismantling track the
+   Marketplace and turn a cleanup tool into an arbitrage loop. Rates sit well under what a pack
+   costs to open, so this can never out-earn simply playing: a Basic pack (◈150) dismantles out to
+   ~◈74 of expected value, an Elite Cache (◈1,500) to ~◈572. It returns some value for shelf-clutter
+   without becoming a Zenni printer. */
+const DISMANTLE_ZENNI = {common:50, rare:250, ultra:1200, apex:6000};
+function dismantleValue(card){ return (card && DISMANTLE_ZENNI[card.rarity]) || DISMANTLE_ZENNI.common; }
+function dismantleCard(name){
+  if(!name) return;
+  var mintedDupes = COLLECTION.filter(function(c){ return c.name===name && c.uid && !c.gachaVariant && (ownedCopies[c.uid]||0)>0; });
+  var unlockedMinted = mintedDupes.filter(function(c){ return !isCardLocked(c.uid); });
+  var baseCount = ownedCopies[name]||0;
+  var baseLocked = isCardLocked(name);
+  var rawTotal = baseCount + mintedDupes.length;
+  var total = (baseLocked?0:baseCount) + unlockedMinted.length;
+  if(total<=1){
+    if(rawTotal>1){ if(typeof toast==='function') toast('🔒 Every spare '+name+' is locked — unlock one in the Vault to dismantle it.', false); return; }
+    if(typeof toast==='function') toast('That is your only '+name+' — keep at least one. Dismantle only duplicates.', false); return;
+  }
+  var proto = COLLECTION.find(function(c){ return c.name===name; });
+  var pay = dismantleValue(proto);
+  if(typeof confirm==='function' && !confirm('Dismantle a duplicate '+name+'?\n\nIt is destroyed forever for ◈ '+fmtPts(pay)+' Zenni. Ingest instead if you would rather it upgrade a copy you keep.')) return;
+  if(unlockedMinted.length>0){
+    var victim=unlockedMinted[0];
+    delete ownedCopies[victim.uid]; delete cardRecords[victim.uid]; delete cardFoils[victim.uid];
+    var ci=COLLECTION.findIndex(function(c){ return c.uid===victim.uid; }); if(ci>=0) COLLECTION.splice(ci,1);
+    var wi=wonInstances.findIndex(function(w){ return w.uid===victim.uid; }); if(wi>=0) wonInstances.splice(wi,1);
+    activeDeck.delete(victim.uid);
+  } else {
+    ownedCopies[name]=Math.max(0,baseCount-1);
+    if(freshCopies[name]) freshCopies[name]=Math.min(freshCopies[name], ownedCopies[name]);
+  }
+  signalPoints += pay;
+  if(typeof updateBalance==='function') updateBalance();
+  if(typeof saveState==='function') saveState();
+  if(typeof buildVault==='function') buildVault();
+  if(typeof toast==='function') toast('⚒ Dismantled a duplicate '+name+' — +◈ '+fmtPts(pay)+' Zenni.', true);
+}
+// Variants dismantle too (owner: every kind of card). Reuses ingestVariant's own guards -- only a
+// duplicate of that same edition, never locked -- and decrements circulation the same way, so the
+// edition ledger stays honest whichever sink the copy went down.
+function dismantleVariant(uid){
+  var inst=COLLECTION.find(function(c){ return c.uid===uid && c.gachaVariant; }); if(!inst) return;
+  var defId=inst.editionId, copies=ownedVariantCopiesOfDef(defId);
+  if(copies.length<=1){ if(typeof toast==='function') toast('That is your only '+inst.variant+' '+inst.name+' — keep at least one. Dismantle only duplicates.', false); return; }
+  if(isCardLocked(uid)){ if(typeof toast==='function') toast('🔒 That '+inst.variant+' '+inst.name+' is locked — unlock it in the Vault to dismantle it.', false); return; }
+  var pay = dismantleValue(inst);
+  if(typeof confirm==='function' && !confirm('Dismantle '+inst.variant+' '+inst.name+' #'+inst.serial+'?\n\nIt is destroyed forever for ◈ '+fmtPts(pay)+' Zenni, and one copy leaves circulation.')) return;
+  var ci=COLLECTION.findIndex(function(c){ return c.uid===uid; }); if(ci>=0) COLLECTION.splice(ci,1);
+  delete ownedCopies[uid]; delete cardRecords[uid]; delete cardFoils[uid];
+  var wi=wonInstances.findIndex(function(w){ return w.uid===uid; }); if(wi>=0) wonInstances.splice(wi,1);
+  activeDeck.delete(uid);
+  if(variantEditions[defId]) variantEditions[defId].circulating=Math.max(0,(variantEditions[defId].circulating||1)-1);
+  signalPoints += pay;
+  if(typeof updateBalance==='function') updateBalance();
+  if(typeof saveState==='function') saveState();
+  if(typeof buildVault==='function') buildVault();
+  if(typeof toast==='function') toast('⚒ Dismantled '+inst.variant+' '+inst.name+' (#'+inst.serial+') — +◈ '+fmtPts(pay)+' Zenni · circulation −1', true);
+}
 function ingestCard(name){
   if(!name) return;
   var mintedDupes = COLLECTION.filter(function(c){ return c.name===name && c.uid && !c.gachaVariant && (ownedCopies[c.uid]||0)>0; });
@@ -14091,6 +14159,7 @@ function buildVault(){
         ${e.locked?`<span class="vc-locked">\ud83d\udd12 Not owned</span>`:''}
         ${c.serial?`<span class="vc-serial">\u2726 #${c.serial}${c.firstPrint?' \u00b7 1st':''}</span>`:''}
         ${c.gachaVariant?`<button class="vc-ingest" onclick="event.stopPropagation();ingestVariant('${c.uid}')" title="Feed this duplicate: +Essence, cosmetic ascension, and it leaves circulation">\u2726 Ingest</button>`:(e.count>1?`<button class="vc-ingest" onclick="event.stopPropagation();ingestCard('${c.name.replace(/'/g,"\\'")}')" title="Feed a duplicate copy: free foil tier, recorded in this card's ledger">\u2726 Ingest</button>`:'')}
+        ${e.locked?'':(c.gachaVariant?`<button class="vc-dismantle" onclick="event.stopPropagation();dismantleVariant('${c.uid}')" title="Destroy this duplicate for Zenni — Ingest instead if you want it to upgrade a copy you keep">\u2692 \u25c8${fmtPts(dismantleValue(c))}</button>`:(e.count>1?`<button class="vc-dismantle" onclick="event.stopPropagation();dismantleCard('${c.name.replace(/'/g,"\\'")}')" title="Destroy a duplicate for Zenni — Ingest instead if you want it to upgrade a copy you keep">\u2692 \u25c8${fmtPts(dismantleValue(c))}</button>`:''))}
         ${e.locked?'':`<button class="vc-lock ${isCardLocked(c.uid||c.name)?'on':''}" onclick="event.stopPropagation();toggleCardLock('${(c.uid||c.name).replace(/'/g,"\\'")}','${c.name.replace(/'/g,"\\'")}')" title="${isCardLocked(c.uid||c.name)?'Locked \u2014 protects it from Trade, Market, Ingest, and Staked PvP. Click to unlock.':'Lock this copy to protect it from Trade, Market, Ingest, and Staked PvP.'}">${isCardLocked(c.uid||c.name)?'\ud83d\udd12':'\ud83d\udd13'}</button>`}
         ${e.fresh?'<span class="vc-fresh">✦ Fresh Mint</span>':(c.ascendant?'<span class="vc-ascendant">⭐ Ascendant</span>':(c.variant?'<span style="position:absolute;top:6px;left:6px;font-size:13px;filter:drop-shadow(0 1px 2px #000)">🏆</span>':''))}
       </div>
