@@ -12429,6 +12429,34 @@ let _onTab = 'login';   // which auth form the Online view is showing
 function onTab(t){ _onTab = t; buildOnline(); }
 function _onMsg(text, cls){ var el=document.getElementById('on-msg'); if(el){ el.textContent=text||''; el.className='on-msg '+(cls||''); } }
 
+/* Snapshot of local progress, sent once at registration so an account starts as a continuation
+   of what the player already did rather than a reset. Only what the server can validate is sent:
+   currency, and owned cards with their records. Cosmetics, quest state and run progress stay
+   local — the server has no schema for them, and sending data it will silently drop would make
+   the "carried over" message a lie. The server caps and validates all of this (MIGRATE_* in
+   app.py); nothing here is trusted on arrival. */
+function sfMigratePayload(){
+  var cards = [];
+  try{
+    for(var key in ownedCopies){
+      var n = ownedCopies[key]||0; if(n<=0) continue;
+      var card = COLLECTION.find(function(x){ return (x.uid||x.name)===key; });
+      var type = card ? card.name : key;
+      var rec  = (typeof cardRecords!=='undefined' && cardRecords[key]) || {};
+      for(var i=0;i<n;i++) cards.push({type:type, k:rec.k||0, d:rec.d||0});
+      if(cards.length>400) break;   // server caps at 400 too; stop early rather than ship a payload it will truncate
+    }
+  }catch(e){}
+  return {signal: (typeof signalPoints==='number'?signalPoints:0), cards: cards};
+}
+// Guest: the login prompt is unskippable after the tutorial (owner), but choosing guest is a real
+// answer to it — play on, progress stays in this browser only, and the prompt stops asking.
+let guestMode = !!lsGet('sf_guest', false);
+function sfContinueAsGuest(){
+  guestMode = true; lsSet('sf_guest', true);
+  var ov=document.getElementById('signup-gate'); if(ov) ov.classList.remove('show');
+  if(typeof toast==='function') toast('Playing as guest — progress stays on this device only. You can create an account any time from Online.', true);
+}
 function sfAuth(isRegister){
   var h = (document.getElementById('on-handle')||{}).value || '';
   var p = (document.getElementById('on-pass')||{}).value || '';
@@ -12436,13 +12464,25 @@ function sfAuth(isRegister){
   if(h.length < 2 || p.length < 4){ _onMsg('Handle needs 2+ characters, password 4+.', 'err'); return; }
   var btn = document.getElementById('on-submit'); if(btn) btn.disabled = true;
   _onMsg(isRegister ? 'Creating account…' : 'Signing in…', '');
-  sfApi('POST', isRegister ? '/api/auth/register' : '/api/auth/login', {handle:h, password:p}, function(err, data){
+  // 8/14/26 — REGISTER carries the local save across (see sfMigratePayload and h_register in
+  // server/app.py). Before this, creating an account hard-coded 5,000 Zenni and a fresh starter
+  // deck server-side, so a player who finished the tutorial and then signed up silently lost
+  // everything they had just earned — which made the account prompt actively hostile. Migration
+  // is registration-only on purpose: signing IN to an existing account must never overwrite it
+  // with whatever happens to be in this browser.
+  var body = {handle:h, password:p};
+  if(isRegister) body.migrate = sfMigratePayload();
+  sfApi('POST', isRegister ? '/api/auth/register' : '/api/auth/login', body, function(err, data){
     if(btn) btn.disabled = false;
     if(err){ _onMsg(err, 'err'); return; }
     sfSaveSession({token:data.token, handle:h});
     SF_STATE = data.state;
+    guestMode = false; lsSet('sf_guest', null);
     buildOnline();
-    toast(isRegister ? 'Account created — you are online' : 'Signed in as '+h, true);
+    if(isRegister){
+      var m = body.migrate || {};
+      toast('Account created — ' + ((m.cards&&m.cards.length) ? (m.cards.length+' cards and \u25c8 '+fmtPts(m.signal||0)+' carried over') : 'you are online'), true);
+    } else toast('Signed in as '+h, true);
   });
 }
 
@@ -13329,17 +13369,103 @@ var TUTORIAL_SCRIPT=[
  {say:"I'll drop you straight into a no-stakes practice duel against a soft opponent. Ready when you are.", spot:null, btn:"Start Duel", act:"tutorialStartDuel"},
  {say:"Each round opens with a draw — your hand is dealt for you. This is your opening hand.", spot:'#hand-row', on:'draw'},
  {say:"A Condition reveals up top — a rule that reshapes the duel. Always read it before you commit.", spot:'#cond-main', on:'reveal'},
- {say:"Now conjure your Fighter — tap a card in your hand to send it to the field. This card does the fighting.", spot:'#hand-row', on:'stage'},
+ {say:"Now conjure your Fighter — <b>tap any card in your hand</b> to send it to the field. The cards themselves are the buttons; that card does the fighting. Nothing is on a timer until you have played one.", spot:'#hand-row', on:'stage'},
  {say:"You can also call up to 2 Supports to the rear slots — free, and they boost your Fighter. Or just commit.", spot:'#player-rear', btn:"Got it"},
- {say:"Ready? Confirm Selection locks in your pick — you can still back out until you do.", spot:'#confirm-btn', on:'confirm'},
+ {say:"Confirm Selection locks your pick in. Two steps, on purpose — <b>Confirm</b> chooses, <b>Commit</b> is the point of no return, and you can still change your mind until then.", spot:'#confirm-btn', on:'confirm'},
  {say:"Commit to lock it in. Both sides reveal at once — the higher total power wins the duel.", spot:'.rr-commit-btn', on:'commit'},
  {say:"The clash resolves. First to win 4 of 7 duels takes the match — and every result is written to your card forever.", spot:null, btn:"Next"},
  {say:"That's the whole loop, Commander. Finish this match at your own pace — the field is yours.", spot:null, btn:"Finish"}
 ];
+/* -- HUB TUTORIAL + SIGN-UP GATE (8/14/26, owner) ------------------------------------------
+   Ordering per owner: tutorial battle, then hub tutorial, then the login screen. The battle
+   script above teaches the duel; this one teaches the app around it, which nothing did before --
+   a cold playtest finished an entire match and still had no idea what Card DNA or a Location was.
+
+   The login prompt is NOT skippable by skipping this tour: endHubTutorial() always opens the
+   gate. Skipping is a shortcut past the teaching, not past the decision. Guest is a real answer
+   to it (see sfContinueAsGuest), so the choice is "make progress permanent" vs "keep it on this
+   device" -- never a wall. */
+var HUB_TUTORIAL_SCRIPT=[
+ {say:"That's the duel. Now the rest of it -- thirty seconds, then you're free.", spot:null, btn:"Go on"},
+ {say:"<b>PLAY</b> is the only button you ever need. Every mode lives behind it, and each one tells you what it puts at risk before you commit.", spot:'.play-hero', btn:"Got it"},
+ {say:"Some modes are <b>records safe</b> -- a loss leaves no mark. In Ranked and Staked, every duel is written to the card <i>forever</i>. That is the whole game: your cards carry their history.", spot:'.play-hero', btn:"Understood"},
+ {say:"A <b>Location</b> reveals before every duel and bends the rules -- extra power, random swings, whole new conditions. Read it before you commit; learning them is most of the skill.", spot:'#nav-conds', btn:"Next"},
+ {say:"<b>Card DNA</b> is a card's real record -- kills, deaths, and the chain of everyone who ever fought with it. A veteran card is worth more than a fresh one.", spot:'#nav-dna', btn:"Next"},
+ {say:"Your <b>Vault</b> holds everything you own. Spare copies can be fed into a card you keep, or dismantled for Zenni.", spot:'#nav-vault', btn:"Next"},
+ {say:"That is everything. One last thing and you are done.", spot:null, btn:"Finish"}
+];
+var hubTutorialMode=false, hubTutorialStep=0;
+function _tutorialSeen(k){ try{ return localStorage.getItem(k)==='1'; }catch(e){ return false; } }
+function startHubTutorial(){
+  if(_tutorialSeen('sf_hub_tutorial_done')){ openSignupGate(); return; }
+  hubTutorialMode=true; hubTutorialStep=0; _coachCSS();
+  if(typeof show==='function') show('hub');
+  showHubCoachStep();
+}
+function showHubCoachStep(){
+  var step=HUB_TUTORIAL_SCRIPT[hubTutorialStep];
+  if(!step){ endHubTutorial(); return; }
+  var old=document.getElementById('coach-box'); if(old) old.remove();
+  var r=(typeof _coachSpot==='function')?_coachSpot(step.spot):null;
+  var box=document.createElement('div'); box.id='coach-box'; box.className='coach-box';
+  box.innerHTML='<div class="cb-mentor">&#127183;</div><div class="cb-body">'+
+    '<div class="cb-step">Getting started &middot; '+(hubTutorialStep+1)+' / '+HUB_TUTORIAL_SCRIPT.length+'</div>'+
+    '<div class="cb-say">'+step.say+'</div>'+
+    '<div class="cb-row"><button class="cb-skip" onclick="endHubTutorial()">Skip</button>'+
+    '<button class="cb-next" onclick="nextHubCoachStep()">'+(step.btn||'Next')+'</button></div></div>';
+  document.body.appendChild(box);
+  if(typeof _positionCoachBox==='function') _positionCoachBox(box, r);
+}
+function nextHubCoachStep(){ hubTutorialStep++; showHubCoachStep(); }
+function endHubTutorial(){
+  hubTutorialMode=false;
+  ['coach-box','coach-spot','coach-fulldim'].forEach(function(id){ var e=document.getElementById(id); if(e) e.remove(); });
+  try{ localStorage.setItem('sf_hub_tutorial_done','1'); }catch(e){}
+  openSignupGate();
+}
+function openSignupGate(){
+  if(guestMode || (typeof sfToken==='function' && sfToken())) return;
+  var ov=document.getElementById('signup-gate');
+  if(!ov){
+    ov=document.createElement('div'); ov.id='signup-gate'; ov.className='signup-gate';
+    ov.innerHTML='<div class="sg-panel">'+
+      '<div class="sg-eyebrow">One last thing</div>'+
+      '<h2>Make it count</h2>'+
+      '<p>You have cards with a record now. Create an account and all of it -- every card, every mark on it, your Zenni -- becomes <b>yours</b>: saved, tracked, and playable against real opponents.</p>'+
+      '<p class="sg-note">&#10004; Everything you just earned carries over. Nothing resets.</p>'+
+      '<div class="sg-actions">'+
+        '<button class="sg-primary" onclick="_sgClose();show(\'online\')">Create my account</button>'+
+        '<button class="sg-ghost" onclick="sfContinueAsGuest()">Play as guest</button>'+
+      '</div>'+
+      '<p class="sg-fine">As a guest your progress stays in this browser only -- clearing site data loses it, and you cannot play online. You can sign up later from Online.</p>'+
+    '</div>';
+    document.body.appendChild(ov);
+  }
+  // Shown synchronously, NOT via requestAnimationFrame: rAF is throttled or never fires in a
+  // backgrounded/hidden tab, which would silently swallow the one prompt the whole tutorial
+  // funnels into. The CSS animation still plays because the element is freshly inserted.
+  ov.classList.add('show');
+}
+function _sgClose(){ var ov=document.getElementById('signup-gate'); if(ov) ov.classList.remove('show'); }
 function _coachCSS(){ if(document.getElementById('coach-style'))return; var st=document.createElement('style'); st.id='coach-style'; st.textContent=`
 .coach-spot{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(4,6,11,.58);transition:all .3s ease;pointer-events:none;z-index:300;border:2px solid var(--gold);animation:coachPulse 1.6s ease-in-out infinite}
 @keyframes coachPulse{0%,100%{box-shadow:0 0 0 9999px rgba(4,6,11,.58),0 0 0 0 rgba(245,194,77,.5)}50%{box-shadow:0 0 0 9999px rgba(4,6,11,.58),0 0 22px 4px rgba(245,194,77,.5)}}
 .coach-fulldim{position:fixed;inset:0;background:rgba(4,6,11,.58);z-index:300;pointer-events:none}
+.signup-gate{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;background:rgba(4,6,11,.86);backdrop-filter:blur(4px)}
+.signup-gate.show{display:flex;animation:sgIn .3s ease}
+@keyframes sgIn{from{opacity:0}to{opacity:1}}
+.signup-gate .sg-panel{width:min(92vw,470px);background:linear-gradient(180deg,#151a28,#0c0f17);border:1px solid var(--gold);border-radius:16px;padding:26px 28px 22px;box-shadow:0 24px 70px rgba(0,0,0,.72);animation:sgPop .34s cubic-bezier(.2,.85,.25,1)}
+@keyframes sgPop{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:none}}
+.signup-gate .sg-eyebrow{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.signup-gate h2{font-size:24px;font-weight:800;color:#fff;margin:4px 0 10px}
+.signup-gate p{font-size:13px;color:var(--text2);line-height:1.6;margin:0 0 10px}
+.signup-gate .sg-note{color:#7CE38B;font-weight:700;font-size:12.5px}
+.signup-gate .sg-actions{display:flex;flex-direction:column;gap:9px;margin:18px 0 12px}
+.signup-gate .sg-primary{background:var(--gold);color:#0a0d14;border:none;border-radius:10px;padding:13px 20px;font-weight:800;font-size:14px;cursor:pointer}
+.signup-gate .sg-primary:hover{filter:brightness(1.08)}
+.signup-gate .sg-ghost{background:none;border:1px solid var(--border2);color:var(--text2);border-radius:10px;padding:11px 20px;font-weight:700;font-size:12.5px;cursor:pointer}
+.signup-gate .sg-ghost:hover{border-color:var(--text3);color:var(--text)}
+.signup-gate .sg-fine{font-size:10.5px;color:var(--text3);line-height:1.55;margin:0}
 .coach-box{position:fixed;left:50%;bottom:4.5%;transform:translateX(-50%);z-index:302;width:min(92vw,540px);background:linear-gradient(180deg,#151a28,#0c0f17);border:1px solid var(--gold);border-radius:14px;padding:15px 17px;box-shadow:0 18px 50px rgba(0,0,0,.65);display:flex;gap:13px;align-items:flex-start;pointer-events:none}
 .coach-box .cb-skip,.coach-box .cb-next{pointer-events:auto}
 .coach-box .cb-mentor{width:46px;height:46px;border-radius:11px;background:var(--gold-glow,rgba(245,194,77,.15));border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
@@ -13404,7 +13530,7 @@ function startTutorial(){ tutorialMode=true; tutorialStep=0; _coachCSS();
   var _howto=document.getElementById('howto-ov'); if(_howto && _howto.classList.contains('on')) _howto.classList.remove('on');
   showCoachStep();
 }
-function endTutorial(){ tutorialMode=false; ['coach-box','coach-spot','coach-fulldim'].forEach(function(id){ var e=document.getElementById(id); if(e) e.remove(); }); var _hb=document.getElementById('howto-btn'); if(_hb) _hb.style.display=''; try{ localStorage.setItem('sf_tutorial_done','1'); }catch(e){} if(typeof toast==='function') toast('🎓 Tutorial complete — the field is yours.', true); }
+function endTutorial(){ tutorialMode=false; ['coach-box','coach-spot','coach-fulldim'].forEach(function(id){ var e=document.getElementById(id); if(e) e.remove(); }); var _hb=document.getElementById('howto-btn'); if(_hb) _hb.style.display=''; try{ localStorage.setItem('sf_tutorial_done','1'); }catch(e){} if(typeof toast==='function') toast('🎓 Duel tutorial complete.', true); if(typeof startHubTutorial==='function') setTimeout(startHubTutorial, 700); }   /* battle -> hub tour -> login, per owner */
 window.startTutorial=startTutorial; window.tutorialAdvance=tutorialAdvance; window.endTutorial=endTutorial; window.tutorialStartDuel=tutorialStartDuel;
 
 

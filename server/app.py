@@ -57,6 +57,12 @@ def seed():
                 c.execute("INSERT INTO listings(type,seller_id,seller_addr,price,k,d,sold,created) VALUES(?,?,?,?,?,?,0,?)",
                           (t, None, addr, price, k, d, store.now()))
 
+# Bounds on what a registering client may claim from its local save. Deliberately generous
+# rather than tight -- the point is to stop absurd claims, not to punish a real player who
+# ground out a big offline collection before making an account.
+MIGRATE_SIGNAL_CAP = 250000
+MIGRATE_CARD_CAP   = 400
+
 def mint_card(c, owner_id, t, k=0, d=0, via="Fresh mint"):
     row = c.execute("SELECT minted,supply FROM mint WHERE type=?", (t,)).fetchone()
     minted = (row["minted"] if row else 0) + 1
@@ -95,10 +101,44 @@ def h_register(uid_none, body):
         if c.execute("SELECT 1 FROM users WHERE handle=?", (handle,)).fetchone():
             return 409, {"error": "handle taken"}
         uid = "u_" + secrets.token_hex(8); salt = rules.new_salt()
-        c.execute("INSERT INTO users(id,handle,pass_hash,salt,created,signal,forge,rp) VALUES(?,?,?,?,?,5000,0,1000)",
-                  (uid, handle, rules.hash_pw(pw, salt), salt, store.now()))
-        for t in rules.STARTER_DECK: mint_card(c, uid, t, via="Starter grant")
-        store.ledger_add(c, uid, "SIGNAL", 5000, "Welcome grant (play currency)", 5000)
+
+        # ── Save migration (8/14/26, owner) ────────────────────────────────────────────────
+        # Registering used to hard-code signal=5000 + a fresh STARTER_DECK and ignore the client
+        # entirely, so a player who finished the tutorial and then made an account silently lost
+        # everything they had just earned. The account is now seeded FROM the local save.
+        #
+        # ⚠ This necessarily trusts the client: offline progress is client-authoritative, so there
+        # is no server-side record to check it against. Everything below is therefore bounded --
+        # currency is capped, card names must exist in the real catalog, the card count is capped,
+        # and it can only ever happen at REGISTRATION (h_login never migrates). The ledger records
+        # it explicitly so a migrated account is auditable and distinguishable from an earned one.
+        mig = body.get("migrate") or {}
+        mig_signal = mig.get("signal")
+        mig_cards  = mig.get("cards")
+        migrated   = False
+        signal = 5000
+        if isinstance(mig_signal, (int, float)) and mig_signal >= 0:
+            signal = int(min(mig_signal, MIGRATE_SIGNAL_CAP)); migrated = True
+        c.execute("INSERT INTO users(id,handle,pass_hash,salt,created,signal,forge,rp) VALUES(?,?,?,?,?,?,0,1000)",
+                  (uid, handle, rules.hash_pw(pw, salt), salt, store.now(), signal))
+
+        minted = 0
+        if isinstance(mig_cards, list) and mig_cards:
+            for entry in mig_cards[:MIGRATE_CARD_CAP]:
+                if not isinstance(entry, dict): continue
+                t = entry.get("type")
+                if t not in rules.CARD_CATALOG: continue          # unknown/forged name -> dropped
+                k = max(0, min(int(entry.get("k") or 0), 9999))
+                d = max(0, min(int(entry.get("d") or 0), 9999))
+                mint_card(c, uid, t, k=k, d=d, via="Migrated from local play")
+                minted += 1
+            migrated = migrated or minted > 0
+        if minted == 0:
+            for t in rules.STARTER_DECK: mint_card(c, uid, t, via="Starter grant")
+
+        store.ledger_add(c, uid, "SIGNAL", signal,
+                         ("Migrated from local play (%d cards)" % minted) if migrated else "Welcome grant (play currency)",
+                         signal)
         tok = rules.new_token()
         c.execute("INSERT INTO sessions(token,user_id,created) VALUES(?,?,?)", (tok, uid, store.now()))
     return 200, {"token": tok, "state": user_state(uid)}
