@@ -56,15 +56,17 @@ Edit this before every run.
 
 ```
 Already verified working, do not spend budget here:
-  Hub, Offline Play (full match), Draft, Shop browse, sidebar navigation,
-  Ranked/Online/Staked failing gracefully with no backend.
+  Offline Play full match, Draft, Shop browse, sidebar nav, Ranked/Online/
+  Staked failing gracefully with no backend.
 
-Unverified, spend your budget here:
-  Reincarnation node-clear summary panel + Continue
-  Vault: Ingest and Dismantle buttons on duplicate cards, lock toggle
-  Deck Builder: changing a deck and having it stick
-  Marketplace: browsing and listing
-  Profile Rank panel: do the mission counters actually tick during play
+Unverified, spend your budget here — the NEW first-run funnel:
+  How to Play -> starter path choice -> coached BATTLE tutorial ->
+  HUB tutorial (7 steps) -> sign-up gate (Create account / Play as guest)
+  None of this has ever been run end to end by a real player. It was built
+  8/14/26 and only triggered programmatically.
+  Also new and unproven: PLAY hero button + mode-select screen with stakes
+  tags; YOU / opponent plates on the duel board; hand cards being tappable
+  at all; the forfeit clock NOT starting until you have played one card.
 ```
 
 ---
