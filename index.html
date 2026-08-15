@@ -1708,6 +1708,11 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .ll-info .ll-none{color:var(--text3)}
 .enter-btn{position:relative;font-family:'Trajan Pro','Cinzel','Hoefler Text',Palatino,Georgia,serif;font-size:15px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#F4E6BE;padding:15px 44px;border:none;cursor:pointer;background:linear-gradient(180deg,#143840 0%,#0a1c22 55%,#0b1519 100%);clip-path:polygon(0% 50%,5% 0%,95% 0%,100% 50%,95% 100%,5% 100%);text-shadow:0 1px 3px #000,0 0 10px rgba(245,194,77,0.25);box-shadow:inset 0 0 0 1px rgba(245,216,146,0.75),inset 0 0 0 3px rgba(10,8,3,0.9),inset 0 0 0 4px var(--gold-dim),inset 0 3px 16px rgba(0,0,0,0.7),inset 0 -3px 14px rgba(111,211,255,0.14),0 6px 22px rgba(0,0,0,0.6),0 0 26px var(--gold-glow)}
 .enter-btn:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.12) saturate(1.08);box-shadow:inset 0 0 0 1px rgba(255,240,190,0.95),inset 0 0 0 3px rgba(10,8,3,0.9),inset 0 0 0 4px var(--gold),inset 0 3px 16px rgba(0,0,0,0.7),inset 0 -3px 18px rgba(111,211,255,0.24),0 9px 30px rgba(0,0,0,0.65),0 0 40px var(--gold-glow)}
+.enter-btn.blocked{opacity:0.5;filter:grayscale(0.6)}
+.enter-btn.blocked:hover{transform:none;filter:grayscale(0.6) brightness(1.02)}
+@keyframes botNudge{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.bot-grid.nudge{animation:botNudge .34s ease}
+@media(prefers-reduced-motion:reduce){.bot-grid.nudge{animation:none;outline:2px solid var(--gold);outline-offset:3px}}
 .enter-btn:disabled{opacity:0.42;cursor:not-allowed;filter:grayscale(0.55)}
 
 /* match exit crumb */
@@ -3156,7 +3161,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <h3 id="ll-title">No opponent selected</h3>
           <p id="ll-sub" class="ll-none">Pick a bot above to begin.</p>
         </div>
-        <button class="enter-btn" id="enter-btn" onclick="enterPublicMatch()" disabled>Enter Match ⚔</button>
+        <button class="enter-btn blocked" id="enter-btn" onclick="enterPublicMatch()" aria-disabled="true">Enter Match ⚔</button>
         <button class="enter-btn" onclick="playSandbox()" style="background:linear-gradient(180deg,#14303a,#0a1c22);box-shadow:inset 0 0 0 1px rgba(111,211,255,0.4)">🌐 Sandbox · all cards</button>
       </div>
     </div>
@@ -4864,6 +4869,16 @@ function buildHand(){
       el.style.borderColor = 'var(--electric)';
       el.style.boxShadow = '0 0 8px rgba(91,192,235,0.25)';
     }
+    // 8/14/26 — a cold playtest FORFEITED ROUND 1 without ever playing a card. The hand card is a
+    // bare <div> with an onclick, so nothing about it reads as clickable to a screen reader, to a
+    // keyboard, or to automation; the only child that WAS exposed is the tiny 'Details' info dot.
+    // The player hunted for the interaction while the forfeit clock ran down. Same defect class as
+    // the 33 unlabeled nav buttons, one screen deeper. Real role, real name, keyboard activation.
+    // Visual is untouched.
+    el.setAttribute('role','button');
+    el.setAttribute('tabindex','0');
+    el.setAttribute('aria-label', (typeof dispName==='function'?dispName(c.name):c.name)+' \u2014 power '+(c.pow!=null?c.pow:'?')+', cost '+(typeof conjureCost==='function'?conjureCost(c):'?')+'. Press to play this card.');
+    el.onkeydown = (ev) => { if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); selectCard(i, el); } };
     el.onclick = () => selectCard(i, el);
     el.onpointerdown = (e) => handPointerDown(e, i);
     el.onmouseenter = () => { cancelHidePreview(); showCardPreview(i); };
@@ -5176,7 +5191,8 @@ function startDecisionClock(seconds, label, opts){ if(typeof tutorialMode!=='und
   let t = seconds;
   let _autoDeployWarned = false;
   strip.style.display = 'flex';
-  strip.classList.remove('urgent');
+  strip.classList.remove('urgent','hint');
+  if(fill) fill.style.background='';   // clear the turn-1 hint styling (showFirstCardHint) if it was showing
   num.textContent = t;
   fill.style.transition = 'none'; fill.style.width = '100%'; void fill.offsetWidth;
   fill.style.transition = 'width ' + seconds + 's linear'; fill.style.width = '0%';
@@ -5652,7 +5668,14 @@ function revealCondition(forceIdx){ if(typeof tutorialAdvance==='function')setTi
   // hand for the first time needs real breathing room. Casual was 30s, actually LESS than
   // ranked's 40 -- backwards for the mode whose own copy calls it "the best place to test a new
   // deck," "the safe ground to try builds." Bumped past ranked instead of just matching it.
-  startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:50, 'choose a card, or the round forfeits');   // casual = 50s round timer (first-timer breathing room); ranked keeps 40
+  // 8/14/26 — the clock no longer runs before the player has EVER selected a card in this match.
+  // A cold playtest lost round 1 to the forfeit timer while still working out that hand cards were
+  // clickable at all, which is close to unrecoverable as a first impression. Raising the duration
+  // (30->50 earlier) treated the symptom; the real problem is running a punishment clock during the
+  // one moment the player has been taught nothing. After the first successful selection the player
+  // has demonstrably found the interaction, so every later round is timed as before.
+  if(_everSelectedThisMatch) startDecisionClock((typeof rankedMode!=='undefined'&&rankedMode)?40:50, 'choose a card, or the round forfeits');
+  else showFirstCardHint();   // casual = 50s round timer (first-timer breathing room); ranked keeps 40
 }
 
 // Real bug (7/28/26): hardcoded ">=3" assumed casual's best-of-7 threshold (4) -- "opponent is one
@@ -7114,7 +7137,19 @@ function resolveHandReturnChoice(takeIt){
 }
 
 var _drag=null, _lastDragTime=0;
+// Set the first time the player selects a card in a match; gates the forfeit clock (see the
+// decision-clock call). Reset per match in resetMatchState() alongside the other per-match flags.
+var _everSelectedThisMatch = false;
+// Turn-1 hint, shown instead of a countdown until the player has acted once. Points at the hand
+// rather than the clock, because "how do I play a card" was the actual unanswered question.
+function showFirstCardHint(){
+  var el = document.getElementById('turn-timer'); if(!el) return;
+  el.textContent = '\u2b07 Tap a card in your hand to play it \u2014 no timer until you do';
+  el.className = 'turn-timer hint';
+  el.style.display = '';
+}
 function selectCard(i, el){
+  _everSelectedThisMatch = true;
   if(Date.now()-_lastDragTime < 350) return;
   if(phase !== 'revealed' && phase !== 'selecting') return;
   var c = hand[i]; if(c.timing === 'instant') return;
@@ -7739,7 +7774,21 @@ const FX = (function(){
   function flash(intensity,color){ if(!on()) return; ensure(); var f=document.getElementById('fx-flash'); if(!f){ f=document.createElement('div'); f.id='fx-flash'; f.className='fx-flash'; document.body.appendChild(f); } f.style.background=color||'#fff'; f.style.setProperty('--fxi', intensity!=null?intensity:0.75); f.classList.remove('go'); void f.offsetWidth; f.classList.add('go'); }
   function vignette(kind,ms){ if(!on()) return; ensure(); var v=document.getElementById('fx-vig'); if(!v){ v=document.createElement('div'); v.id='fx-vig'; document.body.appendChild(v); } v.className='fx-vig '+kind+' show'; setTimeout(function(){ if(v) v.classList.remove('show'); }, ms||900); }
   function stamp(text,kind){ if(!on()) return; ensure(); var s=document.getElementById('fx-stamp'); if(!s){ s=document.createElement('div'); s.id='fx-stamp'; document.body.appendChild(s); } s.className='fx-stamp '+kind; s.textContent=text; s.classList.remove('go'); void s.offsetWidth; s.classList.add('go'); setTimeout(function(){ if(s) s.classList.remove('go'); }, 1650); }
-  return {burst:burst, ring:ring, flash:flash, vignette:vignette, stamp:stamp, on:on};
+  // 8/14/26 — this layer had NO teardown. Its canvas, vignette and stamp are appended to <body>,
+  // nothing scoped them to a match, and a cold playtest watched the red loss vignette and particles
+  // still animating over the sign-in form, the Shop and the Hub several navigations and minutes
+  // after the match ended. clear() cancels the frame loop, empties the particle and ring pools,
+  // wipes the canvas, and drops the vignette/stamp/flash classes. Called from show() on every
+  // navigation — leaving a screen ends its effects.
+  function clear(){
+    if(raf){ try{ cancelAnimationFrame(raf); }catch(e){} raf=0; }
+    parts.length=0; rings.length=0;
+    if(ctx){ try{ ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,innerWidth,innerHeight); }catch(e){} }
+    ['fx-vig','fx-stamp','fx-flash'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.className=id==='fx-vig'?'fx-vig':(id==='fx-stamp'?'fx-stamp':'fx-flash');
+    });
+  }
+  return {burst:burst, ring:ring, flash:flash, vignette:vignette, stamp:stamp, on:on, clear:clear};
 })();
 let _lastBreakdown=null;
 let matchRoundLog=[];   // 7/13/26: every round's breakdown for this match (Match Recap) — _lastBreakdown alone is single-slot and only ever holds the FINAL round
@@ -9718,6 +9767,7 @@ function show(id, btn){
   // (position:fixed, inset:0, z-index:89) across the whole viewport, so the leftover is not just
   // cosmetic -- it eats clicks on whatever screen you landed on. Same failure shape as the stuck
   // CALLED tooltip that softlocked turn 1 of a live PvP match. Clear them on every navigation.
+  if(typeof FX!=='undefined' && FX.clear) FX.clear();   // match VFX must not follow you out of the match
   if(typeof hideCardPreview==='function') hideCardPreview();
   if(typeof hideKwTip==='function'){ try{ hideKwTip(); }catch(e){} }   // no-ops safely if #kw-tip isn't in the DOM yet
   document.querySelectorAll('.view').forEach(v => v.classList.remove('on'));
@@ -16304,12 +16354,12 @@ function updateLaunch(){
     const dmLine = dmReady ? ` · ★ ${deckMasterCard} as Deck Master` : '';
     document.getElementById('ll-sub').textContent=`Difficulty ${b.diff}/4 · ${deckLine}${dmLine}`;
     document.getElementById('ll-sub').classList.remove('ll-none');
-    btn.disabled=false;
+    btn.removeAttribute('aria-disabled'); btn.classList.remove('blocked');
   } else {
     document.getElementById('ll-title').textContent='No opponent selected';
     document.getElementById('ll-sub').textContent='Pick a bot above to begin.';
     document.getElementById('ll-sub').classList.add('ll-none');
-    btn.disabled=true;
+    btn.setAttribute('aria-disabled','true'); btn.classList.add('blocked');
   }
 }
 function startMatch(mode){
@@ -16361,6 +16411,18 @@ function deckMasterReady(){
 // has one ready, same as clicking the old dedicated button -- but never blocks entry, so a player
 // who hasn't named one yet still gets a normal match instead of a dead end.
 function enterPublicMatch(){
+  // 8/14/26 — this was genuinely `disabled`, which swallows the click entirely. A cold playtest
+  // clicked it as the first action of the session and got NO response, because the reason ("Pick a
+  // bot above to begin") sat in small grey text off to the side. The most prominent control on the
+  // screen taught nothing. Now aria-disabled instead: it stays clickable purely so it can explain
+  // itself and point at what to do next.
+  if(!selectedBot){
+    if(typeof toast==='function') toast('Pick an opponent first \u2014 choose a bot from the row above.', false);
+    var _bg=document.getElementById('bot-grid');
+    if(_bg){ _bg.classList.remove('nudge'); void _bg.offsetWidth; _bg.classList.add('nudge'); try{ _bg.scrollIntoView({block:'nearest'}); }catch(e){} }
+    return;
+  }
+
   if(deckMasterReady()){ startDeckMasterMatch(); } else { startMatch(); }
   lobbyMode=true;   // set AFTER startMatch()/startDeckMasterMatch() -- both reset it false internally
   // 8/6/26: startMatch() calls updateStake() itself mid-setup (resetMatchState()), but lobbyMode is
@@ -16440,7 +16502,7 @@ function exitMatch(){
 
 // reset the duel engine for a fresh match
 function resetMatchState(){
-  phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[];
+  phase='predraw'; conditionIndex=-1; selectedCard=null; playerScore=[0,0]; matchComplete=false; firstTurn=true; matchRoundLog=[]; _everSelectedThisMatch=false;
   clearTurnTimers();
   winnersCircle=[]; banishPile=[]; dealNewDeck();
   banishSurge=0; oppBanishSurge=0; dmNextConjureBonus=0; dmNextConjureDouble=false; dmAhdorahBonusPending=false; dmAbilityUsedThisMatch=false; dmDarwinHandRefillArmed=false; oppDmNextConjureBonus=0; oppDmNextConjureDouble=false; oppDmAhdorahBonusPending=false; dmAbilityUsedThisMatchBot=false; oppDmDarwinHandRefillArmed=false; divinerBonusNext=0; deathRemnants=[]; oppDeathRemnants=[]; oppDmRemnantPowOverride=null; lastResult=null; matchCommits=0; skullchainKills=0; matchKillsThisMatch=0; oppMatchKillsThisMatch=0; conjureCountThisMatch={};
