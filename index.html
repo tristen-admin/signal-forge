@@ -220,7 +220,11 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 /* hand-row stretches to player-zone's full width (flex-column default align-items:stretch) but
    centers its actual cards (justify-content:center) -- same empty-space-intercepts-drops issue
    as player-zone itself, one level deeper. Same fix, one more level. */
-.hand-row{display:flex;gap:8px;align-items:flex-end;justify-content:center;overflow-x:auto;padding-bottom:2px;pointer-events:none}
+/* 8/15/26 — `safe center`, not plain `center`. With a full hand the cards are wider than the
+   row, and a centred overflowing flex line spills BOTH ways; the left spill is unreachable
+   because scrollLeft cannot go negative, so the first card sat at left:-63px permanently
+   off-screen and unscrollable. `safe` falls back to flex-start exactly when it overflows. */
+.hand-row{display:flex;gap:8px;align-items:flex-end;justify-content:safe center;overflow-x:auto;padding-bottom:2px;pointer-events:none}
 .hand-row > *{pointer-events:auto}
 /* the "Your Hand" label row: left label + right-aligned pile-strip (margin-left:auto), so the
    gap between them is empty and full-width, same issue again */
@@ -2243,6 +2247,26 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 /* 8/14/26 — z-index was 60 while the FX layer runs 9996-9999, so the round-end particle burst
    and power numbers drew straight THROUGH this modal; a cold playtest hit it 4 times out of 4
    and on one the headline was completely unreadable. Sits above the spectacle now. */
+/* 8/15/26 — these MUST live in document CSS, not in _coachCSS()'s injected stylesheet where
+   they were first written. That sheet only exists once a tutorial has run, so any player who
+   reached the Ranked/Staked gate without one got an UNSTYLED block div appended to <body> --
+   and because <body> is a flex row, it took ~913px of flex space and squeezed the entire game
+   into a 367px column. The duel board clipping traced back to exactly this. */
+.signup-gate{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;background:rgba(4,6,11,.86);backdrop-filter:blur(4px)}
+.signup-gate.show{display:flex;animation:sgIn .3s ease}
+@keyframes sgIn{from{opacity:0}to{opacity:1}}
+.signup-gate .sg-panel{width:min(92vw,470px);background:linear-gradient(180deg,#151a28,#0c0f17);border:1px solid var(--gold);border-radius:16px;padding:26px 28px 22px;box-shadow:0 24px 70px rgba(0,0,0,.72);animation:sgPop .34s cubic-bezier(.2,.85,.25,1)}
+@keyframes sgPop{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:none}}
+.signup-gate .sg-eyebrow{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+.signup-gate h2{font-size:24px;font-weight:800;color:#fff;margin:4px 0 10px}
+.signup-gate p{font-size:13px;color:var(--text2);line-height:1.6;margin:0 0 10px}
+.signup-gate .sg-note{color:#7CE38B;font-weight:700;font-size:12.5px}
+.signup-gate .sg-actions{display:flex;flex-direction:column;gap:9px;margin:18px 0 12px}
+.signup-gate .sg-primary{background:var(--gold);color:#0a0d14;border:none;border-radius:10px;padding:13px 20px;font-weight:800;font-size:14px;cursor:pointer}
+.signup-gate .sg-primary:hover{filter:brightness(1.08)}
+.signup-gate .sg-ghost{background:none;border:1px solid var(--border2);color:var(--text2);border-radius:10px;padding:11px 20px;font-weight:700;font-size:12.5px;cursor:pointer}
+.signup-gate .sg-ghost:hover{border-color:var(--text3);color:var(--text)}
+.signup-gate .sg-fine{font-size:10.5px;color:var(--text3);line-height:1.55;margin:0}
 .wager-overlay{position:fixed;inset:0;z-index:10001;display:none;align-items:center;justify-content:center;background:rgba(5,7,12,0.82);backdrop-filter:blur(3px)}
 .wager-overlay.show{display:flex;animation:wf-in .25s ease}
 @keyframes wf-in{from{opacity:0}to{opacity:1}}
@@ -13513,21 +13537,6 @@ function _coachCSS(){ if(document.getElementById('coach-style'))return; var st=d
 .coach-spot{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(4,6,11,.58);transition:all .3s ease;pointer-events:none;z-index:300;border:2px solid var(--gold);animation:coachPulse 1.6s ease-in-out infinite}
 @keyframes coachPulse{0%,100%{box-shadow:0 0 0 9999px rgba(4,6,11,.58),0 0 0 0 rgba(245,194,77,.5)}50%{box-shadow:0 0 0 9999px rgba(4,6,11,.58),0 0 22px 4px rgba(245,194,77,.5)}}
 .coach-fulldim{position:fixed;inset:0;background:rgba(4,6,11,.58);z-index:300;pointer-events:none}
-.signup-gate{position:fixed;inset:0;z-index:10050;display:none;align-items:center;justify-content:center;background:rgba(4,6,11,.86);backdrop-filter:blur(4px)}
-.signup-gate.show{display:flex;animation:sgIn .3s ease}
-@keyframes sgIn{from{opacity:0}to{opacity:1}}
-.signup-gate .sg-panel{width:min(92vw,470px);background:linear-gradient(180deg,#151a28,#0c0f17);border:1px solid var(--gold);border-radius:16px;padding:26px 28px 22px;box-shadow:0 24px 70px rgba(0,0,0,.72);animation:sgPop .34s cubic-bezier(.2,.85,.25,1)}
-@keyframes sgPop{from{opacity:0;transform:scale(.94) translateY(12px)}to{opacity:1;transform:none}}
-.signup-gate .sg-eyebrow{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
-.signup-gate h2{font-size:24px;font-weight:800;color:#fff;margin:4px 0 10px}
-.signup-gate p{font-size:13px;color:var(--text2);line-height:1.6;margin:0 0 10px}
-.signup-gate .sg-note{color:#7CE38B;font-weight:700;font-size:12.5px}
-.signup-gate .sg-actions{display:flex;flex-direction:column;gap:9px;margin:18px 0 12px}
-.signup-gate .sg-primary{background:var(--gold);color:#0a0d14;border:none;border-radius:10px;padding:13px 20px;font-weight:800;font-size:14px;cursor:pointer}
-.signup-gate .sg-primary:hover{filter:brightness(1.08)}
-.signup-gate .sg-ghost{background:none;border:1px solid var(--border2);color:var(--text2);border-radius:10px;padding:11px 20px;font-weight:700;font-size:12.5px;cursor:pointer}
-.signup-gate .sg-ghost:hover{border-color:var(--text3);color:var(--text)}
-.signup-gate .sg-fine{font-size:10.5px;color:var(--text3);line-height:1.55;margin:0}
 .coach-box{position:fixed;left:50%;bottom:4.5%;transform:translateX(-50%);z-index:302;width:min(92vw,540px);background:linear-gradient(180deg,#151a28,#0c0f17);border:1px solid var(--gold);border-radius:14px;padding:15px 17px;box-shadow:0 18px 50px rgba(0,0,0,.65);display:flex;gap:13px;align-items:flex-start;pointer-events:none}
 .coach-box .cb-skip,.coach-box .cb-next{pointer-events:auto}
 .coach-box .cb-mentor{width:46px;height:46px;border-radius:11px;background:var(--gold-glow,rgba(245,194,77,.15));border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
