@@ -1035,6 +1035,36 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .quest-card.done .qc-label{color:var(--text);text-decoration:line-through;text-decoration-color:rgba(237,231,224,0.35)}
 .quest-card .qc-prog{font-size:11.5px;color:var(--text3);font-variant-numeric:tabular-nums;flex-shrink:0}
 .quest-card .qc-reward{font-size:11.5px;color:var(--gold);font-weight:700;flex-shrink:0;white-space:nowrap}
+/* ── PLAY: hero button + mode select (8/14/26) ── */
+.play-hero{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  align-self:stretch;width:auto;box-sizing:border-box;   /* .hub is a column flex container; width:100% collapsed to 28px there, stretch is what actually fills it */
+  margin:0 0 18px;padding:26px 20px;cursor:pointer;border-radius:16px;
+  background:linear-gradient(180deg,#F5C24D 0%,#D4A843 55%,#B98F31 100%);color:#120d02;
+  border:none;box-shadow:0 10px 34px rgba(245,194,77,.28),inset 0 0 0 2px rgba(255,247,214,.55);
+  transition:transform .12s ease,filter .12s ease}
+.play-hero:hover{transform:translateY(-2px);filter:brightness(1.06)}
+.play-hero:active{transform:translateY(1px)}
+.play-hero .ph-word{font-family:'Trajan Pro','Cinzel',Palatino,Georgia,serif;font-size:34px;font-weight:800;letter-spacing:.2em;line-height:1}
+.play-hero .ph-sub{font-size:10.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;opacity:.72}
+@media(max-width:640px){.play-hero{padding:20px 14px}.play-hero .ph-word{font-size:27px}}
+.play-wrap{max-width:760px;margin:0 auto;padding:26px 18px 40px}
+.play-head h1{font-size:26px;font-weight:800;color:#fff;margin:0 0 4px}
+.play-head p{font-size:12.5px;color:var(--text3);margin:0 0 20px}
+.play-grid{display:flex;flex-direction:column;gap:10px}
+.play-mode{display:flex;align-items:center;gap:13px;text-align:left;padding:15px 16px;cursor:pointer;
+  background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent,#F5C24D);
+  border-radius:11px;transition:border-color .12s,transform .12s,background .12s}
+.play-mode:hover{transform:translateX(3px);border-color:var(--accent,#F5C24D);background:var(--surface)}
+.play-mode .pm-icon{font-size:24px;flex:0 0 auto;width:34px;text-align:center}
+.play-mode .pm-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.play-mode .pm-title{font-size:15px;font-weight:800;color:#fff}
+.play-mode .pm-sub{font-size:11.5px;color:var(--text3)}
+.play-mode .pm-stake{flex:0 0 auto;font-size:9.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;
+  padding:5px 10px;border-radius:20px;white-space:nowrap}
+.play-mode .pm-stake.safe{color:#7CE38B;background:rgba(124,227,139,.1);border:1px solid rgba(124,227,139,.32)}
+.play-mode .pm-stake.risk{color:#E08080;background:rgba(224,80,60,.1);border:1px solid rgba(224,80,60,.34)}
+.play-foot{margin-top:18px;font-size:11px;color:var(--text3);line-height:1.6}
+@media(max-width:640px){.play-mode{flex-wrap:wrap}.play-mode .pm-stake{order:3;width:100%;text-align:center}}
 .hub-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:18px}
 .hub-action{display:flex;align-items:center;gap:15px;text-align:left;background:linear-gradient(135deg,var(--panel),var(--surface));border:1px solid var(--border);border-radius:14px;padding:19px 20px;cursor:pointer;font-family:inherit;transition:transform .13s,border-color .13s,box-shadow .13s;position:relative;overflow:hidden}
 .hub-action::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent,var(--gold));opacity:0.85}
@@ -2800,10 +2830,53 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   </header>
   <div class="screens">
 
+
+  <!-- ── PLAY VIEW — mode select ── -->
+  <div class="view" id="v-play">
+    <div class="play-wrap">
+      <div class="play-head">
+        <h1>Choose your arena</h1>
+        <p>Each mode risks something different. The tag tells you what.</p>
+      </div>
+      <div class="play-grid">
+        <button class="play-mode" style="--accent:#5BC0EB" onclick="show('lobby', document.getElementById('nav-lobby'))">
+          <span class="pm-icon">⚔</span>
+          <span class="pm-body"><span class="pm-title">Offline Play</span><span class="pm-sub">Practice against the AI with any deck</span></span>
+          <span class="pm-stake safe">Records safe · light Zenni</span></button>
+        <button class="play-mode" style="--accent:#7C8CF8" onclick="show('draft', document.getElementById('nav-draft')); buildDraft()">
+          <span class="pm-icon">🌀</span>
+          <span class="pm-body"><span class="pm-title">Draft</span><span class="pm-sub">Pull twenty from the vortex — keep every card</span></span>
+          <span class="pm-stake safe">Records safe · entry fee</span></button>
+        <button class="play-mode" style="--accent:#C88CF5" onclick="show('asc', document.getElementById('nav-asc'))">
+          <span class="pm-icon">👑</span>
+          <span class="pm-body"><span class="pm-title">Reincarnation · The Saga</span><span class="pm-sub">Take one card through a gauntlet of duels</span></span>
+          <span class="pm-stake safe">Records safe · run progress</span></button>
+        <button class="play-mode" style="--accent:#F5C24D" onclick="pvpSetMode(3);show('online', document.getElementById('nav-ranked'))">
+          <span class="pm-icon">🪜</span>
+          <span class="pm-body"><span class="pm-title">Ranked Ladder</span><span class="pm-sub">Real PvP, matchmade — climb and hold your standing</span></span>
+          <span class="pm-stake risk">Records COUNT · RP &amp; Zenni move</span></button>
+        <button class="play-mode" style="--accent:#E0503C" onclick="show('pvp', document.getElementById('nav-pvp'))">
+          <span class="pm-icon">🩸</span>
+          <span class="pm-body"><span class="pm-title">Staked PvP</span><span class="pm-sub">Wager actual cards — winner takes them</span></span>
+          <span class="pm-stake risk">Records COUNT · you can lose cards</span></button>
+      </div>
+      <p class="play-foot">“Records safe” means a loss leaves no mark on a card’s permanent history. Where records count, every duel is written to the card forever.</p>
+    </div>
+  </div>
+
   <!-- ── HUB VIEW ── -->
   <div class="view on" id="v-hub">
     <video class="hub-bg-video" id="hub-bg-video" muted playsinline onerror="this.style.display='none'"></video>
     <div class="hub">
+      <!-- 8/14/26 — a cold playtest landed here and found no PLAY button at all: the largest things on
+           screen were a lore paragraph and a card illustration, neither clickable, and the only way
+           forward was a 25-item sidebar on screen zero. Per owner (Marvel Snap as the reference), the
+           Hub now leads with one big obvious PLAY, and the mode list moved to its own screen where each
+           mode can state what it costs you. -->
+      <button class="play-hero" onclick="show('play')" aria-label="Play — choose a game mode">
+        <span class="ph-word">PLAY</span>
+        <span class="ph-sub">choose a mode</span>
+      </button>
       <div class="camp-banner camp-none" id="camp-banner">
         <div class="cb-sigil" id="cb-sigil">◈</div>
         <div class="cb-title" id="cb-title">No Camp Sworn</div>
@@ -2822,16 +2895,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         </div>
         <div class="featured-card" id="hub-featured"></div>
       </div>
-      <div class="hub-modes">
-        <div class="hc-label">The Arena Awaits</div>
-        <div class="hub-actions">
-          <button class="hub-action ha-hero" style="--accent:#F5C24D" onclick="pvpSetMode(3);show('online', document.getElementById('nav-ranked'))"><span class="ha-icon">🪜</span><span class="ha-txt"><span class="ha-eyebrow">Featured</span><span class="ha-title">Ranked Ladder</span><span class="ha-sub">Real PvP, matchmade — ascend the ranks and claim your standing</span></span><span class="ha-arrow">→</span></button>
-          <button class="hub-action" style="--accent:#5BC0EB" onclick="show('lobby', document.getElementById('nav-lobby'))"><span class="ha-icon">⚔</span><span class="ha-txt"><span class="ha-title">Offline Play</span><span class="ha-sub">All cards · casual · light stakes, no rank risk</span></span><span class="ha-arrow">→</span></button>
-          <button class="hub-action" style="--accent:#E0503C" onclick="show('pvp', document.getElementById('nav-pvp'))"><span class="ha-icon">🩸</span><span class="ha-txt"><span class="ha-title">Staked PvP</span><span class="ha-sub">Wager cards · winner takes them</span></span><span class="ha-arrow">→</span></button>
-          <button class="hub-action" style="--accent:#7C8CF8" onclick="show('draft', document.getElementById('nav-draft')); buildDraft()"><span class="ha-icon">🌀</span><span class="ha-txt"><span class="ha-title">Draft</span><span class="ha-sub">Pull twenty from the vortex — keep every card</span></span><span class="ha-arrow">→</span></button>
-          <button class="hub-action" style="--accent:#C88CF5" onclick="show('asc', document.getElementById('nav-asc'))"><span class="ha-icon">👑</span><span class="ha-txt"><span class="ha-title">Reincarnation · The Saga</span><span class="ha-sub">Reincarnate one card through a gauntlet of duels</span></span><span class="ha-arrow">→</span></button>
-        </div>
-      </div>
+      
     </div>
   </div>
 
@@ -9774,7 +9838,7 @@ function nextTurn(){
   openTurn();
 }
 
-const SCREEN_TITLES = {hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Offline Play',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'KOTEI Online',draft:'Draft',asc:'Reincarnation · The Saga',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile',mailbox:'Mailbox',devnotes:'Dev Notes'};
+const SCREEN_TITLES = { play:'Play', hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Offline Play',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'KOTEI Online',draft:'Draft',asc:'Reincarnation · The Saga',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile',mailbox:'Mailbox',devnotes:'Dev Notes'};
 function toggleSidebar(){ document.body.classList.toggle('nav-collapsed'); }
 // 8/11/26: opening a group closes every other one, so the whole nav column reflows for the length
 // of .nav-sub's max-height transition (220ms). A second click landing inside that window hit
