@@ -577,6 +577,17 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
 .me-btn.again{background:var(--gold);border:1px solid var(--gold);color:#150E00;box-shadow:0 4px 18px rgba(212,168,67,0.3)}
 .me-btn.again:hover{transform:translateY(-2px);box-shadow:0 7px 26px rgba(212,168,67,0.45)}
 @media(prefers-reduced-motion:reduce){ .match-end.show,.me-title{animation:none} }
+/* whose-card-is-whose plates (8/14/26). A cold playtest read a 26-vs-16 board as a comfortable
+   win -- the 26 was the OPPONENT's -- and had to reverse-engineer the convention from the loss
+   banner. Implemented as ::before pseudo-elements rather than real spans ON PURPOSE: both field
+   halves have their innerHTML reassigned when a card is staged/committed/surrendered, which would
+   wipe any child node at exactly the moment the label matters most. A pseudo-element survives that.
+   The opponent plate reads the bot's name via --opp-name, set when a match starts. */
+#player-field::before,#opp-field::before{position:absolute;top:4px;left:50%;transform:translateX(-50%);z-index:4;
+  pointer-events:none;font-size:9px;font-weight:800;letter-spacing:.16em;padding:2px 9px;border-radius:0 0 7px 7px;
+  background:rgba(7,9,15,.82);text-transform:uppercase;white-space:nowrap;max-width:88%;overflow:hidden;text-overflow:ellipsis}
+#player-field::before{content:'YOU';color:var(--gold);border:1px solid rgba(245,194,77,.5);border-top:none}
+#opp-field::before{content:var(--opp-name,'OPPONENT');color:#E08080;border:1px solid rgba(224,80,60,.45);border-top:none}
 .field-half{background:transparent;display:flex;align-items:center;justify-content:center;position:relative}
 .field-half .placeholder{
   display:flex;align-items:center;justify-content:center;text-align:center;
@@ -1708,6 +1719,9 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .ll-info .ll-none{color:var(--text3)}
 .enter-btn{position:relative;font-family:'Trajan Pro','Cinzel','Hoefler Text',Palatino,Georgia,serif;font-size:15px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#F4E6BE;padding:15px 44px;border:none;cursor:pointer;background:linear-gradient(180deg,#143840 0%,#0a1c22 55%,#0b1519 100%);clip-path:polygon(0% 50%,5% 0%,95% 0%,100% 50%,95% 100%,5% 100%);text-shadow:0 1px 3px #000,0 0 10px rgba(245,194,77,0.25);box-shadow:inset 0 0 0 1px rgba(245,216,146,0.75),inset 0 0 0 3px rgba(10,8,3,0.9),inset 0 0 0 4px var(--gold-dim),inset 0 3px 16px rgba(0,0,0,0.7),inset 0 -3px 14px rgba(111,211,255,0.14),0 6px 22px rgba(0,0,0,0.6),0 0 26px var(--gold-glow)}
 .enter-btn:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.12) saturate(1.08);box-shadow:inset 0 0 0 1px rgba(255,240,190,0.95),inset 0 0 0 3px rgba(10,8,3,0.9),inset 0 0 0 4px var(--gold),inset 0 3px 16px rgba(0,0,0,0.7),inset 0 -3px 18px rgba(111,211,255,0.24),0 9px 30px rgba(0,0,0,0.65),0 0 40px var(--gold-glow)}
+/* demoted Sandbox — a text link, deliberately not competing with Enter Match */
+.sandbox-link{background:none;border:1px solid var(--border2);color:var(--text3);font-size:11px;font-weight:600;letter-spacing:.04em;padding:9px 14px;border-radius:8px;cursor:pointer;transition:color .12s,border-color .12s}
+.sandbox-link:hover{color:var(--text2);border-color:var(--text3)}
 .enter-btn.blocked{opacity:0.5;filter:grayscale(0.6)}
 .enter-btn.blocked:hover{transform:none;filter:grayscale(0.6) brightness(1.02)}
 @keyframes botNudge{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
@@ -2186,7 +2200,10 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .whud-btn.fold{border-color:rgba(208,106,106,0.45);color:var(--lose)}
 .whud-btn.fold:hover:not(:disabled){background:rgba(208,106,106,0.12)}
 .whud-btn:disabled{opacity:0.4;cursor:default}
-.wager-overlay{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(5,7,12,0.82);backdrop-filter:blur(3px)}
+/* 8/14/26 — z-index was 60 while the FX layer runs 9996-9999, so the round-end particle burst
+   and power numbers drew straight THROUGH this modal; a cold playtest hit it 4 times out of 4
+   and on one the headline was completely unreadable. Sits above the spectacle now. */
+.wager-overlay{position:fixed;inset:0;z-index:10001;display:none;align-items:center;justify-content:center;background:rgba(5,7,12,0.82);backdrop-filter:blur(3px)}
 .wager-overlay.show{display:flex;animation:wf-in .25s ease}
 @keyframes wf-in{from{opacity:0}to{opacity:1}}
 .wager-panel{background:linear-gradient(180deg,var(--panel),var(--void));border:1px solid var(--gold-dim);border-radius:14px;padding:24px 28px;max-width:460px;width:90%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.6)}
@@ -3162,7 +3179,11 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <p id="ll-sub" class="ll-none">Pick a bot above to begin.</p>
         </div>
         <button class="enter-btn blocked" id="enter-btn" onclick="enterPublicMatch()" aria-disabled="true">Enter Match ⚔</button>
-        <button class="enter-btn" onclick="playSandbox()" style="background:linear-gradient(180deg,#14303a,#0a1c22);box-shadow:inset 0 0 0 1px rgba(111,211,255,0.4)">🌐 Sandbox · all cards</button>
+        <!-- 8/14/26 — Sandbox was styled as a second .enter-btn and was the most saturated thing on the
+             screen, brighter than the real Enter Match beside it, so the loudest button was not
+             the main action. Dev mode (Shift+D) already covers playtesters, so this is demoted to
+             a quiet secondary link, kept only here inside Offline Play. -->
+        <button class="sandbox-link" onclick="playSandbox()" title="Play a one-off match with a random deck drawn from every card — nothing is saved to your collection">🌐 Sandbox</button>
       </div>
     </div>
   </div>
@@ -3324,6 +3345,11 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="rear-slot enemy" id="opp-rear2" style="display:none"></div>
       <!-- 8/5/26: 3rd rear-guard slot, hidden until RG_SLOTS() steps to 3 (matchCommits>=4) -- see fillRearSlot() -->
       <div class="rear-slot enemy" id="opp-rear3" style="display:none"></div>
+      <!-- 8/14/26 — a cold playtest read a 26-vs-16 resolution as a comfortable win; the 26 was the
+           OPPONENT's. Nothing on the board said whose card was whose, so it reverse-engineered the
+           convention from the loss banner afterwards. These plates are always visible, on both
+           halves, and are not part of the resolution animation -- the whole point is that they are
+           there BEFORE you commit, not revealed with the result. -->
       <div class="field-half" id="opp-field"><span class="placeholder">opponent card</span></div>
       <div class="field-half" id="player-field"><span class="placeholder">your card</span></div>
       <div class="rear-slot" id="player-rear" style="display:none"></div>
@@ -7076,9 +7102,9 @@ function renderLossChoice(show){
   if(!show){ sw.innerHTML=''; if(nb) nb.style.display=''; return; }
   const wc=winnersCircle.length;
   sw.innerHTML='<div class="loss-choice"><div class="lc-title">\u21a9 Round lost \u2014 take your pick</div><div class="lc-opts">'+
-    '<button class="lc-btn" onclick="lossChooseSpell()"><b>\ud83c\udccf Draw a spell</b><span>random Interrupt into your energy hand</span></button>'+
-    (wc>0 ? '<button class="lc-btn" onclick="lossChooseWinner()"><b>\u267b Recover a Winner</b><span>random card back \u2014 re-risks its record ('+wc+' in circle)</span></button>'
-          : '<button class="lc-btn dim" disabled><b>\u267b Recover a Winner</b><span>Winners Circle empty</span></button>')+
+    '<button class="lc-btn" onclick="lossChooseSpell()" aria-label="Draw from Spell Deck"><b>\ud83c\udccf Draw from Spell Deck</b><span>a random Interrupt into your hand</span></button>'+
+    (wc>0 ? '<button class="lc-btn" onclick="lossChooseWinner()" aria-label="Draw from Winners Circle"><b>\u267b Draw from Winners Circle</b><span>a card you already won, back into your hand ('+wc+' available)</span></button>'
+          : '<button class="lc-btn dim" disabled aria-label="Draw from Winners Circle — empty"><b>\u267b Draw from Winners Circle</b><span>nothing won yet this match</span></button>')+
     '</div></div>';
   if(nb) nb.style.display='none';
 }
@@ -16363,6 +16389,11 @@ function updateLaunch(){
   }
 }
 function startMatch(mode){
+  // Name the opponent plate (see #opp-field::before). Falls back to "OPPONENT" via the CSS default
+  // when there is no named bot, e.g. Online PvP before the handle is known.
+  try{ var _f=document.querySelector('.field');
+       if(_f) _f.style.setProperty('--opp-name', (typeof activeBot!=='undefined' && activeBot && activeBot.name) ? JSON.stringify(activeBot.name) : "'OPPONENT'"); }catch(e){}
+
   try{ var _fld0=document.querySelector('.field'); if(_fld0) _fld0.classList.toggle('ess-aura', typeof essenceCosmeticOwned==='function' && essenceCosmeticOwned('ec-aura')); }catch(e){}
   const b=BOT_OPPONENTS.find(x=>x.id===selectedBot);
   if(!b) return;
