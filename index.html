@@ -2860,14 +2860,14 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <span class="pm-icon">👑</span>
           <span class="pm-body"><span class="pm-title">Reincarnation · The Saga</span><span class="pm-sub">Take one card through a gauntlet of duels</span></span>
           <span class="pm-stake safe">Records safe · run progress</span></button>
-        <button class="play-mode" style="--accent:#F5C24D" onclick="pvpSetMode(3);show('online', document.getElementById('nav-ranked'))">
+        <button class="play-mode" style="--accent:#F5C24D" onclick="enterOnlineMode('ranked')">
           <span class="pm-icon">🪜</span>
           <span class="pm-body"><span class="pm-title">Ranked Ladder</span><span class="pm-sub">Real PvP, matchmade — climb and hold your standing</span></span>
-          <span class="pm-stake risk">Records COUNT · RP &amp; Zenni move</span></button>
-        <button class="play-mode" style="--accent:#E0503C" onclick="show('pvp', document.getElementById('nav-pvp'))">
+          <span class="pm-stake risk">Records COUNT · account needed</span></button>
+        <button class="play-mode" style="--accent:#E0503C" onclick="enterOnlineMode('staked')">
           <span class="pm-icon">🩸</span>
           <span class="pm-body"><span class="pm-title">Staked PvP</span><span class="pm-sub">Wager actual cards — winner takes them</span></span>
-          <span class="pm-stake risk">Records COUNT · you can lose cards</span></button>
+          <span class="pm-stake risk">Records COUNT · account needed</span></button>
       </div>
       <p class="play-foot">“Records safe” means a loss leaves no mark on a card’s permanent history. Where records count, every duel is written to the card forever.</p>
     </div>
@@ -3234,7 +3234,9 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   <div class="lobby">
     <div class="lobby-head">
       <div class="lh-eyebrow">Online · Live Server</div>
-      <h1>KOTEI Online</h1>
+      <!-- 8/15/26: headline reflects WHY you are here when you arrived from a mode gate, rather
+           than a generic product name that matches nothing the player clicked. -->
+      <h1 id="online-h1">KOTEI Online</h1>
       <!-- 8/15/26 — this said local progress "is never uploaded", which stopped being true when
      registration started migrating the local save (sfMigratePayload / h_register). A cold
      playtest caught it as a straight contradiction against the sign-up gate's bold promise
@@ -12263,7 +12265,7 @@ function buildDeckPool(){
     const inDeck = activeDeck.has(c.uid||c.name);
     const owned = isOwned(c);
     const pristine = ((typeof isPristine==='function')?isPristine(c):(c.deaths===0)) ? `<span class="vc-pristine" data-kw="Pristine">◈</span>` : '';
-    return `<div class="vault-card ${c.rarity} ${campCls} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="cancelHidePreview();previewPoolCardReadable('${nm}',this)" onmouseleave="scheduleHidePreview()">
+    return `<div class="vault-card ${c.rarity} ${campCls} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" role="button" tabindex="-1" aria-label="${vaultCardLabel(c, e)}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="cancelHidePreview();previewPoolCardReadable('${nm}',this)" onmouseleave="scheduleHidePreview()">
       <div class="vc-art" style="${artFillStyle(c.artKey||c.name)}">
         ${sigilFor(c.artKey||c.name)}
         <span class="vc-rarity-ribbon" data-kw="Rarity">${rlab(c.rarity)}</span>
@@ -13451,6 +13453,38 @@ function endHubTutorial(){
   try{ localStorage.setItem('sf_hub_tutorial_done','1'); }catch(e){}
   openSignupGate();
 }
+/* 8/15/26 (owner) — clicking Ranked Ladder used to swap the screen for a bare login form titled
+   "KOTEI Online": no explanation, no back, and a title that did not match what was clicked. A cold
+   playtest assumed it had misclicked. Moving the signup prompt to tutorial-exit fixed WHEN you are
+   asked, not this — you can still arrive here as a guest. So the mode now asks BEFORE it routes,
+   and never navigates you somewhere you did not choose. */
+function enterOnlineMode(mode){
+  var signedIn = (typeof sfToken==='function') && sfToken();
+  if(signedIn){
+    if(mode==='ranked'){ if(typeof pvpSetMode==='function') pvpSetMode(3); show('online', document.getElementById('nav-ranked')); }
+    else show('pvp', document.getElementById('nav-pvp'));
+    return;
+  }
+  var isRanked = mode==='ranked';
+  var ov=document.getElementById('online-gate');
+  if(!ov){ ov=document.createElement('div'); ov.id='online-gate'; ov.className='signup-gate'; document.body.appendChild(ov); }
+  ov.innerHTML='<div class="sg-panel">'+
+    '<div class="sg-eyebrow">'+(isRanked?'Ranked Ladder':'Staked PvP')+'</div>'+
+    '<h2>This one needs an account</h2>'+
+    '<p>'+(isRanked
+      ? 'Ranked matches you against real people and moves your RP and Zenni on every result, so it has to live on your account rather than this device.'
+      : 'Staked PvP wagers real cards against a real opponent \u2014 the cards have to belong to an account for either of you to actually win them.')+'</p>'+
+    '<p class="sg-note">Everything you already have carries over when you sign up. Nothing resets.</p>'+
+    '<div class="sg-actions">'+
+      '<button class="sg-primary" onclick="_ogClose();_onlineWhy('+(isRanked?"'Sign in to play Ranked'":"'Sign in to play Staked PvP'")+');show(\'online\')">Create account or sign in</button>'+
+      '<button class="sg-ghost" onclick="_ogClose()">Back to modes</button>'+
+    '</div>'+
+    '<p class="sg-fine">Offline Play, Draft and Reincarnation need no account and are always open to you.</p>'+
+  '</div>';
+  ov.classList.add('show');
+}
+function _onlineWhy(t){ var h=document.getElementById('online-h1'); if(h) h.textContent=t||'KOTEI Online'; }
+function _ogClose(){ var ov=document.getElementById('online-gate'); if(ov) ov.classList.remove('show'); }
 function openSignupGate(){
   if(guestMode || (typeof sfToken==='function' && sfToken())) return;
   var ov=document.getElementById('signup-gate');
@@ -14427,6 +14461,30 @@ function filterVaultCost(k,btn){
   vaultCostFilter = vaultCostFilter===k ? null : k;
   buildVault();
 }
+/* Accessible name for a vault tile (8/15/26). Without one these render as bare `generic` nodes,
+   and a screen reader falls back to the raw tile text -- "3 14 shield 4 unlocked Chieftain Reyva
+   Vosh 0K 0D" -- numbers and emoji before the card is even identified. Built from card DATA rather
+   than that text so 0K/0D become "0 wins, 0 losses" and Pristine/Locked/In-deck become words, in
+   the order you would actually ask: identity, stats, ownership, record, status.
+
+   tabindex is -1 deliberately: the tile keeps its name and stays reachable by screen-reader browse
+   mode and by pointer, but Tab does not walk 159 cards before reaching the filters above them. */
+function vaultCardLabel(c, e){
+  if(!c) return '';
+  var key=c.uid||c.name, parts=[];
+  parts.push(((typeof dispName==='function')?dispName(c.name):c.name)+'.');
+  parts.push((c.rarity||'common')+', cost '+((typeof conjureCost==='function')?conjureCost(c):'?')+', power '+(c.pow!=null?c.pow:'?')+'.');
+  var owned=(e&&e.count!=null)?e.count:(ownedCopies[key]||0);
+  parts.push(owned<=0 ? 'Not owned.' : (owned===1 ? '1 copy owned.' : owned+' copies owned.'));
+  if(owned>0){
+    var rec=(typeof kdOf==='function')?kdOf(c):{k:c.kills||0,d:c.deaths||0};
+    parts.push('Record '+(rec.k||0)+(rec.k===1?' win, ':' wins, ')+(rec.d||0)+(rec.d===1?' loss.':' losses.'));
+    if((typeof isPristine==='function')?isPristine(c):false) parts.push('Pristine.');
+    if(typeof activeDeck!=='undefined' && activeDeck.has(key)) parts.push('In your deck.');
+    if((typeof isCardLocked==='function') && isCardLocked(key)) parts.push('Locked.');
+  }
+  return parts.join(' ').replace(/"/g,'&quot;');
+}
 function buildVault(){
   const grid=document.getElementById('vault-grid');
   const _dupCounts = ownedNameCounts();
@@ -14477,7 +14535,7 @@ function buildVault(){
     const c=e.c;
     const pristine=isPristine(c)?`<span class="vc-pristine" data-kw="Pristine">◈ Pristine</span>`:'';
     const inDeck=activeDeck.has(c.uid||c.name)?'in-deck':'';
-    return `<div class="vault-card ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()} ${inDeck} ${e.fresh?'is-fresh':''} ${c.won?'is-won':''} ${foilClass(c)} ${frameClass(c)} ${e.locked?'locked-card':(typeof cardStateClasses==='function'?cardStateClasses(c):'')}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}',${e.fresh?'true':'false'})" onmouseenter="cancelHidePreview();previewPoolCardReadable('${(c.uid||c.name).replace(/'/g,"\\'")}',this)" onmouseleave="scheduleHidePreview()">
+    return `<div class="vault-card ${c.rarity} camp-${(c.camp||(typeof campOf==='function'?campOf(c):'Amageras')).toLowerCase()} ${inDeck} ${e.fresh?'is-fresh':''} ${c.won?'is-won':''} ${foilClass(c)} ${frameClass(c)} ${e.locked?'locked-card':(typeof cardStateClasses==='function'?cardStateClasses(c):'')}" role="button" tabindex="-1" aria-label="${vaultCardLabel(c, e)}" onclick="openCardDetail('${(c.uid||c.name).replace(/'/g,"\\'")}',${e.fresh?'true':'false'})" onmouseenter="cancelHidePreview();previewPoolCardReadable('${(c.uid||c.name).replace(/'/g,"\\'")}',this)" onmouseleave="scheduleHidePreview()">
       <div class="vc-art vc-frame">
         ${bigCardHTML(c)}
         ${pristine}
