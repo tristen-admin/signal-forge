@@ -1122,6 +1122,16 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
    Master via campOf() -- the same identity rule Bloodlines Clash already uses (see note above
    campOf/ascCampCls). Real CAMP_COLOR/CAMP_TITLE/CAMP_ICON, not invented flavor. Purely additive:
    a new element above the existing hero, everything else on the Hub keeps its current styling. */
+.identity-strip{display:flex;gap:10px;margin:0 0 14px;flex-wrap:wrap}
+.identity-strip .id-cell{flex:1 1 170px;min-width:0;display:flex;flex-direction:column;gap:2px;
+  background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:11px 14px}
+.identity-strip .id-cell.empty{border-style:dashed}
+.identity-strip .id-k{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--text3)}
+.identity-strip .id-v{font-size:15px;font-weight:800;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.identity-strip .id-v.none{color:var(--text3);font-weight:600}
+.identity-strip .id-sub{font-size:10px;color:var(--text3);overflow:hidden;text-overflow:ellipsis}
+.identity-strip .id-sub b{color:var(--gold)}
+@media(max-width:640px){.identity-strip .id-cell{flex:1 1 100%}}
 .camp-banner{
   --camp-c:#4a4a44; --camp-d:#222220;
   position:relative;padding:12px 16px 18px;text-align:center;
@@ -2790,7 +2800,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <button aria-label="Conditions" class="navitem" id="nav-conds" onclick="show('conds',this)"><span class="ni-icon">🎲</span><span class="brand-text">Conditions</span></button>
         <button aria-label="Abilities" class="navitem" id="nav-abil" onclick="show('abil',this)"><span class="ni-icon">✦</span><span class="brand-text">Abilities</span></button>
         <button aria-label="Card Growth" class="navitem" id="nav-growth" onclick="show('growth',this)"><span class="ni-icon">🌱</span><span class="brand-text">Card Growth</span></button>
-        <button aria-label="Decklists" class="navitem" id="nav-decklists" onclick="show('decklists',this);buildDecklists()"><span class="ni-icon">📋</span><span class="brand-text">Decklists</span></button>
+        <button aria-label="Decklists" class="navitem dev-only" id="nav-decklists" onclick="show('decklists',this);buildDecklists()"><span class="ni-icon">📋</span><span class="brand-text">Decklists</span></button>
       </div>
     </div>
     <!-- 7/22/26: split the old single "Codex" group (7 items -- rules reference mixed in with
@@ -2876,19 +2886,21 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <span class="ph-word">PLAY</span>
         <span class="ph-sub">choose a mode</span>
       </button>
-      <div class="camp-banner camp-none" id="camp-banner">
-        <div class="cb-sigil" id="cb-sigil">◈</div>
-        <div class="cb-title" id="cb-title">No Camp Sworn</div>
-        <div class="cb-sub" id="cb-sub">Name a Deck Master in the Deck Builder to swear allegiance and raise your Camp's banner</div>
+      <!-- 8/15/26 (owner): was a camp banner reading e.g. "OMITSUKI'S PATH" after the player had
+           chosen "Ironsworn" — two names for the same choice, with nothing connecting them. Replaced
+           with the three things a player actually wants on their own Hub: who their Deck Master is,
+           who they are, and what rank they are working on. -->
+      <div class="identity-strip" id="identity-strip">
+        <div class="id-cell id-dm" id="id-dm"></div>
+        <div class="id-cell id-name" id="id-name"></div>
+        <div class="id-cell id-rank" id="id-rank"></div>
       </div>
       <div class="hub-hero">
         <div class="hero-left">
-          <div class="hero-welcome">
-            <div class="hw-eyebrow">Welcome back, Conjurer</div>
-            <h1 id="hub-headline">Your vault holds 41 cards. Apex records run deep.</h1>
-            <p>You are the Conjurer — an arena prize-fighter calling spirits of legend into the ring, each one blessed by Amagera's light, tempered by Kitanoo's storm, or touched by Omitsuki's shadow. Every card you summon carries its record into the colosseum forever: each win etched deeper into legend, each loss a scar that never fades. Assemble your roster, then step into the arena and let them fight for glory.</p>
-          </div>
-          <div class="stat-row" id="hub-stats"></div>
+          <!-- 8/15/26 (owner): the "Welcome back, Conjurer" eyebrow, the vault-count headline and the
+             lore paragraph are gone. It greeted a brand-new player with "welcome BACK", and a
+             cold playtest called the whole block jargon it could not act on. The identity strip
+             below carries the useful part. -->
           <div class="rank-panel" id="hub-rank"></div>
           <div class="quest-row" id="hub-quests"></div>
         </div>
@@ -2990,8 +3002,8 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <div class="deck-pool-col">
           <div class="deck-filter-bar">
             <div class="vh-group dfb-own"><span class="vh-label">Show</span>
-              <button class="filter-chip own-chip on" onclick="filterDeckOwned('all',this)">All</button>
-              <button class="filter-chip own-chip owned" onclick="filterDeckOwned('owned',this)">✓ Owned</button>
+              <button class="filter-chip own-chip" onclick="filterDeckOwned('all',this)">All</button>
+              <button class="filter-chip own-chip owned on" onclick="filterDeckOwned('owned',this)">✓ Owned</button>
               <button class="filter-chip own-chip" onclick="filterDeckOwned('unowned',this)">Unowned</button>
               <button class="filter-chip own-chip" onclick="filterDeckOwned('dup',this)">🗃 Duplicates</button>
             </div>
@@ -13057,7 +13069,11 @@ function validateDeckMaster(){
 }
 
 // ══ DECK-BUILDER FILTER / SORT / KEYWORD ══
-let deckFilter='all', deckSort='rarity', deckKeyword=null, deckOwnFilter='all', deckCostFilter=null;
+// 8/15/26 (owner): deckOwnFilter defaults to 'owned', not 'all'. A new player's first view of
+// "their" collection was a grid mostly stamped "Not owned" — cards they cannot use, shown
+// ahead of the ones they can. The Owned/All chips are right there for anyone who wants the
+// full catalogue; the default just stops leading with what you do not have.
+let deckFilter='all', deckSort='rarity', deckKeyword=null, deckOwnFilter='owned', deckCostFilter=null;
 // Playtest Mode (8/7/26): unlocks every card for deckbuilding -- owner + other playtesters can try
 // any archetype decklist without owning it yet. Deliberately a client-only overlay: it never
 // touches ownedCopies/activeDeck's real contents, only what the Deck Builder's OWNERSHIP GATES
@@ -13072,6 +13088,12 @@ let deckFilter='all', deckSort='rarity', deckKeyword=null, deckOwnFilter='all', 
 let playtestMode = lsGet('sf_playtest_mode', false);
 function isOwned(c){ return playtestMode || (ownedCopies[c.uid||c.name]||0)>0; }
 function setPlaytestMode(on){
+  // 8/15/26 (owner): the nine ready-built archetype decklists are a DEV tool, not a player-facing
+  // screen. A cold playtest opened the Deck Builder area as a brand-new player, found nine decks it
+  // had not made minutes after being told to choose one path, and could not tell which was even
+  // active — it named that screen as the moment it would have quit. Now gated with dev mode.
+  try{ document.querySelectorAll('.dev-only').forEach(function(el){ el.style.display = on ? '' : 'none'; }); }catch(e){}
+
   playtestMode=!!on; lsSet('sf_playtest_mode', playtestMode);
   var btn=document.getElementById('playtest-toggle');
   if(btn){ btn.classList.toggle('on', playtestMode); btn.textContent = playtestMode ? '🔓 Playtest Mode: ON' : '🔓 Playtest Mode'; }
@@ -14199,21 +14221,35 @@ function buildHub(){
 // identity" rule Bloodlines Clash already uses (see note above campOf/ascCampCls). Real
 // CAMP_COLOR/CAMP_TITLE/CAMP_ICON constants, not invented flavor -- no Deck Master named yet shows
 // a neutral prompt instead of assigning a random camp.
+/* 8/15/26 (owner) — replaced the camp banner. It announced a Camp ("OMITSUKI'S PATH") the player
+   never chose by that name, right after they picked "Ironsworn", and a cold playtest assumed it had
+   misclicked. This shows the three things that are actually theirs: Deck Master, name, rank.
+   Kept the renderCampBanner() name so the three existing call sites keep working. */
 function renderCampBanner(){
-  var el=document.getElementById('camp-banner'); if(!el) return;
   var dm=(typeof deckMasterCard!=='undefined')?deckMasterCard:null;
-  var camp=dm?campOf(dm):null;
-  el.className='camp-banner'+(camp?' camp-'+camp.toLowerCase():' camp-none');
-  var sigil=document.getElementById('cb-sigil'), title=document.getElementById('cb-title'), sub=document.getElementById('cb-sub');
-  if(camp){
-    if(sigil) sigil.textContent=CAMP_ICON[camp]||'◈';
-    if(title) title.textContent=CAMP_TITLE[camp]||camp;
-    var _dmc=COLLECTION.find(function(c){return (c.uid||c.name)===dm;});
-    if(sub) sub.textContent=(_dmc?_dmc.name:dm)+' — your Deck Master';
+  var dmEl=document.getElementById('id-dm'), nmEl=document.getElementById('id-name'), rkEl=document.getElementById('id-rank');
+  if(!dmEl) return;
+  if(dm){
+    var _dmc=COLLECTION.find(function(x){ return (x.uid||x.name)===dm; });
+    var camp=(typeof campOf==='function')?campOf(dm):null;
+    dmEl.innerHTML='<span class="id-k">Deck Master</span><span class="id-v">'+((typeof dispName==='function')?dispName(_dmc?_dmc.name:dm):(_dmc?_dmc.name:dm))+'</span>'+
+      (camp?'<span class="id-sub">'+((typeof CAMP_ICON!=='undefined'&&CAMP_ICON[camp])||'')+' '+camp+'</span>':'');
+    dmEl.classList.remove('empty');
   } else {
-    if(sigil) sigil.textContent='◈';
-    if(title) title.textContent='No Camp Sworn';
-    if(sub) sub.textContent="Name a Deck Master in the Deck Builder to swear allegiance and raise your Camp's banner";
+    // The one instruction the Hub gives must say HOW, not just what (owner).
+    dmEl.innerHTML='<span class="id-k">Deck Master</span><span class="id-v none">None yet</span>'+
+      '<span class="id-sub">Deck Builder \u2192 tap a card \u2192 <b>Set as Deck Master</b></span>';
+    dmEl.classList.add('empty');
+  }
+  var handle=(typeof SF_ONLINE!=='undefined'&&SF_ONLINE&&SF_ONLINE.handle)?SF_ONLINE.handle:
+             ((typeof guestMode!=='undefined'&&guestMode)?'Guest':'Not signed in');
+  if(nmEl) nmEl.innerHTML='<span class="id-k">Commander</span><span class="id-v">'+handle+'</span>';
+  var r=(typeof currentRankDef==='function')?currentRankDef():null;
+  if(rkEl){
+    if(r){
+      var done=r.missions.filter(function(m){ return (rankProgress[m.id]||0)>=m.target; }).length;
+      rkEl.innerHTML='<span class="id-k">Rank '+r.n+'</span><span class="id-v">'+r.name+'</span><span class="id-sub">'+done+' / '+r.missions.length+' missions</span>';
+    } else rkEl.innerHTML='<span class="id-k">Rank</span><span class="id-v">Max</span>';
   }
 }
 function ownedFeaturedList(){ return featuredCards.filter(key=>COLLECTION.find(c=>(c.uid||c.name)===key) && (ownedCopies[key]||0)>0); }
@@ -16800,6 +16836,7 @@ initOwnedCopies();
 (function(){ try{ if(typeof COLLECTION!=='undefined') COLLECTION.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.races=racesOf(c.name); c.camp=campOf(c.name);}); if(typeof OPP_CARDS!=='undefined') OPP_CARDS.forEach(function(c){ if(c.rarity==='uncommon') c.rarity='common'; c.race=raceOf(c.name); c.races=racesOf(c.name); c.camp=campOf(c.name);}); var _pk=[]; if(typeof PACKS!=='undefined')_pk=_pk.concat(PACKS); if(typeof FORGE_PACKS!=='undefined')_pk=_pk.concat(FORGE_PACKS); _pk.forEach(function(p){ if(p.odds&&p.odds.uncommon!=null){ p.odds.common=(p.odds.common||0)+p.odds.uncommon; delete p.odds.uncommon; } }); }catch(e){} })();
   supply = defaultSupply(); cardSupply=defaultCardSupply();
 const _hadSave=(function(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}})();
+try{ document.querySelectorAll('.dev-only').forEach(function(el){ el.style.display = (typeof playtestMode!=='undefined'&&playtestMode) ? '' : 'none'; }); }catch(e){}   /* dev-only screens hidden unless playtest mode is on */
 window._sfReturningSession = _hadSave;   // captured before loadState()/startNewPlayer() can write a fresh save -- Hub's one-time reveal reads this
 loadState();
 applyAscendantFrame();
