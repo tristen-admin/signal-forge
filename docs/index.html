@@ -3224,7 +3224,12 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="lobby-head">
       <div class="lh-eyebrow">Online · Live Server</div>
       <h1>KOTEI Online</h1>
-      <p>Your online account lives <strong>on the server</strong>, separate from this device's local progress. Everything on this machine — your Vault, decks, Reincarnation run — stays exactly as it is and is never uploaded.</p>
+      <!-- 8/15/26 — this said local progress "is never uploaded", which stopped being true when
+     registration started migrating the local save (sfMigratePayload / h_register). A cold
+     playtest caught it as a straight contradiction against the sign-up gate's bold promise
+     that everything carries over. Rewritten to describe what actually happens, including the
+     part that is still true: signing IN to an existing account never overwrites it. -->
+      <p><strong>Creating an account carries this device's progress with it</strong> — your cards, their records and your Zenni are copied up once, and the account becomes the real home for them. <em>Signing in</em> to an account you already have does not upload anything: it loads that account as it stands, and this device's local save is left untouched.</p>
     </div>
     <div id="online-body"></div>
   </div>
@@ -5653,6 +5658,7 @@ function _matchEndBgStart(){
   vid.onpause = function(){ if(vid.ended) return; vid.play().catch(function(){}); };
 }
 function matchEndHome(){
+  setTimeout(_maybeStartHubTour, 400);   /* queued hub tour, if the duel tutorial just ended */
   document.getElementById('match-end').classList.remove('show');
   matchComplete = false;
   clearTurnTimers();
@@ -13387,12 +13393,12 @@ var TUTORIAL_SCRIPT=[
    to it (see sfContinueAsGuest), so the choice is "make progress permanent" vs "keep it on this
    device" -- never a wall. */
 var HUB_TUTORIAL_SCRIPT=[
- {say:"That's the duel. Now the rest of it -- thirty seconds, then you're free.", spot:null, btn:"Go on"},
+ {say:"That's the duel. Now the rest of it \u2014 thirty seconds, then you're free.", spot:null, btn:"Go on"},
  {say:"<b>PLAY</b> is the only button you ever need. Every mode lives behind it, and each one tells you what it puts at risk before you commit.", spot:'.play-hero', btn:"Got it"},
- {say:"Some modes are <b>records safe</b> -- a loss leaves no mark. In Ranked and Staked, every duel is written to the card <i>forever</i>. That is the whole game: your cards carry their history.", spot:'.play-hero', btn:"Understood"},
- {say:"A <b>Location</b> reveals before every duel and bends the rules -- extra power, random swings, whole new conditions. Read it before you commit; learning them is most of the skill.", spot:'#nav-conds', btn:"Next"},
- {say:"<b>Card DNA</b> is a card's real record -- kills, deaths, and the chain of everyone who ever fought with it. A veteran card is worth more than a fresh one.", spot:'#nav-dna', btn:"Next"},
- {say:"Your <b>Vault</b> holds everything you own. Spare copies can be fed into a card you keep, or dismantled for Zenni.", spot:'#nav-vault', btn:"Next"},
+ {say:"Some modes are <b>records safe</b> \u2014 a loss leaves no mark. In Ranked and Staked, every duel is written to the card <i>forever</i>. That is the whole game: your cards carry their history.", spot:'.play-hero', btn:"Understood"},
+ {say:"A <b>Condition</b> reveals before every duel and bends the rules \u2014 extra power, random swings, whole new rules for that one clash. Read it before you commit; learning them is most of the skill.", spot:'#nav-hub', btn:"Next"},
+ {say:"<b>Card DNA</b> is a card's real record \u2014 kills, deaths, and the chain of everyone who ever fought with it. A veteran card is worth more than a fresh one.", spot:null, btn:"Next"},
+ {say:"Your <b>Vault</b> holds everything you own. Spare copies can be fed into a card you keep, or dismantled for Zenni.", spot:null, btn:"Next"},
  {say:"That is everything. One last thing and you are done.", spot:null, btn:"Finish"}
 ];
 var hubTutorialMode=false, hubTutorialStep=0;
@@ -13432,13 +13438,13 @@ function openSignupGate(){
     ov.innerHTML='<div class="sg-panel">'+
       '<div class="sg-eyebrow">One last thing</div>'+
       '<h2>Make it count</h2>'+
-      '<p>You have cards with a record now. Create an account and all of it -- every card, every mark on it, your Zenni -- becomes <b>yours</b>: saved, tracked, and playable against real opponents.</p>'+
+      '<p>You have cards with a record now. Create an account and all of it -- every card, every mark on it, your Zenni \u2014 becomes <b>yours</b>: saved, tracked, and playable against real opponents.</p>'+
       '<p class="sg-note">&#10004; Everything you just earned carries over. Nothing resets.</p>'+
       '<div class="sg-actions">'+
         '<button class="sg-primary" onclick="_sgClose();show(\'online\')">Create my account</button>'+
         '<button class="sg-ghost" onclick="sfContinueAsGuest()">Play as guest</button>'+
       '</div>'+
-      '<p class="sg-fine">As a guest your progress stays in this browser only -- clearing site data loses it, and you cannot play online. You can sign up later from Online.</p>'+
+      '<p class="sg-fine">As a guest your progress stays in this browser only \u2014 clearing site data loses it, and you cannot play online. You can sign up later from Online.</p>'+
     '</div>';
     document.body.appendChild(ov);
   }
@@ -13531,7 +13537,22 @@ function startTutorial(){ tutorialMode=true; tutorialStep=0; _coachCSS();
   var _howto=document.getElementById('howto-ov'); if(_howto && _howto.classList.contains('on')) _howto.classList.remove('on');
   showCoachStep();
 }
-function endTutorial(){ tutorialMode=false; ['coach-box','coach-spot','coach-fulldim'].forEach(function(id){ var e=document.getElementById(id); if(e) e.remove(); }); var _hb=document.getElementById('howto-btn'); if(_hb) _hb.style.display=''; try{ localStorage.setItem('sf_tutorial_done','1'); }catch(e){} if(typeof toast==='function') toast('🎓 Duel tutorial complete.', true); if(typeof startHubTutorial==='function') setTimeout(startHubTutorial, 700); }   /* battle -> hub tour -> login, per owner */
+function endTutorial(){ tutorialMode=false; ['coach-box','coach-spot','coach-fulldim'].forEach(function(id){ var e=document.getElementById(id); if(e) e.remove(); }); var _hb=document.getElementById('howto-btn'); if(_hb) _hb.style.display=''; try{ localStorage.setItem('sf_tutorial_done','1'); }catch(e){} if(typeof toast==='function') toast('🎓 Duel tutorial complete.', true); _hubTourPending=true; }   /* battle -> hub tour -> login, per owner -- but NOT mid-match, see below */
+/* 8/15/26 — the hub tour used to fire on a 700ms timer straight out of endTutorial(), and its
+   first act is show('hub'). The duel tutorial's last step says "finish this match at your own
+   pace" and its button says "Finish", so a cold playtest clicked it expecting to dismiss the
+   coach, got ejected from the match at 1-0 of 7, and the duel it had just been taught to win
+   never counted. The tour is now QUEUED and only runs once the player is actually out of a
+   match -- either the match completes, or they leave it themselves. */
+var _hubTourPending=false;
+function _maybeStartHubTour(){
+  if(!_hubTourPending) return;
+  if(typeof matchComplete!=='undefined' && matchComplete) return;      // result screen still up
+  if(typeof phase!=='undefined' && phase && phase!=='predraw' && !_outOfMatch()) return;
+  _hubTourPending=false;
+  if(typeof startHubTutorial==='function') setTimeout(startHubTutorial, 500);
+}
+function _outOfMatch(){ var v=document.querySelector('.view.on'); return !v || v.id!=='v-turn'; }
 window.startTutorial=startTutorial; window.tutorialAdvance=tutorialAdvance; window.endTutorial=endTutorial; window.tutorialStartDuel=tutorialStartDuel;
 
 
@@ -16717,6 +16738,7 @@ function buildDraft(){
 // duplicating its logic a second time (the Weekend Tournament feature already had to special-case
 // hudFold()/exitMatch() divergence once, at line ~13708 -- proof this gap was a real, live trap).
 function exitMatch(){
+  setTimeout(_maybeStartHubTour, 400);   /* queued hub tour, if the duel tutorial just ended */
   clearTurnTimers();
   if(typeof hudFold==='function') hudFold();
   else show('lobby', document.getElementById('nav-lobby'));
