@@ -1367,6 +1367,24 @@
    "timing": "on",
    "starter": false,
    "opp": false
+  },
+  "Sirefax the Warden": {
+   "pow": 16,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Record Guard. On commit: +3 vs a Pristine opponent.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
+  },
+  "Mordezh, Blood Prophet": {
+   "pow": 15,
+   "rarity": "ultra",
+   "cost": 3,
+   "abil": "Bloodrage: +5 while behind; +2 if you lost last.",
+   "timing": "on",
+   "starter": false,
+   "opp": false
   }
  },
  "called": {

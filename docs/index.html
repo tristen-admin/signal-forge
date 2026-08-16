@@ -12929,7 +12929,7 @@ function pvpSyncDeck(done){
     sfApi('POST', '/api/deck/set', {cards: uids}, function(e2){
       if(e2){ done && done(e2); return; }
       if(missing.length && typeof toast==='function'){
-        toast('⚠ '+missing.length+' card'+(missing.length===1?'':'s')+' in your deck are not owned on this account — playing with '+uids.length+'.', false);
+        toast('⚠ '+missing.length+' card'+(missing.length===1?'':'s')+' in your deck '+(missing.length===1?'is':'are')+' not owned on this account — playing with '+uids.length+'.', false);
       }
       done && done(null, uids.length);
     });
