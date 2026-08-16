@@ -605,7 +605,12 @@ def h_pvp_queue(user_id, body):
     owned = _pvp_deck(user_id)
     if len(owned) < 4: return 400, {"error": "need at least 4 cards in your deck to queue"}
     handle = store.conn().execute("SELECT handle FROM users WHERE id=?", (user_id,)).fetchone()["handle"]
-    return pvp.join(user_id, handle, owned, 3 if body.get("mode") == "ranked" else 7)
+    # deckMaster rides along with the queue request (8/15/26) so the server can resolve Deck Master
+    # abilities. Validated against the real catalog rather than trusted: an unknown name becomes None,
+    # which simply means "no Deck Master", never a crash or an invented bonus.
+    _dm = body.get("deckMaster")
+    if _dm not in rules.CARD_CATALOG: _dm = None
+    return pvp.join(user_id, handle, owned, 3 if body.get("mode") == "ranked" else 7, deck_master=_dm)
 
 def h_pvp_leave(user_id, body):   return pvp.leave(user_id)
 def h_pvp_state(user_id, body):   return pvp.state(user_id, body.get("pvpId"))
@@ -628,7 +633,9 @@ def h_pvp_challenge_join(user_id, body):
     owned = _pvp_deck(user_id)
     if len(owned) < 4: return 400, {"error": "need at least 4 cards in your deck to play"}
     handle = store.conn().execute("SELECT handle FROM users WHERE id=?", (user_id,)).fetchone()["handle"]
-    return pvp.join_challenge(user_id, handle, owned, body.get("code"))
+    _dm2 = body.get("deckMaster")
+    if _dm2 not in rules.CARD_CATALOG: _dm2 = None
+    return pvp.join_challenge(user_id, handle, owned, body.get("code"), deck_master=_dm2)
 
 # 8/7/26: challenging a friend straight from the Friends panel -- same CHALLENGES mechanism as the
 # code-sharing flow above, just targeted at a specific account instead of handed out as a code to

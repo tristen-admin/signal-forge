@@ -245,6 +245,11 @@ def _ctx(pc, oc, m, rec, cond_id):
     return {"opp_deaths":oc["deaths"],"opp_kills":oc["kills"],"pc_kills":rec["k"],"pc_deaths":rec["d"],
             "opp_pow":oc["pow"],"pc_pow":pc["pow"],"last_result":m["lastResult"],"match_commits":m["matchCommits"],
             "player_wins":m["playerScore"][0],"player_losses":m["playerScore"][1],"hand_len":len(m["hand"]),
+            # 8/15/26: the Deck Master tables exported from the client use the short forms `wins`/
+            # `losses` where CARD_RULES uses player_wins/player_losses. Same numbers, two names in
+            # the source data -- aliased here rather than rewriting the exported rules, so a
+            # re-export from the client cannot silently break them again.
+            "wins":m["playerScore"][0],"losses":m["playerScore"][1],
             "wc_len":len(m["winnersCircle"]),"skullchain":m["skullchainKills"],"ragwing":m["ragwingWins"],
             "banish_len":len(m.get("banishPile") or []),
             "rear_count":0, "remnant_count":len(m.get("deathRemnants") or []), "hand_banished":0,
@@ -286,6 +291,68 @@ def energy_regen_per_turn(match_commits):
     if d < 5: return 1
     return max(2, round(duel_energy_cap(match_commits) / 3))
 
+# ── DECK MASTER (8/15/26, owner: "deck master abilities need to work, it's integral") ──────────
+# PvP had no deck-master concept at all: the client never sent one and the server never modelled
+# one, so every online duel resolved as if nobody had a Deck Master. These tables are exported from
+# the client's own DM_EXCLUSIVE / DM_VANILLA_OVERRIDE / ARCHETYPE_VANILLA / ARCHETYPE_MEMBERS by
+# sync_dm_rules.py, and use the SAME rule schema as CARD_RULES, so the interpreter below is the
+# existing one rather than a second dialect that could drift from it.
+#
+# Resolution order mirrors the client (applyDeckMasterResolveEffects): a named per-card exclusive
+# wins outright; otherwise a per-card vanilla override; otherwise the shared rule for the
+# archetype the DM belongs to. Only one tier ever fires.
+_DM_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dm_rules.json")
+try:
+    with open(_DM_PATH, encoding="utf-8") as _f: _DM = json.load(_f)
+except Exception:
+    _DM = {"DM_EXCLUSIVE": {}, "DM_VANILLA_OVERRIDE": {}, "ARCHETYPE_VANILLA": {}, "ARCHETYPE_MEMBERS": {}}
+DM_EXCLUSIVE        = _DM.get("DM_EXCLUSIVE", {})
+DM_VANILLA_OVERRIDE = _DM.get("DM_VANILLA_OVERRIDE", {})
+ARCHETYPE_VANILLA   = _DM.get("ARCHETYPE_VANILLA", {})
+ARCHETYPE_MEMBERS   = _DM.get("ARCHETYPE_MEMBERS", {})
+
+def dm_archetype_of(dm_name):
+    """Which archetype a Deck Master belongs to, for the shared-rule tier."""
+    for arch, members in ARCHETYPE_MEMBERS.items():
+        if dm_name in members: return arch
+    return None
+
+def dm_rules_for(dm_name, pc_name):
+    """The one rule list that applies, in the client's own precedence order."""
+    if not dm_name: return []
+    if dm_name in DM_EXCLUSIVE: return DM_EXCLUSIVE[dm_name]
+    if pc_name in DM_VANILLA_OVERRIDE: return DM_VANILLA_OVERRIDE[pc_name]
+    arch = dm_archetype_of(dm_name)
+    return ARCHETYPE_VANILLA.get(arch, []) if arch else []
+
+def apply_deck_master(dm_name, pc_name, ctx, playerPow, oppPow, log, m=None):
+    """Same interpreter as CARD_RULES. Ops this build cannot evaluate server-side (raiseRemnant and
+    friends, which need board state PvP does not track) are SKIPPED rather than raised on, so an
+    unsupported DM degrades to no bonus instead of failing the whole duel — and is reported."""
+    rules = dm_rules_for(dm_name, pc_name)
+    skipped = []
+    for rule in rules:
+        # A rule whose condition references context this build does not compute must be SKIPPED, not
+        # fatal. eval_cond raises KeyError on an unknown ctx key, and a Deck Master is chosen long
+        # before a duel starts -- letting that kill resolve() would take the whole match down over a
+        # cosmetic bonus. Reported through `skipped` so it surfaces in the log instead of vanishing.
+        try:
+            if not eval_cond(rule.get("if"), ctx): continue
+        except KeyError as ex:
+            skipped.append(["ctx:" + str(ex).strip("'")]); continue
+        ops = set(rule.keys()) - {"if", "log", "x"}
+        if not ops or not ops.issubset(KNOWN_RULE_OPS):
+            skipped.append(sorted(ops - KNOWN_RULE_OPS) or ["(empty)"])
+            continue
+        if "add" in rule: playerPow += rule["add"]
+        elif "addvar" in rule: playerPow += ctx.get(rule["addvar"], 0) * rule.get("x", 1)
+        elif "mult" in rule: playerPow = int(playerPow * rule["mult"])
+        elif "set" in rule: playerPow = ctx.get(rule["set"], playerPow)
+        elif "oppadd" in rule: oppPow += rule["oppadd"]
+        else: continue
+        if rule.get("log"): log.append(rule["log"])
+    return playerPow, oppPow, skipped
+
 def _apply_rules(name, ctx, playerPow, oppPow, log, m=None):
     for rule in RULES.get(name, []):
         if not eval_cond(rule.get("if"), ctx): continue
@@ -304,7 +371,7 @@ def _apply_rules(name, ctx, playerPow, oppPow, log, m=None):
 
 # ── the faithful resolve() port ──
 def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None, rear_guards=None,
-            opp_pow_override=None, forced_outcome=None):
+            opp_pow_override=None, forced_outcome=None, deck_master=None):
     """pc, oc: card dicts. pc_record: the player card's live DB record {k,d,ok,od} (drives traits +
     the pc.kills used by conditions). rear_guards: list of card dicts staged alongside pc this duel
     (Milestone B — RG_SLOTS()-capped, validated by the caller). Returns dict with outcome/powers/
@@ -370,6 +437,15 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None, rear_guards=
                 log.append("🔄 Veronica: opponent has no ability")
         else:
             playerPow, oppPow = _apply_rules(n, ctx, playerPow, oppPow, log, m)
+
+        # Deck Master fires after the fighter's own rules, same order as the client's
+        # applyDeckMasterResolveEffects. Skipped op-codes are surfaced in the duel log rather than
+        # silently dropping the bonus -- a DM that cannot resolve server-side should be visible.
+        if deck_master:
+            playerPow, oppPow, _dm_skipped = apply_deck_master(deck_master, n, ctx, playerPow, oppPow, log, m)
+            if _dm_skipped:
+                log.append(f"\u2605 {deck_master}: part of this Deck Master's ability needs board state "
+                           f"online play doesn't track yet ({', '.join(sorted({o for g in _dm_skipped for o in g}))}) \u2014 not applied")
 
         # 8/5/26 Milestone A: opponent's OWN on-commit ability now fires too (client fires BOTH
         # fighters' CARD_RULES every duel; engine.py only ever fired the player's side, leaving any

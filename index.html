@@ -12754,7 +12754,7 @@ function friendRequest(){
 function friendAccept(id){ sfApi('POST', '/api/friends/accept', {id:id}, function(err){ if(err){ _friendsMsg(err,'err'); return; } buildFriendsPanel(); }); }
 function friendDecline(id){ sfApi('POST', '/api/friends/decline', {id:id}, function(err){ if(err){ _friendsMsg(err,'err'); return; } buildFriendsPanel(); }); }
 function friendChallenge(handle){
-  sfApi('POST', '/api/pvp/challenge/direct', {handle: handle, mode: PVP.bestOf===3?'ranked':undefined}, function(err, data){
+  sfApi('POST', '/api/pvp/challenge/direct', {handle: handle, mode: PVP.bestOf===3?'ranked':undefined, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
     if(err){ _friendsMsg(err, 'err'); return; }
     if(data.matched){ pvpEnterMatch(data.pvpId, data.opponent); return; }
     PVP.directChallengeCode = data.code; PVP.directChallengeTarget = handle;
@@ -12778,7 +12778,7 @@ function acceptIncomingChallenge(){
   if(!PVP.incomingChallenge) return;
   var code = PVP.incomingChallenge.code;
   _pvpMsg('Joining…', '');
-  sfApi('POST', '/api/pvp/challenge/join', {code: code}, function(err, data){
+  sfApi('POST', '/api/pvp/challenge/join', {code: code, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
     if(err){ _pvpMsg(err, 'err'); return; }
     PVP.incomingChallenge = null;
     pvpEnterMatch(data.pvpId, data.opponent);
@@ -12835,7 +12835,7 @@ function pvpSetMode(n){ if(PVP.queueTimer||PVP.pvpId) return; PVP.bestOf=n; buil
 
 function pvpFindMatch(){
   _pvpMsg('Searching…', '');
-  sfApi('POST', '/api/pvp/queue', {mode: PVP.bestOf===3?'ranked':undefined}, function(err, data){
+  sfApi('POST', '/api/pvp/queue', {mode: PVP.bestOf===3?'ranked':undefined, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
     if(err){ _pvpMsg(err, 'err'); return; }
     if(data.matched){ pvpEnterMatch(data.pvpId, data.opponent); return; }
     if(!PVP.queueTimer) PVP.queueTimer = setInterval(pvpQueueTick, 2000);
@@ -12851,7 +12851,7 @@ function pvpFindMatch(){
 // the match next time you look). Only an explicit Cancel (pvpLeaveQueue) or a real match now stops it.
 function pvpQueueTick(){
   if(!PVP.queueTimer) return;
-  sfApi('POST', '/api/pvp/queue', {mode: PVP.bestOf===3?'ranked':undefined}, function(err, data){
+  sfApi('POST', '/api/pvp/queue', {mode: PVP.bestOf===3?'ranked':undefined, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
     if(err) return;   // a transient miss on a background poll tick isn't worth interrupting the user over -- the next tick recovers
     if(data.matched){ clearInterval(PVP.queueTimer); PVP.queueTimer=null; pvpEnterMatch(data.pvpId, data.opponent); return; }
     PVP.lastWaiting = data.waiting;
@@ -12873,7 +12873,7 @@ function pvpLeaveQueue(){
 // the challenge endpoints instead of the random-pairing ones.
 function pvpCreateChallenge(){
   _pvpMsg('Creating…', '');
-  sfApi('POST', '/api/pvp/challenge/create', {mode: PVP.bestOf===3?'ranked':undefined}, function(err, data){
+  sfApi('POST', '/api/pvp/challenge/create', {mode: PVP.bestOf===3?'ranked':undefined, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
     if(err){ _pvpMsg(err, 'err'); return; }
     if(data.matched){ pvpEnterMatch(data.pvpId, data.opponent); return; }   // already in a live match
     PVP.challengeCode = data.code;
@@ -12897,7 +12897,7 @@ function pvpJoinChallenge(){
   var code = input ? input.value.trim() : '';
   if(!code){ _pvpMsg('Enter a code first.', 'err'); return; }
   _pvpMsg('Joining…', '');
-  sfApi('POST', '/api/pvp/challenge/join', {code: code}, function(err, data){
+  sfApi('POST', '/api/pvp/challenge/join', {code: code, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
     if(err){ _pvpMsg(err, 'err'); return; }
     pvpEnterMatch(data.pvpId, data.opponent);
   });

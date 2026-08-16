@@ -70,7 +70,7 @@ def _seeded(seed, fn):
         random.setstate(st)
 
 
-def _new_side(user_id, handle, owned, best_of):
+def _new_side(user_id, handle, owned, best_of, deck_master=None):
     """`owned` is the player's real deck, already resolved by the caller (app.py owns deck_load and
     the uid->card mapping). Same shape as app.py's MATCHES session so the two stay recognisable."""
     m = engine.new_match([c["type"] for c in owned], best_of=best_of, lobby_mode=False)
@@ -78,7 +78,7 @@ def _new_side(user_id, handle, owned, best_of):
                   store.conn().execute("SELECT pair,count FROM bonds WHERE user_id=?", (user_id,)).fetchall()}
     hand_cards, deck_cards = owned[:4], owned[4:]
     m["hand"] = [c["type"] for c in hand_cards]
-    return {"user_id": user_id, "handle": handle, "m": m,
+    return {"user_id": user_id, "handle": handle, "m": m, "deck_master": deck_master,
             "hand_cards": hand_cards, "deck_cards": deck_cards, "banish_cards": [],
             "winners_circle_cards": [], "commit": None, "last": None}
 
@@ -113,7 +113,7 @@ def _sides(g, user_id):
 
 
 # ── queue ────────────────────────────────────────────────────────────────────────────────────
-def join(user_id, handle, owned, best_of):
+def join(user_id, handle, owned, best_of, deck_master=None):
     """Pair with anyone already waiting, else take a place in the queue. Returns (status, body).
 
     8/7/26: Ranked (best_of==3) now prefers the closest-RP candidate already queued instead of pure
@@ -136,13 +136,13 @@ def join(user_id, handle, owned, best_of):
         if candidates:
             opp = min(candidates, key=lambda q: abs(q.get("rp", 1000) - my_rp)) if best_of == 3 else candidates[0]
         if not opp:
-            QUEUE.append({"user_id": user_id, "handle": handle, "owned": owned,
+            QUEUE.append({"user_id": user_id, "handle": handle, "owned": owned, "deck_master": deck_master,
                           "best_of": best_of, "joined": time.time(), "rp": my_rp})
             return 200, {"matched": False, "queued": True, "waiting": len(QUEUE)}
         QUEUE.remove(opp)
         # the player who waited is side A, so seating is by arrival and not by who called last
-        g = _new_game(_new_side(opp["user_id"], opp["handle"], opp["owned"], best_of),
-                      _new_side(user_id, handle, owned, best_of), best_of)
+        g = _new_game(_new_side(opp["user_id"], opp["handle"], opp["owned"], best_of, opp.get("deck_master")),
+                      _new_side(user_id, handle, owned, best_of, deck_master), best_of)
         return 200, {"matched": True, "pvpId": g["id"], "opponent": opp["handle"]}
 
 
@@ -191,7 +191,7 @@ def create_challenge(user_id, handle, owned, best_of, target_user_id=None):
         for code in [k for k, ch in CHALLENGES.items() if ch["user_id"] == user_id]:
             del CHALLENGES[code]   # one active challenge per user -- a new one replaces a forgotten stale one
         code = _new_code()
-        CHALLENGES[code] = {"user_id": user_id, "handle": handle, "owned": owned, "best_of": best_of,
+        CHALLENGES[code] = {"user_id": user_id, "handle": handle, "owned": owned, "best_of": best_of, "deck_master": deck_master,
                              "created": time.time(), "target_user_id": target_user_id}
         return 200, {"code": code}
 
@@ -230,7 +230,7 @@ def cancel_challenge(user_id):
         return 200, {"cancelled": removed}
 
 
-def join_challenge(user_id, handle, owned, code):
+def join_challenge(user_id, handle, owned, code, deck_master=None):
     with _LOCK:
         _sweep()
         g = _active_game_for(user_id)
@@ -244,8 +244,8 @@ def join_challenge(user_id, handle, owned, code):
         if ch.get("target_user_id") and ch["target_user_id"] != user_id:
             return 404, {"error": "no match found for that code"}
         del CHALLENGES[key]
-        g = _new_game(_new_side(ch["user_id"], ch["handle"], ch["owned"], ch["best_of"]),
-                      _new_side(user_id, handle, owned, ch["best_of"]), ch["best_of"])
+        g = _new_game(_new_side(ch["user_id"], ch["handle"], ch["owned"], ch["best_of"], ch.get("deck_master")),
+                      _new_side(user_id, handle, owned, ch["best_of"], deck_master), ch["best_of"])
         return 200, {"matched": True, "pvpId": g["id"], "opponent": ch["handle"]}
 
 
@@ -349,24 +349,28 @@ def _resolve_duel(g):
     gb = [engine.card(c["type"]) for c in b["commit"]["rg"]]
     sa, sb = f'{g["id"]}:{n}:a', f'{g["id"]}:{n}:b'
 
-    def run(side, pc, oc, rec, rg, seed, **kw):
-        return _seeded(seed, lambda: engine.resolve(side, pc, oc, cond, pc_record=rec, rear_guards=rg, **kw))
+    # Each side resolves with ITS OWN Deck Master (8/15/26). Passing it here rather than baking it
+    # into the match dict keeps the deepcopy-per-call pattern above intact -- every call already
+    # re-derives from a fresh copy, so the DM has to ride along with the call, not the state.
+    def run(side, pc, oc, rec, rg, seed, dm=None, **kw):
+        return _seeded(seed, lambda: engine.resolve(side, pc, oc, cond, pc_record=rec, rear_guards=rg,
+                                                    deck_master=dm, **kw))
 
     # 1. true powers, each from its own complete state
-    powA = run(copy.deepcopy(a["m"]), pa, pb, ra, ga, sa)["player_pow"]
-    powB = run(copy.deepcopy(b["m"]), pb, pa, rb, gb, sb)["player_pow"]
+    powA = run(copy.deepcopy(a["m"]), pa, pb, ra, ga, sa, dm=a.get("deck_master"))["player_pow"]
+    powB = run(copy.deepcopy(b["m"]), pb, pa, rb, gb, sb, dm=b.get("deck_master"))["player_pow"]
 
     # 2. provisional outcomes against the real opposing power
-    outA = run(copy.deepcopy(a["m"]), pa, pb, ra, ga, sa, opp_pow_override=powB)["outcome"]
-    outB = run(copy.deepcopy(b["m"]), pb, pa, rb, gb, sb, opp_pow_override=powA)["outcome"]
+    outA = run(copy.deepcopy(a["m"]), pa, pb, ra, ga, sa, dm=a.get("deck_master"), opp_pow_override=powB)["outcome"]
+    outB = run(copy.deepcopy(b["m"]), pb, pa, rb, gb, sb, dm=b.get("deck_master"), opp_pow_override=powA)["outcome"]
 
     # 3. reconcile — a guard turning a loss into a tie denies the other side its win
     if "tie" in (outA, outB):
         outA = outB = "tie"
 
     # 4. real pass, joint outcome, state mutated exactly once
-    resA = run(a["m"], pa, pb, ra, ga, sa, opp_pow_override=powB, forced_outcome=outA)
-    resB = run(b["m"], pb, pa, rb, gb, sb, opp_pow_override=powA, forced_outcome=outB)
+    resA = run(a["m"], pa, pb, ra, ga, sa, dm=a.get("deck_master"), opp_pow_override=powB, forced_outcome=outA)
+    resB = run(b["m"], pb, pa, rb, gb, sb, dm=b.get("deck_master"), opp_pow_override=powA, forced_outcome=outB)
 
     _apply(a, resA, powA, powB, b["handle"])
     _apply(b, resB, powB, powA, a["handle"])

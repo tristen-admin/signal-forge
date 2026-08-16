@@ -1,0 +1,323 @@
+{
+ "DM_EXCLUSIVE": {
+  "Arch-Grim Korrin": [
+   {
+    "raiseRemnant": "self_pow",
+    "log": "👻 The Unburied Throne: raises a Death Remnant equal to his own power — no death needed"
+   },
+   {
+    "deathLingerBuffOverride": 10,
+    "log": "👻 The Unburied Throne: his death-buff strengthens to +10 until an enemy dies"
+   }
+  ],
+  "Bannerlord Cassian": [
+   {
+    "addvar": "dm_all_allies",
+    "x": 2,
+    "log": "🤝 Bannerlord's Muster: fires for every ally regardless of cost — +2 power each"
+   }
+  ],
+  "La \"La\" Ballora, the Broodqueen": [
+   {
+    "addvar": "wc_len",
+    "x": 1,
+    "log": "🕷 The Broodqueen's Dominion: +1 power per card in your Winners Circle — nothing she's claimed is ever wasted"
+   }
+  ],
+  "The Long Reckoning": [
+   {
+    "addvar": "wc_len",
+    "x": 1,
+    "log": "⚱ The Reckoning Endures: +1 power per card in your Winners Circle"
+   }
+  ],
+  "Tange Sazen": [
+   {
+    "if": {
+     "v": "wc_len",
+     "op": "==",
+     "n": 0
+    },
+    "add": 8,
+    "log": "⚔ Warpath Ascendant: your Winners Circle is empty — the war never stops, +8 power"
+   }
+  ],
+  "Chieftain Reyva Vosh": [
+   {
+    "addvar": "wc_len",
+    "x": 1,
+    "log": "🏔 Hold's Last Stand: +1 power per Winners Circle card — stacks with her own Warriors in Reserve"
+   }
+  ],
+  "Web-Weaver's Return": [
+   {
+    "addvar": "banish_len",
+    "x": 1,
+    "log": "🕸 The Web Endures: +1 power per card in your banish zone"
+   }
+  ],
+  "Rhaess Korvain": [
+   {
+    "addvar": "banish_len",
+    "x": 1,
+    "log": "🐦‍⬛ Raven's Ledger: +1 additional power per card in your banish zone"
+   }
+  ],
+  "Kotei": [
+   {
+    "addvar": "match_commits",
+    "x": 1,
+    "log": "👑 The Unbroken Reign: +1 power for every duel already played this match — his own printed effect already repeats per round, this compounds it further"
+   }
+  ],
+  "Ahdorah Khaan, Determined Soul": [
+   {
+    "if": {
+     "v": "losses",
+     "op": ">",
+     "n": 0
+    },
+    "add": 4,
+    "log": "🛡 Determined Soul: +4 power once you've weathered a loss this match — Record Guard's whole point is that she rises stronger for it"
+   }
+  ]
+ },
+ "DM_VANILLA_OVERRIDE": {
+  "Widow of the Vigil": [
+   {
+    "if": {
+     "v": "remnant_count",
+     "op": ">",
+     "n": 0
+    },
+    "draw": 2,
+    "log": "☠ Remnant Kinship (Widow's signature): draw 2 on conjure"
+   }
+  ],
+  "Muster-Sergeant Bryn": [
+   {
+    "addvar": "rear_count",
+    "x": 3,
+    "log": "🤝 Muster 3 (new): +3 power per 1-cost ally in support"
+   }
+  ]
+ },
+ "ARCHETYPE_VANILLA": {
+  "Death Remnant": [
+   {
+    "if": {
+     "v": "remnant_count",
+     "op": ">",
+     "n": 0
+    },
+    "draw": 1,
+    "log": "☠ Remnant Kinship: you control a Remnant — draw 1 on conjure"
+   }
+  ],
+  "Muster": [],
+  "Broodswarm": [
+   {
+    "if": {
+     "v": "hand_len",
+     "op": ">=",
+     "n": 4
+    },
+    "add": 2,
+    "log": "🕷 Brood Instinct: +2 power with 4 or more cards in hand"
+   }
+  ],
+  "Warpath": [
+   {
+    "if": {
+     "v": "wc_len",
+     "op": "==",
+     "n": 0
+    },
+    "add": 4,
+    "log": "⚔ Warpath's Momentum: your Winners Circle is empty — +4 power"
+   }
+  ],
+  "Trophy Hall": [
+   {
+    "if": {
+     "v": "wc_len",
+     "op": ">=",
+     "n": 1
+    },
+    "add": 3,
+    "log": "🏛 Trophy Hall's Due: your Winners Circle isn't empty — +3 power"
+   }
+  ],
+  "Radiance": [
+   {
+    "addvar": "charge_capped",
+    "x": 1,
+    "log": "✨ Consecrated Reserve: +1 per Charge held (capped +4)"
+   }
+  ],
+  "Keawe's Circle": [
+   {
+    "if": {
+     "v": "losses",
+     "op": ">",
+     "n": 0
+    },
+    "add": 2,
+    "log": "🤝 Found Family: +2 power once you've lost a duel this match — they don't leave you behind"
+   }
+  ],
+  "Ahdor's Pride": [
+   {
+    "if": {
+     "v": "match_commits",
+     "op": ">=",
+     "n": 2
+    },
+    "add": 2,
+    "log": "🎖 Squad Discipline: +2 power once you've played 2 or more duels this match"
+   }
+  ],
+  "Black Wings": [
+   {
+    "if": {
+     "v": "banish_len",
+     "op": ">",
+     "n": 0
+    },
+    "add": 2,
+    "log": "🖤 Wings in Shadow: +2 power once you've banished a card this match"
+   }
+  ],
+  "Black Council": [
+   {
+    "if": {
+     "v": "behind",
+     "op": ">",
+     "n": 0
+    },
+    "add": 2,
+    "log": "🂠 Court's Advantage: +2 power while you're behind on committed power this duel"
+   }
+  ]
+ },
+ "ARCHETYPE_MEMBERS": {
+  "Death Remnant": [
+   "Arch-Grim Korrin",
+   "Ghorruk \"Gnarly\" Judarr",
+   "Summoned Skull Soldiers",
+   "Uso Oso",
+   "Bone Choirmaster",
+   "Marrow Priest",
+   "Widow of the Vigil",
+   "Gravecaller Voss"
+  ],
+  "Muster": [
+   "Bannerlord Cassian",
+   "Ironsworn Vanguard",
+   "Warden of the Wall",
+   "Oathkeeper Sena",
+   "Muster-Sergeant Bryn",
+   "Chieftain Reyva Vosh"
+  ],
+  "Broodswarm": [
+   "La \"La\" Ballora, the Broodqueen",
+   "Venombrood Queen",
+   "Broodmother",
+   "Hoarder's Gambit",
+   "Web-Tender Matron",
+   "The Gathering Swarm",
+   "Envoy of Tyrants, Ella Ballora",
+   "Web-Weaver's Return"
+  ],
+  "Warpath": [
+   "Tange Sazen",
+   "Kravyn the Collector",
+   "Trophy-Hunter Kessa",
+   "Skullchain Reaver",
+   "Warpath Vanguard",
+   "The Undefeated",
+   "Val Kreigh",
+   "Ruffius Rufeldro",
+   "Bram the Bulwark"
+  ],
+  "Trophy Hall": [
+   "Hall of Champions",
+   "Ash Reckoning",
+   "Twin Ledgers",
+   "Victory Lap",
+   "Coffer-Keeper",
+   "Banked Interest",
+   "The Long Reckoning"
+  ],
+  "Radiance": [
+   "Moro",
+   "Elowen Dawnspear",
+   "Kaelthar the Ascendant",
+   "Oathlit Vanguard"
+  ],
+  "Keawe's Circle": [
+   "Kotei",
+   "Lagertha Waltz",
+   "Hanse Waltz",
+   "Uso Oso",
+   "Bixie Bee",
+   "Melanie",
+   "Heir of Kaiga",
+   "Keawe Kel'rua",
+   "Legend Reborn, Keawe Kel'rua",
+   "Conduit of Chaos, Kleydson",
+   "The Bronzed Beast, Hanse Waltz",
+   "Fenrik Vench",
+   "Yard Sparring Partner",
+   "Barracks Drill Sergeant",
+   "Cadet Corps Recruit",
+   "Writ-Sergeant's Ledger"
+  ],
+  "Ahdor's Pride": [
+   "Ahdorah Khaan, Determined Soul",
+   "Val Kreigh",
+   "Ruffius Rufeldro",
+   "Conduit of Chaos, Kleydson",
+   "Legend Reborn, Keawe Kel'rua",
+   "Ahdorah Khaan, Squad 19 Recruit",
+   "Squad 19 Vanguard",
+   "Squad 19 Medic",
+   "Squad 13 Quartermaster",
+   "Squad 13 Scout",
+   "Barracks Drill Sergeant",
+   "Cadet Corps Recruit",
+   "Writ-Sergeant's Ledger",
+   "Squad 16 Veteran",
+   "Squad 13 Signalman",
+   "Squad 16 Chronicler"
+  ],
+  "Black Wings": [
+   "Black Wings, Ossian Drell",
+   "Corvus",
+   "Kiana",
+   "Rhaess Korvain",
+   "Wren",
+   "Rook",
+   "Falk",
+   "Sable",
+   "Grave-Tithe Acolyte",
+   "Ashen Reclaimer",
+   "Cinder-Marked Hound",
+   "The Black Ledger",
+   "Pyre-Keeper Vayle",
+   "Valcarion"
+  ],
+  "Black Council": [
+   "Darwin",
+   "Young Darwin, Predetermined Dictator",
+   "Zerith Var",
+   "Valcarion",
+   "Envoy of Tyrants, Ella Ballora",
+   "Arch-Grim Korrin",
+   "Cletus Gwyndull",
+   "Kessuae, Tide of Ruin",
+   "Kravyn the Collector",
+   "Court Cipher"
+  ]
+ }
+}
