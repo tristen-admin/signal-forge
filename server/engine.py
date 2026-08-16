@@ -238,10 +238,19 @@ RULES = rules._CAT["rules"]   # canonical rules from catalog.json
 SPELLS = json.load(open(os.path.join(os.path.dirname(__file__), "spells.json"), encoding="utf-8"))
 SPELL_IDS = [s["id"] for s in SPELLS]
 
-def _ctx(pc, oc, m, rec, cond_id):
-    # 8/5/26: banish_len/rear_count/remnant_count/hand_banished are honest 0s -- no real rear-guard/
-    # Called/banish-pile state exists server-side yet (Milestone B). Not faked; will wire for free
-    # once that state exists, same reasoning as everywhere else in this file.
+def _ctx(pc, oc, m, rec, cond_id, rear_guards=None):
+    # 8/16/26 — three Deck Master ctx keys were referenced by the exported tables and never
+    # computed here, so they silently defaulted to 0 via ctx.get(key, 0) in apply_deck_master:
+    # the rule still matched, still logged its text, and still added exactly nothing. That is a
+    # worse failure than a skip -- a skip is visible ("needs board state..."), this looked like it
+    # was working. Confirmed live: Bannerlord Cassian's Muster printed its log line every duel
+    # online with a real board of rear-guards/Winners Circle cards present and no power change.
+    #
+    # rear_count was ALSO hardcoded to 0 with a comment saying no rear-guard state existed
+    # server-side yet -- but resolve() has taken a real `rear_guards` list as a parameter since
+    # rear-guards were wired into PvP (commit 3060bce), it was just never threaded into _ctx().
+    # The comment was accurate when written and stale by the time this was reported.
+    _rc = len(rear_guards or [])
     return {"opp_deaths":oc["deaths"],"opp_kills":oc["kills"],"pc_kills":rec["k"],"pc_deaths":rec["d"],
             "opp_pow":oc["pow"],"pc_pow":pc["pow"],"last_result":m["lastResult"],"match_commits":m["matchCommits"],
             "player_wins":m["playerScore"][0],"player_losses":m["playerScore"][1],"hand_len":len(m["hand"]),
@@ -252,7 +261,13 @@ def _ctx(pc, oc, m, rec, cond_id):
             "wins":m["playerScore"][0],"losses":m["playerScore"][1],
             "wc_len":len(m["winnersCircle"]),"skullchain":m["skullchainKills"],"ragwing":m["ragwingWins"],
             "banish_len":len(m.get("banishPile") or []),
-            "rear_count":0, "remnant_count":len(m.get("deathRemnants") or []), "hand_banished":0,
+            "rear_count":_rc, "remnant_count":len(m.get("deathRemnants") or []), "hand_banished":0,
+            # dm_all_allies is Bannerlord Cassian's own ctx var, computed the same way the client
+            # does it (index.html: "ctx.dm_all_allies = ctx.rear_count + ctx.wc_len").
+            "dm_all_allies": _rc + len(m["winnersCircle"]),
+            # charge_capped backs the Radiance archetype's Consecrated Reserve tier, same cap the
+            # client uses (Math.min(4, charge)).
+            "charge_capped": min(4, m.get("charge", 0)),
             "chaos":cond_id in CHAOS_CONDS,"wc_names":[c["name"] for c in m["winnersCircle"]]}
 def _cmp(a, op, b):
     if op == "==": return a == b
@@ -460,7 +475,7 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None, rear_guards=
         n = pc["name"]
         if n == "Conduit Adept": m["charge"] = min(duel_energy_cap(m.get("matchCommits", 0)), m.get("charge", 0) + 1); log.append("⚡ Conduit Adept: +1 Charge")
         if n == "Voltcaller": m["spellDiscount"] = m.get("spellDiscount", 0) + 2; log.append("⚡ Voltcaller: next Interrupt −2")
-        ctx = _ctx(pc, oc, m, rec, cond_id)
+        ctx = _ctx(pc, oc, m, rec, cond_id, rear_guards)
         if n == "Veronica":
             if oc.get("abil"):
                 log.append(f"🔄 Veronica copies {oc['name']}")

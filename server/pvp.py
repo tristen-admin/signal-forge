@@ -109,6 +109,22 @@ def _new_side(user_id, handle, owned, best_of, deck_master=None):
     owned = list(owned)
     random.shuffle(owned)
     hand_cards, deck_cards = owned[:STARTING_HAND], owned[STARTING_HAND:]
+    # 8/16/26 (owner-confirmed live: "Deckmasters not in opening hands") — offline GUARANTEES the
+    # Deck Master swaps into the opening hand every match, in every mode except Sandbox
+    # (index.html: "not a lottery, while still leaving the choice of WHEN to conjure it entirely up
+    # to the player"). Online had no such guarantee -- the DM was shuffled in with the other 15-16
+    # cards and had the same ~5/17 chance as anything else of landing in the first 5. The DM's
+    # ABILITY was never gated on this (apply_deck_master fires on any conjured card, confirmed
+    # separately), but never being ABLE to conjure your own Deck Master as your opening Fighter is a
+    # real, confirmable difference from the offline design intent. Swaps rather than inserts, so
+    # hand size is untouched, exactly mirroring the client's own splice/pop/push/shuffle.
+    if deck_master:
+        _dmi = next((i for i, c in enumerate(deck_cards) if c["type"] == deck_master), None)
+        if _dmi is not None and not any(c["type"] == deck_master for c in hand_cards):
+            _dm_card = deck_cards.pop(_dmi)
+            deck_cards.append(hand_cards.pop())
+            hand_cards.append(_dm_card)
+            random.shuffle(deck_cards)
     m["hand"] = [c["type"] for c in hand_cards]
     return {"user_id": user_id, "handle": handle, "m": m, "deck_master": deck_master, "seen": time.time(),
             "hand_cards": hand_cards, "deck_cards": deck_cards, "banish_cards": [],
