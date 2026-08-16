@@ -325,12 +325,16 @@ def dm_rules_for(dm_name, pc_name):
     arch = dm_archetype_of(dm_name)
     return ARCHETYPE_VANILLA.get(arch, []) if arch else []
 
-def apply_deck_master(dm_name, pc_name, ctx, playerPow, oppPow, log, m=None):
+def apply_deck_master(dm_name, pc_name, ctx, playerPow, oppPow, log, m=None, hand_ops=None, pc=None):
     """Same interpreter as CARD_RULES. Ops this build cannot evaluate server-side (raiseRemnant and
     friends, which need board state PvP does not track) are SKIPPED rather than raised on, so an
     unsupported DM degrades to no bonus instead of failing the whole duel — and is reported."""
     rules = dm_rules_for(dm_name, pc_name)
     skipped = []
+    # `behind` is the only ctx key the DM tables want that _ctx cannot precompute: it is a live
+    # comparison of the two powers AS THEY STAND at this point in resolution, not a match-level
+    # stat, so it is layered on here rather than baked into _ctx where it would be stale.
+    ctx = dict(ctx); ctx["behind"] = max(0, oppPow - playerPow)
     for rule in rules:
         # A rule whose condition references context this build does not compute must be SKIPPED, not
         # fatal. eval_cond raises KeyError on an unknown ctx key, and a Deck Master is chosen long
@@ -340,15 +344,37 @@ def apply_deck_master(dm_name, pc_name, ctx, playerPow, oppPow, log, m=None):
             if not eval_cond(rule.get("if"), ctx): continue
         except KeyError as ex:
             skipped.append(["ctx:" + str(ex).strip("'")]); continue
+        # Ops this evaluator handles = the shared CARD_RULES set PLUS the three the Deck Master
+        # tables use that CARD_RULES never needed. The guard has to know about them or it rejects
+        # them before the branches below ever run -- which is exactly what it did on first write,
+        # silently no-opping every draw and every raised Remnant while reporting success.
         ops = set(rule.keys()) - {"if", "log", "x"}
-        if not ops or not ops.issubset(KNOWN_RULE_OPS):
-            skipped.append(sorted(ops - KNOWN_RULE_OPS) or ["(empty)"])
+        handled = KNOWN_RULE_OPS | {"draw", "raiseRemnant", "deathLingerBuffOverride"}
+        if not ops or not ops.issubset(handled):
+            skipped.append(sorted(ops - handled) or ["(empty)"])
             continue
         if "add" in rule: playerPow += rule["add"]
         elif "addvar" in rule: playerPow += ctx.get(rule["addvar"], 0) * rule.get("x", 1)
         elif "mult" in rule: playerPow = int(playerPow * rule["mult"])
         elif "set" in rule: playerPow = ctx.get(rule["set"], playerPow)
         elif "oppadd" in rule: oppPow += rule["oppadd"]
+        # draw: emitted as a hand_op, the same instruction channel apply_called already uses, so the
+        # caller (pvp.py / app.py) performs the real deck->hand move and the engine stays pure.
+        elif "draw" in rule:
+            if hand_ops is None: skipped.append(["draw(no hand_ops)"]); continue
+            hand_ops.append({"op": "draw", "n": rule["draw"]})
+        # raiseRemnant: the server DOES model Death Remnants (m["deathRemnants"]), so this raises one
+        # the same way a natural Death Remnant is raised at the bottom of resolve() -- same shape,
+        # same REMNANT_POW lookup, so it disperses on a win with the rest of them.
+        elif "raiseRemnant" in rule:
+            if m is None or pc is None: skipped.append(["raiseRemnant(no match state)"]); continue
+            rp = pc["pow"] if rule["raiseRemnant"] == "self_pow" else rules.REMNANT_POW.get(pc["name"], pc["pow"])
+            m.setdefault("deathRemnants", []).append({"name": pc["name"], "pow": rp})
+        # deathLingerBuffOverride is a modifier on how long a raised Remnant lingers. The server has
+        # no per-remnant lifetime -- they disperse wholesale on a win -- so there is nothing to
+        # override. Recorded rather than pretended.
+        elif "deathLingerBuffOverride" in rule:
+            skipped.append(["deathLingerBuffOverride(no per-remnant lifetime)"]); continue
         else: continue
         if rule.get("log"): log.append(rule["log"])
     return playerPow, oppPow, skipped
@@ -442,7 +468,7 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None, rear_guards=
         # applyDeckMasterResolveEffects. Skipped op-codes are surfaced in the duel log rather than
         # silently dropping the bonus -- a DM that cannot resolve server-side should be visible.
         if deck_master:
-            playerPow, oppPow, _dm_skipped = apply_deck_master(deck_master, n, ctx, playerPow, oppPow, log, m)
+            playerPow, oppPow, _dm_skipped = apply_deck_master(deck_master, n, ctx, playerPow, oppPow, log, m, hand_ops, pc)
             if _dm_skipped:
                 log.append(f"\u2605 {deck_master}: part of this Deck Master's ability needs board state "
                            f"online play doesn't track yet ({', '.join(sorted({o for g in _dm_skipped for o in g}))}) \u2014 not applied")
