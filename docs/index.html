@@ -2282,6 +2282,7 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .pvp-link-strip:empty{display:none}
 .pvp-link-strip .pls-lbl{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
 .pvp-link-strip .pls-chip{font-size:10px;font-weight:700;color:var(--gold);background:rgba(245,194,77,.1);border:1px solid rgba(245,194,77,.32);border-radius:20px;padding:3px 9px}
+#dm-ability-strip .dm-opp{margin-left:auto;font-size:10.5px;color:#E08080;font-weight:700}
 #dm-ability-strip .dm-star{color:var(--gold);font-weight:800;margin-right:6px}
 #dm-ability-strip .dm-name{font-weight:800;color:#fff;margin-right:8px}
 #dm-ability-strip .dm-note{font-size:10.5px;color:var(--text3)}
@@ -12776,6 +12777,12 @@ function friendRequest(){
 function friendAccept(id){ sfApi('POST', '/api/friends/accept', {id:id}, function(err){ if(err){ _friendsMsg(err,'err'); return; } buildFriendsPanel(); }); }
 function friendDecline(id){ sfApi('POST', '/api/friends/decline', {id:id}, function(err){ if(err){ _friendsMsg(err,'err'); return; } buildFriendsPanel(); }); }
 function friendChallenge(handle){
+  // Same reason as pvpFindMatch: with no uploaded deck the server falls back to every card
+  // the account owns, so both players end up on an identical pool that is not their deck.
+  pvpClearFinished();
+  pvpSyncDeck(function(err){ if(err){ _pvpMsg(err, "err"); return; } _friendChallengeInner(handle); });
+}
+function _friendChallengeInner(handle){
   pvpClearFinished();   // never carry a finished match into a new search
   sfApi('POST', '/api/pvp/challenge/direct', {handle: handle, mode: PVP.bestOf===3?'ranked':undefined, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
     if(err){ _friendsMsg(err, 'err'); return; }
@@ -12878,8 +12885,62 @@ function pvpClearFinished(){
 }
 function pvpSetMode(n){ pvpClearFinished(); if(PVP.queueTimer||_pvpInLiveMatch()) return; PVP.bestOf=n; buildOnline(); }
 
+/* ══ DECK SYNC (8/16/26) ═══════════════════════════════════════════════════════════════════════
+   THE BUG: the client had NEVER called /api/deck/set — zero call sites. server _pvp_deck() reads
+   the deck SAVED ON THE SERVER and, finding none, falls back to every card the account owns. For
+   two freshly-registered accounts that is the identical starter grant, so both players drew the
+   same cards, neither drew their own deck, nothing looked randomised (it WAS shuffled — from the
+   same pool), and the Deck Master was absent because nothing guaranteed it was in the pool.
+   Every one of those symptoms is this single missing call.
+
+   Mapping is by NAME, not uid: local uids and server uids are different identities (migration
+   mints fresh server cards), so the deck is expressed as "one server-owned copy per deck slot,
+   matched by card name". Each server card is claimed at most once, so a 2-of in the local deck
+   needs two owned copies server-side and silently becomes a 1-of if only one exists — reported
+   rather than hidden. */
+function pvpSyncDeck(done){
+  if(!(typeof sfToken==='function' && sfToken())){ done && done('not signed in'); return; }
+  sfApi('GET', '/api/state', null, function(err, data){
+    if(err || !data || !data.state || !Array.isArray(data.state.cards)){ done && done(err||'no server state'); return; }
+    SF_STATE = data.state;
+    var byName = {};
+    data.state.cards.forEach(function(sc){ (byName[sc.type] = byName[sc.type] || []).push(sc.uid); });
+    // Deck Master first, so if the deck is over-long it is never the card that gets dropped.
+    var wanted = [];
+    var dm = (typeof deckMasterCard!=='undefined') ? deckMasterCard : null;
+    if(dm){ var dmc = COLLECTION.find(function(x){ return (x.uid||x.name)===dm; }); if(dmc) wanted.push(dmc.name); }
+    (typeof activeDeck!=='undefined' ? Array.from(activeDeck) : []).forEach(function(k){
+      var card = COLLECTION.find(function(x){ return (x.uid||x.name)===k; });
+      if(card) wanted.push(card.name);
+    });
+    var uids = [], missing = [];
+    wanted.forEach(function(nm){
+      var pool = byName[nm];
+      if(pool && pool.length) uids.push(pool.shift());   // claim one copy, never twice
+      else missing.push(nm);
+    });
+    if(uids.length < 4){ done && done('your online account owns only '+uids.length+' of your deck\'s cards — open a pack or trade before queueing'); return; }
+    sfApi('POST', '/api/deck/set', {cards: uids}, function(e2){
+      if(e2){ done && done(e2); return; }
+      if(missing.length && typeof toast==='function'){
+        toast('⚠ '+missing.length+' card'+(missing.length===1?'':'s')+' in your deck are not owned on this account — playing with '+uids.length+'.', false);
+      }
+      done && done(null, uids.length);
+    });
+  });
+}
 function pvpFindMatch(){
   pvpClearFinished();   // never carry a finished match into a new search
+  _pvpMsg('Syncing your deck…', '');
+  // The deck MUST reach the server before queueing: without it _pvp_deck() silently falls back to
+  // every card the account owns, which is why two players drew identical hands that were not their
+  // decks. Queue only after the upload succeeds.
+  pvpSyncDeck(function(err){
+    if(err){ _pvpMsg(err, 'err'); return; }
+    _pvpFindMatchQueued();
+  });
+}
+function _pvpFindMatchQueued(){
   _pvpMsg('Searching…', '');
   sfApi('POST', '/api/pvp/queue', {mode: PVP.bestOf===3?'ranked':undefined, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
     if(err){ _pvpMsg(err, 'err'); return; }
@@ -12918,6 +12979,12 @@ function pvpLeaveQueue(){
 // on their own schedule. Mirrors the queue functions' own shape (create/tick/cancel), just against
 // the challenge endpoints instead of the random-pairing ones.
 function pvpCreateChallenge(){
+  // Same reason as pvpFindMatch: with no uploaded deck the server falls back to every card
+  // the account owns, so both players end up on an identical pool that is not their deck.
+  pvpClearFinished();
+  pvpSyncDeck(function(err){ if(err){ _pvpMsg(err, "err"); return; } _pvpCreateChallengeInner(); });
+}
+function _pvpCreateChallengeInner(){
   pvpClearFinished();   // never carry a finished match into a new search
   _pvpMsg('Creating…', '');
   sfApi('POST', '/api/pvp/challenge/create', {mode: PVP.bestOf===3?'ranked':undefined, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
@@ -13238,13 +13305,24 @@ function pvpRenderBoard(v){
   // Without this there was no confirmation online that a Deck Master was in play at all.
   var dmStrip=document.getElementById('dm-ability-strip');
   if(dmStrip){
-    var dm=(typeof deckMasterCard!=='undefined')?deckMasterCard:null;
+    // Prefer the DM the SERVER is actually resolving (echoed in the payload) over the local
+    // variable. They can differ — a second account in another tab has its own local state — and the
+    // strip must reflect what is really affecting the duel, not what this browser happens to hold.
+    var dm = v.you.deckMaster || ((typeof deckMasterCard!=='undefined')?deckMasterCard:null);
     if(dm){
       var _dmc=COLLECTION.find(function(x){ return (x.uid||x.name)===dm; });
       dmStrip.style.display='';
       dmStrip.innerHTML='<span class="dm-star">★</span><span class="dm-name">'+
         ((typeof dispName==='function')?dispName(_dmc?_dmc.name:dm):(_dmc?_dmc.name:dm))+
         '</span><span class="dm-note">Deck Master — its ability resolves every duel</span>';
+      if(v.them && v.them.deckMaster){
+        var _oc=COLLECTION.find(function(x){ return (x.uid||x.name)===v.them.deckMaster; });
+        dmStrip.innerHTML += '<span class="dm-opp">vs ★ '+_esc((_oc?_oc.name:v.them.deckMaster))+'</span>';
+      }
+    } else if(v.them && v.them.deckMaster){
+      dmStrip.style.display='';
+      dmStrip.innerHTML='<span class="dm-note">No Deck Master set</span><span class="dm-opp">vs ★ '+
+        _esc(v.them.deckMaster)+'</span>';
     } else dmStrip.style.display='none';
   }
 
