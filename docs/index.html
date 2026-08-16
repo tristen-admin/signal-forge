@@ -3030,7 +3030,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <span class="dh-title">🃏 Edit Deck</span>
       <div class="deck-subtabs">
         <button class="dst on" id="dst-deck" onclick="deckTab('deck')">Deck</button>
-        <button class="dst" id="dst-backs" onclick="deckTab('backs')">🎴 Card Backs</button><button class="dst" id="dst-sleeves" onclick="deckTab('sleeves')">🃏 Sleeves</button><button class="dst" id="dst-energy" onclick="deckTab('energy')">&#x26a1; Interrupts</button>
+        <button class="dst" id="dst-backs" onclick="deckTab('backs')">🎴 Card Backs</button><button class="dst" id="dst-sleeves" onclick="deckTab('sleeves')">🃏 Sleeves</button><button class="dst" id="dst-energy" onclick="deckTab('energy')">&#x26a1; Charged Spells</button>
       </div>
       <span class="dh-count" id="deck-count-label">0 / 12</span>
       <span class="dh-status" id="deck-status">Add 10 more</span>
@@ -3094,8 +3094,8 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="backs-grid" id="sleeves-grid"></div>
     </div>
     <div id="deck-energy-body" style="display:none">
-      <div class="dlc-title" style="margin-top:4px">&#x26a1; Interrupt Loadout &mdash; pick up to 5 Interrupts &middot; the spells you draw from on a lost round <span id="energy-count" class="en-count"></span></div>
-      <div class="energy-note">Interrupts are a shared, free toolkit &mdash; every player draws from the same pool, so matches stay about your character cards. Curate the 5 that fit your style; the rest ride the bench.</div>
+      <div class="dlc-title" style="margin-top:4px">&#x26a1; Charged Spell Loadout &mdash; pick up to 5 Charged Spells &middot; the spells you draw from on a lost round <span id="energy-count" class="en-count"></span></div>
+      <div class="energy-note">Charged Spells are a shared, free toolkit that activate instantly &mdash; every player draws from the same pool, so matches stay about your character cards. Curate the 5 that fit your style; the rest ride the bench.</div>
       <div class="energy-grid" id="energy-grid"></div>
     </div>
   </div>
@@ -4048,7 +4048,7 @@ const DECK_POOL = [
   {name:"Bram the Bulwark",pow:15,kills:0,deaths:0,rarity:"rare",timing:"on",abil:"Last Stand — a loss by 3 power or less becomes a tie."},
   // Energy-synergy bodies (Stage 1)
   {name:'Conduit Adept',pow:6,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: gain 1 Charge. As a support (Called), gain 2 Charge and draw a card.'},
-  {name:'Voltcaller',pow:8,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: your next Interrupt costs 2 less.'},
+  {name:'Voltcaller',pow:8,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: your next Charged Spell costs 2 less.'},
   {name:'Signal Diviner',pow:12,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On win: next turn gain 2 max Charge. As a support (Called), gain 3 Charge.'},
   // Commons
   {name:'Ahdorah Khaan, Determined Soul',pow:15,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'Record Guard (one use per match): if this card would lose, the duel ties instead — death blocked. When Ahdor returns to your hand from the effect of "Record Guard", two random hand cards gain +3.'},
@@ -6675,7 +6675,7 @@ const CALLED = {
   "Broodweb Keeper":               {text:"gain 1 Charge if you have 4 or more cards in hand", chargeGainIfHandFull:1},
   "Squad 16 Chronicler":           {text:"gain 1 Charge once you've played 2 or more duels this match", chargeGainIfVeteran:1},
   "Signal Diviner":                {text:"gain 3 Charge", chargeGain:3},
-  "Voltcaller":                    {text:"your next Interrupt costs 2 less", spellDiscountGain:2},
+  "Voltcaller":                    {text:"your next Charged Spell costs 2 less", spellDiscountGain:2},
   "Uso Oso's Skeletal Summons":    {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
   "Sister Mire":                   {text:"banish 1 card from your hand to fuel the Order", banishOwn:1},
   "Josef":                         {text:"your Fighter +5 · draw 1", add:5, draw:1},
@@ -7243,7 +7243,7 @@ function renderLossChoice(show){
   if(!show){ sw.innerHTML=''; if(nb) nb.style.display=''; return; }
   const wc=winnersCircle.length;
   sw.innerHTML='<div class="loss-choice"><div class="lc-title">\u21a9 Round lost \u2014 take your pick</div><div class="lc-opts">'+
-    '<button class="lc-btn" onclick="lossChooseSpell()" aria-label="Draw from Spell Deck"><b>\ud83c\udccf Draw from Spell Deck</b><span>a random Interrupt into your hand</span></button>'+
+    '<button class="lc-btn" onclick="lossChooseSpell()" aria-label="Draw from Spell Deck"><b>\ud83c\udccf Draw from Spell Deck</b><span>a random Charged Spell into your hand</span></button>'+
     (wc>0 ? '<button class="lc-btn" onclick="lossChooseWinner()" aria-label="Draw from Winners Circle"><b>\u267b Draw from Winners Circle</b><span>a card you already won, back into your hand ('+wc+' available)</span></button>'
           : '<button class="lc-btn dim" disabled aria-label="Draw from Winners Circle — empty"><b>\u267b Draw from Winners Circle</b><span>nothing won yet this match</span></button>')+
     '</div></div>';
@@ -9413,15 +9413,15 @@ function resolve(pc, oc, cond, playerCommittedPow){
   // the opponent used an instant, since bot hand activity has no other UI surface.
   if(oppBanishSurge){ oppPow += oppBanishSurge; abilLog.push('⚡ Opponent Surge: banished an instant card, +'+oppBanishSurge+' power'); oppBanishSurge=0; }
   // ── ENERGY SPELL / BODY EFFECTS (Stage 1) ──
-  if(spellJam){ cond = {id:'jammed', mech:'Jammed', name:'Zenni Jammed', icon:'\ud83d\udce1', rule:'Condition negated by an Interrupt.', strat:''}; abilLog.push('\ud83d\udce1 Jammer: active condition negated'); }
+  if(spellJam){ cond = {id:'jammed', mech:'Jammed', name:'Zenni Jammed', icon:'\ud83d\udce1', rule:'Condition negated by a Charged Spell.', strat:''}; abilLog.push('\ud83d\udce1 Jammer: active condition negated'); }
   if(typeof condNeutralized!=='undefined' && condNeutralized){ var _cnb=condNeutralizedBy||'An effect'; cond = {id:'neutral', mech:'Neutral Ground', name:'Renegotiated Ground', icon:'🤝', rule:_cnb+' neutralized the location.', strat:''}; abilLog.push('🤝 '+_cnb+': the location is neutralized — its effect is nullified this duel'); }
-  if(spellOppPow){ oppPow += spellOppPow; abilLog.push('\u26a1 Interrupt: opponent '+spellOppPow+' power'); }
+  if(spellOppPow){ oppPow += spellOppPow; abilLog.push('\u26a1 Charged Spell: opponent '+spellOppPow+' power'); }
   if(spellSelfPow){ playerPow += spellSelfPow; abilLog.push('\u26a1 Spell: your card +'+spellSelfPow+' power'); }
   if(typeof spellHalveField!=='undefined' && spellHalveField){ playerPow=Math.ceil(playerPow/2); oppPow=Math.ceil(oppPow/2); abilLog.push('\u26a1 Collapse: field power halved (both sides)'); }
   if(spellNullOpp) abilLog.push('\ud83d\udce1 Nullwave: opponent card ability suppressed this duel');
   { const _al = cond.id === 'abilitylock';
     if(!_al && pc.name === 'Conduit Adept'){ charge=Math.min(duelEnergyCap(),charge+1); abilLog.push('\u26a1 Conduit Adept: +1 Charge'); if(typeof renderCharge==='function') renderCharge(); }
-    if(!_al && pc.name === 'Voltcaller'){ spellDiscount += 2; abilLog.push('\u26a1 Voltcaller: your next Interrupt costs 2 less'); }
+    if(!_al && pc.name === 'Voltcaller'){ spellDiscount += 2; abilLog.push('\u26a1 Voltcaller: your next Charged Spell costs 2 less'); }
     if(!_al && pc.name === 'Warpath Vanguard' && matchCommits===0){ divinerBonusNext+=1; abilLog.push('\u2694 Warpath Vanguard: +1 MAX Charge next turn (1st duel)'); }
     if(!_al && pc.name === 'Trilogy Ward' && typeof effectiveCampOf==='function' && typeof campBeats==='function'){
       var _twP=effectiveCampOf(pc,deckMasterCard), _twO=effectiveCampOf(oc,(typeof activeBot!=='undefined'&&activeBot)?activeBot.dmCard:null);
@@ -12069,7 +12069,7 @@ const KEYWORDS = {
   'Winners Circle': 'Cards you win with go here. After a lost round you may recover one at random (re-risking its record) instead of drawing a spell.',
   'Pristine': 'A card with at least one win and zero deaths on its permanent record — a proven, never-beaten history. An unfought card doesn\'t qualify.',
   'Purity': 'The value carried by a Pristine record — a card that has never been beaten. Effects that "drain purity" turn an opponent\'s spotless 0-death history into an advantage against it.',
-  'Charge': 'Your resource pool. It regenerates +1 a turn through the 4th duel, then about a third of your current cap each turn after that — a cap that keeps climbing as the match goes on. Leftover charge carries between turns, it does not refill to full. Conjuring a Fighter spends Charge equal to its cost; Interrupt spells and some abilities spend whatever is left.',
+  'Charge': 'Your resource pool. It regenerates +1 a turn through the 4th duel, then about a third of your current cap each turn after that — a cap that keeps climbing as the match goes on. Leftover charge carries between turns, it does not refill to full. Conjuring a Fighter spends Charge equal to its cost; Charged Spells activate instantly and some abilities spend whatever is left.',
   'Called': 'A free Support effect. Drop this card into a rear slot to fire it — it never costs Charge and boosts your fighter.',
   'Link': 'When a support shares a lore group with your fighter, it adds bonus power. Same-family cards fight better together.',
   'Recur': 'Returns cards from your banish pile back to your hand — often stronger than they left.',
@@ -13271,7 +13271,7 @@ function pvpRenderBoard(v){
   if(v.lastDuel && v.seq!==_pvpShownDuelSeq && !_pvpResolving){ _pvpShownDuelSeq=v.seq; _pvpResolving=true; pvpShowResolution(v); }
 }
 
-/* Interrupt tray for PvP. Casting posts to /api/pvp/spell (added 8/16/26); the server spends the
+/* Charged Spell tray for PvP. Casting posts to /api/pvp/spell (added 8/16/26); the server spends the
    Charge and arms the effect flags that engine.resolve() reads at resolution, exactly as
    single-player does. Disabled while committed or when the Charge is not there, so the tray never
    offers a cast the server will refuse. */
@@ -13317,7 +13317,7 @@ function _pvpRenderClock(v){
 function _pvpRenderSpells(v){
   var tray=document.getElementById('spell-tray-cards'); if(!tray) return;
   var hand=(v.you.spellHand)||[];
-  if(!hand.length){ tray.innerHTML='<span class="st-empty">No Interrupts in hand</span>'; return; }
+  if(!hand.length){ tray.innerHTML='<span class="st-empty">No Charged Spells in hand</span>'; return; }
   tray.innerHTML=hand.map(function(id){
     // Read from the server's own spellInfo. The client's ENERGY_SPELLS is a DIFFERENT Interrupt
     // set (sift/empower/hex/...) with no ids in common, so looking up a server spell locally always
@@ -13334,7 +13334,7 @@ function pvpCastSpell(id){
   sfApi('POST','/api/pvp/spell',{pvpId:PVP.pvpId, spellId:id}, function(err, data){
     if(err){ if(typeof toast==='function') toast(err, false); return; }
     PVP.view=data; _renderPvpMatch();
-    if(typeof toast==='function') toast('⚡ Interrupt cast', true);
+    if(typeof toast==='function') toast('⚡ Charged Spell cast', true);
   });
 }
 /* Links read from the same LINK_GROUPS the server uses (engine.py:75 loads them from the shared
@@ -14255,7 +14255,7 @@ function buildEnergyLoadout(){
 }
 function toggleEnergySpell(id){
   const i=energyLoadout.indexOf(id);
-  if(i>-1){ if(energyLoadout.length<=1){ toast('Keep at least 1 Interrupt in your loadout.', false); return; } energyLoadout.splice(i,1); }
+  if(i>-1){ if(energyLoadout.length<=1){ toast('Keep at least 1 Charged Spell in your loadout.', false); return; } energyLoadout.splice(i,1); }
   else { if(energyLoadout.length>=3){ toast('Loadout full \u2014 pick 3 spells (remove one first).', false); return; } energyLoadout.push(id); }
   saveState(); buildEnergyLoadout();
 }
