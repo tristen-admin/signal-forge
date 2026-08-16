@@ -13679,6 +13679,13 @@ function pvpFinishMatch(v){
   if(typeof pvpBoardExit==='function') pvpBoardExit();
   try{ lsSet('sf_pvp_active', null); }catch(e){}             // a finished match is never resumable
   if(PVP.stateTimer){ clearInterval(PVP.stateTimer); PVP.stateTimer=null; }
+  // Real bug (8/16/26): PVP.pvpId used to survive a finished match. buildOnline()'s own resume
+  // check ("if(PVP.pvpId){ restart the poll timer, re-fetch state }") ran the instant the show()
+  // call two lines down painted the Online screen, saw the still-set id, and immediately restarted
+  // polling a match that had just ended -- a background poll loop for a dead match that never
+  // self-cancels (its self-cancel condition is "not on Online/Friends AND no pvpId", both false).
+  // pvpExitMatch() already clears this on a manual exit; a server-driven finish needs the same.
+  PVP.pvpId = null; PVP.opponent = null;
   if(typeof show==='function') show('online', document.getElementById('nav-online'));
   var oc = v && v.lastDuel && v.lastDuel.outcome;
   if(typeof toast==='function'){
