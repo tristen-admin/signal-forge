@@ -13282,10 +13282,23 @@ function pvpRenderBoard(v){
   var _d = (v.duel||1), _cap = _d<=4 ? (_d+2) : (2*_d-2);
   _setText('charge-val', v.you.charge!=null?v.you.charge:'—');
   _setText('charge-cap', Math.max(_cap, v.you.charge||0));
+  // Real bug (8/16/26): read as N/N always (both sides of the slash pulled from the SAME field),
+  // so it looked like the opponent's charge never moved no matter what they spent. Both sides
+  // share one cap curve (duelEnergyCap() is keyed on duel number, not per-player), so the fix is
+  // the same _cap already computed above for the player's own readout.
   var occ=document.getElementById('opp-charge-count');
-  if(occ) occ.textContent = (v.them&&v.them.charge!=null?v.them.charge:'?')+'/'+(v.them&&v.them.charge!=null?v.them.charge:'?');
+  if(occ) occ.textContent = (v.them&&v.them.charge!=null?v.them.charge:'?')+'/'+_cap;
+  // Real bug (8/16/26): raw numbers in unstyled spans with no matching CSS anywhere in the file --
+  // "3–2" in default black text next to a fully art-directed HUD reads exactly like a placeholder,
+  // which is what got reported. Offline's real scoreboard (updateScore(), same #score-display id)
+  // is a row of won/lost pip dots sized to the match's real best-of, not a number. Same convention.
   var sd=document.getElementById('score-display');
-  if(sd) sd.innerHTML = '<span class="sc-you">'+(v.you.score||0)+'</span><span class="sc-vs">–</span><span class="sc-opp">'+((v.them&&v.them.score)||0)+'</span>';
+  if(sd){
+    var _toWin = Math.floor((v.bestOf||7)/2)+1, _sh='', _oh='';
+    for(var _si=0; _si<_toWin; _si++) _sh += '<div class="score-pip'+(_si<(v.you.score||0)?' won':'')+'"></div>';
+    for(var _oi=0; _oi<_toWin; _oi++) _oh += '<div class="score-pip'+(_oi<((v.them&&v.them.score)||0)?' lost':'')+'"></div>';
+    sd.innerHTML = _sh + '<div class="score-sep">vs</div>' + _oh;
+  }
 
   // opponent plate carries their real handle
   try{ var f=document.querySelector('.field'); if(f) f.style.setProperty('--opp-name', JSON.stringify(v.opponent||'OPPONENT')); }catch(e){}
@@ -13590,11 +13603,46 @@ function pvpCommitFromBoard(){
 var _pvpShownDuelSeq=null, _pvpClashTimer=null, _pvpResolving=false;
 function pvpShowResolution(v){
   var d=v.lastDuel; if(!d) return;
-  var pf=document.getElementById('player-field'), of=document.getElementById('opp-field');
-  if(pf && d.yourCard){ var yc=COLLECTION.find(function(x){return x.name===d.yourCard && !x.uid;}); if(yc) pf.innerHTML=bigCardHTML(yc); }
-  if(of && d.opponent){ var oc=COLLECTION.find(function(x){return x.name===d.opponent && !x.uid;}); if(oc) of.innerHTML=bigCardHTML(oc); }
   var won = d.outcome==='win' || d.outcome==='opponent_forfeit';
   var tie = d.outcome==='tie';
+  var wonKey = won?'win':(tie?'tie':'lose');
+
+  var log=document.getElementById('pvp-duel-log');
+  if(!log){ log=document.createElement('div'); log.id='pvp-duel-log'; log.className='pvp-duel-log';
+    var host=document.getElementById('v-turn'); if(host) host.appendChild(log); }
+  log.innerHTML = (d.log && d.log.length)
+    ? '<div class="pdl-head">Why</div>'+d.log.map(function(l){ return '<div>'+_esc(l)+'</div>'; }).join('')
+    : '';
+
+  function onCinematicDone(){
+    _pvpResolving = false;
+    if(pvpBoardOn && PVP.view && !PVP.view.done) pvpRenderBoard(PVP.view);
+  }
+
+  // 8/16/26 (owner): this used to be its own thin FX.flash/burst/vignette/stamp + toast combo --
+  // a second, visibly worse clash animation living next to the real one. playResolutionCinematic()
+  // is the SAME function offline uses (same #player-field/#opp-field/#player-rear.. DOM, same
+  // bigcard flip/shake/flash/victor-fallen treatment), so reusing it directly is what actually
+  // gets PvP "the same as what I'm used to" instead of approximating it a second time.
+  // Known gap, not silently pretended away: the server sends only final power per side, not a
+  // per-rule delta trail the way offline's own abilLog does, so the step-by-step "+3 power" chip
+  // ticker has nothing to animate here -- passing steps:[] skips straight from the flip-in hold to
+  // the clash beat, still landing on the real win/lose/tie stamp, vignette and card treatment.
+  // Giving PvP that per-rule chip trail for real would mean engine.py threading structured deltas
+  // through the wire payload the way abilLog does locally -- a server change, not a client one.
+  var yc = d.yourCard ? COLLECTION.find(function(x){return x.name===d.yourCard && !x.uid;}) : null;
+  var oc = d.opponent ? COLLECTION.find(function(x){return x.name===d.opponent && !x.uid;}) : null;
+  if(yc && oc && typeof playResolutionCinematic==='function'){
+    playResolutionCinematic(yc, oc, [], d.yourPow, d.theirPow, d.yourPow, d.theirPow, wonKey, onCinematicDone);
+    return;
+  }
+
+  // Fallback for the rare case either card can't be found in COLLECTION (e.g. a DM-only card the
+  // viewer doesn't own a copy of) -- same lightweight treatment this function used before, so a
+  // lookup miss degrades to "still shows something" rather than a blank field.
+  var pf=document.getElementById('player-field'), of=document.getElementById('opp-field');
+  if(pf && yc) pf.innerHTML=bigCardHTML(yc);
+  if(of && oc) of.innerHTML=bigCardHTML(oc);
   if(typeof FX!=='undefined' && FX.on && FX.on()){
     try{
       FX.flash(won?0.5:0.35);
@@ -13604,26 +13652,8 @@ function pvpShowResolution(v){
       FX.stamp(won?'DUEL WON':(tie?'TIE':'DUEL LOST'), won?'win':'lose');
     }catch(e){}
   }
-  if(typeof toast==='function'){
-    toast((won?'✅ ':(tie?'🤝 ':'❌ '))+(d.yourPow!=null?(d.yourCard+' '+d.yourPow+' vs '+d.theirPow+' '+d.opponent):'duel resolved'), won);
-  }
-  // The resolved cards are painted over the field ON PURPOSE so you see the clash — but the state
-  // that arrives WITH lastDuel is already the NEXT duel (new condition, empty board). Left alone,
-  // the field kept showing the previous duel's cards under a brand-new condition, which is exactly
-  // the "board still full from selections I made prior" desync. Hold the clash, then hand the field
-  // back to the live duel. _pvpResolving stops that repaint re-entering this function.
   clearTimeout(_pvpClashTimer);
-  _pvpClashTimer = setTimeout(function(){
-    _pvpResolving = false;
-    if(pvpBoardOn && PVP.view && !PVP.view.done) pvpRenderBoard(PVP.view);
-  }, 2400);
-
-  var log=document.getElementById('pvp-duel-log');
-  if(!log){ log=document.createElement('div'); log.id='pvp-duel-log'; log.className='pvp-duel-log';
-    var host=document.getElementById('v-turn'); if(host) host.appendChild(log); }
-  log.innerHTML = (d.log && d.log.length)
-    ? '<div class="pdl-head">Why</div>'+d.log.map(function(l){ return '<div>'+_esc(l)+'</div>'; }).join('')
-    : '';
+  _pvpClashTimer = setTimeout(onCinematicDone, 2400);
 }
 
 function _setText(id,t){ var el=document.getElementById(id); if(el) el.textContent=t; }
