@@ -12937,7 +12937,7 @@ function pvpEnterMatch(pvpId, opponent){
   // client out of a game the SERVER was still running -- you came back with no pvpId, saw stale
   // or empty state, and your opponent sat waiting on a player who no longer knew they were in a
   // match. Cleared by pvpExitMatch, so it only survives a reload, never a deliberate exit.
-  try{ lsSet('sf_pvp_active', {pvpId:pvpId, opponent:opponent, bestOf:PVP.bestOf}); }catch(e){}
+  try{ lsSet('sf_pvp_active', {pvpId:pvpId, opponent:opponent, bestOf:PVP.bestOf, at:Date.now()}); }catch(e){}
   PVP.duelLog=[]; PVP._duelSig=null;
   if(typeof toast==='function') toast('Matched vs '+opponent+'!', true);
   buildOnline();   // re-enters through the dispatch above, which starts the poll loop + fetches
@@ -12949,7 +12949,14 @@ function pvpResumeIfActive(){
   if(PVP.pvpId) return;
   var saved=null; try{ saved=lsGet('sf_pvp_active', null); }catch(e){}
   if(!saved || !saved.pvpId) return;
-  if(!(typeof sfToken==='function' && sfToken())) return;
+  // A pointer older than the server's own abandonment window (ABANDON_TTL=45s, plus slack for a
+  // slow reload) cannot refer to a live match, so do not even ask -- just drop it. Belt and braces
+  // against the server having swept the game while this tab was closed.
+  if(saved.at && (Date.now() - saved.at) > 10*60*1000){ try{ lsSet('sf_pvp_active', null); }catch(e){} return; }
+  // Not signed in: there is no match to rejoin, so the stale pointer is DROPPED rather than left
+  // sitting for a future session to trip over. Previously this returned early and kept it forever,
+  // which meant a pointer written before a sign-out survived indefinitely.
+  if(!(typeof sfToken==='function' && sfToken())){ try{ lsSet('sf_pvp_active', null); }catch(e){} return; }
   PVP.pvpId=saved.pvpId; PVP.opponent=saved.opponent||'opponent';
   if(saved.bestOf) PVP.bestOf=saved.bestOf;
   sfApi('GET', '/api/pvp/state?pvpId='+encodeURIComponent(saved.pvpId), null, function(err, data){
@@ -17203,6 +17210,7 @@ initOwnedCopies();
 const _hadSave=(function(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}})();
 try{ document.querySelectorAll('.dev-only').forEach(function(el){ el.style.display = (typeof playtestMode!=='undefined'&&playtestMode) ? '' : 'none'; }); }catch(e){}   /* dev-only screens hidden unless playtest mode is on */
 try{ setTimeout(function(){ if(typeof pvpResumeIfActive==='function') pvpResumeIfActive(); }, 900); }catch(e){}   /* rejoin an in-progress PvP match after a reload */
+try{ window.SF_BUILD='4bf35af'; console.log('%cKOTEI build 4bf35af','color:#F5C24D;font-weight:bold'); }catch(e){}   /* visible build stamp — check this before debugging a 'fix that did nothing' */
 window._sfReturningSession = _hadSave;   // captured before loadState()/startNewPlayer() can write a fresh save -- Hub's one-time reveal reads this
 loadState();
 applyAscendantFrame();
