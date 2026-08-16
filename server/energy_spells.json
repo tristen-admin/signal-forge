@@ -1,0 +1,53 @@
+[
+ {
+  "id": "sift",
+  "name": "Sift",
+  "cost": 1,
+  "fx": "Draw 1, discard 1"
+ },
+ {
+  "id": "empower",
+  "name": "Empower",
+  "cost": 1,
+  "fx": "Your unit +3 power"
+ },
+ {
+  "id": "hex",
+  "name": "Hex",
+  "cost": 1,
+  "fx": "Opponent unit -3 power"
+ },
+ {
+  "id": "collapse",
+  "name": "Collapse",
+  "cost": 3,
+  "fx": "Halve every card power on field"
+ },
+ {
+  "id": "locus",
+  "name": "Locus Shift",
+  "cost": 3,
+  "fx": "Change the location + reset the timer"
+ },
+ {
+  "id": "drawsurge",
+  "name": "Draw Surge",
+  "cost": 2,
+  "fx": "Draw 3, banish 1",
+  "anorith": true
+ },
+ {
+  "id": "godhand",
+  "name": "Godhand",
+  "cost": 1,
+  "fx": "Your card +10 power",
+  "anorith": true
+ },
+ {
+  "id": "sornshift",
+  "name": "Sorn-Vallis Shift",
+  "cost": 3,
+  "fx": "Warp location to Sorn-Vallis",
+  "anorith": true
+ }
+]

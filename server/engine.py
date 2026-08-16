@@ -212,7 +212,7 @@ def new_match(deck_names, best_of=7, lobby_mode=False):
             "glacialGuardUsed": False, "oppGuardUsed": False, "horrorRegenUsed": False,
             "untouchableUsed": False, "matchTraitPow": {}, "done": False, "log_last": [],
             "bonds": {}, "matchPlayed": set(), "banishPile": [], "charge": duel_energy_cap(0), "spellDiscount": 0,
-            "spellOppPow": 0, "spellSelfPow": 0, "spellJam": False, "spellNullOpp": False,
+            "spellOppPow": 0, "spellSelfPow": 0, "spellJam": False, "spellNullOpp": False, "spellHalveField": False,
             "spellHand": [], "spellShield": False, "deathRemnants": [],
             "bestOf": best_of, "winThreshold": win_threshold, "lobbyMode": lobby_mode}
 
@@ -437,6 +437,12 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None, rear_guards=
     if m.get("spellJam"): cond_id = "jammed"; log.append("📡 Jammer: active condition negated")
     if m.get("spellOppPow"): oppPow += m["spellOppPow"]; log.append(f"⚡ Interrupt: opponent {m['spellOppPow']} power")
     if m.get("spellSelfPow"): playerPow += m["spellSelfPow"]; log.append(f"⚡ Amplify: +{m['spellSelfPow']} power")
+    # 8/16/26 — Collapse ("halve every card power on field", index.html ENERGY_SPELLS). Added when
+    # the Interrupt table was unified onto the client's set; without it the spell was castable
+    # online, spent Charge, and did nothing. Halves BOTH sides, matching its own text.
+    if m.get("spellHalveField"):
+        playerPow = playerPow // 2; oppPow = oppPow // 2
+        log.append("🌀 Collapse: every card on the field is halved")
 
     abilityLocked = (cond_id == "abilitylock")
     if abilityLocked: log.append("⚡ Ability Lock — all card effects suppressed")
@@ -796,6 +802,7 @@ def resolve(m, pc, oc, cond_id, committed_pow=None, pc_record=None, rear_guards=
     m["charge"] = min(duel_energy_cap(m["matchCommits"]), m.get("charge", 0) + regen)
     if won == "lose":
         m["charge"] = min(duel_energy_cap(m["matchCommits"]), m["charge"] + 1)
+    m["spellHalveField"] = False
     m["spellJam"] = False; m["spellOppPow"] = 0; m["spellSelfPow"] = 0; m["spellNullOpp"] = False; m["spellShield"] = False
     m["log_last"] = log
     win_threshold = m.get("winThreshold", 4)

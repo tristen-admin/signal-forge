@@ -43,7 +43,7 @@ Transport is short-interval polling, per the owner's decision — no WebSockets 
 a stdlib ThreadingHTTPServer, so both players can be inside this module concurrently; _LOCK
 serialises every read-modify-write of a game (both sides commit at genuinely the same moment).
 """
-import copy, random, secrets, threading, time
+import copy, json, os, random, secrets, threading, time
 
 import engine, rules, store
 
@@ -61,7 +61,18 @@ STARTING_HAND = 5       # matches index.html:12153; online was dealing 4
 # is unenforceable and trivially bypassed by not running the client.
 TURN_SECONDS = 60.0     # generous vs offline's 40/50 -- a network round trip and a human reading a
                         # new Condition both cost time that a local hotseat never pays.
-SPELLS = {sp['id']: sp for sp in engine.SPELLS}   # same table app.py uses for single-player Interrupts
+# 8/16/26 — ONE Interrupt table. The client's ENERGY_SPELLS (sift/empower/hex/collapse/locus/
+# drawsurge/godhand/sornshift) and engine.SPELLS (overclock/staticpulse/amplify/...) shared no ids
+# at all, so offline and online were running different Interrupt games and the client could not even
+# name a server spell. energy_spells.json is exported from the client's own table (the live game is
+# the reference implementation, same call as dm_rules.json), so there is now a single source of
+# truth and re-exporting keeps them identical.
+_SPELL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "energy_spells.json")
+try:
+    with open(_SPELL_PATH, encoding="utf-8") as _f: SPELL_LIST = json.load(_f)
+except Exception:
+    SPELL_LIST = []
+SPELLS = {sp["id"]: sp for sp in SPELL_LIST}
 GAME_TTL = 3600.0       # an untouched game is abandoned; dropped so GAMES cannot grow forever
 # 8/16/26 (owner: "auto end the match when both players leave room"). GAME_TTL is a memory guard at
 # an hour, far too slow to be a game rule. This is the real one: once BOTH sides have stopped
@@ -328,8 +339,14 @@ def state(user_id, pid):
         if not g: return 404, {"error": "match not found"}
         you, them = _sides(g, user_id)
         if not you: return 403, {"error": "not your match"}
-        _enforce_deadline(g)           # a stalled duel is scored before the view is built
-        you, them = _sides(g, user_id)  # re-read: enforcement can advance the duel
+        # Enforcement can advance the duel, end the match, or reveal a new condition, so the sides
+        # are re-read afterwards rather than reused. _sides returns the SAME dict objects (it does
+        # not copy), so this is belt-and-braces against a future _enforce_deadline that reassigns
+        # them; the guard below is the part that actually matters, since a match ending here must
+        # not fall through and build a view from a half-updated game.
+        _enforce_deadline(g)
+        you, them = _sides(g, user_id)
+        if not you: return 403, {"error": "not your match"}
         g["touched"] = time.time()
         you["seen"] = time.time()      # per-side presence, drives the both-left rule in _sweep()
         return 200, _view(g, you, them)
@@ -363,16 +380,15 @@ def _view(g, you, them):
                 "winnersCircle": _hand_view(you["winners_circle_cards"]),
                 "banish": _hand_view(you["banish_cards"]),
                 "banishCount": len(you["banish_cards"]),
-                # Ship the spell METADATA, not just ids. The client's own Interrupt table
-                # (ENERGY_SPELLS: sift/empower/hex/collapse/locus...) and the server's
-                # (engine.SPELLS: overclock/staticpulse/amplify...) are entirely different sets with
-                # no overlap, so the client cannot name or price a server spell from local data --
-                # it was rendering raw ids at cost 0. Sending name/cost/desc makes the tray correct
-                # today; unifying the two tables is a separate, deliberate decision.
+                # Ship the spell METADATA alongside the ids. The tables are unified now (both
+                # sides read the client's ENERGY_SPELLS via energy_spells.json), so this is no
+                # longer papering over a divergence -- it just keeps the client from needing a
+                # second lookup, and keeps the tray correct if the export ever runs ahead of a
+                # client build.
                 "spellHand": you["m"]["spellHand"],
                 "spellInfo": [{"id": sp["id"], "name": sp.get("name", sp["id"]),
                                "cost": sp.get("cost", 0), "desc": sp.get("fx") or sp.get("desc") or ""}
-                              for sp in engine.SPELLS if sp["id"] in (you["m"].get("spellHand") or [])],
+                              for sp in SPELL_LIST if sp["id"] in (you["m"].get("spellHand") or [])],
                 "committed": you["commit"] is not None,
                 "rgSlots": engine.rg_slots(you["m"].get("matchCommits", 0))},
         "them": {"score": them["m"]["playerScore"][0], "charge": them["m"]["charge"],
@@ -601,19 +617,33 @@ def cast_spell(user_id, pid, spell_id):
             return 402, {"error": f"not enough Charge (need {cost}, have {m['charge']})"}
         m["charge"] -= cost
         m["spellHand"] = [x for x in m["spellHand"] if x != spell_id]
-        # Effects copied verbatim from app.py's h_spell_cast rather than re-derived. My first pass
-        # here invented a "shield" spell that does not exist and omitted amplify/overload/nullwave/
-        # ledgerward -- four of the eight. Single-player is the reference implementation; PvP must
-        # not quietly become a second, different spell system.
-        if spell_id == "overclock":
-            m["charge"] = min(engine.duel_energy_cap(m.get("matchCommits", 0)), m["charge"] + 2)
-        elif spell_id == "staticpulse": m["spellOppPow"] = m.get("spellOppPow", 0) - 3
-        elif spell_id == "overload":    m["spellOppPow"] = m.get("spellOppPow", 0) - 6
-        elif spell_id == "amplify":     m["spellSelfPow"] = m.get("spellSelfPow", 0) + 3
-        elif spell_id == "jammer":      m["spellJam"] = True
-        elif spell_id == "nullwave":    m["spellNullOpp"] = True
-        elif spell_id == "ledgerward":  m["spellShield"] = True
-        # recall: same as single-player -- WC->hand differs server-side, charge spent, effect simplified
+        # Effects mirror the CLIENT's castSpell() (index.html), which is the live game's rule set.
+        # The engine already honours spellSelfPow/spellOppPow at resolve (engine.py:438-439), so the
+        # power spells need no engine change; the draw/banish ones ride the existing hand_ops
+        # channel, and the two condition spells rewrite the SHARED condition -- which is a real
+        # difference from single-player, where the condition is yours alone.
+        hand_ops = []
+        if spell_id == "empower":     m["spellSelfPow"] = m.get("spellSelfPow", 0) + 3
+        elif spell_id == "godhand":   m["spellSelfPow"] = m.get("spellSelfPow", 0) + 10
+        elif spell_id == "hex":       m["spellOppPow"] = m.get("spellOppPow", 0) - 3
+        elif spell_id == "collapse":  m["spellHalveField"] = True
+        elif spell_id == "sift":      hand_ops = [{"op": "draw", "n": 1}, {"op": "banish_random", "n": 1}]
+        elif spell_id == "drawsurge": hand_ops = [{"op": "draw", "n": 3}, {"op": "banish_random", "n": 1}]
+        elif spell_id == "locus":
+            g["condition"] = engine.pick_condition()
+            _reveal(g); _duel_begin(g)          # new condition, and the clock restarts for BOTH players
+        elif spell_id == "sornshift":
+            g["condition"] = "sornvallis" if "sornvallis" in getattr(engine, "CONDITION_IDS", ["sornvallis"]) else engine.pick_condition()
+            _reveal(g); _duel_begin(g)
+        for op in hand_ops:
+            if op["op"] == "draw":
+                for _ in range(op.get("n", 0)):
+                    if you["deck_cards"]: you["hand_cards"].append(you["deck_cards"].pop(0))
+            elif op["op"] == "banish_random":
+                for _ in range(op.get("n", 0)):
+                    if you["hand_cards"]:
+                        you["banish_cards"].append(you["hand_cards"].pop(random.randrange(len(you["hand_cards"]))))
+        you["m"]["hand"] = [c["type"] for c in you["hand_cards"]]
         m["spellDiscount"] = 0
         g["touched"] = time.time(); g["seq"] += 1
         return 200, _view(g, you, them)
