@@ -12830,7 +12830,17 @@ function _pvpAwardRankedIfDone(v){
 }
 
 function _pvpMsg(text, cls){ var el=document.getElementById('on-pvp-msg'); if(el){ el.textContent=text||''; el.className='on-msg '+(cls||''); } }
-function _pvpOnlineViewShowing(){ var v=document.getElementById('v-online'); return !!(v && v.classList.contains('on')); }
+// 8/16/26 — this gates the state poll, and it used to require v-online. Once a live duel moved
+// to the REAL board (v-turn), the poll cleared its own interval the moment the duel began, so
+// the client never saw the opponent commit and sat on "waiting for opponent" forever while the
+// server had already resolved. A live PvP board counts as showing the match.
+function _pvpOnlineViewShowing(){
+  if(typeof pvpBoardOn!=='undefined' && pvpBoardOn){
+    var t=document.getElementById('v-turn');
+    if(t && t.classList.contains('on')) return true;
+  }
+  var v=document.getElementById('v-online'); return !!(v && v.classList.contains('on'));
+}
 
 function pvpSetMode(n){ if(PVP.queueTimer||PVP.pvpId) return; PVP.bestOf=n; buildOnline(); }
 
@@ -12909,9 +12919,32 @@ function pvpEnterMatch(pvpId, opponent){
   clearInterval(PVP.challengeTimer); PVP.challengeTimer=null; PVP.challengeCode=null;
   clearInterval(PVP.directChallengeTimer); PVP.directChallengeTimer=null; PVP.directChallengeCode=null; PVP.directChallengeTarget=null;
   PVP.pvpId=pvpId; PVP.opponent=opponent; PVP.selectedUid=null; PVP.selectedRgUids=[]; PVP.view=null; PVP.rankAwardedFor=null;
+  // 8/16/26: persist the match id. It lived only in memory, so a refresh mid-match dropped the
+  // client out of a game the SERVER was still running -- you came back with no pvpId, saw stale
+  // or empty state, and your opponent sat waiting on a player who no longer knew they were in a
+  // match. Cleared by pvpExitMatch, so it only survives a reload, never a deliberate exit.
+  try{ lsSet('sf_pvp_active', {pvpId:pvpId, opponent:opponent, bestOf:PVP.bestOf}); }catch(e){}
   PVP.duelLog=[]; PVP._duelSig=null;
   if(typeof toast==='function') toast('Matched vs '+opponent+'!', true);
   buildOnline();   // re-enters through the dispatch above, which starts the poll loop + fetches
+}
+/* Rejoin a match in progress after a reload. The server is authoritative and still holds the
+   game, so all the client needs is the id back; state() then repaints the real board from scratch.
+   Guarded on being signed in, and it clears itself if the server no longer knows the match. */
+function pvpResumeIfActive(){
+  if(PVP.pvpId) return;
+  var saved=null; try{ saved=lsGet('sf_pvp_active', null); }catch(e){}
+  if(!saved || !saved.pvpId) return;
+  if(!(typeof sfToken==='function' && sfToken())) return;
+  PVP.pvpId=saved.pvpId; PVP.opponent=saved.opponent||'opponent';
+  if(saved.bestOf) PVP.bestOf=saved.bestOf;
+  sfApi('GET', '/api/pvp/state?pvpId='+encodeURIComponent(saved.pvpId), null, function(err, data){
+    if(err || !data || !data.you){ PVP.pvpId=null; try{ lsSet('sf_pvp_active', null); }catch(e){} return; }
+    PVP.view=data;
+    if(typeof toast==='function') toast('↩ Rejoined your match vs '+(data.opponent||'opponent'), true);
+    _renderPvpMatch();
+    if(!PVP.stateTimer) PVP.stateTimer=setInterval(pvpStateTick, 2000);
+  });
 }
 function pvpStateTick(){
   if(!_pvpOnlineViewShowing() || !PVP.pvpId){ clearInterval(PVP.stateTimer); PVP.stateTimer=null; return; }
@@ -12922,7 +12955,12 @@ function pvpFetchState(){
   sfApi('GET', '/api/pvp/state?pvpId='+encodeURIComponent(PVP.pvpId), null, function(err, data){
     if(err) return;   // one missed tick isn't worth surfacing -- the next tick recovers
     if(!PVP.pvpId) return;   // the user forfeited/exited while this request was in flight
-    if(data.seq !== (PVP.view ? PVP.view.seq : -1)){ PVP.selectedUid=null; PVP.selectedRgUids=[]; }   // a new duel started -- any stale selection no longer applies
+    if(data.seq !== (PVP.view ? PVP.view.seq : -1)){
+      PVP.selectedUid=null; PVP.selectedRgUids=[];   // a new duel started -- any stale selection no longer applies
+      // ...and so does the board's own staging state. Missing this is why a new duel could
+      // arrive with a new condition while the field still showed the previous duel's picks.
+      if(typeof pvpPick!=='undefined'){ pvpPick=null; pvpRg=[]; }
+    }
     // Accumulate the series history (see PVP.duelLog). The signature is seq + the duel payload,
     // NOT seq alone: the server can flip done:true on the same seq that already delivered this
     // duel, which would double-log it. Including the payload also means two genuinely identical
@@ -12970,6 +13008,7 @@ function pvpExitMatch(){
   if(typeof pvpBoardExit==='function') pvpBoardExit();
   clearInterval(PVP.stateTimer); PVP.stateTimer=null;
   PVP.pvpId=null; PVP.opponent=null; PVP.view=null; PVP.selectedUid=null; PVP.selectedRgUids=[];
+  try{ lsSet('sf_pvp_active', null); }catch(e){}
   PVP.duelLog=[]; PVP._duelSig=null;   // series history is per-match and client-only; pvpEnterMatch clears it too, this just avoids carrying a finished series in memory
   sfRefresh();   // the match likely paid out Zenni/RP -- refetch before the account panel shows again
 }
@@ -13011,7 +13050,7 @@ var pvpBoardOn = false, pvpPick = null, pvpRg = [];
 
 function pvpBoardEnter(){
   if(pvpBoardOn) return;
-  pvpBoardOn = true; pvpPick = null; pvpRg = [];
+  pvpBoardOn = true; pvpPick = null; pvpRg = []; _pvpShownDuelSeq = null;
   if(typeof show==='function') show('turn');
   // Local-only chrome that has no meaning in a server-authoritative duel.
   ['confirm-btn','commit-btn','forfeit-round-btn'].forEach(function(id){
@@ -13020,7 +13059,7 @@ function pvpBoardEnter(){
   var rr=document.getElementById('record-reveal'); if(rr) rr.style.display='none';
 }
 function pvpBoardExit(){
-  pvpBoardOn = false; pvpPick = null; pvpRg = [];
+  pvpBoardOn = false; pvpPick = null; pvpRg = []; clearTimeout(_pvpClashTimer); _pvpResolving = false;
   if(typeof FX!=='undefined' && FX.clear) FX.clear();
 }
 
@@ -13109,7 +13148,10 @@ function pvpRenderBoard(v){
   _pvpActionBar(v);
 
   // a resolved duel arriving from the server drives the real cinematic
-  if(v.lastDuel && v.lastDuel.seq!==_pvpShownDuelSeq){ _pvpShownDuelSeq=v.lastDuel.seq; pvpShowResolution(v); }
+  // Dedupe on the MATCH seq, not lastDuel.seq -- the server's side["last"] has no seq field
+  // (pvp.py:435), so the old check compared undefined to undefined and the cinematic fired
+  // exactly once per match instead of once per duel.
+  if(v.lastDuel && v.seq!==_pvpShownDuelSeq && !_pvpResolving){ _pvpShownDuelSeq=v.seq; _pvpResolving=true; pvpShowResolution(v); }
 }
 
 function pvpPickCard(uid){
@@ -13153,7 +13195,7 @@ function pvpCommitFromBoard(){
 
 /* Resolution: the numbers are the SERVER's, never recomputed here. The cinematic and FX are the
    same ones the offline duel uses, so a real match looks like a real match. */
-var _pvpShownDuelSeq=null;
+var _pvpShownDuelSeq=null, _pvpClashTimer=null, _pvpResolving=false;
 function pvpShowResolution(v){
   var d=v.lastDuel; if(!d) return;
   var pf=document.getElementById('player-field'), of=document.getElementById('opp-field');
@@ -13173,6 +13215,17 @@ function pvpShowResolution(v){
   if(typeof toast==='function'){
     toast((won?'✅ ':(tie?'🤝 ':'❌ '))+(d.yourPow!=null?(d.yourCard+' '+d.yourPow+' vs '+d.theirPow+' '+d.opponent):'duel resolved'), won);
   }
+  // The resolved cards are painted over the field ON PURPOSE so you see the clash — but the state
+  // that arrives WITH lastDuel is already the NEXT duel (new condition, empty board). Left alone,
+  // the field kept showing the previous duel's cards under a brand-new condition, which is exactly
+  // the "board still full from selections I made prior" desync. Hold the clash, then hand the field
+  // back to the live duel. _pvpResolving stops that repaint re-entering this function.
+  clearTimeout(_pvpClashTimer);
+  _pvpClashTimer = setTimeout(function(){
+    _pvpResolving = false;
+    if(pvpBoardOn && PVP.view && !PVP.view.done) pvpRenderBoard(PVP.view);
+  }, 2400);
+
   var log=document.getElementById('pvp-duel-log');
   if(!log){ log=document.createElement('div'); log.id='pvp-duel-log'; log.className='pvp-duel-log';
     var host=document.getElementById('v-turn'); if(host) host.appendChild(log); }
@@ -17125,6 +17178,7 @@ initOwnedCopies();
   supply = defaultSupply(); cardSupply=defaultCardSupply();
 const _hadSave=(function(){try{return !!localStorage.getItem(SAVE_KEY);}catch(e){return false;}})();
 try{ document.querySelectorAll('.dev-only').forEach(function(el){ el.style.display = (typeof playtestMode!=='undefined'&&playtestMode) ? '' : 'none'; }); }catch(e){}   /* dev-only screens hidden unless playtest mode is on */
+try{ setTimeout(function(){ if(typeof pvpResumeIfActive==='function') pvpResumeIfActive(); }, 900); }catch(e){}   /* rejoin an in-progress PvP match after a reload */
 window._sfReturningSession = _hadSave;   // captured before loadState()/startNewPlayer() can write a fresh save -- Hub's one-time reveal reads this
 loadState();
 applyAscendantFrame();
