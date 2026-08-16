@@ -60,6 +60,14 @@ def seed():
 # Bounds on what a registering client may claim from its local save. Deliberately generous
 # rather than tight -- the point is to stop absurd claims, not to punish a real player who
 # ground out a big offline collection before making an account.
+# Starter paths exported from the client (starter_decks.json), so the account is minted the same
+# deck the player was actually given locally. Same export pattern as dm_rules.json / energy_spells.json.
+try:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "starter_decks.json"), encoding="utf-8") as _f:
+        STARTER_DECKS = json.load(_f)
+except Exception:
+    STARTER_DECKS = {}
+
 MIGRATE_SIGNAL_CAP = 250000
 MIGRATE_CARD_CAP   = 400
 
@@ -134,7 +142,18 @@ def h_register(uid_none, body):
                 minted += 1
             migrated = migrated or minted > 0
         if minted == 0:
-            for t in rules.STARTER_DECK: mint_card(c, uid, t, via="Starter grant")
+            # 8/16/26 — rules.STARTER_DECK is a 16-card list (Keawe/Waltz/Moro...) that the CLIENT
+            # never grants: the client gives one of three chosen starter paths (ironsworn /
+            # blackwings / broodswarm, 16-17 cards each) with ZERO overlap. So an account created
+            # without a migration payload owned a deck the player did not have locally, and
+            # /api/deck/set then rejected their real deck as "cards you do not own" — which is why
+            # PvP fell back to the all-owned pool. Mint the path they actually chose.
+            _path = (body.get("starterPath") or "").strip()
+            _deck = STARTER_DECKS.get(_path)
+            if not _deck:
+                _deck = rules.STARTER_DECK          # no path sent (older client) -> previous behaviour
+            for t in _deck:
+                if t in rules.CARD_CATALOG: mint_card(c, uid, t, via="Starter deck (" + (_path or "default") + ")")
 
         store.ledger_add(c, uid, "SIGNAL", signal,
                          ("Migrated from local play (%d cards)" % minted) if migrated else "Welcome grant (play currency)",

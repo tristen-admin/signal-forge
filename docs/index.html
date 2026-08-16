@@ -12549,7 +12549,13 @@ function sfAuth(isRegister){
   // is registration-only on purpose: signing IN to an existing account must never overwrite it
   // with whatever happens to be in this browser.
   var body = {handle:h, password:p};
-  if(isRegister) body.migrate = sfMigratePayload();
+  if(isRegister){
+    body.migrate = sfMigratePayload();
+    // Which starter path this player chose. Without it the server mints its own 16-card list,
+    // which shares no cards with any of the three paths the client actually grants — so the
+    // account would not own the player's own deck.
+    try{ body.starterPath = localStorage.getItem('sf_starter_chosen') || null; }catch(e){}
+  }
   sfApi('POST', isRegister ? '/api/auth/register' : '/api/auth/login', body, function(err, data){
     if(btn) btn.disabled = false;
     if(err){ _onMsg(err, 'err'); return; }
@@ -13826,7 +13832,29 @@ const ARCHETYPE_PRESETS = [
 ];
 function cardArchetypes(name){ return ARCHETYPE_PRESETS.filter(function(a){ return a.members.indexOf(name)>=0; }); }
 let deckPresets = lsGet('sf_presets', {});
-(function(){ var _seed={blackwing:BLACKWING_PRESET, deathless:DEATHLESS_PRESET, warpath:WARPATH_PRESET, broodswarm:BROODSWARM_PRESET, ironsworn:IRONSWORN_PRESET, blackcouncil:BLACK_COUNCIL_PRESET, radiance:RADIANCE_PRESET, keawescircle:KEAWES_CIRCLE_PRESET, ahdorspride:AHDORS_PRIDE_PRESET}; var _ch=false; Object.keys(_seed).forEach(function(k){ if(!deckPresets[k] && !lsGet('sf_seed_'+k,0)){ deckPresets[k]=_seed[k].slice(); lsSet('sf_seed_'+k,1); _ch=true; } }); if(!lsGet('sf_bw_seeded',0)) lsSet('sf_bw_seeded',1); if(!lsGet('sf_seed_deathless_v2',0)){ deckPresets.deathless = DEATHLESS_PRESET.slice(); lsSet('sf_seed_deathless_v2',1); _ch=true; } if(_ch) lsSet('sf_presets', deckPresets); })();
+/* 8/16/26 (owner, twice) — the nine archetype decklists used to be SEEDED into the player's own
+   Saved Decks on first run. That is why a brand-new player, told minutes earlier to choose one
+   starter path, opened the deck builder and found nine decks they had never made, with no way to
+   tell which was theirs — a cold playtest named that screen as the moment it would have quit.
+   They are reference decklists, not the player's decks, and they live on the dev-gated Decklists
+   screen. Saved Decks now contains only decks the player actually saved.
+
+   Existing saves are cleaned up below: the seeded entries are removed unless the player has since
+   edited one (compared against the canonical list), so nobody loses a deck they actually built. */
+(function(){
+  var _seeded = {blackwing:BLACKWING_PRESET, deathless:DEATHLESS_PRESET, warpath:WARPATH_PRESET,
+                 broodswarm:BROODSWARM_PRESET, ironsworn:IRONSWORN_PRESET, blackcouncil:BLACK_COUNCIL_PRESET,
+                 radiance:RADIANCE_PRESET, keawescircle:KEAWES_CIRCLE_PRESET, ahdorspride:AHDORS_PRIDE_PRESET};
+  var changed=false;
+  Object.keys(_seeded).forEach(function(k){
+    var cur=deckPresets[k];
+    if(!cur) return;
+    var same = Array.isArray(cur) && cur.length===_seeded[k].length &&
+               cur.every(function(n,i){ return n===_seeded[k][i]; });
+    if(same){ delete deckPresets[k]; changed=true; }   // untouched seed -> remove; edited -> keep, it is theirs now
+  });
+  if(changed) lsSet('sf_presets', deckPresets);
+})();
 ;/* PICK YOUR PATH - starter archetype chooser (onboarding) */
 var STARTER_PATHS=[
   {key:'ironsworn',name:'The Ironsworn',tag:'Strength in Numbers',blurb:'Weak alone, unstoppable together — your soldiers grow stronger with every ally you field and every duel you win. The most forgiving path for a new commander.',rep:'Bannerlord Cassian',icon:'✊',accent:'#8fb3ff'},
