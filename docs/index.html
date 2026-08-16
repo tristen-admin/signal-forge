@@ -2801,10 +2801,10 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       </div>
     </div>
     <div class="nav-group" id="grp-collection">
-      <button aria-label="Collection" class="nav-grp-head" onclick="toggleNavGroup('grp-collection')"><span class="ni-icon">🗂</span><span class="brand-text">Collection</span><span class="grp-chev brand-text">▾</span></button>
+      <button aria-label="Deck Builder" class="nav-grp-head" onclick="toggleNavGroup('grp-collection')"><span class="ni-icon">🗂</span><span class="brand-text">Deck Builder</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
         <button aria-label="Vault" class="navitem" id="nav-vault" onclick="show('vault',this)"><span class="ni-icon">🗄</span><span class="brand-text">Vault</span><span class="ni-badge" id="vault-badge">19</span></button>
-        <button aria-label="Deck Builder" class="navitem" id="nav-deck" onclick="show('deck',this)"><span class="ni-icon">🃏</span><span class="brand-text">Deck Builder</span><span class="ni-badge" id="deck-badge">0/12</span></button>
+        <button aria-label="Edit Deck" class="navitem" id="nav-deck" onclick="show('deck',this)"><span class="ni-icon">🃏</span><span class="brand-text">Edit Deck</span><span class="ni-badge" id="deck-badge">0/12</span></button>
         <button aria-label="Mastery &amp; Bonds" class="navitem" id="nav-mastery" onclick="show('mastery',this);buildMastery()"><span class="ni-icon">⭐</span><span class="brand-text">Mastery &amp; Bonds</span></button>
         <button aria-label="Trade" class="navitem" id="nav-trade" onclick="show('trade',this);buildTrade()"><span class="ni-icon">🤝</span><span class="brand-text">Trade</span></button>
         <button aria-label="Side Stories" class="navitem" id="nav-stories" onclick="show('stories',this)"><span class="ni-icon">📖</span><span class="brand-text">Side Stories</span></button>
@@ -2995,7 +2995,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
   <!-- ── DECK BUILDER VIEW ── -->
   <div class="view" id="v-deck">
     <div class="deck-head">
-      <span class="dh-title">🃏 Deck Builder</span>
+      <span class="dh-title">🃏 Edit Deck</span>
       <div class="deck-subtabs">
         <button class="dst on" id="dst-deck" onclick="deckTab('deck')">Deck</button>
         <button class="dst" id="dst-backs" onclick="deckTab('backs')">🎴 Card Backs</button><button class="dst" id="dst-sleeves" onclick="deckTab('sleeves')">🃏 Sleeves</button><button class="dst" id="dst-energy" onclick="deckTab('energy')">&#x26a1; Interrupts</button>
@@ -9882,7 +9882,7 @@ function nextTurn(){
   openTurn();
 }
 
-const SCREEN_TITLES = { play:'Play', hub:'Hub',vault:'The Vault',deck:'Deck Builder',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Offline Play',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'KOTEI Online',draft:'Draft',asc:'Reincarnation · The Saga',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile',mailbox:'Mailbox',devnotes:'Dev Notes'};
+const SCREEN_TITLES = { play:'Play', hub:'Hub',vault:'The Vault',deck:'Edit Deck',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Offline Play',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'KOTEI Online',draft:'Draft',asc:'Reincarnation · The Saga',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile',mailbox:'Mailbox',devnotes:'Dev Notes'};
 function toggleSidebar(){ document.body.classList.toggle('nav-collapsed'); }
 // 8/11/26: opening a group closes every other one, so the whole nav column reflows for the length
 // of .nav-sub's max-height transition (220ms). A second click landing inside that window hit
@@ -12290,7 +12290,7 @@ function buildDeckPool(){
     const inDeck = activeDeck.has(c.uid||c.name);
     const owned = isOwned(c);
     const pristine = ((typeof isPristine==='function')?isPristine(c):(c.deaths===0)) ? `<span class="vc-pristine" data-kw="Pristine">◈</span>` : '';
-    return `<div class="vault-card ${c.rarity} ${campCls} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" role="button" tabindex="-1" aria-label="${vaultCardLabel(c, e)}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="cancelHidePreview();previewPoolCardReadable('${nm}',this)" onmouseleave="scheduleHidePreview()">
+    return `<div class="vault-card ${c.rarity} ${campCls} ${inDeck?'in-deck':''} ${owned?'':'locked-card'} ${typeof cardStateClasses==='function'?cardStateClasses(c):''}" role="button" tabindex="-1" aria-label="${vaultCardLabel(c)}" onclick="openCardDetail('${nm}')" ${owned?`draggable="true" ondragstart="dragDeckCard(event,'${nm}')"`:''} onmouseenter="cancelHidePreview();previewPoolCardReadable('${nm}',this)" onmouseleave="scheduleHidePreview()">
       <div class="vc-art" style="${artFillStyle(c.artKey||c.name)}">
         ${sigilFor(c.artKey||c.name)}
         <span class="vc-rarity-ribbon" data-kw="Rarity">${rlab(c.rarity)}</span>
@@ -14103,7 +14103,7 @@ const PROFILE_RANKS = [
     {id:'r1_support', icon:'📣', label:'Call 5 Supports',            target:5}]},
   {n:2, name:'Duelist',    blurb:'Make the deck yours.',            zenni:2500,  missions:[
     {id:'r2_win',     icon:'⚔',  label:'Win 5 more duels',           target:5},
-    {id:'r2_deck',    icon:'🃏', label:'Open the Deck Builder',      target:1},
+    {id:'r2_deck',    icon:'🃏', label:'Open Edit Deck',             target:1},
     {id:'r2_conjure', icon:'🎴', label:'Conjure 25 Fighters',        target:25}]},
   {n:3, name:'Collector',  blurb:'Learn the economy.',              zenni:5000,  missions:[
     {id:'r3_pack',    icon:'📦', label:'Open 3 packs',               target:3},
@@ -14282,7 +14282,7 @@ function renderCampBanner(){
   } else {
     // The one instruction the Hub gives must say HOW, not just what (owner).
     dmEl.innerHTML='<span class="id-k">Deck Master</span><span class="id-v none">None yet</span>'+
-      '<span class="id-sub">Deck Builder \u2192 tap a card \u2192 <b>Set as Deck Master</b></span>';
+      '<span class="id-sub">Edit Deck \u2192 tap a card \u2192 <b>Set as Deck Master</b></span>';
     dmEl.classList.add('empty');
   }
   var handle=(typeof SF_ONLINE!=='undefined'&&SF_ONLINE&&SF_ONLINE.handle)?SF_ONLINE.handle:
@@ -14480,7 +14480,13 @@ function filterVaultCost(k,btn){
    tabindex is -1 deliberately: the tile keeps its name and stays reachable by screen-reader browse
    mode and by pointer, but Tab does not walk 159 cards before reaching the filters above them. */
 function vaultCardLabel(c, e){
+  // `e` is the Vault's per-entry object and is OPTIONAL: the Deck Builder renders the same tile
+  // markup without one. Passing it positionally there threw ReferenceError: e is not defined,
+  // which killed buildDeckPool -> buildDeckBuilder -> chooseStarterPath, so the starter choice
+  // never reached startTutorial. One undefined variable took out the entire new-player funnel:
+  // no tutorial, no hub tour, no signup prompt, and an empty deck pool. Guarded on both sides.
   if(!c) return '';
+  e = e || null;
   var key=c.uid||c.name, parts=[];
   parts.push(((typeof dispName==='function')?dispName(c.name):c.name)+'.');
   parts.push((c.rarity||'common')+', cost '+((typeof conjureCost==='function')?conjureCost(c):'?')+', power '+(c.pow!=null?c.pow:'?')+'.');
