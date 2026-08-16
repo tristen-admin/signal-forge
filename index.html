@@ -13097,6 +13097,15 @@ function pvpBoardExit(){
 function pvpRenderBoard(v){
   if(!v || !v.you) return;
   if(!pvpBoardOn) pvpBoardEnter();
+  // The poll is the ONLY channel through which this client learns that the opponent committed or
+  // FORFEITED. Nothing previously guaranteed it was still running while the board was up, so a
+  // client whose interval had been cleared (a finished previous match, a view change, an error
+  // path) sat on a live board seeing nothing happen — which is exactly "folding on one tester's
+  // turn doesn't do anything for the other player". Self-healing: if the board is up and we are in
+  // a match, the poll runs.
+  if(PVP.pvpId && !PVP.stateTimer && typeof pvpStateTick==='function'){
+    PVP.stateTimer = setInterval(pvpStateTick, 2000);
+  }
 
   // ── condition (the real cond card, not a text line) ──
   var ci = (typeof pvpCondInfo==='function') ? pvpCondInfo(v.condition) : {name:v.condition,rule:'',icon:'?'};
@@ -13107,8 +13116,12 @@ function pvpRenderBoard(v){
   _setText('cond-strat', v.lockedWithdraw ? 'Withdraw is locked this duel.' : '');
 
   // ── charge + score ──
+  // Charge IS spent server-side (engine.py:434, at resolve). This readout used to print the same
+  // number as both current and cap, so it always showed "4/4" and looked like nothing was ever
+  // spent. The cap follows the same curve as offline duelEnergyCap(): +1 per duel to 4, then 2d-2.
+  var _d = (v.duel||1), _cap = _d<=4 ? (_d+2) : (2*_d-2);
   _setText('charge-val', v.you.charge!=null?v.you.charge:'—');
-  _setText('charge-cap', v.you.charge!=null?v.you.charge:'—');
+  _setText('charge-cap', Math.max(_cap, v.you.charge||0));
   var occ=document.getElementById('opp-charge-count');
   if(occ) occ.textContent = (v.them&&v.them.charge!=null?v.them.charge:'?')+'/'+(v.them&&v.them.charge!=null?v.them.charge:'?');
   var sd=document.getElementById('score-display');
@@ -13146,6 +13159,13 @@ function pvpRenderBoard(v){
       ? '<div class="card field-card facedown enemy"><div class="fd-mark">▪▪▪</div></div>'
       : '<span class="placeholder">waiting for '+_esc(v.opponent||'opponent')+'…</span>';
   }
+
+  // Any staged uid that is no longer in hand is stale by definition (new duel, new match, or the
+  // server took the card). Dropped here so the board can never present a selection the server
+  // would reject, and so slots can never appear full because of a previous duel.
+  var _uids=(v.you.hand||[]).map(function(h){ return h.uid; });
+  if(pvpPick && _uids.indexOf(pvpPick)<0) pvpPick=null;
+  pvpRg = pvpRg.filter(function(u){ return _uids.indexOf(u)>=0; });
 
   // ── hand: real cards, real markup, same affordances as offline ──
   var row=document.getElementById('hand-row');
@@ -13220,8 +13240,18 @@ function _pvpActionBar(v){
 
 function pvpCommitFromBoard(){
   if(!pvpPick) return;
+  // Validate against the hand we are actually holding right now. A stale pick surviving into a new
+  // duel (or a whole new match) is what produced the server's "that card is not in your hand", and
+  // a stale rear-guard list is what made every slot read as full so nothing could be selected.
+  var hand=(PVP.view && PVP.view.you && PVP.view.you.hand) || [];
+  var has=function(u){ return hand.some(function(h){ return h.uid===u; }); };
+  if(!has(pvpPick)){ pvpPick=null; pvpRg=[]; pvpRenderBoard(PVP.view); return; }
+  pvpRg = pvpRg.filter(has);
   PVP.selectedUid=pvpPick; PVP.selectedRgUids=pvpRg.slice();
   if(typeof pvpCommit==='function') pvpCommit();
+  // Staging is spent the moment it is sent. Holding it past the commit is what carried it into the
+  // next duel; the server is authoritative from here and the next state repaints the board.
+  pvpPick=null; pvpRg=[];
 }
 
 /* Resolution: the numbers are the SERVER's, never recomputed here. The cinematic and FX are the

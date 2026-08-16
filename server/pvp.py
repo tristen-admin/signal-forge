@@ -54,6 +54,7 @@ GAMES = {}       # pid -> game dict (see _new_game)
 CHALLENGES = {}  # code -> {"user_id","handle","owned","best_of","created"} — a pending private-match invite
 
 QUEUE_TTL = 120.0       # a queue entry this old is stale (browser closed, tab killed); dropped on touch
+STARTING_HAND = 5       # matches index.html:12153; online was dealing 4
 GAME_TTL = 3600.0       # an untouched game is abandoned; dropped so GAMES cannot grow forever
 # 8/16/26 (owner: "auto end the match when both players leave room"). GAME_TTL is a memory guard at
 # an hour, far too slow to be a game rule. This is the real one: once BOTH sides have stopped
@@ -83,7 +84,13 @@ def _new_side(user_id, handle, owned, best_of, deck_master=None):
     m = engine.new_match([c["type"] for c in owned], best_of=best_of, lobby_mode=False)
     m["bonds"] = {r["pair"]: r["count"] for r in
                   store.conn().execute("SELECT pair,count FROM bonds WHERE user_id=?", (user_id,)).fetchall()}
-    hand_cards, deck_cards = owned[:4], owned[4:]
+    # 8/16/26 — was `owned[:4], owned[4:]`: no shuffle at all, and a 4-card hand.
+    # No shuffle meant the deal was a pure function of deck order, so the same deck produced the
+    # same opening hand every single match, and two players on the same deck drew identically.
+    # STARTING_HAND is 5 everywhere else (index.html:12153); online was quietly dealing 4.
+    owned = list(owned)
+    random.shuffle(owned)
+    hand_cards, deck_cards = owned[:STARTING_HAND], owned[STARTING_HAND:]
     m["hand"] = [c["type"] for c in hand_cards]
     return {"user_id": user_id, "handle": handle, "m": m, "deck_master": deck_master, "seen": time.time(),
             "hand_cards": hand_cards, "deck_cards": deck_cards, "banish_cards": [],
@@ -330,6 +337,12 @@ def commit(user_id, pid, card_uid, rg_uids):
             c = next((x for x in you["hand_cards"] if x["uid"] == u), None)
             if not c: return 400, {"error": f"rear-guard card {u} is not in your hand"}
             rg_cards.append(c)
+
+        # NOTE: do NOT deduct Charge here. engine.resolve() already spends it at engine.py:434
+        # ("conjuring spends Charge equal to the fighter's own cost"). Deducting at commit as well
+        # would charge twice for one conjure. The reported "charge not being spent" was a CLIENT
+        # display bug -- the board printed the same number as both current and cap -- not a missing
+        # deduction. Verified before changing the server.
 
         you["commit"] = {"card": hc, "rg": rg_cards}
         if them["commit"] is None:
