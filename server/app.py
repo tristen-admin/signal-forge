@@ -614,6 +614,12 @@ def h_pvp_queue(user_id, body):
 
 def h_pvp_leave(user_id, body):   return pvp.leave(user_id)
 def h_pvp_state(user_id, body):   return pvp.state(user_id, body.get("pvpId"))
+def h_pvp_spell(user_id, body):
+    """Cast an Interrupt in a PvP duel. spellHand was advertised in the state payload from the
+    start with no endpoint to act on it -- a whole mechanic visible and unplayable online."""
+    return pvp.cast_spell(user_id, body.get("pvpId"), body.get("spellId"))
+
+
 def h_pvp_forfeit(user_id, body): return pvp.forfeit(user_id, body.get("pvpId"))
 
 # Direct-invite private matches (8/6/26) -- the random queue needs both friends to hit "Find Match"
@@ -1095,6 +1101,7 @@ ROUTES = {
     ("GET", "/api/pvp/state"):     (h_pvp_state, True),
     ("POST","/api/pvp/commit"):    (h_pvp_commit, True),
     ("POST","/api/pvp/forfeit"):   (h_pvp_forfeit, True),
+    ("POST","/api/pvp/spell"):     (h_pvp_spell, True),
     ("POST","/api/pvp/challenge/create"): (h_pvp_challenge_create, True),
     ("GET", "/api/pvp/challenge/status"): (h_pvp_challenge_status, True),
     ("POST","/api/pvp/challenge/cancel"): (h_pvp_challenge_cancel, True),

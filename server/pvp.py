@@ -55,6 +55,7 @@ CHALLENGES = {}  # code -> {"user_id","handle","owned","best_of","created"} — 
 
 QUEUE_TTL = 120.0       # a queue entry this old is stale (browser closed, tab killed); dropped on touch
 STARTING_HAND = 5       # matches index.html:12153; online was dealing 4
+SPELLS = {sp['id']: sp for sp in engine.SPELLS}   # same table app.py uses for single-player Interrupts
 GAME_TTL = 3600.0       # an untouched game is abandoned; dropped so GAMES cannot grow forever
 # 8/16/26 (owner: "auto end the match when both players leave room"). GAME_TTL is a memory guard at
 # an hour, far too slow to be a game rule. This is the real one: once BOTH sides have stopped
@@ -303,7 +304,17 @@ def _view(g, you, them):
         "you": {"score": you["m"]["playerScore"][0], "charge": you["m"]["charge"],
                 "hand": _hand_view(you["hand_cards"]), "deckCount": len(you["deck_cards"]),
                 "winnersCircleCount": len(you["winners_circle_cards"]),
-                "spellHand": you["m"]["spellHand"], "committed": you["commit"] is not None,
+                # Ship the spell METADATA, not just ids. The client's own Interrupt table
+                # (ENERGY_SPELLS: sift/empower/hex/collapse/locus...) and the server's
+                # (engine.SPELLS: overclock/staticpulse/amplify...) are entirely different sets with
+                # no overlap, so the client cannot name or price a server spell from local data --
+                # it was rendering raw ids at cost 0. Sending name/cost/desc makes the tray correct
+                # today; unifying the two tables is a separate, deliberate decision.
+                "spellHand": you["m"]["spellHand"],
+                "spellInfo": [{"id": sp["id"], "name": sp.get("name", sp["id"]),
+                               "cost": sp.get("cost", 0), "desc": sp.get("fx") or sp.get("desc") or ""}
+                              for sp in engine.SPELLS if sp["id"] in (you["m"].get("spellHand") or [])],
+                "committed": you["commit"] is not None,
                 "rgSlots": engine.rg_slots(you["m"].get("matchCommits", 0))},
         "them": {"score": them["m"]["playerScore"][0], "charge": them["m"]["charge"],
                  "handCount": len(them["hand_cards"]), "deckCount": len(them["deck_cards"]),
@@ -501,6 +512,49 @@ def _payout(g):
                     c.execute("INSERT INTO bonds(user_id,pair,count) VALUES(?,?,1) "
                               "ON CONFLICT(user_id,pair) DO UPDATE SET count=count+1",
                               (side["user_id"], pair))
+
+
+def cast_spell(user_id, pid, spell_id):
+    """Cast an Interrupt in a PvP duel (8/16/26).
+
+    spellHand has been in the state payload since PvP was written, but no endpoint ever existed to
+    play one -- so a whole mechanic was visible and unusable online while being core offline. This
+    mirrors app.py's h_spell_cast: same _SPELLS table, same cost/discount rules, same Charge check,
+    same effect flags on the caster's own match state. It deliberately does NOT resolve anything --
+    the flags (spellJam/spellOppPow/spellShield...) are read by engine.resolve() when the duel
+    resolves, exactly as they are single-player."""
+    with _LOCK:
+        g = GAMES.get(pid)
+        if not g: return 404, {"error": "match not found"}
+        you, them = _sides(g, user_id)
+        if not you: return 403, {"error": "not your match"}
+        if g["done"]: return 400, {"error": "match already complete"}
+        if you["commit"] is not None: return 400, {"error": "you already committed this duel"}
+        m = you["m"]
+        s = SPELLS.get(spell_id)
+        if not s: return 400, {"error": "unknown spell"}
+        if spell_id not in m.get("spellHand", []): return 400, {"error": "that Interrupt is not in your hand"}
+        cost = max(0, s["cost"] - m.get("spellDiscount", 0))
+        if m["charge"] < cost:
+            return 402, {"error": f"not enough Charge (need {cost}, have {m['charge']})"}
+        m["charge"] -= cost
+        m["spellHand"] = [x for x in m["spellHand"] if x != spell_id]
+        # Effects copied verbatim from app.py's h_spell_cast rather than re-derived. My first pass
+        # here invented a "shield" spell that does not exist and omitted amplify/overload/nullwave/
+        # ledgerward -- four of the eight. Single-player is the reference implementation; PvP must
+        # not quietly become a second, different spell system.
+        if spell_id == "overclock":
+            m["charge"] = min(engine.duel_energy_cap(m.get("matchCommits", 0)), m["charge"] + 2)
+        elif spell_id == "staticpulse": m["spellOppPow"] = m.get("spellOppPow", 0) - 3
+        elif spell_id == "overload":    m["spellOppPow"] = m.get("spellOppPow", 0) - 6
+        elif spell_id == "amplify":     m["spellSelfPow"] = m.get("spellSelfPow", 0) + 3
+        elif spell_id == "jammer":      m["spellJam"] = True
+        elif spell_id == "nullwave":    m["spellNullOpp"] = True
+        elif spell_id == "ledgerward":  m["spellShield"] = True
+        # recall: same as single-player -- WC->hand differs server-side, charge spent, effect simplified
+        m["spellDiscount"] = 0
+        g["touched"] = time.time(); g["seq"] += 1
+        return 200, _view(g, you, them)
 
 
 def forfeit(user_id, pid):

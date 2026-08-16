@@ -2269,6 +2269,18 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .signup-gate .sg-ghost:hover{border-color:var(--text3);color:var(--text)}
 .signup-gate .sg-fine{font-size:10.5px;color:var(--text3);line-height:1.55;margin:0}
 /* Online PvP action bar + duel log, sitting on the real duel board (see pvpRenderBoard) */
+.pvp-link-strip{position:fixed;left:14px;bottom:70px;z-index:119;display:flex;flex-wrap:wrap;gap:6px;max-width:280px;align-items:center}
+.pvp-link-strip:empty{display:none}
+.pvp-link-strip .pls-lbl{font-size:9px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.pvp-link-strip .pls-chip{font-size:10px;font-weight:700;color:var(--gold);background:rgba(245,194,77,.1);border:1px solid rgba(245,194,77,.32);border-radius:20px;padding:3px 9px}
+#dm-ability-strip .dm-star{color:var(--gold);font-weight:800;margin-right:6px}
+#dm-ability-strip .dm-name{font-weight:800;color:#fff;margin-right:8px}
+#dm-ability-strip .dm-note{font-size:10.5px;color:var(--text3)}
+.spell-tray-cards .st-empty{font-size:10.5px;color:var(--text3)}
+.spell-tray-cards .spell-card{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;margin:2px;cursor:pointer;font-size:11px;color:var(--text)}
+.spell-tray-cards .spell-card:hover:not(:disabled){border-color:var(--electric);color:#fff}
+.spell-tray-cards .spell-card.dim{opacity:.45;cursor:not-allowed}
+.spell-tray-cards .sc-cost{color:var(--electric);font-weight:800}
 .pvp-action-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:120;display:flex;align-items:center;gap:10px;
   background:rgba(10,13,20,.92);border:1px solid var(--border2);border-radius:12px;padding:9px 14px;box-shadow:0 8px 26px rgba(0,0,0,.55)}
 .pvp-action-bar .pab-hint,.pvp-action-bar .pab-wait{font-size:11.5px;color:var(--text2);white-space:nowrap}
@@ -13196,6 +13208,35 @@ function pvpRenderBoard(v){
   _setText('select-hint', v.you.committed ? 'Committed \u2014 waiting on your opponent' : 'Tap a card to conjure it');
   _setText('commit-hint', v.you.committed ? 'Locked in for this duel.' : 'Choose a Fighter, then Commit.');
 
+  // ── piles: the server has been sending all of this since day one and the board ignored it ──
+  _setText('hand-count', (v.you.hand||[]).length);
+  _setText('deck-count', v.you.deckCount!=null?v.you.deckCount:'—');
+  _setText('wc-count', v.you.winnersCircleCount!=null?v.you.winnersCircleCount:0);
+  _setText('opp-hand-count', v.them&&v.them.handCount!=null?v.them.handCount:'—');
+  _setText('opp-deck-count', v.them&&v.them.deckCount!=null?v.them.deckCount:'—');
+  _setText('opp-wc-count', v.them&&v.them.winnersCircleCount!=null?v.them.winnersCircleCount:0);
+
+  // ── Deck Master: the client knows its own, and the server now resolves it (engine.apply_deck_master).
+  // Without this there was no confirmation online that a Deck Master was in play at all.
+  var dmStrip=document.getElementById('dm-ability-strip');
+  if(dmStrip){
+    var dm=(typeof deckMasterCard!=='undefined')?deckMasterCard:null;
+    if(dm){
+      var _dmc=COLLECTION.find(function(x){ return (x.uid||x.name)===dm; });
+      dmStrip.style.display='';
+      dmStrip.innerHTML='<span class="dm-star">★</span><span class="dm-name">'+
+        ((typeof dispName==='function')?dispName(_dmc?_dmc.name:dm):(_dmc?_dmc.name:dm))+
+        '</span><span class="dm-note">Deck Master — its ability resolves every duel</span>';
+    } else dmStrip.style.display='none';
+  }
+
+  // ── Links: engine.active_links() already computes these server-side; surfaced so a player can
+  // see why a fighter is stronger, the same way offline does.
+  _pvpRenderLinks(v);
+
+  // ── Interrupts: spellHand was in the payload from the start with no way to play one ──
+  _pvpRenderSpells(v);
+
   // ── action bar ──
   _pvpActionBar(v);
 
@@ -13206,6 +13247,50 @@ function pvpRenderBoard(v){
   if(v.lastDuel && v.seq!==_pvpShownDuelSeq && !_pvpResolving){ _pvpShownDuelSeq=v.seq; _pvpResolving=true; pvpShowResolution(v); }
 }
 
+/* Interrupt tray for PvP. Casting posts to /api/pvp/spell (added 8/16/26); the server spends the
+   Charge and arms the effect flags that engine.resolve() reads at resolution, exactly as
+   single-player does. Disabled while committed or when the Charge is not there, so the tray never
+   offers a cast the server will refuse. */
+function _pvpRenderSpells(v){
+  var tray=document.getElementById('spell-tray-cards'); if(!tray) return;
+  var hand=(v.you.spellHand)||[];
+  if(!hand.length){ tray.innerHTML='<span class="st-empty">No Interrupts in hand</span>'; return; }
+  tray.innerHTML=hand.map(function(id){
+    // Read from the server's own spellInfo. The client's ENERGY_SPELLS is a DIFFERENT Interrupt
+    // set (sift/empower/hex/...) with no ids in common, so looking up a server spell locally always
+    // failed and the tray rendered bare ids at cost 0.
+    var s=((v.you.spellInfo)||[]).find(function(x){return x.id===id;});
+    var cost=s?s.cost:0, afford=(v.you.charge||0)>=cost, locked=v.you.committed;
+    return '<button class="spell-card'+((!afford||locked)?' dim':'')+'" '+((afford&&!locked)?'':'disabled ')+
+      'onclick="pvpCastSpell(\''+id+'\')" title="'+((s&&s.desc)?String(s.desc).replace(/"/g,'&quot;'):'')+'">'+
+      '<span class="sc-name">'+((s&&s.name)||id)+'</span><span class="sc-cost">⚡'+cost+'</span></button>';
+  }).join('');
+}
+function pvpCastSpell(id){
+  if(!PVP.pvpId) return;
+  sfApi('POST','/api/pvp/spell',{pvpId:PVP.pvpId, spellId:id}, function(err, data){
+    if(err){ if(typeof toast==='function') toast(err, false); return; }
+    PVP.view=data; _renderPvpMatch();
+    if(typeof toast==='function') toast('⚡ Interrupt cast', true);
+  });
+}
+/* Links read from the same LINK_GROUPS the server uses (engine.py:75 loads them from the shared
+   catalog), so client and server agree on what is linked without a second source of truth. */
+function _pvpRenderLinks(v){
+  var host=document.getElementById('pvp-link-strip');
+  if(!host){ host=document.createElement('div'); host.id='pvp-link-strip'; host.className='pvp-link-strip';
+    var t=document.getElementById('v-turn'); if(t) t.appendChild(host); }
+  var names=(v.you.hand||[]).map(function(h){ return h.type; });
+  var picked=pvpPick && (v.you.hand||[]).find(function(h){ return h.uid===pvpPick; });
+  if(!picked || typeof activeLinks!=='function'){ host.innerHTML=''; return; }
+  var links=[];
+  try{ links=activeLinks({name:picked.type}, names.map(function(n){ return {name:n}; }))||[]; }catch(e){ links=[]; }
+  host.innerHTML = links.length
+    ? '<span class="pls-lbl">🔗 Links</span>'+links.map(function(l){
+        return '<span class="pls-chip" title="with '+_esc(l.partner)+'">'+(l.icon||'🔗')+' '+_esc(l.name)+' +'+(l.pow||1)+'</span>';
+      }).join('')
+    : '';
+}
 function pvpPickCard(uid){
   if(!PVP.view || PVP.view.you.committed) return;
   var slots=(PVP.view.you.rgSlots)||2;
