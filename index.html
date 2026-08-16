@@ -12626,7 +12626,7 @@ function _renderAccountPanel(){
   var u = SF_STATE && SF_STATE.user, n = SF_STATE ? SF_STATE.cards.length : null;
   el.innerHTML =
     '<div class="on-panel">'+
-      '<h3>Signed in as '+sfEsc(SF_ONLINE.handle)+'</h3>'+
+      '<h3>Signed in as '+sfEsc((SF_ONLINE&&SF_ONLINE.handle)||'you')+'</h3>'+
       '<p class="on-sub">This account is stored on the server. Your local collection on this device is separate and unaffected.</p>'+
       (u ? '<div class="on-row"><span>Zenni</span><b>'+u.signal.toLocaleString()+'</b></div>'+
            '<div class="on-row"><span>Kinzo</span><b>'+u.forge.toLocaleString()+'</b></div>'+
@@ -12849,7 +12849,7 @@ function _pvpInLiveMatch(){ return !!(PVP.pvpId && !(PVP.view && PVP.view.done))
 function pvpClearFinished(){
   if(PVP.pvpId && PVP.view && PVP.view.done){
     PVP.pvpId=null; PVP.view=null; PVP.selectedUid=null; PVP.selectedRgUids=[];
-    PVP.duelLog=[]; PVP._duelSig=null;
+    PVP.duelLog=[]; PVP._duelSig=null;  _pvpFinished=false;   /* a new/cleared match must be able to end again */
     if(typeof pvpBoardExit==='function') pvpBoardExit();
     try{ lsSet('sf_pvp_active', null); }catch(e){}
   }
@@ -12938,7 +12938,7 @@ function pvpEnterMatch(pvpId, opponent){
   // or empty state, and your opponent sat waiting on a player who no longer knew they were in a
   // match. Cleared by pvpExitMatch, so it only survives a reload, never a deliberate exit.
   try{ lsSet('sf_pvp_active', {pvpId:pvpId, opponent:opponent, bestOf:PVP.bestOf, at:Date.now()}); }catch(e){}
-  PVP.duelLog=[]; PVP._duelSig=null;
+  PVP.duelLog=[]; PVP._duelSig=null;  _pvpFinished=false;   /* a new/cleared match must be able to end again */
   if(typeof toast==='function') toast('Matched vs '+opponent+'!', true);
   buildOnline();   // re-enters through the dispatch above, which starts the poll loop + fetches
 }
@@ -13040,7 +13040,7 @@ function pvpExitMatch(){
   clearInterval(PVP.stateTimer); PVP.stateTimer=null;
   PVP.pvpId=null; PVP.opponent=null; PVP.view=null; PVP.selectedUid=null; PVP.selectedRgUids=[];
   try{ lsSet('sf_pvp_active', null); }catch(e){}
-  PVP.duelLog=[]; PVP._duelSig=null;   // series history is per-match and client-only; pvpEnterMatch clears it too, this just avoids carrying a finished series in memory
+  PVP.duelLog=[]; PVP._duelSig=null;   // series history is per-match and client-only; pvpEnterMatch clears it too, this just avoids carrying a finished series in memory  _pvpFinished=false;   /* a new/cleared match must be able to end again */
   sfRefresh();   // the match likely paid out Zenni/RP -- refetch before the account panel shows again
 }
 
@@ -13268,11 +13268,41 @@ function pvpShowResolution(v){
 function _setText(id,t){ var el=document.getElementById(id); if(el) el.textContent=t; }
 function _esc(s){ return (typeof sfEsc==='function')?sfEsc(s):String(s==null?'':s); }
 
+/* ══ END OF MATCH — the one transition every ending funnels through (8/16/26) ═════════════════
+   THE BUG THIS REPLACES: when a match ended, _renderPvpMatch tore the board down and rendered the
+   result into #online-body -- but never navigated away from v-turn. Both players were left staring
+   at a frozen board while the result rendered into a HIDDEN view. Reported as "both testers stuck
+   on a game state post forfeit", and it applied to EVERY ending, not just forfeit.
+
+   A match can end four ways and they must behave identically:
+     1. natural completion  (pvp.py: match_over -> done)
+     2. you forfeit         (pvp.py: forfeit)
+     3. they forfeit        (same, seen only via the poll)
+     4. both abandoned      (pvp.py: _sweep, ABANDON_TTL)
+   Only #2 has a local trigger; the rest arrive silently on a poll tick. So this cannot live in a
+   click handler -- it is driven by the STATE, which is why every path now reaches it. */
+var _pvpFinished = false;
+function pvpFinishMatch(v){
+  if(_pvpFinished) return;                                   // idempotent: the poll keeps re-delivering done
+  _pvpFinished = true;
+  if(typeof pvpBoardExit==='function') pvpBoardExit();
+  try{ lsSet('sf_pvp_active', null); }catch(e){}             // a finished match is never resumable
+  if(PVP.stateTimer){ clearInterval(PVP.stateTimer); PVP.stateTimer=null; }
+  if(typeof show==='function') show('online', document.getElementById('nav-online'));
+  var oc = v && v.lastDuel && v.lastDuel.outcome;
+  if(typeof toast==='function'){
+    if(oc==='forfeit') toast('\u{1F3F3} You withdrew — the match goes to your opponent.', false);
+    else if(oc==='opponent_forfeit') toast('\u{1F3F3} Your opponent withdrew — the match is yours.', true);
+    else if(v && v.youWon===true) toast('✅ Match won.', true);
+    else if(v && v.youWon===false) toast('❌ Match lost.', false);
+    else toast('Match over.', true);
+  }
+}
+
 function _renderPvpMatch(){
-  // 8/15/26 (owner: option A) — a live duel renders on the REAL board now, not the bespoke panel
-  // below. The panel remains for everything that is not an in-progress duel: queueing, the
-  // challenge flow, and the final series recap. Anything mid-match hands off to pvpRenderBoard.
-  if(PVP.view && PVP.view.you && !PVP.view.done && typeof pvpRenderBoard==='function'){
+  // The DONE branch runs first, so no ending can ever be drawn as a live board.
+  if(PVP.view && PVP.view.done){ pvpFinishMatch(PVP.view); }
+  else if(PVP.view && PVP.view.you && typeof pvpRenderBoard==='function'){
     pvpRenderBoard(PVP.view); return;
   }
   if(typeof pvpBoardOn!=='undefined' && pvpBoardOn && typeof pvpBoardExit==='function') pvpBoardExit();
@@ -13287,7 +13317,7 @@ function _renderPvpMatch(){
   var head =
     '<div class="on-panel on-match">'+
       '<div class="on-mhud">'+
-        '<div class="on-mside"><div class="on-mname">'+sfEsc(SF_ONLINE.handle)+' (you)</div><div class="on-mscore">'+v.you.score+'</div><div class="on-mchg">⚡'+v.you.charge+'</div></div>'+
+        '<div class="on-mside"><div class="on-mname">'+sfEsc((SF_ONLINE&&SF_ONLINE.handle)||'you')+' (you)</div><div class="on-mscore">'+v.you.score+'</div><div class="on-mchg">⚡'+v.you.charge+'</div></div>'+
         '<div class="on-mvs">Best of '+v.bestOf+'<br>first to '+need+'</div>'+
         '<div class="on-mside"><div class="on-mname">'+sfEsc(v.opponent)+'</div><div class="on-mscore">'+v.them.score+'</div><div class="on-mchg">⚡'+v.them.charge+'</div></div>'+
       '</div>'+
