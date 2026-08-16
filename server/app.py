@@ -154,6 +154,8 @@ def h_register(uid_none, body):
                 _deck = rules.STARTER_DECK          # no path sent (older client) -> previous behaviour
             for t in _deck:
                 if t in rules.CARD_CATALOG: mint_card(c, uid, t, via="Starter deck (" + (_path or "default") + ")")
+            if _path in STARTER_DECKS:
+                c.execute("UPDATE users SET starter_path=? WHERE id=?", (_path, uid))
 
         store.ledger_add(c, uid, "SIGNAL", signal,
                          ("Migrated from local play (%d cards)" % minted) if migrated else "Welcome grant (play currency)",
@@ -161,6 +163,18 @@ def h_register(uid_none, body):
         tok = rules.new_token()
         c.execute("INSERT INTO sessions(token,user_id,created) VALUES(?,?,?)", (tok, uid, store.now()))
     return 200, {"token": tok, "state": user_state(uid)}
+
+def _backfill_starter_deck(c, user_id, path):
+    """A card that was missing from CARD_CATALOG when this account registered (server drift, not the
+    player's fault) is minted now if the catalog has since caught up. Idempotent and additive only —
+    checks real ownership first, never touches or removes an existing card. No-ops for an unknown
+    or unrecorded path (accounts from before the starter_path column exists)."""
+    deck = STARTER_DECKS.get(path)
+    if not deck: return
+    owned = {r["type"] for r in c.execute("SELECT type FROM cards WHERE owner_id=?", (user_id,)).fetchall()}
+    for t in deck:
+        if t not in owned and t in rules.CARD_CATALOG:
+            mint_card(c, user_id, t, via="Starter deck backfill (catalog updated since registration)")
 
 def h_login(uid_none, body):
     c = store.conn()
@@ -170,6 +184,8 @@ def h_login(uid_none, body):
     tok = rules.new_token()
     with store.tx() as cc:
         cc.execute("INSERT INTO sessions(token,user_id,created) VALUES(?,?,?)", (tok, u["id"], store.now()))
+        if u["starter_path"]:
+            _backfill_starter_deck(cc, u["id"], u["starter_path"])
     return 200, {"token": tok, "state": user_state(u["id"])}
 
 def h_state(user_id, body):

@@ -169,6 +169,15 @@ def _migrate(c):
     for stmt in [
         "ALTER TABLE asc_prog ADD COLUMN kills INTEGER NOT NULL DEFAULT 0",
         "ALTER TABLE asc_prog ADD COLUMN pool_bonus_granted INTEGER NOT NULL DEFAULT 0",
+        # 8/16/26 (owner: "patches and hotfixes will force players to reset" — this is the actual
+        # fix for that). The chosen starter path was read once at registration and discarded, so a
+        # card added to CARD_CATALOG after an account existed could never reach that account short
+        # of a fresh registration. Persisting it lets h_login backfill on every sign-in: any catalog
+        # card belonging to the recorded path that the account does not yet own gets minted then.
+        # NULL for every account that predates this column (nothing to backfill against — the path
+        # was never recorded and cannot be recovered), which is a one-time, unavoidable gap for
+        # existing accounts only; every account from here on self-heals automatically.
+        "ALTER TABLE users ADD COLUMN starter_path TEXT",
     ]:
         try: c.execute(stmt)
         except sqlite3.OperationalError as e:
