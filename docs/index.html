@@ -12755,6 +12755,7 @@ function friendRequest(){
 function friendAccept(id){ sfApi('POST', '/api/friends/accept', {id:id}, function(err){ if(err){ _friendsMsg(err,'err'); return; } buildFriendsPanel(); }); }
 function friendDecline(id){ sfApi('POST', '/api/friends/decline', {id:id}, function(err){ if(err){ _friendsMsg(err,'err'); return; } buildFriendsPanel(); }); }
 function friendChallenge(handle){
+  pvpClearFinished();   // never carry a finished match into a new search
   sfApi('POST', '/api/pvp/challenge/direct', {handle: handle, mode: PVP.bestOf===3?'ranked':undefined, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
     if(err){ _friendsMsg(err, 'err'); return; }
     if(data.matched){ pvpEnterMatch(data.pvpId, data.opponent); return; }
@@ -12842,9 +12843,22 @@ function _pvpOnlineViewShowing(){
   var v=document.getElementById('v-online'); return !!(v && v.classList.contains('on'));
 }
 
-function pvpSetMode(n){ if(PVP.queueTimer||PVP.pvpId) return; PVP.bestOf=n; buildOnline(); }
+// A DONE match is not a live one. pvpId lingers after a result so the recap can render, but it
+// must not block picking a mode or starting a new search — that is how a finished game ended up
+// being re-entered instead of a new one starting.
+function _pvpInLiveMatch(){ return !!(PVP.pvpId && !(PVP.view && PVP.view.done)); }
+function pvpClearFinished(){
+  if(PVP.pvpId && PVP.view && PVP.view.done){
+    PVP.pvpId=null; PVP.view=null; PVP.selectedUid=null; PVP.selectedRgUids=[];
+    PVP.duelLog=[]; PVP._duelSig=null;
+    if(typeof pvpBoardExit==='function') pvpBoardExit();
+    try{ lsSet('sf_pvp_active', null); }catch(e){}
+  }
+}
+function pvpSetMode(n){ pvpClearFinished(); if(PVP.queueTimer||_pvpInLiveMatch()) return; PVP.bestOf=n; buildOnline(); }
 
 function pvpFindMatch(){
+  pvpClearFinished();   // never carry a finished match into a new search
   _pvpMsg('Searching…', '');
   sfApi('POST', '/api/pvp/queue', {mode: PVP.bestOf===3?'ranked':undefined, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
     if(err){ _pvpMsg(err, 'err'); return; }
@@ -12883,6 +12897,7 @@ function pvpLeaveQueue(){
 // on their own schedule. Mirrors the queue functions' own shape (create/tick/cancel), just against
 // the challenge endpoints instead of the random-pairing ones.
 function pvpCreateChallenge(){
+  pvpClearFinished();   // never carry a finished match into a new search
   _pvpMsg('Creating…', '');
   sfApi('POST', '/api/pvp/challenge/create', {mode: PVP.bestOf===3?'ranked':undefined, deckMaster: (typeof deckMasterCard!=='undefined'?deckMasterCard:null)}, function(err, data){
     if(err){ _pvpMsg(err, 'err'); return; }
@@ -12939,7 +12954,13 @@ function pvpResumeIfActive(){
   PVP.pvpId=saved.pvpId; PVP.opponent=saved.opponent||'opponent';
   if(saved.bestOf) PVP.bestOf=saved.bestOf;
   sfApi('GET', '/api/pvp/state?pvpId='+encodeURIComponent(saved.pvpId), null, function(err, data){
-    if(err || !data || !data.you){ PVP.pvpId=null; try{ lsSet('sf_pvp_active', null); }catch(e){} return; }
+    // Refuse to resume a FINISHED match. Without this the saved id outlived the game that
+    // produced it, so every attempt to start a new match rejoined the last, already-ended one.
+    if(err || !data || !data.you || data.done){
+      PVP.pvpId=null; PVP.view=null;
+      try{ lsSet('sf_pvp_active', null); }catch(e){}
+      return;
+    }
     PVP.view=data;
     if(typeof toast==='function') toast('↩ Rejoined your match vs '+(data.opponent||'opponent'), true);
     _renderPvpMatch();
@@ -12969,6 +12990,10 @@ function pvpFetchState(){
       var _sig = String(data.seq)+'|'+JSON.stringify(data.lastDuel);
       if(_sig !== PVP._duelSig){ PVP._duelSig = _sig; PVP.duelLog.push(data.lastDuel); }
     }
+    // A finished match must stop being "the active match" immediately -- otherwise a reload, or
+    // simply trying to queue again, picks the dead game back up. The view stays so the result
+    // screen still renders; only the persisted pointer is dropped.
+    if(data.done){ try{ lsSet('sf_pvp_active', null); }catch(e){} }
     PVP.view = data;
     _renderPvpMatch();
   });

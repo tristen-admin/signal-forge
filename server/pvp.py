@@ -55,6 +55,13 @@ CHALLENGES = {}  # code -> {"user_id","handle","owned","best_of","created"} — 
 
 QUEUE_TTL = 120.0       # a queue entry this old is stale (browser closed, tab killed); dropped on touch
 GAME_TTL = 3600.0       # an untouched game is abandoned; dropped so GAMES cannot grow forever
+# 8/16/26 (owner: "auto end the match when both players leave room"). GAME_TTL is a memory guard at
+# an hour, far too slow to be a game rule. This is the real one: once BOTH sides have stopped
+# polling for this long the match is over, so neither player can walk away leaving the other holding
+# a live game -- and a stale match can never be re-entered later as if it were still running.
+# Deliberately longer than the 2s poll by a wide margin so a reload, a tab switch or a brief network
+# stall never ends a match somebody is still playing.
+ABANDON_TTL = 45.0
 CHALLENGE_TTL = 300.0   # longer than QUEUE_TTL -- sharing a code out-of-band (text/Discord) takes longer than auto-matching
 _CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"   # no 0/O/1/I/L -- easy to misread when typed from a screen or read aloud
 
@@ -78,7 +85,7 @@ def _new_side(user_id, handle, owned, best_of, deck_master=None):
                   store.conn().execute("SELECT pair,count FROM bonds WHERE user_id=?", (user_id,)).fetchall()}
     hand_cards, deck_cards = owned[:4], owned[4:]
     m["hand"] = [c["type"] for c in hand_cards]
-    return {"user_id": user_id, "handle": handle, "m": m, "deck_master": deck_master,
+    return {"user_id": user_id, "handle": handle, "m": m, "deck_master": deck_master, "seen": time.time(),
             "hand_cards": hand_cards, "deck_cards": deck_cards, "banish_cards": [],
             "winners_circle_cards": [], "commit": None, "last": None}
 
@@ -160,6 +167,14 @@ def _sweep():
     QUEUE[:] = [q for q in QUEUE if now - q["joined"] < QUEUE_TTL]
     for code in [k for k, ch in CHALLENGES.items() if now - ch["created"] > CHALLENGE_TTL]:
         del CHALLENGES[code]
+    # Both sides gone -> end it, rather than leaving a live game nobody is in.
+    for g in GAMES.values():
+        if g["done"]: continue
+        a_seen = g["a"].get("seen", g["touched"]); b_seen = g["b"].get("seen", g["touched"])
+        if now - a_seen > ABANDON_TTL and now - b_seen > ABANDON_TTL:
+            g["done"] = True; g["winner"] = None; g["seq"] += 1; g["touched"] = now
+            for side, other in ((g["a"], g["b"]), (g["b"], g["a"])):
+                side["last"] = {"outcome": "tie", "log": ["\u23f8 match abandoned \u2014 both players left the room"]}
     for pid in [k for k, g in GAMES.items() if now - g["touched"] > GAME_TTL]:
         del GAMES[pid]
 
@@ -257,6 +272,7 @@ def state(user_id, pid):
         you, them = _sides(g, user_id)
         if not you: return 403, {"error": "not your match"}
         g["touched"] = time.time()
+        you["seen"] = time.time()      # per-side presence, drives the both-left rule in _sweep()
         return 200, _view(g, you, them)
 
 
