@@ -55,6 +55,12 @@ CHALLENGES = {}  # code -> {"user_id","handle","owned","best_of","created"} — 
 
 QUEUE_TTL = 120.0       # a queue entry this old is stale (browser closed, tab killed); dropped on touch
 STARTING_HAND = 5       # matches index.html:12153; online was dealing 4
+# 8/16/26 — online had NO turn timer at all. Offline runs a forfeit clock on every decision
+# (index.html startDecisionClock), so a stalling opponent online could hold a match open forever
+# and the other player had no recourse but to quit. This has to be server-side: a client countdown
+# is unenforceable and trivially bypassed by not running the client.
+TURN_SECONDS = 60.0     # generous vs offline's 40/50 -- a network round trip and a human reading a
+                        # new Condition both cost time that a local hotseat never pays.
 SPELLS = {sp['id']: sp for sp in engine.SPELLS}   # same table app.py uses for single-player Interrupts
 GAME_TTL = 3600.0       # an untouched game is abandoned; dropped so GAMES cannot grow forever
 # 8/16/26 (owner: "auto end the match when both players leave room"). GAME_TTL is a memory guard at
@@ -104,8 +110,15 @@ def _new_game(a, b, best_of):
          "winner": None, "seq": 0, "touched": time.time(),
          "condition": engine.pick_condition()}
     _reveal(g)
+    _duel_begin(g)
     GAMES[pid] = g
     return g
+
+
+def _duel_begin(g):
+    """Start the clock for a new duel. Called wherever a duel starts, so there is exactly one place
+    the deadline is defined."""
+    g["deadline"] = time.time() + TURN_SECONDS
 
 
 def _reveal(g):
@@ -175,6 +188,11 @@ def _sweep():
     QUEUE[:] = [q for q in QUEUE if now - q["joined"] < QUEUE_TTL]
     for code in [k for k, ch in CHALLENGES.items() if now - ch["created"] > CHALLENGE_TTL]:
         del CHALLENGES[code]
+    # Time out stalled duels even when nobody is polling, so a match cannot sit mid-duel
+    # indefinitely just because both clients happen to be idle at that instant.
+    for g in list(GAMES.values()):
+        if not g["done"]: _enforce_deadline(g)
+
     # Both sides gone -> end it, rather than leaving a live game nobody is in.
     for g in GAMES.values():
         if g["done"]: continue
@@ -273,12 +291,45 @@ def join_challenge(user_id, handle, owned, code, deck_master=None):
 
 
 # ── state ────────────────────────────────────────────────────────────────────────────────────
+def _enforce_deadline(g):
+    """Time out the duel if someone stalled. Mirrors offline's rule -- missing the decision clock
+    surrenders the ROUND, not the match -- so a stalled duel is scored rather than voided:
+      one side committed  -> the committer wins the duel
+      neither committed   -> the duel is a tie for both
+    Called from state() and _sweep(), so it fires whether anyone is watching or not. A match cannot
+    sit open forever because one player walked away mid-duel."""
+    if g["done"] or not g.get("deadline"): return
+    if time.time() < g["deadline"]: return
+    a, b = g["a"], g["b"]
+    ac, bc = a["commit"] is not None, b["commit"] is not None
+    if ac and bc: return                      # both in; normal resolution will handle it
+    if not ac and not bc:
+        for s_, o_ in ((a, b), (b, a)):
+            s_["last"] = {"outcome": "tie", "log": ["\u23f1 neither player committed in time \u2014 duel skipped"]}
+        g["duel"] += 1; g["seq"] += 1
+        g["condition"] = engine.pick_condition(); _reveal(g); _duel_begin(g)
+        return
+    winner, loser = (a, b) if ac else (b, a)
+    winner["m"]["playerScore"][0] += 1
+    winner["last"] = {"outcome": "win",  "log": ["\u23f1 your opponent ran out of time \u2014 duel awarded to you"]}
+    loser["last"]  = {"outcome": "lose", "log": ["\u23f1 you ran out of time \u2014 the duel is forfeit"]}
+    winner["commit"] = loser["commit"] = None
+    g["duel"] += 1; g["seq"] += 1
+    need = g["bestOf"] // 2 + 1
+    if winner["m"]["playerScore"][0] >= need:
+        g["done"] = True; g["winner"] = winner["user_id"]; _payout(g)
+    else:
+        g["condition"] = engine.pick_condition(); _reveal(g); _duel_begin(g)
+
+
 def state(user_id, pid):
     with _LOCK:
         g = GAMES.get(pid)
         if not g: return 404, {"error": "match not found"}
         you, them = _sides(g, user_id)
         if not you: return 403, {"error": "not your match"}
+        _enforce_deadline(g)           # a stalled duel is scored before the view is built
+        you, them = _sides(g, user_id)  # re-read: enforcement can advance the duel
         g["touched"] = time.time()
         you["seen"] = time.time()      # per-side presence, drives the both-left rule in _sweep()
         return 200, _view(g, you, them)
@@ -304,6 +355,14 @@ def _view(g, you, them):
         "you": {"score": you["m"]["playerScore"][0], "charge": you["m"]["charge"],
                 "hand": _hand_view(you["hand_cards"]), "deckCount": len(you["deck_cards"]),
                 "winnersCircleCount": len(you["winners_circle_cards"]),
+                # 8/16/26 — the piles were browsable offline and count-only online, because only
+                # the counts were ever sent. YOUR OWN piles are yours to inspect, so the real lists
+                # go out. The opponent's stay counts-only on purpose: their Winners Circle is live
+                # information about what they still hold, and offline only ever showed you a number
+                # for the bot too.
+                "winnersCircle": _hand_view(you["winners_circle_cards"]),
+                "banish": _hand_view(you["banish_cards"]),
+                "banishCount": len(you["banish_cards"]),
                 # Ship the spell METADATA, not just ids. The client's own Interrupt table
                 # (ENERGY_SPELLS: sift/empower/hex/collapse/locus...) and the server's
                 # (engine.SPELLS: overclock/staticpulse/amplify...) are entirely different sets with
@@ -319,10 +378,12 @@ def _view(g, you, them):
         "them": {"score": them["m"]["playerScore"][0], "charge": them["m"]["charge"],
                  "handCount": len(them["hand_cards"]), "deckCount": len(them["deck_cards"]),
                  "winnersCircleCount": len(them["winners_circle_cards"]),
+                 "banishCount": len(them["banish_cards"]),
                  "committed": them["commit"] is not None},
         "lastDuel": you["last"],
         "youWon": (g["winner"] == you["user_id"]) if g["done"] and g["winner"] else None,
         "lockedWithdraw": g["condition"] == "noretreat",
+        "secondsLeft": max(0, int(g["deadline"] - time.time())) if g.get("deadline") and not g["done"] else None,
     }
 
 
@@ -429,6 +490,7 @@ def _resolve_duel(g):
     else:
         g["condition"] = engine.pick_condition()
         _reveal(g)
+    _duel_begin(g)
 
 
 def _apply(side, res, my_pow, opp_pow, opp_handle):
