@@ -2818,15 +2818,13 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <button aria-label="Hub" class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon">◈</span><span class="brand-text">Hub</span></button>
     <button aria-label="Mailbox" class="navitem" id="nav-mailbox" onclick="show('mailbox',this)"><span class="ni-icon">📬</span><span class="brand-text">Mailbox</span><span class="ni-badge" id="mailbox-badge"></span></button>
     <button aria-label="Dev Notes" class="navitem" id="nav-devnotes" onclick="show('devnotes',this)"><span class="ni-icon">🛠</span><span class="brand-text">Dev Notes</span><span class="ni-badge devnotes-pill" id="devnotes-badge" style="display:none">NEW</span></button>
-    <div class="nav-group open" id="grp-play">
-      <button aria-label="Play" class="nav-grp-head" onclick="toggleNavGroup('grp-play')"><span class="ni-icon">🎮</span><span class="brand-text">Play</span><span class="grp-chev brand-text">▾</span></button>
-      <div class="nav-sub">
-        <button aria-label="Offline Play" class="navitem" id="nav-lobby" onclick="show('lobby',this)"><span class="ni-icon">⚔</span><span class="brand-text">Offline Play</span></button>
-        <button aria-label="Ranked Ladder" class="navitem" id="nav-ranked" onclick="pvpSetMode(3);show('online',this)"><span class="ni-icon">🪜</span><span class="brand-text">Ranked Ladder</span></button>
-        <button aria-label="Staked PvP" class="navitem" id="nav-pvp" onclick="show('pvp',this)"><span class="ni-icon">🩸</span><span class="brand-text">Staked PvP</span></button>
-        <button aria-label="Online" class="navitem" id="nav-online" onclick="show('online',this)"><span class="ni-icon">🌐</span><span class="brand-text">Online</span></button>
-      </div>
-    </div>
+    <!-- 8/16/26 (owner): Play collapsed from a 4-item group to one flat button -- every mode it
+         used to list (Offline/Ranked/Staked) already lives one click deeper on the v-play mode-select
+         screen (id="v-play", "Choose your arena"), so the group was a redundant second copy of that
+         menu. Online no longer belongs here at all -- promoted to its own top-level item below, since
+         it is account/social surface, not a game mode. -->
+    <button aria-label="Arena" class="navitem" id="nav-play" onclick="show('play',this)"><span class="ni-icon">🎮</span><span class="brand-text">Arena</span></button>
+    <button aria-label="Online" class="navitem" id="nav-online" onclick="show('online',this)"><span class="ni-icon">🌐</span><span class="brand-text">Online</span></button>
     <div class="nav-group" id="grp-limited">
       <button aria-label="Limited Events" class="nav-grp-head" onclick="toggleNavGroup('grp-limited')"><span class="ni-icon">🎟️</span><span class="brand-text">Limited Events</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
@@ -2838,13 +2836,28 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="nav-sub">
         <button aria-label="Vault" class="navitem" id="nav-vault" onclick="show('vault',this)"><span class="ni-icon">🗄</span><span class="brand-text">Vault</span><span class="ni-badge" id="vault-badge">19</span></button>
         <button aria-label="Edit Deck" class="navitem" id="nav-deck" onclick="show('deck',this)"><span class="ni-icon">🃏</span><span class="brand-text">Edit Deck</span><span class="ni-badge" id="deck-badge">0/12</span></button>
-        <button aria-label="Mastery &amp; Bonds" class="navitem" id="nav-mastery" onclick="show('mastery',this);buildMastery()"><span class="ni-icon">⭐</span><span class="brand-text">Mastery &amp; Bonds</span></button>
-        <button aria-label="Trade" class="navitem" id="nav-trade" onclick="show('trade',this);buildTrade()"><span class="ni-icon">🤝</span><span class="brand-text">Trade</span></button>
-        <button aria-label="Side Stories" class="navitem" id="nav-stories" onclick="show('stories',this)"><span class="ni-icon">📖</span><span class="brand-text">Side Stories</span></button>
+      </div>
+    </div>
+    <!-- 8/16/26 (owner): new top-level category grouping the two narrative/world-exploration modes
+         that used to be buried inside Deck Builder, where neither is about deck-building at all. -->
+    <div class="nav-group" id="grp-kaiora">
+      <button aria-label="Explore Kaiora" class="nav-grp-head" onclick="toggleNavGroup('grp-kaiora')"><span class="ni-icon">🗺</span><span class="brand-text">Explore Kaiora</span><span class="grp-chev brand-text">▾</span></button>
+      <div class="nav-sub">
         <button aria-label="Expeditions" class="navitem" id="nav-expeditions" onclick="show('expeditions',this)"><span class="ni-icon">🗺</span><span class="brand-text">Expeditions</span><span class="ni-badge" id="expedition-badge"></span></button>
+        <button aria-label="Side Stories" class="navitem" id="nav-stories" onclick="show('stories',this)"><span class="ni-icon">📖</span><span class="brand-text">Side Stories</span></button>
       </div>
     </div>
     <button aria-label="Reincarnation" class="navitem nav-asc-tab" id="nav-asc" onclick="show('asc',this)"><span class="ni-icon">👑</span><span class="brand-text">Reincarnation</span><span class="ni-asc-tag">SAGA</span></button>
+    <!-- 8/16/26 (owner): new category for player-to-player surfaces that are not a match itself --
+         Trade (moved out of Deck Builder, where it never belonged) plus a real standalone Friends
+         page (previously only reachable embedded inside the Online account screen). -->
+    <div class="nav-group" id="grp-social">
+      <button aria-label="Social" class="nav-grp-head" onclick="toggleNavGroup('grp-social')"><span class="ni-icon">🤝</span><span class="brand-text">Social</span><span class="grp-chev brand-text">▾</span></button>
+      <div class="nav-sub">
+        <button aria-label="Trade" class="navitem" id="nav-trade" onclick="show('trade',this);buildTrade()"><span class="ni-icon">🤝</span><span class="brand-text">Trade</span></button>
+        <button aria-label="Friends" class="navitem" id="nav-friends" onclick="show('friends',this)"><span class="ni-icon">👥</span><span class="brand-text">Friends</span></button>
+      </div>
+    </div>
     <div class="nav-group" id="grp-market">
       <button aria-label="Market" class="nav-grp-head" onclick="toggleNavGroup('grp-market')"><span class="ni-icon">🪙</span><span class="brand-text">Market</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
@@ -2868,6 +2881,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     <div class="nav-group" id="grp-records">
       <button aria-label="Records" class="nav-grp-head" onclick="toggleNavGroup('grp-records')"><span class="ni-icon">📊</span><span class="brand-text">Records</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
+        <button aria-label="Mastery &amp; Bonds" class="navitem" id="nav-mastery" onclick="show('mastery',this);buildMastery()"><span class="ni-icon">⭐</span><span class="brand-text">Mastery &amp; Bonds</span></button>
         <button aria-label="Legend Board" class="navitem" id="nav-legend" onclick="show('legend',this)"><span class="ni-icon">🏆</span><span class="brand-text">Legend Board</span></button>
         <button aria-label="Match Arc" class="navitem" id="nav-match" onclick="show('match',this)"><span class="ni-icon">◷</span><span class="brand-text">Match Arc</span></button>
         <button aria-label="Card DNA" class="navitem" id="nav-dna" onclick="show('dna',this)"><span class="ni-icon">🧬</span><span class="brand-text">Card DNA</span></button>
@@ -2906,7 +2920,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <p>Each mode risks something different. The tag tells you what.</p>
       </div>
       <div class="play-grid">
-        <button class="play-mode" style="--accent:#5BC0EB" onclick="show('lobby', document.getElementById('nav-lobby'))">
+        <button class="play-mode" style="--accent:#5BC0EB" onclick="show('lobby', document.getElementById('nav-play'))">
           <span class="pm-icon">⚔</span>
           <span class="pm-body"><span class="pm-title">Offline Play</span><span class="pm-sub">Practice against the AI with any deck</span></span>
           <span class="pm-stake safe">Records safe · light Zenni</span></button>
@@ -3170,6 +3184,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
         <button class="shop-tab" id="stab-cosmetics" onclick="setShopTab('cosmetics')">✦ Cosmetics</button>
         <button class="shop-tab" id="stab-variants" onclick="setShopTab('variants')">✦ Skins</button>
         <button class="shop-tab" id="stab-forge" onclick="setShopTab('forge')">❖ Buy Kinzo</button>
+        <button class="shop-tab" id="stab-merch" onclick="setShopTab('merch')">📚 Merchandise</button>
       </div>
       <div class="shop-catalog" id="shop-catalog"></div>
     </div>
@@ -3728,6 +3743,24 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
     Swap earned cards and Reincarnation units with other collectors. Skins and starters never trade — cash-bought finishes stay bound to you.
   </div>
   <div style="overflow-y:auto;flex:1;padding:14px"><div id="trade-hub"></div></div>
+</div>
+
+<!-- ── FRIENDS ── (8/16/26, owner: standalone Social page, extracted from the Online account screen) -->
+<div class="view" id="v-friends" style="flex-direction:column">
+  <div class="view-head">
+    <strong>Friends</strong>
+    Add a friend by handle, see who is online, and send a direct challenge — no match code to share.
+  </div>
+  <div style="overflow-y:auto;flex:1;padding:14px">
+    <div class="on-panel">
+      <div class="on-join-row">
+        <input class="on-in" id="friend-handle-in" placeholder="Friend's handle">
+        <button class="on-btn" onclick="friendRequest()">Add</button>
+      </div>
+      <div class="on-msg" id="on-friends-msg"></div>
+      <div id="friends-body"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ── MATCH VIEW ── -->
@@ -9915,7 +9948,7 @@ function nextTurn(){
   openTurn();
 }
 
-const SCREEN_TITLES = { play:'Play', hub:'Hub',vault:'The Vault',deck:'Edit Deck',mastery:'Mastery & Bonds',trade:'Trade',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Offline Play',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'KOTEI Online',draft:'Draft',asc:'Reincarnation · The Saga',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile',mailbox:'Mailbox',devnotes:'Dev Notes'};
+const SCREEN_TITLES = { play:'Arena', hub:'Hub',vault:'The Vault',deck:'Edit Deck',mastery:'Mastery & Bonds',trade:'Trade',friends:'Friends',stories:'Side Stories',expeditions:'Expeditions',shop:'Shop',market:'Marketplace',lobby:'Offline Play',ranked:'Ranked Ladder',pvp:'Staked PvP',online:'KOTEI Online',draft:'Draft',asc:'Reincarnation · The Saga',turn:'Match — Best of 7',conds:'Turn Conditions',abil:'Card Abilities',match:'Match Arc',dna:'Card DNA',replay:'Match Replay',legend:'The Legend Board',growth:'Living Cards — How They Grow',profile:'Profile',mailbox:'Mailbox',devnotes:'Dev Notes'};
 function toggleSidebar(){ document.body.classList.toggle('nav-collapsed'); }
 // 8/11/26: opening a group closes every other one, so the whole nav column reflows for the length
 // of .nav-sub's max-height transition (220ms). A second click landing inside that window hit
@@ -9946,7 +9979,7 @@ function show(id, btn){
   else { const nb = document.getElementById('nav-'+id); if(nb) nb.classList.add('on'); }
   var _nb=document.getElementById('nav-'+id); var _grp=(_nb&&_nb.closest)?_nb.closest('.nav-group'):null;
   document.querySelectorAll('.nav-group').forEach(function(x){ x.classList.remove('open'); });
-  if(_grp) _grp.classList.add('open'); else { var _pg=document.getElementById('grp-play'); if(_pg) _pg.classList.add('open'); }
+  if(_grp) _grp.classList.add('open');
   document.getElementById('tb-title').textContent = SCREEN_TITLES[id] || id;
   document.getElementById('tb-crumb').textContent = '';
   if(id==='vault') buildVault();
@@ -9957,6 +9990,7 @@ function show(id, btn){
   if(id==='lobby') buildLobby();
   if(id==='pvp') buildPvP();
   if(id==='online') buildOnline();
+  if(id==='friends'){ buildFriendsPanel(); if(!_friendsPollTimer) _friendsPollTimer = setInterval(friendsTick, 4000); }
   if(id==='asc') buildAscension();
   if(id==='ranked') buildRanked();
   if(id==='dna') buildDNA();
@@ -11313,14 +11347,16 @@ function variantsSectionHTML(){
 }
 function buildShop(){
   updateBalance();
-  const packs = shopTab==='packs', forge = shopTab==='forge', variants = shopTab==='variants';
+  const packs = shopTab==='packs', forge = shopTab==='forge', variants = shopTab==='variants', merch = shopTab==='merch';
   document.querySelectorAll('.shop-tab').forEach(el=>el.classList.toggle('on', el.id===('stab-'+shopTab)));
   const _eb=document.getElementById('shop-eyebrow'), _ds=document.getElementById('shop-intro-desc');
-  if(_eb) _eb.textContent = forge ? 'Buy Kinzo · Premium currency' : packs ? 'Card Packs' : 'Cosmetics · Kinzo';
+  if(_eb) _eb.textContent = forge ? 'Buy Kinzo · Premium currency' : packs ? 'Card Packs' : merch ? 'Merchandise' : 'Cosmetics · Kinzo';
   if(_ds) _ds.textContent = forge
     ? 'Buy Kinzo with real money for cosmetics and card skins. It never buys cards and never cashes out — cards are earned with Zenni.'
     : packs
     ? `${SEASON.pack} — this season's pack line, drawn from the finite shared mint with your Zenni Points. Supply is saved between visits and never resets.`
+    : merch
+    ? 'The KOTEI story in print — real, physical books. Nothing here touches Zenni or Kinzo.'
     : 'Spend Kinzo on cosmetic flair — accent auras, card backs, emblems, and duelist titles. Everything here is purely aesthetic and never affects play.';
   let html='';
   if(forge){
@@ -11331,6 +11367,8 @@ function buildShop(){
     html = variantsSectionHTML();
     if(_eb) _eb.textContent='Skin Summon';
     if(_ds) _ds.textContent='Summon alternate skins of marquee units with Kinzo — cosmetic only, same power. Play-only, never scarcer than the base.';
+  } else if(merch){
+    html = merchSectionHTML();
   } else {
     const _cc=ownedCosmetics.has('cache:mystery');
     html = `<div class="mystery-cache${_cc?' claimed':''}"><div class="mc-icon">🎁</div><div class="mc-body"><div class="mc-name">Mystery Cache <span class="mc-tag">One-time offer</span></div><div class="mc-desc">${_cc?'Claimed — this one-time cache has already been opened.':'A one-time cache: rolls a random cosmetic you do not own yet — any category, any flair.'}</div></div>${_cc?'<button class="pack-buy" style="width:auto;padding:9px 22px" disabled>✓ Claimed</button>':'<button class="pack-buy" style="width:auto;padding:9px 22px" onclick="mysteryCache()">❖ 750</button>'}</div>`;
@@ -11347,9 +11385,38 @@ function buildShop(){
       html+=`</div>`;
     });
   }
-  if(!packs && !forge && !variants){ html += framesShopHTML(); }
+  if(!packs && !forge && !variants && !merch){ html += framesShopHTML(); }
   document.getElementById('shop-catalog').innerHTML=html;
   _ensureFhTimer();
+}
+// 8/16/26 (owner): real-world merch -- physical paperbacks of the novel this game is set in.
+// Deliberately NOT wired to Kinzo/Zenni or any in-app purchase flow: these are printed books
+// bought with real money through a real storefront, which this client has no payment backend
+// for. "Notify me" only sets a local wishlist flag -- it does not simulate a purchase or credit
+// anything, so it can never be confused with a real order the way a fake "Buy" button would be.
+const MERCH_BOOKS = [
+  {id:'book1', title:'Kotei: Legends Reborn — Book 1', icon:'📕'},
+  {id:'book2', title:'Kotei: Legends Reborn — Book 2', icon:'📗'},
+  {id:'book3', title:'Kotei: Legends Reborn — Book 3', icon:'📘'}
+];
+function merchSectionHTML(){
+  return '<div class="shop-section-title">📚 Paperbacks <span class="ssc-count">The graphic novel series</span></div>'+
+    '<div class="cosmetic-grid">'+
+    MERCH_BOOKS.map(function(b){
+      var wanted = ownedCosmetics.has('merch-wish:'+b.id);
+      var btn = wanted
+        ? '<button class="cos-btn owned" disabled>🔔 On your wishlist</button>'
+        : '<button class="cos-btn buy" onclick="merchNotifyMe(\''+b.id+'\')">🔔 Notify Me</button>';
+      return '<div class="cosmetic"><div class="cos-preview" style="font-size:38px">'+b.icon+'</div>'+
+        '<div class="cos-name">'+b.title+'</div><div class="cos-name" style="opacity:.6;font-size:10.5px">Paperback · Coming soon</div>'+btn+'</div>';
+    }).join('')+
+    '</div>';
+}
+function merchNotifyMe(id){
+  ownedCosmetics.add('merch-wish:'+id);
+  if(typeof saveState==='function') saveState();
+  if(typeof toast==='function') toast('🔔 We\'ll let you know when it ships.', true);
+  buildShop();
 }
 // 8/7/26: live countdown on the featured-apex banner, matching the reference screenshot's
 // "Refreshes in 2h" pattern -- self-clearing the same way _expTickTimer already does (see show()),
@@ -12694,19 +12761,16 @@ function _renderAccountPanel(){
             '<button class="on-btn" onclick="pvpJoinChallenge()">Join</button>'+
           '</div>')+
     '</div>'+
+    // 8/16/26 (owner): the full add-by-handle / requests / roster block that used to live here
+    // moved to its own page (Social > Friends, id="v-friends") -- Online kept only a pointer to
+    // it, since match-code challenges and friend-handle challenges are two different flows and
+    // conflating them in one screen was the reason this panel got as long as it did.
     '<div class="on-panel">'+
       '<h3>Friends</h3>'+
-      '<p class="on-sub">Add a friend by handle, then challenge them directly — no code to share.</p>'+
-      '<div class="on-join-row">'+
-        '<input class="on-in" id="friend-handle-in" placeholder="Friend\'s handle">'+
-        '<button class="on-btn" onclick="friendRequest()">Add</button>'+
-      '</div>'+
-      '<div class="on-msg" id="on-friends-msg"></div>'+
-      '<div id="friends-body"></div>'+
+      '<p class="on-sub">Manage your friends list and handle-based challenges from its own page.</p>'+
+      '<button class="on-btn" onclick="show(\'friends\', document.getElementById(\'nav-friends\'))">Open Friends →</button>'+
     '</div>';
   if(!SF_STATE) sfRefresh();
-  buildFriendsPanel();
-  if(!_friendsPollTimer) _friendsPollTimer = setInterval(friendsTick, 4000);
 }
 
 // ── Friends list + direct friend-challenge (8/7/26) ──────────────────────────────────────────
@@ -12874,7 +12938,8 @@ function _pvpOnlineViewShowing(){
     var t=document.getElementById('v-turn');
     if(t && t.classList.contains('on')) return true;
   }
-  var v=document.getElementById('v-online'); return !!(v && v.classList.contains('on'));
+  var v=document.getElementById('v-online'); if(v && v.classList.contains('on')) return true;
+  var f=document.getElementById('v-friends'); return !!(f && f.classList.contains('on'));
 }
 
 // A DONE match is not a live one. pvpId lingers after a result so the recap can render, but it
@@ -14132,8 +14197,8 @@ function endHubTutorial(){
 function enterOnlineMode(mode){
   var signedIn = (typeof sfToken==='function') && sfToken();
   if(signedIn){
-    if(mode==='ranked'){ if(typeof pvpSetMode==='function') pvpSetMode(3); show('online', document.getElementById('nav-ranked')); }
-    else show('pvp', document.getElementById('nav-pvp'));
+    if(mode==='ranked'){ if(typeof pvpSetMode==='function') pvpSetMode(3); show('online', document.getElementById('nav-online')); }
+    else show('pvp', document.getElementById('nav-play'));
     return;
   }
   var isRanked = mode==='ranked';
@@ -15831,7 +15896,7 @@ function startPvpMatch(){
   document.getElementById('match-bot-name').textContent=b.name;
   document.getElementById('match-bot-tag').textContent=`Staked Duel · wagering ${pvpStakeTheirs}`;
   show('turn', null);
-  const np=document.getElementById('nav-pvp'); if(np) np.classList.add('on');
+  const np=document.getElementById('nav-play'); if(np) np.classList.add('on');
   document.getElementById('tb-title').textContent='Staked Duel — vs '+b.name;
 }
 function setPvpFloor(k){
@@ -17381,7 +17446,7 @@ function startMatch(mode){
   document.getElementById('match-bot-name').textContent=b.name;
   document.getElementById('match-bot-tag').textContent=`${b.arch} · Difficulty ${b.diff}/4`;
   show('turn', null);
-  document.getElementById('nav-lobby').classList.add('on');
+  var _nlb=document.getElementById('nav-play'); if(_nlb) _nlb.classList.add('on');
   document.getElementById('tb-title').textContent='Match — vs '+b.name;
 }
 // Deck Master (Phase C, 7/11/26) — same shared-function-then-flag idiom as Ranked Ladder
@@ -17395,7 +17460,7 @@ function startDeckMasterMatch(){
   // entirely and the guarantee had nothing to find, while the stale badge still claimed it was in play.
   if(activeDeck.size < MIN_DECK){ toast('Your deck needs at least '+MIN_DECK+' cards before playing Deck Master — build it up in the Deck Builder first.', false); return; }
   startMatch('deckmaster');
-  document.getElementById('nav-lobby').classList.add('on');
+  var _ndm=document.getElementById('nav-play'); if(_ndm) _ndm.classList.add('on');
   document.getElementById('tb-title').textContent='Deck Master — vs '+activeBot.name;
   toast('★ Deck Master: '+deckMasterCard, true);
 }
@@ -17496,7 +17561,7 @@ function exitMatch(){
   setTimeout(_maybeStartHubTour, 400);   /* queued hub tour, if the duel tutorial just ended */
   clearTurnTimers();
   if(typeof hudFold==='function') hudFold();
-  else show('lobby', document.getElementById('nav-lobby'));
+  else show('lobby', document.getElementById('nav-play'));
 }
 
 // reset the duel engine for a fresh match
