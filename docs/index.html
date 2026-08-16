@@ -2268,6 +2268,17 @@ body[data-sleeve="prismatic"] .vault-card,body[data-sleeve="prismatic"] .deck-sl
 .signup-gate .sg-ghost{background:none;border:1px solid var(--border2);color:var(--text2);border-radius:10px;padding:11px 20px;font-weight:700;font-size:12.5px;cursor:pointer}
 .signup-gate .sg-ghost:hover{border-color:var(--text3);color:var(--text)}
 .signup-gate .sg-fine{font-size:10.5px;color:var(--text3);line-height:1.55;margin:0}
+/* Online PvP action bar + duel log, sitting on the real duel board (see pvpRenderBoard) */
+.pvp-action-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:120;display:flex;align-items:center;gap:10px;
+  background:rgba(10,13,20,.92);border:1px solid var(--border2);border-radius:12px;padding:9px 14px;box-shadow:0 8px 26px rgba(0,0,0,.55)}
+.pvp-action-bar .pab-hint,.pvp-action-bar .pab-wait{font-size:11.5px;color:var(--text2);white-space:nowrap}
+.pvp-action-bar .rr-commit-btn{flex:0 0 auto;padding:8px 18px;font-size:11.5px}
+.pvp-action-bar .rr-commit-btn:disabled{opacity:.45;cursor:not-allowed}
+.pvp-duel-log{position:fixed;right:14px;bottom:70px;z-index:119;max-width:300px;max-height:36vh;overflow-y:auto;
+  background:rgba(10,13,20,.92);border:1px solid var(--border2);border-radius:11px;padding:10px 12px;font-size:11px;color:var(--text2);line-height:1.5}
+.pvp-duel-log:empty{display:none}
+.pvp-duel-log .pdl-head{font-size:9px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+@media(max-width:640px){.pvp-duel-log{display:none}.pvp-action-bar{width:calc(100% - 20px);justify-content:center}}
 .wager-overlay{position:fixed;inset:0;z-index:10001;display:none;align-items:center;justify-content:center;background:rgba(5,7,12,0.82);backdrop-filter:blur(3px)}
 .wager-overlay.show{display:flex;animation:wf-in .25s ease}
 @keyframes wf-in{from{opacity:0}to{opacity:1}}
@@ -12956,6 +12967,7 @@ function pvpForfeit(){
   });
 }
 function pvpExitMatch(){
+  if(typeof pvpBoardExit==='function') pvpBoardExit();
   clearInterval(PVP.stateTimer); PVP.stateTimer=null;
   PVP.pvpId=null; PVP.opponent=null; PVP.view=null; PVP.selectedUid=null; PVP.selectedRgUids=[];
   PVP.duelLog=[]; PVP._duelSig=null;   // series history is per-match and client-only; pvpEnterMatch clears it too, this just avoids carrying a finished series in memory
@@ -12978,7 +12990,209 @@ function pvpCondInfo(id){
   return c || {name:id, rule:'', icon:'❔'};
 }
 
+/* ══ ONLINE PvP ON THE REAL BOARD (8/15/26, owner: option A) ══════════════════════════════════
+   Online used to render its own ~94-line panel (.on-hand/.on-hc/.on-mhud...) that shared NOT ONE
+   element with the duel board. Everything that makes a duel feel like this game was missing from
+   it: rear-guards, the condition card, charge, the resolution cinematic, the FX layer, the
+   ability log, the YOU/opponent plates. The owner's words: "a cheap imitation of it".
+
+   The server was never the limit -- pvp.py's payload already carries real hand cards, charge,
+   condition, rgSlots, spellHand and lockedWithdraw, backed by a real engine. The client simply
+   never drew any of it.
+
+   DESIGN: this RENDERS the real board from server state. It deliberately does NOT reuse the local
+   duel functions (selectCard/stageFighter/confirmSelection/commitCard/resolve), because those
+   compute their own outcome from local state -- running them here would produce a client that
+   shows one number while the server scored another. So the board is populated directly and the
+   handlers below talk only to the PvP API. Local game state is never touched while online.
+   Anything still absent (Deck Master abilities, Links) is absent from the SERVER payload too, and
+   is a real server gap rather than a client shortcut. */
+var pvpBoardOn = false, pvpPick = null, pvpRg = [];
+
+function pvpBoardEnter(){
+  if(pvpBoardOn) return;
+  pvpBoardOn = true; pvpPick = null; pvpRg = [];
+  if(typeof show==='function') show('turn');
+  // Local-only chrome that has no meaning in a server-authoritative duel.
+  ['confirm-btn','commit-btn','forfeit-round-btn'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.style.display='none';
+  });
+  var rr=document.getElementById('record-reveal'); if(rr) rr.style.display='none';
+}
+function pvpBoardExit(){
+  pvpBoardOn = false; pvpPick = null; pvpRg = [];
+  if(typeof FX!=='undefined' && FX.clear) FX.clear();
+}
+
+function pvpRenderBoard(v){
+  if(!v || !v.you) return;
+  if(!pvpBoardOn) pvpBoardEnter();
+
+  // ── condition (the real cond card, not a text line) ──
+  var ci = (typeof pvpCondInfo==='function') ? pvpCondInfo(v.condition) : {name:v.condition,rule:'',icon:'?'};
+  _setText('cond-icon', ci.icon||'?');
+  _setText('cond-name', ci.name||v.condition||'—');
+  _setText('cond-rule', ci.rule||'');
+  _setText('cond-eyebrow', 'Duel '+(v.duel||1)+' · first to '+(Math.floor((v.bestOf||7)/2)+1));
+  _setText('cond-strat', v.lockedWithdraw ? 'Withdraw is locked this duel.' : '');
+
+  // ── charge + score ──
+  _setText('charge-val', v.you.charge!=null?v.you.charge:'—');
+  _setText('charge-cap', v.you.charge!=null?v.you.charge:'—');
+  var occ=document.getElementById('opp-charge-count');
+  if(occ) occ.textContent = (v.them&&v.them.charge!=null?v.them.charge:'?')+'/'+(v.them&&v.them.charge!=null?v.them.charge:'?');
+  var sd=document.getElementById('score-display');
+  if(sd) sd.innerHTML = '<span class="sc-you">'+(v.you.score||0)+'</span><span class="sc-vs">–</span><span class="sc-opp">'+((v.them&&v.them.score)||0)+'</span>';
+
+  // opponent plate carries their real handle
+  try{ var f=document.querySelector('.field'); if(f) f.style.setProperty('--opp-name', JSON.stringify(v.opponent||'OPPONENT')); }catch(e){}
+
+  // ── rear-guard slots, per the server's own rgSlots ──
+  var slots = v.you.rgSlots || 2;
+  ['player-rear','player-rear2','player-rear3'].forEach(function(id,i){
+    var el=document.getElementById(id); if(!el) return;
+    el.style.display = i < slots ? 'flex' : 'none';
+    var uid = pvpRg[i];
+    if(uid){
+      var hc=(v.you.hand||[]).find(function(h){return h.uid===uid;});
+      el.innerHTML = hc ? bigCardHTML(pvpCardObj(hc), {mini:true}) : '';
+      el.onclick = function(){ pvpRg.splice(i,1); pvpRenderBoard(PVP.view); };
+    } else {
+      el.innerHTML = '<span class="rs-hint">support slot '+(i+1)+'</span>';
+      el.onclick = null;
+    }
+  });
+
+  // ── field ──
+  var pf=document.getElementById('player-field'), of=document.getElementById('opp-field');
+  if(pf){
+    if(pvpPick){
+      var pc=(v.you.hand||[]).find(function(h){return h.uid===pvpPick;});
+      pf.innerHTML = pc ? bigCardHTML(pvpCardObj(pc)) : '<span class="placeholder">your card</span>';
+    } else pf.innerHTML = '<span class="placeholder">tap a card to conjure it</span>';
+  }
+  if(of){
+    of.innerHTML = (v.them && v.them.committed)
+      ? '<div class="card field-card facedown enemy"><div class="fd-mark">▪▪▪</div></div>'
+      : '<span class="placeholder">waiting for '+_esc(v.opponent||'opponent')+'…</span>';
+  }
+
+  // ── hand: real cards, real markup, same affordances as offline ──
+  var row=document.getElementById('hand-row');
+  if(row){
+    row.innerHTML='';
+    (v.you.hand||[]).forEach(function(hc){
+      var card=pvpCardObj(hc);
+      var el=document.createElement('div');
+      var chosen = pvpPick===hc.uid, called = pvpRg.indexOf(hc.uid)>=0;
+      el.className='card hand-card '+(card.rarity||'common')+(chosen?' selected':'')+(called?' called':'');
+      el.innerHTML=bigCardHTML(card);
+      el.setAttribute('role','button'); el.setAttribute('tabindex','0');
+      el.setAttribute('aria-label',(card.name||'card')+' — power '+(card.pow!=null?card.pow:'?')+'. Press to conjure.');
+      el.onclick=function(){ pvpPickCard(hc.uid); };
+      el.onkeydown=function(ev){ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); pvpPickCard(hc.uid); } };
+      row.appendChild(el);
+    });
+  }
+
+  // Local-duel prompts that make no sense in a server-authoritative match. The offline board
+  // narrates its own draw/turn phases; online, the server has already dealt and the player's only
+  // job is to choose and commit, so these are rewritten rather than left contradicting the screen.
+  var opp=document.getElementById('opp-area');
+  if(opp) opp.innerHTML = (v.them&&v.them.committed)
+    ? '\u2713 '+_esc(v.opponent||'Opponent')+' has committed'
+    : '\u23f3 Waiting for '+_esc(v.opponent||'opponent')+'\u2026';
+  _setText('select-hint', v.you.committed ? 'Committed \u2014 waiting on your opponent' : 'Tap a card to conjure it');
+  _setText('commit-hint', v.you.committed ? 'Locked in for this duel.' : 'Choose a Fighter, then Commit.');
+
+  // ── action bar ──
+  _pvpActionBar(v);
+
+  // a resolved duel arriving from the server drives the real cinematic
+  if(v.lastDuel && v.lastDuel.seq!==_pvpShownDuelSeq){ _pvpShownDuelSeq=v.lastDuel.seq; pvpShowResolution(v); }
+}
+
+function pvpPickCard(uid){
+  if(!PVP.view || PVP.view.you.committed) return;
+  var slots=(PVP.view.you.rgSlots)||2;
+  if(pvpPick===uid){ pvpPick=null; }
+  else if(pvpRg.indexOf(uid)>=0){ pvpRg.splice(pvpRg.indexOf(uid),1); }
+  else if(!pvpPick){ pvpPick=uid; }
+  else if(pvpRg.length<slots){ pvpRg.push(uid); }     // fighter chosen already -> next taps call supports
+  else { if(typeof toast==='function') toast('Support slots are full — tap one to take it back.', false); return; }
+  pvpRenderBoard(PVP.view);
+}
+
+function _pvpActionBar(v){
+  var bar=document.getElementById('pvp-action-bar');
+  if(!bar){
+    bar=document.createElement('div'); bar.id='pvp-action-bar'; bar.className='pvp-action-bar';
+    var host=document.getElementById('v-turn'); if(host) host.appendChild(bar);
+  }
+  if(v.done){
+    bar.innerHTML='<button class="rr-commit-btn" onclick="pvpBoardExit();pvpExitMatch()">← Back to Online</button>';
+    return;
+  }
+  if(v.you.committed){
+    bar.innerHTML='<span class="pab-wait">⏳ Committed — waiting for '+_esc(v.opponent||'opponent')+'…</span>';
+    return;
+  }
+  var ready=!!pvpPick;
+  bar.innerHTML='<span class="pab-hint">'+(ready
+      ? 'Fighter set'+(pvpRg.length?(' · '+pvpRg.length+' support'+(pvpRg.length===1?'':'s')):'')+' — commit when ready'
+      : 'Tap a card in your hand to conjure it')+'</span>'+
+    '<button class="rr-commit-btn"'+(ready?'':' disabled')+' onclick="pvpCommitFromBoard()">⚔ Commit</button>'+
+    (v.lockedWithdraw?'':'<button class="bd-close2" onclick="pvpForfeit()">🏳 Forfeit</button>');
+}
+
+function pvpCommitFromBoard(){
+  if(!pvpPick) return;
+  PVP.selectedUid=pvpPick; PVP.selectedRgUids=pvpRg.slice();
+  if(typeof pvpCommit==='function') pvpCommit();
+}
+
+/* Resolution: the numbers are the SERVER's, never recomputed here. The cinematic and FX are the
+   same ones the offline duel uses, so a real match looks like a real match. */
+var _pvpShownDuelSeq=null;
+function pvpShowResolution(v){
+  var d=v.lastDuel; if(!d) return;
+  var pf=document.getElementById('player-field'), of=document.getElementById('opp-field');
+  if(pf && d.yourCard){ var yc=COLLECTION.find(function(x){return x.name===d.yourCard && !x.uid;}); if(yc) pf.innerHTML=bigCardHTML(yc); }
+  if(of && d.opponent){ var oc=COLLECTION.find(function(x){return x.name===d.opponent && !x.uid;}); if(oc) of.innerHTML=bigCardHTML(oc); }
+  var won = d.outcome==='win' || d.outcome==='opponent_forfeit';
+  var tie = d.outcome==='tie';
+  if(typeof FX!=='undefined' && FX.on && FX.on()){
+    try{
+      FX.flash(won?0.5:0.35);
+      FX.burst(innerWidth/2, innerHeight/2, {n:won?62:34, speed:won?7:5,
+        colors: won?['#ffe7a8','#f5c24d','#fff2c9']:['#c98a8a','#8a3a34','#e0503c']});
+      FX.vignette(won?'win':'lose', 1100);
+      FX.stamp(won?'DUEL WON':(tie?'TIE':'DUEL LOST'), won?'win':'lose');
+    }catch(e){}
+  }
+  if(typeof toast==='function'){
+    toast((won?'✅ ':(tie?'🤝 ':'❌ '))+(d.yourPow!=null?(d.yourCard+' '+d.yourPow+' vs '+d.theirPow+' '+d.opponent):'duel resolved'), won);
+  }
+  var log=document.getElementById('pvp-duel-log');
+  if(!log){ log=document.createElement('div'); log.id='pvp-duel-log'; log.className='pvp-duel-log';
+    var host=document.getElementById('v-turn'); if(host) host.appendChild(log); }
+  log.innerHTML = (d.log && d.log.length)
+    ? '<div class="pdl-head">Why</div>'+d.log.map(function(l){ return '<div>'+_esc(l)+'</div>'; }).join('')
+    : '';
+}
+
+function _setText(id,t){ var el=document.getElementById(id); if(el) el.textContent=t; }
+function _esc(s){ return (typeof sfEsc==='function')?sfEsc(s):String(s==null?'':s); }
+
 function _renderPvpMatch(){
+  // 8/15/26 (owner: option A) — a live duel renders on the REAL board now, not the bespoke panel
+  // below. The panel remains for everything that is not an in-progress duel: queueing, the
+  // challenge flow, and the final series recap. Anything mid-match hands off to pvpRenderBoard.
+  if(PVP.view && PVP.view.you && !PVP.view.done && typeof pvpRenderBoard==='function'){
+    pvpRenderBoard(PVP.view); return;
+  }
+  if(typeof pvpBoardOn!=='undefined' && pvpBoardOn && typeof pvpBoardExit==='function') pvpBoardExit();
+
   var el = document.getElementById('online-body'); if(!el) return;
   var v = PVP.view;
   if(!v){ el.innerHTML = '<div class="on-panel"><p class="on-sub" style="margin:0">Loading match…</p></div>'; return; }
