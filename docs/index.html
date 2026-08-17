@@ -5631,7 +5631,20 @@ function proceedFromWager(){
 }
 // ANYTIME WAGER (Marvel-Snap style) - raise/fold from the HUD any time during the match
 function closeWagerModal(){ const ov=document.getElementById('wager-overlay'); if(ov) ov.classList.remove('show'); }
-function hudFold(){ if(matchComplete||matchOver()) return; if(pvpMode){ pvpEndMatch(false); return; } retreat('player'); }
+function hudFold(){
+  // Real bug (8/17/26, reported live, confirmed to still be reachable after the last fix): hiding
+  // the top wager-HUD button stopped a direct click, but exitMatch() ("Exit to Lobby" -- the most
+  // visible, most-clicked button on the whole screen) calls hudFold() DIRECTLY, bypassing the
+  // hidden button entirely. The function itself still only knew about pvpMode (Staked-PvP-vs-BOT,
+  // a different single-player flag) and fell through to retreat('player') -- a purely local
+  // function -- for a real online match, same root cause as before, just reached a different way.
+  // Real online PvP has to be checked FIRST, ahead of every single-player branch.
+  if(typeof pvpBoardOn!=='undefined' && pvpBoardOn && typeof PVP!=='undefined' && PVP.pvpId){
+    if(typeof pvpForfeit==='function') pvpForfeit();
+    return;
+  }
+  if(matchComplete||matchOver()) return; if(pvpMode){ pvpEndMatch(false); return; } retreat('player');
+}
 function hudRaise(){
   if(matchComplete||matchOver()) return;
   // Agree to a rival's pending raise -> stake scales
@@ -13400,6 +13413,29 @@ function pvpBoardEnter(){
   // action bar below, and two differently-wired buttons that are supposed to do the same thing is
   // exactly the "redundant" confusion reported alongside this.
   var wh=document.querySelector('.wager-hud'); if(wh) wh.style.display='none';
+  // Real bug (8/17/26, full audit after the fold/forfeit reports: "fix all singleplayer code from
+  // multiplayer places -- im sure that happened multiple times"). It had: #draw-btn defaults
+  // display:none in the static markup and PVP never shows it, but nothing here defensively RE-hid
+  // it -- if a prior offline match in the same tab left it visible, clicking "Draw Card" would run
+  // the single-player drawCard() (reads/mutates hand/drawPile, neither of which PVP uses) on top of
+  // a live server-authoritative duel. #reveal-btn is worse: it has no display:none default, only a
+  // `disabled` attribute, and revealCondition() gates on the single-player `phase` variable rather
+  // than checking whether a real PVP match is active -- a stale phase==='drawn' left over from
+  // offline (entirely plausible in the same tab) would let a click OVERWRITE the real,
+  // server-provided condition just shown on screen with a random offline one. #result-overlay is a
+  // DESCENDANT of #v-turn (not a sibling view), so switching to the PVP board via show('turn') does
+  // NOT hide it if a previous offline match left its own win/lose screen showing -- it would render
+  // on top of the live board. All three are single-player-only surfaces with no PVP-aware
+  // replacement, so unlike record-reveal/the pile chips (which get re-wired to real PVP functions
+  // on every render) these are simply neutralized outright.
+  var db=document.getElementById('draw-btn'); if(db) db.style.display='none';
+  var rb=document.getElementById('reveal-btn'); if(rb) rb.disabled=true;
+  // #bd-btn ("Why? -- power breakdown", showBreakdown()) lives INSIDE #result-overlay, so hiding
+  // the overlay above already hides it structurally -- no separate handling needed, and no separate
+  // un-hide needed on exit either (a real risk here: bd-btn has no other display toggle anywhere in
+  // the offline codebase, so an explicit hide on this element specifically would never self-correct
+  // for a later offline match the way #result-overlay's own .show toggle already does).
+  var ro=document.getElementById('result-overlay'); if(ro) ro.classList.remove('show');
 }
 function pvpBoardExit(){
   pvpBoardOn = false; pvpPick = null; pvpRg = []; clearTimeout(_pvpClashTimer); _pvpResolving = false;
