@@ -597,10 +597,20 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
   display:flex;align-items:center;justify-content:center;text-align:center;
   width:88px;height:112px;box-sizing:border-box;padding:6px;
   border:1.5px dashed rgba(245,216,146,0.5);border-radius:6px;
-  background:rgba(6,8,12,0.14);box-shadow:inset 0 0 20px rgba(0,0,0,0.3);
+  background:rgba(6,8,12,0.14);box-shadow:inset 0 0 20px rgba(0,0,0,0.3),0 0 0 rgba(245,194,77,0);
   font-size:9.5px;color:rgba(245,236,209,0.72);letter-spacing:0.1em;text-transform:uppercase;
   text-shadow:0 1px 3px rgba(0,0,0,0.9);
+  animation:socketPulse 2.6s ease-in-out infinite;
 }
+/* 8/17/26: the empty conjure slot read as a plain dashed box next to the video-lit rune-circle
+   arena behind it -- a faint breathing glow ties it to that same conjuring motif instead of
+   inventing new chrome. Opponent's slot is passive (nothing to do there) so it pulses slower/dimmer. */
+#opp-field .placeholder{animation-duration:4.4s;opacity:.82}
+@keyframes socketPulse{
+  0%,100%{box-shadow:inset 0 0 20px rgba(0,0,0,0.3),0 0 0 rgba(245,194,77,0)}
+  50%{box-shadow:inset 0 0 20px rgba(0,0,0,0.3),0 0 13px rgba(245,194,77,0.4)}
+}
+@media (prefers-reduced-motion:reduce){ .field-half .placeholder{animation:none} }
 .field-divider{
   position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--border);
   transform:translateX(-50%);z-index:1;
@@ -613,11 +623,11 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
   position:relative;overflow:hidden;user-select:none;
 }
 .card:hover:not(.locked):not(.field-card){
-  transform:translateY(-4px);
+  transform:rotate(var(--fan-r,0deg)) translateY(calc(var(--fan-y,0px) - 4px));
   box-shadow:0 8px 24px rgba(0,0,0,0.5);
 }
 .card.selected:not(.field-card){
-  transform:translateY(-6px);
+  transform:rotate(var(--fan-r,0deg)) translateY(calc(var(--fan-y,0px) - 6px));
   box-shadow:0 0 0 2px var(--gold),0 8px 24px rgba(212,168,67,0.25);
 }
 
@@ -626,7 +636,7 @@ button:focus-visible,.navitem:focus-visible,.filter-chip:focus-visible,.emblem:f
    120px card width); the .bigcard inside scales off this width via width:100%, so this alone
    shrinks the whole card proportionally. Mobile already ships 64/60px hand cards (below), so
    92px on desktop is still well above the smallest size this game already ships and tests. */
-.hand-card{width:92px;padding:0;background:transparent!important;overflow:visible;position:relative;border:none!important}
+.hand-card{width:92px;padding:0;background:transparent!important;overflow:visible;position:relative;border:none!important;transform:rotate(var(--fan-r,0deg)) translateY(var(--fan-y,0px));transform-origin:bottom center}
 .hand-card .bigcard.tframe{width:100%!important;box-shadow:0 5px 14px rgba(0,0,0,.55)}
 .hand-card .bigcard{pointer-events:none}
 .hand-card .tf-text{display:none}          /* ability micro-text off the tiny hand frame — read it on hover */
@@ -3361,8 +3371,12 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 .pile-chip{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:3px;padding:4px 8px;cursor:default}
 .pile-chip.winners{border-color:rgba(212,168,67,0.3);background:rgba(212,168,67,0.05)}
 .pile-chip.banish{border-color:rgba(120,48,184,0.3);background:rgba(120,48,184,0.05)}
-.pile-chip.charge{border-color:rgba(91,192,235,0.3);background:rgba(91,192,235,0.05)}
-.pile-chip.charge .pile-count{color:var(--electric)}
+/* 8/17/26: Charge is the opponent's one number that actually matters turn-to-turn (what they can
+   conjure with) -- it sat at the same visual weight as Hand/Deck/WC/Banish in this row, so nothing
+   drew the eye to it. Same glow language as .charge-meter (the player's own readout, line ~455)
+   instead of inventing a new treatment -- makes both HUDs consistent. */
+.pile-chip.charge{border-color:rgba(91,192,235,0.45);background:rgba(91,192,235,0.08);box-shadow:0 0 10px rgba(91,192,235,0.18)}
+.pile-chip.charge .pile-count{color:var(--electric);font-size:13px;font-weight:800;text-shadow:0 0 6px rgba(91,192,235,.5)}
 .pile-icon{font-size:11px}
 .pile-count{font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text)}
 .pile-label{font-size:9px;color:var(--text3);letter-spacing:0.05em;display:none}
@@ -5096,6 +5110,12 @@ function buildHand(){
     el.onpointerdown = (e) => handPointerDown(e, i);
     el.onmouseenter = () => { cancelHidePreview(); showCardPreview(i); };
     el.onmouseleave = scheduleHidePreview;
+    // 8/17/26: hand fan -- a flat row read as a spreadsheet, not cards held in hand. Splay rotates
+    // outward from center and edges dip slightly (transform-origin:bottom center on .hand-card),
+    // same curve every reference TCG UI (MTGA/Snap/Hearthstone) applies to the hand row.
+    const _mid = (hand.length - 1) / 2, _off = i - _mid;
+    el.style.setProperty('--fan-r', (_off * 3.2).toFixed(2) + 'deg');
+    el.style.setProperty('--fan-y', (_off * _off * 1.1).toFixed(2) + 'px');
     row.appendChild(el);
   });
 }
@@ -13458,7 +13478,8 @@ function pvpRenderBoard(v){
   var row=document.getElementById('hand-row');
   if(row){
     row.innerHTML='';
-    (v.you.hand||[]).forEach(function(hc){
+    var _pvpHand=v.you.hand||[];
+    _pvpHand.forEach(function(hc,i){
       var card=pvpCardObj(hc);
       var el=document.createElement('div');
       var chosen = pvpPick===hc.uid, called = pvpRg.indexOf(hc.uid)>=0;
@@ -13468,6 +13489,9 @@ function pvpRenderBoard(v){
       el.setAttribute('aria-label',(card.name||'card')+' — power '+(card.pow!=null?card.pow:'?')+'. Press to conjure.');
       el.onclick=function(){ pvpPickCard(hc.uid); };
       el.onkeydown=function(ev){ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); pvpPickCard(hc.uid); } };
+      var _mid=(_pvpHand.length-1)/2, _off=i-_mid;
+      el.style.setProperty('--fan-r',(_off*3.2).toFixed(2)+'deg');
+      el.style.setProperty('--fan-y',(_off*_off*1.1).toFixed(2)+'px');
       row.appendChild(el);
     });
   }
