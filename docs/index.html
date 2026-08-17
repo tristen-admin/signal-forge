@@ -12602,6 +12602,30 @@ function sfContinueAsGuest(){
   var ov=document.getElementById('signup-gate'); if(ov) ov.classList.remove('show');
   if(typeof toast==='function') toast('Playing as guest — progress stays on this device only. You can create an account any time from Online.', true);
 }
+// Rebuilds the local Vault/deck from an account's real server-side cards on LOGIN (never on
+// register -- see the comment inside sfAuth's login branch below for why the direction differs).
+function sfHydrateFromAccount(state){
+  var counts = {}, recs = {};
+  (state && state.cards || []).forEach(function(c){
+    counts[c.type] = (counts[c.type]||0) + 1;
+    if(!recs[c.type]){
+      recs[c.type] = {k:c.k||0, d:c.d||0, ok:c.ok||0, od:c.od||0,
+        chain:[{owner:(typeof ME_ADDR!=='undefined'?ME_ADDR:'you'), date:(typeof todayISO==='function'?todayISO():''), via:'Online account'}]};
+    }
+  });
+  ownedCopies = counts;
+  cardRecords = recs;
+  if(typeof activeDeck!=='undefined' && activeDeck){
+    var kept = Array.from(activeDeck).filter(function(k){ return counts[k] > 0; });
+    var dropped = activeDeck.size - kept.length;
+    activeDeck = new Set(kept);
+    if(dropped && typeof toast==='function'){
+      toast('⚠ '+dropped+' card'+(dropped===1?'':'s')+' in your deck '+(dropped===1?"isn't":"aren't")+' owned on this account — removed. Check Edit Deck.', false);
+    }
+  }
+  if(typeof deckMasterCard!=='undefined' && deckMasterCard && !counts[deckMasterCard]) deckMasterCard = null;
+  if(typeof saveState==='function') saveState();
+}
 function sfAuth(isRegister){
   var h = (document.getElementById('on-handle')||{}).value || '';
   var p = (document.getElementById('on-pass')||{}).value || '';
@@ -12629,6 +12653,16 @@ function sfAuth(isRegister){
     sfSaveSession({token:data.token, handle:h});
     SF_STATE = data.state;
     guestMode = false; lsSet('sf_guest', null);
+    // Real bug (8/16/26, reported): signing into an EXISTING account never touched local
+    // ownedCopies/activeDeck -- those are device-local save state, so switching between accounts
+    // on one browser kept showing whichever Vault/deck the local save happened to have, which then
+    // didn't match the newly-signed-in account's real cards ("your online account owns only N of
+    // your deck's cards" at PvP queue time; Vault/deck looking unchanged across account switches).
+    // REGISTER already goes the other direction (migrate local -> server, sfMigratePayload above) --
+    // this is LOGIN going the other way: the account you just signed into is the real owner of
+    // record, so its cards become your local Vault, same as sitting down on a fresh device and
+    // signing into your own account should show YOUR cards, not whatever was on the machine before.
+    if(!isRegister) sfHydrateFromAccount(data.state);
     buildOnline();
     if(isRegister){
       var m = body.migrate || {};
