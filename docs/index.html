@@ -4149,6 +4149,12 @@ const DECK_POOL = [
   {name:'King Joris',pow:12,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rightful Claim: on commit, +1 power for every death on the opponent\'s record — the betrayed king judges every usurper\'s sins.'},
   {name:'The Regenerating Horror',pow:11,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Regeneration (one use per match): the first time this card would lose, it regrows instead — the duel ties, no death is recorded, and it returns to your hand. Only a finisher truly ends it.'},
   {name:'Broodmother',pow:13,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Spiderling Swarm: on commit, +1 power for every card in your hand — the brood answers her call.'},
+  // 8/16/26 (owner: real bug) — named in STARTER_DECKS.broodswarm as its one Ultra splash but never
+  // actually built as a card, so every Broodswarm player was silently one card short and every
+  // lookup for it (Vault, Deck Builder, PvP sync) silently failed. Stats match what the server
+  // already grants (catalog.json, patched earlier this session); ability reuses Broodmother's own
+  // established +1×hand value verbatim rather than inventing a new number.
+  {name:'Mordezh, Blood Prophet',pow:15,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Prophecy: on commit, +1 power for every card in your hand.'},
   {name:'Fledgling Broodmother',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Lesser Swarm: on commit, +1 power for every card in your hand.'},
   {name:"Web-Weaver's Return",pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: shuffle your banish pile back into your deck, then draw a card — the web is rewoven.'},
   {name:'Chieftain Reyva Vosh',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Warriors in Reserve: on commit, +2 power for each card in your Winners Circle — she commits her hold\'s warriors once the stakes are undeniable.'},
@@ -4168,6 +4174,12 @@ const DECK_POOL = [
   {name:'Falk',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Dive: on commit, +2 power for every card in your banish zone.'},
   {name:'Sable',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Quartermaster: as a support (Called), banish a card from your hand and give your Fighter +5.'},
   {name:'Bannerlord Cassian',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 5: on commit, +5 power for each 1-cost ally — your 1-cost supports this duel plus every 1-cost card in your Winners Circle. The banner of the cheap and the many.'},
+  // 8/16/26 (owner: real bug) — named in STARTER_DECKS.ironsworn as its one Ultra splash but never
+  // actually built as a card, so every Ironsworn player was silently one card short and every
+  // lookup for it (Vault, Deck Builder, PvP sync) silently failed. Stats match what the server
+  // already grants (catalog.json, patched earlier this session); Muster value matches Bannerlord's
+  // own established same-cost-tier number verbatim rather than inventing a new one (see RALLY table).
+  {name:'Sirefax the Warden',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Muster 5: on commit, +5 power for each 1-cost ally — your 1-cost supports this duel plus every 1-cost card in your Winners Circle.'},
   {name:'Ironsworn Vanguard',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 power per 1-cost ally (1-cost supports this duel + 1-cost cards in your Winners Circle).'},
   {name:'Warden of the Wall',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. A wall is only as strong as the line beside it.'},
   {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.'},
@@ -4786,7 +4798,7 @@ function oppRemnantPowSum(){ return oppDeathRemnants.reduce(function(a,r){return
 let oppDmRemnantPowOverride = null;   // bot-side mirror of dmRemnantPowOverride
 const REMNANT_POW = {'Arch-Grim Korrin':8,'Summoned Skull Soldiers':7,'Bone Choirmaster':5,'Grave-Fed Ghoul':4,'Uso Oso':10,'Ghorruk "Gnarly" Judarr':8,'Kiba':2,'Sythe Marrow':5,'Little Pox':4,'Sister Mire':6,"Uso Oso's Skeletal Summons":5,'Gravecaller Voss':5,'Grave-Warden':3};   // 7/24/26: Ghorruk corrected 6->8 to match the 2026-07-07 owner-spec override below, then that now-redundant override line was removed -- one source of truth, not two disagreeing ones.
 const RAISE_REMNANT = {'Pale Gravedigger':3,'Gravecaller Voss':5,'Uso Oso':2};   // PROACTIVE: raise a Death Remnant on commit — no death needed. Uso Oso added 7/24/26, Stage 1 of "The Bulwark of Bones"
-const RALLY = {'Bannerlord Cassian':5,'Ironsworn Vanguard':3,'Warden of the Wall':3,'Oathkeeper Sena':3,'Shieldwall Recruit':3};   // MUSTER: +N power per 1-COST ally (1-cost called supports this duel + 1-cost cards in Winners Circle). 7/29/26: Oathbound Shield + Sworn Duelist reworked off Muster (see their abil text) -- removed here so the RALLY table stops silently granting them a bonus their printed text no longer describes.
+const RALLY = {'Bannerlord Cassian':5,'Sirefax the Warden':5,'Ironsworn Vanguard':3,'Warden of the Wall':3,'Oathkeeper Sena':3,'Shieldwall Recruit':3};   // MUSTER: +N power per 1-COST ally (1-cost called supports this duel + 1-cost cards in Winners Circle). 7/29/26: Oathbound Shield + Sworn Duelist reworked off Muster (see their abil text) -- removed here so the RALLY table stops silently granting them a bonus their printed text no longer describes.
 const LINGERING_SUPPORTS = ['Uso Oso','Ghorruk "Gnarly" Judarr','Sister Mire','Kiba','Grave-Fed Ghoul','Bone Choirmaster','Gravecaller Voss',"Uso Oso's Skeletal Summons"];
 // BOUNCE_ON_WIN (8/8/26, owner: "make bouncing cards back to hand after playing or winning a more
 // universal mechanic that everyone can toolbox into") -- one shared, data-driven table read by
@@ -4896,6 +4908,7 @@ const OPP_CARDS = [
   {name:'The Regenerating Horror',pow:11,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Regeneration (one use per match): the first time this card would lose, it regrows instead — the duel ties, no death is recorded, and it returns to your hand. Only a finisher truly ends it.'},
   {name:'Signal Diviner',pow:12,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On win: next turn gain 2 max Charge.'},
   {name:'Bannerlord Cassian',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 5: on commit, +5 power for each 1-cost ally — your 1-cost supports this duel plus every 1-cost card in your Winners Circle. The banner of the cheap and the many.'},
+  {name:'Sirefax the Warden',pow:16,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Muster 5: on commit, +5 power for each 1-cost ally — your 1-cost supports this duel plus every 1-cost card in your Winners Circle.'},
   {name:'Ironsworn Vanguard',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 power per 1-cost ally (1-cost supports this duel + 1-cost cards in your Winners Circle).'},
   {name:'Warden of the Wall',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. A wall is only as strong as the line beside it.'},
   {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.'},
@@ -4911,6 +4924,7 @@ const OPP_CARDS = [
   {name:'La "La" Ballora, the Broodqueen',pow:16,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Broodqueen: on commit, +2 power for every card in your hand, and draw 2 cards — her brood is her hand.'},
   {name:'Venombrood Queen',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Broodswarm: on commit, +2 power for each card in your hand.'},
   {name:'Broodmother',pow:13,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Spiderling Swarm: on commit, +1 power for every card in your hand — the brood answers her call.'},
+  {name:'Mordezh, Blood Prophet',pow:15,cost:3,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'Blood Prophecy: on commit, +1 power for every card in your hand.'},
   {name:'Fledgling Broodmother',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Lesser Swarm: on commit, +1 power for every card in your hand.'},
   {name:'Web-Spinner Acolyte',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your hand.'},
   {name:'Skittering Drone',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: on commit, +1 power for each card in your hand.'},
@@ -9218,6 +9232,13 @@ const CARD_RULES = {
    "addvar": "hand_len",
    "x": 1,
    "log": "🕷 Swarm: +1×hand"
+  }
+ ],
+ "Mordezh, Blood Prophet": [
+  {
+   "addvar": "hand_len",
+   "x": 1,
+   "log": "🩸 Blood Prophecy: +1×hand"
   }
  ],
  "Fledgling Broodmother": [
