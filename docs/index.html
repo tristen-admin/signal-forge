@@ -13067,10 +13067,16 @@ function pvpSyncDeck(done){
     // Deck Master first, so if the deck is over-long it is never the card that gets dropped.
     var wanted = [];
     var dm = (typeof deckMasterCard!=='undefined') ? deckMasterCard : null;
-    if(dm){ var dmc = COLLECTION.find(function(x){ return (x.uid||x.name)===dm; }); if(dmc) wanted.push(dmc.name); }
+    var dmName = null;
+    if(dm){ var dmc = COLLECTION.find(function(x){ return (x.uid||x.name)===dm; }); if(dmc){ dmName = dmc.name; wanted.push(dmName); } }
+    // Real bug (8/16/26, reported: "1 card in your deck is not owned" on a card the account
+    // genuinely owns): the Deck Master IS normally one of the deck's own cards, not a 21st card
+    // fielded on top of it -- pushing it here AND again below asked for two copies of one card a
+    // single-copy account only has one of, so its second request always landed in `missing`.
+    // Skip re-requesting whichever name the DM push above already claimed.
     (typeof activeDeck!=='undefined' ? Array.from(activeDeck) : []).forEach(function(k){
       var card = COLLECTION.find(function(x){ return (x.uid||x.name)===k; });
-      if(card) wanted.push(card.name);
+      if(card && card.name!==dmName) wanted.push(card.name);
     });
     var uids = [], missing = [];
     wanted.forEach(function(nm){
