@@ -17734,6 +17734,21 @@ window._sfReturningSession = _hadSave;   // captured before loadState()/startNew
 loadState();
 applyAscendantFrame();
 if(!_hadSave && typeof startNewPlayer==='function') startNewPlayer();
+// Real bug (8/16/26, reported: "same error as 3 hours ago" on a supposedly-fresh account):
+// sfHydrateFromAccount() only ever ran inside sfAuth's login branch -- the moment you click "Sign
+// in". A RESUMED session (the token in localStorage from hours/days ago, the page just reloaded)
+// never goes through sfAuth at all, so it never hydrated. The account panel still looked correctly
+// signed in (its Zenni/Kinzo/card-count come from SF_STATE, auto-refetched on first Online visit
+// via _renderAccountPanel's own "if(!SF_STATE) sfRefresh()"), which is exactly what made this
+// invisible -- the DISPLAY was right while the actual Vault/deck underneath had silently drifted.
+// Runs once, at boot, only if a token already exists.
+try{
+  if(typeof sfToken==='function' && sfToken() && typeof sfApi==='function' && typeof sfHydrateFromAccount==='function'){
+    sfApi('GET', '/api/state', null, function(err, data){
+      if(!err && data && data.state){ SF_STATE = data.state; sfHydrateFromAccount(data.state); }
+    });
+  }
+}catch(e){}
 // Hub is the default view in static markup, show() never runs for it at boot. Deferred past window.load
 // + a double-rAF (7/17/26): this file is 25MB+ of embedded base64 media -- firing the reveal synchronously
 // mid-script risked the whole fade completing before the browser had even painted once on a slow load.
