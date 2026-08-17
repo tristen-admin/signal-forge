@@ -29,7 +29,13 @@
   --r-rare:#4C74EE;
   --r-ultra:#A24CE8;
   --r-apex:#F5C24D;
-  font-family:system-ui,-apple-system,sans-serif;
+  /* 8/17/26: was the raw OS UI font (system-ui) -- everything that didn't set its own font-family
+     (most buttons/labels/stats -- 35+ rules just say font-family:inherit) rendered in whatever
+     generic sans the visitor's platform defaults to, same fingerprint as an unstyled template.
+     Reusing the serif body-voice already proven out for copy elsewhere in this file (e.g. the Hub
+     welcome text) as the actual global default, so the whole app reads as one consistently-serif
+     heraldic voice instead of only isolated headline moments getting real typography. */
+  font-family:Palatino,'Palatino Linotype','Book Antiqua',Georgia,serif;
   font-size:15px;
 }
 body{background:var(--void);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column}
