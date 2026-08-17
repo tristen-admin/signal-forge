@@ -13436,6 +13436,13 @@ function pvpBoardEnter(){
   // the offline codebase, so an explicit hide on this element specifically would never self-correct
   // for a later offline match the way #result-overlay's own .show toggle already does).
   var ro=document.getElementById('result-overlay'); if(ro) ro.classList.remove('show');
+  // #dm-badge/#opp-dm-badge (the hover-to-preview Deck Master portraits) both default hidden and
+  // their hover/pin handlers read single-player-only globals (deckMasterCard, activeBot.dmCard) --
+  // no PVP-aware version exists, unlike dm-ability-strip below which already shows the real DM for
+  // both sides from the server payload. Same defensive-reset reasoning as draw-btn/reveal-btn: safe
+  // by default (they start hidden), but a stale offline session leaving either visible would show
+  // the WRONG card's portrait on hover during a real match.
+  ['dm-badge','opp-dm-badge'].forEach(function(id){ var el=document.getElementById(id); if(el) el.style.display='none'; });
 }
 function pvpBoardExit(){
   pvpBoardOn = false; pvpPick = null; pvpRg = []; clearTimeout(_pvpClashTimer); _pvpResolving = false;
@@ -13455,6 +13462,14 @@ function pvpRenderBoard(v){
   if(PVP.pvpId && !PVP.stateTimer && typeof pvpStateTick==='function'){
     PVP.stateTimer = setInterval(pvpStateTick, 2000);
   }
+
+  // Real bug (8/17/26, found in a follow-up audit pass): #match-bot-name defaults to the literal
+  // text "Bot" in the static markup, and every OTHER mode that uses this toolbar (regular offline,
+  // Staked-vs-bot, Tournament) sets it to the real opponent's name when that mode starts -- real
+  // PvP never did, so it silently kept showing "Bot" for your actual human opponent the whole
+  // match. Same class of bug as hudFold(): a shared surface nothing had claimed for PvP yet.
+  _setText('match-bot-name', v.opponent || 'Opponent');
+  _setText('match-bot-tag', 'Real PvP · Duel '+(v.duel||1)+' of '+(v.bestOf||7));
 
   // ── condition (the real cond card, not a text line) ──
   var ci = (typeof pvpCondInfo==='function') ? pvpCondInfo(v.condition) : {name:v.condition,rule:'',icon:'?'};
