@@ -12675,7 +12675,31 @@ let SF_STATE = null;   // last /api/state response; in-memory only, refetched on
 function sfLogout(){
   sfSaveSession(null); SF_STATE=null;
   var v=document.getElementById('login-bg-video'); if(v){ v.removeAttribute('src'); v.classList.remove('on'); }
+  // Real bug (8/16/26, reported): logging out left the Vault/deck exactly as the last signed-in
+  // account's sfHydrateFromAccount() set them -- so the cards on screen kept belonging to whichever
+  // account you'd JUST signed out of, indefinitely, with no account attached to vouch for them
+  // anymore. The counterpart of "signing in makes the account authoritative" is that signing out
+  // has to let go of that account's cards too, back to a genuine blank slate -- same starter-path
+  // choice a new player gets, not reused hand-me-downs. Deliberately scoped to only what
+  // sfHydrateFromAccount touches (cards/deck/Deck Master) -- Zenni, cosmetics and ranked stats were
+  // never account-derived in the first place (sfAuth never touches them either), so resetting them
+  // here would be undoing progress the account switch never actually caused.
+  sfResetToGuestLocal();
   buildOnline(); toast('Signed out of online', true);
+}
+function sfResetToGuestLocal(){
+  for(let i=COLLECTION.length-1;i>=0;i--){ if(COLLECTION[i].won||COLLECTION[i].minted) COLLECTION.splice(i,1); }
+  wonInstances=[]; wonCounter=0;
+  ownedCopies={}; freshCopies={}; cardRecords={};
+  activeDeck=new Set(); deckMasterCard=null;
+  try{ localStorage.removeItem('sf_starter_chosen'); }catch(e){}
+  try{ lsSet('sf_deckmaster', null); }catch(e){}
+  if(typeof saveState==='function') saveState();
+  if(typeof buildVault==='function') buildVault();
+  if(typeof buildHub==='function') buildHub();
+  if(typeof updateDeckCount==='function') updateDeckCount();
+  if(typeof updateBalance==='function') updateBalance();
+  if(typeof showStarterChooser==='function') showStarterChooser();
 }
 function sfRefresh(){
   _onMsg('Refreshing…', '');
