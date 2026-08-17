@@ -103,6 +103,15 @@ CREATE TABLE IF NOT EXISTS listings(
   seller_addr TEXT NOT NULL, price INTEGER NOT NULL, k INTEGER NOT NULL DEFAULT 0,
   d INTEGER NOT NULL DEFAULT 0, sold INTEGER NOT NULL DEFAULT 0, created TEXT NOT NULL);
 
+-- 8/16/26: server-side mailbox claims. The client's SERVER_GIFTS table (mirrored to
+-- server_gifts.json, same export-from-client pattern as dm_rules/energy_spells/starter_decks)
+-- is the only source of truth for what a gift ID is worth -- the amount is looked up here, never
+-- trusted from the request, and the PRIMARY KEY makes a double-claim a constraint violation
+-- rather than something application logic has to remember to check.
+CREATE TABLE IF NOT EXISTS mailbox_claims(
+  user_id TEXT NOT NULL, gift_id TEXT NOT NULL, claimed TEXT NOT NULL,
+  PRIMARY KEY(user_id, gift_id));
+
 -- APPEND-ONLY: the $FORGE + Signal ledger
 CREATE TABLE IF NOT EXISTS ledger(
   id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT NOT NULL, user_id TEXT NOT NULL,

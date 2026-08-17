@@ -12487,6 +12487,18 @@ function claimGift(id){
   if(g.zenni){ signalPoints += g.zenni; if(typeof updateBalance==='function') updateBalance(); }
   if(typeof buildMailbox==='function') buildMailbox();
   if(typeof toast==='function') toast('📬 Claimed — '+g.title+(g.zenni?(': +'+fmtPts(g.zenni)+' Zenni'):''), true);
+  // Real gap (8/16/26, reported): this only ever updated LOCAL signalPoints -- a claim made while
+  // signed in never reached the account, so the account's real Zenni silently diverged from what
+  // the player just saw credited. The server independently looks up the gift's real value (never
+  // trusts an amount from here) and rejects a repeat claim via mailbox_claims' own primary key, so
+  // this is safe to fire whenever signed in. Not retroactive: a gift already claimed locally as a
+  // guest, before ever signing in, stays local-only -- mailboxClaimed already marks it done, so
+  // there is nothing left here to resubmit once an account exists.
+  if(typeof sfToken==='function' && sfToken()){
+    sfApi('POST', '/api/mailbox/claim', {giftId:id}, function(err, data){
+      if(!err && data && data.state){ SF_STATE = data.state; if(typeof buildOnline==='function') buildOnline(); }
+    });
+  }
 }
 function refreshMailboxBadge(){
   var b=document.getElementById('mailbox-badge'); if(!b) return;

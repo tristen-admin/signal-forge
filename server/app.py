@@ -6,7 +6,7 @@ Run:  python3 server/app.py                    → binds 127.0.0.1:8787 (local d
 The client may only READ state and REQUEST validated actions. It can never set its
 own balances, records, or outcomes — every mutation is computed and applied here.
 """
-import json, secrets, os, time, calendar, random
+import json, secrets, os, time, calendar, random, sqlite3
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs
 import store, rules, engine, asc, pvp
@@ -70,6 +70,38 @@ except Exception:
 
 MIGRATE_SIGNAL_CAP = 250000
 MIGRATE_CARD_CAP   = 400
+
+# 8/16/26 (owner: local Zenni gains must reach the real account, not just a one-time registration
+# snapshot). Mailbox gifts are a small, fixed, hand-maintained table (index.html's SERVER_GIFTS),
+# so unlike a duel win or a pack pull -- which this server has no independent way to verify --
+# a mailbox claim CAN be validated safely here: the amount is looked up from this table, never
+# trusted from the request, and mailbox_claims' PRIMARY KEY makes a double-claim (replay, or two
+# tabs racing the same claim) a constraint violation instead of something application code has to
+# remember to check. Same export-from-client pattern as dm_rules.json/energy_spells.json/
+# starter_decks.json above -- the client stays the one place gifts are authored.
+try:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "server_gifts.json"), encoding="utf-8") as _f:
+        SERVER_GIFTS = {g["id"]: g for g in json.load(_f)}
+except Exception:
+    SERVER_GIFTS = {}
+
+def h_mailbox_claim(user_id, body):
+    gift_id = body.get("giftId")
+    gift = SERVER_GIFTS.get(gift_id)
+    if not gift: return 404, {"error": "unknown gift"}
+    amt = int(gift.get("zenni") or 0)
+    with store.tx() as c:
+        try:
+            c.execute("INSERT INTO mailbox_claims(user_id,gift_id,claimed) VALUES(?,?,?)",
+                      (user_id, gift_id, store.now()))
+        except sqlite3.IntegrityError:
+            return 400, {"error": "already claimed"}
+        if amt:
+            u = c.execute("SELECT signal FROM users WHERE id=?", (user_id,)).fetchone()
+            ns = u["signal"] + amt
+            c.execute("UPDATE users SET signal=? WHERE id=?", (ns, user_id))
+            store.ledger_add(c, user_id, "SIGNAL", amt, "Mailbox: " + gift.get("title", gift_id), ns)
+    return 200, {"claimed": gift_id, "zenni": amt, "state": user_state(user_id)}
 
 def mint_card(c, owner_id, t, k=0, d=0, via="Fresh mint"):
     row = c.execute("SELECT minted,supply FROM mint WHERE type=?", (t,)).fetchone()
@@ -1125,6 +1157,7 @@ ROUTES = {
     ("POST","/api/auth/register"): (h_register, False),
     ("POST","/api/auth/login"):    (h_login, False),
     ("GET", "/api/state"):         (h_state, True),
+    ("POST","/api/mailbox/claim"): (h_mailbox_claim, True),
     ("POST","/api/match/start"):   (h_match_start, True),
     ("POST","/api/match/commit"):  (h_match_commit, True),
     ("POST","/api/deck/set"):      (h_deck_set, True),

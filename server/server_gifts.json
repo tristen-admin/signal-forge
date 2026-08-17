@@ -1,0 +1,16 @@
+[
+  {
+    "id": "welcome_conjurer",
+    "date": "2026-08-08",
+    "title": "Welcome, Conjurer",
+    "desc": "A gift from the Forge itself — every arena prize-fighter starts somewhere.",
+    "zenni": 500
+  },
+  {
+    "id": "dm_bot_fix_apology",
+    "date": "2026-08-08",
+    "title": "The Bots Remembered Their Training",
+    "desc": "Deck Master abilities were quietly doing nothing when your opponent conjured their own — fixed. A little something for the inconvenience.",
+    "zenni": 300
+  }
+]
