@@ -96,14 +96,38 @@ touching commit/withdraw/reveal logic)
   forever. If a match ever seems stuck cycling skipped duels with a real
   human still there, this is the first place to check.
 - The **only** correct way to concede a whole match client-side is
-  `pvpForfeit()` → `POST /api/pvp/forfeit`. The top toolbar's Raise/Fold
-  buttons (`hud-raise-btn`/`hud-fold-btn`, `hudRaise()`/`hudFold()`) are a
-  **single-player** wager-HUD left over from Staked-PvP-vs-bot — `hudFold()`
-  checks `pvpMode` (a different, single-player flag) and falls through to
-  `retreat('player')`, a purely local function, if you're in a real online
-  match. `pvpBoardEnter()` now hides that whole HUD while real PvP is active
-  specifically so nobody hits this dead end again — don't re-add it without
-  wiring it to `pvpForfeit()` first.
+  `pvpForfeit()` → `POST /api/pvp/forfeit`. `hudFold()` now checks real
+  `PVP.pvpId`/`pvpBoardOn` **first**, before any single-player branch, and
+  delegates to `pvpForfeit()` — fixed at the function itself (8/17/26), not
+  just at the button, because `exitMatch()` ("Exit to Lobby," the most
+  prominent button on the whole screen) calls `hudFold()` directly and was
+  still reaching `retreat('player')` (pure single-player, no server call)
+  even after the button itself got hidden. If you ever add a new "leave/
+  quit/fold" affordance anywhere in `v-turn`, make it call `pvpForfeit()`
+  when `PVP.pvpId` is set — don't assume the existing single-player exit
+  paths (`hudFold`, `retreat`, `exitMatch`) are safe to reuse as-is; they
+  weren't, twice.
+
+### `v-turn` is shared DOM — audit single-player leakage before assuming a
+new PvP surface is safe
+
+The PvP board renders into the SAME DOM as the offline duel (`#hand-row`,
+`#player-field`, `#v-turn`'s whole toolbar), so every single-player-only
+button already living in that markup is technically clickable during a real
+match unless something explicitly neutralizes it. Confirmed instances found
+by direct audit (8/17/26), beyond `hudFold()` above: `#draw-btn`
+(`drawCard()`) and `#reveal-btn` (`revealCondition()`, which gates on the
+single-player `phase` global and would overwrite the real server-provided
+condition with a random offline one) both needed a defensive reset in
+`pvpBoardEnter()`, and `#result-overlay` is a **descendant of `#v-turn`**,
+not a sibling view — switching to the PvP board does not hide it the way
+switching to a different top-level view would, so a stale offline win/lose
+screen could render on top of a live match. All three are now reset in
+`pvpBoardEnter()`, same pattern as the pre-existing
+`confirm-btn`/`commit-btn`/`forfeit-round-btn`/`.wager-hud` hides. Before
+adding anything new to `v-turn`'s static markup, check whether
+`pvpBoardEnter()` needs to know about it too — don't assume "PvP doesn't use
+this element" means "PvP can't reach it."
 
 ### What's real multiplayer vs. still bot-standin
 
