@@ -55,6 +55,15 @@ CHALLENGES = {}  # code -> {"user_id","handle","owned","best_of","created"} — 
 
 QUEUE_TTL = 120.0       # a queue entry this old is stale (browser closed, tab killed); dropped on touch
 STARTING_HAND = 5       # matches index.html:12153; online was dealing 4
+# 8/16/26 (owner-reported live: "new cards aren't being drawn, the whole deck system needs to be
+# sure it's running correctly"). Real bug, not an exaggeration: _apply() below moves the committed
+# card to its post-duel destination and _reveal() applies the Condition's own draw/discard, but
+# nothing ever replaced the card that just left the hand with a fresh one from the deck -- there was
+# no baseline per-duel draw step online AT ALL. Offline's is index.html:5201 drawCard() / the
+# DRAW_PER_TURN constant; matching both values here so a duel online draws exactly what one does
+# offline, not a separate, ad-hoc number.
+MAX_HAND = 7            # matches index.html:12287
+DRAW_PER_TURN = 1       # matches index.html:12284
 # 8/16/26 — online had NO turn timer at all. Offline runs a forfeit clock on every decision
 # (index.html startDecisionClock), so a stalling opponent online could hold a match open forever
 # and the other player had no recourse but to quit. This has to be server-side: a client countdown
@@ -128,7 +137,7 @@ def _new_side(user_id, handle, owned, best_of, deck_master=None):
     m["hand"] = [c["type"] for c in hand_cards]
     return {"user_id": user_id, "handle": handle, "m": m, "deck_master": deck_master, "seen": time.time(),
             "hand_cards": hand_cards, "deck_cards": deck_cards, "banish_cards": [],
-            "winners_circle_cards": [], "commit": None, "last": None}
+            "winners_circle_cards": [], "commit": None, "confirmed": None, "last": None}
 
 
 def _new_game(a, b, best_of):
@@ -146,6 +155,19 @@ def _duel_begin(g):
     """Start the clock for a new duel. Called wherever a duel starts, so there is exactly one place
     the deadline is defined."""
     g["deadline"] = time.time() + TURN_SECONDS
+
+
+def _draw_for_turn(side):
+    """The baseline per-duel draw offline always had and online never did (see the note by
+    DRAW_PER_TURN above). Deck first; Winners Circle only once the deck is genuinely empty, same
+    fallback order as drawCard()'s useWC branch. Silently does nothing at the hand cap or with
+    nothing left to draw from -- exactly offline's own two no-draw branches, not an error state."""
+    for _ in range(DRAW_PER_TURN):
+        if len(side["hand_cards"]) >= MAX_HAND: break
+        if side["deck_cards"]: side["hand_cards"].append(side["deck_cards"].pop(0))
+        elif side["winners_circle_cards"]: side["hand_cards"].append(side["winners_circle_cards"].pop())
+        else: break
+    side["m"]["hand"] = [c["type"] for c in side["hand_cards"]]
 
 
 def _reveal(g):
@@ -329,7 +351,20 @@ def _enforce_deadline(g):
     if time.time() < g["deadline"]: return
     a, b = g["a"], g["b"]
     ac, bc = a["commit"] is not None, b["commit"] is not None
-    if ac and bc: return                      # both in; normal resolution will handle it
+    if ac and bc:
+        # 8/16/26 (owner-requested feature) — both staged is no longer synonymous with resolved:
+        # each side now separately confirms or withdraws after seeing the reveal, and THAT decision
+        # can stall too. A side that never decides defaults to "commit" rather than "withdraw" --
+        # defaulting to withdraw would let silence be a free, riskless dodge of a bad matchup, which
+        # is exactly the incentive a decision clock exists to remove.
+        if a["confirmed"] is not None and b["confirmed"] is not None: return   # both in; resolution already ran
+        if a["confirmed"] is None: a["confirmed"] = "commit"
+        if b["confirmed"] is None: b["confirmed"] = "commit"
+        if a["confirmed"] == "commit" and b["confirmed"] == "commit":
+            _resolve_duel(g)
+        else:
+            _resolve_withdraw(g)
+        return
     if not ac and not bc:
         for s_, o_ in ((a, b), (b, a)):
             s_["last"] = {"outcome": "tie", "log": ["\u23f1 neither player committed in time \u2014 duel skipped"]}
@@ -407,13 +442,24 @@ def _view(g, you, them):
                               for sp in SPELL_LIST if sp["id"] in (you["m"].get("spellHand") or [])],
                 "deckMaster": you.get("deck_master"),
                 "committed": you["commit"] is not None,
+                "confirmed": you["confirmed"],
                 "rgSlots": engine.rg_slots(you["m"].get("matchCommits", 0))},
         "them": {"score": them["m"]["playerScore"][0], "charge": them["m"]["charge"],
                  "handCount": len(them["hand_cards"]), "deckCount": len(them["deck_cards"]),
                  "winnersCircleCount": len(them["winners_circle_cards"]),
                  "banishCount": len(them["banish_cards"]),
                  "deckMaster": them.get("deck_master"),
-                 "committed": them["commit"] is not None},
+                 "committed": them["commit"] is not None,
+                 "confirmed": them["confirmed"] is not None},
+        # 8/16/26 (owner-requested feature: "the withdraw phase only makes sense if it pops up once
+        # both players commit a card -- that way you can see the win/loss record of your opponent
+        # without seeing the card, and decide if you want to risk playing your KD against a proven
+        # victor"). Populated only once BOTH sides have staged -- their card's real k/d, never its
+        # identity, mirroring offline's own #record-reveal panel ("-- identity hidden --" on the
+        # opponent's side). The client uses you.committed && them.committed as the signal to show
+        # the reveal/withdraw screen; this is the payload it reveals once that's true.
+        "revealOpponentRecord": (_record(them["commit"]["card"]["uid"])
+                                  if you["commit"] is not None and them["commit"] is not None else None),
         "lastDuel": you["last"],
         "youWon": (g["winner"] == you["user_id"]) if g["done"] and g["winner"] else None,
         "lockedWithdraw": g["condition"] == "noretreat",
@@ -451,10 +497,89 @@ def commit(user_id, pid, card_uid, rg_uids):
         # deduction. Verified before changing the server.
 
         you["commit"] = {"card": hc, "rg": rg_cards}
-        if them["commit"] is None:
+        # 8/16/26 (owner-requested feature) — used to resolve the instant both sides had staged.
+        # Now it just stages: once both are in, _view()'s revealOpponentRecord starts showing each
+        # side the OTHER's real k/d (never their card), and the duel doesn't actually resolve until
+        # both sides separately call confirm_or_withdraw() below, having seen it.
+        return 200, {"waiting": them["commit"] is None, **_view(g, you, them)}
+
+
+def confirm_or_withdraw(user_id, pid, action):
+    """The decision made AFTER seeing the opponent's record (see the reveal note in _view()) --
+    'commit' to actually play the duel out, or 'withdraw' to concede it. Withdrawing keeps your
+    card's record clean: offline's own retreatCard() (index.html:7695) never records a K/D on
+    either card when you retreat, it just hands the opponent the duel outright. Same rule here,
+    across two real accounts instead of one human and a bot."""
+    if action not in ("commit", "withdraw"):
+        return 400, {"error": "action must be 'commit' or 'withdraw'"}
+    with _LOCK:
+        g = GAMES.get(pid)
+        if not g: return 404, {"error": "match not found"}
+        you, them = _sides(g, user_id)
+        if not you: return 403, {"error": "not your match"}
+        if g["done"]: return 400, {"error": "match already complete"}
+        if you["commit"] is None or them["commit"] is None:
+            return 400, {"error": "both sides must stage a card before you can commit or withdraw"}
+        if action == "withdraw" and g["condition"] == "noretreat":
+            return 400, {"error": "withdraw is locked this duel"}
+        if you["confirmed"] is not None:
+            return 400, {"error": "you already decided this duel"}
+        g["touched"] = time.time()
+
+        you["confirmed"] = action
+        if them["confirmed"] is None:
             return 200, {"waiting": True, **_view(g, you, them)}
-        _resolve_duel(g)
+
+        if you["confirmed"] == "commit" and them["confirmed"] == "commit":
+            _resolve_duel(g)
+        else:
+            _resolve_withdraw(g)
         return 200, {"waiting": False, **_view(g, you, them)}
+
+
+def _resolve_withdraw(g):
+    """At least one side withdrew. Neither card is staged (see _stage()'s docstring — it only runs
+    inside _resolve_duel), so both simply stay in hand untouched: no K/D on either card, exactly
+    offline's rule. Mutual withdraw is a tie (both sides equally declined the risk, so neither side
+    is favored) -- there's no offline precedent for it since a bot never withdraws, so this is the
+    most defensible reading of "no K/D on either card" extended to both sides at once."""
+    a, b = g["a"], g["b"]
+    a_in, b_in = a["confirmed"], b["confirmed"]
+
+    if a_in == "withdraw" and b_in == "withdraw":
+        outcome_a, outcome_b = "mutual_withdraw", "mutual_withdraw"
+    elif a_in == "withdraw":
+        a["m"]["playerScore"][1] += 1; b["m"]["playerScore"][0] += 1
+        outcome_a, outcome_b = "withdraw", "opponent_withdrew"
+    else:
+        b["m"]["playerScore"][1] += 1; a["m"]["playerScore"][0] += 1
+        outcome_a, outcome_b = "opponent_withdrew", "withdraw"
+
+    a["last"] = {"outcome": outcome_a, "log": [_withdraw_log(outcome_a, b["handle"])]}
+    b["last"] = {"outcome": outcome_b, "log": [_withdraw_log(outcome_b, a["handle"])]}
+
+    a["commit"] = b["commit"] = None
+    a["confirmed"] = b["confirmed"] = None
+    g["duel"] += 1
+    g["seq"] += 1
+
+    threshold = a["m"].get("winThreshold", 4)
+    sc_a, sc_b = a["m"]["playerScore"][0], b["m"]["playerScore"][0]
+    if sc_a >= threshold or sc_b >= threshold:
+        g["done"] = True
+        g["winner"] = a["user_id"] if sc_a > sc_b else (b["user_id"] if sc_b > sc_a else None)
+        _payout(g)
+    else:
+        _draw_for_turn(a); _draw_for_turn(b)
+        g["condition"] = engine.pick_condition()
+        _reveal(g)
+    _duel_begin(g)
+
+
+def _withdraw_log(outcome, opp_handle):
+    if outcome == "withdraw": return "↩ You withdrew — no K/D recorded, " + opp_handle + " takes the duel."
+    if outcome == "opponent_withdrew": return "↩ " + opp_handle + " withdrew — no K/D recorded, the duel is yours."
+    return "↩ Both sides withdrew — no K/D recorded, the duel ties."
 
 
 def _record(uid):
@@ -522,6 +647,7 @@ def _resolve_duel(g):
         g["winner"] = a["user_id"] if sc_a > sc_b else (b["user_id"] if sc_b > sc_a else None)
         _payout(g)
     else:
+        _draw_for_turn(a); _draw_for_turn(b)
         g["condition"] = engine.pick_condition()
         _reveal(g)
     _duel_begin(g)

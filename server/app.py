@@ -735,6 +735,9 @@ def h_pvp_challenge_incoming(user_id, body):
 def h_pvp_commit(user_id, body):
     return pvp.commit(user_id, body.get("pvpId"), body.get("cardUid"), body.get("rearGuardUids"))
 
+def h_pvp_confirm(user_id, body):
+    return pvp.confirm_or_withdraw(user_id, body.get("pvpId"), body.get("action"))
+
 def h_deck_set(user_id, body):
     uids = body.get("cards")
     if not isinstance(uids, list) or len(uids) < 4:
@@ -1168,6 +1171,7 @@ ROUTES = {
     ("POST","/api/pvp/leave"):     (h_pvp_leave, True),
     ("GET", "/api/pvp/state"):     (h_pvp_state, True),
     ("POST","/api/pvp/commit"):    (h_pvp_commit, True),
+    ("POST","/api/pvp/confirm"):   (h_pvp_confirm, True),
     ("POST","/api/pvp/forfeit"):   (h_pvp_forfeit, True),
     ("POST","/api/pvp/spell"):     (h_pvp_spell, True),
     ("POST","/api/pvp/challenge/create"): (h_pvp_challenge_create, True),

@@ -13408,6 +13408,18 @@ function pvpRenderBoard(v){
   _setText('cond-rule', ci.rule||'');
   _setText('cond-eyebrow', 'Duel '+(v.duel||1)+' · first to '+(Math.floor((v.bestOf||7)/2)+1));
   _setText('cond-strat', v.lockedWithdraw ? 'Withdraw is locked this duel.' : '');
+  // Real bug (8/16/26, reported: "turn ends aren't announced, neither are new turn starts"). The
+  // resolution cinematic already marks a duel ENDING (its win/lose/tie stamp) -- there was nothing
+  // marking one BEGINNING, so the eyebrow text just silently ticked over to the next number with no
+  // beat calling attention to it. Duel 1 is deliberately not announced here -- entering the match at
+  // all already says that -- this only fires from duel 2 onward, exactly the transitions that were
+  // otherwise silent.
+  if(v.duel && v.duel!==_pvpShownDuelNum){
+    if(_pvpShownDuelNum!=null && v.duel>1 && typeof toast==='function'){
+      toast('⚔ Duel '+v.duel+' begins — first to '+(Math.floor((v.bestOf||7)/2)+1), true);
+    }
+    _pvpShownDuelNum = v.duel;
+  }
 
   // ── charge + score ──
   // Charge IS spent server-side (engine.py:434, at resolve). This readout used to print the same
@@ -13489,6 +13501,15 @@ function pvpRenderBoard(v){
       el.setAttribute('aria-label',(card.name||'card')+' — power '+(card.pow!=null?card.pow:'?')+'. Press to conjure.');
       el.onclick=function(){ pvpPickCard(hc.uid); };
       el.onkeydown=function(ev){ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); pvpPickCard(hc.uid); } };
+      // Real bug (8/16/26, reported: "cards don't hover to see details in gameplay"). Offline's
+      // buildHand() wires this per-card (onmouseenter -> showCardPreview(i)); this PVP hand row
+      // never did. wireFieldCardPreview()'s delegated listeners already cover #player-field/
+      // #opp-field/rear slots for free (bigCardHTML's own data-cn attribute is all THAT needs), but
+      // it deliberately excludes #hand-row so it never fights buildHand()'s own wiring there --
+      // meaning hand cards need their own hookup same as offline, just keyed by the card object
+      // already in hand (`card`) instead of an index into the single-player `hand` array.
+      el.onmouseenter=function(){ cancelHidePreview(); if(typeof SFX!=='undefined') SFX.play('hover'); previewCardEl(card, el, true); };
+      el.onmouseleave=scheduleHidePreview;
       var _mid=(_pvpHand.length-1)/2, _off=i-_mid;
       el.style.setProperty('--fan-r',(_off*3.2).toFixed(2)+'deg');
       el.style.setProperty('--fan-y',(_off*_off*1.1).toFixed(2)+'px');
@@ -13563,6 +13584,7 @@ function pvpRenderBoard(v){
 
   // ── action bar ──
   _pvpActionBar(v);
+  _pvpRecordReveal(v);
 
   // a resolved duel arriving from the server drives the real cinematic
   // Dedupe on the MATCH seq, not lastDuel.seq -- the server's side["last"] has no seq field
@@ -13675,6 +13697,15 @@ function _pvpActionBar(v){
     bar.innerHTML='<button class="rr-commit-btn" onclick="pvpBoardExit();pvpExitMatch()">← Back to Online</button>';
     return;
   }
+  // Both staged: the record-reveal panel (see _pvpRecordReveal) owns the Commit/Withdraw decision
+  // and its own buttons, so the action bar only ever needs to say something here once THIS side
+  // has already decided and is waiting on the other one.
+  if(v.you.committed && v.them.committed){
+    bar.innerHTML = v.you.confirmed
+      ? '<span class="pab-wait">⏳ Decision locked in — waiting for '+_esc(v.opponent||'opponent')+'…</span>'
+      : '';
+    return;
+  }
   if(v.you.committed){
     bar.innerHTML='<span class="pab-wait">⏳ Committed — waiting for '+_esc(v.opponent||'opponent')+'…</span>';
     return;
@@ -13683,42 +13714,56 @@ function _pvpActionBar(v){
   bar.innerHTML='<span class="pab-hint">'+(ready
       ? 'Fighter set'+(pvpRg.length?(' · '+pvpRg.length+' support'+(pvpRg.length===1?'':'s')):'')+' — commit when ready'
       : 'Tap a card in your hand to conjure it')+'</span>'+
-    '<button class="rr-commit-btn"'+(ready?'':' disabled')+' onclick="pvpOpenRecordReveal()">⚔ Commit</button>'+
+    '<button class="rr-commit-btn"'+(ready?'':' disabled')+' onclick="pvpCommitFromBoard()">⚔ Commit</button>'+
     (v.lockedWithdraw?'':'<button class="bd-close2" onclick="pvpForfeit()">🏳 Forfeit</button>');
 }
 
-/* Records-revealed step (8/16/26). Offline shows both cards' permanent records before you lock in,
-   with a withdraw escape; online committed blind. The server already sends per-card k/d on every
-   hand card and a lockedWithdraw flag for the No Retreat condition, so this needs no new endpoint.
-
-   NOTE what is honestly knowable here: the OPPONENT's card is hidden until both commit, so this
-   shows YOUR card's record and what you are risking, not theirs. Offline can show theirs because it
-   knows the bot's pick; a real opponent's is genuinely secret, and inventing it would be a lie. */
-function pvpOpenRecordReveal(){
-  var v=PVP.view; if(!v || !pvpPick) return;
-  var hc=(v.you.hand||[]).find(function(h){ return h.uid===pvpPick; }); if(!hc) return;
+/* Records-revealed step (8/16/26, rebuilt same day — owner-reported the first version "only
+   makes sense once both players commit a card": the version this replaces showed the reveal right
+   after YOU staged, before the opponent necessarily had — at that point their record genuinely
+   wasn't knowable yet, so it could only ever show "?" for them, which is the "doesn't make sense"
+   the report was about. Real fix has to be server-driven: pvp.py's revealOpponentRecord field is
+   populated only once BOTH sides have staged (never before), so this now shows something true —
+   their card's real k/d, never its identity, letting you weigh "am I willing to risk my card's
+   record against a proven victor" the way the owner described, before either side is locked in. */
+function _pvpRecordReveal(v){
   var rr=document.getElementById('record-reveal'); if(!rr) return;
-  var k=hc.k||0, d=hc.d||0;
-  _setText('rr-you-k', k); _setText('rr-you-d', d);
-  _setText('rr-opp-k', '?'); _setText('rr-opp-d', '?');
-  var oid=document.getElementById('rr-opp-id');
-  if(oid) oid.textContent = v.them && v.them.committed ? '— committed, identity hidden until reveal —' : '— still choosing —';
+  var bothStaged = v.you.committed && v.them.committed;
+  if(v.done || !bothStaged || v.you.confirmed){ rr.style.display='none'; return; }
+  var hc=(v.you.hand||[]).find(function(h){ return h.uid===pvpPick; });
+  var myK = hc?(hc.k||0):0, myD = hc?(hc.d||0):0;
+  var opp = v.revealOpponentRecord || {k:0,d:0};
+  _setText('rr-you-k', myK); _setText('rr-you-d', myD);
+  _setText('rr-opp-k', opp.k||0); _setText('rr-opp-d', opp.d||0);
+  var oid=document.getElementById('rr-opp-id'); if(oid) oid.textContent='— identity hidden —';
+  var yid=document.getElementById('rr-you-id'); if(yid) yid.textContent = hc ? (hc.type||'') : '';
   var pr=document.getElementById('rr-proj');
-  if(pr) pr.textContent = (k===0&&d===0) ? 'This card has no record yet — its first result is written here.'
-                                         : 'Risking a '+k+'\u2013'+d+' record.';
+  if(pr){
+    var ok=opp.k||0, od=opp.d||0;
+    pr.textContent = (ok+od)===0 ? 'Opponent’s card has no record yet.'
+      : ok>od ? 'Opponent’s card is a proven victor — '+ok+'–'+od+'.'
+      : od>ok ? 'Opponent’s card has a losing record — '+ok+'–'+od+'.'
+      : 'Opponent’s card is even — '+ok+'–'+od+'.';
+  }
   var rb=document.querySelector('.rr-retreat-btn');
   if(rb){
     if(v.lockedWithdraw){ rb.disabled=true; rb.style.opacity='0.3'; rb.style.cursor='not-allowed';
       rb.textContent='🔒 No Retreat — withdraw locked'; rb.onclick=null; }
     else { rb.disabled=false; rb.style.opacity=''; rb.style.cursor='';
       rb.textContent='↩ Withdraw · keep your record clean';
-      rb.onclick=function(){ pvpCloseRecordReveal(); pvpPick=null; pvpRg=[]; pvpRenderBoard(PVP.view); }; }
+      rb.onclick=function(){ pvpConfirmDuel('withdraw'); }; }
   }
   var cb=document.querySelector('#record-reveal .rr-commit-btn');
-  if(cb) cb.onclick=function(){ pvpCloseRecordReveal(); pvpCommitFromBoard(); };
+  if(cb) cb.onclick=function(){ pvpConfirmDuel('commit'); };
   rr.style.display='flex';
 }
-function pvpCloseRecordReveal(){ var rr=document.getElementById('record-reveal'); if(rr) rr.style.display='none'; }
+function pvpConfirmDuel(action){
+  if(!PVP.pvpId) return;
+  sfApi('POST', '/api/pvp/confirm', {pvpId:PVP.pvpId, action:action}, function(err, data){
+    if(err){ if(typeof toast==='function') toast(err, false); return; }
+    PVP.view=data; _renderPvpMatch();
+  });
+}
 
 function pvpCommitFromBoard(){
   if(!pvpPick) return;
@@ -13738,7 +13783,7 @@ function pvpCommitFromBoard(){
 
 /* Resolution: the numbers are the SERVER's, never recomputed here. The cinematic and FX are the
    same ones the offline duel uses, so a real match looks like a real match. */
-var _pvpShownDuelSeq=null, _pvpClashTimer=null, _pvpResolving=false;
+var _pvpShownDuelSeq=null, _pvpClashTimer=null, _pvpResolving=false, _pvpShownDuelNum=null;
 function pvpShowResolution(v){
   var d=v.lastDuel; if(!d) return;
   var won = d.outcome==='win' || d.outcome==='opponent_forfeit';
