@@ -246,10 +246,26 @@ def _sweep():
     for g in GAMES.values():
         if g["done"]: continue
         a_seen = g["a"].get("seen", g["touched"]); b_seen = g["b"].get("seen", g["touched"])
-        if now - a_seen > ABANDON_TTL and now - b_seen > ABANDON_TTL:
+        a_gone, b_gone = now - a_seen > ABANDON_TTL, now - b_seen > ABANDON_TTL
+        if a_gone and b_gone:
             g["done"] = True; g["winner"] = None; g["seq"] += 1; g["touched"] = now
             for side, other in ((g["a"], g["b"]), (g["b"], g["a"])):
                 side["last"] = {"outcome": "tie", "log": ["\u23f8 match abandoned \u2014 both players left the room"]}
+        elif a_gone or b_gone:
+            # Real bug (8/17/26, reported live: "infinite loop on the broken opponent's end").
+            # Ending a match used to require BOTH sides silent -- a genuinely present player,
+            # politely polling every 2s, can never make that condition true on their own. One side
+            # vanishing (e.g. via the since-fixed hudFold() bug, which exited the client without
+            # ever telling the server) meant the PRESENT side's own honest, continued activity was
+            # exactly what stopped this from ever resolving: every duel timed out "neither
+            # committed" forever, because the present side wasn't going to stop polling just to
+            # trigger an end condition, and the absent side obviously never would either. The side
+            # that stayed did nothing wrong -- award them the match instead of trapping them in it.
+            gone, present = (g["a"], g["b"]) if a_gone else (g["b"], g["a"])
+            g["done"] = True; g["winner"] = present["user_id"]; g["seq"] += 1; g["touched"] = now
+            present["last"] = {"outcome": "opponent_forfeit", "log": ["\U0001f6c8 opponent went silent \u2014 the match is yours"]}
+            gone["last"] = {"outcome": "forfeit", "log": ["\U0001f6c8 you went silent \u2014 the match goes to your opponent"]}
+            _payout(g)
     for pid in [k for k, g in GAMES.items() if now - g["touched"] > GAME_TTL]:
         del GAMES[pid]
 

@@ -13388,10 +13388,22 @@ function pvpBoardEnter(){
     var el=document.getElementById(id); if(el) el.style.display='none';
   });
   var rr=document.getElementById('record-reveal'); if(rr) rr.style.display='none';
+  // Real bug (8/17/26, reported live: "i folded on left tester, nothing happened to the connected
+  // opponent"). This top-bar Fold button is hud-fold-btn -> hudFold() -> checks the WRONG pvpMode
+  // flag (that one means "Staked PvP vs a BOT," an entirely different single-player mode with its
+  // own wager/stake state) -- so in a REAL online match it fell through to retreat('player'), a
+  // single-player-only function that shows a fake local "match complete" screen and never once
+  // touches the server. The opponent never heard anything because nothing was ever sent. There is
+  // no wager/stake concept in real online PvP for Raise to act on either. Hiding both rather than
+  // trying to make hudFold() dual-purpose -- the real, correctly-wired Forfeit already lives in the
+  // action bar below, and two differently-wired buttons that are supposed to do the same thing is
+  // exactly the "redundant" confusion reported alongside this.
+  var wh=document.querySelector('.wager-hud'); if(wh) wh.style.display='none';
 }
 function pvpBoardExit(){
   pvpBoardOn = false; pvpPick = null; pvpRg = []; clearTimeout(_pvpClashTimer); _pvpResolving = false;
   if(typeof FX!=='undefined' && FX.clear) FX.clear();
+  var wh=document.querySelector('.wager-hud'); if(wh) wh.style.display='';
 }
 
 function pvpRenderBoard(v){
@@ -13703,17 +13715,25 @@ function _pvpActionBar(v){
     bar.innerHTML='<button class="rr-commit-btn" onclick="pvpBoardExit();pvpExitMatch()">← Back to Online</button>';
     return;
   }
+  // Real bug (8/17/26, reported live: "fold nor forfeit end the match for some reason"). Every
+  // branch below used to render its own status text with NO forfeit button once you'd staged a
+  // card -- so the one real, correctly-wired way to quit the whole match (pvpForfeit(), which
+  // actually reaches the server) disappeared the moment you committed, and stayed gone through the
+  // entire reveal/confirm window. A player stuck against a vanished opponent had no way out. Same
+  // gate as before (the No Retreat condition blocks quitting outright, not just this duel's
+  // withdraw), just applied consistently instead of only in the pre-stage branch.
+  var forfeitBtn = v.lockedWithdraw ? '' : '<button class="bd-close2" onclick="pvpForfeit()">🏳 Forfeit</button>';
   // Both staged: the record-reveal panel (see _pvpRecordReveal) owns the Commit/Withdraw decision
   // and its own buttons, so the action bar only ever needs to say something here once THIS side
   // has already decided and is waiting on the other one.
   if(v.you.committed && v.them.committed){
-    bar.innerHTML = v.you.confirmed
+    bar.innerHTML = (v.you.confirmed
       ? '<span class="pab-wait">⏳ Decision locked in — waiting for '+_esc(v.opponent||'opponent')+'…</span>'
-      : '';
+      : '') + forfeitBtn;
     return;
   }
   if(v.you.committed){
-    bar.innerHTML='<span class="pab-wait">⏳ Committed — waiting for '+_esc(v.opponent||'opponent')+'…</span>';
+    bar.innerHTML='<span class="pab-wait">⏳ Committed — waiting for '+_esc(v.opponent||'opponent')+'…</span>'+forfeitBtn;
     return;
   }
   var ready=!!pvpPick;
@@ -13721,7 +13741,7 @@ function _pvpActionBar(v){
       ? 'Fighter set'+(pvpRg.length?(' · '+pvpRg.length+' support'+(pvpRg.length===1?'':'s')):'')+' — commit when ready'
       : 'Tap a card in your hand to conjure it')+'</span>'+
     '<button class="rr-commit-btn"'+(ready?'':' disabled')+' onclick="pvpCommitFromBoard()">⚔ Commit</button>'+
-    (v.lockedWithdraw?'':'<button class="bd-close2" onclick="pvpForfeit()">🏳 Forfeit</button>');
+    forfeitBtn;
 }
 
 /* Records-revealed step (8/16/26, rebuilt same day — owner-reported the first version "only

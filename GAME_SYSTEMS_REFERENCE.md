@@ -119,7 +119,22 @@ The bot mirrors most player-facing systems: its own Charge pool (same cap/regen 
 
 **Settings**: Sound/Music/Reduce Motion toggles, all persisted, all functioning — Reduce Motion in particular blankets every element on the page via a single CSS rule, not a hand-picked subset.
 
-Ranked and Staked PvP both disclose "(Rival AI stands in until networked play ships.)" — there is no real networked multiplayer yet in either mode.
+**STALE until 8/17/26 — corrected below.** This line used to say neither mode had real networked
+play. That's no longer true for one of the two, and was never quite true for how they're split:
+
+- **Ranked Ladder and the Online screen's Public/Casual matchmaking (`Find a match`) ARE real
+  networked PvP**, server-authoritative via `server/pvp.py` — a real queue (`/api/pvp/queue`,
+  FIFO for casual/best-of-7, closest-RP-first for ranked/best-of-3), real per-duel commit/resolve
+  between two real accounts (`server/engine.py` run once per side and reconciled), a 60s per-duel
+  decision timer enforced server-side even if nobody is polling (`_enforce_deadline`/`_sweep`),
+  real per-duel card draw, private-match challenge codes, and (added 8/17/26) a records-revealed
+  step: once both sides stage a card, each sees the OTHER's real win/loss record — never their
+  card's identity — before independently choosing to commit or withdraw. Verified working via
+  live two-account tests and deployed to production (play.koteitcg.com) as of this correction.
+- **Staked PvP is still bot-only** — `enterOnlineMode('staked')` routes to the single-player
+  `v-pvp` view (a real card wagered against an AI rival), not `server/pvp.py`. Its own "(Rival AI
+  stands in until networked play ships.)" disclosure is accurate as written; only Ranked's copy of
+  that line was ever describing something that has since shipped.
 
 ## 11. Deck Building & Collection
 
