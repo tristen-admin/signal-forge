@@ -12629,9 +12629,27 @@ function sfHydrateFromAccount(state){
   if(typeof activeDeck!=='undefined' && activeDeck){
     var kept = Array.from(activeDeck).filter(function(k){ return counts[k] > 0; });
     var dropped = activeDeck.size - kept.length;
-    activeDeck = new Set(kept);
+    // Real bug (8/16/26, reported repeatedly): dropping unowned cards with nothing to replace them
+    // was correct but left decks as thin as 1/20 whenever the account's real pool barely overlapped
+    // whatever the local deck had been -- technically honest, but a deck that thin can't even queue
+    // (MIN_DECK=16), so every account switch dropped the player into a broken state they had to
+    // manually rebuild by hand every single time. Top back up from the SAME account's own real
+    // cards (never invented, never another account's) until either DECK_SIZE is reached or the
+    // account is simply out of distinct types to add -- so switching accounts always lands on a
+    // playable deck when the account owns enough to make one, same spirit as a fresh starter deck.
+    var filled = kept.slice();
+    if(filled.length < DECK_SIZE){
+      Object.keys(counts).forEach(function(k){
+        if(filled.length >= DECK_SIZE) return;
+        if(filled.indexOf(k) < 0) filled.push(k);
+      });
+    }
+    var added = filled.length - kept.length;
+    activeDeck = new Set(filled);
     if(dropped && typeof toast==='function'){
-      toast('⚠ '+dropped+' card'+(dropped===1?'':'s')+' in your deck '+(dropped===1?"isn't":"aren't")+' owned on this account — removed. Check Edit Deck.', false);
+      var msg = '⚠ '+dropped+' card'+(dropped===1?'':'s')+' in your deck '+(dropped===1?"isn't":"aren't")+' owned on this account — removed';
+      msg += added ? (' and topped up with '+added+' owned card'+(added===1?'':'s')+'.') : '. Check Edit Deck.';
+      toast(msg, false);
     }
   }
   if(typeof deckMasterCard!=='undefined' && deckMasterCard && !counts[deckMasterCard]) deckMasterCard = null;
