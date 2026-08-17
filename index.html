@@ -13874,6 +13874,21 @@ function pvpShowResolution(v){
     ? '<div class="pdl-head">Why</div>'+d.log.map(function(l){ return '<div>'+_esc(l)+'</div>'; }).join('')
     : '';
 
+  // Real gap (8/17/26, owner: "the whole game wasn't ready for multiplayer... brought up to speed").
+  // Offline grants these PER DUEL WON/LOST (resolve(), index.html ~9822/9839), not once per match --
+  // real PvP never called any of them, so a whole real match's worth of duels paid no XP, no daily-
+  // quest progress, and no profile-rank progress at all, regardless of outcome. Same exact values,
+  // same exact gate (win/lose only -- offline's own retreatCard() never grants these for a withdrawn
+  // duel either, matching d.outcome checked against the RAW string here, not the cinematic's
+  // broader won/tie booleans which fold in the whole-match forfeit outcomes for animation purposes).
+  if(d.outcome==='win'){
+    if(typeof grantPlayerXP==='function') grantPlayerXP(15);
+    if(typeof bumpQuestProgress==='function') bumpQuestProgress('win2');
+    if(typeof rankBump==='function'){ rankBump('r1_win'); rankBump('r2_win'); }
+  } else if(d.outcome==='lose'){
+    if(typeof grantPlayerXP==='function') grantPlayerXP(5);
+  }
+
   function onCinematicDone(){
     _pvpResolving = false;
     if(pvpBoardOn && PVP.view && !PVP.view.done) pvpRenderBoard(PVP.view);
@@ -13947,15 +13962,42 @@ function pvpFinishMatch(v){
   // pvpExitMatch() already clears this on a manual exit; a server-driven finish needs the same.
   PVP.pvpId = null; PVP.opponent = null;
   if(typeof show==='function') show('online', document.getElementById('nav-online'));
-  var oc = v && v.lastDuel && v.lastDuel.outcome;
-  if(typeof toast==='function'){
-    if(oc==='forfeit') toast('\u{1F3F3} You withdrew — the match goes to your opponent.', false);
-    else if(oc==='opponent_forfeit') toast('\u{1F3F3} Your opponent withdrew — the match is yours.', true);
-    else if(v && v.youWon===true) toast('✅ Match won.', true);
-    else if(v && v.youWon===false) toast('❌ Match lost.', false);
-    else toast('Match over.', true);
-  }
+  // Real gap (8/17/26, owner: "the whole game wasn't ready for multiplayer... brought up to speed").
+  // A real match conclusion used to be a single toast -- offline's showMatchComplete() is a whole
+  // screen (final score, what changed, a real next step). This isn't that screen verbatim (no video
+  // background, no Oath/bond-formation beats -- those are tied to single-player-only systems that
+  // don't map 1:1 onto two real accounts without their own design pass), but it's a REAL conclusion
+  // with the REAL numbers pvp.py's _payout() actually applied, not a guess or a re-derivation.
+  _pvpShowMatchComplete(v);
 }
+
+function _pvpShowMatchComplete(v){
+  var oc = v && v.lastDuel && v.lastDuel.outcome;
+  var ranked = (v.bestOf||7)===3;
+  var won = v && v.youWon===true, lost = v && v.youWon===false;
+  var title = oc==='forfeit' ? '🏳 You withdrew' : oc==='opponent_forfeit' ? '🏳 Opponent withdrew — you win'
+    : won ? '✅ Match won' : lost ? '❌ Match lost' : '🤝 Match over';
+  var scoreLine = (v.you && v.you.score!=null && v.them && v.them.score!=null) ? (v.you.score+' – '+v.them.score) : '';
+  var payout = v && v.payout, rewardParts = [];
+  if(payout){
+    if(ranked && payout.rpDelta) rewardParts.push((payout.rpDelta>0?'+':'')+payout.rpDelta+' RP');
+    if(payout.zenniGain) rewardParts.push('+'+(typeof fmtPts==='function'?fmtPts(payout.zenniGain):payout.zenniGain)+' ◈ Zenni');
+  }
+  var rewardLine = rewardParts.length ? rewardParts.join(' · ') : (ranked ? '' : 'Casual match — no rank at stake.');
+  var ov=document.getElementById('pvp-match-complete');
+  if(!ov){ ov=document.createElement('div'); ov.className='signup-gate'; ov.id='pvp-match-complete'; document.body.appendChild(ov); }
+  ov.innerHTML='<div class="sg-panel">'+
+    '<div class="sg-eyebrow">'+(ranked?'Ranked Ladder':'Public Match')+' · vs '+_esc(v.opponent||'opponent')+'</div>'+
+    '<h2 style="margin:6px 0 4px">'+title+'</h2>'+
+    (scoreLine?'<p style="font-size:26px;font-weight:800;color:#fff;margin:8px 0">'+scoreLine+'</p>':'')+
+    (rewardLine?'<p class="sg-note">'+_esc(rewardLine)+'</p>':'')+
+    '<div class="sg-actions" style="margin-top:18px">'+
+      '<button class="sg-primary" onclick="_pvpCloseMatchComplete()">Back to Online</button>'+
+    '</div>'+
+  '</div>';
+  requestAnimationFrame(function(){ ov.classList.add('show'); });
+}
+function _pvpCloseMatchComplete(){ var ov=document.getElementById('pvp-match-complete'); if(ov) ov.classList.remove('show'); }
 
 function _renderPvpMatch(){
   // The DONE branch runs first, so no ending can ever be drawn as a live board.

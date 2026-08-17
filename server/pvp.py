@@ -63,6 +63,22 @@ STARTING_HAND = 5       # matches index.html:12153; online was dealing 4
 # DRAW_PER_TURN constant; matching both values here so a duel online draws exactly what one does
 # offline, not a separate, ad-hoc number.
 MAX_HAND = 7            # matches index.html:12287
+# 8/17/26 (owner: "the whole game wasn't ready for multiplayer... I need all of it fixed and
+# brought up to speed... the systems need to all be working the way it was intended"). Real gap:
+# _payout() below used to give a flat +100 RP to the winner ONLY, on EVERY match regardless of
+# mode -- so casual/public matches (bestOf=7) moved RP when the written design
+# (GAME_SYSTEMS_REFERENCE.md: "Casual... Signal-only rewards, no RP change") says they never
+# should, Ranked gave no penalty to the loser (not a real ladder, just a one-way ratchet), and
+# NEITHER mode paid a single Zenni for winning a real online match -- beating a real person was
+# worth strictly less than beating a bot. These rates are not invented: they're the exact numbers
+# offline's own showMatchComplete() already uses for Ranked-vs-bot (100 RP swing; win pays 3000
+# Zenni per 100 RP at stake, loss pays a 30% consolation) and casual vs-bot (flat 180/30 Zenni) --
+# ported to the real online mode they were always meant to eventually cover, not new numbers.
+RANKED_RP_DELTA = 100
+RANKED_WIN_ZENNI = 3000
+RANKED_LOSS_ZENNI = 900   # 30% consolation, same rate offline uses
+CASUAL_WIN_ZENNI = 180
+CASUAL_LOSS_ZENNI = 30
 DRAW_PER_TURN = 1       # matches index.html:12284
 # 8/16/26 — online had NO turn timer at all. Offline runs a forfeit clock on every decision
 # (index.html startDecisionClock), so a stalling opponent online could hold a match open forever
@@ -478,6 +494,10 @@ def _view(g, you, them):
                                   if you["commit"] is not None and them["commit"] is not None else None),
         "lastDuel": you["last"],
         "youWon": (g["winner"] == you["user_id"]) if g["done"] and g["winner"] else None,
+        # 8/17/26 (owner: real PvP needs a real conclusion, not a bare toast) -- the real RP/Zenni
+        # this side's account actually received, so the client's match-complete screen shows real
+        # numbers instead of re-deriving or guessing them. None until the match is actually done.
+        "payout": (g.get("payout") or {}).get(you["user_id"]),
         "lockedWithdraw": g["condition"] == "noretreat",
         "secondsLeft": max(0, int(g["deadline"] - time.time())) if g.get("deadline") and not g["done"] else None,
     }
@@ -737,12 +757,34 @@ def _persist_records(side, res):
 
 
 def _payout(g):
-    """Match-end: RP to the winner, bonds for both. Mirrors app.py's own match-over block."""
+    """Match-end: RP + Zenni for both sides (winner more, loser a real consolation, ranked-only for
+    RP), bonds for both. See the rate constants above for why these specific numbers. A null winner
+    (both-abandoned tie -- the only way a whole MATCH ends without someone crossing the score
+    threshold) pays nothing to either side; a tie is not a loss for either of them."""
+    ranked = g["bestOf"] == 3
+    payout = {}   # user_id -> {rpDelta, zenniGain} -- echoed back via _view() so the client's real
+                  # match-complete screen shows the real numbers instead of guessing or re-deriving them
     with store.tx() as c:
         for side in (g["a"], g["b"]):
-            if g["winner"] == side["user_id"]:
-                row = c.execute("SELECT rp FROM users WHERE id=?", (side["user_id"],)).fetchone()
-                if row: c.execute("UPDATE users SET rp=? WHERE id=?", (row["rp"] + 100, side["user_id"]))
+            if g["winner"] is not None:
+                won = g["winner"] == side["user_id"]
+                row = c.execute("SELECT rp, signal FROM users WHERE id=?", (side["user_id"],)).fetchone()
+                if row:
+                    new_rp, rp_delta = row["rp"], 0
+                    if ranked:
+                        rp_delta = RANKED_RP_DELTA if won else -RANKED_RP_DELTA
+                        new_rp = max(0, row["rp"] + rp_delta)
+                        rp_delta = new_rp - row["rp"]   # true applied delta, after the floor-at-0 clamp
+                        zenni_gain = RANKED_WIN_ZENNI if won else RANKED_LOSS_ZENNI
+                    else:
+                        zenni_gain = CASUAL_WIN_ZENNI if won else CASUAL_LOSS_ZENNI
+                    new_signal = row["signal"] + zenni_gain
+                    c.execute("UPDATE users SET rp=?, signal=? WHERE id=?", (new_rp, new_signal, side["user_id"]))
+                    if zenni_gain:
+                        store.ledger_add(c, side["user_id"], "SIGNAL", zenni_gain,
+                                          ("Ranked" if ranked else "Casual") + " PvP " + ("win" if won else "loss"),
+                                          new_signal)
+                    payout[side["user_id"]] = {"rpDelta": rp_delta, "zenniGain": zenni_gain}
             played = sorted(side["m"]["matchPlayed"])
             for i in range(len(played)):
                 for j in range(i + 1, len(played)):
@@ -750,6 +792,7 @@ def _payout(g):
                     c.execute("INSERT INTO bonds(user_id,pair,count) VALUES(?,?,1) "
                               "ON CONFLICT(user_id,pair) DO UPDATE SET count=count+1",
                               (side["user_id"], pair))
+    g["payout"] = payout
 
 
 def cast_spell(user_id, pid, spell_id):
