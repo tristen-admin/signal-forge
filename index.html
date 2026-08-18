@@ -5822,6 +5822,9 @@ function matchEndHome(){
   show('hub', document.getElementById('nav-hub'));
 }
 function matchEndAgain(){
+  setTimeout(_maybeStartHubTour, 400);   /* queued hub tour, if the duel tutorial just ended -- same
+    gap as exitMatch()/matchEndHome(): a player who skips the tutorial then keeps clicking "Play
+    Again" instead of "Home" never hit either of those triggers either. */
   document.getElementById('match-end').classList.remove('show');
   matchComplete = false;
   { const v=document.getElementById('me-bg-video'); if(v){ try{ v.pause(); }catch(e){} } }
@@ -14652,7 +14655,18 @@ function startTutorial(){ tutorialMode=true; tutorialStep=0; _coachCSS();
   var _howto=document.getElementById('howto-ov'); if(_howto && _howto.classList.contains('on')) _howto.classList.remove('on');
   showCoachStep();
 }
-function endTutorial(){ tutorialMode=false; ['coach-box','coach-spot','coach-fulldim'].forEach(function(id){ var e=document.getElementById(id); if(e) e.remove(); }); var _hb=document.getElementById('howto-btn'); if(_hb) _hb.style.display=''; try{ localStorage.setItem('sf_tutorial_done','1'); }catch(e){} if(typeof toast==='function') toast('🎓 Duel tutorial complete.', true); _hubTourPending=true; }   /* battle -> hub tour -> login, per owner -- but NOT mid-match, see below */
+function endTutorial(){ tutorialMode=false; ['coach-box','coach-spot','coach-fulldim'].forEach(function(id){ var e=document.getElementById(id); if(e) e.remove(); }); var _hb=document.getElementById('howto-btn'); if(_hb) _hb.style.display=''; try{ localStorage.setItem('sf_tutorial_done','1'); }catch(e){} if(typeof toast==='function') toast('🎓 Duel tutorial complete.', true); _hubTourPending=true;
+  // Real bug (8/17/26, reported live: "skipping tutorial doesn't force a login screen pop up").
+  // _hubTourPending only ever got consumed by matchEndHome()/exitMatch() -- both assume the player
+  // was actually IN a match when they skipped. But "Skip tutorial" is reachable from the very FIRST
+  // coach step ("Welcome, Commander... Begin ->"), shown on the Hub before the practice match ever
+  // starts -- skip there and neither trigger can ever fire, since there was no match to leave. The
+  // mandatory sign-up gate (openSignupGate(), never skippable by design) sat behind that pending
+  // flag forever. _maybeStartHubTour() already has the correct guard (only proceeds if genuinely
+  // out of a match) -- calling it here too just closes the gap for the pre-battle skip case; a
+  // genuine mid-match skip still correctly waits for the real exit.
+  if(typeof _maybeStartHubTour==='function') setTimeout(_maybeStartHubTour, 400);
+}   /* battle -> hub tour -> login, per owner -- but NOT mid-match, see below */
 /* 8/15/26 — the hub tour used to fire on a 700ms timer straight out of endTutorial(), and its
    first act is show('hub'). The duel tutorial's last step says "finish this match at your own
    pace" and its button says "Finish", so a cold playtest clicked it expecting to dismiss the
