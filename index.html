@@ -10024,6 +10024,20 @@ function toggleNavGroup(id){ var g=document.getElementById(id); if(!g) return; v
   var sb=document.querySelector('.sidebar'); if(sb){ sb.classList.add('nav-settling'); clearTimeout(_navSettleTimer); _navSettleTimer=setTimeout(function(){ sb.classList.remove('nav-settling'); }, 240); }
 }
 function show(id, btn){
+  // Real fix (8/18/26, owner: "don't let players with no account maneuver hubs, pages, etc. if a
+  // player is not signed in force the login popup"). Confirmed scope (owner: "yes"): close the
+  // LEAK, don't remove guest mode -- every player must pass through the gate (sign in OR
+  // explicitly choose guest, sfContinueAsGuest()) before reaching anything else; once either
+  // choice is made, existing rules are untouched. This is the central chokepoint: every sidebar
+  // click and every screen transition in the app already routes through show(), including the
+  // exact leak this closes (skip the tutorial early enough and nothing else ever stopped a
+  // sidebar click). _authGateRequired() allows the few screens onboarding itself needs (the Hub
+  // it renders onto, the practice duel it runs, and Online in case someone wants to sign in
+  // early) and blocks everything else, popping the real gate instead of completing the nav.
+  if(typeof _authGateRequired==='function' && _authGateRequired(id)){
+    if(typeof openSignupGate==='function') openSignupGate();
+    return;
+  }
   // 8/11/26: transient card/keyword overlays are anchored to fixed viewport coordinates and have
   // no idea a screen just changed underneath them, so any one still open survived the transition
   // and floated over the new screen. Worst case is a PINNED preview: it drops #preview-scrim
@@ -12671,6 +12685,16 @@ function sfMigratePayload(){
 // Guest: the login prompt is unskippable after the tutorial (owner), but choosing guest is a real
 // answer to it — play on, progress stays in this browser only, and the prompt stops asking.
 let guestMode = !!lsGet('sf_guest', false);
+// 8/18/26 (owner) — see the matching comment on show() for the full reasoning. Screens onboarding
+// itself needs before any decision can exist yet: the Hub it renders onto, the practice duel it
+// runs, and Online (in case someone wants to sign in immediately rather than finish the tour).
+// Everything else is gated until sfToken() or guestMode is real.
+var _AUTH_GATE_EXEMPT = {hub:1, turn:1, online:1};
+function _authGateRequired(id){
+  if(guestMode) return false;
+  if(typeof sfToken==='function' && sfToken()) return false;
+  return !_AUTH_GATE_EXEMPT[id];
+}
 function sfContinueAsGuest(){
   guestMode = true; lsSet('sf_guest', true);
   var ov=document.getElementById('signup-gate'); if(ov) ov.classList.remove('show');
@@ -17994,6 +18018,21 @@ try{
     sfApi('GET', '/api/state', null, function(err, data){
       if(!err && data && data.state){ SF_STATE = data.state; sfHydrateFromAccount(data.state); }
     });
+  }
+}catch(e){}
+// Real fix (8/18/26, owner: "don't let players with no account maneuver hubs, pages, etc.").
+// show()'s own guard (search _authGateRequired) closes the leak going forward for anyone who
+// navigates from here on, but a RETURNING session that already leaked past the gate in an earlier
+// visit (this device has a starter path chosen -- real progress exists -- yet neither a token nor
+// guestMode is set) would otherwise sit quietly on the Hub, which is itself gate-exempt, until they
+// happened to click something. Proactively reopens the gate on boot for that case specifically --
+// never for a genuinely brand-new player who hasn't even picked a path yet, since that's the normal
+// pre-decision onboarding sequence, not a leak.
+try{
+  if(!(typeof sfToken==='function' && sfToken()) && !guestMode){
+    var _hasChosenPath = false;
+    try{ _hasChosenPath = !!localStorage.getItem('sf_starter_chosen'); }catch(e){}
+    if(_hasChosenPath && typeof openSignupGate==='function') setTimeout(openSignupGate, 700);
   }
 }catch(e){}
 // Hub is the default view in static markup, show() never runs for it at boot. Deferred past window.load
