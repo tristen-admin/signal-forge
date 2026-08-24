@@ -4122,11 +4122,11 @@ const DECK_POOL = [
   // unglamorous, resource-smoothing pieces on purpose — the rares/URs can come later.
   {name:'Ahdorah Khaan, Squad 19 Recruit',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"An earlier printing — before the Determined Soul, just a recruit finding her footing. On commit: +3 power if you lost your last duel."},
   {name:'Squad 16 Veteran',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"The last of a squad disbanded before Ahdorah's time — reassigned, scattered, mostly forgotten. On commit: +3 power once you've played 2 or more duels this match."},
-  {name:'Squad 19 Vanguard',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the squad holds the line.'},
-  {name:'Squad 19 Medic',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2 and draw a card.'},
+  {name:'Squad 19 Vanguard',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Veteran: on commit, +3 power once you\'ve fought 2 or more duels this match — the squad holds the line.'},
+  {name:'Squad 19 Medic',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Veteran: on commit, +3 power once you\'ve fought 2 or more duels this match.'},
   {name:'Squad 13 Quartermaster',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +4 power while your hand has 3 or fewer cards — keeping the squad supplied.'},
-  {name:'Squad 13 Scout',pow:4,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), draw a card.'},
-  {name:'Barracks Drill Sergeant',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2. [Tosa Pact]'},
+  {name:'Squad 13 Scout',pow:4,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Scout: on commit, gain 1 Charge.'},
+  {name:'Barracks Drill Sergeant',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Veteran: on commit, +3 power once you\'ve fought 2 or more duels this match. [Tosa Pact]'},
   {name:'Cadet Corps Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +3 power on the 1st or 2nd duel of the match. [Tosa Pact]'},
   {name:"Writ-Sergeant's Ledger",pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), gain 1 Charge. [Tosa Pact]'},
   // 7/24/26: Ahdor's Pride charge economy — the archetype had zero Charge access at all (balance
@@ -4135,12 +4135,12 @@ const DECK_POOL = [
   {name:'Squad 13 Signalman',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: gain 1 Charge. [Tosa Pact]'},
   {name:'Squad 16 Chronicler',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:"As a support (Called), gain 1 Charge once you've played 2 or more duels this match. [Tosa Pact]"},
   {name:'Fenrik Vench',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:"A causeway-lord's son, first to prove himself against you in the yard. On commit: +3 power if you have lost a duel this match — the rivalry sharpens him."},
-  {name:'Yard Sparring Partner',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3.'},
+  {name:'Yard Sparring Partner',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Veteran: on commit, +3 power once you\'ve fought 2 or more duels this match.'},
   // Charge economy pass, 7/24/26 -- one on-commit + one support card per starved archetype (Black Wings, Black Council, Radiance, Warpath)
   {name:"Pyre-Keeper's Apprentice",pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), gain 1 Charge.'},
-  {name:'Court Cipher',pow:7,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), gain 1 Charge if the active condition is locked this turn.'},
+  {name:'Court Cipher',pow:7,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Cipher: on commit, +4 power once you\'ve fought 2 or more duels this match.'},
   {name:'Lumen Acolyte',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: gain 1 Charge.'},
-  {name:'Oathlit Attendant',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), gain 1 Charge.'},
+  {name:'Oathlit Attendant',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Veteran: on commit, +3 power once you\'ve fought 2 or more duels this match.'},
   {name:'Trophy Runner',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:"As a support (Called), gain 1 Charge if you've earned a kill this match."},
   // Skyward Trilogy tech piece, 7/24/26 -- occasional deckbuilding option, not archetype-specific, not systemic
   {name:'Trilogy Ward',pow:15,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:"On commit: +5 power if your card's camp beats the opponent's on the Skyward Trilogy wheel (Amageras>Omitsuki>Kitanoo>Amageras). Same camp on both sides: no bonus."},
@@ -4164,7 +4164,7 @@ const DECK_POOL = [
   {name:'Envoy of Tyrants, Ella Ballora',pow:14,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Bloodrage: on commit +3 with 3+ cards in hand, and +3 more if you have already lost a duel this match — she fights harder wounded.'},
   {name:'Kiana',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Elemental Flurry: on commit +3 power, and +4 more if you have 4 or more cards in your hand'},
   // ── KOTEI Series 1 Expansion ──
-  {name:'Melanie',pow:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), your Fighter +5 and draw a card. Keawe\'s mother — a civilian, not a fighter, but she still knows how to help. At 1 power she quietly wins under Lowest Wins.'},
+  {name:'Melanie',pow:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Quiet Aid: on commit, gain 1 Charge. Keawe\'s mother — a civilian, not a fighter, but she still knows how to help. At 1 power she quietly wins under Lowest Wins.'},
   {name:'Uso Oso\'s Skeletal Summons',pow:5,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Death Remnant: these bones don\'t stay down — when the summons falls it lingers on the field, +5 to your committed cards until an opponent\'s card is killed.'},
   {name:'King Joris',pow:12,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Rightful Claim: on commit, +1 power for every death on the opponent\'s record — the betrayed king judges every usurper\'s sins.'},
   {name:'The Regenerating Horror',pow:11,kills:0,deaths:0,rarity:'common',timing:'resolution',abil:'Regeneration (one use per match): the first time this card would lose, it regrows instead — the duel ties, no death is recorded, and it returns to your hand. Only a finisher truly ends it.'},
@@ -4192,7 +4192,7 @@ const DECK_POOL = [
   {name:'Wren',pow:9,cost:1,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wingmate: on commit, return a banished card to your hand, then +4 power — Wren never leaves one behind.'},
   {name:'Rook',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Scout: on commit, banish the top card of your deck, then +1 power for every card in your banish zone.'},
   {name:'Falk',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Dive: on commit, +2 power for every card in your banish zone.'},
-  {name:'Sable',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Quartermaster: as a support (Called), banish a card from your hand and give your Fighter +5.'},
+  {name:'Sable',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Quartermaster: on commit, +1 power for every card in your banish zone.'},
   {name:'Bannerlord Cassian',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 5: on commit, +5 power for each 1-cost ally — your 1-cost supports this duel plus every 1-cost card in your Winners Circle. The banner of the cheap and the many.'},
   // 8/16/26 (owner: real bug) — named in STARTER_DECKS.ironsworn as its one Ultra splash but never
   // actually built as a card, so every Ironsworn player was silently one card short and every
@@ -4203,24 +4203,24 @@ const DECK_POOL = [
   {name:'Ironsworn Vanguard',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 power per 1-cost ally (1-cost supports this duel + 1-cost cards in your Winners Circle).'},
   {name:'Warden of the Wall',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. A wall is only as strong as the line beside it.'},
   {name:'Oathkeeper Sena',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Muster 3: +3 per 1-cost ally. As a support (Called), give your Fighter +2.'},
-  {name:'Muster-Sergeant Bryn',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), give your Fighter +1 for every card in your Winners Circle.'},
+  {name:'Muster-Sergeant Bryn',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Veteran\'s Due: on commit, +2 power for every duel you\'ve already won this match.'},
   {name:'Oathbound Shield',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Last Stand: if this card loses by 3 power or less, the duel ties instead — no death recorded.'},
   {name:'Sworn Duelist',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Kill Escalation: +3 power at 5+ career kills, +3 more at 15+ career kills.'},
-  {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +3 — the banner lifts the whole line.'},
-  {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), give your Fighter +2.'},
+  {name:'Standard-Bearer Halden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Veteran: on commit, +3 power once you\'ve fought 2 or more duels this match — the banner lifts the whole line.'},
+  {name:'Rank-Sworn Levy',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Veteran: on commit, +3 power once you\'ve fought 2 or more duels this match.'},
   {name:'Shieldwall Recruit',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Muster 3: +3 per 1-cost ally. Weak alone, unbroken together.'},
   
   {name:'Skittering Drone',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: on commit, +1 power for each card in your hand.'},
   {name:'Hatchling Tide',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: +4 power while your hand is full (4+ cards).'},
-  {name:'Silk-Spinner Drone',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), draw a card to feed the brood.'},
-  {name:'Web-Tender Matron',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), draw 2 cards.'},
+  {name:'Silk-Spinner Drone',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: on commit, +1 power for every card in your hand.'},
+  {name:'Web-Tender Matron',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Swarm: on commit, +2 power for every card in your hand.'},
   {name:'Venombrood Queen',pow:10,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Broodswarm: on commit, +2 power for each card in your hand.'},
   
   {name:'Wingblade Scout',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Wingblade: on commit, +1 power for every card in your banish zone.'},
-  {name:'Feather-Marked Skirmisher',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), banish a card from your hand and give your Fighter +4.'},
+  {name:'Feather-Marked Skirmisher',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Wingblade: on commit, +1 power for every card in your banish zone.'},
   {name:'Squad-Captain Vesk',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Wing Commander: on commit, +2 power for every card in your banish zone.'},
   {name:'Grave-Warden',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Death Remnant: when it falls, +3 to your cards until an enemy dies.'},
-  {name:'Bone-Stitcher',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'As a support (Called), your Fighter +3; if a Remnant is on the field, draw a card.'},
+  {name:'Bone-Stitcher',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Remnant-Fed: on commit, +4 power if you have a Death Remnant on the field.'},
   
   {name:'Kotei',uid:'kotei-tournament',artKey:'kotei-tournament',variant:'Tournament Won',tourneyOpened:12,pow:18,kills:0,deaths:0,rarity:'apex',timing:'on',abil:'On commit: +3 if opponent\'s card has 0 deaths, and +3 if you lost your last duel. The whole effect repeats for every round this match has completed.'},
   // ── art-swapped in from Set 2 storage ──
@@ -4242,11 +4242,11 @@ const DECK_POOL = [
   {name:'Cinder-Marked Hound',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your banish zone.'},
   {name:'The Black Ledger',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish 2 random cards from your hand, then draw 1.'},
   {name:'Pyre-Keeper Vayle',pow:13,cost:3,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +5 power while 2 or more cards are banished.'},
-  {name:'Hollow Mendicant',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Support: banish a card from your hand; your Fighter +4.'},
+  {name:'Hollow Mendicant',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Wingblade: on commit, +1 power for every card in your banish zone.'},
   // ── THE DEATHLESS (Death Remnants linger + draw to replenish) ──
   {name:'Bone Choirmaster',pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +5 to your cards until an enemy dies. On a win, draw a card.'},
   {name:'Grave-Fed Ghoul',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Death Remnant: when it falls, +4 to your cards until an enemy dies.'},
-  {name:'Marrow Priest',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Support: your Fighter +3; if a Remnant is on the field, draw a card.'},
+  {name:'Marrow Priest',pow:11,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Marrow Rite: on commit, +4 power if you have a Death Remnant on the field.'},
   {name:'Summoned Skull Soldiers',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'Death Remnant: when it falls, +7 to your cards until an enemy dies. On commit: +3 power for each Remnant you hold.'},
   {name:'Pale Gravedigger',pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: raise a +3 Death Remnant, then draw a card while you hold a Remnant.'},
   {name:'Gravecaller Voss',pow:9,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: banish a card from your hand to raise a Death Remnant worth +5 — no death required. Called as a support: lingers as a +5 Remnant.'},
@@ -4263,12 +4263,12 @@ const DECK_POOL = [
   {name:'Web-Spinner Acolyte',pow:8,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +1 power for every card in your hand.'},
   {name:"Hoarder's Gambit",pow:12,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: draw 2, then +1 power for every card in your hand.'},
   {name:'The Gathering Swarm',pow:14,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +4 power while you hold 3 or more cards; the opponent −4 power while you hold 5 or more.'},
-  {name:'Silkbound Sentinel',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Support: draw a card; your Fighter +2.'},
+  {name:'Silkbound Sentinel',pow:7,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: on commit, +1 power for every card in your hand.'},
   // 7/24/26: Broodswarm charge economy — the archetype had zero Charge access at all (balance
   // audit round 2, §5). One Fighter + one Support common, matching the round-1 pattern used for
   // Black Wings/Black Council/Radiance/Warpath.
   {name:'Silk-Fed Hatchling',pow:6,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: gain 1 Charge.'},
-  {name:'Broodweb Keeper',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'As a support (Called), gain 1 Charge if you have 4 or more cards in hand.'},
+  {name:'Broodweb Keeper',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Swarm: on commit, +1 power for every card in your hand.'},
   {name:"Widow's Patience",pow:9,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'On commit: +5 power if your hand is full (6 cards).'},
   // ── NOVELTY / TECH (splashes into any deck) ──
   
@@ -4279,10 +4279,10 @@ const DECK_POOL = [
   // duplicate "Reclaim the Colors" line that lives in both pools) and were completely unreachable
   // in COLLECTION until this fix moved them into the real DECK_POOL.
   {name:'Hall of Champions',pow:7,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +6 power if your Winners Circle holds 2 or more cards.'},
-  {name:'Victory Lap',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Called as a support: return 1 card from your Winners Circle straight to your hand.'},
+  {name:'Victory Lap',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Victory Lap: on commit, +1 power for every duel you\'ve already won this match.'},
   {name:'Ash Reckoning',pow:7,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +7 power if your banish zone holds 3 or more cards.'},
   {name:'Twin Ledgers',pow:6,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +1 power for every card in your Winners Circle, and +1 more for every card in your banish zone.'},
-  {name:'Coffer-Keeper',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Called as a support: banish 1 card from your hand; your Fighter +3.'},
+  {name:'Coffer-Keeper',pow:5,cost:1,kills:0,deaths:0,rarity:'common',timing:'on',abil:'Ledger: on commit, +1 power for every card in your banish zone.'},
   {name:'Banked Interest',pow:6,cost:2,kills:0,deaths:0,rarity:'rare',timing:'on',abil:'On commit: +2 power per card in your Winners Circle, up to 3 (+6 max).'},
   {name:'The Long Reckoning',pow:14,cost:2,kills:0,deaths:0,rarity:'ultra',timing:'on',abil:'On commit: +2 power for every card across your Winners Circle and banish zone combined, no cap.'},
 ];
@@ -9029,7 +9029,7 @@ const CARD_RULES = {
  "Lumen Acolyte": [{"chargeGain":1,"log":"✨ Lumen Acolyte: gain 1 Charge"}],
  "Oathlit Vanguard": [{"if":{"v":"player_losses","op":"==","n":0},"add":5,"log":"🛡 Oathlit Vanguard: +5 (undefeated this match)"}],
  "Silk-Spinner Drone": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"🕷 Swarm: +1×hand"}],
- "Web-Tender Matron": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"🕸 Swarm: +1×hand"}],
+ "Web-Tender Matron": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":2,"log":"🕸 Swarm: +2×hand"}],
  "Brood-Tender": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"\ud83d\udd77 Swarm: +1\u00d7hand"}],
  "Skittering Drone": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"\ud83d\udd77 Swarm: +1\u00d7hand"}],
  "Hatchling Tide": [{"if":{"v":"hand_len","op":">=","n":4},"add":4,"log":"\ud83d\udd78 Swarm: +4 (full hand)"}],
@@ -9420,7 +9420,37 @@ const CARD_RULES = {
  "The Gathering Swarm": [{ "if": { "v": "hand_len", "op": ">=", "n": 3 }, "add": 4, "log": "🕷 Swarm: +4" }, { "if": { "v": "hand_len", "op": ">=", "n": 5 }, "oppadd": -4, "log": "🕷 Swarm: opp −4" }],
  "Widow's Patience": [{ "if": { "v": "hand_len", "op": ">=", "n": 6 }, "add": 5, "log": "🕷 Patience: +5 (full hand)" }],
  "Mirror Shade": [{ "set": "opp_pow", "log": "🔄 Mirror: copy opp" }, { "add": 1, "log": "🔄 Mirror: +1" }],
- "Tosa Envoy": [{ "add": 3, "log": "🤝 Tosa Envoy: +3" }]
+ "Tosa Envoy": [{ "add": 3, "log": "🤝 Tosa Envoy: +3" }],
+ // 8/24/26: 20 R/C cards had ONLY a Called/Support effect -- their printed `abil` text was a bare
+ // restatement of that same Called effect ("As a support (Called), ..."), which readableCardHTML()
+ // then displayed verbatim under the "Conjured — Fighter" header, making it look like their Fighter
+ // ability just re-described their Support ability (see Hollow Mendicant, the case that surfaced
+ // this). Owner call: give each a real, generic on-commit Fighter ability instead of suppressing the
+ // section -- reusing the SAME state-variable templates already established elsewhere in this table
+ // (match_commits/hand_len/banish_len/remnant_count/player_wins/chargeGain), scaled by rarity (Rare
+ // gets a stronger tier of the same template than Common) and by cost (all 22 are cost-1 or cost-2,
+ // matching the existing inverse-cost-curve convention used for Called buffs elsewhere in this file).
+ // Their Called/Support effect is untouched -- this only fills in the missing Fighter half.
+ "Squad 19 Vanguard": [{"if":{"v":"match_commits","op":">=","n":2},"add":3,"log":"⚔ Veteran: +3 (2+ duels played)"}],
+ "Squad 19 Medic": [{"if":{"v":"match_commits","op":">=","n":2},"add":3,"log":"⚔ Veteran: +3 (2+ duels played)"}],
+ "Barracks Drill Sergeant": [{"if":{"v":"match_commits","op":">=","n":2},"add":3,"log":"⚔ Veteran: +3 (2+ duels played)"}],
+ "Yard Sparring Partner": [{"if":{"v":"match_commits","op":">=","n":2},"add":3,"log":"⚔ Veteran: +3 (2+ duels played)"}],
+ "Oathlit Attendant": [{"if":{"v":"match_commits","op":">=","n":2},"add":3,"log":"⚔ Veteran: +3 (2+ duels played)"}],
+ "Standard-Bearer Halden": [{"if":{"v":"match_commits","op":">=","n":2},"add":3,"log":"⚔ Veteran: +3 (2+ duels played)"}],
+ "Rank-Sworn Levy": [{"if":{"v":"match_commits","op":">=","n":2},"add":3,"log":"⚔ Veteran: +3 (2+ duels played)"}],
+ "Court Cipher": [{"if":{"v":"match_commits","op":">=","n":2},"add":4,"log":"🔒 Cipher: +4 (2+ duels played, rare)"}],
+ "Squad 13 Scout": [{"chargeGain":1,"log":"🔭 Scout: gain 1 Charge"}],
+ "Melanie": [{"chargeGain":1,"log":"🕊 Quiet Aid: gain 1 Charge"}],
+ "Broodweb Keeper": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"🕷 Swarm: +1×hand"}],
+ "Silkbound Sentinel": [{"if":{"v":"hand_len","op":">","n":0},"addvar":"hand_len","x":1,"log":"🕷 Swarm: +1×hand"}],
+ "Hollow Mendicant": [{"if":{"v":"banish_len","op":">","n":0},"addvar":"banish_len","x":1,"log":"🦴 Wingblade: +1×banish"}],
+ "Sable": [{"if":{"v":"banish_len","op":">","n":0},"addvar":"banish_len","x":1,"log":"🦴 Wingblade: +1×banish"}],
+ "Feather-Marked Skirmisher": [{"if":{"v":"banish_len","op":">","n":0},"addvar":"banish_len","x":1,"log":"🦴 Wingblade: +1×banish"}],
+ "Coffer-Keeper": [{"if":{"v":"banish_len","op":">","n":0},"addvar":"banish_len","x":1,"log":"🦴 Wingblade: +1×banish"}],
+ "Bone-Stitcher": [{"if":{"v":"remnant_count","op":">","n":0},"add":4,"log":"⚰ Remnant-Fed: +4 (Remnant present, rare)"}],
+ "Marrow Priest": [{"if":{"v":"remnant_count","op":">","n":0},"add":4,"log":"⚰ Marrow Rite: +4 (Remnant present, rare)"}],
+ "Victory Lap": [{"if":{"v":"player_wins","op":">","n":0},"addvar":"player_wins","x":1,"log":"🏁 Victory Lap: +1×wins"}],
+ "Muster-Sergeant Bryn": [{"if":{"v":"player_wins","op":">","n":0},"addvar":"player_wins","x":2,"log":"🏆 Veteran's Due: +2×wins (rare)"}]
 };
 function evalRuleCond(cond, ctx){
   if(!cond) return true;
