@@ -1492,6 +1492,17 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .nav-asc-tab:hover{border-color:var(--violet);box-shadow:0 0 14px rgba(200,140,245,0.25)}
 .nav-asc-tab.on{border-color:var(--violet);box-shadow:inset 0 0 0 1px var(--violet),0 0 16px rgba(200,140,245,0.3)}
 .ni-asc-tag{margin-left:auto;font-size:8px;font-weight:800;letter-spacing:0.12em;color:var(--violet);background:rgba(200,140,245,0.16);padding:2px 6px;border-radius:5px}
+/* 8/31/26: nav redesign -- Play/Summon are the two primary CTAs (the "always one tap away" genre
+   convention), styled like nav-asc-tab's own gold-accented treatment but in the gold accent color
+   instead of violet, so they read as elevated without inventing a third visual language. */
+.navitem-cta{border:1px solid rgba(245,194,77,0.34);border-radius:9px;margin:3px 0;background:linear-gradient(100deg,rgba(120,90,20,0.3),rgba(40,28,8,0.14));font-weight:800}
+.navitem-cta .ni-icon{color:var(--gold)}
+.navitem-cta:hover{border-color:var(--gold);box-shadow:0 0 14px rgba(245,194,77,0.28)}
+.navitem-cta.on{border-color:var(--gold);box-shadow:inset 0 0 0 1px var(--gold),0 0 16px rgba(245,194,77,0.32)}
+/* Menu overflow: non-interactive section dividers, and a taller open-state cap since Menu now
+   holds ~22 rows across 3 clusters (the old .nav-sub max-height:360px was sized for a 2-8 item group). */
+.nav-sub-heading{font-size:9.5px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);padding:9px 10px 3px;opacity:0.75}
+#grp-menu.open .nav-sub{max-height:820px}
 .asc-altmodes{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap}
 .asc-chapters{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 12px}
 .asc-chapter{flex:1;min-width:200px;text-align:left;background:linear-gradient(180deg,rgba(30,24,44,0.55),rgba(12,10,18,0.8));border:1px solid var(--border2);border-radius:11px;padding:11px 14px;cursor:pointer;font-family:inherit;color:var(--text);display:flex;flex-direction:column;gap:2px;transition:border-color .12s,transform .12s}
@@ -2830,72 +2841,47 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 <aside class="sidebar">
   <button aria-label="KOTEI — collapse or expand the menu" class="brand nav-toggle" onclick="toggleSidebar()" title="Collapse / expand the menu"><span class="brand-mark">◈</span><span class="brand-text">KOTEI<span class="brand-sub">TRADING CARD GAME · PROTOTYPE</span></span></button>
   <nav class="nav">
-    <button aria-label="Hub" class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon">◈</span><span class="brand-text">Hub</span></button>
-    <button aria-label="Mailbox" class="navitem" id="nav-mailbox" onclick="show('mailbox',this)"><span class="ni-icon">📬</span><span class="brand-text">Mailbox</span><span class="ni-badge" id="mailbox-badge"></span></button>
-    <button aria-label="Dev Notes" class="navitem" id="nav-devnotes" onclick="show('devnotes',this)"><span class="ni-icon">🛠</span><span class="brand-text">Dev Notes</span><span class="ni-badge devnotes-pill" id="devnotes-badge" style="display:none">NEW</span></button>
-    <!-- 8/16/26 (owner): Play collapsed from a 4-item group to one flat button -- every mode it
-         used to list (Offline/Ranked/Staked) already lives one click deeper on the v-play mode-select
-         screen (id="v-play", "Choose your arena"), so the group was a redundant second copy of that
-         menu. Online no longer belongs here at all -- promoted to its own top-level item below, since
-         it is account/social surface, not a game mode. -->
-    <button aria-label="Arena" class="navitem" id="nav-play" onclick="show('play',this)"><span class="ni-icon">🎮</span><span class="brand-text">Arena</span></button>
-    <button aria-label="Online" class="navitem" id="nav-online" onclick="show('online',this)"><span class="ni-icon">🌐</span><span class="brand-text">Online</span></button>
-    <div class="nav-group" id="grp-limited">
-      <button aria-label="Limited Events" class="nav-grp-head" onclick="toggleNavGroup('grp-limited')"><span class="ni-icon">🎟️</span><span class="brand-text">Limited Events</span><span class="grp-chev brand-text">▾</span></button>
-      <div class="nav-sub">
-        <button aria-label="Draft" class="navitem" id="nav-draft" onclick="show('draft',this);buildDraft()"><span class="ni-icon">🌀</span><span class="brand-text">Draft</span></button>
-      </div>
-    </div>
+    <!-- 8/31/26 (owner): full nav redesign -- the old 13-item flat/grouped sidebar buried Shop and
+         Marketplace near the bottom of a long scroll and made Card Packs/The Rite three clicks deep
+         (Menu > Shop > tab). Restructured to the genre-standard shape most active gacha games use
+         (Genshin, Star Rail, FGO, Arknights): a handful of PRIMARY destinations always visible, one
+         tap away, plus a single Menu overflow for everything else. Six primary items below: Home,
+         Play, Summon (pulled out of Shop -- pulling is the core loop, it should never be nested),
+         Collection, Shop, Menu. No view ids changed, no nav item id changed for anything that
+         already existed -- show()'s own id-lookup (`document.getElementById('nav-'+id)`) depends on
+         these exact ids to know which group to auto-open, so every pre-existing button kept its id
+         even where its position/parent moved. -->
+    <button aria-label="Home" class="navitem on" id="nav-hub" onclick="show('hub',this)"><span class="ni-icon">◈</span><span class="brand-text">Home</span></button>
+    <button aria-label="Play" class="navitem navitem-cta" id="nav-play" onclick="show('play',this)"><span class="ni-icon">🎮</span><span class="brand-text">Play</span></button>
+    <button aria-label="Summon" class="navitem navitem-cta" id="nav-summon" onclick="shopTab='packs';show('shop',this)"><span class="ni-icon">✦</span><span class="brand-text">Summon</span></button>
     <div class="nav-group" id="grp-collection">
-      <button aria-label="Deck Builder" class="nav-grp-head" onclick="toggleNavGroup('grp-collection')"><span class="ni-icon">🗂</span><span class="brand-text">Deck Builder</span><span class="grp-chev brand-text">▾</span></button>
+      <button aria-label="Collection" class="nav-grp-head" onclick="toggleNavGroup('grp-collection')"><span class="ni-icon">🗂</span><span class="brand-text">Collection</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
         <button aria-label="Vault" class="navitem" id="nav-vault" onclick="show('vault',this)"><span class="ni-icon">🗄</span><span class="brand-text">Vault</span><span class="ni-badge" id="vault-badge">19</span></button>
         <button aria-label="Edit Deck" class="navitem" id="nav-deck" onclick="show('deck',this)"><span class="ni-icon">🃏</span><span class="brand-text">Edit Deck</span><span class="ni-badge" id="deck-badge">0/12</span></button>
       </div>
     </div>
-    <!-- 8/16/26 (owner): new top-level category grouping the two narrative/world-exploration modes
-         that used to be buried inside Deck Builder, where neither is about deck-building at all. -->
-    <div class="nav-group" id="grp-kaiora">
-      <button aria-label="Explore Kaiora" class="nav-grp-head" onclick="toggleNavGroup('grp-kaiora')"><span class="ni-icon">🗺</span><span class="brand-text">Explore Kaiora</span><span class="grp-chev brand-text">▾</span></button>
+    <button aria-label="Shop" class="navitem" id="nav-shop" onclick="shopTab='cosmetics';show('shop',this)"><span class="ni-icon">🏪</span><span class="brand-text">Shop</span></button>
+    <div class="nav-group" id="grp-menu">
+      <button aria-label="Menu" class="nav-grp-head" onclick="toggleNavGroup('grp-menu')"><span class="ni-icon">☰</span><span class="brand-text">Menu</span><span class="grp-chev brand-text">▾</span></button>
       <div class="nav-sub">
-        <button aria-label="Expeditions" class="navitem" id="nav-expeditions" onclick="show('expeditions',this)"><span class="ni-icon">🗺</span><span class="brand-text">Expeditions</span><span class="ni-badge" id="expedition-badge"></span></button>
-        <button aria-label="Side Stories" class="navitem" id="nav-stories" onclick="show('stories',this)"><span class="ni-icon">📖</span><span class="brand-text">Side Stories</span></button>
-      </div>
-    </div>
-    <button aria-label="Reincarnation" class="navitem nav-asc-tab" id="nav-asc" onclick="show('asc',this)"><span class="ni-icon">👑</span><span class="brand-text">Reincarnation</span><span class="ni-asc-tag">SAGA</span></button>
-    <!-- 8/16/26 (owner): new category for player-to-player surfaces that are not a match itself --
-         Trade (moved out of Deck Builder, where it never belonged) plus a real standalone Friends
-         page (previously only reachable embedded inside the Online account screen). -->
-    <div class="nav-group" id="grp-social">
-      <button aria-label="Social" class="nav-grp-head" onclick="toggleNavGroup('grp-social')"><span class="ni-icon">🤝</span><span class="brand-text">Social</span><span class="grp-chev brand-text">▾</span></button>
-      <div class="nav-sub">
+        <div class="nav-sub-heading">Account &amp; Social</div>
+        <button aria-label="Mailbox" class="navitem" id="nav-mailbox" onclick="show('mailbox',this)"><span class="ni-icon">📬</span><span class="brand-text">Mailbox</span><span class="ni-badge" id="mailbox-badge"></span></button>
+        <button aria-label="Online" class="navitem" id="nav-online" onclick="show('online',this)"><span class="ni-icon">🌐</span><span class="brand-text">Online</span></button>
         <button aria-label="Trade" class="navitem" id="nav-trade" onclick="show('trade',this);buildTrade()"><span class="ni-icon">🤝</span><span class="brand-text">Trade</span></button>
         <button aria-label="Friends" class="navitem" id="nav-friends" onclick="show('friends',this)"><span class="ni-icon">👥</span><span class="brand-text">Friends</span></button>
-      </div>
-    </div>
-    <div class="nav-group" id="grp-market">
-      <button aria-label="Market" class="nav-grp-head" onclick="toggleNavGroup('grp-market')"><span class="ni-icon">🪙</span><span class="brand-text">Market</span><span class="grp-chev brand-text">▾</span></button>
-      <div class="nav-sub">
-        <button aria-label="Shop" class="navitem" id="nav-shop" onclick="show('shop',this)"><span class="ni-icon">🏪</span><span class="brand-text">Shop</span></button>
+        <button aria-label="Dev Notes" class="navitem" id="nav-devnotes" onclick="show('devnotes',this)"><span class="ni-icon">🛠</span><span class="brand-text">Dev Notes</span><span class="ni-badge devnotes-pill" id="devnotes-badge" style="display:none">NEW</span></button>
+        <div class="nav-sub-heading">World &amp; Modes</div>
+        <button aria-label="Draft" class="navitem" id="nav-draft" onclick="show('draft',this);buildDraft()"><span class="ni-icon">🌀</span><span class="brand-text">Draft</span></button>
+        <button aria-label="Expeditions" class="navitem" id="nav-expeditions" onclick="show('expeditions',this)"><span class="ni-icon">🗺</span><span class="brand-text">Expeditions</span><span class="ni-badge" id="expedition-badge"></span></button>
+        <button aria-label="Side Stories" class="navitem" id="nav-stories" onclick="show('stories',this)"><span class="ni-icon">📖</span><span class="brand-text">Side Stories</span></button>
+        <button aria-label="Reincarnation" class="navitem nav-asc-tab" id="nav-asc" onclick="show('asc',this)"><span class="ni-icon">👑</span><span class="brand-text">Reincarnation</span><span class="ni-asc-tag">SAGA</span></button>
+        <div class="nav-sub-heading">Reference &amp; Records</div>
         <button aria-label="Marketplace" class="navitem" id="nav-market" onclick="show('market',this)"><span class="ni-icon">⚖</span><span class="brand-text">Marketplace</span></button>
-      </div>
-    </div>
-    <div class="nav-group" id="grp-reference">
-      <button aria-label="Reference" class="nav-grp-head" onclick="toggleNavGroup('grp-reference')"><span class="ni-icon">📜</span><span class="brand-text">Reference</span><span class="grp-chev brand-text">▾</span></button>
-      <div class="nav-sub">
         <button aria-label="Conditions" class="navitem" id="nav-conds" onclick="show('conds',this)"><span class="ni-icon">🎲</span><span class="brand-text">Conditions</span></button>
         <button aria-label="Abilities" class="navitem" id="nav-abil" onclick="show('abil',this)"><span class="ni-icon">✦</span><span class="brand-text">Abilities</span></button>
         <button aria-label="Card Growth" class="navitem" id="nav-growth" onclick="show('growth',this)"><span class="ni-icon">🌱</span><span class="brand-text">Card Growth</span></button>
         <button aria-label="Decklists" class="navitem dev-only" id="nav-decklists" onclick="show('decklists',this);buildDecklists()"><span class="ni-icon">📋</span><span class="brand-text">Decklists</span></button>
-      </div>
-    </div>
-    <!-- 7/22/26: split the old single "Codex" group (7 items -- rules reference mixed in with
-         personal stats/history) into these two, so each group is one coherent kind of thing
-         rather than a catch-all. Also fixes an icon collision: Codex and Side Stories both used
-         📖 before this. -->
-    <div class="nav-group" id="grp-records">
-      <button aria-label="Records" class="nav-grp-head" onclick="toggleNavGroup('grp-records')"><span class="ni-icon">📊</span><span class="brand-text">Records</span><span class="grp-chev brand-text">▾</span></button>
-      <div class="nav-sub">
         <button aria-label="Mastery &amp; Bonds" class="navitem" id="nav-mastery" onclick="show('mastery',this);buildMastery()"><span class="ni-icon">⭐</span><span class="brand-text">Mastery &amp; Bonds</span></button>
         <button aria-label="Legend Board" class="navitem" id="nav-legend" onclick="show('legend',this)"><span class="ni-icon">🏆</span><span class="brand-text">Legend Board</span></button>
         <button aria-label="Match Arc" class="navitem" id="nav-match" onclick="show('match',this)"><span class="ni-icon">◷</span><span class="brand-text">Match Arc</span></button>
