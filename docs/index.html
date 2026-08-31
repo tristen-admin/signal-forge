@@ -3018,7 +3018,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
           <button class="filter-chip vf-rarity" onclick="filterVault('rare',this)" title="Rare — stacks with the other rarity chips">Rare</button>
           <button class="filter-chip vf-rarity" onclick="filterVault('common',this)" title="Common — stacks with the other rarity chips">Common</button>
           <button class="filter-chip vf-mode" onclick="filterVault('deck',this)" title="One view at a time — narrows whatever rarities are selected">🃏 In Deck</button>
-          <button class="filter-chip vf-mode" onclick="filterVault('variant',this)" title="One view at a time — narrows whatever rarities are selected">🏆 Skins</button>
+          <button class="filter-chip vf-mode" onclick="filterVault('variant',this)" title="One view at a time — narrows whatever rarities are selected">🏆 Rite Prints</button>
           <button class="filter-chip vf-mode" onclick="filterVault('dup',this)" title="One view at a time — narrows whatever rarities are selected">🗃 Duplicates</button>
           <button class="filter-chip" id="vault-own-toggle" onclick="toggleVaultOwned(this)">🔒 Owned Only</button>
         </div>
@@ -3198,7 +3198,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       <div class="shop-tabs">
         <button class="shop-tab on" id="stab-packs" onclick="setShopTab('packs')">🎴 Card Packs</button>
         <button class="shop-tab" id="stab-cosmetics" onclick="setShopTab('cosmetics')">✦ Cosmetics</button>
-        <button class="shop-tab" id="stab-variants" onclick="setShopTab('variants')">✦ Skins</button>
+        <button class="shop-tab" id="stab-variants" onclick="setShopTab('variants')">✦ The Rite</button>
         <button class="shop-tab" id="stab-forge" onclick="setShopTab('forge')">❖ Buy Kinzo</button>
         <button class="shop-tab" id="stab-merch" onclick="setShopTab('merch')">📚 Merchandise</button>
       </div>
@@ -3760,7 +3760,7 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
 <div class="view" id="v-trade" style="flex-direction:column">
   <div class="view-head">
     <strong>Trade</strong>
-    Swap earned cards and Reincarnation units with other collectors. Skins and starters never trade — cash-bought finishes stay bound to you.
+    Swap earned cards and Reincarnation units with other collectors. Rite prints and starters never trade — cash-bought unlocks stay bound to you.
   </div>
   <div style="overflow-y:auto;flex:1;padding:14px"><div id="trade-hub"></div></div>
 </div>
@@ -10698,7 +10698,7 @@ function isStarter(c){ const n=typeof c==='string'?c:(c&&c.name); return STARTER
 // PROVENANCE (Option A play-only firewall): 'forged'=earned → tradeable+wagerable | 'bought'=real-money Kinzo lane → play-only | 'starter'=fixed
 function cardProv(c){ if(!c) return 'forged'; if(c.variant) return 'variant'; if(c.prov) return c.prov; if(isStarter(c)) return 'starter'; return 'forged'; }
 function isTradeable(c){ return !isStarter(c) && !c.variant; }  // all non-starter cards tradeable (no paid/earned firewall)
-function provLabelText(c){ return c.variant?'✦ Skin · play-only, yours forever':isStarter(c)?'🔒 Starter · always in creation':'🏆 Forged · tradeable'; }
+function provLabelText(c){ return c.variant?'✦ Rite print · never tradeable, yours forever':isStarter(c)?'🔒 Starter · always in creation':'🏆 Forged · tradeable'; }
 // Real new-player onboarding: 5,000 Zenni + the starter deck, fresh 0-0 records. Default for a
 // brand-new vault (no save). 8/6/26: was 20,000 -- cut to 5,000 (matches the online/server grant,
 // h_register in app.py) plus a separate one-time +5,000 Day 1 login bonus (grantDailyBonusIfDue()).
@@ -11057,7 +11057,7 @@ const FORGE_VAULT_BONUS = 3000;
 function forgeSectionHTML(){
   const boughtCount=FORGE_TIERS.filter(function(t){return boughtForgeTiers.has(t.id);}).length;
   const vaultReady=boughtCount>=FORGE_TIERS.length && !forgeVaultClaimed;
-  return '<div class="forge-note">Kinzo is the premium currency — spend it on cosmetics and card skins. It never expires, <b>never cashes out</b>, and <b>never buys cards</b> (cards are earned in Zenni). <b>Prototype: no real charge is made; each tier credits instantly so you can test the economy.</b> <span class="dev-note">(dev)</span></div>'
+  return '<div class="forge-note">Kinzo is the premium currency — spend it on cosmetics and Rite prints. It never expires, <b>never cashes out</b>, and <b>never buys cards</b> (cards are earned in Zenni). <b>Prototype: no real charge is made; each tier credits instantly so you can test the economy.</b> <span class="dev-note">(dev)</span></div>'
     +'<div class="pack-grid">'+FORGE_TIERS.map(function(t,i){
       var per=Math.round(t.forge/t.usd);
       var firstBuy=!boughtForgeTiers.has(t.id);
@@ -11175,33 +11175,82 @@ function singlesSectionHTML(){
   return '<div class="banner-head singles">◈ Singles · Direct Mint <span class="banner-sub">Buy the <b>exact</b> card you want with earned Zenni — each is finite. When a holder <b>integrates</b> a copy for a foil boost, it returns to this pool, so a card is never gone for good.</span></div><div class="single-grid">'+cards+'</div>';
 }
 // ── VARIANT GACHA: Kinzo-summoned play-only skins — full in-game parity, minus scarcity/trade/wager ──
-const GACHA_ODDS = {apex:5, ultra:15, rare:80}; // per-pull rarity odds — Apex(AR) capped at 5%, the risk that funds the whole thing
+const GACHA_ODDS = {apex:20, ultra:80}; // per-pull rarity odds, rare tier retired 8/30/26 — apex is the featured weekly chase, deliberately high (owner: "high pull rates")
 let variantEditions = {};   // {defId:{minted,circulating,sealed}} — Panini-Instant emergent editions (minted freezes at banner close; circulating burns on ingestion)
 let variantEssence = 0;   // cosmetic-only currency from ingesting dupe variants (NEVER buys cards/power/Zenni)
 let variantFed = {};   // {defId:#dupes fed} -> drives cosmetic ascension tier
+// 8/30/26 (owner correction): "skins" isn't the right word -- mintVariant() creates a genuinely
+// playable card, not a cosmetic overlay (same power/abilities, counts for deck legality, earns
+// Zenni/rank identically). The real distinction is PERMISSIONS (see isTradeable(): any c.variant
+// card is hard-blocked from the Marketplace), not power. For now this covers Ultra + Apex tier only
+// -- every card gets this eventually, per owner -- so the Rare-tier entries that used to live here
+// are dropped, and two pre-existing mistagged entries are corrected: Arch-Grim Korrin is genuinely
+// Ultra (was tagged 'rare'), while Envoy of Tyrants/Ella Ballora and Lagertha Waltz, Wrathful
+// Transformation are genuinely Rare (were tagged 'ultra') -- those two are dropped along with the
+// rest of the Rare tier rather than left in under a wrong tier. Every remaining Ultra/Apex card in
+// COLLECTION gets a fresh entry below so the weekly Rite has a real pool to draw from.
 const VARIANT_DEFS = [
   {id:'v-akatosh-eclipse', unit:'Ourevos, the Golden Dragon', label:'Eclipse', tier:'apex', foil:'ethereal'},
   {id:'v-kotei-ascend', unit:'Kotei', label:'Ascendant', tier:'apex', foil:'ethereal'},
   {id:'v-darwin-primal', unit:'Darwin', label:'Primal', tier:'apex', foil:'ethereal'},
   {id:'v-tange-shogun', unit:'Tange Sazen', label:'Shogun', tier:'apex', foil:'gold'},
   {id:'v-ahdor-warden', unit:'Ahdorah Khaan, Determined Soul', label:'Eternal Warden', tier:'apex', foil:'gold'},
-  {id:'v-ella-crimson', unit:'Envoy of Tyrants, Ella Ballora', label:'Crimson', tier:'ultra', foil:'prism'},
+  {id:'v-anorith-unbound', unit:'Anorith Keeling', label:'Unbound', tier:'apex', foil:'ethereal'},
   {id:'v-ella-radiant', unit:'La "La" Ballora, the Broodqueen', label:'Radiant', tier:'ultra', foil:'prism'},
   {id:'v-hanse-bloodmoon', unit:'The Bronzed Beast, Hanse Waltz', label:'Bloodmoon', tier:'ultra', foil:'prism'},
-  {id:'v-lagertha-frost', unit:'Lagertha Waltz, Wrathful Transformation', label:'Frost', tier:'ultra', foil:'prism'},
-  {id:'v-forgemask-molten', unit:'Forgemask', label:'Molten', tier:'rare', foil:'holo'},
-  {id:'v-valcarion-astral', unit:'Cletus Gwyndull', label:'Astral', tier:'rare', foil:'holo'},
-  {id:'v-voltcaller-surge', unit:'Voltcaller', label:'Surge', tier:'rare', foil:'holo'},
-  {id:'v-alucard-nightfall', unit:'Valcarion', label:'Nightfall', tier:'rare', foil:'holo'},
-  {id:'v-korrin-warlord', unit:'Arch-Grim Korrin', label:'Warlord', tier:'rare', foil:'holo'},
-  {id:'v-lagertha-storm', unit:'Lagertha Waltz', label:'Storm', tier:'rare', foil:'holo'},
+  {id:'v-korrin-warlord', unit:'Arch-Grim Korrin', label:'Warlord', tier:'ultra', foil:'prism'},
+  {id:'v-keawe-borrowed-verdant', unit:"The Borrowed Green, Keawe Kel'rua", label:'Verdant Oath', tier:'ultra', foil:'prism'},
+  {id:'v-ahdor-keptblade-vow', unit:'The Kept Blade, Ahdor', label:'Silent Vow', tier:'ultra', foil:'prism'},
+  {id:'v-hanse-nightmare-toll', unit:"The Nightmare's Toll, Hanse Waltz", label:'Midnight Toll', tier:'ultra', foil:'prism'},
+  {id:'v-lagertha-claim-oathbeast', unit:'The Claim, Lagertha Waltz', label:'Oathbeast', tier:'ultra', foil:'prism'},
+  {id:'v-uso-throne-bonecrown', unit:'Throne of Bones, Uso Oso', label:'Bonecrown', tier:'ultra', foil:'prism'},
+  {id:'v-ruffius-reliquary-relic', unit:'The Reliquary, Ruffius Rufeldro', label:'Masked Relic', tier:'ultra', foil:'prism'},
+  {id:'v-tange-unending-ember', unit:'The Unending Flame, Tange Sazen', label:'Everember', tier:'ultra', foil:'prism'},
+  {id:'v-kleydson-between-liminal', unit:'The Between, Kleydson', label:'Liminal', tier:'ultra', foil:'prism'},
+  {id:'v-ahdorah-circle-sealedvow', unit:'Ahdorah Khaan, Circle Unbroken', label:'Sealed Vow', tier:'ultra', foil:'prism'},
+  {id:'v-kynaht-ashen-cinder', unit:'Kynaht, Ashen Return', label:'Cinder Rebirth', tier:'ultra', foil:'prism'},
+  {id:'v-ridgeline-warden-stonewatch', unit:'Ridgeline Warden', label:'Stonewatch', tier:'ultra', foil:'prism'},
+  {id:'v-trilogy-ward-triune', unit:'Trilogy Ward', label:'Triune', tier:'ultra', foil:'prism'},
+  {id:'v-mordezh-blood-oracle', unit:'Mordezh, Blood Prophet', label:'Crimson Oracle', tier:'ultra', foil:'prism'},
+  {id:'v-keawe-legend-dawn', unit:"Legend Reborn, Keawe Kel'rua", label:'Second Dawn', tier:'ultra', foil:'prism'},
+  {id:'v-ossian-blackwings-shroud', unit:'Black Wings, Ossian Drell', label:'Ravenshroud', tier:'ultra', foil:'prism'},
+  {id:'v-corvus-nightfeather', unit:'Corvus', label:'Nightfeather', tier:'ultra', foil:'prism'},
+  {id:'v-sirefax-ironwatch', unit:'Sirefax the Warden', label:'Ironwatch', tier:'ultra', foil:'prism'},
+  {id:'v-moro-sanctified', unit:'Moro', label:'Sanctified', tier:'ultra', foil:'prism'},
+  {id:'v-sistermire-wailing-bloom', unit:'Sister Mire, Wailing Nightmare', label:'Wailing Bloom', tier:'ultra', foil:'prism'},
+  {id:'v-conduit-chaos-discordant', unit:'Conduit of Chaos, Kleydson', label:'Discordant', tier:'ultra', foil:'prism'},
+  {id:'v-longreckoning-ledger', unit:'The Long Reckoning', label:'Final Ledger', tier:'ultra', foil:'prism'},
 ];
 function variantDef(id){ return VARIANT_DEFS.find(function(v){return v.id===id;}); }
-const GACHA_BANNERS = [
-  {id:'b-apex', name:'Apex Legends', blurb:'Apex-focused summon. Rate-up on three Apex-tier champions. Ultra & rare skins round out a tight pool.', cost:900, featured:'v-akatosh-eclipse', rateUp:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal'], pool:['v-akatosh-eclipse','v-kotei-ascend','v-darwin-primal','v-ella-crimson','v-hanse-bloodmoon','v-forgemask-molten','v-valcarion-astral','v-voltcaller-surge']},
-  {id:'b-vanguard', name:'Vanguard Rites', blurb:'Rate-up on three Apex-tier champions. A curated pool of apex, ultra & rare champions.', cost:600, featured:'v-tange-shogun', rateUp:['v-tange-shogun','v-ahdor-warden','v-darwin-primal'], pool:['v-darwin-primal','v-tange-shogun','v-ahdor-warden','v-ella-radiant','v-lagertha-frost','v-alucard-nightfall','v-korrin-warlord','v-lagertha-storm']},
-];
-function bannerByIdx(i){ return GACHA_BANNERS[i]; }
+// ── The Rite: single always-live banner whose CONTENTS recompose weekly (8/30/26 redesign) ──
+// Replaces the old fixed two-banner setup ("Apex Legends"/"Vanguard Rites"), which never actually
+// changed WHAT was in either banner — only which of the two fixed banners counted as "live" each
+// week. Now there's exactly one banner; every week it draws a fresh 3-or-4-card featured Apex
+// lineup (high pull rate) plus a swapped base pool of Ultra prints from the full VARIANT_DEFS
+// catalog, deterministically (hashStr(weekIdx + salt + id), no real RNG needed for "which week
+// shows what" — same player sees the same lineup all week, every player sees the same lineup).
+function _weekSort(defs, salt, wk){
+  return defs.slice().sort(function(a,b){ return hashStr(wk+':'+salt+':'+a.id) - hashStr(wk+':'+salt+':'+b.id); });
+}
+function currentGachaBanner(){
+  var wk = _isoWeekIdx();
+  var apexPool = VARIANT_DEFS.filter(function(v){ return v.tier==='apex'; });
+  var ultraPool = VARIANT_DEFS.filter(function(v){ return v.tier==='ultra'; });
+  var featCount = (wk % 2 === 0) ? 3 : 4;
+  var featured = _weekSort(apexPool, 'feat', wk).slice(0, featCount);
+  var basePool = _weekSort(ultraPool, 'base', wk).slice(0, 8);
+  var featuredIds = featured.map(function(v){ return v.id; });
+  var poolIds = featuredIds.concat(basePool.map(function(v){ return v.id; }));
+  return {
+    id: 'b-rite',
+    name: 'The Rite',
+    blurb: 'Alternate prints of Ultra & Apex champions — real, playable cards, only the art changes. Featured Apex prints carry a boosted pull rate this week; the base pool of Ultra prints swaps out weekly too.',
+    cost: 900,
+    featured: featuredIds[0] || null,
+    rateUp: featuredIds,
+    pool: poolIds
+  };
+}
 let gachaPity = {};            // {bannerId: pulls since last Apex}
 const GACHA_PITY_CAP = 60;     // guaranteed rate-up Apex by this pull
 let essenceCosmetics = {};     // {itemId:true} cosmetic unlocks bought with Variant Essence
@@ -11222,14 +11271,15 @@ function buyEssenceCosmetic(id){
 }
 // rotation: one banner live at a time (weekly); sealed editions freeze + get a Final Print
 function _isoWeekIdx(){ try{ var d=new Date(); var j=new Date(d.getFullYear(),0,1); return Math.floor((((d-j)/86400000)+j.getDay()+1)/7); }catch(e){ return 0; } }
-function activeBannerIdx(){ return _isoWeekIdx() % GACHA_BANNERS.length; }
-function bannerIsOpen(i){ return i===activeBannerIdx(); }
 function sealEdition(defId){
   var ed=variantEditions[defId]; if(!ed||ed.sealed) return; ed.sealed=true;
   var fin=COLLECTION.find(function(c){ return c.editionId===defId && c.serial===ed.minted; }); if(fin) fin.finalPrint=true;
 }
+// Any print that isn't in THIS week's live pool gets sealed (Final Print) -- same scarcity beat the
+// old two-banner rotation had, just keyed off pool membership instead of "which banner is live."
 function reconcileEditions(){
-  GACHA_BANNERS.forEach(function(b,i){ if(!bannerIsOpen(i)){ b.pool.forEach(function(id){ if(variantEditions[id]) sealEdition(id); }); } });
+  var live = currentGachaBanner().pool;
+  VARIANT_DEFS.forEach(function(v){ if(live.indexOf(v.id) < 0 && variantEditions[v.id]) sealEdition(v.id); });
 }
 function variantOwned(v){ return COLLECTION.some(function(c){ return c.variant===v.label && c.name===v.unit && (ownedCopies[c.uid]||0)>0; }); }
 function mintVariant(def, viaLabel){
@@ -11240,7 +11290,7 @@ function mintVariant(def, viaLabel){
   _ed.minted++; _ed.circulating++; var _serial=_ed.minted;
   const inst=Object.assign({}, base, {uid:uid, variant:def.label, artKey:base.artKey||base.name, prov:'variant', gachaVariant:true, serial:_serial, editionId:def.id, firstPrint:(_serial===1)});
   COLLECTION.push(inst); ownedCopies[uid]=1;
-  cardRecords[uid]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:viaLabel||'Skin Summon'}]};
+  cardRecords[uid]={k:0,d:0,ok:0,od:0,chain:[{owner:ME_ADDR,date:todayISO(),via:viaLabel||'The Rite'}]};
   wonInstances.push({uid:uid, name:def.unit, variant:def.label, artKey:base.artKey||base.name, prov:'variant', gachaVariant:true});
   if(def.foil){ cardFoils[uid]=def.foil; }
   return {uid:uid, base:base, def:def, serial:_serial, minted:_ed.minted};
@@ -11377,32 +11427,28 @@ function ingestCard(name){
   if(typeof buildVault==='function') buildVault();
   if(typeof toast==='function') toast('✦ Ingested a duplicate '+name+' — your remaining copy gains a free foil tier.', true);
 }
-function pullVariant(bannerId){
-  const b=GACHA_BANNERS.find(function(x){return x.id===bannerId;}); if(!b) return;
-  const bi=GACHA_BANNERS.indexOf(b);
-  if(!bannerIsOpen(bi)){ if(typeof toast==='function') toast(b.name+' is sealed this rotation \u2014 summon on the live banner.', false); return; }
-  if(forgeBalance < b.cost){ if(typeof toast==='function') toast('Need ❖ '+fmtPts(b.cost)+' Kinzo to summon on '+b.name+'.', false); return; }
+function pullVariant(){
+  const b=currentGachaBanner();
+  if(forgeBalance < b.cost){ if(typeof toast==='function') toast('Need ❖ '+fmtPts(b.cost)+' Kinzo to pull on '+b.name+'.', false); return; }
   forgeBalance-=b.cost;
-  const tiers=['apex','ultra','rare'].filter(function(t){ return b.pool.some(function(id){ var v=variantDef(id); return v&&v.tier===t; }); });
-  var _tot=tiers.reduce(function(s,t){return s+(GACHA_ODDS[t]||0);},0), _roll=Math.random()*_tot, _tier=tiers[tiers.length-1];
-  for(var _i=0;_i<tiers.length;_i++){ _roll-=(GACHA_ODDS[tiers[_i]]||0); if(_roll<=0){ _tier=tiers[_i]; break; } }
-  var _pity=(gachaPity[bannerId]||0)+1, _forced=false;
-  if(_tier!=='apex' && _pity>=GACHA_PITY_CAP && tiers.indexOf('apex')>=0){ _tier='apex'; _forced=true; }
+  var _tot=(GACHA_ODDS.apex||0)+(GACHA_ODDS.ultra||0), _roll=Math.random()*_tot;
+  var _tier = _roll < (GACHA_ODDS.apex||0) ? 'apex' : 'ultra';
+  var _pity=(gachaPity[b.id]||0)+1;
+  if(_tier!=='apex' && _pity>=GACHA_PITY_CAP){ _tier='apex'; }
   var cands=b.pool.filter(function(id){ var v=variantDef(id); return v&&v.tier===_tier; });
-  var _ru=(b.rateUp||[]).filter(function(id){ return cands.indexOf(id)>=0; });
-  let pickId = (_tier==='apex' && _ru.length && (_forced || Math.random()<0.7)) ? _ru[Math.floor(Math.random()*_ru.length)] : cands[Math.floor(Math.random()*cands.length)];
-  if(_tier==='apex'){ gachaPity[bannerId]=0; } else { gachaPity[bannerId]=_pity; }
+  if(!cands.length) cands=b.pool;   // safety net -- should never actually trigger
+  let pickId = cands[Math.floor(Math.random()*cands.length)];
+  if(_tier==='apex'){ gachaPity[b.id]=0; } else { gachaPity[b.id]=_pity; }
   const def=variantDef(pickId)||variantDef(b.featured);
-  const res=mintVariant(def, 'Skin Summon · '+b.name);
+  const res=mintVariant(def, 'The Rite · '+def.label);
   if(typeof updateBalance==='function') updateBalance();
   if(typeof saveState==='function') saveState();
   if(typeof buildShop==='function') buildShop();
   if(res){
-    if(typeof toast==='function') toast('✦ Summoned '+def.label+' '+def.unit+' — #'+res.serial+' of '+res.minted+' minted'+(res.serial===1?' · ★ FIRST PRINT':'')+' · play-only, yours forever.', true);
-    if(typeof openLightbox==='function') openLightbox(res.base.name, '✦ Skin Summon — '+def.label+' '+def.unit);
+    if(typeof toast==='function') toast('✦ Pulled '+def.label+' '+def.unit+' — #'+res.serial+' of '+res.minted+' minted'+(res.serial===1?' · ★ FIRST PRINT':'')+' · unlocked & playable, never tradeable.', true);
+    if(typeof openLightbox==='function') openLightbox(res.base.name, '✦ The Rite — '+def.label+' '+def.unit);
   }
 }
-function pullVariantAt(i){ const b=GACHA_BANNERS[i]; if(b) pullVariant(b.id); }
 function variantCardHTML(id){
   const v=variantDef(id); if(!v) return '';
   const base=COLLECTION.find(function(c){return c.name===v.unit && !c.uid;});
@@ -11425,33 +11471,32 @@ function variantCardHTML(id){
     +'<div class="var-body"><div class="var-label">'+v.label+'</div><div class="var-unit">'+v.unit+'</div>'
     +'<div class="var-tags"><span class="var-tag">✦ Play-only</span><span class="var-pow">'+pow+' POW</span></div>'+(badge?'<div class="var-badges">'+badge+'</div>':'')+'</div></div>';
 }
-function bannerHTML(b, i, featured){
+function bannerHTML(b){
   const owned=b.pool.filter(function(id){ const v=variantDef(id); return v && variantOwned(v); }).length;
-  const isOpen=(typeof bannerIsOpen==='function')?bannerIsOpen(i):true;
   const pity=(gachaPity[b.id]||0), pityPct=Math.min(100,Math.round(pity/GACHA_PITY_CAP*100));
   const mintedTot=b.pool.reduce(function(s,id){ return s+((variantEditions[id]&&variantEditions[id].minted)||0); },0);
   const ruNames=(b.rateUp||[]).map(function(id){ var v=variantDef(id); return v?(v.label+' '+v.unit):''; }).filter(Boolean);
   const cards=b.pool.map(variantCardHTML).join('');
-  const _tiers=['apex','ultra','rare'].filter(function(t){ return b.pool.some(function(id){ var v=variantDef(id); return v&&v.tier===t; }); });
-  const oddsStr=_tiers.map(function(t){ return '<b>'+rlab(t)+' '+(GACHA_ODDS[t]||0)+'%</b>'; }).join(' · ');
+  const oddsStr='<b>Apex '+(GACHA_ODDS.apex||0)+'%</b> · <b>Ultra '+(GACHA_ODDS.ultra||0)+'%</b>';
   const afford=forgeBalance>=b.cost;
-  return '<div class="gacha-banner'+(featured?' feat':'')+(isOpen?' live':' sealed')+'">'
-    +'<div class="gb-head"><div><div class="gb-name">'+(isOpen?'<span class="gb-live">\u25cf LIVE</span> ':'<span class="gb-seal">\u25a0 SEALED</span> ')+b.name+'</div><div class="gb-blurb">'+b.blurb+'</div></div>'
-    +'<button class="gb-pull'+((afford&&isOpen)?'':' dim')+'" onclick="pullVariantAt('+i+')">'+(isOpen?('Summon \u00b7 \u2756 '+fmtPts(b.cost)):'Sealed this rotation')+'</button></div>'
-    +(ruNames.length?'<div class="gb-rateup">\u2605 Rate-up Apexes \u00b7 '+ruNames.join(' \u00b7 ')+'</div>':'')
+  return '<div class="gacha-banner feat live">'
+    +'<div class="gb-head"><div><div class="gb-name">\u25cf LIVE '+b.name+'</div><div class="gb-blurb">'+b.blurb+'</div></div>'
+    +'<button class="gb-pull'+(afford?'':' dim')+'" onclick="pullVariant()">Pull \u00b7 \u2756 '+fmtPts(b.cost)+'</button></div>'
+    +(ruNames.length?'<div class="gb-rateup">\u2605 Featured this week (high pull rate) \u00b7 '+ruNames.join(' \u00b7 ')+'</div>':'')
     +'<div class="gb-odds">Pull odds \u2014 '+oddsStr+'</div>'
-    +(isOpen?'<div class="gb-pity"><div class="gb-pity-bar"><span style="width:'+pityPct+'%"></span></div><div class="gb-pity-lab">Pity '+pity+' / '+GACHA_PITY_CAP+' \u2014 next rate-up Apex guaranteed at '+GACHA_PITY_CAP+'</div></div>':'')
+    +'<div class="gb-pity"><div class="gb-pity-bar"><span style="width:'+pityPct+'%"></span></div><div class="gb-pity-lab">Pity '+pity+' / '+GACHA_PITY_CAP+' \u2014 next featured Apex guaranteed at '+GACHA_PITY_CAP+'</div></div>'
     +'<div class="var-grid">'+cards+'</div>'
-    +'<div class="gb-foot">'+owned+' / '+b.pool.length+' collected \u00b7 '+mintedTot+' minted this edition'+(isOpen?' (live)':' (frozen)')+' \u00b7 dupes ingest for Essence</div></div>';
+    +'<div class="gb-foot">'+owned+' / '+b.pool.length+' collected this week · '+mintedTot+' minted this edition · dupes ingest for Essence</div></div>';
 }
 function variantsSectionHTML(){
   if(typeof reconcileEditions==='function') reconcileEditions();
-  const banners=GACHA_BANNERS.map(function(b,i){ return bannerHTML(b, i, (typeof bannerIsOpen==='function')?bannerIsOpen(i):(i===0)); }).join('');
-  const essChip='<div class="ess-chip">\u2726 Skin Essence <b>'+variantEssence+'</b> <span>earned by ingesting dupe skins \u00b7 spends on cosmetics only</span></div>';
+  const banner=bannerHTML(currentGachaBanner());
+  const essChip='<div class="ess-chip">\u2726 Skin Essence <b>'+variantEssence+'</b> <span>earned by ingesting dupe prints \u00b7 spends on cosmetics only</span></div>';
   const shopCards=ESSENCE_SHOP.map(function(it){ var got=essenceCosmeticOwned(it.id), can=variantEssence>=it.cost; return '<div class="ess-item'+(got?' got':'')+'"><div class="ess-it-name">'+it.name+'</div><div class="ess-it-desc">'+it.desc+'</div><button class="ess-buy'+((can&&!got)?'':' dim')+'" onclick="buyEssenceCosmetic(\''+it.id+'\')">'+(got?'\u2713 Owned':'\u2726 '+it.cost)+'</button></div>'; }).join('');
   const essShop='<div class="ess-shop"><div class="ess-shop-head">\u2726 Essence Exchange <span>cosmetic flair only \u2014 never cards, power, or Zenni</span></div><div class="ess-grid">'+shopCards+'</div></div>';
-  return '<div class="banner-head singles">\u2726 Skin Summon <span class="banner-sub">Spend <b>\u2756 Kinzo</b> to summon alternate skins of marquee units \u2014 <b>cosmetic only, never power</b>. A skin plays, ranks, drafts, and earns Zenni + Glory <b>identically</b> to its base card; the art is the only thing that changes. That is the whole point of paid skins: they let you express yourself and support development without ever touching who wins. Because of that, a skin is always <b>play-only</b> \u2014 it can never be traded, sold, or wagered \u2014 and never scarcer than the card it skins, so nobody can corner a look or speculate on one. Banners <b>rotate weekly</b> \u2014 one is live, the rest sealed with frozen editions. <span class="dev-note">(placeholder art)</span></span></div>'+essChip+banners+essShop;
+  return '<div class="banner-head singles">\u2726 The Rite <span class="banner-sub">Spend <b>\u2756 Kinzo</b> to pull an alternate-art print of an Ultra or Apex champion \u2014 a real, playable card, unlocked for you even if you\u2019ve never pulled the base copy. Same power, same abilities, only the art changes. In exchange for unlocking it with real money instead of earned Zenni, a Rite print can <b>never be listed on the Marketplace</b> \u2014 it plays, ranks, and earns Zenni identically to any other copy, but it can\u2019t be sold back for the currency you actually grind for. Featured Apex prints and the base Ultra pool both <b>swap out weekly</b>. <span class="dev-note">(placeholder art)</span></span></div>'+essChip+banner+essShop;
 }
+
 function buildShop(){
   updateBalance();
   const packs = shopTab==='packs', forge = shopTab==='forge', variants = shopTab==='variants', merch = shopTab==='merch';
@@ -11459,7 +11504,7 @@ function buildShop(){
   const _eb=document.getElementById('shop-eyebrow'), _ds=document.getElementById('shop-intro-desc');
   if(_eb) _eb.textContent = forge ? 'Buy Kinzo · Premium currency' : packs ? 'Card Packs' : merch ? 'Merchandise' : 'Cosmetics · Kinzo';
   if(_ds) _ds.textContent = forge
-    ? 'Buy Kinzo with real money for cosmetics and card skins. It never buys cards and never cashes out — cards are earned with Zenni.'
+    ? 'Buy Kinzo with real money for cosmetics and Rite prints. It never buys cards and never cashes out — cards are earned with Zenni.'
     : packs
     ? `${SEASON.pack} — this season's pack line, drawn from the finite shared mint with your Zenni Points. Supply is saved between visits and never resets.`
     : merch
@@ -11472,8 +11517,8 @@ function buildShop(){
     html = packsSectionHTML();
   } else if(variants){
     html = variantsSectionHTML();
-    if(_eb) _eb.textContent='Skin Summon';
-    if(_ds) _ds.textContent='Summon alternate skins of marquee units with Kinzo — cosmetic only, same power. Play-only, never scarcer than the base.';
+    if(_eb) _eb.textContent='The Rite';
+    if(_ds) _ds.textContent='Pull real, playable alternate prints of Ultra & Apex champions with Kinzo — same power, only the art changes. Unlocked and yours to play immediately, but never sellable on the Marketplace.';
   } else if(merch){
     html = merchSectionHTML();
   } else {
@@ -12177,7 +12222,7 @@ function renderDNABody(c){
     `<div class="db-row"><span class="db-key">${i===0?'◈ Minted / first held':'◈ Transfer #'+i}</span><span class="db-val" style="font-size:10px">${e.owner}</span></div>`+
     `<div class="db-row" style="margin-top:-5px"><span class="db-key" style="padding-left:14px;font-size:9px;color:var(--text3)">${e.date} · ${e.via}</span><span class="db-val"></span></div>`
   ).join('');
-  const idxLabel=c.variant?`#${p.idx} · 🏆 Skin`:`#${String(p.idx).padStart(3,'0')} / ${p.supply} · ${rlab(c.rarity)}`;
+  const idxLabel=c.variant?`#${p.idx} · 🏆 Rite`:`#${String(p.idx).padStart(3,'0')} / ${p.supply} · ${rlab(c.rarity)}`;
   const hasArt=!!(CARD_ART[c.artKey||c.name]);
   return `
     <div class="dna-card-full ${c.rarity}">
@@ -14347,7 +14392,7 @@ const GUIDE_TIPS = {
   vault: "The Vault holds every card you own. Tap one to see its full record — every card remembers every duel it's ever fought.",
   deck: "Build your active deck here. Whatever you set as Deck Master shapes the whole squad, so choose with an eye on your archetype.",
   mastery: "Bonds and Mastery track your history with a card — how long you've held it, and who it's fought alongside.",
-  trade: "Trade lets you send and receive cards with other players. Starters and skins don't leave your hands — everything else can move.",
+  trade: "Trade lets you send and receive cards with other players. Starters and Rite prints don't leave your hands — everything else can move.",
   shop: "The Shop sells packs for Zenni, and cosmetics for Kinzo. Kinzo never buys power — only look.",
   market: "The Marketplace is where players list cards for Zenni. Prices track a card's real record, so a proven veteran costs more than a fresh mint.",
   lobby: "Offline Play is casual practice against the AI at light Zenni stakes — your rank and record stay untouched, so it's still the best place to test a new deck before it matters.",
@@ -15665,7 +15710,7 @@ function buildVault(){
   const searchLabel = vaultSearch ? ' · "'+vaultSearch+'"' : '';
   document.getElementById('vault-count').textContent=`${totalCards} cards${vaultKeyword?' · '+vaultKeyword:''}${archLabel}${campLabel}${searchLabel}${sortLabel}`;
   { var _vt=document.getElementById('vault-tracker'); if(_vt) _vt.innerHTML=vaultTrackerHTML(); }
-  if(!entries.length){ var _emsg = vaultViewMode==='variant' ? 'No skin cards yet — skins come from Kinzo summons (paid, play-only copies).' : (vaultKeyword||vaultArchetype||vaultViewMode||vaultRaritySet.size||vaultCamp||vaultSearch) ? 'No cards match this filter — try clearing it.' : 'Your vault is empty — open a pack in the Shop or win a duel.'; grid.innerHTML='<div class="vault-empty">'+_emsg+'</div>'; return; }
+  if(!entries.length){ var _emsg = vaultViewMode==='variant' ? 'No Rite prints yet — pull one on The Rite in the Shop (paid, unlocked & playable, never tradeable).' : (vaultKeyword||vaultArchetype||vaultViewMode||vaultRaritySet.size||vaultCamp||vaultSearch) ? 'No cards match this filter — try clearing it.' : 'Your vault is empty — open a pack in the Shop or win a duel.'; grid.innerHTML='<div class="vault-empty">'+_emsg+'</div>'; return; }
   grid.innerHTML=entries.map(e=>{
     const c=e.c;
     const pristine=isPristine(c)?`<span class="vc-pristine" data-kw="Pristine">◈ Pristine</span>`:'';
@@ -15886,7 +15931,7 @@ function openCardDetail(id, fresh, tab){
     </div>
     ${valuationHTML(c,_k,_d,true)}
     <div class="dr-section">
-      <div class="dr-sec-title">Provenance</div>${c.variant?`<div class="dr-row" style="background:linear-gradient(90deg,rgba(212,168,67,0.16),transparent);border-left:2px solid var(--gold);border-radius:3px;padding:5px 8px;margin-bottom:5px"><span class="dr-key" style="color:var(--gold);font-weight:700">🏆 Skin</span><span class="dr-val gold">${c.variant}</span></div>`:''}
+      <div class="dr-sec-title">Provenance</div>${c.variant?`<div class="dr-row" style="background:linear-gradient(90deg,rgba(212,168,67,0.16),transparent);border-left:2px solid var(--gold);border-radius:3px;padding:5px 8px;margin-bottom:5px"><span class="dr-key" style="color:var(--gold);font-weight:700">🏆 Rite</span><span class="dr-val gold">${c.variant}</span></div>`:''}
       <div class="dr-row"><span class="dr-key">Mint cohort</span><span class="dr-val">${p.seasons} · #${p.block.toLocaleString()}</span></div>
       <div class="dr-row"><span class="dr-key">Mint index</span><span class="dr-val elec">#${p.idx} / ${p.supply.toLocaleString()}</span></div>
       <div class="dr-row"><span class="dr-key">Edition</span><span class="dr-val">${c.variant?`🏆 ${c.variant} · #${p.idx} / ${c.tourneyOpened} opened`:`Chapter 1 · Rebirth · ${c.rarity} run of ${p.supply.toLocaleString()}`}</span></div>
@@ -16521,7 +16566,7 @@ function buildTrade(){
      if(o.kind==='unit') return '<div class="trade-offer"><div class="to-partner">'+o.partner+' proposes</div><div class="to-swap"><span class="to-give">⚔ '+o.give+'<i>'+o.giveMeta+'</i></span><span class="to-arrow">⇄</span><span class="to-want">your '+o.want+'<i>'+o.wantMeta+'</i></span></div><button class="to-accept" onclick="acceptTrade('+idx+')">Accept</button></div>';
      return '<div class="trade-offer"><div class="to-partner">'+o.partner+' proposes</div><div class="to-swap"><span class="to-give '+o.giveRar+'">'+o.give+'</span><span class="to-arrow">⇄</span><span class="to-want '+o.wantRar+'">your '+o.wantName+'</span></div><button class="to-accept" onclick="acceptTrade('+idx+')">Accept</button></div>';
    }).join('')+'</div>' : '<div class="df-empty">'+(tradeTab==='units'?'No unit offers right now — refresh for more.':'No offers match your tradeable cards yet — play more to build a collection worth trading.')+'</div>';
-  el.innerHTML=tabs+'<div class="trade-note">'+(tradeTab==='units'?'Swap Reincarnation units with other Saga-runners.':'Swap earned cards with other collectors.')+' <b>Skins &amp; starters never trade.</b> Partners are simulated until online play launches.</div>'+body+'<button class="trade-refresh" onclick="tradeOffers=null;buildTrade()">↻ New offers</button>';
+  el.innerHTML=tabs+'<div class="trade-note">'+(tradeTab==='units'?'Swap Reincarnation units with other Saga-runners.':'Swap earned cards with other collectors.')+' <b>Rite prints &amp; starters never trade.</b> Partners are simulated until online play launches.</div>'+body+'<button class="trade-refresh" onclick="tradeOffers=null;buildTrade()">↻ New offers</button>';
 }
 // ══ REINCARNATION — The Saga (avatar mode) ══
 // ══ REINCARNATION — JRPG party mode: separate unit roster/vault, turn-based battles ══
