@@ -1939,6 +1939,15 @@ body.rm body.nav-collapsed .brand .brand-mark,body.rm.nav-collapsed .brand .bran
 .featured-hero .fh-cta{flex:0 0 auto}
 .featured-hero .fh-refresh{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:none;letter-spacing:0;margin-left:8px}
 .featured-hero .fh-refresh #fh-countdown{color:var(--lose);font-weight:800;font-variant-numeric:tabular-nums}
+/* 8/31/26 (owner: shop doesn't differentiate/hype the summons enough) -- The Rite reuses the exact
+   same .featured-hero component Elite Cache's daily-featured-Apex banner already has, so both real
+   summon areas read as equally "the exciting thing" instead of one plain grid and one flashy one.
+   Its own accent (violet, matching Reincarnation's existing --violet identity elsewhere in this
+   file) gives it a distinct visual identity from Card Packs' gold hero without inventing a third
+   unrelated color language. */
+.rite-hero{background:linear-gradient(135deg,rgba(200,140,245,0.16),rgba(200,140,245,0.03));border-color:var(--violet)}
+.rite-hero .fh-eyebrow{color:var(--violet)}
+.rite-hero .fh-refresh #rh-countdown{color:var(--violet);font-weight:800;font-variant-numeric:tabular-nums}
 .pack-was{color:var(--text3);text-decoration:line-through;font-size:11px;font-weight:600;margin-right:3px}
 #decklists-body{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:16px;align-items:start}
 .dl-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
@@ -3183,8 +3192,8 @@ body{box-sizing:border-box;padding:env(safe-area-inset-top) env(safe-area-inset-
       </div>
       <div class="shop-tabs">
         <button class="shop-tab on" id="stab-packs" onclick="setShopTab('packs')">🎴 Card Packs</button>
-        <button class="shop-tab" id="stab-cosmetics" onclick="setShopTab('cosmetics')">✦ Cosmetics</button>
         <button class="shop-tab" id="stab-variants" onclick="setShopTab('variants')">✦ The Rite</button>
+        <button class="shop-tab" id="stab-cosmetics" onclick="setShopTab('cosmetics')">✦ Cosmetics</button>
         <button class="shop-tab" id="stab-forge" onclick="setShopTab('forge')">❖ Buy Kinzo</button>
         <button class="shop-tab" id="stab-merch" onclick="setShopTab('merch')">📚 Merchandise</button>
       </div>
@@ -11237,6 +11246,34 @@ function currentGachaBanner(){
     pool: poolIds
   };
 }
+// Reuses _isoWeekIdx()'s own formula on future dates rather than approximating "next Monday" --
+// stays correct even if that formula's week-boundary definition ever changes.
+function msUntilNextWeeklyRotation(){
+  try{
+    var cur=_isoWeekIdx(), now=new Date();
+    for(var i=1;i<=8;i++){
+      var probe=new Date(now.getFullYear(),now.getMonth(),now.getDate()+i,0,0,0,0);
+      var j=new Date(probe.getFullYear(),0,1);
+      var wk=Math.floor((((probe-j)/86400000)+j.getDay()+1)/7);
+      if(wk!==cur) return probe-now;
+    }
+    return 7*86400000;
+  }catch(e){ return 0; }
+}
+function riteHeroHTML(){
+  var b=currentGachaBanner();
+  var feat=variantDef(b.featured);
+  if(!feat) return '';
+  return '<div class="featured-hero rite-hero">'
+    +'<div class="fh-icon">✦</div>'
+    +'<div class="fh-body">'
+    +'<div class="fh-eyebrow">This Week\'s Rite <span class="fh-refresh">New pool in <span id="rh-countdown">'+fmtCountdown(msUntilNextWeeklyRotation())+'</span></span></div>'
+    +'<div class="fh-name">'+feat.label+' '+feat.unit+'</div>'
+    +'<div class="fh-sub">1 of '+b.rateUp.length+' featured Apex prints at a boosted pull rate this week — real, playable card, unlocked for you even without the base copy.</div>'
+    +'</div>'
+    +'<button class="fh-cta pack-buy" style="width:auto" onclick="pullVariant()">Pull · ❖ '+fmtPts(b.cost)+'</button>'
+    +'</div>';
+}
 let gachaPity = {};            // {bannerId: pulls since last Apex}
 const GACHA_PITY_CAP = 60;     // guaranteed rate-up Apex by this pull
 let essenceCosmetics = {};     // {itemId:true} cosmetic unlocks bought with Variant Essence
@@ -11476,11 +11513,12 @@ function bannerHTML(b){
 }
 function variantsSectionHTML(){
   if(typeof reconcileEditions==='function') reconcileEditions();
+  const hero=riteHeroHTML();
   const banner=bannerHTML(currentGachaBanner());
   const essChip='<div class="ess-chip">\u2726 Skin Essence <b>'+variantEssence+'</b> <span>earned by ingesting dupe prints \u00b7 spends on cosmetics only</span></div>';
   const shopCards=ESSENCE_SHOP.map(function(it){ var got=essenceCosmeticOwned(it.id), can=variantEssence>=it.cost; return '<div class="ess-item'+(got?' got':'')+'"><div class="ess-it-name">'+it.name+'</div><div class="ess-it-desc">'+it.desc+'</div><button class="ess-buy'+((can&&!got)?'':' dim')+'" onclick="buyEssenceCosmetic(\''+it.id+'\')">'+(got?'\u2713 Owned':'\u2726 '+it.cost)+'</button></div>'; }).join('');
   const essShop='<div class="ess-shop"><div class="ess-shop-head">\u2726 Essence Exchange <span>cosmetic flair only \u2014 never cards, power, or Zenni</span></div><div class="ess-grid">'+shopCards+'</div></div>';
-  return '<div class="banner-head singles">\u2726 The Rite <span class="banner-sub">Spend <b>\u2756 Kinzo</b> to pull an alternate-art print of an Ultra or Apex champion \u2014 a real, playable card, unlocked for you even if you\u2019ve never pulled the base copy. Same power, same abilities, only the art changes. In exchange for unlocking it with real money instead of earned Zenni, a Rite print can <b>never be listed on the Marketplace</b> \u2014 it plays, ranks, and earns Zenni identically to any other copy, but it can\u2019t be sold back for the currency you actually grind for. Featured Apex prints and the base Ultra pool both <b>swap out weekly</b>. <span class="dev-note">(placeholder art)</span></span></div>'+essChip+banner+essShop;
+  return hero+'<div class="banner-head singles">\u2726 The Rite <span class="banner-sub">Spend <b>\u2756 Kinzo</b> to pull an alternate-art print of an Ultra or Apex champion \u2014 a real, playable card, unlocked for you even if you\u2019ve never pulled the base copy. Same power, same abilities, only the art changes. In exchange for unlocking it with real money instead of earned Zenni, a Rite print can <b>never be listed on the Marketplace</b> \u2014 it plays, ranks, and earns Zenni identically to any other copy, but it can\u2019t be sold back for the currency you actually grind for. Featured Apex prints and the base Ultra pool both <b>swap out weekly</b>. <span class="dev-note">(placeholder art)</span></span></div>'+essChip+banner+essShop;
 }
 
 function buildShop(){
